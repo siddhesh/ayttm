@@ -1,3 +1,8 @@
+* Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-82
+- modules/yahoo2/yahoo.c
+do_prompt_save_file defaults to 1 (more intuitive than 
+having to look in working directory)
+
 * Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-81
 - src/chat_window.c
 Check offline messaging button state even if 

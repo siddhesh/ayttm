@@ -109,7 +109,7 @@ static int do_mail_notify = 0;
 static int do_yahoo_debug = 0;
 static int login_invisible = 0;
 static int ignore_system = 0;
-static int do_prompt_save_file = 0;
+static int do_prompt_save_file = 1;
 static int do_guess_away = 1;
 
 /* Exported to libyahoo2 */
@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.14 $",
-	"$Date: 2003/04/09 12:22:37 $",
+	"$Revision: 1.15 $",
+	"$Date: 2003/04/09 16:08:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
