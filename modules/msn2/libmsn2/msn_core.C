@@ -1551,7 +1551,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 #ifndef __MINGW32__
     struct pollfd pfd;
     unsigned char c;
-#lese
+#else
     char c;
 #endif
 
