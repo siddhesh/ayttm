@@ -72,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.12 $",
-	"$Date: 2003/07/09 18:33:38 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/07/10 10:42:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -203,6 +203,7 @@ static void unload_theme(struct smiley_theme * theme)
 	while(theme->smileys) {
 		struct smiley_struct *smiley = theme->smileys->data;
 		XpmFree(smiley->pixmap);
+		FREE(smiley->service);
 		FREE(smiley);
 		theme->smileys = l_list_remove_link(theme->smileys, theme->smileys);
 	}

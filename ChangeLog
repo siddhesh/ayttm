@@ -1,3 +1,7 @@
+* Thu Jul 10 2003 04:15 GMT [philip]	0.3.2-24
+- modules/smileys/smiley-themer.c
+fix memory leak since I forgot to free the smiley service.
+
 * Wed Jul 09 2003 21:30 GMT [colin]	0.3.2-23
 - src/chat_room.c
 Raise window
