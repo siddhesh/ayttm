@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 13:55 GMT [philip]	0.3.0-20
+- src/spellcheck.C src/gtk/gtkspell.c
+context menu for spelling errors
+
 * Mon Apr 28 2003 12:17 GMT [colin]	0.3.0-19
 - modules/msn2/msn.C
 don't autoimport contacts already having a local_account

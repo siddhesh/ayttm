@@ -1,6 +1,6 @@
 TODO 0.3.1
 * Use pspell for spell-checker - Done
-  * Right click context menu on misspelled words
+  * Right click context menu on misspelled words - Done
 * Phase in multiple accounts per service
   * add service flag for multi account if service supports it - Done
   * add contact should add to local account, not to service

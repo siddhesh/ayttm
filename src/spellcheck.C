@@ -9,6 +9,7 @@
 
 #include <pspell/pspell.h>
 #include <stdlib.h>
+#include <string.h>
 #include "prefs.h"
 #include "globals.h"	// for DBG_CORE
 #include "debug.h"
@@ -24,6 +25,7 @@ class AySpellChecker {
 	AySpellChecker();
 	void reload();
 	int check(const char * word);
+	LList * suggest(const char * word);
 	~AySpellChecker();
 };
 
@@ -84,8 +86,27 @@ int AySpellChecker::check(const char * word)
 		return pspell_manager_check(spell_checker, word, -1);
 }
 
+LList * AySpellChecker::suggest(const char * word)
+{
+	if(!word || !spell_checker)
+		return NULL;
+
+	LList * words = NULL;
+	const char *w;
+
+	const PspellWordList * suggestions = pspell_manager_suggest(spell_checker, word, -1);
+	PspellStringEmulation * elements = pspell_word_list_elements(suggestions);
+	while( (w = pspell_string_emulation_next(elements)) != NULL)
+		words = l_list_append(words, strdup(w));
+	delete_pspell_string_emulation(elements);
+
+	return words;
+}
+
 AySpellChecker::~AySpellChecker()
 {
+	if(spell_checker)
+		delete_pspell_manager(spell_checker);
 	if(spell_config)
 		delete_pspell_config(spell_config);
 }
@@ -98,6 +119,11 @@ int ay_spell_check(const char * word)
 	return speller.check(word);
 }
 
+LList * ay_spell_check_suggest(const char * word)
+{
+	return speller.suggest(word);
+}
+
 void ay_spell_check_reload()
 {
 	speller.reload();
@@ -108,6 +134,11 @@ void ay_spell_check_reload()
 int ay_spell_check(const char * word)
 {
 	return 1;
+}
+
+LList * ay_spell_check_suggest(const char * word)
+{
+	return NULL;
 }
 
 void ay_spell_check_reload()

@@ -28,6 +28,7 @@
 
 #include "spellcheck.h"
 #include "platform_defs.h"
+#include "util.h"
 
 
 /* size of the text buffer used in various word-processing routines. */
@@ -44,17 +45,6 @@
 static GdkColor highlight = { 0, 255*256, 0, 0 };
 
 static void entry_insert_cb(GtkText *gtktext, gchar *newtext, guint len, guint *ppos, gpointer d);
-
-static GList* misspelled_suggest(char *word) 
-{
-	GList *l = NULL;
-
-	/*
-	 * TODO: Populate l with a list of suggestions
-	 */
-
-	return l;
-}
 
 static gboolean iswordsep(char c) 
 {
@@ -123,7 +113,7 @@ static void change_color(GtkText *gtktext, int start, int end, GdkColor *color)
 static gboolean check_at(GtkText *gtktext, int from_pos) 
 {
 	int start, end;
-	char buf[BUFSIZE];
+	char buf[BUFSIZE]={0};
 
 	if (!get_word_from_pos(gtktext, from_pos, buf, &start, &end)) {
 		return FALSE;
@@ -220,7 +210,7 @@ static void replace_word(GtkWidget *w, gpointer d)
 {
 	int start, end, newword_len;
 	char *newword;
-	char buf[BUFSIZE];
+	char buf[BUFSIZE]={0};
 
 	/* we don't save their position, 
 	 * because the cursor is moved by the click. */
@@ -298,12 +288,15 @@ static GtkMenu *make_menu(GList *l, GtkText *gtktext)
 
 static void popup_menu(GtkText *gtktext, GdkEventButton *eb) 
 {
-	char buf[BUFSIZE];
+	char buf[BUFSIZE]={0};
 	GList *list;
 
 	get_curword(gtktext, buf, NULL, NULL);
+	if(ay_spell_check(buf))
+		return;
 
-	list = misspelled_suggest(buf);
+	list = llist_to_glist( ay_spell_check_suggest(buf), 1 );
+	list = g_list_prepend(list, strdup(buf));
 	if (list != NULL) {
 		gtk_menu_popup(make_menu(list, gtktext), NULL, NULL, NULL, NULL, eb->button, eb->time);
 		while (list) {
@@ -327,10 +320,12 @@ static gint button_press_intercept_cb(GtkText *gtktext, GdkEvent *e, gpointer d)
 	GdkEventButton *eb;
 	gboolean retval;
 
-	if (e->type != GDK_BUTTON_PRESS) return FALSE;
+	if (e->type != GDK_BUTTON_PRESS)
+		return FALSE;
 	eb = (GdkEventButton*) e;
 
-	if (eb->button != 3) return FALSE;
+	if (eb->button != 3)
+		return FALSE;
 
 	/* forge the leftclick */
 	eb->button = 1;
