@@ -599,7 +599,6 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 
 ay_prefs_window::~ay_prefs_window( void )
 {
-printf( "ay_prefs_window::~ay_prefs_window\n" );
 	GList	*iter = m_panels;
 	
 	while ( iter != NULL )
