@@ -1,3 +1,7 @@
+* Fri May  2 2003 21:00 GMT [colin]	0.3.0-104
+- src/chat_window.c
+Fix another of my segfaults
+
 * Fri May  2 2003 21:00 GMT [colin]	0.3.0-103
 - src/gtk/prefs_window.C
 Workaround strange metacity bug

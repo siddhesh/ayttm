@@ -484,12 +484,13 @@ void show_data_choicewindow(
 		if (help) {
 			label = gtk_label_new(help);
 			gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-			gtk_widget_set_usize(text_entry, 300, -1);
 			gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
 			gtk_widget_show(label);
 			gtk_box_pack_start(GTK_BOX(vbox2), label, TRUE, TRUE, 0);
 		}
+
 		text_entry = gtk_text_new(NULL,NULL);
+		gtk_widget_set_usize(text_entry, 300, -1);
 		gtk_text_set_editable(GTK_TEXT(text_entry), TRUE);
 		gtk_widget_set_usize(text_entry, 300, 60);
 		gtk_box_pack_start(GTK_BOX(vbox2), text_entry, TRUE, TRUE, 0);
