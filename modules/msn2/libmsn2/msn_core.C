@@ -331,7 +331,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
 
   if(!strcmp(args[0], "SYN"))
   {
-    if(numargs >=3 && info->serial==atoi(args[2]))
+    if(numargs >=3 && info && info->serial==atoi(args[2]))
     {
     /*  delete info;
       info=NULL;*/
@@ -339,7 +339,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
       ext_syncing_lists(conn, 0);
       ext_got_info(conn, NULL);
       return;
-    } else {
+    } else if (info) {
       info->serial=atoi(args[2]);
       ext_latest_serial(conn, info->serial);
     }
@@ -390,6 +390,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
   if(numargs >=3 && !strcmp(args[0], "LSG"))
   {
 	  ext_got_group(conn, args[1], msn_decode_URL(args[2]));
+	  return;
   }
   
   if(numargs >=1 && !strcmp(args[0], "GTC"))
@@ -906,6 +907,11 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
     return;
   }
   
+  if (!strcmp(args[0], "LSG")) {
+	msn_syncdata(conn, 0, args, numargs, NULL);
+	return;  
+  }
+  
   if(numargs >=2)
 	  trid=atoi(args[1]);
 
@@ -924,8 +930,8 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
       list=list->next;
       if(list==NULL) { break; } // defaults
     }
-  } else if (list!=NULL && (!strcmp(args[0],"LSG") || !strcmp(args[0],"LST"))) {
-	  /* hack because LSG/LST don't have trid anymore */
+  } else if (list!=NULL && !strcmp(args[0],"LST")) {
+	  /* hack because LST don't have trid anymore */
     while(1)
     {
       call=(callback *)list->data;

@@ -1,3 +1,7 @@
+* Sat Aug 23 2003 10:52 GMT [colin]	0.3.4-3
+- modules/msn2/
+Fix groups 
+
 * Sat Aug 23 2003 10:52 GMT [colin]	0.3.4-2
 - src/ssl.[ch] ** NEW FILES **
   configure.ac
