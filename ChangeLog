@@ -1,3 +1,7 @@
+* Wed Apr 02 2003 02:29 GMT [colin]	0.2.3-pre71
+- modules/msn2/libmsn2/msn_bittybits.C
+Try to use more normal allocation in msn_read_line()
+
 * Tue Apr 01 2003 01:30 GMT [edward]	0.2.3-pre70
 - src/chat_window.c
 Added Necessary redraws for MINGW32 port
