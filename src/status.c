@@ -661,11 +661,11 @@ static void ay_compare_version (const char *version, int warn_again)
 {
 	char *warned = cGetLocalPref("last_warned_version");
 	
-	if (strcmp(version, VERSION)) {
+	if (version_cmp(version, VERSION "-" RELEASE) > 0) {
 		/* versions differ, should I warn ? */
 		if (warn_again || !warned || strcmp(warned, version)) {
 			char * buf = g_strdup_printf(_("A new release of ayttm is available.\n"
-					"Last version is %s, while you have %s.\n"), version, VERSION);
+					"Latest version is %s, while you have %s.\n"), version, VERSION "-" RELEASE);
 			ay_do_info(_("New release available !"), buf);
 			cSetLocalPref("last_warned_version", (char *)version);
 			ayttm_prefs_write();

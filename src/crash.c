@@ -203,7 +203,7 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_container_set_border_width(GTK_CONTAINER(hbox1), 4);
 
 	version = ay_get_last_version();
-	if (version && strcmp(version, VERSION))
+	if (version && version_cmp(version, VERSION "-" RELEASE) > 0)
 		label1 = gtk_label_new
 			(g_strdup_printf(_("%s.\nA newer version (%s) is available; please do not file a bugreport before upgrading."),
 				text, version));

@@ -1,3 +1,8 @@
+* Thu Oct 16 2003 04:24 GMT [philip]	0.4.3-pre18
+- src/util.c src/crash.c src/status.c
+more correct version number comparison - still doesn't work
+correctly with -pre* releases
+
 * Wed Oct 15 2003 07:09 GMT [philip]	0.4.3-pre17
 - src/util.c src/contact_parser.y
 Don't allow duplicate contact accounts

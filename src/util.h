@@ -137,6 +137,7 @@ LList * ay_save_account_information(int service_id);
 void ay_restore_account_information(LList *saved);
 
 char * ay_http_get(const char *uri);
+int version_cmp(const char *v1, const char *v2);
 char *ay_get_last_version(void);
 void ay_dump_cts(void);
 void ay_dump_elas(void);
