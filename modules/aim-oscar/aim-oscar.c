@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:51 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/04 00:32:25 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1489,7 +1489,7 @@ int eb_aim_chatnav_info(struct aim_session_t *sess,
     va_end(ap);
 
 #ifdef DEBUG
-    g_message("faimtest: recieved room create reply for %s", fqcn);
+    g_message("faimtest: received room create reply for %s", fqcn);
     g_message("ck: %s", ck);
 #endif
 

@@ -335,7 +335,7 @@ faim_export int aim_rxdispatch(struct aim_session_t *sess)
       case -1:
 	/*
 	 * This can happen if we have a queued command
-	 * that was recieved after a connection has 
+	 * that was received after a connection has 
 	 * been terminated.  In which case, the handler
 	 * list has been cleared, and there's nothing we
 	 * can do for it.  We can only cancel it.
@@ -806,7 +806,7 @@ faim_internal int aim_parse_unknown(struct aim_session_t *sess,
   if (!sess || !command)
     return 1;
 
-  faimdprintf(1, "\nRecieved unknown packet:");
+  faimdprintf(1, "\nReceived unknown packet:");
 
   for (i = 0; i < command->commandlen; i++)
     {

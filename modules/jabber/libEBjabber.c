@@ -665,7 +665,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 	eb_debug(DBG_JBR,  "Packet: %s\n", packet->x->name);
 	switch(packet->type) {
 	case JPACKET_MESSAGE:
-		eb_debug(DBG_JBR,  "MESSAGE recieved\n");
+		eb_debug(DBG_JBR,  "MESSAGE received\n");
 		from = xmlnode_get_attrib (packet->x, "from");
 		type = xmlnode_get_attrib (packet->x, "type");
 		/* type can be empty, chat, groupchat, or error */
@@ -711,14 +711,14 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		}
 		break;
 	case JPACKET_IQ:
-		eb_debug(DBG_JBR,  "IQ packet recieved\n");
+		eb_debug(DBG_JBR,  "IQ packet received\n");
 		type = xmlnode_get_attrib(packet->x, "type");
 		from = xmlnode_get_attrib(packet->x, "from");
 		if(!type) {
 			eb_debug(DBG_JBR,  "<JPACKET_IQ: NULL type\n");
 			return;
 		}
-		eb_debug(DBG_JBR,  "IQ recieved: %s\n", type);
+		eb_debug(DBG_JBR,  "IQ received: %s\n", type);
 		if(!strcmp(type, "result")) {
 			id = xmlnode_get_attrib (packet->x, "id");
 			if (id) {
@@ -916,12 +916,12 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		}
 		break;
 	case JPACKET_PRESENCE:
-		eb_debug(DBG_JBR,  "Presence packet recieved\n");
+		eb_debug(DBG_JBR,  "Presence packet received\n");
 		status = JABBER_ONLINE;
 		type = xmlnode_get_attrib (packet->x, "type");
 		from = xmlnode_get_attrib (packet->x, "from");
 		/* For now, everybuddy does not understand resources */
-		eb_debug(DBG_JBR,  "PRESENCE recieved type: %s from: %s\n", type, from);
+		eb_debug(DBG_JBR,  "PRESENCE received type: %s from: %s\n", type, from);
 		x = xmlnode_get_tag (packet->x, "show");
 		if (x) {
 			show = xmlnode_get_data (x);
@@ -966,7 +966,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		}
 		break;
 	case JPACKET_S10N:
-		eb_debug(DBG_JBR,  "S10N packet recieved\n");
+		eb_debug(DBG_JBR,  "S10N packet received\n");
 		from = xmlnode_get_attrib (packet->x, "from");
 		type = xmlnode_get_attrib (packet->x, "type");
 		if (type) {
@@ -1003,10 +1003,10 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 	default:
 		from = xmlnode_get_attrib (packet->x, "from");
 		if(from) {
-			fprintf(stderr, "unrecognized packet: %i recieved from %s\n", packet->type, from);
+			fprintf(stderr, "unrecognized packet: %i received from %s\n", packet->type, from);
 		}
 		else
-			fprintf(stderr, "unrecognized packet: %i recieved\n", packet->type);
+			fprintf(stderr, "unrecognized packet: %i received\n", packet->type);
 		break;
 	}
 	eb_debug (DBG_JBR, "<\n");

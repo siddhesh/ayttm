@@ -81,7 +81,7 @@ faim_internal int aim_chatnav_parse_info(struct aim_session_t *sess, struct comm
   
   if (snac->family != 0x000d)
     {
-      printf("faim: chatnav_parse_info: recieved response that maps to corrupt request! (fam=%04x)\n", snac->family);
+      printf("faim: chatnav_parse_info: received response that maps to corrupt request! (fam=%04x)\n", snac->family);
       return 1;
     }
 

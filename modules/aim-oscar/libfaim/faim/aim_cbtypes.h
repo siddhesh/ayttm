@@ -193,9 +193,9 @@
 #define AIM_CB_OFT_DIRECTIMINITIATE 0x0005
 
 #define AIM_CB_OFT_GETFILECONNECTREQ 0x0006 /* connect request -- actually an OSCAR CAP*/
-#define AIM_CB_OFT_GETFILEFILEREQ 0x0007    /* recieved file request */
-#define AIM_CB_OFT_GETFILEFILESEND 0x0008   /* recieved file request confirm -- send data */
-#define AIM_CB_OFT_GETFILECOMPLETE 0x0009   /* recieved file send complete*/
+#define AIM_CB_OFT_GETFILEFILEREQ 0x0007    /* received file request */
+#define AIM_CB_OFT_GETFILEFILESEND 0x0008   /* received file request confirm -- send data */
+#define AIM_CB_OFT_GETFILECOMPLETE 0x0009   /* received file send complete*/
 #define AIM_CB_OFT_GETFILEINITIATE 0x000a   /* request for file get acknowledge */
 #define AIM_CB_OFT_GETFILEDISCONNECT 0x000b   /* OFT connection disconnected.*/
 

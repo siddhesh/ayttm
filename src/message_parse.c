@@ -65,7 +65,7 @@ char filename[1024];
 // static unsigned long filename_len = 0; // unused
 static int xfer_in_progress = 0;
 static FILE * fp;
-static unsigned long amount_recieved;
+static unsigned long amount_received;
 static int fd;
 #ifndef __MINGW32__
 static pthread_mutex_t mutex;
@@ -147,7 +147,7 @@ static void send_file2(void * ptr )
 					j += k;
 				}
 				pthread_mutex_lock(&mutex);
-				amount_recieved = i;
+				amount_received = i;
 				pthread_mutex_unlock(&mutex);
 		}
 	}
@@ -177,7 +177,7 @@ static int update_send_progress(void * data )
 #endif
 	if( xfer_in_progress > 0 )
 	{
-		update_progress(pcd->tag, amount_recieved);
+		update_progress(pcd->tag, amount_received);
 	}
 	else if( xfer_in_progress == -1 )
 	{
@@ -307,8 +307,8 @@ static void get_file2( void *data, int source, eb_input_condition condition )
 		{
 			fputc(buffer[i], fp);
 		}
-		amount_recieved += len2;
-		update_progress(pcd->tag, amount_recieved);
+		amount_received += len2;
+		update_progress(pcd->tag, amount_received);
 	}
 }
 
@@ -379,7 +379,7 @@ static void get_file( int s )
 
 	snprintf( buffer, 1024, "%s/%s", getenv("HOME"),buffer2);
 	printf("receiving file %s\n", buffer);
-	amount_recieved = 0;
+	amount_received = 0;
 	fp = fopen(buffer, "wb");
 
 	snprintf( buffer3, 1024, _("Would you like to accept\n the file %s?\nSize=%lu"), buffer2,(unsigned long)filelen);

@@ -163,7 +163,7 @@ faim_internal int aim_parse_outgoing_im_middle(struct aim_session_t *sess,
   i += 2;
 
   if (channel != 0x01) {
-    printf("faim: icbm: ICBM recieved on unsupported channel.  Ignoring. (chan = %04x)\n", channel);
+    printf("faim: icbm: ICBM received on unsupported channel.  Ignoring. (chan = %04x)\n", channel);
     return 1;
   }
 
