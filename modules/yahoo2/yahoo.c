@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.15 $",
-	"$Date: 2003/04/09 16:08:57 $",
+	"$Revision: 1.16 $",
+	"$Date: 2003/04/09 18:58:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2585,6 +2585,7 @@ static void yahoo_init_smileys()
 
 	psmileys=add_protocol_smiley(psmileys, "o:)", "angel");
 	psmileys=add_protocol_smiley(psmileys, "O:)", "angel");
+	psmileys=add_protocol_smiley(psmileys, "0:)", "angel");
 
 	psmileys=add_protocol_smiley(psmileys, ":((", "cry");
 	psmileys=add_protocol_smiley(psmileys, ":-((", "cry");
@@ -2596,6 +2597,8 @@ static void yahoo_init_smileys()
 
 	psmileys=add_protocol_smiley(psmileys, ":o)", "clown");
 	psmileys=add_protocol_smiley(psmileys, ":O)", "clown");
+	psmileys=add_protocol_smiley(psmileys, ":0)", "clown");
+	psmileys=add_protocol_smiley(psmileys, "<@:)", "clown");
 
 	psmileys=add_protocol_smiley(psmileys, "*-:)", "lightbulb");
 
