@@ -220,7 +220,7 @@ void	ay_ui_show_about(void *useless, void *null)
 	gtk_widget_show( GTK_WIDGET(label) );
 	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
 
-	/* list of Everybuddy developers */
+	/* list of "Help" team */
 	table = sMakeDeveloperTable( HELP_TEAM_SIZE, sHelpDevTeam );
 	gtk_box_pack_start(vbox2, GTK_WIDGET(table), TRUE, TRUE, 5);
 
@@ -232,6 +232,18 @@ void	ay_ui_show_about(void *useless, void *null)
 	
 	gtk_box_pack_start(vbox, GTK_WIDGET(scroll), TRUE, TRUE, 5);
 	
+	/* separator */
+	separator = gtk_hseparator_new();
+	gtk_widget_show( separator );
+	gtk_box_pack_start(vbox2, separator, TRUE, TRUE, 5);
+
+	/* text */
+	label = GTK_LABEL(gtk_label_new( _("And a special thanks to Mark Spencer, initial creator of GAIM,\nfor all the tremendous support he has given.") ));
+	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+	gtk_widget_show( GTK_WIDGET(label) );
+	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
+
 	/* close button */
 	ok = gtk_button_new_with_label(_("Close"));
 	gtk_signal_connect_object(GTK_OBJECT(ok), "clicked",

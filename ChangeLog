@@ -1,3 +1,7 @@
+* Sat Apr 26 2003 17:36 GMT [colin]	0.3.0-pre30
+- src/gtk/about.c AUTHORS
+Authors sync
+
 * Fri Apr 25 2003 18:40 GMT [philip]	0.3.0-pre29
 - src/util.c
 fix get_local_addresses
