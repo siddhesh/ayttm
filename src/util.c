@@ -975,19 +975,26 @@ static void add_account_verbose( char * contact, eb_account * account, int verbo
 {
 	struct relocate_account_data * rad; 
 	struct contact * c = find_contact_by_nick( contact );
-	eb_account * ea = find_account_by_handle(account->handle, account->service_id);
+	eb_account * ea;
+	if(account->ela)
+		ea = find_account_with_ela(account->handle, account->ela);
+	else
+		ea = find_account_by_handle(account->handle, account->service_id);
+
 	if(ea) {
 		if(!strcasecmp(ea->account_contact->group->name, _("Unknown"))) {
 			move_account(c, ea);
 		} else {
 			char buff[2048];
 			snprintf(buff, sizeof(buff), 
-					_("The account already exists on your\n"
+					_("The account \"%s\" already exists on your\n"
 					"contact list at the following location\n"
 					"\tGroup: %s\n"
 					"\tContact: %s\n"
 					"\nShould I move it?"),
-					ea->account_contact->group->name, ea->account_contact->nick );
+					ea->handle,
+					ea->account_contact->group->name,
+					ea->account_contact->nick );
 
 			/* remove this contact if it was newly created */
 			if(verbosity) {
@@ -1000,7 +1007,7 @@ static void add_account_verbose( char * contact, eb_account * account, int verbo
 		}
 		return;
 	}
-	if (!find_suitable_local_account(NULL, account->service_id)) {
+	if (!find_suitable_local_account(account->ela, account->service_id)) {
 		contact_mgmt_queue_add(account, MGMT_ADD, c?c->group->name:_("Unknown"));
 	}
 	if (c) {
