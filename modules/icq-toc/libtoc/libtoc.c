@@ -1269,7 +1269,7 @@ static void icqtoc_signon2(void *data, int source, eb_input_condition condition 
 {
 	char *flap_result=NULL;
 	toc_conn *conn = (toc_conn *)data;
-	char *norm_username = aim_normalize(conn->username);
+	char *norm_username = icq_normalize(conn->username);
 	unsigned short username_length = htons(strlen(norm_username));
 	char sflap_header[] = {0,0,0,1,0,1};
 	char buff[2048];
