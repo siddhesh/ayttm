@@ -33,9 +33,9 @@ messages through AOL, ICQ, Yahoo, MSN, IRC and Jabber.
 
 %build
 %if "%{nodebug}" == "0"
-%configure --enable-smtp
+%configure --enable-smtp --enable-jasper-filter
 %else
-%configure --disable-crash-dialog --enable-smtp
+%configure --disable-crash-dialog --enable-smtp --enable-jasper-filter
 %endif
 make
 
