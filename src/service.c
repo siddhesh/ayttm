@@ -220,12 +220,18 @@ char *get_service_name( int service_id )
 	return "unknown";
 }
 
+static int strcasecmp_list(void* a, void* b)
+{
+	return strcasecmp((const char *)a, (const char *)b);
+}
+
+
 LList * get_service_list()
 {
 	LList * newlist = NULL;
 	int i;
 	for ( i = 0; i < NUM_SERVICES; i++ )
-		newlist = l_list_append( newlist, eb_services[i].name );
+		newlist = l_list_insert_sorted( newlist, eb_services[i].name, strcasecmp_list);
 
 	return newlist;
 }

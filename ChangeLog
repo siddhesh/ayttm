@@ -1,3 +1,7 @@
+* Sat May  3 2003 10:32 GMT [colin]	0.3.0-110
+- src/service.c
+get_service_list() sorts alphabetically
+
 * Sat May  3 2003 10:32 GMT [colin]	0.3.0-109
 - src/edit_local_accounts.c src/util.[ch]
 Move account save/restore to util
