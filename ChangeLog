@@ -1,3 +1,7 @@
+* Fri May  2 2003 00:20 GMT [colin]	0.3.0-91
+- src/edit_local_accounts.c
+Fix another ea->ela related crash
+
 * Fri May  2 2003 00:20 GMT [colin]	0.3.0-90
 - src/dialog.c
 Space between Yes and No

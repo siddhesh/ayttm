@@ -364,7 +364,10 @@ static LList * save_account_information(void)
 			eb_account *ea = (eb_account *)accs->data;
 			account_information * ai = g_new0(account_information,1);
 			ai->ea = ea;
-			ai->local_acc = strdup(ea->ela->handle);
+			if (ea->ela)
+				ai->local_acc = strdup(ea->ela->handle);
+			else
+				ai->local_acc = NULL;
 			eb_debug(DBG_CORE, " SAVED { %p(%s), %d, %s }\n", ea, ea->handle, ea->service_id, ea->ela->handle);
 			saved = l_list_append(saved, ai);
 		}
@@ -379,7 +382,10 @@ static void restore_account_information(LList *saved)
 	for (walk = saved; walk; walk=walk->next) {
 		account_information * ai = (account_information *)walk->data;
 		eb_account *ea = ai->ea;
-		ea->ela = find_local_account_by_handle(ai->local_acc, ea->service_id);
+		if (ai->local_acc)
+			ea->ela = find_local_account_by_handle(ai->local_acc, ea->service_id);
+		else
+			ea->ela = NULL;
 		if (!ea->ela) {
 			/* ooh an orphaned ea */
 			ea->ela = find_local_account_for_remote(ea, 0);
