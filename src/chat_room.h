@@ -27,11 +27,8 @@
 
 #include <time.h>
 
-#include <gtk/gtk.h>
-
 #include "account.h"
 #include "logs.h"
-#include "chat_window.h"
 
 typedef struct _eb_chat_room_buddy
 {
@@ -40,7 +37,8 @@ typedef struct _eb_chat_room_buddy
 	int color;
 } eb_chat_room_buddy;
 
-#define eb_chat_room chat_window
+struct _chat_window;
+typedef struct _chat_window eb_chat_room;
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +60,7 @@ void eb_destroy_all_chat_rooms (void);
 eb_chat_room* find_tabbed_chat_room(void);
 eb_chat_room *find_tabbed_chat_room_index (int current_page);
 void do_invite_window(void *widget, eb_chat_room * room );
-void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num);
+void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num);
 eb_chat_room * find_chat_room_by_id( char * id );
 eb_chat_room * find_chat_room_by_name( char * name, int service_id );
 LList * find_chatrooms_with_remote_account(eb_account *remote);

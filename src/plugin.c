@@ -35,6 +35,7 @@ typedef long __off32_t;
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <gtk/gtk.h>
 
 #include "globals.h"
 #include "defaults.h"

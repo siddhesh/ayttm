@@ -32,6 +32,7 @@
 #include "gtk_globals.h"
 #include "messages.h"
 #include "service.h"
+#include "chat_window.h"
 #include "gtk/gtkutils.h"
 
 #include "pixmaps/tb_preferences.xpm"

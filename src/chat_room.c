@@ -236,12 +236,12 @@ static void send_typing_status(eb_chat_room *cr)
 	}
 }
 
-void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num)
+void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num)
 {
 	LList *w = NULL;
 	for (w = chat_rooms; w; w = w->next) {
 		eb_chat_room *cr = (eb_chat_room *)w->data;
-		if (cr->notebook_child == page->child) {
+		if (cr->notebook_child == ((GtkNotebookPage *)page)->child) {
 			printf("crnotebook %p child %p \n", cr->notebook, cr->notebook_child);
 			set_tab_normal(cr);
 			eb_chat_room_update_window_title(cr, FALSE);
