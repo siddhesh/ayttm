@@ -207,7 +207,7 @@ Add gtkut_create_label_button()
   src/gtk/prefs_window.C
 Add Load and Unload buttons to module preference panels
 
-* Tue Apr 29 2003 19:30 GMT [philip]	0.3.0-55
+* Tue Apr 29 2003 19:30 GMT [colin]	0.3.0-55
 - src/nomodule.c
 I'm stupid
 
