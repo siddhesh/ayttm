@@ -896,9 +896,13 @@ void remove_contact( struct contact * c )
 {
 	grouplist * g = c->group;
 
-	if(c->chatwindow)
-		gtk_widget_destroy(c->chatwindow->window);
-
+	if(c->chatwindow) {
+		if (iGetLocalPref("do_tabbed_chat"))
+			cw_remove_tab(c);
+		else
+			cw_close_win(NULL, c->chatwindow); 
+	}
+	
 	while(c->accounts && !l_list_empty(c->accounts))
 		if (!remove_account(c->accounts->data))
 			return;

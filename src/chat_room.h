@@ -58,6 +58,7 @@ void open_join_chat_window();
 char* next_chatroom_name();
 void eb_chat_room_display_status (eb_account *remote, char *message);
 void eb_destroy_chat_room (eb_chat_room *ecr);
+void eb_destroy_all_chat_rooms (void);
 eb_chat_room* find_tabbed_chat_room(void);
 eb_chat_room *find_tabbed_chat_room_index (int current_page);
 void do_invite_window(void *widget, eb_chat_room * room );

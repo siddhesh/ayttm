@@ -1,3 +1,7 @@
+* Tue Aug 26 2003 12:09 GMT [colin]	0.4.0-7
+- src/chat_window.[ch] src/chat_room.c src/util.c src/edit_account_window.c
+Clean a bit tabbed chatwindows
+
 * Tue Aug 26 2003 12:09 GMT [colin]	0.4.0-6
 - modules/msn2/libmsn2/
 Don't hardcode file transfer's chunk size when receiving

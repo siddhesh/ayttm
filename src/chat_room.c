@@ -241,6 +241,7 @@ void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, 
 	for (w = chat_rooms; w; w = w->next) {
 		eb_chat_room *cr = (eb_chat_room *)w->data;
 		if (cr->notebook_child == page->child) {
+			printf("crnotebook %p child %p \n", cr->notebook, cr->notebook_child);
 			set_tab_normal(cr);
 			eb_chat_room_update_window_title(cr, FALSE);
 			gtk_widget_grab_focus(cr->entry);
@@ -858,6 +859,15 @@ void destroy_chat_room (GtkWidget *widget, gpointer data)
 		gtk_widget_destroy(room->window);
 	}
 }
+
+void eb_destroy_all_chat_rooms (void) 
+{
+	while (chat_rooms && chat_rooms->data) {
+		destroy_chat_room(NULL, (eb_chat_room *)chat_rooms->data);
+	}
+	
+}
+
 
 void eb_destroy_chat_room (eb_chat_room *room) 
 {

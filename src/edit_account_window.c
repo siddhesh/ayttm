@@ -60,7 +60,7 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 	gint service_id = -1;
 	gchar *local_acc = strstr(service, " ") +1;
 	eb_local_account *ela = NULL;
-	
+	int reshow_chatwindow;
 	if (strcmp(service, _("[None]")) && strstr(service, "]")) {
 		char *mservice = NULL;
 		*(strstr(service, "]")) = '\0';
@@ -98,6 +98,9 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 		con = add_new_contact(COMBO_TEXT(group), COMBO_TEXT(nick), account->service_id);
 	}
 
+	if (con && con->chatwindow) {
+		reshow_chatwindow=TRUE;
+	}
 	if(!account->account_contact)
 		add_account(con->nick, account);
 	else
@@ -109,6 +112,9 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 	update_contact_list();
 	write_contact_list();
 	gtk_widget_destroy(edit_account_window);
+	if (reshow_chatwindow) {
+		eb_chat_window_display_contact(con);
+	}
 }
 
 static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
