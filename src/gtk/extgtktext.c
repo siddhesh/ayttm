@@ -122,6 +122,10 @@
   ((MARK_CURRENT_PROPERTY(mark)->flags & PROPERTY_DIVIDER) ? \
          TRUE : \
          FALSE)
+#define MARK_CURRENT_FILL(text, mark) \
+  ((MARK_CURRENT_PROPERTY(mark)->flags & PROPERTY_FILL) ? \
+         TRUE : \
+         FALSE)
 #define MARK_CURRENT_MASK(text, mark) \
   ((MARK_CURRENT_PROPERTY(mark)->flags & PROPERTY_IMAGE) ? \
          MARK_CURRENT_PROPERTY(mark)->mask: \
@@ -195,7 +199,8 @@ typedef enum {
   PROPERTY_UNDERLINED = 1 << 3,
   PROPERTY_IMAGE      = 1 << 4,
   PROPERTY_DATA       = 1 << 5,
-  PROPERTY_DIVIDER    = 1 << 6
+  PROPERTY_DIVIDER    = 1 << 6,
+  PROPERTY_FILL       = 1 << 7
 } TextPropertyFlags;
 
 
@@ -334,14 +339,14 @@ static ExtGtkTextFont* get_text_font (VFont* gfont);
 static void         text_font_unref (ExtGtkTextFont *text_font);
 static void insert_text_property (ExtGtkText* text, VFont* font,
 				  GdkColor *fore, GdkColor* back,
-                                  gboolean underlined, gboolean divider,
+                                  gboolean underlined, gboolean divider, gboolean fill,
 				  GdkDrawable *image, GdkBitmap *mask, 
                                   gpointer user_data, guint user_data_length,
                                   DataFunc *user_data_func,
                                   guint len);
 static TextProperty* new_text_property (ExtGtkText *text, VFont* font, 
 					GdkColor* fore, GdkColor* back,
-                                        gboolean underlined, gboolean divider, GdkDrawable *image,
+                                        gboolean underlined, gboolean divider, gboolean fill, GdkDrawable *image,
 					GdkBitmap *mask,
                                         gpointer user_data, guint user_data_length,
                                         DataFunc *user_data_func,
@@ -1076,7 +1081,8 @@ ext_gtk_text_insert_alltypes (ExtGtkText    *text,
                           guint    user_data_length,
                           DataFunc *user_data_func,
 		          const char *chars,
-		          gint        nchars)
+		          gint        nchars,
+			  gint        fill)
 {
   GtkEditable *editable = GTK_EDITABLE (text);
   gboolean frozen = FALSE;
@@ -1173,7 +1179,7 @@ ext_gtk_text_insert_alltypes (ExtGtkText    *text,
   if (numwcs > 0) /*  this is where rejection happened, changed next */
     {
 /*      insert_text_property (text, font, fore, back, numwcs); */
-      insert_text_property (text, font, fore, back, underlined, divider, image, mask, user_data, user_data_length, user_data_func, numwcs);
+      insert_text_property (text, font, fore, back, underlined, divider, fill, image, mask, user_data, user_data_length, user_data_func, numwcs);
    
       text->gap_size -= numwcs;
       text->gap_position += numwcs;
@@ -1204,9 +1210,10 @@ ext_gtk_text_insert (ExtGtkText    *text,
 	         GdkColor   *fore,
 	         GdkColor   *back,
                  const char *chars,
-	         gint        nchars)
+	         gint        nchars,
+		 gint        fill)
 {
-  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, FALSE, NULL, NULL, NULL,0,NULL, chars, nchars);
+  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, FALSE, NULL, NULL, NULL,0,NULL, chars, nchars, fill);
 }
 
 void
@@ -1215,9 +1222,10 @@ ext_gtk_text_insert_underlined (ExtGtkText    *text,
 	                    GdkColor   *fore,
 	                    GdkColor   *back,
                             const char *chars,
-	                    gint        nchars)
+	                    gint        nchars,
+			    gint        fill)
 {
-  ext_gtk_text_insert_alltypes(text, font, fore, back, TRUE, FALSE, NULL, NULL, NULL,0, NULL, chars, nchars);
+  ext_gtk_text_insert_alltypes(text, font, fore, back, TRUE, FALSE, NULL, NULL, NULL,0, NULL, chars, nchars, fill);
 }
 
 void
@@ -1228,7 +1236,7 @@ ext_gtk_text_insert_divider(ExtGtkText    *text,
                             const char *chars,
 	                    gint        nchars)
 {
-  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, TRUE, NULL, NULL, NULL,0, NULL, " \n", 2);
+  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, TRUE, NULL, NULL, NULL,0, NULL, " \n", 2, 0);
 }
 
 void
@@ -1241,7 +1249,7 @@ ext_gtk_text_insert_pixmap  (ExtGtkText *text,
                             const char *chars,
 	                    gint        nchars)
 {
-  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, FALSE, image, mask, NULL,0,NULL, " ", 1);
+  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, FALSE, image, mask, NULL,0,NULL, " ", 1, 0);
 }
 
 void
@@ -1253,11 +1261,12 @@ ext_gtk_text_insert_data_underlined   (ExtGtkText *text,
                                         guint    user_data_length, 
                                         DataFunc *user_data_func,
                                         const char *chars,
-                                        gint        nchars)
+                                        gint        nchars,
+					gint        fill)
 {
   gpointer user_data=g_malloc(user_data_length);
   memcpy(user_data,user_data_n, user_data_length);
-  ext_gtk_text_insert_alltypes(text, font, fore, back, TRUE, FALSE, NULL, NULL, user_data, user_data_length, user_data_func, chars, nchars);
+  ext_gtk_text_insert_alltypes(text, font, fore, back, TRUE, FALSE, NULL, NULL, user_data, user_data_length, user_data_func, chars, nchars, fill);
 }
 
 void
@@ -1269,11 +1278,12 @@ ext_gtk_text_insert_data   (ExtGtkText *text,
                             guint    user_data_length, 
                             DataFunc *user_data_func, 
                             const char *chars,
-	                    gint        nchars)
+	                    gint        nchars,
+			    gint        fill)
 {
   gpointer user_data=g_malloc(user_data_length);
   memcpy(user_data,user_data_n, user_data_length);
-  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, FALSE, NULL, NULL, user_data, user_data_length, user_data_func, chars, nchars);
+  ext_gtk_text_insert_alltypes(text, font, fore, back, FALSE, FALSE, NULL, NULL, user_data, user_data_length, user_data_func, chars, nchars, 0);
 }
 
 gint
@@ -2214,7 +2224,7 @@ ext_gtk_text_insert_text    (GtkEditable       *editable,
       memcpy(user_data, property->user_data, user_data_length);
       user_data_func=property->user_data_func;
   }
-  ext_gtk_text_insert_alltypes (text, font, fore, back, underlined, FALSE, image, mask, user_data, user_data_length, user_data_func, new_text, new_text_length);
+  ext_gtk_text_insert_alltypes (text, font, fore, back, underlined, FALSE, image, mask, user_data, user_data_length, user_data_func, new_text, new_text_length, 0);
 
   *position = text->point.index;
 }
@@ -3327,7 +3337,7 @@ text_font_unref (ExtGtkTextFont *text_font)
 
 static gint
 text_properties_equal (TextProperty* prop, VFont* font, GdkColor *fore, 
-                        GdkColor *back, gboolean underlined,gboolean divider,
+                        GdkColor *back, gboolean underlined,gboolean divider, gboolean fill,
 			GdkDrawable *image, 
                         gpointer user_data, guint user_data_length, 
                         DataFunc *user_data_func)
@@ -3374,6 +3384,9 @@ text_properties_equal (TextProperty* prop, VFont* font, GdkColor *fore,
     return FALSE;
 
   if (((prop->flags & PROPERTY_DIVIDER)?TRUE:FALSE)!=divider)
+    return FALSE;
+  
+  if (((prop->flags & PROPERTY_FILL)?TRUE:FALSE)!=fill)
     return FALSE;
   
   if (prop->flags & PROPERTY_IMAGE)
@@ -3449,7 +3462,7 @@ unrealize_properties (ExtGtkText *text)
 
 static TextProperty*
 new_text_property (ExtGtkText *text, VFont*font, GdkColor* fore, 
-		   GdkColor* back, gboolean underlined, gboolean divider, GdkDrawable *image, 
+		   GdkColor* back, gboolean underlined, gboolean divider, gboolean fill, GdkDrawable *image, 
                    GdkBitmap *mask, gpointer user_data, guint user_data_length, 
 		   DataFunc *user_data_func, guint length)
 {
@@ -3498,6 +3511,11 @@ new_text_property (ExtGtkText *text, VFont*font, GdkColor* fore,
       prop->flags |= PROPERTY_DIVIDER;
     }
 
+  if (fill)
+    {
+      prop->flags |= PROPERTY_FILL;
+    }
+    
   if (image)
     {
       prop->flags |= PROPERTY_IMAGE;
@@ -3629,7 +3647,7 @@ make_forward_space (ExtGtkText* text, guint len)
 static void
 insert_text_property (ExtGtkText* text, VFont* font,
 		      GdkColor *fore, GdkColor* back,
-                      gboolean underlined, gboolean divider, 
+                      gboolean underlined, gboolean divider, gboolean fill, 
 		      GdkDrawable* image, GdkBitmap *mask, 
                       gpointer user_data, guint user_data_length,
                       DataFunc *user_data_func, 
@@ -3645,14 +3663,14 @@ insert_text_property (ExtGtkText* text, VFont* font,
        * If it is the same as either, grow, else insert
        * a new one. */
       
-      if (text_properties_equal(forward_prop, font, fore, back, underlined, divider, image, user_data, user_data_length, user_data_func)) 
+      if (text_properties_equal(forward_prop, font, fore, back, underlined, divider, fill, image, user_data, user_data_length, user_data_func)) 
 	{
 	  /* Grow the property in front of us. */
 	  
 	  MARK_PROPERTY_LENGTH(mark) += len;
 	}
       else if (backward_prop &&
-	       text_properties_equal(backward_prop, font, fore, back, underlined, divider, image, user_data, user_data_length, user_data_func)) 
+	       text_properties_equal(backward_prop, font, fore, back, underlined, divider, fill, image, user_data, user_data_length, user_data_func)) 
 	{
 	  /* Grow property behind us, point property and offset
 	   * change. */
@@ -3704,6 +3722,10 @@ insert_text_property (ExtGtkText* text, VFont* font,
 	  {
               forward_prop->flags |= PROPERTY_DIVIDER;
 	  }
+	  if(fill)
+	  {
+              forward_prop->flags |= PROPERTY_FILL;
+	  }
           if (user_data!=NULL) 
             {
               forward_prop->flags |= PROPERTY_DATA;
@@ -3736,7 +3758,7 @@ insert_text_property (ExtGtkText* text, VFont* font,
 	  if (new_prop->prev)
 	    new_prop->prev->next = new_prop;
 
-	  new_prop->data = new_text_property (text, font, fore, back, underlined, divider, image,mask,user_data, user_data_length, user_data_func,len); 
+	  new_prop->data = new_text_property (text, font, fore, back, underlined, divider, fill, image,mask,user_data, user_data_length, user_data_func,len); 
 
 	  SET_PROPERTY_MARK (mark, new_prop, 0);
 	}
@@ -3750,7 +3772,7 @@ insert_text_property (ExtGtkText* text, VFont* font,
       /* In the middle of forward_prop, if properties are equal,
        * just add to its length, else split it into two and splice
        * in a new one. */
-      if (text_properties_equal (forward_prop, font, fore, back, underlined, divider, image, user_data, user_data_length, user_data_func)) 
+      if (text_properties_equal (forward_prop, font, fore, back, underlined, divider, fill, image, user_data, user_data_length, user_data_func)) 
 	{
 	  forward_prop->length += len;
 	}
@@ -3763,7 +3785,7 @@ insert_text_property (ExtGtkText* text, VFont* font,
 	  forward_prop->length -= 1;
 	  
 	  new_prop = g_list_alloc();
-	  new_prop->data = new_text_property (text, font, fore, back, underlined, divider, image, mask, user_data,user_data_length, user_data_func, len+1); 
+	  new_prop->data = new_text_property (text, font, fore, back, underlined, divider, fill, image, mask, user_data,user_data_length, user_data_func, len+1); 
 	  new_prop->prev = MARK_LIST_PTR(mark);
 	  new_prop->next = NULL;
 	  MARK_NEXT_LIST_PTR(mark) = new_prop;
@@ -3793,6 +3815,8 @@ insert_text_property (ExtGtkText* text, VFont* font,
 			             TRUE : FALSE,
 			      forward_prop->flags & PROPERTY_DIVIDER?
 			             TRUE : FALSE,
+			      forward_prop->flags & PROPERTY_FILL?
+			             TRUE : FALSE,
                               forward_prop->flags & PROPERTY_IMAGE ?
                                       forward_prop->image: NULL,
                               forward_prop->flags & PROPERTY_IMAGE ?
@@ -3805,7 +3829,7 @@ insert_text_property (ExtGtkText* text, VFont* font,
                                       forward_prop->user_data_func:NULL,
 			      old_length - forward_prop->length);
 
-	  new_prop->data = new_text_property(text, font, fore, back, underlined, divider, image, mask, user_data,user_data_length, user_data_func,  len);  
+	  new_prop->data = new_text_property(text, font, fore, back, underlined, divider, fill, image, mask, user_data,user_data_length, user_data_func,  len);  
 	  /* Now splice things in. */
 	  MARK_NEXT_LIST_PTR(mark) = new_prop;
 	  new_prop->prev = MARK_LIST_PTR(mark);
@@ -3922,7 +3946,7 @@ init_properties (ExtGtkText *text)
       text->text_properties = g_list_alloc();
       text->text_properties->next = NULL;
       text->text_properties->prev = NULL;
-      text->text_properties->data = new_text_property (text, NULL, NULL, NULL, FALSE, FALSE, NULL, NULL, NULL,0,NULL, 1); 
+      text->text_properties->data = new_text_property (text, NULL, NULL, NULL, FALSE, FALSE, FALSE, NULL, NULL, NULL,0,NULL, 1); 
       text->text_properties_end = text->text_properties;
       
       SET_PROPERTY_MARK (&text->point, text->text_properties, 0);
@@ -5580,7 +5604,7 @@ draw_line (ExtGtkText* text,
 	     pixel_width =((GdkWindowPrivate*) image) ->width +2;
 #endif
 	  }
-	  if(MARK_CURRENT_DIVIDER(text, &mark))
+	  if(MARK_CURRENT_DIVIDER(text, &mark) || MARK_CURRENT_FILL(text, &mark))
 	  {
 		  int width;
 		  gdk_window_get_size(text->text_area, &width, NULL);

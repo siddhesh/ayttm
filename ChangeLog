@@ -1,3 +1,9 @@
+* Fri May  2 2003 21:00 GMT [colin]	0.3.0-102
+- src/chat_window.c
+Nicer ayttm messages
+- src/gtk/extgtktext.[ch] src/gtk/gtk_eb_html.c
+Allow body to fill width
+
 * Fri May  2 2003 21:00 GMT [colin]	0.3.0-101
 - src/prefs.[ch] 
   src/gtk/gtk_eb_html.c

@@ -219,13 +219,15 @@ void       ext_gtk_text_insert          (ExtGtkText       *text,
 				     GdkColor      *fore,
 				     GdkColor      *back,
 				     const char    *chars,
-				     gint           length);
+				     gint           length,
+				     gint	    fill);
 void       ext_gtk_text_insert_underlined(ExtGtkText       *text,
 				     VFont *font,
 				     GdkColor      *fore,
 				     GdkColor      *back,
 				     const char    *chars,
-				     gint           length);
+				     gint           length,
+				     gint	    fill);
 void
 ext_gtk_text_insert_divider(ExtGtkText    *text,
 		            VFont *font,
@@ -250,7 +252,8 @@ void       ext_gtk_text_insert_data_underlined (ExtGtkText       *text,
                                      guint         user_data_length,
                                      DataFunc      *user_data_func, 
 				     const char    *chars,
-				     gint           length);
+				     gint           length,
+				     gint           fill);
 void       ext_gtk_text_insert_data (ExtGtkText       *text,
 				     VFont *font,
 				     GdkColor      *fore,
@@ -259,7 +262,8 @@ void       ext_gtk_text_insert_data (ExtGtkText       *text,
                                      guint         user_data_length,
                                      DataFunc      *user_data_func, 
 				     const char    *chars,
-				     gint           length);
+				     gint           length,
+				     gint           fill);
 gint       ext_gtk_text_backward_delete (ExtGtkText       *text,
 				     guint          nchars);
 gint       ext_gtk_text_forward_delete  (ExtGtkText       *text,

@@ -667,6 +667,7 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 {
 	gchar ** tokens;
 	int i = 0;
+	int fill = 0;
 #ifndef HAVE_LIBXFT
 	GdkFont * font = NULL;
 	GdkFont * previousfont = NULL;
@@ -1000,7 +1001,7 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 							parm += strlen("alt=");
 							_extract_parameter(parm, tmp_sname, 64);
 							ext_gtk_text_insert(widget, font, fs->fore, fs->back,
-									tmp_sname, strlen(tmp_sname));
+									tmp_sname, strlen(tmp_sname), fill);
 						}
 						else
 						{
@@ -1168,12 +1169,12 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 				if(url)
 				{
 					ext_gtk_text_insert_data_underlined(widget, font, fs->fore, fs->back, 
-						url, strlen(url)+1, handle_click, "\n", strlen("\n"));
+						url, strlen(url)+1, handle_click, "\n", strlen("\n"), fill);
 				}
 				else
 				{
 					ext_gtk_text_insert(widget, font, fs->fore, fs->back, 
-						"\n", strlen("\n"));
+						"\n", strlen("\n"), fill);
 				}
 			}
 			else if(!strcmp(tags[0], "html") 
@@ -1191,7 +1192,7 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					|| !strncmp(tags[0], "hr ", strlen("hr ")))
 			{
 				ext_gtk_text_insert(widget, font, fs->fore, fs->back, 
-						"\n", strlen("\n"));
+						"\n", strlen("\n"),fill);
 				ext_gtk_text_insert_divider(widget, font, fs->fore, fs->back, 
 						" \n", strlen(" \n"));
 
@@ -1266,6 +1267,17 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 						fs->back = NULL;
 					}
 				}
+				if((parm = strstr(data, "width=")) != NULL) 
+				{
+					char width[10];
+					parm += strlen("width=");
+					_extract_parameter(parm, width, 10);
+					if (!strcmp(width, "*") || !strcmp(width, "100%")) {
+						fill = 1;
+					} else {
+						eb_debug(DBG_HTML, "body width != 100% unimplemented yet\n");
+					}
+				}
 			}
 			else
 			{
@@ -1273,16 +1285,16 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 				if(url)
 				{
 					ext_gtk_text_insert_data_underlined(widget, font, fs->fore, fs->back,
-								url, strlen(url)+1, handle_click, "<", 1);
+								url, strlen(url)+1, handle_click, "<", 1, fill);
 					ext_gtk_text_insert_data_underlined(widget, font, fs->fore, fs->back,
-								url, strlen(url)+1, handle_click, copy, strlen(copy));
+								url, strlen(url)+1, handle_click, copy, strlen(copy), fill);
 				}
 				else
 				{
 					ext_gtk_text_insert(widget, font, fs->fore, fs->back,
-								"<", 1);
+								"<", 1, fill);
 					ext_gtk_text_insert(widget, font, fs->fore, fs->back,
-								copy, strlen(copy));
+								copy, strlen(copy), fill);
 				}
 				g_strfreev(tags);
 				free(copy);
@@ -1298,13 +1310,13 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 				if(url)
 				{
 					ext_gtk_text_insert_data_underlined(widget, font, fs->fore, fs->back,
-								url, strlen(url)+1, handle_click, tags[1], strlen(tags[1]));
+								url, strlen(url)+1, handle_click, tags[1], strlen(tags[1]), fill);
 					eb_debug(DBG_HTML, "Underlined text inserted\n");
 				}
 				else
 				{
 					ext_gtk_text_insert(widget, font, fs->fore, fs->back,
-								tags[1], strlen(tags[1]));
+								tags[1], strlen(tags[1]), fill);
 				}
 			}
 			g_strfreev(tags);
@@ -1327,12 +1339,12 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					if(url)
 					{
 						ext_gtk_text_insert_data_underlined( widget, font, fs->fore, 
-								fs->back, url, strlen(url)+1, handle_click, "<", strlen("<") );
+								fs->back, url, strlen(url)+1, handle_click, "<", strlen("<"),fill );
 					}
 					else
 					{
 						ext_gtk_text_insert( widget, font, fs->fore, 
-								fs->back, "<", strlen("<") );
+								fs->back, "<", strlen("<"),fill );
 					}
 				}
 
@@ -1340,12 +1352,12 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 				if(url)
 				{
 					ext_gtk_text_insert_data_underlined(widget, font, fs->fore, fs->back,
-									url, strlen(url)+1, handle_click, tokens[i], strlen(tokens[i]));
+									url, strlen(url)+1, handle_click, tokens[i], strlen(tokens[i]), fill);
 				}
 				else
 				{
 					ext_gtk_text_insert(widget, font, fs->fore, fs->back,
-									tokens[i], strlen(tokens[i]));
+									tokens[i], strlen(tokens[i]), fill);
 				}
 			}
 
@@ -1363,12 +1375,12 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 		if(url)
 		{
 			ext_gtk_text_insert_data_underlined( widget, font, fs->fore, 
-				fs->back, url, strlen(url)+1, handle_click, "<", strlen("<") );
+				fs->back, url, strlen(url)+1, handle_click, "<", strlen("<") ,fill);
 		}
 		else
 		{
 			ext_gtk_text_insert( widget, font, fs->fore, 
-				fs->back, "<", strlen("<") );
+				fs->back, "<", strlen("<") ,fill);
 		}
 	}
 		

@@ -449,15 +449,11 @@ void send_message(GtkWidget *widget, gpointer d)
 		if(data->contact->send_offline && can_offline_message(data->contact)) {
 			data->preferred = can_offline_message(data->contact);
 		} else {
-			cw_put_message(data, "<hr>",0,0,0);
-			cw_put_message(data, _("<b>Cannot send message - user is offline.</b>"),0,0,0);
-			cw_put_message(data, "<hr>",0,0,0);
+			cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
 			return;
 		}
 	} else if (!data->preferred->online && !data->contact->send_offline) {
-		cw_put_message(data, "<hr>",0,0,0);
-		cw_put_message(data, _("<b>Cannot send message - user is offline.</b>"),0,0,0);
-		cw_put_message(data, "<hr>",0,0,0);
+		cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
 		return;		
 	}
 
@@ -473,9 +469,7 @@ void send_message(GtkWidget *widget, gpointer d)
 		data->local_user = find_suitable_local_account(data->preferred->ela, data->preferred->service_id); 
 
 	if(!data->local_user) {
-		cw_put_message(data, "<hr>",0,0,0);
-		cw_put_message(data, _("<b>Cannot send message - no local account found.</b>"),0,0,0);
-		cw_put_message(data, "<hr>",0,0,0);
+		cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - no local account found.</b></body>\n"),0,0,0);
 		return;		
 	}
 	
@@ -659,9 +653,7 @@ static void send_file (GtkWidget * sendf_button, gpointer userdata)
 	GET_CHAT_WINDOW(data);
 
 	if ( data->contact->online == 0 ) {
-		cw_put_message(data, "<hr>", 0,0,0);
-		cw_put_message(data, _("<b>Cannot send message - user is offline.</b>"), 0, 0, 0);
-		cw_put_message(data, "<hr>", 0,0,0);
+		cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
 		return;
 	}
 
@@ -1202,11 +1194,9 @@ void eb_chat_window_do_timestamp(struct contact * c, gboolean online)
 	if( !iGetLocalPref("do_timestamp") )
 		return;
 	
-	gtk_eb_html_add(EXT_GTK_TEXT(c->chatwindow->chat), "<hr>", 0,0,0);
-	g_snprintf(buff, BUF_SIZE,_("<b>%s is logged %s @ %s.</b>"),
+	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#e0c96d width=*> <b>%s is logged %s @ %s.</b></body>\n"),
 	     c->nick, (online?_("in"):_("out")), g_strchomp(asctime(localtime(&my_time))));
 	gtk_eb_html_add(EXT_GTK_TEXT(c->chatwindow->chat), buff, 0,0,0);
-	gtk_eb_html_add(EXT_GTK_TEXT(c->chatwindow->chat), "<hr>", 0,0,0);
 }
 
 
@@ -1520,7 +1510,7 @@ void eb_log_status_changed(eb_account *ea, gchar *status)
 			ea->account_contact->chatwindow->loginfo == NULL)
 		return;
 	
-	g_snprintf(buff, BUF_SIZE,_("<hr><b>%s changed status to %s @ %s.</b><hr>"),
+	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#e0c96d width=*><b> %s changed status to %s @ %s.</b></body>"),
 		   ea->account_contact->nick, ((status && status[0])?status:_("(Online)")), 
 		   g_strchomp(asctime(localtime(&my_time))));
 
@@ -1587,34 +1577,63 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 
 		if(buff[0] == '<') /*this is html*/ {
 
-			if(!strncmp(buff,"<HR WIDTH=\"100%\">", strlen("<HR WIDTH=\"100%\">")))
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff+strlen("<HR WIDTH=\"100%\">"),0,0,0);
-			else if(!strncmp(buff,"<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">", strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">")))
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff+strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">"),0,0,0);
-			else if(!strncmp(buff,"<P ALIGN=\"CENTER\">", strlen("<P ALIGN=\"CENTER\">")))
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff+strlen("<P ALIGN=\"CENTER\">"),0,0,0);
-			else {
+			if(!strncmp(buff,"<HR WIDTH=\"100%\">", strlen("<HR WIDTH=\"100%\">"))) {
+				char buff2[1024];
+				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+						buff+strlen("<HR WIDTH=\"100%\">"));
+				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+			} else if(!strncmp(buff,"<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">", strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">"))) {
+				char buff2[1024];
+				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+						buff+strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">"));
+				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+			} else if(!strncmp(buff,"<P ALIGN=\"CENTER\">", strlen("<P ALIGN=\"CENTER\">"))) {
+				char buff2[1024];
+				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+						buff+strlen("<P ALIGN=\"CENTER\">"));
+				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+			} else if(strlen(buff) > strlen(_("<B>Conversation ")) 
+			     && !strncmp(buff+strlen(_("<B>Conversation ")),_("ended on"),8)) {
+				char buff2[1024];
+				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>\n"), 
+						buff);
+				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				endreached = TRUE;	
+				break;
+			} else if(strlen(buff) > strlen(_("<P ALIGN=\"CENTER\"><B>Conversation "))
+			     && !strncmp(buff+strlen(_("<P ALIGN=\"CENTER\"><B>Conversation ")),_("ended on"),8) ) {
+				char buff2[1024];
+				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>\n"), 
+						buff+strlen("<P ALIGN=\"CENTER\">"));
+				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				endreached = TRUE;	
+				break;
+			} else if (strlen(buff) > strlen(_("<P><hr><b>"))
+			  &&  !strncmp(buff, _("<P><hr><b>"), strlen(_("<P><hr><b>")))
+			  &&  strstr(buff, _("changed status to"))) {
+				char buff2[1024];
+				char *temp = strdup(buff);
+				char *itemp = temp;
+				itemp += strlen(_("<P><hr><b>"));
+				*strstr(itemp, "<hr>") = '\0';
+				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+						itemp);
+				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				free(temp);
+			} else {
 				log_parse_and_add(buff, cw->chat);
 			}
 
 			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);
-
-			if( (strlen(buff) > strlen(_("<B>Conversation ")) 
-			     && !strncmp(buff+strlen(_("<B>Conversation ")),_("ended on"),8))
-			||  (strlen(buff) > strlen(_("<P ALIGN=\"CENTER\"><B>Conversation ")) 
-			     && !strncmp(buff+strlen(_("<P ALIGN=\"CENTER\"><B>Conversation ")),_("ended on"),8) )) {
-				endreached = TRUE;	    
-				break;
-			}
 		} else if(!strncmp(buff,_("Conversation started"),strlen(_("Conversation started")))) {
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<hr>", 0,0,0);
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff, 0,0,0);
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);
+			char buff2[1024];
+			snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), buff);
+			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 
 		} else if(!strncmp(buff,_("Conversation ended"),strlen(_("Conversation ended")))) {
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff,0,0,0);
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<hr>",0,0,0);
+			char buff2[1024];
+			snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), buff);
+			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 			endreached = TRUE;	    
 			break;
 		} else {
@@ -1678,7 +1697,7 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
    		}
 	}
 	if (!endreached) {
-		char *endbuf = g_strdup_printf(_("%sConversation ended%s\n"),
+		char *endbuf = g_strdup_printf(_("<body bgcolor=#e0c96d width=*>%sConversation ended%s</body>\n"),
 			(iGetLocalPref("do_strip_html") ? "" : "<B>"),
 			(iGetLocalPref("do_strip_html") ? "" : "</B>")); 
 		gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), endbuf,0,0,0);
