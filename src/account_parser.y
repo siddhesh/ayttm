@@ -14,6 +14,17 @@
 	#define accounterror(error) printf("Parse error on line %d: %s\n", Line, error );
 	extern int accountlex();
 
+	static int laccount_cmp(const void * a, const void * b)
+	{
+		const eb_local_account *ca=a, *cb=b;
+		int cmp = 0;
+		if(cmp == 0)
+			cmp = strcasecmp(ca->handle, cb->handle);
+		if(cmp == 0)
+			cmp = strcasecmp(get_service_name(ca->service_id), get_service_name(cb->service_id));
+
+		return cmp;
+	}
 %}
 
 %union {
@@ -39,7 +50,7 @@ account_list:
 	 	account account_list
 		{
 			if($1) {
-				$$ = l_list_append( $2, $1 );
+				$$ = l_list_insert_sorted( $2, $1, laccount_cmp );
 				eb_debug(DBG_CORE, "Adding account %s\n", $1->handle);
 			} else {
 				$$=$2;

@@ -1,3 +1,7 @@
+* Tue Jul 22 2003 05:24 GMT [philip]	0.3.3-7
+- src/account_parser.y
+sort local account list on name-service
+
 * Tue Jul 22 2003 04:23 GMT [philip]	0.3.3-6
 - src/edit_local_accounts.c
 add access keys for Screen _Name, _Password, Service _Type and
