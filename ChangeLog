@@ -1,3 +1,9 @@
+* Wed Jan 07 2004 05:10 GMT [philip]	0.4.6-pre2
+- src/spellcheck.C
+pspell_manager_check and pspell_manager_suggest do not take
+last argument of -1 - that is required for the equivalent aspell
+functions
+
 * Wed Jan 07 2004 04:59 GMT [philip]	0.4.6-pre1
 - ayttm.spec.in
 jasper filter on by default

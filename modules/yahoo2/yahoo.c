@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.88 $",
-	"$Date: 2003/12/22 20:40:13 $",
+	"$Revision: 1.89 $",
+	"$Date: 2004/01/07 05:28:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1611,7 +1611,7 @@ static void _image_window_closed(int tag, void *data)
 }
 
 static void ext_yahoo_got_webcam_image(int id, const char *who,
-		unsigned char *image, unsigned int image_size, unsigned int real_size,
+		const unsigned char *image, unsigned int image_size, unsigned int real_size,
 		unsigned int timestamp)
 {
 	struct webcam_feed *wf = NULL;

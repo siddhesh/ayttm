@@ -28,7 +28,9 @@
 
 #ifdef HAVE_LIBPSPELL
 
+#define USE_ORIGINAL_MANAGER_FUNCS
 #include <pspell/pspell.h>
+#undef USE_ORIGINAL_MANAGER_FUNCS
 #include <stdlib.h>
 #include <string.h>
 #include "prefs.h"
@@ -106,7 +108,7 @@ int AySpellChecker::check(const char * word)
 	if(!word || !spell_checker)
 		return 1;
 	else
-		return pspell_manager_check(spell_checker, word, -1);
+		return pspell_manager_check(spell_checker, word);
 }
 
 LList * AySpellChecker::suggest(const char * word)
@@ -117,7 +119,7 @@ LList * AySpellChecker::suggest(const char * word)
 	LList * words = NULL;
 	const char *w;
 
-	const PspellWordList * suggestions = pspell_manager_suggest(spell_checker, word, -1);
+	const PspellWordList * suggestions = pspell_manager_suggest(spell_checker, word);
 	PspellStringEmulation * elements = pspell_word_list_elements(suggestions);
 	while( (w = pspell_string_emulation_next(elements)) != NULL)
 		words = l_list_append(words, strdup(w));
