@@ -167,10 +167,7 @@ static eb_account * eb_nomodule_read_config( LList * config, struct contact *con
 
 static LList * eb_nomodule_get_states()
 {
-	LList * states = NULL;
-	states = l_list_append(states, _("No Module or broken account"));
-	
-	return states;
+	return NULL;
 }
 
 /* return an error string in case this login is syntaxically 

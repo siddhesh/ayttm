@@ -1636,6 +1636,9 @@ static GtkWidget* MakeStatusMenu(eb_local_account * ela)
 
 	ela->status_button = gtk_menu_item_new_with_label(string);
   
+	if (!widgets)
+		return ela->status_button; 
+
 	/* First deactivate zeroth status radio item */
 	GTK_CHECK_MENU_ITEM(l_list_nth(widgets, 0)->data)->active = 0 ;
 	/* Now, activate the desired status radio item */
@@ -1744,9 +1747,13 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 	gtk_menu_append(GTK_MENU(account_menu), label); 
 	gtk_widget_show(label);
 	for(list = accounts; list; list  = list->next ) {
-		label = MakeStatusMenu(list->data);
-		((eb_local_account*)(list->data))->status_button = label;
+		eb_local_account *ela = (eb_local_account *)list->data;
+		label = MakeStatusMenu(ela);
 		gtk_menu_append(GTK_MENU(account_menu), label);
+		if (!ela->status_menu)
+			gtk_widget_set_sensitive(label, FALSE);
+		else
+			gtk_widget_set_sensitive(label, TRUE);
 		gtk_widget_show(label);
 	}
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(set_status_submenuitem), account_menu);

@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-71
+- src/status.c
+Update menus when unloading modules 
+
 * Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-70
 - src/service.c
 Update menus when loading modules
