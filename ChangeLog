@@ -1,4 +1,7 @@
-* Thu Sep 12 2003 15:10 GMT [elh]	0.4.0-25
+* Fri Sep 12 2003 15:30 GMT [philip]	0.4.1-pre1
+- feature freeze
+
+* Fri Sep 12 2003 15:10 GMT [elh]	0.4.0-25
 - README.WIN32
   src/ssl.c
   modules/msn2/libmsn2/msn_core.C

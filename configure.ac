@@ -1,11 +1,11 @@
 # Process this file with autoconf to produce a configure script.
 dnl We use the new format of AC_INIT
 dnl info --file=autoconf.info --node="Initializing configure" for more info
-AC_INIT(Ayttm, 0.4.0, ayttm-users@lists.sourceforge.net)
+AC_INIT(Ayttm, 0.4.1, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=25
+RELEASE=pre1
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -268,9 +268,9 @@ if test "$enable_xft" = yes ; then
     AC_CHECK_HEADER(X11/Xft/Xft.h, [
 	AC_CHECK_LIB(Xft, XftFontOpen, 
             have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS"], 
-            [AC_CHECK_LIB(Xft, XftFontOpen,
-                have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS"], ,
-                -L/usr/X11R6/lib -lX11 -lfontconfig)],
+            [AC_CHECK_LIB(fontconfig, XftFontOpen,
+                have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS -lfontconfig"], ,
+                -L/usr/X11R6/lib -lX11 -lXft)],
             -L/usr/X11R6/lib -lX11)
     ])
   if test "$have_xft" = yes; then
