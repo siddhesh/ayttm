@@ -1,3 +1,7 @@
+* Thu Oct  9 2003 09:10 GMT [philip]	0.4.2-17
+- src/account_parser.y src/account_scanner.l src/account.c
+Comments allowed in accounts file.  Comment about passwords added
+
 * Thu Oct  9 2003 07:53 GMT [philip]	0.4.2-16
 - src/account.c src/account_parser.y
 encode passwords on disk - to prevent over the shoulder password loss.

@@ -86,6 +86,10 @@ void write_account_list()
 	if(! (fp = fdopen( creat(buff2, S_IRWXU), "w") ) )
 		return;
 
+	fprintf(fp, 	"# Ayttm's Local Account file\n"
+			"# Edit only if you know what you're doing\n"
+			"# Passwords are obfuscated, not encrypted\n"
+			"\n");
 
 	for(l1 = accounts; l1; l1=l1->next )
 	{

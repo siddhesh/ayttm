@@ -14,6 +14,7 @@ A [^\n\t"<>/= ]
 [/]account  {return END_ACCOUNT;}
 account		{return ACCOUNT;}
 ["=<>]		return accounttext[0];
+#[^\n]*		{return COMMENT;}
 {A}+		{accountlval.string = strdup(accounttext); return IDENTIFIER;}
 ["]([^"]|(\\\"))*["] { accountlval.string = strdup(accounttext+1); accountlval.string[strlen(accountlval.string)-1] = '\0'; return STRING; }
 [\n]	   Line++;

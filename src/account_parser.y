@@ -38,6 +38,7 @@
 	eb_local_account * acnt;
 }
 
+%token <string> COMMENT
 %token <string> IDENTIFIER
 %token <string> STRING
 %type <vals> account_list
@@ -50,7 +51,8 @@ start:
 ;
 
 account_list:
-	 	account account_list
+		COMMENT account_list { $$=$2; }
+	| 	account account_list
 		{
 			if($1) {
 				$$ = l_list_insert_sorted( $2, $1, laccount_cmp );
@@ -99,7 +101,8 @@ account:
 ;
 
 value_list:
-		IDENTIFIER '=' STRING value_list { 
+		COMMENT value_list { $$ = $2; }
+	|	IDENTIFIER '=' STRING value_list { 
 			$$ = value_pair_add($4, $1, $3);
 			free($1);
 			free($3);
