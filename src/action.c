@@ -40,7 +40,6 @@
 
 
 static void create_action_menu(char *html_file, char *plain_file, int sens);
-static void save_action(char *action);
 
 static void action_do_action(char * value, void * data)
 {
@@ -93,7 +92,6 @@ static void action_do_action(char * value, void * data)
 		g_free(cmd);
 		_exit(0);
 	} else if (child > 0) {
-		save_action(value);
 		g_free(begin);
 	} else {
 		ay_do_error( _("Action Error"), _("Cannot run command : fork() failed.") );
@@ -102,19 +100,13 @@ static void action_do_action(char * value, void * data)
 #endif
 }
 
-static void action_prepare(GtkWidget *w, void *data)
-{
-	char *val = gtk_widget_get_name(w);
-
-	action_do_action(val, data);
-}
-
 void conversation_action(log_info *li, int to_end)
 {
 #ifndef __MINGW32__
 	char buf[4096], *output_html, *output_plain;
 	int firstline = 1;
 	char *tempdir = NULL;
+	char **files;
 	log_info *loginfo = g_new0(log_info, 1);
 	FILE *output_fhtml;
 	FILE *output_fplain;
@@ -248,109 +240,26 @@ void conversation_action(log_info *li, int to_end)
 	fclose(output_fhtml);
 	fclose(output_fplain);
 	
+	files = ay_new(char *, 2);
+	files[0] = strdup(output_html);	/* free after callback */
+	files[1] = strdup(output_plain);
+	
 	if (ftell(loginfo->fp) == loginfo->filepos) {
-		create_action_menu(output_html, output_plain, FALSE);
+		ay_do_error( _("Action Error"), _("No data available to use.") );
 	} else	{
-		create_action_menu(output_html, output_plain, TRUE);
+		char fname[255];
+		snprintf(fname, 255, "%sactions_list", config_dir);
+
+		/* Fixme help test */
+		show_data_choicewindow(fname, 
+					_("Action"), _("Execute"), 
+					_("Enter the command to run here:\n"
+					  " %s = displayed conversation's file (as HTML)\n"
+					  " %p = displayed conversation's file (as text)"), 
+					"ACTION", "COMMAND", action_do_action, files);
 	}
 	g_free(output_html);
 	g_free(output_plain);
 	fclose(loginfo->fp);
 #endif
-}
-
-static void add_command_cb(GtkWidget * w, void * a)
-{
-		do_text_input_window_multiline(
-			_("Enter command:\n"
-			  " %s = displayed conversation's file (as HTML)\n"
-			  " %p = displayed conversation's file (as text)"), 
-			"", FALSE, action_do_action, a); 
-}
-
-
-static LList *load_actions(void)
-{
-	FILE *in;
-	char fname[255], buf[1024];
-	LList *list = NULL;
-	
-	snprintf(fname, 255, "%sactions", config_dir);
-	in = fopen(fname, "r");
-	if (!in)
-		return NULL;
-	
-	while (fgets(buf, sizeof(buf), in)) {
-		char *val = strdup(buf);
-		val[strlen(val)-1] = '\0';
-		
-		list = l_list_append(list, val);
-	}
-	
-	fclose(in);
-	return list;
-}
-
-static void save_action(char *action)
-{
-	FILE *in;
-	char fname[255], buf[1024];
-	
-	snprintf(fname, 255, "%sactions", config_dir);
-	in = fopen(fname, "r");
-	if (in) {
-		while (fgets(buf, sizeof(buf), in)) {
-			if (!strncmp(action, buf, strlen(buf)-1)) {
-				/* already exists */
-				fclose(in);
-				return;
-			}
-		}
-		fclose(in);
-	}
-	
-	in = fopen(fname, "a");
-	fprintf(in, "%s\n",action);
-	fclose(in);	
-}
-
-static void create_action_menu(char *html_file, char *plain_file, int sens)
-{
-	GtkWidget *menu = NULL;
-	GtkWidget *item = NULL;
-	LList *commands = NULL, *walk = NULL;
-	char **files = ay_new(char *, 2);
-	
-	files[0] = strdup(html_file);	/* free after callback */
-	files[1] = strdup(plain_file);
-	
-	menu = gtk_menu_new();
-	item = gtkut_create_menu_button (GTK_MENU(menu), _("New command..."),
-			GTK_SIGNAL_FUNC(add_command_cb), files);
-	gtk_widget_set_sensitive(item, sens); /* don't set the whole menu unsensitive */
-
-	commands = load_actions();
-	
-	if (l_list_empty(commands)) {
-		/* create the print command so people will understand... */
-		
-		save_action("html2ps -U %s | lpr");
-		commands = load_actions();
-	}
-	
-	if (!l_list_empty(commands)) {
-		gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
-		walk = commands;
-		while (walk) {
-			item = gtkut_create_menu_button(GTK_MENU(menu), walk->data, 
-					GTK_SIGNAL_FUNC(action_prepare), files);
-			gtk_widget_set_name(item, walk->data);
-			gtk_widget_set_sensitive(item, sens);
-			walk = walk->next;
-		}
-	}	
-	
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
-		 1, 0 );
-	l_list_free(commands);
 }
