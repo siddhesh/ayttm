@@ -4,4 +4,4 @@ shift
 d=$1
 shift
 make $o.o
-dllwrap -g -mno-cygwin --export-all-symbols --output-def $o.def --implib $o.dll.a --target i386-mingw32 --driver-name $d -I/target/include/glib-2.0 -o $o.dll $o.o $* ../../libayttm.a /target/lib/intl.lib /target/lib/iconv.lib ../../libltdl/libltdl.a /target/lib/dirent.lib -L/target/lib -lgdk -lgtk -lglib-2.0 -lws2_32 -lwst -lmsvcrt40
+dllwrap -g -mno-cygwin --export-all-symbols --output-def $o.def --implib $o.dll.a --target i386-mingw32 --driver-name $d -I/target/include/glib-2.0 -o $o.dll $o.o $* ../libayttm.a /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib /target/lib/libgtk.dll.a /target/lib/libgdk.dll.a /target/lib/libglib-2.0.dll.a -lws2_32 -lwst -lmsvcrt

@@ -14,7 +14,7 @@ all: ayttm.exe plugins
 ayttm.exe: ayttmrc
 	./makeebdll
 	cp ayttmrc /cygdrive/c
-	cp ayttm.exe /cygdrive/c/Program\ Files/ayttm
+	cp ../ayttm.exe /cygdrive/c/Program\ Files/ayttm
 
 plugins: modules sound importers utilities aim-toc icq-toc irc yahoo2 jabber smtp smileys
 
@@ -23,53 +23,47 @@ modules:
 #	cp *.la /cygdrive/c/Program\ Files/ayttm/modules
 
 sound:
-	cp sounds/*.au /cygdrive/c/Program\ Files/ayttm
+	cp ../sounds/*.au /cygdrive/c/Program\ Files/ayttm
 
 importers:
-	for x in import_gaim import_gnomeicu importicq importlicq import_everybuddy
-	do
-                ./makedll ../modules/importers/$x $(CC)
-		cp $x.dll /cygdrive/c/Program\ Files/ayttm/modules
-		cp $x.la /cygdrive/c/Program\ Files/ayttm/modules
-	done
+	for x in import_gaim import_gnomeicu importicq importlicq import_everybuddy; do ./makedll ../modules/importers/$$x $(CC); cp ../modules/importers/$$x.dll /cygdrive/c/Program\ Files/ayttm/modules; cp $$x.la /cygdrive/c/Program\ Files/ayttm/modules; done
 
 utilities:
-	for x in rainbow autotrans # notes middle
-	do
-                ./makedll ../modules/utility/$x $(CC)
-                cp $x.dll /cygdrive/c/Program\ Files/ayttm/modules
-		cp $x.la /cygdrive/c/Program\ Files/ayttm/modules
-	done
+	for x in rainbow autotrans; do ./makedll ../modules/utility/$$x $(CC); cp ../modules/utility/$$x.dll /cygdrive/c/Program\ Files/ayttm/modules; cp $$x.la /cygdrive/c/Program\ Files/ayttm/modules; done
 
 aim-toc:
 	./makedll ../modules/aim-toc/aim-toc $(CC) ../modules/aim-toc/libtoc/libtoc.o
-	cp aim-toc.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../modules/aim-toc/aim-toc.dll /cygdrive/c/Program\ Files/ayttm/modules
 	cp aim-toc.la /cygdrive/c/Program\ Files/ayttm/modules
 
 icq-toc:
 	./makedll ../modules/icq-toc/icq-toc $(CC) ../modules/icq-toc/libtoc/libtoc.o
-	cp icq-toc.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../modules/icq-toc/icq-toc.dll /cygdrive/c/Program\ Files/ayttm/modules
 	cp icq-toc.la /cygdrive/c/Program\ Files/ayttm/modules
 
 yahoo2:
-	./makedll ../modules/yahoo/yahoo $(CC) ../modules/yahoo/libyahoo2/*.o
-	cp yahoo.dll /cygdrive/c/Program\ Files/ayttm/modules
+	./makedll ../modules/yahoo2/yahoo $(CC) ../modules/yahoo2/libyahoo2/*.o
+	cp ../modules/yahoo2/yahoo.dll /cygdrive/c/Program\ Files/ayttm/modules
 	cp yahoo2.la /cygdrive/c/Program\ Files/ayttm/modules
 
 irc:
 	./makedll ../modules/irc/irc $(CC)
-	cp irc.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../modules/irc/irc.dll /cygdrive/c/Program\ Files/ayttm/modules
 	cp irc.la /cygdrive/c/Program\ Files/ayttm/modules
 
+msn2:
 	./makedll ../modules/msn2/msn c++ ../modules/msn2/libmsn2/*.o
-	cp msn.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../modules/msn2/msn.dll /cygdrive/c/Program\ Files/ayttm/modules
 	cp msn2.la /cygdrive/c/Program\ Files/ayttm/modules
 
 jabber:
 	./makedll ../modules/jabber/jabber $(CC) ../modules/jabber/libEBjabber.o ../modules/jabber/libjabber/*.o ../modules/jabber/libxode/*.o
-	cp jabber.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../modules/jabber/jabber.dll /cygdrive/c/Program\ Files/ayttm/modules
 	cp jabber.la /cygdrive/c/Program\ Files/ayttm/modules
 
 smtp:
 
 smileys:
+	./makedll ../modules/smileys/smiley-themer $(CC) /target/lib/libXpm.dll.a
+	cp ../modules/smileys/smiley-themer.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp smiley-themer.la /cygdrive/c/Program\ Files/ayttm/modules
