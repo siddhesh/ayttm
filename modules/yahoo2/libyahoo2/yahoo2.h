@@ -90,17 +90,22 @@ void yahoo_conference_message(int id, const char * from, YList *who, const char 
 void yahoo_conference_logon(int id, const char * from, YList *who, const char *room);
 void yahoo_conference_logoff(int id, const char * from, YList *who, const char *room);
 
-/* returns a socket file descriptor to the upload stream. */
-/* you should write your data to this stream when it returns */
-int  yahoo_send_file(int id, const char *who, const char *msg, const char *name, long size);
+/* will set up a connection and initiate file transfer.
+ * callback will be called with the fd that you should write
+ * the file data to
+ */
+void yahoo_send_file(int id, const char *who, const char *msg, const char *name, unsigned long size,
+		yahoo_get_fd_callback callback, void *data);
+
 /* returns a socket fd to a url for downloading a file. */
-int yahoo_get_url_handle(int id, const char *url, char *filename, unsigned long *filesize);
+void yahoo_get_url_handle(int id, const char *url, 
+		yahoo_get_url_handle_callback callback, void *data);
 
 /* these should be called when input is available on a fd */
 /* registered by ext_yahoo_add_handler */
 /* if these return negative values, errno may be set */
-int  yahoo_read_ready(int id, int fd);
-int  yahoo_write_ready(int id, int fd);
+int  yahoo_read_ready(int id, int fd, void *data);
+int  yahoo_write_ready(int id, int fd, void *data);
 
 /* utility functions. these do not hit the server */
 enum yahoo_status yahoo_current_status(int id);

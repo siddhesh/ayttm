@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.18 $",
-	"$Date: 2003/04/11 05:25:06 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/04/15 09:39:15 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -854,26 +854,14 @@ static void eb_yahoo_save_file_callback(gpointer data, int fd,
 		count -= c;
 }
 
-static void eb_yahoo_save_file(char *filename, gpointer data)
+static void eb_yahoo_got_url_handle(int id, int fd, int error, 
+		const char *filename, unsigned long size, void *data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	char label[1024];
-	int fd;
-
-	if(!filename) {
-		FREE(yftd->from);
-		FREE(yftd->url);
-		FREE(yftd->fname);
-		FREE(yftd);
-
-		return;
-	}
-
-	fd = yahoo_get_url_handle(yftd->id, yftd->url, NULL, &yftd->fsize);
 
 	if(fd<=0) {
-		WARNING(("yahoo_get_url_handle returned %d", fd));
-		FREE(filename);
+		WARNING(("yahoo_get_url_handle returned (%d) %s", error, strerror(error)));
 		FREE(yftd->from);
 		FREE(yftd->url);
 		FREE(yftd->fname);
@@ -895,11 +883,24 @@ static void eb_yahoo_save_file(char *filename, gpointer data)
 	}
 
 	snprintf(label,1024,"Receiving %s...", filename);
-	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);	
+	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);
 	yftd->input = eb_input_add(fd, EB_INPUT_READ, eb_yahoo_save_file_callback, yftd);
+}
 
-	FREE(filename);
+static void eb_yahoo_save_file(char *filename, gpointer data)
+{
+	eb_yahoo_file_transfer_data *yftd = data;
 
+	if(!filename) {
+		FREE(yftd->from);
+		FREE(yftd->url);
+		FREE(yftd->fname);
+		FREE(yftd);
+
+		return;
+	}
+
+	yahoo_get_url_handle(yftd->id, yftd->url, eb_yahoo_got_url_handle, yftd);
 }
 
 static void eb_yahoo_accept_file(gpointer data, int result)
@@ -982,11 +983,28 @@ done_sending:
 	}
 }
 
+static void eb_yahoo_got_fd(int id, int fd, int error, void *data)
+{
+	eb_yahoo_file_transfer_data *yftd = data;
+	char label[1024];
+
+	if(fd <= 0) {
+		WARNING(("yahoo_send_file returned (%d) %s", error, strerror(error)));
+		FREE(yftd->fname);
+		FREE(yftd);
+		return;
+	}
+
+	snprintf(label,1024,"Sending %s...", yftd->fname);
+	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);	
+
+	yftd->input = eb_input_add(fd, EB_INPUT_WRITE, eb_yahoo_send_file_callback, yftd);
+}
+
 static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *file)
 {
 	struct stat stats;
-	int in, out;
-	char label[1024];
+	int in;
 	
 	eb_yahoo_local_account_data *ylad = from->protocol_local_account_data;
 	eb_yahoo_file_transfer_data *yftd;
@@ -1010,13 +1028,11 @@ static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *fil
 	if(yftd->fsize < 0)
 		yftd->fsize = stats.st_size;
 	yftd->file = in;
+	yftd->fname = strdup(file);
 
-	out = yahoo_send_file(ylad->id, to->handle, "", file, yftd->fsize);
+	yahoo_send_file(ylad->id, to->handle, "", file, yftd->fsize,
+			eb_yahoo_got_fd, yftd);
 
-	snprintf(label,1024,"Sending %s...", file);
-	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);	
-
-	yftd->input = eb_input_add(out, EB_INPUT_WRITE, eb_yahoo_send_file_callback, yftd);
 }
 
 /*
@@ -2495,7 +2511,7 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 
 	if(condition & EB_INPUT_READ) {
 		LOG(("Read: %d", source));
-		ret = yahoo_read_ready(d->id, source);
+		ret = yahoo_read_ready(d->id, source, d->data);
 
 		if(ret == -1)
 			snprintf(buff, sizeof(buff), 
@@ -2508,7 +2524,7 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 
 	if(condition & EB_INPUT_WRITE) {
 		LOG(("Write: %d", source));
-		ret = yahoo_write_ready(d->id, source);
+		ret = yahoo_write_ready(d->id, source, d->data);
 
 		if(ret == -1)
 			snprintf(buff, sizeof(buff), 
@@ -2530,11 +2546,12 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 
 static YList * handlers = NULL;
 
-static void ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond)
+static void ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond, void *data)
 {
 	eb_yahoo_callback_data *d = g_new0(eb_yahoo_callback_data, 1);
 	d->id = id;
 	d->fd = fd;
+	d->data = data;
 	d->tag = eb_input_add(fd, cond, eb_yahoo_callback, d);
 	LOG(("%d added %d for %d", id, fd, cond));
 

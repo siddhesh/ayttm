@@ -1,3 +1,7 @@
+* Tue Apr 15 2003 09:35 GMT [philip]	0.2.3-102
+- modules/yahoo2
+Implement non-blocking connects for http too
+
 * Mon Apr 14 2003 08:47 GMT [colin]	0.2.3-101
 - src/action.c
 Better wording

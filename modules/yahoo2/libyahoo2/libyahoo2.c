@@ -259,6 +259,7 @@ static struct yahoo_input_data * find_input_by_id_and_type(int id, enum yahoo_co
 	return NULL;
 }
 
+/*
 static struct yahoo_input_data * find_input_by_id_and_fd(int id, int fd)
 {
 	YList *l;
@@ -269,7 +270,7 @@ static struct yahoo_input_data * find_input_by_id_and_fd(int id, int fd)
 			return yid;
 	}
 	return NULL;
-}
+}*/
 
 static int count_inputs_with_id(int id)
 {
@@ -1779,7 +1780,7 @@ static struct yab * yahoo_getyab(struct yahoo_input_data *yid)
 	return yab;
 }
 
-int yahoo_write_ready(int id, int fd)
+int yahoo_write_ready(int id, int fd, void *data)
 {
 	return 1;
 }
@@ -1845,9 +1846,9 @@ static void (*yahoo_process_connection[])(struct yahoo_input_data *) = {
 	yahoo_process_yab_connection
 };
 
-int yahoo_read_ready(int id, int fd)
+int yahoo_read_ready(int id, int fd, void *data)
 {
-	struct yahoo_input_data *yid = find_input_by_id_and_fd(id, fd);
+	struct yahoo_input_data *yid = data;
 	char buf[1024];
 	int len;
 
@@ -1954,7 +1955,7 @@ static void yahoo_connected(int fd, int error, void *data)
 	yid->fd = fd;
 	inputs = y_list_prepend(inputs, yid);
 
-	YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ);
+	YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ, yid);
 }
 
 void yahoo_login(int id, int initial)
@@ -2126,6 +2127,19 @@ void yahoo_get_list(int id)
 	}
 }
 
+static void _yahoo_get_yab_connected(int id, int fd, int error, void *data)
+{
+	struct yahoo_input_data *yid = data;
+	if(fd <= 0) {
+		inputs = y_list_remove(inputs, yid);
+		FREE(yid);
+		return;
+	}
+
+	yid->fd = fd;
+	YAHOO_CALLBACK(ext_yahoo_add_handler)(id, fd, YAHOO_INPUT_READ, yid);
+}
+
 void yahoo_get_yab(int id)
 {
 	struct yahoo_data *yd = find_conn_by_id(id);
@@ -2145,15 +2159,10 @@ void yahoo_get_yab(int id)
 	snprintf(buff, sizeof(buff), "Y=%s; T=%s",
 			yd->cookie_y, yd->cookie_t);
 
-	yid->fd = yahoo_http_get(url, buff);
-	if(yid->fd <= 0) {
-		FREE(yid);
-		return;
-	}
-
 	inputs = y_list_prepend(inputs, yid);
 
-	YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ);
+	yahoo_http_get(yid->yd->client_id, url, buff, 
+			_yahoo_get_yab_connected, yid);
 }
 
 void yahoo_set_yab(int id, struct yab * yab)
@@ -2233,15 +2242,10 @@ void yahoo_set_yab(int id, struct yab * yab)
 	snprintf(buff, sizeof(buff), "Y=%s; T=%s",
 			yd->cookie_y, yd->cookie_t);
 
-	yid->fd = yahoo_http_get(url, buff);
-	if(yid->fd <= 0) {
-		FREE(yid);
-		return;
-	}
-
 	inputs = y_list_prepend(inputs, yid);
 
-	YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ);
+	yahoo_http_get(yid->yd->client_id, url, buff, 
+			_yahoo_get_yab_connected, yid);
 }
 
 void yahoo_set_identity_status(int id, const char * identity, int active)
@@ -2573,7 +2577,54 @@ void yahoo_conference_message(int id, const char * from, YList *who, const char 
 	yahoo_packet_free(pkt);
 }
 
-int yahoo_send_file(int id, const char *who, const char *msg, const char *name, long size)
+struct send_file_data {
+	struct yahoo_packet *pkt;
+	yahoo_get_fd_callback callback;
+	void *user_data;
+};
+
+static void _yahoo_send_file_connected(int id, int fd, int error, void *data)
+{
+	struct yahoo_input_data *yid = find_input_by_id_and_type(id, YAHOO_CONNECTION_FT);
+	struct send_file_data *sfd = data;
+	struct yahoo_packet *pkt = sfd->pkt;
+	unsigned char buff[1024];
+
+	if(fd <= 0) {
+		sfd->callback(id, fd, error, sfd->user_data);
+		FREE(sfd);
+		yahoo_packet_free(pkt);
+		return;
+	}
+
+	yid->fd = fd;
+	yahoo_send_packet(yid->fd, pkt, 8);
+	yahoo_packet_free(pkt);
+
+	snprintf((char *)buff, sizeof(buff), "29");
+	buff[2] = 0xc0;
+	buff[3] = 0x80;
+	
+	write(yid->fd, buff, 4);
+
+/*	YAHOO_CALLBACK(ext_yahoo_add_handler)(nyd->client_id, nyd->fd, YAHOO_INPUT_READ); */
+
+	sfd->callback(id, fd, error, sfd->user_data);
+	FREE(sfd);
+	inputs = y_list_remove(inputs, yid);
+	/*
+	while(yahoo_tcp_readline(buff, sizeof(buff), nyd->fd) > 0) {
+		if(!strcmp(buff, ""))
+			break;
+	}
+
+	*/
+	yahoo_input_close(yid);
+}
+
+void yahoo_send_file(int id, const char *who, const char *msg, 
+		const char *name, unsigned long size, 
+		yahoo_get_fd_callback callback, void *data)
 {
 	struct yahoo_data *yd = find_conn_by_id(id);
 	struct yahoo_input_data *yid;
@@ -2582,9 +2633,10 @@ int yahoo_send_file(int id, const char *who, const char *msg, const char *name, 
 	long content_length=0;
 	unsigned char buff[1024];
 	char url[255];
+	struct send_file_data *sfd;
 
 	if(!yd)
-		return -1;
+		return;
 
 	yid = y_new0(struct yahoo_input_data, 1);
 	yid->yd = yd;
@@ -2606,31 +2658,14 @@ int yahoo_send_file(int id, const char *who, const char *msg, const char *name, 
 			filetransfer_host, filetransfer_port);
 	snprintf((char *)buff, sizeof(buff), "Y=%s; T=%s",
 			yd->cookie_y, yd->cookie_t);
-	yid->fd = yahoo_http_post(url, (char *)buff, content_length + 4 + size);
-
 	inputs = y_list_prepend(inputs, yid);
 
-	yahoo_send_packet(yid->fd, pkt, 8);
-	yahoo_packet_free(pkt);
-
-	snprintf((char *)buff, sizeof(buff), "29");
-	buff[2] = 0xc0;
-	buff[3] = 0x80;
-	
-	write(yid->fd, buff, 4);
-
-/*	YAHOO_CALLBACK(ext_yahoo_add_handler)(nyd->client_id, nyd->fd, YAHOO_INPUT_READ); */
-
-	return yid->fd;
-
-	/*
-	while(yahoo_tcp_readline(buff, sizeof(buff), nyd->fd) > 0) {
-		if(!strcmp(buff, ""))
-			break;
-	}
-
-	yahoo_input_close(yid);
-	*/
+	sfd = y_new0(struct send_file_data, 1);
+	sfd->pkt = pkt;
+	sfd->callback = callback;
+	sfd->user_data = data;
+	yahoo_http_post(yid->yd->client_id, url, (char *)buff, content_length+4+size,
+			_yahoo_send_file_connected, sfd);
 }
 
 
@@ -2682,13 +2717,14 @@ const char * yahoo_get_cookie(int id, const char *which)
 	return NULL;
 }
 
-int yahoo_get_url_handle(int id, const char *url, char *filename, unsigned long *filesize)
+void yahoo_get_url_handle(int id, const char *url, 
+		yahoo_get_url_handle_callback callback, void *data)
 {
 	struct yahoo_data *yd = find_conn_by_id(id);
 	if(!yd)
-		return 0;
+		return;
 
-	return yahoo_get_url_fd(url, yd, filename, filesize);
+	return yahoo_get_url_fd(id, url, yd, callback, data);
 }
 
 const char * yahoo_get_profile_url( void )

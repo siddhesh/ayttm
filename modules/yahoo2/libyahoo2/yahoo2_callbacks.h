@@ -65,6 +65,8 @@ typedef enum {
  */
 typedef void (*yahoo_connect_callback)(int fd, int error, void *callback_data);
 
+
+
 /*
  * The following functions need to be implemented in the client
  * interface.  They will be called by the library when each
@@ -380,6 +382,9 @@ int YAHOO_CALLBACK_TYPE(ext_yahoo_log)(char *fmt, ...);
 
 
 
+
+
+
 /*
  * Name: ext_yahoo_add_handler
  * 	Add a listener for the fd.  Must call yahoo_read_ready
@@ -389,8 +394,9 @@ int YAHOO_CALLBACK_TYPE(ext_yahoo_log)(char *fmt, ...);
  * 	id   - the id that identifies the server connection
  * 	fd   - the fd on which to listen
  * 	cond - the condition on which to call the callback
+ * 	data - callback data to pass to yahoo_*_ready
  */
-void YAHOO_CALLBACK_TYPE(ext_yahoo_add_handler)(int id, int fd, yahoo_input_condition cond);
+void YAHOO_CALLBACK_TYPE(ext_yahoo_add_handler)(int id, int fd, yahoo_input_condition cond, void *data);
 
 
 

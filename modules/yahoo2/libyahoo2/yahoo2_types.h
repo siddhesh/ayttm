@@ -150,6 +150,18 @@ struct yahoo_buddy {
 	struct yab *yab_entry;
 };
 
+/*
+ * Function pointer to be passed to http get/post and send file
+ */
+typedef void (*yahoo_get_fd_callback)(int id, int fd, int error, void *data);
+
+/*
+ * Function pointer to be passed to yahoo_get_url_handle
+ */
+typedef void (*yahoo_get_url_handle_callback)(int id, int fd, int error,
+		const char *filename, unsigned long size, void *data);
+
+
 #ifdef __cplusplus
 }
 #endif
