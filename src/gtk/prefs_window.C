@@ -319,8 +319,8 @@ class ay_proxy_panel : public ay_prefs_window_panel
 		virtual void	Apply( void );
 	
 	private:	// Gtk callbacks
+		static void		s_toggle_checkbox( GtkWidget *w, void *data );
 		static void		s_set_proxy_type( GtkWidget *w, void *data );
-		static void		s_set_proxy_auth( GtkWidget *w, void *data );
 		
 		/// Callback data struct for the proxy panel
 		typedef struct
@@ -334,6 +334,7 @@ class ay_proxy_panel : public ay_prefs_window_panel
 			};
 		} t_cb_data;
 		
+		t_cb_data	m_toggle_data;			///< callback data for the toggle button
 		t_cb_data	m_cb_data[PROXY_MAX];	///< one for each proxy type
 		t_cb_data	m_auth_cb_data;
 		
@@ -342,11 +343,19 @@ class ay_proxy_panel : public ay_prefs_window_panel
 		
 		struct prefs::advanced &m_prefs;
 
+		eProxyType	m_last_proxy_type;
+		
+		GtkWidget	*m_proxy_checkbox;
+		
+		GtkWidget	*m_proxy_frame;
 		GtkWidget	*m_proxy_server_entry;
 		GtkWidget	*m_proxy_port_entry;
+		
 		GtkWidget	*m_auth_toggle;
 		GtkWidget	*m_proxy_user_entry;
 		GtkWidget	*m_proxy_password_entry;
+		
+		bool		m_finished_construction;
 };
 
 #ifdef HAVE_ICONV
@@ -1610,56 +1619,62 @@ void	ay_tabs_panel::s_getnewkey( GtkWidget *keybutton, void *data )
 ay_proxy_panel::ay_proxy_panel( const char *inTopFrameText, struct prefs::advanced &inPrefs )
 :	ay_prefs_window_panel( inTopFrameText ),
 	m_prefs( inPrefs ),
+	m_last_proxy_type( PROXY_NONE ),
+	m_proxy_checkbox( NULL ),
+	m_proxy_frame( NULL ),
 	m_proxy_server_entry( NULL ),
 	m_proxy_port_entry( NULL ),
 	m_auth_toggle( NULL ),
 	m_proxy_user_entry( NULL ),
-	m_proxy_password_entry( NULL )
+	m_proxy_password_entry( NULL ),
+	m_finished_construction( false )
 {
 }
 
 // Build
 void	ay_proxy_panel::Build( GtkWidget *inParent )
 {
+	m_last_proxy_type = static_cast<eProxyType>(m_prefs.proxy_type);
 	
+	// set last type to HTTP if we are currently set to NONE
+	//	because NONE is not one of the radio buttons
+	//	[NOTE we have to do a bit of fancy footwork to work around the fact that
+	//		PROXY_NONE is a proxy type...]
+	if ( m_last_proxy_type == PROXY_NONE )
+		m_last_proxy_type = PROXY_HTTP;
+		
 	m_proxy_server_entry = gtk_entry_new();
 	m_proxy_port_entry = gtk_entry_new();
 	m_proxy_user_entry = gtk_entry_new();
 	m_proxy_password_entry = gtk_entry_new();
-
-	GtkWidget	*label = gtk_label_new( _("Note: Not all services are available through\nproxy, please see the README for details.") );
-	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 0 );
-	gtk_widget_show( label );
 	
-	GtkWidget	*proxy_frame = gtk_frame_new( _( "Proxy Type" ) );
-	gtk_widget_show( proxy_frame );
-	gtk_container_set_border_width( GTK_CONTAINER(proxy_frame), 5 );
+	m_toggle_data.m_panel = this;
+	m_toggle_data.m_toggle_data = NULL;
+	m_proxy_checkbox = gtkut_check_button( m_top_vbox, _("Use a proxy server"), (m_prefs.proxy_type != PROXY_NONE),
+		GTK_SIGNAL_FUNC(s_toggle_checkbox), &m_toggle_data );
 	
-	GtkWidget	*proxy_vbox = gtk_vbox_new( FALSE, 4 );
+	m_proxy_frame = gtk_frame_new( _( "Proxy Type" ) );
+	gtk_widget_show( m_proxy_frame );
+	gtk_container_set_border_width( GTK_CONTAINER(m_proxy_frame), 0 );
+	
+	GtkWidget	*proxy_vbox = gtk_vbox_new( FALSE, 5 );
 	gtk_widget_show( proxy_vbox );
-	gtk_container_add( GTK_CONTAINER(proxy_frame), proxy_vbox );
+	gtk_container_set_border_width( GTK_CONTAINER(proxy_vbox), 5 );
+	gtk_container_add( GTK_CONTAINER(m_proxy_frame), proxy_vbox );
 	
 	/* Because it seems that the 'clicked' function is called when we create the radio buttons [!],
 		we must save our current value and restore it after the creation of the radio buttons
 	*/
-	const int	old_value = m_prefs.proxy_type;
+	const eProxyType	old_value = m_last_proxy_type;
 	
 	GSList	*radio_group = NULL;
-	
-	// PROXY_NONE	
-	m_cb_data[PROXY_NONE].m_panel = this;
-	m_cb_data[PROXY_NONE].m_proxy_type = PROXY_NONE;
-		
-	radio_group = gtkut_add_radio_button_to_group( radio_group, proxy_vbox,
-			_("None"), (m_prefs.proxy_type == PROXY_NONE),
-			GTK_SIGNAL_FUNC(s_set_proxy_type), &(m_cb_data[PROXY_NONE]) );
 	
 	// PROXY_HTTP
 	m_cb_data[PROXY_HTTP].m_panel = this;
 	m_cb_data[PROXY_HTTP].m_proxy_type = PROXY_HTTP;
 	
 	radio_group = gtkut_add_radio_button_to_group( radio_group, proxy_vbox,
-			_("HTTP"), (m_prefs.proxy_type == PROXY_HTTP),
+			_("HTTP"), (m_last_proxy_type == PROXY_HTTP),
 			GTK_SIGNAL_FUNC(s_set_proxy_type), &(m_cb_data[PROXY_HTTP]) );
 
 	// PROXY_SOCKS4	
@@ -1667,7 +1682,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	m_cb_data[PROXY_SOCKS4].m_proxy_type = PROXY_SOCKS4;
 	
 	radio_group = gtkut_add_radio_button_to_group( radio_group, proxy_vbox,
-			_("SOCKS4"), (m_prefs.proxy_type == PROXY_SOCKS4),
+			_("SOCKS4"), (m_last_proxy_type == PROXY_SOCKS4),
 			GTK_SIGNAL_FUNC(s_set_proxy_type), &(m_cb_data[PROXY_SOCKS4]) );
 
 	// PROXY_SOCKS5
@@ -1675,75 +1690,118 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	m_cb_data[PROXY_SOCKS5].m_proxy_type = PROXY_SOCKS5;
 
 	radio_group = gtkut_add_radio_button_to_group( radio_group, proxy_vbox,
-			_("SOCKS5"), (m_prefs.proxy_type == PROXY_SOCKS5),
+			_("SOCKS5"), (m_last_proxy_type == PROXY_SOCKS5),
 			GTK_SIGNAL_FUNC(s_set_proxy_type), &(m_cb_data[PROXY_SOCKS5]) );
 	
-	gtk_box_pack_start( GTK_BOX(m_top_vbox), proxy_frame, FALSE, FALSE, 5 );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_proxy_frame, FALSE, FALSE, 5 );
 
-	m_prefs.proxy_type = old_value;
+	m_last_proxy_type = old_value;
 	
-	// server and port
+	const int	label_len = 75;
+	const int	default_entry_len = 75;
+	
+	// server
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
-	label = gtk_label_new( _("Server:") );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	GtkWidget	*label = gtk_label_new( _("Server:") );
 	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, label_len, 15 );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_proxy_server_entry), m_prefs.proxy_host );
-
-	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_server_entry, TRUE, TRUE, 10 );
 	gtk_widget_show( m_proxy_server_entry );
+	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_server_entry, TRUE, TRUE, 5 );
+	
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 3 );
 
+	// port
+	hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
+	
 	label = gtk_label_new( _("Port:") );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, label_len, 15 );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	const int	buff_len = 10;
 	char		buff[buff_len];   
      
 	g_snprintf( buff, buff_len, "%d", m_prefs.proxy_port );
 	gtk_entry_set_text( GTK_ENTRY(m_proxy_port_entry), buff );
-	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_port_entry, FALSE, FALSE, 0 );
+	gtk_widget_set_usize( m_proxy_port_entry, default_entry_len, -1 );
 	gtk_widget_show( m_proxy_port_entry );
-
+	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_port_entry, FALSE, FALSE, 5 );
+	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 3 );
-	gtk_widget_show( hbox );
 
 	// authentication
 	m_auth_cb_data.m_panel = this;
 	m_auth_cb_data.m_toggle_data = &m_prefs.do_proxy_auth;
 	m_auth_toggle = gtkut_check_button( m_top_vbox, _("Proxy requires authentication"), m_prefs.do_proxy_auth,
-		GTK_SIGNAL_FUNC(s_set_proxy_auth), &m_auth_cb_data );
+		GTK_SIGNAL_FUNC(s_toggle_checkbox), &m_auth_cb_data );
 
+	const int	spacer_len = 15;
+	
+	// user ID
 	hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	GtkWidget	*spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
+	
 	label = gtk_label_new( _("User ID:") );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_proxy_user_entry), m_prefs.proxy_user );
-
-	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_user_entry, TRUE, TRUE, 10 );
+	gtk_widget_set_usize( m_proxy_user_entry, default_entry_len, -1 );
 	gtk_widget_show( m_proxy_user_entry );
+	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_user_entry, FALSE, FALSE, 5 );
+	
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 3 );
 
+	// password
+	hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
+	
 	label = gtk_label_new( _("Password:") );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
 	gtk_widget_show( label );
-
-	gtk_entry_set_text( GTK_ENTRY(m_proxy_password_entry), m_prefs.proxy_password );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	gtk_entry_set_visibility( GTK_ENTRY(m_proxy_password_entry), FALSE );
-
-	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_password_entry, FALSE, FALSE, 0 );
+	gtk_entry_set_text( GTK_ENTRY(m_proxy_password_entry), m_prefs.proxy_password );
+	gtk_widget_set_usize( m_proxy_password_entry, default_entry_len, -1 );
 	gtk_widget_show( m_proxy_password_entry );
+	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_password_entry, FALSE, FALSE, 5 );
 
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 3 );
-	gtk_widget_show( hbox );
 
+	m_finished_construction = true;
 	SetActiveWidgets();
 }
 
 // Apply
 void	ay_proxy_panel::Apply( void )
 {
+	if ( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(m_proxy_checkbox) ) )
+		m_prefs.proxy_type = PROXY_NONE;
+	else
+		m_prefs.proxy_type = m_last_proxy_type;
+		
 	strncpy( m_prefs.proxy_host, gtk_entry_get_text(GTK_ENTRY(m_proxy_server_entry)), MAX_PREF_LEN );
 	m_prefs.proxy_port = atol( gtk_entry_get_text(GTK_ENTRY(m_proxy_port_entry)) );
 	strncpy( m_prefs.proxy_user, gtk_entry_get_text(GTK_ENTRY(m_proxy_user_entry)), MAX_PREF_LEN );
@@ -1753,20 +1811,41 @@ void	ay_proxy_panel::Apply( void )
 // SetActiveWidgets
 void	ay_proxy_panel::SetActiveWidgets( void )
 {
-	const bool	proxy_is_none = (m_prefs.proxy_type == PROXY_NONE);
-	
-	gtk_widget_set_sensitive( m_proxy_server_entry, !proxy_is_none );
-	gtk_widget_set_sensitive( m_proxy_port_entry, !proxy_is_none );
-	gtk_widget_set_sensitive( m_auth_toggle, !proxy_is_none );
+	if ( !m_finished_construction )
+		return;
 		
-	const bool	auth_active = !proxy_is_none && m_prefs.do_proxy_auth;
-	
+	const bool	use_proxy = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(m_proxy_checkbox) );
+
+	gtk_widget_set_sensitive( m_proxy_frame, use_proxy );
+
+	gtk_widget_set_sensitive( m_proxy_server_entry, use_proxy );
+	gtk_widget_set_sensitive( m_proxy_port_entry, use_proxy );
+	gtk_widget_set_sensitive( m_auth_toggle, use_proxy );
+
+	const bool	auth_active = use_proxy && m_prefs.do_proxy_auth;
+
 	gtk_widget_set_sensitive( m_proxy_user_entry, auth_active );
 	gtk_widget_set_sensitive( m_proxy_password_entry, auth_active );
 }
 
 ////
 // ay_proxy_panel callbacks
+
+// s_toggle_checkbox
+void	ay_proxy_panel::s_toggle_checkbox( GtkWidget *w, void *data )
+{
+	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
+	assert( cb_data != NULL );
+
+	ay_proxy_panel	*the_panel = cb_data->m_panel;
+	
+	// toggle the data
+	int	*value = cb_data->m_toggle_data;
+	if ( value != NULL )
+		*value = !(*value);
+
+	the_panel->SetActiveWidgets();
+}
 
 // s_set_proxy_type
 void	ay_proxy_panel::s_set_proxy_type( GtkWidget *w, void *data )
@@ -1777,25 +1856,11 @@ void	ay_proxy_panel::s_set_proxy_type( GtkWidget *w, void *data )
 	ay_proxy_panel	*the_panel = cb_data->m_panel;
 	eProxyType		the_type = cb_data->m_proxy_type;
     
-	the_panel->m_prefs.proxy_type = the_type;
+	the_panel->m_last_proxy_type = the_type;
 
 	the_panel->SetActiveWidgets();
 }
 
-// s_set_proxy_auth
-void	ay_proxy_panel::s_set_proxy_auth( GtkWidget *w, void *data )
-{
-	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
-	assert( cb_data != NULL );
-
-	ay_proxy_panel	*the_panel = cb_data->m_panel;
-	
-	// toggle the data
-	int	*value = cb_data->m_toggle_data;
-	*value = !(*value);
-
-	the_panel->SetActiveWidgets();
-}
 
 ////////////////
 //// ay_encoding_panel implementation
@@ -1824,28 +1889,48 @@ void	ay_encoding_panel::Build( GtkWidget *inParent )
 	GtkWidget	*button = eb_button( _("Use recoding in conversations"), &m_prefs.use_recoding, m_top_vbox );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_set_use_of_recoding), this );
 
+	const int	label_len = 120;
+	const int 	spacer_len = 15;
+	
 	// LOCAL
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	GtkWidget	*spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
+	
 	label = gtk_label_new( _("Local encoding:") );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_local_encoding_entry), cGetLocalPref("local_encoding") );
-	gtk_box_pack_start( GTK_BOX(hbox), m_local_encoding_entry, TRUE, TRUE, 10 );
 	gtk_widget_show( m_local_encoding_entry );
+	gtk_box_pack_start( GTK_BOX(hbox), m_local_encoding_entry, TRUE, TRUE, 10 );
+	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 10 );
-	gtk_widget_show( hbox );
 
 	// REMOTE
 	hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
+	
 	label = gtk_label_new( _("Remote encoding:") );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_remote_encoding_entry), cGetLocalPref("remote_encoding") );
-	gtk_box_pack_start( GTK_BOX(hbox), m_remote_encoding_entry, TRUE, TRUE, 10 );
 	gtk_widget_show( m_remote_encoding_entry );
-	gtk_widget_show( hbox );
+	gtk_box_pack_start( GTK_BOX(hbox), m_remote_encoding_entry, TRUE, TRUE, 10 );
 
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 10 );
 
