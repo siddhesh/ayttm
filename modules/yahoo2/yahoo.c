@@ -112,6 +112,8 @@ static int do_prompt_save_file = 1;
 static int do_guess_away = 0;
 static int do_show_away_time = 0;
 
+static void *wc_chat_menu, *wc_contact_menu;
+
 /* Exported to libyahoo2 */
 char pager_host[MAX_PREF_LEN]="scs.yahoo.com";
 char pager_port[MAX_PREF_LEN]="5050";
@@ -129,8 +131,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.59 $",
-	"$Date: 2003/06/10 05:04:56 $",
+	"$Revision: 1.60 $",
+	"$Date: 2003/07/13 06:30:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1696,6 +1698,10 @@ static void ext_yahoo_webcam_closed(int id, char *who, int reason)
 	YList *l;
 
 	char buff[1024];
+
+	if(!reason)
+		return;
+
 	snprintf(buff, sizeof(buff), _("%s, webcam connection closed. %s "), ela->handle, who);
 	switch(reason) {
 		case 1: strncat(buff, _("stopped broadcasting."), sizeof(buff) - strlen(buff));
