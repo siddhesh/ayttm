@@ -1,3 +1,7 @@
+* Wed Apr 16 2003 18:25 GMT [andy]	0.2.3-113
+- src/gtk/prefs_window.C
+Fix previous fix for case with no iconv
+
 * Wed Apr 16 2003 17:20 GMT [edward]	0.2.3-112
 - src/gtk/prefs_window.C
   src/action.c

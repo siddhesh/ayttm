@@ -91,7 +91,9 @@ class ay_prefs_window
 			PANEL_CHAT_GENERAL,
 			PANEL_CHAT_TABS,
 			PANEL_PROXY,
+#ifdef HAVE_ICONV
 			PANEL_ENCODING,
+#endif
 			PANEL_MAX
 		};
 
@@ -347,7 +349,7 @@ class ay_proxy_panel : public ay_prefs_window_panel
 		GtkWidget	*m_proxy_password_entry;
 };
 
-#ifdef HAVE_ICONV_H
+#ifdef HAVE_ICONV
 /// Encoding prefs panel
 class ay_encoding_panel : public ay_prefs_window_panel
 {
@@ -370,7 +372,7 @@ class ay_encoding_panel : public ay_prefs_window_panel
 		GtkWidget	*m_local_encoding_entry;
 		GtkWidget	*m_remote_encoding_entry;
 };
-#endif	// HAVE_ICONV_H
+#endif	// HAVE_ICONV
 
 /// A module prefs panel
 class ay_module_panel : public ay_prefs_window_panel
@@ -411,8 +413,11 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 	_( "Sound:Files" ),
 	_( "Chat" ),
 	_( "Chat:Tabs" ),
-	_( "Advanced:Proxy" ),
+	_( "Advanced:Proxy" )
+#ifdef HAVE_ICONV
+	,
 	_( "Advanced:Encoding" )
+#endif
 };
 
 ay_prefs_window	*ay_prefs_window::s_only_prefs_window = NULL;
@@ -741,13 +746,11 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParent, struc
 			new_panel = new ay_proxy_panel( inName, inPrefs.advanced );
 			break;
 
+#ifdef HAVE_ICONV
 		case ay_prefs_window::PANEL_ENCODING:
-#ifdef HAVE_ICONV_H
 			new_panel = new ay_encoding_panel( inName, inPrefs.advanced );
-#else
-			return( NULL );
-#endif
 			break;
+#endif
 		
 		default:
 			assert( false );
@@ -1791,7 +1794,7 @@ void	ay_proxy_panel::s_set_proxy_auth( GtkWidget *w, void *data )
 
 ////////////////
 //// ay_encoding_panel implementation
-#ifdef HAVE_ICONV_H
+#ifdef HAVE_ICONV
 
 const int	ay_encoding_panel::ENCODE_LEN = 64;
 
@@ -1870,7 +1873,7 @@ void	ay_encoding_panel::s_set_use_of_recoding( GtkWidget *widget, void *data )
 	the_panel->SetActiveWidgets();
 }
 
-#endif	// HAVE_ICONV_H
+#endif	// HAVE_ICONV
 
 ////////////////
 //// ay_module_panel implementation
