@@ -1,8 +1,13 @@
-* Wed May  7 2003 02:23 GMT [colin]     0.3.0-151
+* Wed May  7 2003 11:46 GMT [philip]	0.3.0-152
+- src/chat_window.c
+Try to fix bug 733808 and maybe 733237.  let destroy be the last
+called event
+
+* Wed May  7 2003 02:23 GMT [colin]	0.3.0-151
 - src/chat_window.c
 try to fix focus event coming after destroy event
 
-* Wed May  7 2003 02:23 GMT [colin]     0.3.0-150
+* Wed May  7 2003 02:23 GMT [colin]	0.3.0-150
 - src/gtk/prefs_window.C
 include mem_util only if necessary
 

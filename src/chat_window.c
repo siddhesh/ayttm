@@ -792,7 +792,8 @@ static void handle_focus(GtkWidget *widget, GdkEventFocus * event,
 {
 	chat_window * cw = (chat_window *)userdata;
 	eb_update_window_title(cw, FALSE);
-	gtk_widget_grab_focus(cw->entry);
+	if(cw->entry)
+		gtk_widget_grab_focus(cw->entry);
 }
 
 /*This handles the right mouse button clicks*/
@@ -1996,14 +1997,13 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	gtk_signal_connect(GTK_OBJECT(cw->entry), "activate",
 			   GTK_SIGNAL_FUNC(send_message), cw);
 
-	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_event), cw);	
-
 	gtk_signal_connect(GTK_OBJECT(cw->chat), "button_press_event",
 			   GTK_SIGNAL_FUNC(handle_click), cw);                     	
-
 	gtk_signal_connect(GTK_OBJECT(cw->window), "focus_in_event",
 			   GTK_SIGNAL_FUNC(handle_focus), cw);
+
+	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
+			   GTK_SIGNAL_FUNC(destroy_event), cw);	
 
 	hbox = gtk_hbox_new(FALSE, 0);
 	gtk_widget_set_usize(hbox, 200, 25);
