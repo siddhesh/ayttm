@@ -4388,7 +4388,7 @@ struct yahoo_fn yahoo_fntable[5][96] =
      { XOR, {(unsigned char *) 0x77D64B90}, 0 },
      { BITFLD, {table_103}, 0 },
      { LOOKUP, {table_104}, 0 },
-     { MULADD, {(unsigned char *) 0x7D1428CB}, 0x89F6853D },
+     { MULADD, {(unsigned char *) 0x7D1428CB}, 0x3D },
      { XOR, {(unsigned char *) 0x6F872C49}, 0 },
      { XOR, {(unsigned char *) 0x2E484655}, 0 },
      { MULADD, {(unsigned char *) 0x1E3349F7}, 0x41F5 },

@@ -1,4 +1,7 @@
-* Wed Jun 16 3004 19:28 GMT [tnhashmi]  0.4.6-16
+* Sun Jun 27 2004 16:20 GMT [tnhashmi]  0.4.6-17
+- fixed yahoo auth after protocol change
+
+* Wed Jun 16 2004 19:28 GMT [tnhashmi]  0.4.6-16
 - modules/yahoo2/yahoo.c
 added new yahoo smileys
 - configure.ac
