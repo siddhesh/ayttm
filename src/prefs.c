@@ -417,7 +417,6 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_noautoresize", 0 );
 	iSetLocalPref( "use_alternate_browser", 0 );
 	cSetLocalPref( "alternate_browser", "" );
-	cSetLocalPref( "action_cmd", "html2ps %s | lpr" );
 	
 	iSetLocalPref( "do_spell_checking", 0 );
 	cSetLocalPref( "spell_dictionary", "" );
@@ -694,7 +693,6 @@ void	ayttm_prefs_write( void )
     fprintf( fp, "do_noautoresize=%d\n", iGetLocalPref("do_noautoresize") ) ;
     fprintf( fp, "use_alternate_browser=%d\n", iGetLocalPref("use_alternate_browser") );
 	fprintf( fp, "alternate_browser=%s\n", cGetLocalPref("alternate_browser") );
-	fprintf( fp, "action_cmd=%s\n", cGetLocalPref("action_cmd") );
 
 	/* logging */
 	fprintf( fp, "do_logging=%d\n", iGetLocalPref("do_logging") );
