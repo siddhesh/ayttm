@@ -1,3 +1,9 @@
+* Sun Jul 06 2003 09:30 GMT [colin]	0.3.2-5
+- src/chat_room.[ch]
+  src/chat_window.[ch]
+  src/util.h
+Tabbed chat rooms
+
 * Sat Jul 05 2003 22:37 GMT [colin]	0.3.2-4
 - modules/irc/irc.c
 Async connect for irc

@@ -31,7 +31,7 @@
 
 #include "account.h"
 #include "logs.h"
-
+#include "chat_window.h"
 
 typedef struct _eb_chat_room_buddy
 {
@@ -40,55 +40,7 @@ typedef struct _eb_chat_room_buddy
 	int color;
 } eb_chat_room_buddy;
 
-typedef struct _eb_chat_room
-{
-	GtkWidget *window;
-	GtkWidget *chat;
-	GtkWidget *entry;
-	GtkWidget *smiley_button;
-	GtkWidget *smiley_window;
-	GtkWidget *sound_button;
-	GtkWidget *status_label;
-	
-	/* sound stuff */
-	int sound_enabled;
-	int send_enabled;
-	int first_enabled;
-	int receive_enabled;
-
-	eb_local_account * local_user; /* who are we talking as? */
-	
-	time_t next_typing_send; 
-	LList * history;
-	LList * hist_pos;
-	int this_msg_in_history;
-	log_file	*logfile;
-
-	/* begin chat room specific stuff */
-	
-	int connected; /* are we currently in this chat room */
-	char id[255];      /* who are we? */
-	/*int service_id;*/
-
-	char room_name[1024];  /* what is this chat room called */
-	LList * fellows;   /* who is in the chat room */
-	GtkWidget *fellows_widget;  /* CList of online folks */
-	LList * typing_fellows;
-	int total_arrivals;
-	
-	void *protocol_local_chat_room_data; /* For protocol-specific storage */
-
-	/*
-	 * the folloing data members is for the invite window gui
-	 * since each chat room may spawn an invite window
-	 */
-
-	int invite_window_is_open;
-	GtkWidget * invite_window;
-	GtkWidget * invite_buddy;
-	GtkWidget * invite_message;
-
-} eb_chat_room;
+#define eb_chat_room chat_window
 
 #ifdef __cplusplus
 extern "C" {
@@ -105,6 +57,7 @@ void open_join_chat_window();
 char* next_chatroom_name();
 void eb_chat_room_display_status (eb_account *remote, char *message);
 void eb_destroy_chat_room (eb_chat_room *ecr);
+eb_chat_room* find_tabbed_chat_room(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

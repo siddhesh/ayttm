@@ -93,7 +93,6 @@
 }
 
 /* forward declaration */
-static chat_window * find_tabbed_chat_window_index (int current_page);
 static void eb_update_window_title(chat_window * cw, gboolean new_message);
 static void eb_update_window_title_to_tab(int tab, gboolean new_message);
 static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
@@ -215,7 +214,7 @@ static void redraw_chat_window(GtkWidget *text)
 }
 #endif
 
-static void set_tab_red(struct contact *ct)
+void set_tab_red(chat_window *cw)
 {
 	GtkStyle *style;
 	GdkColor color;
@@ -223,10 +222,10 @@ static void set_tab_red(struct contact *ct)
 	GtkWidget *child = NULL;
 	GtkWidget *label = NULL;
 
-	if (!ct || !ct->chatwindow)
+	if (!cw)
 		return;
-	notebook = ct->chatwindow->notebook;
-	child = ct->chatwindow->notebook_child;
+	notebook = cw->notebook;
+	child = cw->notebook_child;
 	
 	if (!notebook || !child)
 		return;
@@ -248,7 +247,7 @@ static void set_tab_red(struct contact *ct)
 	gtk_widget_set_style(label, style);
 }
 
-static void set_tab_normal(struct contact *ct)
+void set_tab_normal(chat_window *cw)
 {
 	GtkStyle *style;
 	GdkColor color;
@@ -257,10 +256,10 @@ static void set_tab_normal(struct contact *ct)
 	GtkWidget *child = NULL;
 	GtkWidget *label = NULL;
 
-	if (!ct || !ct->chatwindow)
+	if (!cw)
 		return;
-	notebook = ct->chatwindow->notebook;
-	child = ct->chatwindow->notebook_child;
+	notebook = cw->notebook;
+	child = cw->notebook_child;
 	
 	if (!notebook || !child)
 		return;
@@ -612,7 +611,7 @@ void send_message(GtkWidget *widget, gpointer d)
 		/* no more icons in the tabs */
 		/* gtk_widget_hide(data->talk_pixmap); */
 		/* printf("chat icon is off... \n"); */
-		set_tab_normal(data->contact);
+		set_tab_normal(data->contact->chatwindow);
 	}
 }
 
@@ -1153,7 +1152,7 @@ static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage
 			/*  notebook tab... */
 			c = (struct contact*)l2->data;
 			if (c->chatwindow && c->chatwindow->notebook_child == page->child) {
-				set_tab_normal(c);
+				set_tab_normal(c->chatwindow);
 				ENTRY_FORCE_FOCUS(c->chatwindow);
 				eb_update_window_title_to_tab (page_num, FALSE);
 			}
@@ -1176,10 +1175,10 @@ static chat_window* find_tabbed_chat_window()
 		}
 	}
 
-	return NULL;
+	return find_tabbed_chat_room();
 }
 
-static chat_window *find_tabbed_chat_window_index (int current_page)
+chat_window *find_tabbed_chat_window_index (int current_page)
 {
 	LList *l1;
 	LList *l2;
@@ -1355,7 +1354,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 				      remote_contact->chatwindow->notebook_child);
 		int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(remote_contact->chatwindow->notebook));
 		if (remote_num != current_num)
-			set_tab_red(remote_contact);
+			set_tab_red(remote_contact->chatwindow);
 
 	} else {
 		if(iGetLocalPref("do_raise_window"))
@@ -1493,7 +1492,7 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 				     (remote_contact->chatwindow->notebook),
 				     remote_contact->chatwindow->notebook_child);
 		chat_window *current = NULL;
-		set_tab_normal (remote_contact);
+		set_tab_normal (remote_contact->chatwindow);
 
 		current = find_tabbed_chat_window();
 		if (current)
@@ -1562,7 +1561,7 @@ void eb_chat_window_display_account(eb_account * remote_account)
 			                		 remote_contact->chatwindow->notebook_child);
 
 		chat_window *current = NULL;
-		set_tab_normal (remote_contact);
+		set_tab_normal (remote_contact->chatwindow);
 
 		current = find_tabbed_chat_window();
 		GET_CHAT_WINDOW(current);
@@ -1890,6 +1889,87 @@ static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 	g_free( scd );
 }
 
+void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
+{
+	chat_window *tab_cw = NULL;
+	char buff[1024];
+	int pos;
+	GtkWidget *contact_label = NULL;
+	
+	/* we're doing a tabbed chat */
+	if (iGetLocalPref("do_tabbed_chat")) {
+		/* look for an already open tabbed chat window */
+		tab_cw = find_tabbed_chat_window();
+		if (tab_cw == NULL) {
+			/* none exists, create one */
+			cw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+			gtk_window_set_wmclass(GTK_WINDOW(cw->window), "ayttm-chat", "Ayttm");
+			gtk_window_set_policy(GTK_WINDOW(cw->window), TRUE, TRUE, TRUE);
+			gtk_widget_realize(cw->window);
+
+			cw->notebook = gtk_notebook_new();
+
+			/* Set tab orientation.... */
+			pos = GTK_POS_BOTTOM;
+			switch ( iGetLocalPref("do_tabbed_chat_orient") ) {
+				case 1: 
+					pos = GTK_POS_TOP; break;
+				case 2:
+					pos = GTK_POS_LEFT; break;
+				case 3:
+					pos = GTK_POS_RIGHT; break;
+				case 0:
+				default:
+					pos = GTK_POS_BOTTOM; break;
+			}
+			gtk_notebook_set_tab_pos(GTK_NOTEBOOK(cw->notebook), pos);
+			/* End tab orientation */
+
+			gtk_notebook_set_scrollable(GTK_NOTEBOOK(cw->notebook), TRUE);
+			gtk_container_add(GTK_CONTAINER(cw->window), cw->notebook);
+
+			/* setup a signal handler for the notebook to handle page switches */
+			gtk_signal_connect(GTK_OBJECT(cw->notebook), "switch-page",
+				       GTK_SIGNAL_FUNC(chat_notebook_switch_callback),
+				       cw);
+
+			gtk_widget_show(cw->notebook);
+		} else {
+			cw->window = tab_cw->window;
+			cw->notebook = tab_cw->notebook;
+		}
+
+		if (strlen(name) > 20) {
+			strncpy(buff, name, 17);
+			buff[17]='\0';
+			strcat(buff, "..."); /* buff is large enough */
+		} else
+			strncpy(buff, name, sizeof(buff));
+
+		/* set up the text and close button */
+		contact_label = gtk_label_new(buff);
+		gtk_widget_show(contact_label);
+
+		/* we use vbox as our child. */
+		gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
+		cw->notebook_child = vbox;
+		gtk_notebook_append_page(GTK_NOTEBOOK(cw->notebook), cw->notebook_child, contact_label);
+		gtk_widget_show(cw->notebook_child);
+	} else {
+		/* setup like normal */
+		cw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+		gtk_window_set_wmclass(GTK_WINDOW(cw->window), "ayttm-chat", "Ayttm");
+		gtk_window_set_policy(GTK_WINDOW(cw->window), TRUE, TRUE, TRUE);
+		gtk_widget_realize(cw->window);
+
+		cw->notebook = NULL;
+		cw->notebook_child = NULL;
+		gtk_container_add(GTK_CONTAINER(cw->window), vbox);
+		gtk_widget_show(vbox);
+	}
+}
+
 chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remote)
 {
 	GtkWidget *vbox;
@@ -1933,79 +2013,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	vbox = gtk_vbox_new(FALSE,0);	
 
-	/* we're doing a tabbed chat */
-	if (tabbedChat) {
-		/* look for an already open tabbed chat window */
-		tab_cw = find_tabbed_chat_window();
-		if (tab_cw == NULL) {
-			/* none exists, create one */
-			cw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-			gtk_window_set_wmclass(GTK_WINDOW(cw->window), "ayttm-chat", "Ayttm");
-			gtk_window_set_policy(GTK_WINDOW(cw->window), TRUE, TRUE, TRUE);
-			gtk_widget_realize(cw->window);
-
-			cw->notebook = gtk_notebook_new();
-
-			/* Set tab orientation.... */
-			pos = GTK_POS_BOTTOM;
-			switch ( iGetLocalPref("do_tabbed_chat_orient") ) {
-				case 1: 
-					pos = GTK_POS_TOP; break;
-				case 2:
-					pos = GTK_POS_LEFT; break;
-				case 3:
-					pos = GTK_POS_RIGHT; break;
-				case 0:
-				default:
-					pos = GTK_POS_BOTTOM; break;
-			}
-			gtk_notebook_set_tab_pos(GTK_NOTEBOOK(cw->notebook), pos);
-			/* End tab orientation */
-
-			gtk_notebook_set_scrollable(GTK_NOTEBOOK(cw->notebook), TRUE);
-			gtk_container_add(GTK_CONTAINER(cw->window), cw->notebook);
-
-			/* setup a signal handler for the notebook to handle page switches */
-			gtk_signal_connect(GTK_OBJECT(cw->notebook), "switch-page",
-				       GTK_SIGNAL_FUNC(chat_notebook_switch_callback),
-				       cw);
-
-			gtk_widget_show(cw->notebook);
-		} else {
-			cw->window = tab_cw->window;
-			cw->notebook = tab_cw->notebook;
-		}
-
-		if (strlen(remote->nick) > 20) {
-			strncpy(buff, remote->nick, 17);
-			buff[17]='\0';
-			strcat(buff, "..."); /* buff is large enough */
-		} else
-			strncpy(buff, remote->nick, sizeof(buff));
-
-		/* set up the text and close button */
-		contact_label = gtk_label_new(buff);
-		gtk_widget_show(contact_label);
-
-		/* we use vbox as our child. */
-		gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
-		cw->notebook_child = vbox;
-		gtk_notebook_append_page(GTK_NOTEBOOK(cw->notebook), cw->notebook_child, contact_label);
-		gtk_widget_show(cw->notebook_child);
-	} else {
-		/* setup like normal */
-		cw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-		gtk_window_set_wmclass(GTK_WINDOW(cw->window), "ayttm-chat", "Ayttm");
-		gtk_window_set_policy(GTK_WINDOW(cw->window), TRUE, TRUE, TRUE);
-		gtk_widget_realize(cw->window);
-
-		cw->notebook = NULL;
-		cw->notebook_child = NULL;
-		gtk_container_add(GTK_CONTAINER(cw->window), vbox);
-		gtk_widget_show(vbox);
-	}
-
+	layout_chatwindow(cw, vbox, remote->nick);
+	
 	/* Next line allows making window smaller than orig. size */
 	cw->chat = ext_gtk_text_new(NULL,NULL);
 	gtk_eb_html_init(EXT_GTK_TEXT(cw->chat));

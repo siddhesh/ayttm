@@ -62,7 +62,7 @@ typedef struct _chat_window
 	int this_msg_in_history;
 	log_file	*logfile;
 
-	/* begin chat window specific stuff */
+	/* CHATWINDOW STUFF */
 
 	struct contact * contact;
 	eb_account * preferred; /*for sanity reasons, try using the
@@ -77,6 +77,30 @@ typedef struct _chat_window
 
 	GtkWidget* notebook; /* when using tabbed chat, this is the same for all chat_window structs. */
 	GtkWidget* notebook_child; /* this part is different for each person we're talking to */
+
+	/* CHATROOM STUFF */
+	
+	int connected; /* are we currently in this chat room */
+	char id[255];      /* who are we? */
+	/*int service_id;*/
+
+	char room_name[1024];  /* what is this chat room called */
+	LList * fellows;   /* who is in the chat room */
+	GtkWidget *fellows_widget;  /* CList of online folks */
+	LList * typing_fellows;
+	int total_arrivals;
+	
+	void *protocol_local_chat_room_data; /* For protocol-specific storage */
+
+	/*
+	 * the folloing data members is for the invite window gui
+	 * since each chat room may spawn an invite window
+	 */
+
+	int invite_window_is_open;
+	GtkWidget * invite_window;
+	GtkWidget * invite_buddy;
+	GtkWidget * invite_message;
 } chat_window;
 
 /* Struct to hold info used by get_local_accounts to hold callback info */
@@ -99,5 +123,8 @@ void eb_log_status_changed(eb_account *ea, gchar *status );
 void eb_chat_window_do_timestamp( struct contact * c, gboolean online );
 void eb_restore_last_conv(gchar *file_name, chat_window* cw);
 void send_message(GtkWidget *widget, gpointer d);
-
+void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name);
+chat_window *find_tabbed_chat_window_index (int current_page);
+void set_tab_red(chat_window *cw);
+void set_tab_normal(chat_window *cw);
 #endif

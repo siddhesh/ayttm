@@ -36,7 +36,7 @@
 #include "action.h"
 #include "messages.h"
 #include "mem_util.h"
-
+#include "chat_window.h"
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
 
@@ -224,7 +224,8 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
   GdkModifierType modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
   eb_chat_room_update_window_title(cr, FALSE);
-
+  set_tab_normal (cr);
+  
   if (!iGetLocalPref("do_multi_line"))
 	  return FALSE;
   
@@ -744,9 +745,24 @@ void open_join_chat_window()
 				GTK_SIGNAL_FUNC(join_chat_destroy), NULL );
 }
 
-void eb_destroy_chat_room (eb_chat_room *room) 
+void destroy_chat_room (GtkWidget *widget, gpointer data) 
 {
-	gtk_widget_destroy(room->window);
+	eb_chat_room *room = (eb_chat_room *)data;
+
+	if (iGetLocalPref("do_tabbed_chat")) {
+		GtkWidget *window = room->window;
+		GtkWidget *notebook = room->notebook;
+		int tab_number;
+
+		tab_number = gtk_notebook_page_num (GTK_NOTEBOOK(notebook), room->notebook_child);
+		gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), tab_number);
+
+		if (gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0) == NULL) {
+			gtk_widget_destroy(window);
+		} 
+	} else {
+		gtk_widget_destroy(room->window);
+	}
 }
 
 static void destroy(GtkWidget * widget, gpointer data)
@@ -756,12 +772,16 @@ static void destroy(GtkWidget * widget, gpointer data)
 	if ( ecr == NULL )
 		return;
 
+	gtk_signal_disconnect_by_func(GTK_OBJECT(ecr->window),
+			   GTK_SIGNAL_FUNC(handle_focus), ecr);
+
 	while (l_list_find(chat_rooms, data)) {
 		chat_rooms = l_list_remove(chat_rooms, data);
 	}
 	RUN_SERVICE(ecr->local_user)->leave_chat_room(ecr);
 		
 	free_chat_room( ecr );
+	
 }
 
 static LList * find_chat_room_buddy( eb_chat_room * room, gchar * user )
@@ -777,6 +797,19 @@ static LList * find_chat_room_buddy( eb_chat_room * room, gchar * user )
 	}
 	return NULL;
 }
+
+eb_chat_room *find_tabbed_chat_room(void)
+{
+	LList *w = chat_rooms;
+	while(w) {
+		eb_chat_room *cr = (eb_chat_room *)w->data;
+		if (cr->notebook)
+			return cr;
+		w = w->next;
+	}
+	return NULL;
+}
+
 
 static void eb_chat_room_refresh_list(eb_chat_room * room )
 {
@@ -892,12 +925,15 @@ static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer user
 {
 	eb_chat_room * cr = (eb_chat_room *)userdata;
 	eb_chat_room_update_window_title(cr, FALSE);
+	set_tab_normal (cr);
 
 }
 
 static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_message)
 {
 	char *room_title;
+	if (!ecb || !ecb->local_user)
+		return; 
 	room_title = g_strdup_printf("%s%s [%s]", 
 			new_message?"* ":"",
 			ecb->room_name, 
@@ -923,6 +959,7 @@ void eb_start_chat_room( eb_local_account *ela, gchar * name, int is_public )
 			chat_rooms = l_list_append(chat_rooms, ecb);
 		}
 		eb_chat_room_update_window_title(ecb, FALSE);
+		set_tab_normal (ecb);
 	}
 }
 
@@ -1001,6 +1038,13 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 		eb_chat_room_update_window_title(chat_room, TRUE);
 		if (iGetLocalPref("do_raise_window"))
 			gdk_window_raise(chat_room->window->window);
+		if (chat_room->notebook != NULL) {
+			int remote_num = gtk_notebook_page_num(GTK_NOTEBOOK(chat_room->notebook),
+					      chat_room->notebook_child);
+			int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(chat_room->notebook));
+			if (remote_num != current_num)
+				set_tab_red(chat_room);
+		}
 		 
 	}
 	if(RUN_SERVICE(chat_room->local_user)->get_smileys)
@@ -1038,12 +1082,6 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 static void invite_button_callback( GtkWidget * widget, gpointer data )
 {
 	do_invite_window(data);
-}
-
-static void destroy_chat_window(GtkWidget * widget, gpointer data)
-{
-	eb_chat_room *ecr = (eb_chat_room *)data;
-	gtk_widget_destroy(ecr->window);
 }
 
 static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
@@ -1106,7 +1144,6 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 
 	gtk_paned_set_gutter_size(GTK_PANED(hbox), 20);
 	
-	chat_room->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	chat_room->fellows_widget = gtk_clist_new(1);
 	gtk_clist_set_column_title(GTK_CLIST(chat_room->fellows_widget), 0, _("Online"));
 	gtk_widget_set_usize(chat_room->fellows_widget, 100, 20 );
@@ -1198,8 +1235,11 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	else
 		room_title = g_strdup_printf("%s", chat_room->room_name);
 	
+	layout_chatwindow(chat_room, vbox, room_title);
+
 	gtk_window_set_title(GTK_WINDOW(chat_room->window), room_title);
 	g_free(room_title);
+
 	gtkut_set_window_icon(chat_room->window->window, NULL);
 	gtk_signal_connect(GTK_OBJECT(chat_room->window), "focus_in_event",
 					   GTK_SIGNAL_FUNC(handle_focus), chat_room);
@@ -1294,7 +1334,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 
 	TOOLBAR_SEPARATOR();
 	
-	close_button = TOOLBAR_APPEND(_("Close"), iconwid, destroy_chat_window, chat_room);
+	close_button = TOOLBAR_APPEND(_("Close"), iconwid, destroy_chat_room, chat_room);
 	
 	chat_room->status_label = gtk_label_new(" ");
 	gtk_box_pack_start(GTK_BOX(hbox2), chat_room->status_label, FALSE, FALSE, 0);
@@ -1307,12 +1347,11 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
 	gtk_widget_show(hbox2);
 	
-	gtk_container_add(GTK_CONTAINER(chat_room->window), vbox);
 	gtk_widget_show(vbox);
 
 	gtk_container_set_border_width(GTK_CONTAINER(chat_room->window), 5);
 	
-	gtk_signal_connect(GTK_OBJECT(chat_room->window), "destroy",
+	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
 					   GTK_SIGNAL_FUNC(destroy), chat_room );
 	gtk_widget_show(chat_room->window);
 
@@ -1344,6 +1383,13 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	init_chat_room_log_file(chat_room);
 	RUN_SERVICE(chat_room->local_user)->join_chat_room(chat_room);
 	gtk_widget_grab_focus(chat_room->entry);
+	
+	if (iGetLocalPref("do_tabbed_chat")) {
+		int page_num = gtk_notebook_page_num (GTK_NOTEBOOK
+				     (chat_room->notebook),
+				     chat_room->notebook_child);
+		gtk_notebook_set_page (GTK_NOTEBOOK(chat_room->notebook), page_num);		
+	}
 }
 
 static void init_chat_room_log_file( eb_chat_room *chat_room )
