@@ -5,1562 +5,90 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
-"POT-Creation-Date: 2003-04-27 12:02+0200\n"
-"PO-Revision-Date: 2003-04-25 16:10--100\n"
+"POT-Creation-Date: 2003-04-30 15:14+0200\n"
+"PO-Revision-Date: 2003-04-30 15:14--100\n"
 "Last-Translator: Colin Leroy <colin@colino.net>\n"
 "Language-Team: Colin Leroy <colin@colino.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libproxy/proxy.c:463
+#: libproxy/proxy.c:475
+#: libproxy/proxy.c:477
+#: libproxy/proxy.c:479
+#: libproxy/proxy.c:481
+#: libproxy/proxy.c:629
+#: libproxy/proxy.c:756
+#: libproxy/proxy.c:763
+#: libproxy/proxy.c:819
+msgid "Proxy Error"
+msgstr "Erreur proxy"
+
+#: libproxy/proxy.c:475
 msgid "Socks 4 proxy rejected request for an unknown reason."
 msgstr "Le proxy Socks4 a rejeté la demande sans spécifier de raison."
 
-#: libproxy/proxy.c:463 libproxy/proxy.c:465 libproxy/proxy.c:467
-#: libproxy/proxy.c:469 libproxy/proxy.c:617 libproxy/proxy.c:744
-#: libproxy/proxy.c:751
-msgid "Proxy error"
-msgstr "Erreur proxy"
+#: libproxy/proxy.c:477
+msgid "Socks 4 proxy rejected request because it could not connect to our identd."
+msgstr "Le proxy Socks4 a rejeté la demande car il n'a pu se connecter à notre identd."
 
-#: libproxy/proxy.c:465
-msgid ""
-"Socks 4 proxy rejected request because it could not connect to our identd."
-msgstr ""
-"Le proxy Socks4 a rejeté la demande car il n'a pu se connecter à notre "
-"identd."
+#: libproxy/proxy.c:479
+msgid "Socks 4 proxy rejected request because identd returned a different userid."
+msgstr "Le proxy Socks4 a rejeté la demande car identd a renvoyé un utilisateur différent."
 
-#: libproxy/proxy.c:467
-msgid ""
-"Socks 4 proxy rejected request because identd returned a different userid."
-msgstr ""
-"Le proxy Socks4 a rejeté la demande car identd a renvoyé un utilisateur "
-"différent."
-
-#: libproxy/proxy.c:469
-msgid "Socks 4 proxy rejected request with an RFC-uncompliant error code."
+#: libproxy/proxy.c:481
+msgid "Socks 4 proxy rejected request with an RFC-uncompliant error cod."
 msgstr "Le proxy Socks4 a rejeté la demande avec un code d'erreur non valide."
 
-#: libproxy/proxy.c:617
+#: libproxy/proxy.c:629
 msgid "Socks5 proxy refused our authentication."
 msgstr "Le proxy Socks5 a refusé notre authentification."
 
-#: libproxy/proxy.c:744
+#: libproxy/proxy.c:756
 msgid "HTTP proxy error: Authentication required."
 msgstr "Erreur du proxy HTTP : Authentification requise."
 
-#: libproxy/proxy.c:751
+#: libproxy/proxy.c:763
 msgid "HTTP proxy error: permission denied."
 msgstr "Erreur du proxy HTTP: permission refusée."
 
-#: src/gtk/about.c:154
-msgid "About Ayttm"
-msgstr "À propos de Ayttm"
-
-#. text
-#: src/gtk/about.c:187
-msgid "Ayttm is brought to you by:"
-msgstr "Ayttm vous est présenté par:"
-
-#. text
-#: src/gtk/about.c:203
-msgid "\"With a little help from\":"
-msgstr "\"With a little help from\":"
-
-#. text
-#: src/gtk/about.c:227
-msgid "Ayttm is based on Everybuddy 0.4.3 which was brought to you by:"
-msgstr "Ayttm est basé sur Everybuddy 0.4.3, écrit par:"
-
-#. close button
-#: src/chat_room.c:1119 src/chat_window.c:911 src/chat_window.c:2085
-#: src/gtk/about.c:238 src/info_window.c:120 src/log_window.c:484
-msgid "Close"
-msgstr "Fermer"
-
-#. Cancel Button
-#: src/activity_bar.C:137 src/add_contact_window.c:390 src/away_window.c:537
-#: src/chat_room.c:543 src/dialog.c:566 src/edit_account_window.c:215
-#: src/edit_contact_window.c:185 src/edit_group_window.c:129
-#: src/edit_local_accounts.c:644 src/edit_local_accounts.c:645
-#: src/edit_local_accounts.c:646 src/gtk/prefs_window.C:568 src/trigger.c:457
-msgid "Cancel"
-msgstr "Annuler"
-
-#: src/add_contact_window.c:202 src/edit_local_accounts.c:236
-#: src/edit_local_accounts.c:285
-#, c-format
-msgid ""
-"This account is not a valid %s account: \n"
-"\n"
-" %s"
-msgstr ""
-"Ce compte n'est pas un compte %s valide :\n"
-"\n"
-"%s"
-
-#: src/add_contact_window.c:205 src/edit_local_accounts.c:239
-#: src/edit_local_accounts.c:251 src/edit_local_accounts.c:288
-#: src/edit_local_accounts.c:300
-msgid "Invalid account"
-msgstr "Compte invalide"
-
-#. Section for adding account
-#: src/add_contact_window.c:264
-msgid "Account: "
-msgstr "Compte :"
-
-#: src/add_contact_window.c:281
-msgid "Protocol: "
-msgstr "Protocole :"
-
-#: src/add_contact_window.c:300
-msgid "Contact: "
-msgstr "Contact :"
-
-#: src/add_contact_window.c:325
-msgid "Group: "
-msgstr "Groupe :"
-
-#: modules/aim-toc/aim-toc.c:1271 modules/msn2/msn.C:1108
-#: modules/msn2/msn.C:1109 modules/msn2/msn.C:1370 modules/msn2/msn.C:1385
-#: modules/msn2/msn.C:1427 modules/msn2/msn.C:1431 modules/msn2/msn.C:1524
-#: modules/msn2/msn.C:1544 modules/msn2/msn.C:1858 modules/msn2/msn.C:1859
-#: modules/msn2/msn.C:1861 src/add_contact_window.c:343
-msgid "Buddies"
-msgstr "Contacts"
-
-#: src/add_contact_window.c:358 src/chat_window.c:823 src/chat_window.c:1996
-#: src/chat_window.c:2116
-msgid "Add Contact"
-msgstr "Ajouter un contact"
-
-#: src/add_contact_window.c:379 src/edit_account_window.c:272
-#: src/edit_group_window.c:98 src/edit_group_window.c:119
-#: src/edit_local_accounts.c:580 src/edit_local_accounts.c:582
-msgid "Add"
-msgstr "Ajouter"
-
-#: src/add_contact_window.c:419
-msgid "Ayttm - Add Contact"
-msgstr "Ayttm - Ajouter un contact"
-
-#: src/away_window.c:207 src/edit_local_accounts.c:594
-#: src/edit_local_accounts.c:596
-msgid "Delete"
-msgstr "Effacer"
-
-#: src/away_window.c:229
-msgid "Title"
-msgstr "Titre :"
-
-#: src/away_window.c:230
-msgid "Message"
-msgstr "Message :"
-
-#: src/away_window.c:352 src/away_window.c:357 src/away_window.c:479
-msgid "Save for later use"
-msgstr "Enregistrer ce message"
-
-#: src/away_window.c:354 src/away_window.c:355
-msgid "Replace saved message"
-msgstr "Remplacer le message enregistré"
-
-#: src/away_window.c:388
-msgid "You have to enter a message."
-msgstr "Vous devez entrer un message."
-
-#: modules/jabber/libEBjabber.c:917 src/away_window.c:388
-#: src/edit_local_accounts.c:362 src/edit_local_accounts.c:417
-#: src/plugin.c:177
-msgid "Error"
-msgstr "Erreur"
-
-#: src/away_window.c:450
-msgid "Title: "
-msgstr "Titre :"
-
-#: src/away_window.c:466
-msgid "Away Message: "
-msgstr "Message d'absence:"
-
-#: src/away_window.c:484
-msgid "New Away Message"
-msgstr "Nouveau message d'absence"
-
-# modules/sms/sms.c:
-#: src/away_window.c:505
-msgid "Existing Messages"
-msgstr "Messages existants"
-
-#. put in the pixmap and label for the 'Set away' button
-#: src/away_window.c:527
-msgid "Set away"
-msgstr "S'absenter"
-
-#: src/away_window.c:561
-msgid "Set as away"
-msgstr "S'absenter"
-
-#: src/away_window.c:582
-msgid "You are currently away, click \"I'm back\" to return"
-msgstr "Vous êtes actuellement absent ; cliquez sur \"Je suis de retour\""
-
-#: src/away_window.c:587
-msgid ""
-"This is the away message that will \n"
-"be sent to people messaging you.\n"
-"You may edit this message if you wish."
-msgstr ""
-"Ceci est le message d'absence qui sera\n"
-"envoyé aux personnes qui vous parleront.\n"
-"Vous pouvez éditer ce message."
-
-#: src/away_window.c:602
-msgid "I'm Back"
-msgstr "Je suis de retour"
-
-#: src/away_window.c:619
-msgid "Away"
-msgstr "Absent"
-
-#: src/chat_room.c:363
-msgid "Handle:"
-msgstr "Nom :"
-
-#: src/chat_room.c:379
-msgid "Message:"
-msgstr "Message :"
-
-#: src/chat_room.c:390
-msgid "Invite"
-msgstr "Inviter"
-
-#: src/chat_room.c:418
-#, c-format
-msgid "Chatroom %d"
-msgstr "Forum %d"
-
-#: src/chat_room.c:472
-msgid "Chat Room Name:"
-msgstr "Nom de la salle de discussion"
-
-#. Service Type Section
-#: src/chat_room.c:480 src/edit_local_accounts.c:529
-msgid "Service Type:"
-msgstr "Type du service :"
-
-#: src/chat_room.c:494
-msgid "Join a Chat Room"
-msgstr "Rejoindre une salle de discussion"
-
-#. stuff for the join button
-#: src/chat_room.c:532
-msgid "Join"
-msgstr "Rejoindre"
-
-#: src/chat_room.c:679
-#, c-format
-msgid "<i>%s (%s) has joined the chat</i>"
-msgstr "<i>%s (%s) a rejoint la salle</i>"
-
-#: src/chat_room.c:696
-#, c-format
-msgid "<i>%s has left the chat</i>"
-msgstr "<i>%s a quitté la salle</i>"
-
-#: src/chat_room.c:916 src/status.c:1906
-msgid "Online"
-msgstr "En ligne"
-
-#: src/chat_room.c:993
-msgid "Invite User"
-msgstr "Inviter un utilisateur"
-
-#: src/chat_room.c:1061 src/chat_window.c:2141
-msgid "Insert Smiley"
-msgstr "Insérer un smiley"
-
-#: src/chat_room.c:1075 src/chat_room.c:1077 src/chat_window.c:2152
-#: src/chat_window.c:2154 src/gtk/prefs_window.C:453
-msgid "Sound"
-msgstr "Son"
-
-#: src/chat_room.c:1076 src/chat_window.c:850 src/chat_window.c:2021
-msgid "Enable Sounds"
-msgstr "Activer les sons"
-
-#: src/chat_room.c:1108 src/chat_window.c:865 src/chat_window.c:2073
-#: src/chat_window.c:2175 src/log_window.c:480
-msgid "Actions..."
-msgstr "Actions..."
-
-#. Send message Section
-#: src/chat_room.c:1113 src/chat_window.c:891 src/chat_window.c:2054
-msgid "Send Message"
-msgstr "Envoyer le message"
-
-#: modules/msn2/msn.C:2246 modules/yahoo2/yahoo.c:1525 src/chat_room.c:1255
-#: src/chat_room.c:1273
-msgid "typing..."
-msgstr "compose..."
-
-#: src/chat_window.c:454 src/chat_window.c:460 src/chat_window.c:664
-msgid "<b>Cannot send message - user is offline.</b>"
-msgstr "<b>Impossible d'envoyer - le contact est hors-ligne.</b>"
-
-#: src/chat_window.c:478
-msgid "<b>Cannot send message - no local account found.</b>"
-msgstr "<b>Impossible d'envoyer - pas de compte local adapté.</b>"
-
-#. adding to ignore
-#: modules/msn2/msn.C:1141 modules/msn2/msn.C:1780 modules/yahoo2/yahoo.c:2109
-#: modules/yahoo2/yahoo.c:2150 src/chat_window.c:636 src/chat_window.c:1226
-#: src/status.c:1065 src/status.c:1393 src/status.c:1425 src/util.c:987
-#: src/util.c:1118 src/util.c:1122
-msgid "Ignore"
-msgstr "Ignorer"
-
-#: src/chat_window.c:649
-#, c-format
-msgid "Do you really want to ignore %s?"
-msgstr "Voulez-vous réellement ignorer %s?"
-
-#. Ignore Section
-#: src/chat_window.c:651 src/chat_window.c:883 src/chat_window.c:2033
-msgid "Ignore Contact"
-msgstr "Ignorer ce contact"
-
-#. Start building the menu
-#: src/chat_window.c:772
-msgid "Change Local Account"
-msgstr "Changer le compte local"
-
-#. This is the same as handle_clicks, without showing the menu for
-#. accelerators to hopefully work better now.
-#.
-#. Add Contact Selection
-#: modules/aim-toc/aim-toc.c:1245 src/chat_window.c:821 src/chat_window.c:1219
-#: src/chat_window.c:1223 src/chat_window.c:1225 src/chat_window.c:1787
-#: src/chat_window.c:1994 src/chat_window.c:2113 src/edit_account_window.c:256
-#: src/edit_account_window.c:277 src/status.c:1064 src/status.c:1472
-#: src/status.c:1513 src/util.c:956 src/util.c:980 src/util.c:1088
-msgid "Unknown"
-msgstr "Unknown"
-
-#: src/chat_window.c:833 src/chat_window.c:2006
-msgid "Offline Messaging"
-msgstr "Messagerie hors-ligne"
-
-#: src/chat_window.c:848 src/chat_window.c:2019
-msgid "Disable Sounds"
-msgstr "Désactiver les sons"
-
-#. View log selection
-#: src/chat_window.c:859
-msgid "View Log"
-msgstr "Voir l'historique"
-
-#. Send File Selection
-#: src/chat_window.c:875 src/chat_window.c:2043
-msgid "Send File"
-msgstr "Envoyer un fichier"
-
-#: src/chat_window.c:1167
-msgid "<b>Error: </b>"
-msgstr "<b>Erreur : </b>"
-
-#: src/chat_window.c:1187
-#, c-format
-msgid "<b>%s is logged %s @ %s.</b>"
-msgstr "<b>%s est %s @ %s"
-
-#: src/chat_window.c:1188
-msgid "in"
-msgstr "connecté(e)"
-
-#: src/chat_window.c:1188
-msgid "out"
-msgstr "déconnecté(e)"
-
-#: src/chat_window.c:1503
-#, c-format
-msgid "<hr><b>%s changed status to %s @ %s.</b><hr>"
-msgstr "<hr><b>%s est %s @ %s</b><hr>"
-
-#: src/chat_window.c:1504
-msgid "(Online)"
-msgstr "(En ligne)"
-
-#: src/chat_window.c:1534 src/chat_window.c:1589
-msgid "Conversation started"
-msgstr "Conversation commencée"
-
-#: src/chat_window.c:1535
-#, c-format
-msgid "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation started"
-msgstr "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation commencée"
-
-#: src/chat_window.c:1536
-msgid "<HR WIDTH=\"100%\"><B>Conversation started"
-msgstr "<HR WIDTH=\"100%\"><B>Conversation commencée"
-
-#: src/chat_window.c:1582 src/chat_window.c:1583
-msgid "<B>Conversation "
-msgstr "<B>Conversation "
-
-#: src/chat_window.c:1583 src/chat_window.c:1585
-msgid "ended on"
-msgstr "terminée à"
-
-#: src/chat_window.c:1584 src/chat_window.c:1585
-msgid "<P ALIGN=\"CENTER\"><B>Conversation "
-msgstr "<P ALIGN=\"CENTER\"><B>Conversation "
-
-#: src/chat_window.c:1594
-msgid "Conversation ended"
-msgstr "Conversation terminée"
-
-#: src/chat_window.c:1661
-#, c-format
-msgid "%sConversation ended%s\n"
-msgstr "%sConversation terminée%s\n"
-
-#: src/chat_window.c:2063
-msgid "View log"
-msgstr "Voir l'historique"
-
-#: src/chat_window.c:2127 src/chat_window.c:2129
-msgid "Allow"
-msgstr "Permettre"
-
-#: src/chat_window.c:2128
-msgid "Allow Offline Messaging CTRL+O"
-msgstr "Permettre la messagerie hors-ligne CTRL+O"
-
-#: src/chat_window.c:2153
-msgid "Enable Sounds CTRL+S"
-msgstr "Activer les sons CTRL+S"
-
-#: src/chat_window.c:2171
-msgid "View Log CTRL+L"
-msgstr "Voir l'historique CTRL+L"
-
-#: src/chat_window.c:2183
-msgid "Send File CTRL+T"
-msgstr "Envoyer un fichier CTRL+T"
-
-#: src/chat_window.c:2189
-msgid "Ignore CTRL+G"
-msgstr "Ignorer CTRL+G"
-
-#: src/chat_window.c:2195
-msgid "Send Message CTRL+R"
-msgstr "Envoyer le message CTRL+R"
-
-#: src/chat_window.c:2204 src/chat_window.c:2206
-msgid "Close CTRL+Q"
-msgstr "Fermer CTRL+Q"
-
-#: src/contact_actions.c:60
-msgid "Select file to send"
-msgstr "Choisissez le fichier"
-
-#: src/dialog.c:356
-msgid "No"
-msgstr "Non"
-
-#: src/dialog.c:371
-msgid "Yes"
-msgstr "Oui"
-
-#: src/dialog.c:427 src/dialog.c:554 src/gtk/prefs_window.C:562
-msgid "OK"
-msgstr "OK"
-
-#: src/edit_local_accounts.c:212
-msgid "You have to enter an account."
-msgstr "Vous devez entrer un compte."
-
-#: src/edit_local_accounts.c:248 src/edit_local_accounts.c:297
-#, c-format
-msgid ""
-"You already have an account for %s service. \n"
-"\n"
-"Multiple accounts per service aren't supported yet."
-msgstr ""
-"Vous avez déjà un compte pour le service %s.\n"
-"\n"
-"Les comptes multiples par service ne sont pas encore supportés."
-
-#: src/edit_local_accounts.c:362
-msgid "You didn't define any account."
-msgstr "Vous n'avez pas défini de comptes."
-
-#: src/edit_local_accounts.c:417
-msgid "Can't add account : unknown service"
-msgstr "Impossible d'ajouter le compte: service inconnu"
-
-#: src/edit_local_accounts.c:466
-msgid "C"
-msgstr "C"
-
-#: src/edit_local_accounts.c:467
-msgid "Screen Name"
-msgstr "Pseudonyme"
-
-#: src/edit_local_accounts.c:468
-msgid "Password"
-msgstr "Mot de passe"
-
-#: src/edit_local_accounts.c:469
-msgid "Service"
-msgstr "Service"
-
-#. Screen Name Section
-#: src/edit_local_accounts.c:508
-msgid "Screen Name:"
-msgstr "Pseudonyme"
-
-#. Password Section
-#: src/edit_local_accounts.c:518 src/gtk/prefs_window.C:1859
-msgid "Password:"
-msgstr "Mot de passe"
-
-#. Connect at startup Section
-#: src/edit_local_accounts.c:543
-msgid "Connect at startup"
-msgstr "Connecter au lancement"
-
-#: src/edit_local_accounts.c:581
-msgid "Add Account"
-msgstr "Ajouter un compte"
-
-#: src/edit_local_accounts.c:595 src/status.c:247
-msgid "Delete Account"
-msgstr "Effacer le compte"
-
-#: src/edit_local_accounts.c:609 src/edit_local_accounts.c:611
-msgid "Modify"
-msgstr "Modifier"
-
-#: src/edit_local_accounts.c:610
-msgid "Modify Account"
-msgstr "Modifier le compte"
-
-#: src/edit_local_accounts.c:630 src/edit_local_accounts.c:631
-#: src/edit_local_accounts.c:632
-msgid "Ok"
-msgstr "OK"
-
-#: src/edit_local_accounts.c:665
-msgid "Ayttm Account Editor"
-msgstr "Editeur de comptes Ayttm"
-
-#. Contact
-#: src/edit_account_window.c:170 src/edit_contact_window.c:95
-msgid "Contact Name: "
-msgstr "Nom du contact :"
-
-#. Group
-#: src/edit_account_window.c:150 src/edit_contact_window.c:113
-msgid "Group Name: "
-msgstr "Nom du groupe :"
-
-#. Default service
-#: src/edit_contact_window.c:136
-msgid "Default Protocol: "
-msgstr "Protocole par défaut :"
-
-#: src/edit_contact_window.c:156 src/edit_contact_window.c:217
-#: src/edit_group_window.c:154
-#, c-format
-msgid "Edit Properties for %s"
-msgstr "Editer les propriétés de %s"
-
-#. Ok Button
-#: src/edit_contact_window.c:175
-msgid "Apply"
-msgstr "Appliquer"
-
-#: src/edit_account_window.c:272
-#, c-format
-msgid "Add %s to Contact List"
-msgstr "Ajouter %s à la liste de contacts"
-
-#: src/edit_account_window.c:272
-msgid "Add Unknown Contact"
-msgstr "Ajouter un nouveau contact"
-
-#: src/edit_account_window.c:280
-#, c-format
-msgid "Edit %s"
-msgstr "Editer %s"
-
-#: src/edit_account_window.c:280
-msgid "Edit Account"
-msgstr "Editer le compte"
-
-#: src/edit_account_window.c:280 src/edit_group_window.c:119
-msgid "Save"
-msgstr "Enregistrer"
-
-#: src/edit_group_window.c:87
-msgid "Group Name:"
-msgstr "Nom du groupe :"
-
-#: src/edit_group_window.c:98
-#, c-format
-msgid "%s group%s%s"
-msgstr "%s groupe%s%s"
-
-#: src/edit_group_window.c:98
-msgid "Edit"
-msgstr "Edition du"
-
-#: src/edit_group_window.c:156
-msgid "Add group"
-msgstr "Ajouter un groupe"
-
-#. extract the date, I am not sure if this is portable (but it
-#. works on my machine, so if someone wants to hack it, go ahead
-#: src/action.c:189 src/log_window.c:146 src/log_window.c:151
-msgid "Conversation started on "
-msgstr "Conversation commencée le "
-
-#: src/action.c:187 src/log_window.c:179
-msgid "Conversation ended on "
-msgstr "Conversation terminée le "
-
-#: src/log_window.c:186
-msgid "Undated Log"
-msgstr "Historique non daté"
-
-#: src/log_window.c:209
-msgid "No log available"
-msgstr "Aucun log"
-
-#: src/log_window.c:411
-#, c-format
-msgid "Past conversations with %s"
-msgstr "Conversations précédentes avec %s"
-
-#: src/log_window.c:413
-msgid "Past conversation"
-msgstr "Conversation précédente"
-
-#. search field
-#: src/log_window.c:452
-msgid "Search: "
-msgstr "Rechercher : "
-
-#: src/log_window.c:579
-#, c-format
-msgid "%sConversation started on %s %s\n"
-msgstr "%sConversation commencée le %s à %s\n"
-
-#: src/log_window.c:599
-#, c-format
-msgid "%sConversation ended on %s %s\n"
-msgstr "%sConversation terminée le %s à %s\n"
-
-#: src/main.c:459
-#, c-format
-msgid ""
-"Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot "
-"be connected."
-msgstr ""
-"Ayttm est déjà lancé (pid %d), et la socket UNIX de contrôle ne peut être "
-"connectée."
-
-#. TODO make sure this one is modal
-#: src/main.c:461
-msgid "Already logged on"
-msgstr "Déjà connecté"
-
-#: src/message_parse.c:185
-msgid "Remote Side Disconnected"
-msgstr "L'hôte distant s'est déconnecté"
-
-#: src/message_parse.c:185 src/message_parse.c:192 src/message_parse.c:199
-#: src/message_parse.c:282
-msgid "Ayttm file x-fer"
-msgstr "Transfert de fichier Ayttm"
-
-#: src/message_parse.c:192
-msgid "Unable to open file!"
-msgstr "Impossible d'ouvrir le fichier !"
-
-#: src/message_parse.c:199
-msgid "File Sent Successfully"
-msgstr "Fichier envoyé"
-
-#: src/message_parse.c:281
-msgid "Remote Side has aborted the file transfer"
-msgstr "L'hôte distant a annulé le transfert de fichier"
-
-#: src/message_parse.c:299
-msgid "File Receive Complete"
-msgstr "Fichier reçu"
-
-#: src/message_parse.c:299
-msgid "Ayttm File x-fer"
-msgstr "Transfert de fichier Ayttm"
-
-#: src/message_parse.c:389
-#, c-format
-msgid ""
-"Would you like to accept\n"
-" the file %s?\n"
-"Size=%lu"
-msgstr ""
-"Voulez-vous accepter le\n"
-"fichier %s ?\n"
-"Taille : %lu"
-
-#: src/message_parse.c:390
-msgid "Download File"
-msgstr "Télécharger le fichier"
-
-#: src/nomodule.c:167
-msgid "No Module or broken account"
-msgstr "Pas de module, ou compte invalide"
-
-#: src/nomodule.c:209
-msgid "(Offline)"
-msgstr "(Hors-ligne)"
-
-#: src/plugin.c:137
-#, c-format
-msgid ""
-"Plugin %s has not been loaded because of an error:\n"
-"\n"
-"%s"
-msgstr ""
-"Le plugin %s n'a pas été chargé à cause d'une erreur:\n"
-"\n"
-"%s"
-
-#: src/plugin.c:139
-msgid "Plugin error"
-msgstr "Erreur plugin"
-
-#: src/plugin.c:176
-#, c-format
-msgid "Unable to unload plugin %s; maybe it is still in use?"
-msgstr "Impossible de décharger le plugin %s, utilisé ?"
-
-#. Only update status on a plugin that is not already loaded
-#: src/plugin.c:230
-msgid "Cannot resolve symbol \"plugin_info\"."
-msgstr "Impossible de résoudre le symbole \"plugin_info\"."
-
-#: src/plugin.c:290
-#, c-format
-msgid "Cannot open module directory \"%s\"."
-msgstr "Impossible d'ouvrir le répertoire de modules \"%s\"."
-
-#: modules/utility/autotrans.c:183 src/plugin.c:291 src/plugin.c:403
-msgid "Warning"
-msgstr "Attention"
-
-#: src/plugin.c:300
-#, c-format
-msgid "Looking for modules in %s"
-msgstr "Recherche de modules dans %s"
-
-#: src/plugin.c:345
-msgid "Unable to resolve symbol SERVICE_INFO"
-msgstr "Impossible de résoudre le symbole SERVICE_INFO"
-
-#: src/plugin.c:352
-#, c-format
-msgid "Not loading module %s, a module for that service is already loaded!\n"
-msgstr "Module %s non chargé, un module pour se service est déjà actif !\n"
-
-#: src/plugin.c:353
-msgid "Same service is provided by an already loaded plugin."
-msgstr "Le même service est fourni par un plugin déjà chargé."
-
-#: src/plugin.c:400
-msgid "No init function defined"
-msgstr "Pas de fonction init définie"
-
-#: src/plugin.c:402
-#, c-format
-msgid "Utility module %s doesn't define an init function; skipping it."
-msgstr "Le module utilitaire %s ne définit de fonction init; non chargé."
-
-#: src/gtk/prefs_window.C:451
-msgid "Preferences"
-msgstr "Préférences"
-
-#: src/gtk/prefs_window.C:452
-msgid "Preferences:Logging"
-msgstr "Préférences:Logs"
-
-#: src/gtk/prefs_window.C:454
-msgid "Sound:Files"
-msgstr "Son:Fichiers"
-
-#: src/gtk/prefs_window.C:455
-msgid "Chat"
-msgstr "Dialogue"
-
-#: src/gtk/prefs_window.C:456
-msgid "Chat:Tabs"
-msgstr "Dialogue:Onglets"
-
-#: src/gtk/prefs_window.C:457
-msgid "Advanced"
-msgstr "Avancé"
-
-#: src/gtk/prefs_window.C:458
-msgid "Advanced:Proxy"
-msgstr "Avancé:Proxy"
-
-#: src/gtk/prefs_window.C:460
-msgid "Advanced:Encoding"
-msgstr "Avancé:Encodage"
-
-#: src/gtk/prefs_window.C:462 src/gtk/prefs_window.C:846
-msgid "Services"
-msgstr "Services"
-
-#: src/gtk/prefs_window.C:463 src/gtk/prefs_window.C:848
-msgid "Utilities"
-msgstr "Utilitaires"
-
-#: src/gtk/prefs_window.C:479
-msgid "Ayttm Preferences"
-msgstr "Préférences Ayttm"
-
-#: src/gtk/prefs_window.C:850
-msgid "Other Plugins"
-msgstr "Autres plugins"
-
-#: src/gtk/prefs_window.C:942
-msgid "Use spell checking"
-msgstr "Utiliser le correcteur d'orthographe"
-
-#: src/gtk/prefs_window.C:955
-msgid "Dictionary (blank for default):"
-msgstr "Dictionnaire (vide pour défaut) :"
-
-#: src/gtk/prefs_window.C:967
-msgid "Use alternate browser"
-msgstr "Utiliser un navigateur alternatif"
-
-#: src/gtk/prefs_window.C:978
-msgid "Browser command:"
-msgstr "Commande du navigateur:"
-
-#: src/gtk/prefs_window.C:987 src/gtk/prefs_window.C:1197 src/trigger.c:397
-msgid "Browse"
-msgstr "Parcourir"
-
-#: src/gtk/prefs_window.C:994
-msgid "Enable debug messages"
-msgstr "Activer les messages de debug"
-
-#: src/gtk/prefs_window.C:1068
-msgid "Select your browser"
-msgstr "Sélectionnez votre navigateur"
-
-#: src/gtk/prefs_window.C:1085
-msgid "Save all conversations to logfiles"
-msgstr "Enregistrer les conversations"
-
-#: src/gtk/prefs_window.C:1086
-msgid "Restore last conversation when opening a chat window"
-msgstr "Restaurer la dernière conversation à l'ouverture"
-
-#: src/gtk/prefs_window.C:1102
-msgid "Disable sounds when I am away"
-msgstr "Désactiver les sons lorsque je suis absent"
-
-#: src/gtk/prefs_window.C:1103
-msgid "Disable sounds for Ignored people"
-msgstr "Désactiver les sons pour les ignorés"
-
-#: src/gtk/prefs_window.C:1104
-msgid "Play sounds when people sign on or off"
-msgstr "Jouer un son à la (dé)connexion"
-
-#: src/gtk/prefs_window.C:1105
-msgid "Play a sound when sending a message"
-msgstr "Jouer un son à l'envoi de message"
-
-#: src/gtk/prefs_window.C:1106
-msgid "Play a sound when receiving a message"
-msgstr "Jouer un son à la réception de message"
-
-#: src/gtk/prefs_window.C:1107
-msgid "Play a special sound when receiving first message"
-msgstr "Jouer un son spécial au premier message reçu"
-
-#: src/gtk/prefs_window.C:1130
-msgid "Contact signs on: "
-msgstr "Connexion :"
-
-#: src/gtk/prefs_window.C:1132
-msgid "Contact goes away: "
-msgstr "Absence :"
-
-#: src/gtk/prefs_window.C:1134
-msgid "Contact signs off: "
-msgstr "Déconnexion d'un contact:"
-
-# modules/sms/sms.c:
-#: src/gtk/prefs_window.C:1136
-msgid "Message sent: "
-msgstr "Message envoyé:"
-
-#: src/gtk/prefs_window.C:1138
-msgid "Message received: "
-msgstr "Message reçu :"
-
-#: src/gtk/prefs_window.C:1140
-msgid "First message received: "
-msgstr "Premier message reçu : "
-
-#: src/gtk/prefs_window.C:1142
-msgid "Relative volume (dB)"
-msgstr "Volume relatif (dB)"
-
-#: src/gtk/prefs_window.C:1176
-msgid "Preview"
-msgstr "Prévisualiser"
-
-#: src/gtk/prefs_window.C:1301
-msgid "Select a file to use"
-msgstr "Choisissez un fichier"
-
-#: src/gtk/prefs_window.C:1367
-msgid "Send idle/away status to servers"
-msgstr "Envoyer les statuts inactif/absent aux serveurs"
-
-#: src/gtk/prefs_window.C:1368
-msgid "Raise chat-window when receiving a message"
-msgstr "Amener la fenêtre au premier plan à la réception"
-
-#: src/gtk/prefs_window.C:1369
-msgid "Ignore unknown people"
-msgstr "Ignorer les inconnus"
-
-#: src/gtk/prefs_window.C:1370
-msgid "Ignore foreground Colors"
-msgstr "Ignorer la couleur du texte"
-
-#: src/gtk/prefs_window.C:1371
-msgid "Ignore background Colors"
-msgstr "Ignorer la couleur du fond"
-
-#: src/gtk/prefs_window.C:1372
-msgid "Ignore fonts"
-msgstr "Ignorer les polices"
-
-#: src/gtk/prefs_window.C:1376
-msgid "Font size: "
-msgstr "Taille de la police : "
-
-#: src/gtk/prefs_window.C:1420
-msgid "Use tabs in chat windows"
-msgstr "Utiliser des fenêtres de dialogue à onglets"
-
-#. orientation
-#: src/gtk/prefs_window.C:1424
-msgid "Tab Position"
-msgstr "Position des onglets"
-
-#: src/gtk/prefs_window.C:1443
-msgid "Bottom"
-msgstr "Bas"
-
-#: src/gtk/prefs_window.C:1450
-msgid "Top"
-msgstr "Haut"
-
-#: src/gtk/prefs_window.C:1457
-msgid "Left"
-msgstr "Gauche"
-
-#: src/gtk/prefs_window.C:1464
-msgid "Right"
-msgstr "Droite"
-
-#: src/gtk/prefs_window.C:1477
-msgid "Hotkeys"
-msgstr "Raccourcis"
-
-#: src/gtk/prefs_window.C:1487
-msgid "Previous tab:"
-msgstr "Onglet précédent:"
-
-#: src/gtk/prefs_window.C:1491
-msgid "Next tab:"
-msgstr "Onglet suivant:"
-
-#: src/gtk/prefs_window.C:1659
-msgid "<Press modifier + key or escape to cancel>"
-msgstr "<Appuyez sur une combinaison de touches (esc pour annuler)>"
-
-#: src/gtk/prefs_window.C:1685
-msgid ""
-"This section is for configuration of advanced options such as proxy\n"
-"servers and encoding conversion [if your system supports them]."
-msgstr ""
-"Cette section sert à configurer les options avancées, comme le serveur\n"
-"proxy et les conversions d'encodage [si votre système les supporte]."
-
-#: src/gtk/prefs_window.C:1691
-msgid "[There are no general preferences for the Advanced section]"
-msgstr "[Pas de préférences générales dans la section Avancé]"
-
-#: src/gtk/prefs_window.C:1733
-msgid "Use a proxy server"
-msgstr "Utiliser un proxy"
-
-#: src/gtk/prefs_window.C:1736
-msgid "Proxy Type"
-msgstr "Type de proxy"
-
-#: src/gtk/prefs_window.C:1757
-msgid "HTTP"
-msgstr "HTTP"
-
-#: src/gtk/prefs_window.C:1765
-msgid "SOCKS4"
-msgstr "SOCKS4"
-
-#: src/gtk/prefs_window.C:1773
-msgid "SOCKS5"
-msgstr "SOCKS5"
-
-#: modules/aim-toc/aim-toc.c:116 modules/icq-toc/icq-toc.c:117
-#: modules/icq/icq.c:118 modules/msn2/msn.C:200 src/gtk/prefs_window.C:1787
+#: libproxy/proxy.c:819
+msgid "Could not resolve host."
+msgstr "Nom d'hôte introuvable."
+
+#: modules/aim-toc/aim-toc.c:118
+#: modules/icq-toc/icq-toc.c:118
+#: modules/icq/icq.c:120
+#: modules/msn2/msn.C:189
+#: modules/workwizu/workwizu.c:141
+#: src/gtk/prefs_window.C:1820
 msgid "Server:"
 msgstr "Serveur :"
 
-#: modules/aim-toc/aim-toc.c:123 modules/icq-toc/icq-toc.c:124
-#: modules/icq/icq.c:125 modules/jabber/jabber.c:112 modules/msn2/msn.C:207
-#: modules/smtp/smtp.c:108 src/gtk/prefs_window.C:1803
+#: modules/aim-toc/aim-toc.c:125
+#: modules/icq-toc/icq-toc.c:125
+#: modules/icq/icq.c:127
+#: modules/jabber/jabber.c:116
+#: modules/msn2/msn.C:196
+#: modules/smtp/smtp.c:108
+#: modules/workwizu/workwizu.c:148
+#: src/gtk/prefs_window.C:1836
 msgid "Port:"
 msgstr "Port :"
 
-#: src/gtk/prefs_window.C:1823
-msgid "Proxy requires authentication"
-msgstr "Authentification requise"
-
-#: src/gtk/prefs_window.C:1837
-msgid "User ID:"
-msgstr "Login du proxy :"
-
-#: src/gtk/prefs_window.C:1965
-msgid ""
-"Note: Conversion is made using iconv() which is UNIX98 standard.\n"
-"For list of possible encodings run 'iconv --list'."
-msgstr ""
-"Attention: la conversion est faite avec iconv, un standard UNIX98, et nous "
-"espérons que vous l'avez installé :-)\n"
-"Pour obtenir la liste des encodages possibles, exécutez 'iconv --list'."
-
-#: src/gtk/prefs_window.C:1969
-msgid "Use recoding in conversations"
-msgstr "Recoder les conversations"
-
-#: src/gtk/prefs_window.C:1984
-msgid "Local encoding:"
-msgstr "Encodage local :"
-
-#: src/gtk/prefs_window.C:2005
-msgid "Remote encoding:"
-msgstr "Encodage distant :"
-
-#: src/gtk/prefs_window.C:2059
-msgid ""
-"Services allow you to connect to and chat with people using a\n"
-"variety of messenger protocols."
-msgstr ""
-"Les services vous permettent de vous connecter à différents\n"
-"protocoles et de parler avec vos contacts."
-
-#: src/gtk/prefs_window.C:2065
-msgid "[There are no general preferences for the Services section]"
-msgstr "[Pas de préférences générales dans la section Services]"
-
-#: src/gtk/prefs_window.C:2081
-msgid ""
-"Utilities add additional capabilities such as importing contacts or\n"
-"changing your smiley sets."
-msgstr ""
-"Les utilitaires ajoutent des fonctionnalités comme l'import de \n"
-"contacts ou le changement des smileys."
-
-#: src/gtk/prefs_window.C:2087
-msgid "[There are no general preferences for the Utilities section]"
-msgstr "[Pas de préférences générales dans la section Utilitaires]"
-
-#: src/gtk/prefs_window.C:2107 src/status.c:475
-msgid "Info"
-msgstr "Info"
-
-#: src/gtk/prefs_window.C:2117
-msgid "Description:"
-msgstr "Description :"
-
-#: src/gtk/prefs_window.C:2118
-msgid "Version:"
-msgstr "Version :"
-
-#: src/gtk/prefs_window.C:2119
-msgid "Date:"
-msgstr "Date : "
-
-#: src/gtk/prefs_window.C:2120
-msgid "Path:"
-msgstr "Chemin : "
-
-#: src/gtk/prefs_window.C:2132
-msgid "Plugin Error"
-msgstr "Erreur plugin"
-
-#: src/gtk/prefs_window.C:2156
-msgid "[There are no preferences for "
-msgstr "[Pas de préférences pour"
-
-#: src/action.c:85
-#, c-format
-msgid "Command line is invalid (missing %s and %p)."
-msgstr "La ligne de commande est invalide (il manque %s)."
-
-#: src/action.c:85 src/action.c:99 src/action.c:138 src/action.c:142
-#: src/action.c:173 src/action.c:240
-msgid "Action error"
-msgstr "Erreur Actions"
-
-#: src/action.c:99
-msgid "Cannot run command : fork() failed."
-msgstr "Impossible d'exécuter la commande : fork() a échoué."
-
-#: src/action.c:138
-msgid "Cannot use log: no logfile available."
-msgstr "Impossible d'utiliser ce log : pas de fichier disponible."
-
-#: src/action.c:142
-msgid "Cannot use log: logfile too short (!?)."
-msgstr "Impossible d'utiliser ce log : Fichier de log trop court (!?)."
-
-#: src/action.c:173
-msgid "Cannot use log: Impossible to create temporary file."
-msgstr ""
-"Impossible d'utiliser ce log : Erreur de création du fichier temporaire."
-
-#: src/action.c:265
-#, c-format
-msgid ""
-"Enter command:\n"
-" %s = displayed conversation's file (as HTML)\n"
-" %p = displayed conversation's file (as text)"
-msgstr ""
-"Entrez la commande :\n"
-"%s = fichier de la conversation affichée (en HTML)\n"
-"%p = fichier de la conversation affichée (en texte)"
-
-#: src/action.c:328
-msgid "New command..."
-msgstr "Nouvelle commande..."
-
-#: src/status.c:200
-#, c-format
-msgid "Do you really want to delete group \"%s\"?"
-msgstr "Voulez-vous vraiment effacer le groupe \"%s\" ?"
-
-#: src/status.c:201
-msgid "Delete Group"
-msgstr "Effacer le groupe"
-
-#: src/status.c:224
-#, c-format
-msgid "Do you really want to delete contact \"%s\"?"
-msgstr "Voulez-vous vraiment effacer le contact \"%s\" ?"
-
-#: src/status.c:225
-msgid "Delete Contact"
-msgstr "Effacer le contact"
-
-#: src/status.c:246
-#, c-format
-msgid "Do you really want to delete account \"%s\"?"
-msgstr "Voulez-vous vraiment effacer le compte \"%s\" ?"
-
-#: src/status.c:357
-msgid "Add contact to group..."
-msgstr "Ajouter un contact..."
-
-#: src/status.c:362
-msgid "Edit Group..."
-msgstr "Editer le groupe..."
-
-#: src/status.c:365
-msgid "Delete Group..."
-msgstr "Effacer le groupe..."
-
-#: src/status.c:412
-#, c-format
-msgid "%s options"
-msgstr "Options %s"
-
-#: src/status.c:452
-msgid "Add Account to Contact..."
-msgstr "Ajouter un compte au contact..."
-
-#: src/status.c:455
-msgid "Edit Contact..."
-msgstr "Editer le contact..."
-
-#: src/status.c:458
-msgid "Delete Contact..."
-msgstr "Effacer le contact..."
-
-#. sep
-#: src/status.c:463 src/status.c:516
-msgid "Send File..."
-msgstr "Envoyer un fichier..."
-
-#: src/status.c:466
-msgid "Edit Trigger..."
-msgstr "Editer le déclencheur..."
-
-#. sep
-#: src/status.c:471
-msgid "View Log..."
-msgstr "Voir l'historique..."
-
-#: src/status.c:507
-msgid "Edit Account..."
-msgstr "Editer le compte..."
-
-#: src/status.c:510
-msgid "Delete Account..."
-msgstr "Effacer le compte..."
-
-#: src/status.c:519
-msgid "Info..."
-msgstr "Info..."
-
-#: src/status.c:770
-msgid "Account vanished after add_account_line.\n"
-msgstr "Le compte a disparu après add_account_line.\n"
-
-#: src/status.c:783
-msgid "Account missing while online?\n"
-msgstr "Compte manquant alors qu'il est connecté ?\n"
-
-#: src/status.c:934 src/status.c:977
-msgid "status info here"
-msgstr "Info sur le statut"
-
-#: src/status.c:969
-#, c-format
-msgid "%s since %s"
-msgstr "%s depuis %s"
-
-#: src/status.c:1361 src/status.c:1960
-msgid "Ayttm "
-msgstr "Ayttm "
-
-#: src/status.c:1361 src/status.c:1960
-msgid "-"
-msgstr "-"
-
-#: src/status.c:1400
-#, c-format
-msgid "%s is now online"
-msgstr "%s est connecté(e)"
-
-#: src/status.c:1434
-#, c-format
-msgid "%s is now offline"
-msgstr "%s est déconnecté(e)"
-
-#: src/status.c:1647
-msgid "eb_import_function: calling callback\n"
-msgstr "eb_import_function: calling callback\n"
-
-#: src/status.c:1657
-msgid "eb_profile_function: calling callback\n"
-msgstr "eb_profile_function: calling callback\n"
-
-#: src/status.c:1749
-msgid "/_File"
-msgstr "/_Fichier"
-
-#: src/status.c:1750
-msgid "/File/Set _status"
-msgstr "/Fichier/_Statut"
-
-#: src/status.c:1751
-msgid "/File/Sign o_n all"
-msgstr "/Fichier/Tout _connecter"
-
-#: src/status.c:1752
-msgid "/File/Sign o_ff all"
-msgstr "/Fichier/Tout _déconnecter"
-
-#: src/status.c:1753 src/status.c:1756
-msgid "/File/---"
-msgstr "/Fichier/---"
-
-#: src/status.c:1754
-msgid "/File/_Import"
-msgstr "/Fichier/_Importer"
-
-#: src/status.c:1755
-msgid "/File/Set _profile"
-msgstr "/Fichier/_Profil"
-
-#: src/status.c:1757
-msgid "/File/_Quit"
-msgstr "/Fichier/_Quitter"
-
-#: src/status.c:1758
-msgid "/_Tools"
-msgstr "/_Outils"
-
-#: src/status.c:1759
-msgid "/Tools/New group _chat..."
-msgstr "/Outils/_Nouvelle salle de chat"
-
-#: src/status.c:1761
-msgid "/Tools/Set as _away..."
-msgstr "/Outils/_S'absenter"
-
-#: src/status.c:1762 src/status.c:1767
-msgid "/Tools/---"
-msgstr "/Outils/---"
-
-#: src/status.c:1763
-msgid "/Tools/Add a con_tact account..."
-msgstr "/Outils/_Ajouter un contact"
-
-#: src/status.c:1765
-msgid "/Tools/Add a _group..."
-msgstr "/Outils/Ajouter un _groupe"
-
-#: src/status.c:1768
-msgid "/Tools/_Preferences..."
-msgstr "/Outils/_Préférences"
-
-#: src/status.c:1770
-msgid "/Tools/_Edit accounts..."
-msgstr "/Outils/_Editer les comptes..."
-
-#: src/status.c:1772
-msgid "/_Help"
-msgstr "/_Aide"
-
-#: src/status.c:1773
-msgid "/Help/_Web site..."
-msgstr "/Aide/_Site internet..."
-
-#: src/status.c:1774
-msgid "/Help/_Manual..."
-msgstr "/Aide/_Manuel..."
-
-#: src/status.c:1775
-msgid "/Help/---"
-msgstr "/Aide/---"
-
-#: src/status.c:1776
-msgid "/Help/_About Ayttm..."
-msgstr "/Aide/_A propos..."
-
-#: src/status.c:1802
-msgid "/Tools/New group chat..."
-msgstr "/Outils/Nouvelle salle de chat"
-
-#: src/status.c:1803
-msgid "/Tools/Set as away..."
-msgstr "/Outils/S'absenter"
-
-#: src/status.c:1804
-msgid "/File/Sign off all"
-msgstr "/Fichier/Tout déconnecter"
-
-#: src/status.c:1805
-msgid "/File/Sign on all"
-msgstr "/Fichier/Tout connecter"
-
-#: src/status.c:1915
-msgid "Contacts"
-msgstr "Contacts"
-
-#: src/status.c:1924
-msgid "Accounts"
-msgstr "Comptes"
-
-#: src/status.c:1950
-msgid "Welcome To Ayttm"
-msgstr "Bienvenue à Ayttm"
-
-#: src/trigger.c:60
-msgid "Okay"
-msgstr "OK"
-
-#: src/trigger.c:115
-msgid "online"
-msgstr "connecté"
-
-#: src/trigger.c:115
-msgid "offline"
-msgstr "déconnecté"
-
-#: src/trigger.c:193
-msgid "Select parameter"
-msgstr "Sélectionner les paramètres"
-
-#: src/trigger.c:272 src/trigger.c:284
-msgid "None"
-msgstr "Aucun"
-
-#: src/trigger.c:273
-msgid "User goes online"
-msgstr "L'utilisateur se connecte"
-
-#: src/trigger.c:274
-msgid "User goes offline"
-msgstr "L'utilisateur se déconnecte"
-
-#: src/trigger.c:275
-msgid "User goes on or offline"
-msgstr "L'utilisateur se (dé)connecte"
-
-#: src/trigger.c:285
-msgid "Play sound"
-msgstr "Jouer un son"
-
-#: src/trigger.c:286
-msgid "Execute command"
-msgstr "Exécuter une commande"
-
-#: src/trigger.c:287
-msgid "Show alert dialog"
-msgstr "Afficher une fenêtre"
-
-#: src/trigger.c:288
-msgid "Send message"
-msgstr "Envoyer le message"
-
-#. Section for letting the user know which trigger they are editing
-#: src/trigger.c:327
-msgid "User: "
-msgstr "Utilisateur :"
-
-#: src/trigger.c:341
-msgid "Trigger: "
-msgstr "Déclencheur :"
-
-#: src/trigger.c:363
-msgid "Action: "
-msgstr "Action :"
-
-#: src/trigger.c:383
-msgid "Parameter: "
-msgstr "Paramètre :"
-
-#: src/trigger.c:411
-msgid "Edit Trigger"
-msgstr "Editer le déclencheur"
-
-#: src/trigger.c:432
-msgid "Update"
-msgstr "Actualiser"
-
-#: src/trigger.c:498
-msgid "Ayttm - Edit Trigger"
-msgstr "Ayttm - Editeur de déclencheur"
-
-#: src/util.c:961
-#, c-format
-msgid ""
-"The account already exists on your\n"
-"contact list at the following location\n"
-"\tGroup: %s\n"
-"\tContact: %s\n"
-"\n"
-"Should I move it?"
-msgstr ""
-"Ce compte existe déjà dans votre\n"
-"liste de contacts, à l'endroit suivant :\n"
-"Groupe : %s\n"
-"Contact : %s\n"
-"Le déplacer ?"
-
-#: src/util.c:973
-msgid "Error: account exists"
-msgstr "Erreur : le compte existe"
-
-#: src/util.c:1291
-#, c-format
-msgid ""
-"User %s wants to invite you to\n"
-"%s\n"
-"Would you like to accept?"
-msgstr ""
-"%s veut vous inviter sur\n"
-"%s\n"
-"Voulez-vous accepter ?"
-
-#: src/util.c:1297
-msgid "Chat Invite"
-msgstr "Inviter"
-
-#: src/util.c:1368 src/util.c:1385
-msgid "deleting stale lock file\n"
-msgstr "deleting stale lock file\n"
-
-#: src/util.c:1416
-msgid "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
-msgstr "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
-
-#: src/util.c:1420
-msgid "No callback defined in call to eb_generic_menu_function, ignoring call!"
-msgstr ""
-"No callback defined in call to eb_generic_menu_function, ignoring call!"
-
-#: src/gtk/gtkspell.c:211
-msgid ""
-"Ispell exited abnormally.\n"
-" You probably specified a invalid dictionary."
-msgstr ""
-"Ispell a quitté bizarrement.\n"
-" Vous avez peut-être spécifié un dictionnaire invalide."
-
-#: src/gtk/gtkspell.c:212
-msgid "Ispell error"
-msgstr "Erreur ispell"
-
-#: src/gtk/gtkspell.c:479
-#, c-format
-msgid "Not in dictionary: %s"
-msgstr "Inconnu : %s"
-
-#: src/gtk/gtkspell.c:493
-msgid "(no suggestions)"
-msgstr "(pas de suggestion)"
-
-#: src/gtk/gtkspell.c:503
-msgid "Other Possibilities..."
-msgstr "Autres possibilités"
-
-#: modules/aim-toc/aim-toc.c:130 modules/icq-toc/icq-toc.c:131
-#: modules/icq/icq.c:132 modules/jabber/jabber.c:119 modules/msn2/msn.C:263
-#: modules/smtp/smtp.c:115 modules/yahoo2/yahoo.c:212
+#: modules/aim-toc/aim-toc.c:132
+#: modules/icq-toc/icq-toc.c:132
+#: modules/icq/icq.c:134
+#: modules/jabber/jabber.c:123
+#: modules/msn2/msn.C:252
+#: modules/smtp/smtp.c:115
+#: modules/workwizu/workwizu.c:162
+#: modules/yahoo2/yahoo.c:210
 msgid "Enable debugging"
 msgstr "Activer le debug"
 
-#: modules/aim-toc/aim-toc.c:269 modules/icq-toc/icq-toc.c:270
+#: modules/aim-toc/aim-toc.c:269
+#: modules/icq-toc/icq-toc.c:269
 #, c-format
 msgid "Profile for account %s"
 msgstr "Profil du compte %s"
@@ -1582,47 +110,89 @@ msgstr ""
 msgid "Incoming AIM File Request"
 msgstr "Arrivée d'un fichier"
 
-#: modules/aim-toc/aim-toc.c:422 modules/aim-toc/aim-toc.c:810
-#: modules/aim-toc/aim-toc.c:895
+#: modules/aim-toc/aim-toc.c:422
+#: modules/aim-toc/aim-toc.c:818
+#: modules/aim-toc/aim-toc.c:903
+#: modules/aim-toc/aim-toc.c:1281
 msgid "AIM Error"
 msgstr "Erreur AIM"
 
-#: modules/aim-toc/aim-toc.c:769
+#: modules/aim-toc/aim-toc.c:777
 #, c-format
 msgid "Logging in to AIM account: %s"
 msgstr "Connexion de %s à AIM"
 
-#: modules/aim-toc/aim-toc.c:810
+#: modules/aim-toc/aim-toc.c:818
 msgid "Cannot connect to AIM due to network problem."
 msgstr "Impossible de se connecter à AIM (problèmes réseau)."
 
 # modules/sms/sms.c:
-#: modules/aim-toc/aim-toc.c:895 modules/icq-toc/icq-toc.c:895
+#: modules/aim-toc/aim-toc.c:903
+#: modules/icq-toc/icq-toc.c:904
 msgid "Message Truncated"
 msgstr "Message tronqué"
 
-#: modules/aim-toc/aim-toc.c:1049 modules/icq-toc/icq-toc.c:1047
+#: modules/aim-toc/aim-toc.c:1065
+#: modules/icq-toc/icq-toc.c:1063
 msgid "User is currently away"
 msgstr "L'utilisateur est absent"
 
-#: modules/aim-toc/aim-toc.c:1280
+#. This is the same as handle_clicks, without showing the menu for
+#. accelerators to hopefully work better now.
+#.
+#. Add Contact Selection
+#: modules/aim-toc/aim-toc.c:1246
+#: src/chat_window.c:820
+#: src/chat_window.c:1218
+#: src/chat_window.c:1222
+#: src/chat_window.c:1224
+#: src/chat_window.c:1786
+#: src/chat_window.c:1981
+#: src/chat_window.c:2100
+#: src/contact_util.c:159
+#: src/crash.c:460
+#: src/crash.c:479
+#: src/edit_account_window.c:312
+#: src/edit_account_window.c:344
+#: src/status.c:1073
+#: src/status.c:1481
+#: src/status.c:1522
+#: src/util.c:987
+#: src/util.c:1013
+#: src/util.c:1121
+msgid "Unknown"
+msgstr "Unknown"
+
+#: modules/aim-toc/aim-toc.c:1272
+#: modules/msn2/msn.C:1121
+#: modules/msn2/msn.C:1122
+#: modules/msn2/msn.C:1403
+#: modules/msn2/msn.C:1422
+#: modules/msn2/msn.C:1467
+#: modules/msn2/msn.C:1471
+#: modules/msn2/msn.C:1575
+#: modules/msn2/msn.C:1596
+#: modules/msn2/msn.C:1978
+#: modules/msn2/msn.C:1979
+#: modules/msn2/msn.C:1981
+#: src/add_contact_window.c:378
+msgid "Buddies"
+msgstr "Contacts"
+
+#: modules/aim-toc/aim-toc.c:1281
 msgid "This URL isn't supported by AIM module."
 msgstr "Cette URL n'est pas supportée par le module AIM."
 
-#: modules/aim-toc/aim-toc.c:1280
-msgid "AIM error"
-msgstr "Erreur AIM"
-
-#: modules/icq/icq.c:658
+#: modules/icq/icq.c:660
 #, c-format
 msgid "User is away: %s"
 msgstr "L'utilisateur est absent: %s"
 
-#: modules/icq/icq.c:664
+#: modules/icq/icq.c:666
 msgid "I have just added you to my contact list."
 msgstr "Je viens de vous ajouter à ma liste de contacts."
 
-#: modules/icq/icq.c:681
+#: modules/icq/icq.c:683
 #, c-format
 msgid ""
 "ICQ user %d would like to\n"
@@ -1635,7 +205,7 @@ msgstr ""
 "%s\n"
 "Voulez-vous l'accepter ?"
 
-#: modules/icq/icq.c:698
+#: modules/icq/icq.c:700
 #, c-format
 msgid ""
 "ICQ user %s would like to add you to their contact list.\n"
@@ -1646,84 +216,85 @@ msgstr ""
 "Raison: %s\n"
 "Voulez-vous l'y autoriser ?"
 
-#: modules/icq/icq.c:701
+#: modules/icq/icq.c:703
 msgid "Authorize ICQ User"
 msgstr "Autoriser"
 
-#: modules/icq/icq.c:708
+#: modules/icq/icq.c:710
 #, c-format
 msgid "Unknown packet type %x contents %s"
 msgstr "Paquet inconnu, type %x, contenu %s"
 
-#: modules/icq/icq.c:1472
+#: modules/icq/icq.c:1474
 msgid "ICQ Info:<BR>"
 msgstr "Information ICQ :<BR>"
 
-#: modules/icq/icq.c:1479 modules/icq/icq.c:1496
+#: modules/icq/icq.c:1481
+#: modules/icq/icq.c:1498
 #, c-format
 msgid "UIN: %d<br>"
 msgstr "UIN : %d<br>"
 
-#: modules/icq/icq.c:1481
+#: modules/icq/icq.c:1483
 #, c-format
 msgid "Nickname: %s<br>"
 msgstr "Pseudo : %s<br>"
 
-#: modules/icq/icq.c:1483
+#: modules/icq/icq.c:1485
 #, c-format
 msgid "First Name: %s<br>"
 msgstr "Prénom : %s<br>"
 
-#: modules/icq/icq.c:1485
+#: modules/icq/icq.c:1487
 #, c-format
 msgid "Last Name: %s<br>"
 msgstr "Nom : %s<br>"
 
-#: modules/icq/icq.c:1487
+#: modules/icq/icq.c:1489
 #, c-format
 msgid "Email: %s<br>"
 msgstr "Email : %s<br>"
 
-#: modules/icq/icq.c:1490
+#: modules/icq/icq.c:1492
 msgid "Authorization Required<BR>"
 msgstr "Autorisation requise<br>"
 
-#: modules/icq/icq.c:1499
+#: modules/icq/icq.c:1501
 #, c-format
 msgid "City: %s<br>"
 msgstr "Ville : %s<br>"
 
-#: modules/icq/icq.c:1501
+#: modules/icq/icq.c:1503
 #, c-format
 msgid "State: %s<br>"
 msgstr "Pays : %s<br>"
 
-#: modules/icq/icq.c:1503
+#: modules/icq/icq.c:1505
 #, c-format
 msgid "Age: %s<br>"
 msgstr "Age : %s<br>"
 
-#: modules/icq/icq.c:1505
+#: modules/icq/icq.c:1507
 #, c-format
 msgid "Sex: %s<br>"
 msgstr "Sexe : %s<br>"
 
-#: modules/icq/icq.c:1507
+#: modules/icq/icq.c:1509
 #, c-format
 msgid "Phone: %s<br>"
 msgstr "Téléphone : %s<br>"
 
-#: modules/icq/icq.c:1509
+#: modules/icq/icq.c:1511
 #, c-format
 msgid "Url: %s<br>"
 msgstr "Url: %s<br>"
 
-#: modules/icq/icq.c:1511
+#: modules/icq/icq.c:1513
 #, c-format
 msgid "About: %s<br>"
 msgstr "A propos : %s<br>"
 
-#: modules/icq-toc/icq-toc.c:396
+#: modules/icq-toc/icq-toc.c:395
 #, c-format
 msgid ""
 "icq user %s would like to\n"
@@ -1736,147 +307,233 @@ msgstr ""
 "%s\n"
 "Voulez-vous l'accepter ?"
 
-#: modules/icq-toc/icq-toc.c:398
+#: modules/icq-toc/icq-toc.c:397
 msgid "Incoming icq File Request"
 msgstr "Arrivée d'un fichier"
 
-#: modules/icq-toc/icq-toc.c:423 modules/icq-toc/icq-toc.c:895
-msgid "icq Error"
+#: modules/icq-toc/icq-toc.c:422
+#: modules/icq-toc/icq-toc.c:817
+msgid "ICQ Error"
 msgstr "Erreur ICQ"
 
-#: modules/icq-toc/icq-toc.c:773
+#: modules/icq-toc/icq-toc.c:782
 #, c-format
 msgid "Logging in to ICQ account: %s"
 msgstr "Connexion de %s à ICQ"
 
-#: modules/icq-toc/icq-toc.c:808
+#: modules/icq-toc/icq-toc.c:817
 msgid "Cannot connect to ICQ due to network problem."
 msgstr "Impossible de se connecter à ICQ (problèmes réseau)."
 
-#: modules/icq-toc/icq-toc.c:808
-msgid "ICQ Error"
-msgstr "Erreur ICQ"
+#: modules/icq-toc/icq-toc.c:904
+msgid "ICQ Warning"
+msgstr "ICQ - Attention"
 
-#: modules/irc/irc.c:915
+#: modules/importers/import_everybuddy.c:120
+#: modules/importers/import_everybuddy.c:129
+#: modules/importers/import_everybuddy.c:165
+#: modules/importers/import_everybuddy.c:180
+#: modules/importers/import_everybuddy.c:192
+msgid "Import error"
+msgstr "Erreur d'import"
+
+#: modules/importers/import_everybuddy.c:120
+msgid "Cannot import accounts.\n"
+"Check that ~/.everybuddy/accounts exists and is readable."
+msgstr "Impossible d'importer les comptes.\n"
+"Vérifiez que ~/.everybuddy/accounts existe et est lisible."
+
+#: modules/importers/import_everybuddy.c:129
+msgid "Cannot import contacts.\n"
+"Check that ~/.everybuddy/contacts exists and is readable."
+msgstr "Impossible d'importer les contacts.\n"
+"Vérifiez que ~/.everybuddy/contacts existe et est lisible."
+
+#: modules/importers/import_everybuddy.c:166
+msgid "Cannot import preferences.\n"
+"Check that ~/.everybuddy/preferences exists and is readable."
+msgstr "Impossible d'importer les préférences.\n"
+"Vérifiez que ~/.everybuddy/prefs existe et est lisible."
+
+#: modules/importers/import_everybuddy.c:181
+msgid "Cannot save away messages.\n"
+"Check that ~/.ayttm/away_messages is writable."
+msgstr "Impossible d'enregistrer les messages.\n"
+"Vérifiez que ~/.ayttm/away_messages existe et est accessible en écriture."
+
+#: modules/importers/import_everybuddy.c:193
+msgid "Cannot import away messages.\n"
+"Check that ~/.everybuddy/away_messages exists and is readable."
+msgstr "Impossible d'importer les messages d'absence.\n"
+"Vérifiez que ~/.everybuddy/away_messages existe et est lisible."
+
+#: modules/importers/import_everybuddy.c:213
+msgid "Import success"
+msgstr "Succès"
+
+#: modules/importers/import_everybuddy.c:233
+msgid "Import parameters"
+msgstr "Paramètres d'import"
+
+#: modules/importers/import_everybuddy.c:239
+msgid "Select which parts of your everybuddy configuration to import.\n"
+msgstr "Sélectionnez ce que vous désirez importer d'Everybuddy.\n"
+
+#: modules/importers/import_everybuddy.c:243
+msgid "Import local accounts"
+msgstr "Importer les comptes locaux"
+
+#: modules/importers/import_everybuddy.c:245
+msgid "Import contacts"
+msgstr "Importer les contacts"
+
+#: modules/importers/import_everybuddy.c:247
+msgid "Import preferences"
+msgstr "Importer les préférences"
+
+#: modules/importers/import_everybuddy.c:249
+msgid "Import away messages"
+msgstr "Ignorer les messages d'absence"
+
+#: modules/importers/import_everybuddy.c:251
+#: src/dialog.c:349
+#: src/gtk/message_windows.c:145
+#: src/gtk/prefs_window.C:571
+msgid "OK"
+msgstr "OK"
+
+#. Cancel Button
+#: modules/importers/import_everybuddy.c:252
+#: src/activity_bar.C:137
+#: src/add_contact_window.c:425
+#: src/chat_room.c:573
+#: src/dialog.c:361
+#: src/edit_account_window.c:275
+#: src/edit_contact_window.c:187
+#: src/edit_group_window.c:132
+#: src/edit_list_window.c:560
+#: src/edit_local_accounts.c:728
+#: src/edit_local_accounts.c:729
+#: src/edit_local_accounts.c:730
+#: src/gtk/prefs_window.C:577
+#: src/trigger.c:459
+msgid "Cancel"
+msgstr "Annuler"
+
+#: modules/irc/irc.c:912
 #, c-format
-msgid ""
-"NOTICE %s :CLIENTINFO ACTION CLIENTINFO PING VERSION :Use CLIENTINFO "
-"<COMMAND> to get more specific information\n"
-msgstr ""
-"NOTICE %s :CLIENTINFO ACTION CLIENTINFO PING VERSION :Use CLIENTINFO "
-"<COMMAND> to get more specific information\n"
+msgid "NOTICE %s :CLIENTINFO ACTION CLIENTINFO PING VERSION :Use CLIENTINFO <COMMAND> to get more specific information\n"
+msgstr "NOTICE %s :CLIENTINFO ACTION CLIENTINFO PING VERSION :Use CLIENTINFO <COMMAND> to get more specific information\n"
 
-#: modules/irc/irc.c:919
+#: modules/irc/irc.c:916
 #, c-format
-msgid ""
-"NOTICE %s :CLIENTINFO :ACTION contains action descriptions for atmosphere\n"
-msgstr ""
-"NOTICE %s :CLIENTINFO :ACTION contains action descriptions for atmosphere\n"
+msgid "NOTICE %s :CLIENTINFO :ACTION contains action descriptions for atmosphere\n"
+msgstr "NOTICE %s :CLIENTINFO :ACTION contains action descriptions for atmosphere\n"
 
-#: modules/irc/irc.c:923
+#: modules/irc/irc.c:920
 #, c-format
-msgid ""
-"NOTICE %s :CLIENTINFO :CLIENTINFO gives information about available CTCP "
-"commands\n"
-msgstr ""
-"NOTICE %s :CLIENTINFO :CLIENTINFO gives information about available CTCP "
-"commands\n"
+msgid "NOTICE %s :CLIENTINFO :CLIENTINFO gives information about available CTCP commands\n"
+msgstr "NOTICE %s :CLIENTINFO :CLIENTINFO gives information about available CTCP commands\n"
 
-#: modules/irc/irc.c:927
+#: modules/irc/irc.c:924
 #, c-format
 msgid "NOTICE %s :CLIENTINFO :PING echoes back whatever it receives\n"
 msgstr "NOTICE %s :CLIENTINFO :PING echoes back whatever it receives\n"
 
-#: modules/irc/irc.c:931
+#: modules/irc/irc.c:928
 #, c-format
-msgid ""
-"NOTICE %s :CLIENTINFO :VERSION shows client type, version and environment\n"
+msgid "NOTICE %s :CLIENTINFO :VERSION shows client type, version and environment\n"
 msgstr "NOTICE %s :CLIENTINFO :PING echoes back whatever it receives\n"
 
-#: modules/irc/irc.c:992
+#: modules/irc/irc.c:989
 #, c-format
 msgid "Connection closed by %s."
 msgstr "Connexion fermée par %s."
 
-#: modules/irc/irc.c:1125
+#: modules/irc/irc.c:990
+#: modules/irc/irc.c:1123
+#: modules/irc/irc.c:1142
+msgid "IRC Error"
+msgstr "Erreur IRC"
+
+#: modules/irc/irc.c:1122
 #, c-format
 msgid "%s: Unknown host."
 msgstr "%s: Hôte inconnu."
 
-#: modules/irc/irc.c:1144
+#: modules/irc/irc.c:1141
 #, c-format
 msgid "Cannot connect to %s."
 msgstr "Impossible de se connecter à %s."
 
-#: modules/irc/irc.c:1424
+#: modules/irc/irc.c:1422
 msgid "No hostname found in your login (which should be in user@host form)."
-msgstr ""
-"Il n'y a pas de serveur dans votre login (qui doit être de la forme "
-"utilisateur@serveur)."
+msgstr "Il n'y a pas de serveur dans votre login (qui doit être de la forme utilisateur@serveur)."
 
-#: modules/irc/irc.c:1699
+#: modules/irc/irc.c:1697
 #, c-format
 msgid "<b>User info for</b> %s<br>"
 msgstr "<b>Infos utilisateur pour</b> %s<br>"
 
-#: modules/irc/irc.c:1700
+#: modules/irc/irc.c:1698
 #, c-format
 msgid "<b>Server:</b> %s<br>"
 msgstr "<b>Serveur :</b> %s<br>"
 
-#: modules/irc/irc.c:1702
+#: modules/irc/irc.c:1700
 #, c-format
 msgid "<b>Idle time and online status:</b> %s<br>"
 msgstr "<B>Temps libre et statut : </b> %s<br>"
 
-#: modules/irc/irc.c:1707
+#: modules/irc/irc.c:1705
 #, c-format
 msgid "<b>Whois info:</b> %s<br>"
 msgstr "<b>Whois :</b> %s<br>"
 
-#: modules/irc/irc.c:1851
+#: modules/irc/irc.c:1849
 #, c-format
 msgid ">>> Inviting %s [%s] <<<"
 msgstr ">>> Invitation de %s [%s] <<<"
 
-#: modules/irc/irc.c:1853
+#: modules/irc/irc.c:1851
 #, c-format
 msgid ">>> Inviting %s <<<"
 msgstr ">>> Invitation de %s <<<"
 
-#: modules/jabber/jabber.c:105
+#: modules/jabber/jabber.c:109
 msgid "Default Server:"
 msgstr "Serveur par défaut :"
 
-#: modules/jabber/jabber.c:272
+#: modules/jabber/jabber.c:276
 #, c-format
 msgid "Logging in to Jabber account: %s"
 msgstr "Connexion de %s à Jabber"
 
-#: modules/jabber/libEBjabber.c:228
+#: modules/jabber/libEBjabber.c:231
 msgid "No jabber server specified."
 msgstr "Pas de serveur Jabber spécifié."
 
-#: modules/jabber/libEBjabber.c:228
+#: modules/jabber/libEBjabber.c:231
 msgid "Cannot login"
 msgstr "Login impossible"
 
-#: modules/jabber/libEBjabber.c:252 modules/jabber/libEBjabber.c:260
+#: modules/jabber/libEBjabber.c:255
+#: modules/jabber/libEBjabber.c:263
+#: modules/jabber/libEBjabber.c:666
+#: modules/jabber/libEBjabber.c:920
 msgid "Jabber Error"
 msgstr "Erreur Jabber"
 
-#: modules/jabber/libEBjabber.c:892
+#: modules/jabber/libEBjabber.c:895
 msgid "Register? You're not authorized"
 msgstr "Création du compte"
 
-#: modules/jabber/libEBjabber.c:893
+#: modules/jabber/libEBjabber.c:896
 #, c-format
-msgid ""
-"Do you want to try to create the account \"%s\" on the jabber server %s?"
-msgstr ""
-"Voulez-vous essayer de créer le compte \"%s\" sur le serveur Jabber %s ?"
+msgid "Do you want to try to create the account \"%s\" on the jabber server %s?"
+msgstr "Voulez-vous essayer de créer le compte \"%s\" sur le serveur Jabber %s ?"
 
-#: modules/jabber/libEBjabber.c:979
+#: modules/jabber/libEBjabber.c:982
 #, c-format
 msgid ""
 "%s wants to add you to his friends' list.\n"
@@ -1887,7 +544,7 @@ msgstr ""
 "\n"
 "Voulez-vous l'y autoriser ?"
 
-#: modules/jabber/libEBjabber.c:995
+#: modules/jabber/libEBjabber.c:998
 #, c-format
 msgid ""
 "%s removed you from his list.\n"
@@ -1898,105 +555,102 @@ msgstr ""
 "\n"
 "Voulez-vous l'enlever de la vôtre ?"
 
-#: modules/jabber/libEBjabber.c:1031
+#: modules/jabber/libEBjabber.c:1034
 #, c-format
 msgid "The Jabber server %s has disconnected you."
 msgstr "Le serveur Jabber %s vous a déconnecté."
 
-#: modules/jabber/libEBjabber.c:1033
+#: modules/jabber/libEBjabber.c:1036
 msgid "Disconnect"
 msgstr "Déconnexion"
 
-#: modules/jabber/libEBjabber.c:1041
+#: modules/jabber/libEBjabber.c:1044
 #, c-format
 msgid "Connection to the jabber server %s failed!"
 msgstr "La connexion au serveur Jabber %s a échoué !"
 
-#: modules/jabber/libEBjabber.c:1042
+#: modules/jabber/libEBjabber.c:1045
 msgid "Jabber server not responding"
 msgstr "Le serveur Jabber ne répond pas"
 
-#: modules/smtp/smtp.c:101
-msgid "SMTP Server:"
-msgstr "Serveur smtp :"
-
-#: modules/smtp/smtp.c:453
-msgid "You cannot send files through SMTP... yet"
-msgstr "Impossible d'envoyer des fichiers par smtp - pour l'instant."
-
-#: modules/smtp/smtp.c:454
-msgid "SMTP send file"
-msgstr "Envoi de fichier par smtp"
-
-# modules/sms/sms.c:
-#: modules/smtp/smtp.c:500
-msgid "Message Sent"
-msgstr "Message envoyé"
-
-# modules/sms/sms.c:
-#: modules/smtp/smtp.c:502
-msgid "Error Sending Message"
-msgstr "Erreur à l'envoi"
-
-#: modules/msn2/msn.C:193
+#: modules/msn2/msn.C:182
 msgid "Friendly Name:"
 msgstr "Pseudonyme :"
 
-#: modules/msn2/msn.C:214
+#: modules/msn2/msn.C:203
 msgid "Tell me about new Hotmail/MSN mail"
 msgstr "Prévenir de l'arrivée de courrier MSN/Hotmail"
 
-#: modules/msn2/msn.C:221
+#: modules/msn2/msn.C:210
 msgid "Notify me about new mail even if it isn't in my Inbox"
 msgstr "Notifier pour le mail même s'il n'est pas dans l'Inbox"
 
-#: modules/msn2/msn.C:228
+#: modules/msn2/msn.C:217
 msgid "Run Script on Mail Notification"
 msgstr "Exécuter un script à la notification"
 
-#: modules/msn2/msn.C:235
+#: modules/msn2/msn.C:224
 msgid "Script Name:"
 msgstr "Nom du script :"
 
-#: modules/msn2/msn.C:242 modules/yahoo2/yahoo.c:205
+#: modules/msn2/msn.C:231
+#: modules/yahoo2/yahoo.c:203
 msgid "Guess status from Away messages"
 msgstr "Deviner le statut du message d'absence"
 
-#: modules/msn2/msn.C:249
+#: modules/msn2/msn.C:238
 msgid "Check the connection state"
 msgstr "Vérifier la connexion"
 
-#: modules/msn2/msn.C:256
+#: modules/msn2/msn.C:245
 msgid "Reconnect if connection unexpectedly drops"
 msgstr "Reconnecter si la connexion se coupe"
 
-#: modules/msn2/msn.C:401 modules/msn2/msn.C:406
+#: modules/msn2/msn.C:390
+#: modules/msn2/msn.C:395
 msgid "Invite to Gnomemeeting"
 msgstr "Lancer Gnomemeeting"
 
-#: modules/msn2/msn.C:619
+#: modules/msn2/msn.C:608
 #, c-format
 msgid "Logging in to MSN account: %s"
 msgstr "Connexion de %s à MSN"
 
-#: modules/msn2/msn.C:959
+#: modules/msn2/msn.C:958
 msgid "MSN logins must have @domain.tld part."
 msgstr "Les logins MSN doivent contenir une partie @domaine.com."
 
-#: modules/msn2/msn.C:1016 modules/yahoo2/yahoo.c:923
+#: modules/msn2/msn.C:1024
+#: modules/yahoo2/yahoo.c:935
 msgid "Save file as"
 msgstr "Enregistrer le fichier sous"
 
-#: modules/msn2/msn.C:1068
+#: modules/msn2/msn.C:1076
 #, c-format
 msgid "The file %s has been successfully transfered."
 msgstr "Le fichier %s a bien été transféré."
 
-#: modules/msn2/msn.C:1069
-msgid "File transfered"
-msgstr "Fichier transféré"
+#. get orphaned
+#: modules/msn2/msn.C:1162
+#: modules/msn2/msn.C:1897
+#: modules/yahoo2/yahoo.c:2134
+#: modules/yahoo2/yahoo.c:2175
+#: src/chat_window.c:635
+#: src/chat_window.c:1225
+#: src/contact_util.c:275
+#: src/contact_util.c:279
+#: src/offline_queue_mgmt.c:158
+#: src/offline_queue_mgmt.c:160
+#: src/status.c:1074
+#: src/status.c:1402
+#: src/status.c:1434
+#: src/util.c:1020
+#: src/util.c:1151
+#: src/util.c:1155
+msgid "Ignore"
+msgstr "Ignorer"
 
-#: modules/msn2/msn.C:1302
+#: modules/msn2/msn.C:1329
 #, c-format
 msgid ""
 "The MSN user %s (%s) would like to add you to their contact list.\n"
@@ -2007,16 +661,17 @@ msgstr ""
 "\n"
 "Voulez-vous l'y autoriser ?"
 
-#: modules/msn2/msn.C:1307
+#: modules/msn2/msn.C:1336
 msgid "Authorize MSN User"
 msgstr "Autoriser l'utilisateur"
 
-#: modules/msn2/msn.C:2043 modules/msn2/msn.C:2047
+#: modules/msn2/msn.C:2154
+#: modules/msn2/msn.C:2158
 msgid "(closed window)"
 msgstr "(fenêtre fermée)"
 
 # msn.C
-#: modules/msn2/msn.C:2144
+#: modules/msn2/msn.C:2252
 #, c-format
 msgid ""
 "The MSN user %s (%s) would like to send you this file:\n"
@@ -2031,61 +686,93 @@ msgstr ""
 "\n"
 "Voulez-vous accepter ?"
 
-#: modules/msn2/msn.C:2150
+#: modules/msn2/msn.C:2258
 msgid "Accept file"
 msgstr "Accepter le fichier"
 
-#: modules/msn2/msn.C:2162 modules/msn2/msn.C:2174
+#: modules/msn2/msn.C:2270
+#: modules/msn2/msn.C:2276
+#: modules/msn2/msn.C:2282
+#: modules/msn2/msn.C:2292
+msgid "GnomeMeeting Error"
+msgstr "Erreur Gnomemeeting"
+
+#: modules/msn2/msn.C:2270
+#: modules/msn2/msn.C:2282
 msgid "Cannot run gnomemeeting: presence test failed."
 msgstr "Impossible de lancer gnomemeeting : non trouvé."
 
-#: modules/msn2/msn.C:2162
-msgid "Cannot run gnomemeeting"
-msgstr "Impossible de lancer gnomemeeting"
+#: modules/msn2/msn.C:2276
+msgid "You do not have gnomemeeting installed or it isn't in your PATH."
+msgstr "Gnomemeeting n'est pas installé, ou bien il n'est pas pas dans votre PATH."
 
-#: modules/msn2/msn.C:2168
-msgid "You have no gnomemeeting installed or it isn't in your PATH."
-msgstr ""
-"Gnomemeeting n'est pas installé, ou bien il n'est pas pas dans votre PATH."
-
-#: modules/msn2/msn.C:2184
-msgid ""
-"Your gnomemeeting version doesn't support --callto argument; You should "
-"update it."
-msgstr ""
-"Votre version de gnomemeeting n'accepte pas l'argument --callto. Vous "
-"devriez la mettre à jour."
+#: modules/msn2/msn.C:2292
+msgid "Your gnomemeeting version doesn't support --callto argument; You should update it."
+msgstr "Votre version de gnomemeeting n'accepte pas l'argument --callto. Vous devriez la mettre à jour."
 
 # msn.C
-#: modules/msn2/msn.C:2203
+#: modules/msn2/msn.C:2311
 #, c-format
 msgid ""
 "The MSN user %s (%s) would like to speak with you using (Gnome|Net)Meeting.\n"
 "\n"
 "Do you want to accept ?"
 msgstr ""
-"L'utilisateur MSN %s (%s) voudrait discuter avec vous via (Gnome|Net)"
-"Meeting.\n"
+"L'utilisateur MSN %s (%s) voudrait discuter avec vous via (Gnome|Net)Meeting.\n"
 "\n"
 "Voulez-vous accepter ?"
 
-#: modules/msn2/msn.C:2207
+#: modules/msn2/msn.C:2315
 msgid "Accept invitation"
 msgstr "Accepter l'invitation"
 
-#: modules/msn2/msn.C:2617
-msgid "Cannot find a valid local account to invite your contact."
-msgstr ""
-"Impossible de trouver un compte local valide pour inviter votre contact."
+#: modules/msn2/msn.C:2337
+#: modules/msn2/msn.C:2347
+msgid "MSN Mail"
+msgstr "Courrier MSN"
 
-#: modules/msn2/msn.C:2617 modules/msn2/msn.C:2632
+#: modules/msn2/msn.C:2354
+#: modules/workwizu/workwizu.c:326
+#: modules/yahoo2/yahoo.c:1537
+#: src/chat_room.c:1269
+#: src/chat_room.c:1287
+msgid "typing..."
+msgstr "compose..."
+
+#: modules/msn2/msn.C:2729
+#: modules/msn2/msn.C:2744
 msgid "MSN Error"
 msgstr "Erreur MSN"
 
-#: modules/msn2/msn.C:2632
+#: modules/msn2/msn.C:2729
+msgid "Cannot find a valid local account to invite your contact."
+msgstr "Impossible de trouver un compte local valide pour inviter votre contact."
+
+#: modules/msn2/msn.C:2744
 msgid "Cannot find a valid remote account to invite your contact."
-msgstr ""
-"Impossible de trouver un compte distant valide pour inviter votre contact."
+msgstr "Impossible de trouver un compte distant valide pour inviter votre contact."
+
+#: modules/smtp/smtp.c:101
+msgid "SMTP Server:"
+msgstr "Serveur smtp :"
+
+#: modules/smtp/smtp.c:459
+msgid "SMTP Warning"
+msgstr "SMTP - Attention"
+
+#: modules/smtp/smtp.c:459
+msgid "You cannot send files through SMTP... yet"
+msgstr "Impossible d'envoyer des fichiers par smtp - pour l'instant."
+
+# modules/sms/sms.c:
+#: modules/smtp/smtp.c:505
+msgid "Message Sent"
+msgstr "Message envoyé"
+
+# modules/sms/sms.c:
+#: modules/smtp/smtp.c:507
+msgid "Error Sending Message"
+msgstr "Erreur à l'envoi"
 
 #: modules/utility/autotrans.c:99
 msgid "Enable automatic translation"
@@ -2096,316 +783,1975 @@ msgid "My language code:"
 msgstr "Mon code langue :"
 
 #. the following is adapted from notes.c
-#: modules/utility/autotrans.c:116 modules/utility/autotrans.c:122
+#: modules/utility/autotrans.c:116
+#: modules/utility/autotrans.c:122
 msgid "Set Language"
 msgstr "Choisir la langue"
 
 #: modules/utility/autotrans.c:176
-msgid ""
-"Warning - you have just selected a language with which to talk to a buddy. "
-"This will only affect you if you have the auto-translatorplugin turned on. "
-"If you do, beware that it willhang each time you send or receive a message, "
-"forthe time it takes to contact BabelFish. This cantake several seconds."
-msgstr ""
-"Attention - vous venez de choisir une langue pour parler avec cette "
-"personne. Ceci ne fonctionnera que si vous avez activé le plugin de "
-"traduction automatique. Si vous le faites, ceci ajoutera un délai chaque "
-"fois que vous enverrez ou recevrez un message (le temps de contacter "
-"BabelFish)."
+msgid "Auto-Translation Warning"
+msgstr "Auto-traduction : Attention "
 
-#: modules/utility/autotrans.c:215
+#: modules/utility/autotrans.c:176
+msgid "You have just selected a language with which to talk to a buddy. This will only affect you if you have the auto-translatorplugin turned on. If you do, beware that it willhang each time you send or receive a message, forthe time it takes to contact BabelFish. This cantake several seconds."
+msgstr "Attention - vous venez de choisir une langue pour parler avec cette personne. Ceci ne fonctionnera que si vous avez activé le plugin de traduction automatique. Si vous le faites, ceci ajoutera un délai chaque fois que vous enverrez ou recevrez un message (le temps de contacter BabelFish)."
+
+#: modules/utility/autotrans.c:214
 #, c-format
 msgid "Select the code for the language to use when talking to %s"
 msgstr "Choisissez le code langue à utiliser pour %s"
 
-#: modules/utility/autotrans.c:218
+#: modules/utility/autotrans.c:217
 msgid "Select Language"
 msgstr "Choisissez la langue"
 
-#: modules/utility/middle.c:78
+#: modules/utility/middle.c:85
 msgid "Enable L33t-speak conversion"
 msgstr "Activer le mode h4X0r"
 
-#: modules/utility/rainbow.c:99
-msgid "Enable rainbow conversion"
-msgstr "Activer les couleurs arc-en-ciel"
-
-#: modules/utility/rainbow.c:106
-msgid "Starting R value"
-msgstr "Valeur R de départ :"
-
-#: modules/utility/rainbow.c:112
-msgid "Starting G value"
-msgstr "Valeur V de départ :"
-
-#: modules/utility/rainbow.c:118
-msgid "Starting B value"
-msgstr "Valeur B de départ :"
-
-#: modules/utility/rainbow.c:125
-msgid "Ending R value"
-msgstr "Valeur R de fin :"
-
-#: modules/utility/rainbow.c:131
-msgid "Ending G value"
-msgstr "Valeur V de fin :"
-
-#: modules/utility/rainbow.c:137
-msgid "Ending B value"
-msgstr "Valeur B de fin :"
-
-#: modules/yahoo2/yahoo.c:149
-msgid "Pager Server:"
-msgstr "Serveur pager :"
-
-#: modules/yahoo2/yahoo.c:156
-msgid "Pager Port:"
-msgstr "Port pager :"
-
-#: modules/yahoo2/yahoo.c:163
-msgid "File Transfer Host:"
-msgstr "Hôte de transfert de fichiers :"
-
-#: modules/yahoo2/yahoo.c:170
-msgid "File Transfer Port:"
-msgstr "Port de transfert de fichiers :"
-
-#: modules/yahoo2/yahoo.c:177
-msgid "Yahoo Mail Notification"
-msgstr "Notification de mail"
-
-#: modules/yahoo2/yahoo.c:184
-msgid "Login invisible"
-msgstr "Login invisible"
-
-#: modules/yahoo2/yahoo.c:191
-msgid "Ignore System Messages"
-msgstr "Ignorer les messages systèmes"
-
-#: modules/yahoo2/yahoo.c:198
-msgid "Prompt for transferred filename"
-msgstr "Demander le nom du fichier transféré"
-
-#: modules/yahoo2/yahoo.c:807
-#, c-format
-msgid "<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"
-msgstr "<FONT COLOR=\"#0000FF\">[Message hors-ligne à %s]</FONT><BR>%s"
-
-#: modules/yahoo2/yahoo.c:943
-#, c-format
-msgid "The yahoo user %s has sent you a file%s%s, Do you want to accept it?"
-msgstr ""
-"L'utilisateur yahoo %s vous a envoyé un fichier%s%s ; voulez-vous "
-"l'accepter ?"
-
-#: modules/yahoo2/yahoo.c:945
-msgid " with the message "
-msgstr " avec le message "
-
-#: modules/yahoo2/yahoo.c:954
-msgid "Yahoo File Transfer"
-msgstr "Transfert de fichier Yahoo"
-
-#: modules/yahoo2/yahoo.c:1125
-#, c-format
-msgid ""
-"The yahoo user %s declined your invitation to join conference %s, with the "
-"message: %s"
-msgstr ""
-"L'utilisateur yahoo %s a refusé votre invitation à rejoindre %s, avec le "
-"message: %s"
-
-#: modules/yahoo2/yahoo.c:1128
-msgid "Yahoo conference decline"
-msgstr "Refus de conférence"
-
-#: modules/yahoo2/yahoo.c:1158 modules/yahoo2/yahoo.c:1235
-msgid "Thanks, but no thanks"
-msgstr "Oui, mais non"
-
-#: modules/yahoo2/yahoo.c:1170
-#, c-format
-msgid ""
-"The yahoo user %s has invited you to a conference - %s, the topic is %s.\n"
-msgstr ""
-"L'utilisateur yahoo %s vous a invité à une conférence - %s, le sujet est %"
-"s.\n"
-
-#: modules/yahoo2/yahoo.c:1171
-msgid "Do you want to join?"
-msgstr "Voulez-vous y aller ?"
-
-#: modules/yahoo2/yahoo.c:1177
-msgid "Yahoo Join Conference"
-msgstr "Conférence Yahoo"
-
-#: modules/yahoo2/yahoo.c:1375
-msgid "Join my conference"
-msgstr "Rejoignez ma conférence"
-
-#: modules/yahoo2/yahoo.c:1448
-#, c-format
-msgid "%s has rejected your request to be added as a buddy%s%s"
-msgstr "%s, l'utilisateur Yahoo %s a refusé votre demande d'ajout%s"
-
-#: modules/yahoo2/yahoo.c:1449
-msgid " with the message:\n"
-msgstr " avec le message:\n"
-
-#: modules/yahoo2/yahoo.c:1450
-msgid "Yahoo Buddy"
-msgstr "Contact Yahoo"
-
-#: modules/yahoo2/yahoo.c:1458
-#, c-format
-msgid "The yahoo user %s has added you to their contact list"
-msgstr "L'utilisateur yahoo %s vous a ajouté à ses contacts"
-
-#: modules/yahoo2/yahoo.c:1460
-msgid " with the following message:\n"
-msgstr " avec le message suivant:\n"
-
-#: modules/yahoo2/yahoo.c:1466
-msgid "Do you want to allow this?"
-msgstr "Voulez-vous l'accepter ?"
-
-#: modules/yahoo2/yahoo.c:1470
-msgid "Yahoo New Contact"
-msgstr "Nouveau contact Yahoo"
-
-#: modules/yahoo2/yahoo.c:1544
-#, c-format
-msgid "You have new mail from %s about %s\n"
-msgstr "Vous avez du courrier de %s à propos de %s\n"
-
-#: modules/yahoo2/yahoo.c:1549
-#, c-format
-msgid "You have %d message%s\n"
-msgstr "Vous avez %d message%s\n"
-
-#: modules/yahoo2/yahoo.c:1555
-msgid "Yahoo Mail"
-msgstr "Yahoo Mail"
-
-#: modules/yahoo2/yahoo.c:1563
-msgid "Yahoo System Message"
-msgstr "Message système Yahoo"
-
-#: modules/yahoo2/yahoo.c:1570 modules/yahoo2/yahoo.c:2552
-msgid "Yahoo Error"
-msgstr "Erreur Yahoo"
-
-#: modules/yahoo2/yahoo.c:1644
-#, c-format
-msgid "Logging in to Yahoo account: %s"
-msgstr "Connexion de %s à Yahoo"
-
-#: modules/yahoo2/yahoo.c:1682
-msgid "Fetching buddies..."
-msgstr "Récupération des contacts..."
-
-#: modules/yahoo2/yahoo.c:1695
-msgid ""
-"Could not log into Yahoo service.  Please verify that your username and "
-"password are correctly typed."
-msgstr ""
-"Impossible de se logger sur Yahoo. Vérifiez que votre login et votre mot de "
-"passe sont corrects."
-
-#: modules/yahoo2/yahoo.c:1699
-#, c-format
-msgid ""
-"Could not log into Yahoo service.  Your account has been locked.\n"
-"Visit %s to reactivate it."
-msgstr ""
-"Impossible de se logger sur Yahoo. Votre compte a été désactivé.\n"
-"Allez sur %s pour le réactiver."
-
-#: modules/yahoo2/yahoo.c:1702
-msgid ""
-"You have been logged out of the yahoo service, possibly due to a duplicate "
-"login."
-msgstr "Vous avez été déconnecté de Yahoo (double connexion ?)."
-
-#: modules/yahoo2/yahoo.c:1704
-msgid ""
-"Could not connect to Yahoo server.  Please verify that you are connected to "
-"the net and the pager host and port are correctly entered."
-msgstr ""
-"Impossible de se logger sur Yahoo. Vérifiez que votre login et votre mot de "
-"passe sont corrects."
-
-#: modules/yahoo2/yahoo.c:1706
-#, c-format
-msgid "Could not log into Yahoo service due to unknown state: %d\n"
-msgstr "Impossible de se logger sur Yahoo (erreur inconnue, %d)\n"
-
-#: modules/yahoo2/yahoo.c:1714
-msgid "Yahoo Login Error"
-msgstr "Erreur Login Yahoo"
-
-#: modules/yahoo2/yahoo.c:2526
-#, c-format
-msgid "Yahoo read error (%d): %s"
-msgstr "Yahoo: erreur %d en lecture: %s"
-
-#: modules/yahoo2/yahoo.c:2530
-msgid "Yahoo read error: Server closed socket"
-msgstr "Yahoo: erreur en lecture: connexion fermée"
-
-#: modules/yahoo2/yahoo.c:2539
-#, c-format
-msgid "Yahoo write error (%d): %s"
-msgstr "Yahoo: erreur %d en écriture: %s"
-
-#: modules/yahoo2/yahoo.c:2543
-msgid "Yahoo write error: Server closed socket"
-msgstr "Yahoo: erreur en écriture: connexion fermée"
-
-#: modules/zephyr/zephyr_mod.c:444
-msgid "Flush pre-existing Zephyr locations"
-msgstr "Effacer les localisations Zephyr existantes"
-
-#: modules/zephyr/zephyr_mod.c:451
-msgid "Send authenticated buddy location requests"
-msgstr "Envoyer des requêtes de localisation authentifiées"
-
-#: modules/zephyr/zephyr_mod.c:458
-msgid "Send authenticated messages"
-msgstr "Envoyer des messages authentifiés"
-
-#: modules/zephyr/zephyr_mod.c:465
-msgid "Authenticate incoming messages"
-msgstr "Authentifier les messages arrivant"
-
-#: modules/zephyr/zephyr_mod.c:472
-msgid "Notice chk. int. (ms):"
-msgstr "Notice chk. int. (ms):"
-
-#: modules/zephyr/zephyr_mod.c:479
-msgid "Buddy chk. int. (ms):"
-msgstr "Buddy chk. int. (ms):"
-
-#: modules/zephyr/zephyr_mod.c:1185
-msgid "[<B>TTY</B>]@<B>Host</B> (<B>Time</B>)<HR>"
-msgstr "[<B>TTY</B>]@<B>Hôte</B> (<B>Time</B>)<HR>"
-
-#: modules/zephyr/zephyr_mod.c:1349
-msgid "<HR><B>UNAUTHENTIC</B><BR><HR>"
-msgstr "<HR><B>NON AUTHENTIQUE</B><BR><HR>"
-
-#: modules/zephyr/zephyr_mod.c:1353
-msgid "<HR><B>FORGED?</B><BR><HR>"
-msgstr "<HR><B>FORGÉ ?</B><BR><HR>"
-
-#: modules/zephyr/zephyr_mod.c:1464
-msgid "[Zephyr] Server error!"
-msgstr "[Zephir] Erreur serveur !"
-
-#: modules/zephyr/zephyr_mod.c:1467
-msgid "[Zephyr] Client OK"
-msgstr "[Zephyr] Client OK"
+#: modules/utility/middle.c:92
+msgid "Enable 3x7r3m3 L33t-speak [implies previous]"
+msgstr "Activer le mode 3x7r3m3 h4X0r [précédent nécessité]"
 
 #: modules/utility/notes.c:112
 msgid "Notes Editor"
 msgstr "Editeur de notes"
+
+#: modules/utility/rainbow.c:98
+msgid "Enable rainbow conversion"
+msgstr "Activer les couleurs arc-en-ciel"
+
+#: modules/utility/rainbow.c:105
+msgid "Starting R value"
+msgstr "Valeur R de départ :"
+
+#: modules/utility/rainbow.c:111
+msgid "Starting G value"
+msgstr "Valeur V de départ :"
+
+#: modules/utility/rainbow.c:117
+msgid "Starting B value"
+msgstr "Valeur B de départ :"
+
+#: modules/utility/rainbow.c:124
+msgid "Ending R value"
+msgstr "Valeur R de fin :"
+
+#: modules/utility/rainbow.c:130
+msgid "Ending G value"
+msgstr "Valeur V de fin :"
+
+#: modules/utility/rainbow.c:136
+msgid "Ending B value"
+msgstr "Valeur B de fin :"
+
+#: modules/workwizu/workwizu.c:155
+msgid "Distbase:"
+msgstr "Distbase:"
+
+#: modules/workwizu/workwizu.c:204
+#: modules/workwizu/workwizu.c:452
+#: modules/workwizu/workwizu.c:464
+#: modules/workwizu/workwizu.c:490
+#: modules/workwizu/workwizu.c:634
+#: modules/workwizu/workwizu.c:687
+#: modules/workwizu/workwizu.c:775
+#: modules/workwizu/workwizu.c:996
+msgid "Workwizu Error"
+msgstr "Erreur WWZ"
+
+#: modules/workwizu/workwizu.c:204
+msgid "Connection closed (can't write)"
+msgstr "Connexion fermée"
+
+#: modules/workwizu/workwizu.c:452
+#: modules/workwizu/workwizu.c:634
+#: modules/workwizu/workwizu.c:687
+msgid "Server doesn't answer."
+msgstr "Le serveur ne répond pas."
+
+#: modules/workwizu/workwizu.c:464
+msgid "Bad authentication."
+msgstr "Authentification échouée."
+
+#: modules/workwizu/workwizu.c:489
+#, c-format
+msgid "Connection to %s lost."
+msgstr "Connexion fermée par %s."
+
+#: modules/workwizu/workwizu.c:672
+#, c-format
+msgid "Logging in to Workwizu account: %s"
+msgstr "Connexion de %s à Workwizu"
+
+#: modules/workwizu/workwizu.c:775
+#: modules/workwizu/workwizu.c:996
+msgid "You aren't allowed to speak.\n"
+"This message has probably not arrived."
+msgstr "Vous n'avez pas la parole."
+
+#: modules/workwizu/workwizu.c:917
+msgid "The login is empty."
+msgstr "Le login est vide."
+
+#: modules/workwizu/workwizu.c:971
+msgid "Offline"
+msgstr "Hors-ligne"
+
+#: modules/workwizu/workwizu.c:973
+msgid "No speak"
+msgstr "Pas de parole"
+
+#: modules/yahoo2/yahoo.c:147
+msgid "Pager Server:"
+msgstr "Serveur pager :"
+
+#: modules/yahoo2/yahoo.c:154
+msgid "Pager Port:"
+msgstr "Port pager :"
+
+#: modules/yahoo2/yahoo.c:161
+msgid "File Transfer Host:"
+msgstr "Hôte de transfert de fichiers :"
+
+#: modules/yahoo2/yahoo.c:168
+msgid "File Transfer Port:"
+msgstr "Port de transfert de fichiers :"
+
+#: modules/yahoo2/yahoo.c:175
+msgid "Yahoo Mail Notification"
+msgstr "Notification de mail"
+
+#: modules/yahoo2/yahoo.c:182
+msgid "Login invisible"
+msgstr "Login invisible"
+
+#: modules/yahoo2/yahoo.c:189
+msgid "Ignore System Messages"
+msgstr "Ignorer les messages systèmes"
+
+#: modules/yahoo2/yahoo.c:196
+msgid "Prompt for transferred filename"
+msgstr "Demander le nom du fichier transféré"
+
+#: modules/yahoo2/yahoo.c:819
+#, c-format
+msgid "<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"
+msgstr "<FONT COLOR=\"#0000FF\">[Message hors-ligne à %s]</FONT><BR>%s"
+
+#: modules/yahoo2/yahoo.c:955
+#, c-format
+msgid "The yahoo user %s has sent you a file%s%s, Do you want to accept it?"
+msgstr "L'utilisateur yahoo %s vous a envoyé un fichier%s%s ; voulez-vous l'accepter ?"
+
+#: modules/yahoo2/yahoo.c:957
+msgid " with the message "
+msgstr " avec le message "
+
+#: modules/yahoo2/yahoo.c:966
+msgid "Yahoo File Transfer"
+msgstr "Transfert de fichier Yahoo"
+
+#: modules/yahoo2/yahoo.c:1137
+#, c-format
+msgid "The yahoo user %s declined your invitation to join conference %s, with the message: %s"
+msgstr "L'utilisateur yahoo %s a refusé votre invitation à rejoindre %s, avec le message: %s"
+
+#: modules/yahoo2/yahoo.c:1140
+#: modules/yahoo2/yahoo.c:1460
+#: modules/yahoo2/yahoo.c:1586
+#: modules/yahoo2/yahoo.c:1730
+#: modules/yahoo2/yahoo.c:2564
+msgid "Yahoo Error"
+msgstr "Erreur Yahoo"
+
+#: modules/yahoo2/yahoo.c:1169
+#: modules/yahoo2/yahoo.c:1244
+msgid "Thanks, but no thanks"
+msgstr "Oui, mais non"
+
+#: modules/yahoo2/yahoo.c:1181
+#, c-format
+msgid "The yahoo user %s has invited you to a conference - %s, the topic is %s.\n"
+msgstr "L'utilisateur yahoo %s vous a invité à une conférence - %s, le sujet est %s.\n"
+
+#: modules/yahoo2/yahoo.c:1182
+msgid "Do you want to join?"
+msgstr "Voulez-vous y aller ?"
+
+#: modules/yahoo2/yahoo.c:1188
+msgid "Yahoo Join Conference"
+msgstr "Conférence Yahoo"
+
+#: modules/yahoo2/yahoo.c:1384
+msgid "Join my conference"
+msgstr "Rejoignez ma conférence"
+
+#: modules/yahoo2/yahoo.c:1458
+#, c-format
+msgid "%s has rejected your request to be added as a buddy%s%s"
+msgstr "%s, l'utilisateur Yahoo %s a refusé votre demande d'ajout%s"
+
+#: modules/yahoo2/yahoo.c:1459
+msgid " with the message:\n"
+msgstr " avec le message:\n"
+
+#: modules/yahoo2/yahoo.c:1468
+#, c-format
+msgid "The yahoo user %s has added you to their contact list"
+msgstr "L'utilisateur yahoo %s vous a ajouté à ses contacts"
+
+#: modules/yahoo2/yahoo.c:1470
+msgid " with the following message:\n"
+msgstr " avec le message suivant:\n"
+
+#: modules/yahoo2/yahoo.c:1476
+msgid "Do you want to allow this?"
+msgstr "Voulez-vous l'accepter ?"
+
+#: modules/yahoo2/yahoo.c:1480
+msgid "Yahoo New Contact"
+msgstr "Nouveau contact Yahoo"
+
+#: modules/yahoo2/yahoo.c:1559
+#, c-format
+msgid "You have new mail from %s about %s\n"
+msgstr "Vous avez du courrier de %s à propos de %s\n"
+
+#: modules/yahoo2/yahoo.c:1565
+#, c-format
+msgid "You have %d message%s\n"
+msgstr "Vous avez %d message%s\n"
+
+#: modules/yahoo2/yahoo.c:1571
+msgid "Yahoo Mail"
+msgstr "Yahoo Mail"
+
+#: modules/yahoo2/yahoo.c:1579
+msgid "Yahoo System Message"
+msgstr "Message système Yahoo"
+
+#: modules/yahoo2/yahoo.c:1660
+#, c-format
+msgid "Logging in to Yahoo account: %s"
+msgstr "Connexion de %s à Yahoo"
+
+#: modules/yahoo2/yahoo.c:1698
+msgid "Fetching buddies..."
+msgstr "Récupération des contacts..."
+
+#: modules/yahoo2/yahoo.c:1711
+msgid "Could not log into Yahoo service.  Please verify that your username and password are correctly typed."
+msgstr "Impossible de se logger sur Yahoo. Vérifiez que votre login et votre mot de passe sont corrects."
+
+#: modules/yahoo2/yahoo.c:1715
+#, c-format
+msgid "Could not log into Yahoo service.  Your account has been locked.\n"
+"Visit %s to reactivate it."
+msgstr "Impossible de se logger sur Yahoo. Votre compte a été désactivé.\n"
+"Allez sur %s pour le réactiver."
+
+#: modules/yahoo2/yahoo.c:1718
+msgid "You have been logged out of the yahoo service, possibly due to a duplicate login."
+msgstr "Vous avez été déconnecté de Yahoo (double connexion ?)."
+
+#: modules/yahoo2/yahoo.c:1720
+msgid "Could not connect to Yahoo server.  Please verify that you are connected to the net and the pager host and port are correctly entered."
+msgstr "Impossible de se logger sur Yahoo. Vérifiez que votre login et votre mot de passe sont corrects."
+
+#: modules/yahoo2/yahoo.c:1722
+#, c-format
+msgid "Could not log into Yahoo service due to unknown state: %d\n"
+msgstr "Impossible de se logger sur Yahoo (erreur inconnue, %d)\n"
+
+#: modules/yahoo2/yahoo.c:2538
+#, c-format
+msgid "Yahoo read error (%d): %s"
+msgstr "Yahoo: erreur %d en lecture: %s"
+
+#: modules/yahoo2/yahoo.c:2542
+msgid "Yahoo read error: Server closed socket"
+msgstr "Yahoo: erreur en lecture: connexion fermée"
+
+#: modules/yahoo2/yahoo.c:2551
+#, c-format
+msgid "Yahoo write error (%d): %s"
+msgstr "Yahoo: erreur %d en écriture: %s"
+
+#: modules/yahoo2/yahoo.c:2555
+msgid "Yahoo write error: Server closed socket"
+msgstr "Yahoo: erreur en écriture: connexion fermée"
+
+#: modules/zephyr/zephyr_mod.c:445
+msgid "Flush pre-existing Zephyr locations"
+msgstr "Effacer les localisations Zephyr existantes"
+
+#: modules/zephyr/zephyr_mod.c:452
+msgid "Send authenticated buddy location requests"
+msgstr "Envoyer des requêtes de localisation authentifiées"
+
+#: modules/zephyr/zephyr_mod.c:459
+msgid "Send authenticated messages"
+msgstr "Envoyer des messages authentifiés"
+
+#: modules/zephyr/zephyr_mod.c:466
+msgid "Authenticate incoming messages"
+msgstr "Authentifier les messages arrivant"
+
+#: modules/zephyr/zephyr_mod.c:473
+msgid "Notice chk. int. (ms):"
+msgstr "Notice chk. int. (ms):"
+
+#: modules/zephyr/zephyr_mod.c:480
+msgid "Buddy chk. int. (ms):"
+msgstr "Buddy chk. int. (ms):"
+
+#: modules/zephyr/zephyr_mod.c:1186
+msgid "[<B>TTY</B>]@<B>Host</B> (<B>Time</B>)<HR>"
+msgstr "[<B>TTY</B>]@<B>Hôte</B> (<B>Time</B>)<HR>"
+
+#: modules/zephyr/zephyr_mod.c:1350
+msgid "<HR><B>UNAUTHENTIC</B><BR><HR>"
+msgstr "<HR><B>NON AUTHENTIQUE</B><BR><HR>"
+
+#: modules/zephyr/zephyr_mod.c:1354
+msgid "<HR><B>FORGED?</B><BR><HR>"
+msgstr "<HR><B>FORGÉ ?</B><BR><HR>"
+
+#: modules/zephyr/zephyr_mod.c:1465
+msgid "[Zephyr] Server error!"
+msgstr "[Zephir] Erreur serveur !"
+
+#: modules/zephyr/zephyr_mod.c:1468
+msgid "[Zephyr] Client OK"
+msgstr "[Zephyr] Client OK"
+
+#: src/action.c:84
+#: src/action.c:97
+#: src/action.c:130
+#: src/action.c:134
+#: src/action.c:165
+#: src/action.c:232
+#: src/action.c:248
+msgid "Action Error"
+msgstr "Erreur Action"
+
+#: src/action.c:84
+#, c-format
+msgid "Command line is invalid (missing %s and %p)."
+msgstr "La ligne de commande est invalide (il manque %s)."
+
+#: src/action.c:97
+msgid "Cannot run command : fork() failed."
+msgstr "Impossible d'exécuter la commande : fork() a échoué."
+
+#: src/action.c:130
+msgid "Cannot use log: no logfile available."
+msgstr "Impossible d'utiliser ce log : pas de fichier disponible."
+
+#: src/action.c:134
+msgid "Cannot use log: logfile too short (!?)."
+msgstr "Impossible d'utiliser ce log : Fichier de log trop court (!?)."
+
+#: src/action.c:165
+msgid "Cannot use log: Impossible to create temporary file."
+msgstr "Impossible d'utiliser ce log : Erreur de création du fichier temporaire."
+
+#: src/action.c:179
+#: src/log_window.c:176
+msgid "Conversation ended on "
+msgstr "Conversation terminée le "
+
+#. extract the date, I am not sure if this is portable (but it
+#. works on my machine, so if someone wants to hack it, go ahead
+#: src/action.c:181
+#: src/log_window.c:143
+#: src/log_window.c:148
+msgid "Conversation started on "
+msgstr "Conversation commencée le "
+
+#: src/action.c:248
+msgid "No data available to use."
+msgstr "Il n'y a pas de données utilisable."
+
+#: src/action.c:255
+msgid "Action"
+msgstr "Action"
+
+#: src/action.c:255
+msgid "Execute"
+msgstr "Exécuter"
+
+#: src/action.c:256
+#, c-format
+msgid ""
+"Enter the command to run here:\n"
+" %s = displayed conversation's file (as HTML)\n"
+" %p = displayed conversation's file (as text)"
+msgstr ""
+"Entrez la commande à exécuter :\n"
+" %s = fichier de la conversation affichée (en HTML)\n"
+" %p = fichier de la conversation affichée (en texte)"
+
+#: src/add_contact_window.c:202
+#: src/add_contact_window.c:214
+#: src/edit_account_window.c:69
+#: src/edit_account_window.c:80
+msgid "Account error"
+msgstr "Erreur Compte"
+
+#: src/add_contact_window.c:202
+#: src/chat_room.c:436
+msgid "No local account specified."
+msgstr "Pas de compte local spécifié."
+
+#: src/add_contact_window.c:214
+msgid "Local account doesn't exist."
+msgstr "Erreur : le compte n'existe pas."
+
+#: src/add_contact_window.c:228
+#: src/edit_local_accounts.c:244
+#: src/edit_local_accounts.c:297
+#, c-format
+msgid ""
+"This account is not a valid %s account: \n"
+"\n"
+" %s"
+msgstr ""
+"Ce compte n'est pas un compte %s valide :\n"
+"\n"
+"%s"
+
+#: src/add_contact_window.c:231
+#: src/edit_local_accounts.c:247
+#: src/edit_local_accounts.c:260
+#: src/edit_local_accounts.c:300
+#: src/edit_local_accounts.c:313
+#: src/edit_local_accounts.c:419
+#: src/service.c:126
+msgid "Invalid Account"
+msgstr "Compte invalide"
+
+#. Section for adding account
+#: src/add_contact_window.c:291
+msgid "Account: "
+msgstr "Compte :"
+
+#: src/add_contact_window.c:308
+#: src/chat_room.c:510
+#: src/edit_account_window.c:218
+msgid "Local account: "
+msgstr "Compte Local:"
+
+#: src/add_contact_window.c:335
+msgid "Contact: "
+msgstr "Contact :"
+
+#: src/add_contact_window.c:360
+msgid "Group: "
+msgstr "Groupe :"
+
+#: src/add_contact_window.c:393
+#: src/chat_window.c:822
+#: src/chat_window.c:1983
+#: src/chat_window.c:2103
+msgid "Add Contact"
+msgstr "Ajouter un contact"
+
+#: src/add_contact_window.c:414
+#: src/edit_account_window.c:339
+#: src/edit_group_window.c:101
+#: src/edit_group_window.c:122
+#: src/edit_local_accounts.c:659
+#: src/edit_local_accounts.c:661
+msgid "Add"
+msgstr "Ajouter"
+
+#: src/add_contact_window.c:454
+msgid "Ayttm - Add Contact"
+msgstr "Ayttm - Ajouter un contact"
+
+#: src/away_window.c:72
+msgid "Away message"
+msgstr "Message d'absence"
+
+#: src/away_window.c:72
+msgid "Set away"
+msgstr "S'absenter"
+
+#: src/away_window.c:105
+msgid "You are currently away, click \"I'm back\" to return"
+msgstr "Vous êtes actuellement absent ; cliquez sur \"Je suis de retour\""
+
+#: src/away_window.c:110
+msgid ""
+"This is the away message that will \n"
+"be sent to people messaging you.\n"
+"You may edit this message if you wish."
+msgstr ""
+"Ceci est le message d'absence qui sera\n"
+"envoyé aux personnes qui vous parleront.\n"
+"Vous pouvez éditer ce message."
+
+#: src/away_window.c:125
+msgid "I'm Back"
+msgstr "Je suis de retour"
+
+#: src/away_window.c:141
+msgid "Away"
+msgstr "Absent"
+
+#: src/chat_room.c:370
+msgid "Handle: "
+msgstr "Nom :"
+
+#: src/chat_room.c:386
+msgid "Message:"
+msgstr "Message :"
+
+#: src/chat_room.c:397
+msgid "Invite"
+msgstr "Inviter"
+
+#: src/chat_room.c:425
+#, c-format
+msgid "Chatroom %d"
+msgstr "Forum %d"
+
+#: src/chat_room.c:436
+#: src/chat_room.c:452
+msgid "Cannot join"
+msgstr "Erreur"
+
+#: src/chat_room.c:452
+#: src/edit_account_window.c:69
+#: src/edit_account_window.c:80
+msgid "The local account doesn't exist."
+msgstr "Le compte local n'existe pas."
+
+#: src/chat_room.c:502
+msgid "Chat Room Name: "
+msgstr "Nom de la salle de discussion :"
+
+#: src/chat_room.c:524
+msgid "Join a Chat Room"
+msgstr "Rejoindre une salle de discussion"
+
+#. stuff for the join button
+#: src/chat_room.c:562
+msgid "Join"
+msgstr "Rejoindre"
+
+#: src/chat_room.c:709
+#, c-format
+msgid "<i>%s (%s) has joined the chat</i>"
+msgstr "<i>%s (%s) a rejoint la salle</i>"
+
+#: src/chat_room.c:726
+#, c-format
+msgid "<i>%s has left the chat</i>"
+msgstr "<i>%s a quitté la salle</i>"
+
+#: src/chat_room.c:945
+#: src/status.c:1920
+msgid "Online"
+msgstr "En ligne"
+
+#: src/chat_room.c:1007
+msgid "Invite User"
+msgstr "Inviter un utilisateur"
+
+#: src/chat_room.c:1075
+#: src/chat_window.c:2128
+msgid "Insert Smiley"
+msgstr "Insérer un smiley"
+
+#: src/chat_room.c:1089
+#: src/chat_room.c:1091
+#: src/chat_window.c:2139
+#: src/chat_window.c:2141
+#: src/gtk/prefs_window.C:461
+msgid "Sound"
+msgstr "Son"
+
+#: src/chat_room.c:1090
+#: src/chat_window.c:849
+#: src/chat_window.c:2008
+msgid "Enable Sounds"
+msgstr "Activer les sons"
+
+#: src/chat_room.c:1122
+#: src/chat_window.c:864
+#: src/chat_window.c:2060
+#: src/chat_window.c:2162
+#: src/log_window.c:477
+msgid "Actions..."
+msgstr "Actions..."
+
+#. Send message Section
+#: src/chat_room.c:1127
+#: src/chat_window.c:890
+#: src/chat_window.c:2041
+msgid "Send Message"
+msgstr "Envoyer le message"
+
+#. Close Selection
+#: src/chat_room.c:1133
+#: src/chat_window.c:910
+#: src/chat_window.c:2072
+#: src/crash.c:253
+#: src/gtk/about_window.c:196
+#: src/image_window.c:99
+#: src/info_window.c:122
+#: src/log_window.c:481
+msgid "Close"
+msgstr "Fermer"
+
+#: src/chat_window.c:453
+#: src/chat_window.c:459
+#: src/chat_window.c:663
+msgid "<b>Cannot send message - user is offline.</b>"
+msgstr "<b>Impossible d'envoyer - le contact est hors-ligne.</b>"
+
+#: src/chat_window.c:477
+msgid "<b>Cannot send message - no local account found.</b>"
+msgstr "<b>Impossible d'envoyer - pas de compte local adapté.</b>"
+
+#: src/chat_window.c:648
+#, c-format
+msgid "Do you really want to ignore %s?"
+msgstr "Voulez-vous réellement ignorer %s?"
+
+#. Ignore Section
+#: src/chat_window.c:650
+#: src/chat_window.c:882
+#: src/chat_window.c:2020
+msgid "Ignore Contact"
+msgstr "Ignorer ce contact"
+
+#. Start building the menu
+#: src/chat_window.c:771
+msgid "Change Local Account"
+msgstr "Changer le compte local"
+
+#: src/chat_window.c:832
+#: src/chat_window.c:1993
+msgid "Offline Messaging"
+msgstr "Messagerie hors-ligne"
+
+#: src/chat_window.c:847
+#: src/chat_window.c:2006
+msgid "Disable Sounds"
+msgstr "Désactiver les sons"
+
+#. View log selection
+#: src/chat_window.c:858
+msgid "View Log"
+msgstr "Voir l'historique"
+
+#. Send File Selection
+#: src/chat_window.c:874
+#: src/chat_window.c:2030
+msgid "Send File"
+msgstr "Envoyer un fichier"
+
+#: src/chat_window.c:1166
+msgid "<b>Error: </b>"
+msgstr "<b>Erreur : </b>"
+
+#: src/chat_window.c:1186
+#, c-format
+msgid "<b>%s is logged %s @ %s.</b>"
+msgstr "<b>%s est %s @ %s"
+
+#: src/chat_window.c:1187
+msgid "in"
+msgstr "connecté(e)"
+
+#: src/chat_window.c:1187
+msgid "out"
+msgstr "déconnecté(e)"
+
+#: src/chat_window.c:1502
+#, c-format
+msgid "<hr><b>%s changed status to %s @ %s.</b><hr>"
+msgstr "<hr><b>%s est %s @ %s</b><hr>"
+
+#: src/chat_window.c:1503
+msgid "(Online)"
+msgstr "(En ligne)"
+
+#: src/chat_window.c:1533
+#: src/chat_window.c:1588
+msgid "Conversation started"
+msgstr "Conversation commencée"
+
+#: src/chat_window.c:1534
+#, c-format
+msgid "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation started"
+msgstr "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation commencée"
+
+#: src/chat_window.c:1535
+msgid "<HR WIDTH=\"100%\"><B>Conversation started"
+msgstr "<HR WIDTH=\"100%\"><B>Conversation commencée"
+
+#: src/chat_window.c:1581
+#: src/chat_window.c:1582
+msgid "<B>Conversation "
+msgstr "<B>Conversation "
+
+#: src/chat_window.c:1582
+#: src/chat_window.c:1584
+msgid "ended on"
+msgstr "terminée à"
+
+#: src/chat_window.c:1583
+#: src/chat_window.c:1584
+msgid "<P ALIGN=\"CENTER\"><B>Conversation "
+msgstr "<P ALIGN=\"CENTER\"><B>Conversation "
+
+#: src/chat_window.c:1593
+msgid "Conversation ended"
+msgstr "Conversation terminée"
+
+#: src/chat_window.c:1660
+#, c-format
+msgid "%sConversation ended%s\n"
+msgstr "%sConversation terminée%s\n"
+
+#: src/chat_window.c:2050
+msgid "View log"
+msgstr "Voir l'historique"
+
+#: src/chat_window.c:2114
+#: src/chat_window.c:2116
+msgid "Allow"
+msgstr "Permettre"
+
+#: src/chat_window.c:2115
+msgid "Allow Offline Messaging CTRL+O"
+msgstr "Permettre la messagerie hors-ligne CTRL+O"
+
+#: src/chat_window.c:2140
+msgid "Enable Sounds CTRL+S"
+msgstr "Activer les sons CTRL+S"
+
+#: src/chat_window.c:2158
+msgid "View Log CTRL+L"
+msgstr "Voir l'historique CTRL+L"
+
+#: src/chat_window.c:2170
+msgid "Send File CTRL+T"
+msgstr "Envoyer un fichier CTRL+T"
+
+#: src/chat_window.c:2176
+msgid "Ignore CTRL+G"
+msgstr "Ignorer CTRL+G"
+
+#: src/chat_window.c:2182
+msgid "Send Message CTRL+R"
+msgstr "Envoyer le message CTRL+R"
+
+#: src/chat_window.c:2191
+#: src/chat_window.c:2193
+msgid "Close CTRL+Q"
+msgstr "Fermer CTRL+Q"
+
+#: src/contact_actions.c:60
+msgid "Select file to send"
+msgstr "Choisissez le fichier"
+
+#: src/crash.c:151
+#, c-format
+msgid "Ayttm process (%ld) received signal %ld"
+msgstr "Le processus ayttm (%ld) a reçu un signal %d"
+
+#: src/crash.c:189
+msgid "Ayttm has crashed"
+msgstr "Ayttm a crashé"
+
+#: src/crash.c:205
+#, c-format
+msgid "%s.\n"
+"Please file a bug report and include the information below."
+msgstr "%s.\n"
+"Merci de remplir un rapport de bug avec l'information ci-dessous."
+
+#: src/crash.c:210
+msgid "Debug log"
+msgstr "Log de debug"
+
+#: src/crash.c:258
+msgid "Save to current directory"
+msgstr "Enregistrer dans le répertoire courant"
+
+#: src/crash.c:263
+msgid "Create bug report"
+msgstr "Créer un rapport de bug"
+
+#: src/crash.c:514
+#, c-format
+msgid "Caught strange signal (%d). This is probably\n"
+"due to a broken compilation; Exiting."
+msgstr "Signal bizarre (%d). Ceci est probablement dû à une mauvaise compilation."
+
+#: src/crash.c:516
+msgid "Error"
+msgstr "Erreur"
+
+#: src/dialog.c:219
+msgid "No"
+msgstr "Non"
+
+#: src/dialog.c:234
+msgid "Yes"
+msgstr "Oui"
+
+#: src/edit_account_window.c:62
+#: src/edit_account_window.c:75
+#: src/edit_account_window.c:237
+#: src/edit_account_window.c:323
+msgid "[None]"
+msgstr "[Aucun]"
+
+#. Contact
+#: src/edit_account_window.c:183
+#: src/edit_contact_window.c:97
+msgid "Contact Name: "
+msgstr "Nom du contact :"
+
+#. Group
+#: src/edit_account_window.c:198
+#: src/edit_contact_window.c:115
+msgid "Group Name: "
+msgstr "Nom du groupe :"
+
+#: src/edit_account_window.c:328
+#, c-format
+msgid "%s - Account edition"
+msgstr "%s - Edition de compte"
+
+#: src/edit_account_window.c:339
+#, c-format
+msgid "Add %s to Contact List"
+msgstr "Ajouter %s à la liste de contacts"
+
+#: src/edit_account_window.c:339
+msgid "Add Unknown Contact"
+msgstr "Ajouter un nouveau contact"
+
+#: src/edit_account_window.c:347
+#, c-format
+msgid "Edit %s"
+msgstr "Editer %s"
+
+#: src/edit_account_window.c:347
+msgid "Edit Account"
+msgstr "Editer le compte"
+
+#. Ok Button
+#: src/edit_account_window.c:347
+#: src/edit_contact_window.c:177
+#: src/edit_group_window.c:122
+#: src/edit_list_window.c:339
+#: src/edit_list_window.c:344
+#: src/edit_list_window.c:500
+msgid "Save"
+msgstr "Enregistrer"
+
+#. Default service
+#: src/edit_contact_window.c:138
+msgid "Default Protocol: "
+msgstr "Protocole par défaut :"
+
+#: src/edit_contact_window.c:158
+#: src/edit_group_window.c:157
+#, c-format
+msgid "Edit Properties for %s"
+msgstr "Editer les propriétés de %s"
+
+#: src/edit_contact_window.c:219
+#, c-format
+msgid "%s - Contact edition"
+msgstr "%s - Edition de contact"
+
+#: src/edit_group_window.c:90
+msgid "Group Name:"
+msgstr "Nom du groupe :"
+
+#: src/edit_group_window.c:101
+#, c-format
+msgid "%s group%s%s"
+msgstr "%s groupe%s%s"
+
+#: src/edit_group_window.c:101
+msgid "Edit"
+msgstr "Edition du"
+
+#: src/edit_group_window.c:159
+msgid "Add group"
+msgstr "Ajouter un groupe"
+
+#: src/edit_list_window.c:193
+#: src/edit_local_accounts.c:674
+#: src/edit_local_accounts.c:676
+msgid "Delete"
+msgstr "Effacer"
+
+#: src/edit_list_window.c:215
+msgid "Title"
+msgstr "Titre :"
+
+#: src/edit_list_window.c:341
+#: src/edit_list_window.c:342
+msgid "Replace saved"
+msgstr "Remplacer"
+
+#: src/edit_list_window.c:375
+#, c-format
+msgid "You have to fill in \"%s\"."
+msgstr "Vous devez remplir \"%s\"."
+
+#: src/edit_list_window.c:376
+msgid "Input missing"
+msgstr "Entrée manquante"
+
+#: src/edit_list_window.c:458
+msgid "Title: "
+msgstr "Titre :"
+
+#: src/edit_list_window.c:474
+msgid "Value:"
+msgstr "Valeur :"
+
+#: src/edit_list_window.c:505
+#, c-format
+msgid "New %s"
+msgstr "Nouveau %s"
+
+# modules/sms/sms.c:
+#: src/edit_list_window.c:527
+#, c-format
+msgid "Existing %ss"
+msgstr "%ss existants"
+
+#: src/edit_list_window.c:583
+#, c-format
+msgid "Edit %ss"
+msgstr "Editer les %ss"
+
+#: src/edit_local_accounts.c:219
+msgid "You have to enter an account."
+msgstr "Vous devez entrer un compte."
+
+#: src/edit_local_accounts.c:257
+#: src/edit_local_accounts.c:310
+#, c-format
+msgid ""
+"You already have an account for %s service.\n"
+"\n"
+"Multiple accounts on this service aren't supported yet."
+msgstr ""
+"Vous avez déjà un compte pour le service %s.\n"
+"\n"
+"Les comptes multiples sur ce service ne sont pas encore supportés."
+
+#: src/edit_local_accounts.c:419
+msgid "You didn't define an account."
+msgstr "Vous n'avez pas défini de comptes."
+
+#: src/edit_local_accounts.c:485
+msgid "Invalid Service"
+msgstr "Service invalide"
+
+#: src/edit_local_accounts.c:485
+msgid "Can't add account : unknown service"
+msgstr "Impossible d'ajouter le compte: service inconnu"
+
+#: src/edit_local_accounts.c:540
+msgid "C"
+msgstr "C"
+
+#: src/edit_local_accounts.c:541
+msgid "Screen Name"
+msgstr "Pseudonyme"
+
+#: src/edit_local_accounts.c:542
+msgid "Password"
+msgstr "Mot de passe"
+
+#: src/edit_local_accounts.c:543
+msgid "Service"
+msgstr "Service"
+
+#. Screen Name Section
+#: src/edit_local_accounts.c:583
+msgid "Screen Name:"
+msgstr "Pseudonyme"
+
+#. Password Section
+#: src/edit_local_accounts.c:593
+#: src/gtk/prefs_window.C:1892
+msgid "Password:"
+msgstr "Mot de passe"
+
+#. Service Type Section
+#: src/edit_local_accounts.c:604
+msgid "Service Type:"
+msgstr "Type du service :"
+
+#. Connect at startup Section
+#: src/edit_local_accounts.c:619
+msgid "Connect at startup"
+msgstr "Connecter au lancement"
+
+#: src/edit_local_accounts.c:660
+msgid "Add Account"
+msgstr "Ajouter un compte"
+
+#: src/edit_local_accounts.c:675
+#: src/status.c:246
+msgid "Delete Account"
+msgstr "Effacer le compte"
+
+#: src/edit_local_accounts.c:690
+#: src/edit_local_accounts.c:692
+msgid "Modify"
+msgstr "Modifier"
+
+#: src/edit_local_accounts.c:691
+msgid "Modify Account"
+msgstr "Modifier le compte"
+
+#: src/edit_local_accounts.c:713
+#: src/edit_local_accounts.c:714
+#: src/edit_local_accounts.c:715
+msgid "Ok"
+msgstr "OK"
+
+#: src/edit_local_accounts.c:750
+msgid "Ayttm Account Editor"
+msgstr "Editeur de comptes Ayttm"
+
+#: src/gtk/about_window.c:110
+msgid "About Ayttm"
+msgstr "À propos de Ayttm"
+
+#. text
+#: src/gtk/about_window.c:144
+msgid "Ayttm is brought to you by:"
+msgstr "Ayttm vous est présenté par:"
+
+#. text
+#: src/gtk/about_window.c:160
+msgid "\"With a little help from\":"
+msgstr "\"With a little help from\":"
+
+#. text
+#: src/gtk/about_window.c:181
+msgid "Ayttm is based on Everybuddy 0.4.3 which was brought to you by:"
+msgstr "Ayttm est basé sur Everybuddy 0.4.3, écrit par:"
+
+#: src/gtk/gtkspell.c:240
+#, c-format
+msgid "Not in dictionary: %s"
+msgstr "Inconnu : %s"
+
+#: src/gtk/gtkspell.c:254
+msgid "(no suggestions)"
+msgstr "(pas de suggestion)"
+
+#: src/gtk/gtkspell.c:264
+msgid "Other Possibilities..."
+msgstr "Autres possibilités"
+
+#: src/gtk/prefs_window.C:459
+msgid "Preferences"
+msgstr "Préférences"
+
+#: src/gtk/prefs_window.C:460
+msgid "Preferences:Logging"
+msgstr "Préférences:Logs"
+
+#: src/gtk/prefs_window.C:462
+msgid "Sound:Files"
+msgstr "Son:Fichiers"
+
+#: src/gtk/prefs_window.C:463
+msgid "Chat"
+msgstr "Dialogue"
+
+#: src/gtk/prefs_window.C:464
+msgid "Chat:Tabs"
+msgstr "Dialogue:Onglets"
+
+#: src/gtk/prefs_window.C:465
+msgid "Advanced"
+msgstr "Avancé"
+
+#: src/gtk/prefs_window.C:466
+msgid "Advanced:Proxy"
+msgstr "Avancé:Proxy"
+
+#: src/gtk/prefs_window.C:468
+msgid "Advanced:Encoding"
+msgstr "Avancé:Encodage"
+
+#: src/gtk/prefs_window.C:470
+#: src/gtk/prefs_window.C:853
+msgid "Services"
+msgstr "Services"
+
+#: src/gtk/prefs_window.C:471
+#: src/gtk/prefs_window.C:855
+msgid "Utilities"
+msgstr "Utilitaires"
+
+#: src/gtk/prefs_window.C:487
+msgid "Ayttm Preferences"
+msgstr "Préférences Ayttm"
+
+#: src/gtk/prefs_window.C:857
+msgid "Other Plugins"
+msgstr "Autres plugins"
+
+#: src/gtk/prefs_window.C:950
+msgid "Use spell checking"
+msgstr "Utiliser le correcteur d'orthographe"
+
+#: src/gtk/prefs_window.C:963
+msgid "Dictionary (blank for default):"
+msgstr "Dictionnaire (vide pour défaut) :"
+
+#: src/gtk/prefs_window.C:975
+msgid "Use alternate browser"
+msgstr "Utiliser un navigateur alternatif"
+
+#: src/gtk/prefs_window.C:986
+msgid "Browser command:"
+msgstr "Commande du navigateur:"
+
+#: src/gtk/prefs_window.C:995
+#: src/gtk/prefs_window.C:1208
+#: src/trigger.c:399
+msgid "Browse"
+msgstr "Parcourir"
+
+#: src/gtk/prefs_window.C:1002
+msgid "Enable debug messages"
+msgstr "Activer les messages de debug"
+
+#: src/gtk/prefs_window.C:1079
+msgid "Select your browser"
+msgstr "Sélectionnez votre navigateur"
+
+#: src/gtk/prefs_window.C:1096
+msgid "Save all conversations to logfiles"
+msgstr "Enregistrer les conversations"
+
+#: src/gtk/prefs_window.C:1097
+msgid "Restore last conversation when opening a chat window"
+msgstr "Restaurer la dernière conversation à l'ouverture"
+
+#: src/gtk/prefs_window.C:1113
+msgid "Disable sounds when I am away"
+msgstr "Désactiver les sons lorsque je suis absent"
+
+#: src/gtk/prefs_window.C:1114
+msgid "Disable sounds for Ignored people"
+msgstr "Désactiver les sons pour les ignorés"
+
+#: src/gtk/prefs_window.C:1115
+msgid "Play sounds when people sign on or off"
+msgstr "Jouer un son à la (dé)connexion"
+
+#: src/gtk/prefs_window.C:1116
+msgid "Play a sound when sending a message"
+msgstr "Jouer un son à l'envoi de message"
+
+#: src/gtk/prefs_window.C:1117
+msgid "Play a sound when receiving a message"
+msgstr "Jouer un son à la réception de message"
+
+#: src/gtk/prefs_window.C:1118
+msgid "Play a special sound when receiving first message"
+msgstr "Jouer un son spécial au premier message reçu"
+
+#: src/gtk/prefs_window.C:1141
+msgid "Contact signs on: "
+msgstr "Connexion :"
+
+#: src/gtk/prefs_window.C:1143
+msgid "Contact goes away: "
+msgstr "Absence :"
+
+#: src/gtk/prefs_window.C:1145
+msgid "Contact signs off: "
+msgstr "Déconnexion d'un contact:"
+
+# modules/sms/sms.c:
+#: src/gtk/prefs_window.C:1147
+msgid "Message sent: "
+msgstr "Message envoyé:"
+
+#: src/gtk/prefs_window.C:1149
+msgid "Message received: "
+msgstr "Message reçu :"
+
+#: src/gtk/prefs_window.C:1151
+msgid "First message received: "
+msgstr "Premier message reçu : "
+
+#: src/gtk/prefs_window.C:1153
+msgid "Relative volume (dB)"
+msgstr "Volume relatif (dB)"
+
+#: src/gtk/prefs_window.C:1187
+msgid "Preview"
+msgstr "Prévisualiser"
+
+#: src/gtk/prefs_window.C:1312
+msgid "Select a file to use"
+msgstr "Choisissez un fichier"
+
+#: src/gtk/prefs_window.C:1379
+msgid "Send idle/away status to servers"
+msgstr "Envoyer les statuts inactif/absent aux serveurs"
+
+#: src/gtk/prefs_window.C:1380
+msgid "Raise chat-window when receiving a message"
+msgstr "Amener la fenêtre au premier plan à la réception"
+
+#: src/gtk/prefs_window.C:1381
+msgid "Ignore unknown people"
+msgstr "Ignorer les inconnus"
+
+#: src/gtk/prefs_window.C:1382
+msgid "Ignore foreground Colours"
+msgstr "Ignorer la couleur du texte"
+
+#: src/gtk/prefs_window.C:1383
+msgid "Ignore background Colours"
+msgstr "Ignorer la couleur du fond"
+
+#: src/gtk/prefs_window.C:1384
+msgid "Ignore fonts"
+msgstr "Ignorer les polices"
+
+#: src/gtk/prefs_window.C:1388
+msgid "Font size: "
+msgstr "Taille de la police : "
+
+#: src/gtk/prefs_window.C:1407
+msgid "Font face: "
+msgstr "Police de caractères : "
+
+#: src/gtk/prefs_window.C:1453
+msgid "Use tabs in chat windows"
+msgstr "Utiliser des fenêtres de dialogue à onglets"
+
+#. orientation
+#: src/gtk/prefs_window.C:1457
+msgid "Tab Position"
+msgstr "Position des onglets"
+
+#: src/gtk/prefs_window.C:1476
+msgid "Bottom"
+msgstr "Bas"
+
+#: src/gtk/prefs_window.C:1483
+msgid "Top"
+msgstr "Haut"
+
+#: src/gtk/prefs_window.C:1490
+msgid "Left"
+msgstr "Gauche"
+
+#: src/gtk/prefs_window.C:1497
+msgid "Right"
+msgstr "Droite"
+
+#: src/gtk/prefs_window.C:1510
+msgid "Hotkeys"
+msgstr "Raccourcis"
+
+#: src/gtk/prefs_window.C:1520
+msgid "Previous tab:"
+msgstr "Onglet précédent:"
+
+#: src/gtk/prefs_window.C:1524
+msgid "Next tab:"
+msgstr "Onglet suivant:"
+
+#: src/gtk/prefs_window.C:1692
+msgid "<Press modifier + key or escape to cancel>"
+msgstr "<Appuyez sur une combinaison de touches (esc pour annuler)>"
+
+#: src/gtk/prefs_window.C:1718
+msgid "This section is for configuration of advanced options such as proxy\n"
+"servers and encoding conversion [if your system supports them]."
+msgstr "Cette section sert à configurer les options avancées, comme le serveur\n"
+"proxy et les conversions d'encodage [si votre système les supporte]."
+
+#: src/gtk/prefs_window.C:1724
+msgid "[There are no general preferences for the Advanced section]"
+msgstr "[Pas de préférences générales dans la section Avancé]"
+
+#: src/gtk/prefs_window.C:1766
+msgid "Use a proxy server"
+msgstr "Utiliser un proxy"
+
+#: src/gtk/prefs_window.C:1769
+msgid "Proxy Type"
+msgstr "Type de proxy"
+
+#: src/gtk/prefs_window.C:1790
+msgid "HTTP"
+msgstr "HTTP"
+
+#: src/gtk/prefs_window.C:1798
+msgid "SOCKS4"
+msgstr "SOCKS4"
+
+#: src/gtk/prefs_window.C:1806
+msgid "SOCKS5"
+msgstr "SOCKS5"
+
+#: src/gtk/prefs_window.C:1856
+msgid "Proxy requires authentication"
+msgstr "Authentification requise"
+
+#: src/gtk/prefs_window.C:1870
+msgid "User ID:"
+msgstr "Login du proxy :"
+
+#: src/gtk/prefs_window.C:1998
+msgid "Note: Conversion is made using iconv() which is UNIX98 standard.\n"
+"For list of possible encodings run 'iconv --list'."
+msgstr "Attention: la conversion est faite avec iconv, un standard UNIX98, et nous espérons que vous l'avez installé :-)\n"
+"Pour obtenir la liste des encodages possibles, exécutez 'iconv --list'."
+
+#: src/gtk/prefs_window.C:2002
+msgid "Use recoding in conversations"
+msgstr "Recoder les conversations"
+
+#: src/gtk/prefs_window.C:2017
+msgid "Local encoding:"
+msgstr "Encodage local :"
+
+#: src/gtk/prefs_window.C:2038
+msgid "Remote encoding:"
+msgstr "Encodage distant :"
+
+#: src/gtk/prefs_window.C:2092
+msgid "Services allow you to connect to and chat with people using a\n"
+"variety of messenger protocols."
+msgstr "Les services vous permettent de vous connecter à différents\n"
+"protocoles et de parler avec vos contacts."
+
+#: src/gtk/prefs_window.C:2098
+msgid "[There are no general preferences for the Services section]"
+msgstr "[Pas de préférences générales dans la section Services]"
+
+#: src/gtk/prefs_window.C:2114
+msgid "Utilities add additional capabilities such as importing contacts or\n"
+"changing your smiley sets."
+msgstr "Les utilitaires ajoutent des fonctionnalités comme l'import de \n"
+"contacts ou le changement des smileys."
+
+#: src/gtk/prefs_window.C:2120
+msgid "[There are no general preferences for the Utilities section]"
+msgstr "[Pas de préférences générales dans la section Utilitaires]"
+
+#: src/gtk/prefs_window.C:2148
+#: src/status.c:478
+msgid "Info"
+msgstr "Info"
+
+#: src/gtk/prefs_window.C:2158
+msgid "Description:"
+msgstr "Description :"
+
+#: src/gtk/prefs_window.C:2159
+msgid "Version:"
+msgstr "Version :"
+
+#: src/gtk/prefs_window.C:2160
+msgid "Date:"
+msgstr "Date : "
+
+#: src/gtk/prefs_window.C:2161
+msgid "Path:"
+msgstr "Chemin : "
+
+#: src/gtk/prefs_window.C:2162
+msgid "Status:"
+msgstr "Statut :"
+
+#: src/gtk/prefs_window.C:2174
+msgid "Plugin Error"
+msgstr "Erreur plugin"
+
+#: src/gtk/prefs_window.C:2218
+msgid "[The module '"
+msgstr "[Le module '"
+
+#: src/gtk/prefs_window.C:2222
+msgid "' is not loaded]"
+msgstr "' n'est pas chargé]"
+
+#: src/gtk/prefs_window.C:2224
+msgid "' has no preferences]"
+msgstr "' n'a pas de préférences]"
+
+#: src/gtk/prefs_window.C:2233
+msgid "Unload Module"
+msgstr "Décharger le module"
+
+#: src/gtk/prefs_window.C:2237
+msgid "Load Module"
+msgstr "Charger le module"
+
+#: src/image_window.c:75
+msgid "Viewing Image"
+msgstr "Vue de l'image"
+
+#: src/log_window.c:183
+msgid "Undated Log"
+msgstr "Historique non daté"
+
+#: src/log_window.c:206
+msgid "No log available"
+msgstr "Aucun log"
+
+#: src/log_window.c:408
+#, c-format
+msgid "Past conversations with %s"
+msgstr "Conversations précédentes avec %s"
+
+#: src/log_window.c:410
+msgid "Past conversation"
+msgstr "Conversation précédente"
+
+#. search field
+#: src/log_window.c:449
+msgid "Search: "
+msgstr "Rechercher : "
+
+#: src/log_window.c:576
+#, c-format
+msgid "%sConversation started on %s %s\n"
+msgstr "%sConversation commencée le %s à %s\n"
+
+#: src/log_window.c:596
+#, c-format
+msgid "%sConversation ended on %s %s\n"
+msgstr "%sConversation terminée le %s à %s\n"
+
+#: src/main.c:457
+#, c-format
+msgid "Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot be connected."
+msgstr "Ayttm est déjà lancé (pid %d), et la socket UNIX de contrôle ne peut être connectée."
+
+#. TODO make sure this one is modal
+#: src/main.c:459
+msgid "Already Logged On"
+msgstr "Déjà connecté"
+
+#: src/message_parse.c:182
+#: src/message_parse.c:189
+#: src/message_parse.c:196
+#: src/message_parse.c:278
+#: src/message_parse.c:295
+msgid "Ayttm File Transfer"
+msgstr "Transfert de fichier Ayttm"
+
+#: src/message_parse.c:182
+msgid "Remote Side Disconnected"
+msgstr "L'hôte distant s'est déconnecté"
+
+#: src/message_parse.c:189
+msgid "Unable to open file"
+msgstr "Impossible d'ouvrir le fichier !"
+
+#: src/message_parse.c:196
+msgid "File Sent Successfully"
+msgstr "Fichier envoyé"
+
+#: src/message_parse.c:278
+msgid "Remote Side has aborted the file transfer"
+msgstr "L'hôte distant a annulé le transfert de fichier"
+
+#: src/message_parse.c:295
+msgid "File Receive Complete"
+msgstr "Fichier reçu"
+
+#: src/message_parse.c:385
+#, c-format
+msgid ""
+"Would you like to accept\n"
+" the file %s?\n"
+"Size=%lu"
+msgstr ""
+"Voulez-vous accepter le\n"
+"fichier %s ?\n"
+"Taille : %lu"
+
+#: src/message_parse.c:386
+msgid "Download File"
+msgstr "Télécharger le fichier"
+
+#: src/nomodule.c:171
+msgid "No Module or broken account"
+msgstr "Pas de module, ou compte invalide"
+
+#: src/nomodule.c:213
+msgid "(Offline)"
+msgstr "(Hors-ligne)"
+
+#: src/plugin.c:145
+#, c-format
+msgid ""
+"Plugin %s has not been loaded because of an error:\n"
+"\n"
+"%s"
+msgstr ""
+"Le plugin %s n'a pas été chargé à cause d'une erreur:\n"
+"\n"
+"%s"
+
+#: src/plugin.c:147
+#: src/plugin.c:457
+msgid "Plugin error"
+msgstr "Erreur plugin"
+
+#. Only update status on a plugin that is not already loaded
+#: src/plugin.c:194
+msgid "Cannot resolve symbol \"plugin_info\"."
+msgstr "Impossible de résoudre le symbole \"plugin_info\"."
+
+#: src/plugin.c:277
+#, c-format
+msgid "Cannot open module directory \"%s\"."
+msgstr "Impossible d'ouvrir le répertoire de modules \"%s\"."
+
+#: src/plugin.c:278
+#: src/plugin.c:389
+msgid "Plugin Warning"
+msgstr "Attention"
+
+#: src/plugin.c:287
+#, c-format
+msgid "Looking for modules in %s"
+msgstr "Recherche de modules dans %s"
+
+#: src/plugin.c:332
+msgid "Unable to resolve symbol SERVICE_INFO"
+msgstr "Impossible de résoudre le symbole SERVICE_INFO"
+
+#: src/plugin.c:339
+#, c-format
+msgid "Not loading module %s, a module for that service is already loaded!\n"
+msgstr "Module %s non chargé, un module pour se service est déjà actif !\n"
+
+#: src/plugin.c:340
+msgid "Same service is provided by an already loaded plugin."
+msgstr "Le même service est fourni par un plugin déjà chargé."
+
+#: src/plugin.c:386
+msgid "No init function defined"
+msgstr "Pas de fonction init définie"
+
+#: src/plugin.c:388
+#, c-format
+msgid "Utility module %s doesn't define an init function; skipping it."
+msgstr "Le module utilitaire %s ne définit de fonction init; non chargé."
+
+#: src/plugin.c:456
+#, c-format
+msgid "Unable to unload plugin %s; maybe it is still in use?"
+msgstr "Impossible de décharger le plugin %s, utilisé ?"
+
+#: src/service.c:125
+#, c-format
+msgid "Unable to create account for %s.\n"
+"Check your config file."
+msgstr "Impossible de créer le compte pour %s.\n"
+"Vérifiez votre fichier de config."
+
+#: src/status.c:199
+#, c-format
+msgid "Do you really want to delete group \"%s\"?"
+msgstr "Voulez-vous vraiment effacer le groupe \"%s\" ?"
+
+#: src/status.c:200
+msgid "Delete Group"
+msgstr "Effacer le groupe"
+
+#: src/status.c:223
+#, c-format
+msgid "Do you really want to delete contact \"%s\"?"
+msgstr "Voulez-vous vraiment effacer le contact \"%s\" ?"
+
+#: src/status.c:224
+msgid "Delete Contact"
+msgstr "Effacer le contact"
+
+#: src/status.c:245
+#, c-format
+msgid "Do you really want to delete account \"%s\"?"
+msgstr "Voulez-vous vraiment effacer le compte \"%s\" ?"
+
+#: src/status.c:356
+msgid "Add contact to group..."
+msgstr "Ajouter un contact..."
+
+#: src/status.c:361
+msgid "Edit Group..."
+msgstr "Editer le groupe..."
+
+#: src/status.c:364
+msgid "Delete Group..."
+msgstr "Effacer le groupe..."
+
+#: src/status.c:415
+#, c-format
+msgid "%s options"
+msgstr "Options %s"
+
+#: src/status.c:455
+msgid "Add Account to Contact..."
+msgstr "Ajouter un compte au contact..."
+
+#: src/status.c:458
+msgid "Edit Contact..."
+msgstr "Editer le contact..."
+
+#: src/status.c:461
+msgid "Delete Contact..."
+msgstr "Effacer le contact..."
+
+#. sep
+#: src/status.c:466
+#: src/status.c:519
+msgid "Send File..."
+msgstr "Envoyer un fichier..."
+
+#: src/status.c:469
+msgid "Edit Trigger..."
+msgstr "Editer le déclencheur..."
+
+#. sep
+#: src/status.c:474
+msgid "View Log..."
+msgstr "Voir l'historique..."
+
+#: src/status.c:510
+msgid "Edit Account..."
+msgstr "Editer le compte..."
+
+#: src/status.c:513
+msgid "Delete Account..."
+msgstr "Effacer le compte..."
+
+#: src/status.c:522
+msgid "Info..."
+msgstr "Info..."
+
+#: src/status.c:779
+msgid "Account vanished after add_account_line.\n"
+msgstr "Le compte a disparu après add_account_line.\n"
+
+#: src/status.c:792
+msgid "Account missing while online?\n"
+msgstr "Compte manquant alors qu'il est connecté ?\n"
+
+#: src/status.c:943
+#: src/status.c:986
+msgid "status info here"
+msgstr "Info sur le statut"
+
+#: src/status.c:978
+#, c-format
+msgid "%s since %s"
+msgstr "%s depuis %s"
+
+#: src/status.c:1370
+#: src/status.c:1974
+msgid "-"
+msgstr "-"
+
+#: src/status.c:1409
+#, c-format
+msgid "%s is now online"
+msgstr "%s est connecté(e)"
+
+#: src/status.c:1443
+#, c-format
+msgid "%s is now offline"
+msgstr "%s est déconnecté(e)"
+
+#: src/status.c:1656
+msgid "eb_import_function: calling callback\n"
+msgstr "eb_import_function: calling callback\n"
+
+#: src/status.c:1666
+msgid "eb_profile_function: calling callback\n"
+msgstr "eb_profile_function: calling callback\n"
+
+#: src/status.c:1758
+msgid "/_File"
+msgstr "/_Fichier"
+
+#: src/status.c:1759
+msgid "/File/Set _status"
+msgstr "/Fichier/_Statut"
+
+#: src/status.c:1760
+msgid "/File/Sign o_n all"
+msgstr "/Fichier/Tout _connecter"
+
+#: src/status.c:1761
+msgid "/File/Sign o_ff all"
+msgstr "/Fichier/Tout _déconnecter"
+
+#: src/status.c:1762
+#: src/status.c:1765
+msgid "/File/---"
+msgstr "/Fichier/---"
+
+#: src/status.c:1763
+msgid "/File/_Import"
+msgstr "/Fichier/_Importer"
+
+#: src/status.c:1764
+msgid "/File/Set _profile"
+msgstr "/Fichier/_Profil"
+
+#: src/status.c:1766
+msgid "/File/_Quit"
+msgstr "/Fichier/_Quitter"
+
+#: src/status.c:1767
+msgid "/_Tools"
+msgstr "/_Outils"
+
+#: src/status.c:1768
+msgid "/Tools/New group _chat..."
+msgstr "/Outils/_Nouvelle salle de chat"
+
+#: src/status.c:1770
+msgid "/Tools/Set as _away..."
+msgstr "/Outils/_S'absenter"
+
+#: src/status.c:1771
+#: src/status.c:1776
+msgid "/Tools/---"
+msgstr "/Outils/---"
+
+#: src/status.c:1772
+msgid "/Tools/Add a con_tact account..."
+msgstr "/Outils/_Ajouter un contact"
+
+#: src/status.c:1774
+msgid "/Tools/Add a _group..."
+msgstr "/Outils/Ajouter un _groupe"
+
+#: src/status.c:1777
+msgid "/Tools/_Preferences..."
+msgstr "/Outils/_Préférences"
+
+#: src/status.c:1779
+msgid "/Tools/_Edit accounts..."
+msgstr "/Outils/_Editer les comptes..."
+
+#: src/status.c:1781
+msgid "/_Help"
+msgstr "/_Aide"
+
+#: src/status.c:1782
+msgid "/Help/_Web site..."
+msgstr "/Aide/_Site internet..."
+
+#: src/status.c:1783
+msgid "/Help/_Manual..."
+msgstr "/Aide/_Manuel..."
+
+#: src/status.c:1784
+msgid "/Help/---"
+msgstr "/Aide/---"
+
+#: src/status.c:1785
+msgid "/Help/_About Ayttm..."
+msgstr "/Aide/_A propos..."
+
+#: src/status.c:1811
+msgid "/Tools/New group chat..."
+msgstr "/Outils/Nouvelle salle de chat"
+
+#: src/status.c:1812
+msgid "/Tools/Set as away..."
+msgstr "/Outils/S'absenter"
+
+#: src/status.c:1813
+msgid "/File/Sign off all"
+msgstr "/Fichier/Tout déconnecter"
+
+#: src/status.c:1814
+msgid "/File/Sign on all"
+msgstr "/Fichier/Tout connecter"
+
+#: src/status.c:1929
+msgid "Contacts"
+msgstr "Contacts"
+
+#: src/status.c:1938
+msgid "Accounts"
+msgstr "Comptes"
+
+#: src/status.c:1964
+msgid "Welcome To Ayttm"
+msgstr "Bienvenue à Ayttm"
+
+#: src/tcp_util.c:293
+#, c-format
+msgid "Looking for %s..."
+msgstr "Recherche de %s"
+
+#: src/tcp_util.c:312
+#, c-format
+msgid "Connecting to %s:%d..."
+msgstr "Connexion en cours à %s:%d..."
+
+#: src/tcp_util.c:329
+#, c-format
+msgid "Connected to %s:%d..."
+msgstr "Connecté à %s:%d..."
+
+#: src/trigger.c:62
+msgid "Okay"
+msgstr "OK"
+
+#: src/trigger.c:117
+msgid "online"
+msgstr "connecté"
+
+#: src/trigger.c:117
+msgid "offline"
+msgstr "déconnecté"
+
+#: src/trigger.c:195
+msgid "Select parameter"
+msgstr "Sélectionner les paramètres"
+
+#: src/trigger.c:274
+#: src/trigger.c:286
+msgid "None"
+msgstr "Aucun"
+
+#: src/trigger.c:275
+msgid "User goes online"
+msgstr "L'utilisateur se connecte"
+
+#: src/trigger.c:276
+msgid "User goes offline"
+msgstr "L'utilisateur se déconnecte"
+
+#: src/trigger.c:277
+msgid "User goes on or offline"
+msgstr "L'utilisateur se (dé)connecte"
+
+#: src/trigger.c:287
+msgid "Play sound"
+msgstr "Jouer un son"
+
+#: src/trigger.c:288
+msgid "Execute command"
+msgstr "Exécuter une commande"
+
+#: src/trigger.c:289
+msgid "Show alert dialog"
+msgstr "Afficher une fenêtre"
+
+#: src/trigger.c:290
+msgid "Send message"
+msgstr "Envoyer le message"
+
+#. Section for letting the user know which trigger they are editing
+#: src/trigger.c:329
+msgid "User: "
+msgstr "Utilisateur :"
+
+#: src/trigger.c:343
+msgid "Trigger: "
+msgstr "Déclencheur :"
+
+#: src/trigger.c:365
+msgid "Action: "
+msgstr "Action :"
+
+#: src/trigger.c:385
+msgid "Parameter: "
+msgstr "Paramètre :"
+
+#: src/trigger.c:413
+msgid "Edit Trigger"
+msgstr "Editer le déclencheur"
+
+#: src/trigger.c:434
+msgid "Update"
+msgstr "Actualiser"
+
+#: src/trigger.c:500
+msgid "Ayttm - Edit Trigger"
+msgstr "Ayttm - Editeur de déclencheur"
+
+#: src/util.c:992
+#, c-format
+msgid ""
+"The account \"%s\" already exists on your\n"
+"contact list at the following location\n"
+"\tGroup: %s\n"
+"\tContact: %s\n"
+"\n"
+"Should I move it?"
+msgstr ""
+"Le compte \"%s\" existe déjà dans votre\n"
+"liste de contacts, à l'endroit suivant :\n"
+"Groupe : %s\n"
+"Contact : %s\n"
+"\n"
+"Faut-il le déplacer ?"
+
+#: src/util.c:1006
+msgid "Error: account exists"
+msgstr "Erreur : le compte existe"
+
+#: src/util.c:1324
+#, c-format
+msgid ""
+"User %s wants to invite you to\n"
+"%s\n"
+"Would you like to accept?"
+msgstr ""
+"%s veut vous inviter sur\n"
+"%s\n"
+"Voulez-vous accepter ?"
+
+#: src/util.c:1330
+msgid "Chat Invite"
+msgstr "Inviter"
+
+#: src/util.c:1392
+#: src/util.c:1408
+msgid "deleting stale lock file\n"
+msgstr "deleting stale lock file\n"
+
+#: src/util.c:1439
+msgid "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
+msgstr "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
+
+#: src/util.c:1443
+msgid "No callback defined in call to eb_generic_menu_function, ignoring call!"
+msgstr "No callback defined in call to eb_generic_menu_function, ignoring call!"
+
