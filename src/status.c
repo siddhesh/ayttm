@@ -1109,7 +1109,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 	if (ea->status) {
 		char *current = NULL;
 		gtk_label_get(GTK_LABEL(ea->status), &current);
-		printf("current %s c %s\n",current,c);
+		eb_debug(DBG_CORE,"current %s c %s\n",current,c);
 		if (current && strcmp(current, c)) {
 			char buff[1024];
 			g_snprintf(buff, 1024, _("%s is now %s"), 
