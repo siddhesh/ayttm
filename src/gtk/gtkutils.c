@@ -144,6 +144,34 @@ void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos
 		*outYpos = y;
 }
 
+GtkWidget	*gtkut_create_label_button( const char *inButtonText, GtkSignalFunc inSignalFunc, void *inCallbackData )
+{
+	GtkWidget	*label_hbox = NULL;
+	GtkWidget	*label = NULL;
+	GtkWidget	*button = NULL;
+	int			button_width = 100;	// minimum width for the button
+	
+	
+	label_hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( label_hbox );
+	
+	label = gtk_label_new( inButtonText );
+	gtk_widget_show( label );
+	gtk_box_pack_start( GTK_BOX(label_hbox), label, TRUE, TRUE, 0 );
+		
+	button = gtk_button_new();
+	gtk_container_add( GTK_CONTAINER(button), label_hbox );
+	gtk_widget_show( button );
+		
+	if ( button->requisition.width > button_width )
+		button_width = button->requisition.width;
+		
+	gtk_widget_set_usize( button, button_width, -1 );
+	gtk_signal_connect( GTK_OBJECT(button), "clicked", inSignalFunc, inCallbackData );
+	
+	return( button );
+}
+
 GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox,
 			const char *inButtonText, int inIsSelected,
 			GtkSignalFunc inSignalFunc, void *inCallbackData )

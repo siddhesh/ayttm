@@ -40,11 +40,21 @@ void gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap *outPixmap );
 
 /** Get a widget's position.
 
-	@param	inWidget	which eidget?
+	@param	inWidget	which widget?
 	@param	outXpos		if not NULL returns the x position
 	@param	outYpos		if not NULL returns the y position
 */
 void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos );
+
+/** Create a button with a label in it.
+
+	@param	inButtonText	the text of the nutton
+	@param	inSignalFunc	the callback function to call when it is clicked
+	@param	inCallbackData	the callback data
+	
+	@returns	the new button
+*/
+GtkWidget	*gtkut_create_label_button( const char *inButtonText, GtkSignalFunc inSignalFunc, void *inCallbackData );
 
 /** Create a radio button and add it to a group.
 
