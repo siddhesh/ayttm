@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.26 $",
-	"$Date: 2003/06/27 12:54:53 $",
+	"$Revision: 1.27 $",
+	"$Date: 2003/06/27 13:35:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -358,11 +358,27 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		g_strdown(tempstring);
 		ecr = find_chat_room_by_id(tempstring);
 		if (ecr) {
+			char *msg = NULL;
+			char mynick[100]="";
 			alpha = strchr(nick, '!');
 			if (alpha != NULL)
 				*alpha = '\0';
 			tempstring2 = strip_color(buff2[3] + 1);
-			eb_chat_room_show_message( ecr, nick, tempstring2);
+			if (strstr(ela->handle,"@")) {
+				strncpy(mynick, ela->handle, strlen(ela->handle)-strlen(ila->server)-1);
+				mynick[strlen(ela->handle)-strlen(ila->server)-1]='\0';
+			} else {
+				strncpy(mynick, ela->handle, strlen(ela->handle));
+				mynick[strlen(ela->handle)]='\0';
+		}
+			if (!strncmp(tempstring2, mynick, strlen(mynick))) {
+				msg = g_strdup_printf("<font color=\"#ff0000\">%s</font> %s",
+						mynick, (tempstring2+strlen(mynick)));
+			} else {
+				msg = g_strdup(tempstring2);
+			}
+			eb_chat_room_show_message( ecr, nick, msg);
+			g_free(msg);
 			free(tempstring2);
 		}
 		g_strfreev (buff2);

@@ -1,3 +1,7 @@
+* Fri Jun 27 2003 13:15 GMT [colin]	0.3.1-45
+- modules/irc/irc.c
+Highlight my nickname when some message begins with it
+
 * Fri Jun 27 2003 12:15 GMT [colin]	0.3.1-44
 - modules/irc/irc.c
 remove @server part from handle before inviting
