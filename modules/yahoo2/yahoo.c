@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.33 $",
-	"$Date: 2003/04/28 18:30:59 $",
+	"$Revision: 1.34 $",
+	"$Date: 2003/04/28 18:58:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -243,6 +243,8 @@ typedef struct {
 
 static void free_yahoo_account(eb_yahoo_account_data * yad)
 {
+	if(!yad)
+		return;
 	if(yad->status_message)
 		free(yad->status_message);
 
