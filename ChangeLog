@@ -1,3 +1,7 @@
+* Fri Apr 05 2003 10:45 GMT [philip]	0.2.3-1r76
+- src/image_window.c configure.in
+Make gdk_pixbuf optional
+
 * Fri Apr 05 2003 10:11 GMT [colin]	0.2.3-16
 - modules/msn2/msn.C
 Fix status staying Offline after a sign on all

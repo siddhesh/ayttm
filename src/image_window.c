@@ -1,16 +1,22 @@
+#ifndef HAVE_GDK_PIXBUF
+#include "debug.h"
+int ay_image_window_new(int width, int height, const char *title) { 
+	eb_debug(DBG_CORE, "Image window support not included\n");
+	return 0; 
+}
+int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int new) { return 0; }
+void ay_image_window_close(int tag) { }
+#else
+
 #include "intl.h"
 #include <gtk/gtk.h>
-#ifndef __MINGW32__
 #include <gdk-pixbuf/gdk-pixbuf-loader.h>
-#endif
 #include "llist.h"
 
 struct ay_image_wnd {
 	GtkWidget *window;
 	GtkWidget *pixmap;
-#ifndef __MINGW32__
 	GdkPixbufLoader *loader;
-#endif
 	int tag;
 };
 
@@ -115,10 +121,8 @@ int ay_image_window_new(int width, int height, const char *title)
  *
  * returns: 1 on success, 0 on failure (window already closed?)
  */
-#include <stdio.h>
 int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int new)
 {
-#ifndef __MINGW32__
 	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);
 	GdkPixbuf *pixbuf;
 	GdkPixmap *gdkpixmap;
@@ -152,9 +156,6 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int n
 	gtk_widget_show(aiw->pixmap);
 
 	return 1;
-#else
-	return 0;
-#endif
 }
 
 void ay_image_window_close(int tag)
@@ -166,9 +167,7 @@ void ay_image_window_close(int tag)
 
 	images = l_list_remove(images, aiw);
 
-#ifndef __MINGW32__
 	gdk_pixbuf_loader_close(aiw->loader);
-#endif
 	gtk_widget_destroy(aiw->window);
 
 	if(aiw->tag == last_tag)
@@ -176,4 +175,4 @@ void ay_image_window_close(int tag)
 
 	g_free(aiw);
 }
-
+#endif
