@@ -384,6 +384,11 @@ static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 			eb_update_from_value_pair(info->prefs, user_prefs);
 		}
 		eb_debug(DBG_MOD, "prefs name: %s\n", info->prefs->widget.entry.name);
+
+		if(info->reload_prefs) {
+			eb_debug(DBG_CORE, "Executing reload_prefs for %s\n", info->module_name);
+			info->reload_prefs();
+		}
 	}
 	Service_Info->sc=query_callbacks();
 	/* The callbacks are defined by the SERVICE_INFO struct in each module */
@@ -426,6 +431,11 @@ static int	load_plugin_default( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 			eb_update_from_value_pair( info->prefs, user_prefs );
 
 		eb_debug( DBG_MOD, "prefs name: %s\n", info->prefs->widget.entry.name );
+
+		if(info->reload_prefs) {
+			eb_debug(DBG_CORE, "Executing reload_prefs for %s\n", info->module_name);
+			info->reload_prefs();
+		}
 	}
 	
 	SetPluginInfo( info, name, Module, PLUGIN_LOADED, "", NULL, TRUE );

@@ -220,7 +220,7 @@ char *get_service_name( int service_id )
 	return "unknown";
 }
 
-static int strcasecmp_list(void* a, void* b)
+static int strcasecmp_list(const void* a, const void* b)
 {
 	return strcasecmp((const char *)a, (const char *)b);
 }

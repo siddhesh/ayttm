@@ -426,58 +426,58 @@ static void	s_write_module_prefs( void *inListItem, void *inData )
 static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 {
 	t_module_pref	*the_prefs = inListItem;
-	int				apply = (int)inData;
+	int		apply = (int)inData;
+	eb_PLUGIN_INFO	*plugin_info = NULL;
+		
+	if ( !apply )
+		return;
+
+	/* now we have to apply to the things that have pointers in the 'real' list
+		NOTE that this will hopefully be solved by changing the way prefs are
+		applied to plugins
+	*/
+	plugin_info = FindPluginByName( the_prefs->file_name );
 	
-	
-	if ( apply )
+	if ( plugin_info != NULL )
 	{
-		eb_PLUGIN_INFO	*plugin_info = NULL;
+		input_list	*real_list = plugin_info->pi.prefs;
+		input_list	*local_copy = the_prefs->pref_list;
 		
-				
-		/* now we have to apply to the things that have pointers in the 'real' list
-			NOTE that this will hopefully be solved by changing the way prefs are
-			applied to plugins
-		*/
-		plugin_info = FindPluginByName( the_prefs->file_name );
-		
-		if ( plugin_info != NULL )
+		while ( real_list != NULL )
 		{
-			input_list	*real_list = plugin_info->pi.prefs;
-			input_list	*local_copy = the_prefs->pref_list;
-			
-			while ( real_list != NULL )
+			switch ( real_list->type )
 			{
-				switch ( real_list->type )
-				{
-					case EB_INPUT_CHECKBOX:
+				case EB_INPUT_CHECKBOX:
+					{
+						if ( (real_list->widget.checkbox.value != NULL) &&
+							(local_copy->widget.checkbox.value != NULL) )
 						{
-							if ( (real_list->widget.checkbox.value != NULL) &&
-								(local_copy->widget.checkbox.value != NULL) )
-							{
-								*(real_list->widget.checkbox.value) = *(local_copy->widget.checkbox.value);
-							}
-
+							*(real_list->widget.checkbox.value) = *(local_copy->widget.checkbox.value);
 						}
-						break;
 
-					case EB_INPUT_ENTRY:
-						{
-							strncpy( real_list->widget.entry.value, local_copy->widget.entry.value, MAX_PREF_LEN );
-						}
-						break;
+					}
+					break;
 
-					default:
-						assert( FALSE );
-						break;
-				}
-				
-				real_list = real_list->next;
-				
-				assert( local_copy != NULL );
-				
-				local_copy = local_copy->next;
+				case EB_INPUT_ENTRY:
+					{
+						strncpy( real_list->widget.entry.value, local_copy->widget.entry.value, MAX_PREF_LEN );
+					}
+					break;
+
+				default:
+					assert( FALSE );
+					break;
 			}
+			
+			real_list = real_list->next;
+			
+			assert( local_copy != NULL );
+			
+			local_copy = local_copy->next;
 		}
+
+		if(plugin_info->pi.reload_prefs)
+			plugin_info->pi.reload_prefs();
 	}
 }
 

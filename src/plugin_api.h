@@ -54,6 +54,7 @@ typedef struct {
 	int *ref_count;
 	eb_plugin_func init;
 	eb_plugin_func finish;
+	eb_plugin_func reload_prefs;
 	input_list *prefs;
 } PLUGIN_INFO;
 
