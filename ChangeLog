@@ -1,3 +1,7 @@
+* Tue May  6 2003 13:39 GMT [colin]	0.3.0-144
+- modules/msn2/msn.C
+use dummy contacts as long as noone chose to add the contact
+
 * Tue May  6 2003 13:39 GMT [colin]	0.3.0-143
 - src/chat_window.c
 Fix "change local account" displaying twice the same account

@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.46 $",
-	"$Date: 2003/05/06 08:43:46 $",
+	"$Revision: 1.47 $",
+	"$Date: 2003/05/06 14:28:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -973,8 +973,8 @@ static void eb_msn_authorize_callback( gpointer data, int response )
   if(response) {
     if (ac == NULL) {
       ac = eb_msn_new_account(ela, username);
-      add_account_silent(username, ac);
-      eb_msn_add_user(ac);
+      add_dummy_contact(username, ac);
+      msn_add_to_list(mlad->mc, "AL", username);
       edit_account_window_new(ac);
     }
     eb_debug(DBG_MSN, "User (%s) authorized - adding to allow list (AL)\n", username);
