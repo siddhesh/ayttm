@@ -86,8 +86,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.12 $",
-	"$Date: 2003/10/02 12:19:31 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/10/06 21:35:25 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -120,13 +120,15 @@ struct eb_aim_account_data
 	gint logged_in_time;
 	gint status;
 	gint evil;
+	gint on_server;
 };
 
 struct eb_aim_local_account_data
 {
 	char password[255];
 	gint status;
-
+	gint listsyncing;
+	
 	LList *buddies;
 	
 	int fd;
@@ -161,9 +163,8 @@ static void connect_error (struct eb_aim_local_account_data *alad, char *msg); /
 /* ayttm callbacks forward declaration */
 static void ay_aim_login  (eb_local_account *account);
 static void ay_aim_logout (eb_local_account *account);
-
+static eb_account * ay_aim_new_account (eb_local_account * ela, const char *account);
 static void ay_aim_add_user (eb_account *account);
-
 static void ay_aim_callback (void *data, int source, eb_input_condition condition);
 
 /* faim callbacks forward declaration */
@@ -176,6 +177,7 @@ static int faim_cb_selfinfo           (aim_session_t *sess, aim_frame_t *fr, ...
 
 static int faim_cb_ssi_parserights    (aim_session_t *sess, aim_frame_t *fr, ...);
 static int faim_cb_ssi_parselist      (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_ssi_parseack       (aim_session_t *sess, aim_frame_t *fr, ...);
 
 static int faim_cb_parse_locaterights (aim_session_t *sess, aim_frame_t *fr, ...);
 static int faim_cb_parse_buddyrights  (aim_session_t *sess, aim_frame_t *fr, ...);
@@ -351,11 +353,11 @@ faim_cb_parse_authresp (aim_session_t *sess,
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_SSI, AIM_CB_SSI_RIGHTSINFO, faim_cb_ssi_parserights, 0);
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_SSI, AIM_CB_SSI_LIST, faim_cb_ssi_parselist, 0);
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_SSI, AIM_CB_SSI_NOLIST, faim_cb_ssi_parselist, 0);
+	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_SSI, AIM_CB_SSI_SRVACK, faim_cb_ssi_parseack, 0);
 
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_LOC, AIM_CB_LOC_RIGHTSINFO, faim_cb_parse_locaterights, 0);
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_BUD, AIM_CB_BUD_RIGHTSINFO, faim_cb_parse_buddyrights, 0);
 
-	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_GEN, AIM_CB_GEN_SERVERREADY, faim_cb_serverready, 0 );
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_GEN, AIM_CB_GEN_RATEINFO, faim_cb_rateresp_bos, 0 );
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_MSG, AIM_CB_MSG_PARAMINFO, faim_cb_icbmparaminfo, 0 );
 	
@@ -440,7 +442,7 @@ faim_cb_selfinfo (aim_session_t *sess, aim_frame_t *fr, ...)
 static int
 faim_cb_ssi_parserights (aim_session_t *sess, aim_frame_t *fr, ...)
 {
-	int numtypes, i;
+	int numtypes;
 	fu16_t *maxitems;
 	va_list ap;
 
@@ -464,8 +466,135 @@ faim_cb_ssi_parserights (aim_session_t *sess, aim_frame_t *fr, ...)
 static int
 faim_cb_ssi_parselist (aim_session_t *sess, aim_frame_t *fr, ...)
 {
+	struct aim_ssi_item *curitem = NULL;
+	int changed = FALSE;
+	eb_local_account * ela = NULL;
+	struct eb_aim_local_account_data *alad = NULL;
+	LList *node;
+	eb_account *ea = NULL;
+	struct eb_aim_account_data *aad = NULL;
+	
+	ela = (eb_local_account *)sess->aux_data;
+	alad = (struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+
+	alad->listsyncing = TRUE;
+
+	/* Clean the buddy list */
+	aim_ssi_cleanlist(sess);
+
+	/* Add from server list to local list */
+	for (curitem=sess->ssi.local; curitem; curitem=curitem->next) {
+
+		switch (curitem->type) {
+			
+		case 0x0000: /* Buddy */
+			if (curitem->name) {
+				char *group = aim_ssi_itemlist_findparentname (sess->ssi.local, curitem->name);
+				char *alias = aim_ssi_getalias (sess->ssi.local, group, curitem->name);
+								
+				g_message ("[SSI] \\ Buddy %s, Group %s, Nick %s.", curitem->name, group, alias);
+
+				ea = find_account_with_ela (curitem->name, ela);
+				
+				if (ea) {
+					aad = (struct eb_aim_account_data *)ea->protocol_account_data;
+					aad->on_server = TRUE;
+					g_message ("       Found the corresponding account");
+					
+					/* Nothing to do */
+				} else {
+					g_message ("       Cannot find the corresponding account");
+					ea = ay_aim_new_account (ela, curitem->name);
+					add_unknown(ea);
+					
+					if (group != NULL && group[0] && strcmp ("~", group)) {
+						if (!find_grouplist_by_name (group))
+							add_group (group);
+						move_contact (group, ea->account_contact);
+					} else {
+						if (!find_grouplist_by_name ("Buddies"))
+							add_group ("Buddies");
+						move_contact ("Buddies", ea->account_contact);
+					}
+
+					changed = TRUE;
+				}
+			} else {
+				g_warning ("[SSI] A buddy with no name ! :)");
+			}
+			break;
+			
+		case 0x0001: /* Group */
+			if (curitem->name) {
+				g_message ("[SSI] Group %s", curitem->name);
+			} else {
+				g_warning ("[SSI] A group with no name ! :)");
+			}
+			break;
+			
+		}
+	}
+	
+	if (changed) {
+		update_contact_list();
+		write_contact_list();
+	}
+
+	/* Add from local list to server */
+	for (node = alad->buddies; node; node = l_list_next (node)) {
+		ea = (eb_account *)node->data;
+		aad = (struct eb_aim_account_data *)ea->protocol_account_data;
+		if (!aad->on_server) {
+			g_message ("[SSI] Need to add buddy %s on the server !", ea->handle);
+			aim_ssi_addbuddy(sess, ea->handle, ea->account_contact->group->name,
+					 ea->account_contact->nick, NULL, NULL, 0);
+		}
+	}
+	
 	/* TODO */
 	aim_ssi_enable(sess);
+
+	alad->listsyncing = FALSE;
+
+	return 1;
+}
+
+static int
+faim_cb_ssi_parseack (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	va_list ap;
+	struct aim_ssi_tmp *retval;
+	
+	va_start(ap, fr);
+	retval = va_arg(ap, struct aim_ssi_tmp *);
+	va_end(ap);
+	
+	while (retval) {
+		g_message ("[SSI] Status is 0x%04hx for a 0x%04hx action with name %s\n", retval->ack,  retval->action, retval->item ? (retval->item->name ? retval->item->name : "no name") : "no item");
+		
+		switch (retval->ack) {
+		case 0x0000:
+			g_message ("[SSI] Added successfully");
+			break;
+		case 0x000c:
+			g_message ("[SSI] Error, too many buddies in your buddy list");
+			break;
+		case 0x000e:
+			g_message ("[SSI] buddy requires authorization");
+			// TODO
+			break;
+		case 0xffff:
+			g_message ("[SSI] ack : 0xffff");
+			break;
+		default:
+			g_message ("[SSI] Failed to add the buddy, unknown error");
+			break;
+		}
+
+		retval = retval->next;
+	}
+
+	return 1;
 }
 
 static int
@@ -500,41 +629,6 @@ faim_cb_parse_buddyrights (aim_session_t *sess, aim_frame_t *fr, ...)
 	va_end(ap);
 	
 	g_message ("max buddies = %d, max watchers = %d\n", maxbuddies, maxwatchers);
-	
-	return 1;
-}
-
-static int
-faim_cb_serverready (aim_session_t *sess, aim_frame_t *fr, ...)
-{
-	int famcount;
-	fu16_t *families;
-	va_list ap;
-
-	eb_local_account *ela = (eb_local_account *)sess->aux_data;
-	struct eb_aim_local_account_data * alad =
-		(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
-	
-	va_start(ap, fr);
-	famcount = va_arg(ap, int);
-	families = va_arg(ap, fu16_t *);
-	va_end(ap);
-	
-	switch (fr->conn->type)
-	{
-	case AIM_CONN_TYPE_BOS:
-		ay_progress_bar_update_progress (alad->progress_bar, 3);
-
-		aim_auth_setversions(sess, fr->conn);
-		aim_bos_reqrate(sess, fr->conn);
-		g_message ("done with auth server ready\n");
-		break;
-		
-		
-		/* FIXME add group chat :) */
-	default:
-		g_warning ("unknown connection type on Server Ready");
-	}
 	
 	return 1;
 }
@@ -1197,15 +1291,12 @@ make_buddy_offline (void *b, void *n)
 {
 	eb_account *user;
 	struct eb_aim_account_data *aad;
-	char *buddy = (char *)b;
 	
-	user = find_account_by_handle(buddy, SERVICE_INFO.protocol_id);
-	if (!user) {		
-		g_warning ("Bug in make_buddy_offline for buddy %s\n", buddy);
-		return;
-	}
-
+	user = (eb_account *)b;
 	aad = (struct eb_aim_account_data *)user->protocol_account_data;
+	
+	aad->on_server = FALSE;
+
 	if (aad->status != AIM_OFFLINE) {
 		aad->status = AIM_OFFLINE;
 		buddy_logoff(user);
@@ -1292,6 +1383,7 @@ ay_aim_read_config (eb_account *ea, LList *config)
 	struct eb_aim_account_data *aad =  g_new0 (struct eb_aim_account_data, 1);
 	
 	aad->status = AIM_OFFLINE;
+	aad->on_server= FALSE;
 	ea->protocol_account_data = aad;
 	
 	ay_aim_add_user(ea);
@@ -1305,19 +1397,28 @@ ay_aim_add_user (eb_account *account)
 	eb_local_account *ela = NULL;
 	struct eb_aim_local_account_data *alad = NULL;
 
-	g_assert (eb_services[account->service_id].protocol_id == SERVICE_INFO.protocol_id);
+	char *name;
+	char *group;
+	char *nick;
 
 	ela = account->ela;
-	g_assert (ela);
-
 	alad = (struct eb_aim_local_account_data *)ela->protocol_local_account_data;
-	g_assert (alad);
 
-	if (!l_list_find (alad->buddies, account->handle))
-		alad->buddies = l_list_append (alad->buddies, account->handle);
+	name = strdup(account->handle);
+	group = strdup(account->account_contact->group->name);
+	nick = strdup(account->account_contact->nick);
 
-	if (alad->status != AIM_OFFLINE) {
-		aim_add_buddy (&(alad->aimsess), alad->conn, account->handle);
+	g_message ("Adding buddy %s in group %s (nick=%s)", name, group, nick);
+
+	if (!l_list_find (alad->buddies, account))
+		alad->buddies = l_list_append (alad->buddies, account);
+	else
+		return;
+
+	if ((alad->status != AIM_OFFLINE) && (!alad->listsyncing)) {
+		g_message ("Adding the buddy to the remote buddy list");
+		
+		aim_ssi_addbuddy (&(alad->aimsess), name, group, nick, NULL, NULL, 0);
 	}
 }
 
@@ -1333,6 +1434,7 @@ ay_aim_new_account (eb_local_account * ela, const char *account)
 	strcpy (a->handle, account);
 	a->service_id = SERVICE_INFO.protocol_id;
 	aad->status = AIM_OFFLINE;
+	aad->on_server = FALSE;
 	a->ela = ela;
 	return a;
 }
@@ -1345,24 +1447,21 @@ ay_aim_del_user (eb_account *account)
 	LList *node;
 	
 	ela = account->ela;
-	if (!ela) {
-		g_warning ("FIXME");
-		return;
-	}
-	
 	alad = (struct eb_aim_local_account_data *)ela->protocol_local_account_data;
 	
-	if (!l_list_find (alad->buddies, account->handle)) {
+	if (!l_list_find (alad->buddies, account)) {
 		g_warning ("FIXME");
 		return;
 	}
 	
-	alad->buddies = l_list_remove (alad->buddies, account->handle);
+	alad->buddies = l_list_remove (alad->buddies, account);
 
-	if (alad->status != AIM_OFFLINE) {
-		aim_remove_buddy (&(alad->aimsess), alad->conn, account->handle);
+	if ((alad->status != AIM_OFFLINE) && (!alad->listsyncing)) {
+		g_message ("suppression ####### %s ..... %s", account->handle, account->account_contact->group->name);
+		aim_ssi_delbuddy (&(alad->aimsess), account->handle,
+				  account->account_contact->group->name);
 	}
-
+	
 	g_free (account->protocol_account_data);
 }
 

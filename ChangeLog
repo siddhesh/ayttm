@@ -1,3 +1,7 @@
+* Mon Oct  6 2003 20:11 GMT [nicolas]  0.4.2-11
+- modules/aim-oscar/aim-oscar.c
+Implement server side buddy list
+
 * Mon Oct  6 2003 00:05 GMT [colin]   0.4.2-10
 - src/chatroom.[ch] src/offline_queue_mgmt.c
 auto reconnect to chatrooms
