@@ -1,9 +1,13 @@
+* Tue Apr 29 2003 12:52 GMT [colin]	0.3.0-43
+- src/status.c
+use ea->ela
+
 * Tue Apr 29 2003 12:42 GMT [edward]	0.3.0-42
 - mingw32/gdk/Makefile.am
   mingw32/gdk/win32/Makefile.am
 Fixes so make works.
 
-* Tue Apr 29 2003 12:42 GMT [philip]	0.3.0-41
+* Tue Apr 29 2003 12:42 GMT [colin]	0.3.0-41
 - modules/msn2/msn.C
 use dummy accounts
 

@@ -379,7 +379,11 @@ int add_menu_items(void *vmenu, int cur_service, int should_sep,
 	LList *list=NULL;
 	int next_sep=0;
 	int last=-2;
+	eb_local_account *l_ela = ela;
 	
+	if (!l_ela) 
+		l_ela = ea->ela;
+
 	md = GetPref(EB_CONTACT_MENU);
 	for(list = md->menu_items; list; list  = list->next ) {
 		ecd=ebmContactData_new();
@@ -392,7 +396,7 @@ int add_menu_items(void *vmenu, int cur_service, int should_sep,
 		mid=(menu_item_data *)list->data;
 		mid->data=(ebmCallbackData *)ecd;
 		if (mid->protocol != NULL) {
-			eb_local_account *a = ela?ela:find_suitable_local_account(NULL, 
+			eb_local_account *a = l_ela?l_ela:find_suitable_local_account(NULL, 
 					get_service_id(mid->protocol));
 			ecd->local_account = (a && a->connected) ? a->handle:NULL;
 		}
