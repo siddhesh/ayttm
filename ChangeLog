@@ -1,3 +1,7 @@
+* Sat Aug  2 2003 10:48 GMT [philip]	0.3.3-18
+- src/smileys.c
+Fix bug 781677 thanks to code from Anonymous Poster
+
 * Fri Aug  1 2003 09:46 GMT [philip]	0.3.3-17
 - modules/livejournal/
 Added module for LiveJournal Blog service

@@ -550,8 +550,6 @@ void show_smileys_cb (smiley_callback_data *data) {
 	gtk_window_set_policy(GTK_WINDOW(smiley_window), FALSE, FALSE, FALSE);
 	gtk_widget_realize(smiley_window);
 
-	gtk_widget_show(smiley_window);
-
 	gtk_container_add(GTK_CONTAINER(smiley_window), smileys_table);
 	gtk_widget_show(smileys_table);
 
@@ -567,6 +565,8 @@ void show_smileys_cb (smiley_callback_data *data) {
 	
 	if (data && data->c_window)
 		data->c_window->smiley_window = smiley_window;
+
+	gtk_widget_show(smiley_window);
 
 }
 
