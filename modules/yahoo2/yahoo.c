@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.10 $",
-	"$Date: 2003/04/06 18:40:45 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/04/07 05:44:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1189,7 +1189,7 @@ static void eb_yahoo_accept_invite(eb_local_account *ela, void * data)
 			eb_chat_room_buddy_arrive(chat_room, ela->alias, ylad->act_id);
 			done_myself=1;
 		} else {
-			ea = find_account_by_handle(ycrd->host, 
+			ea = find_account_by_handle(handle, 
 					SERVICE_INFO.protocol_id);
 			eb_chat_room_buddy_arrive(chat_room, 
 					(ea?ea->account_contact->nick:handle), 

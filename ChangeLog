@@ -1,3 +1,7 @@
+* Mon Apr 07 2003 05:40 GMT [philip]	0.2.3-48
+- modules/yahoo2/yahoo.c
+Show buddy's name correctly in yahoo conference - even if not in buddy list
+
 * Mon Apr 07 2003 05:20 GMT [philip]	0.2.3-47
 - src/edit_local_accounts.c
 don't crash on first startup - when no accounts exist
