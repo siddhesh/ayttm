@@ -639,10 +639,16 @@ static void eb_status( GtkCheckMenuItem * widget, gpointer stats )
 	}
 	eb_debug(DBG_CORE, "%s set to state %d.\n", eb_services[s->ela->service_id].name, s->status );
 	/* in about 10 seconds try to flush contact mgmt queue */
-	if (s->ela->mgmt_flush_tag == 0) {
+	if (s->ela->mgmt_flush_tag == 0 
+	&& (s->ela->connecting || s->ela->connected)) {
 		s->ela->mgmt_flush_tag = 
 			eb_timeout_add(10000 + (1000*s->ela->service_id),
 				 (GtkFunction)contact_mgmt_flush, (gpointer)s->ela);
+	}
+	if (s->ela->mgmt_flush_tag 
+	&& !s->ela->connecting && !s->ela->connected) {
+		eb_timeout_remove(s->ela->mgmt_flush_tag);
+		s->ela->mgmt_flush_tag=0;
 	}
 	set_menu_sensitivity();
 }
@@ -676,6 +682,10 @@ void eb_sign_off_all()
 		eb_local_account *ac = (eb_local_account*)(node->data);
 		if (ac && ac->connected)
 			RUN_SERVICE(ac)->logout(ac) ;
+		if (ac && ac->mgmt_flush_tag) {
+			eb_timeout_remove(ac->mgmt_flush_tag);
+			ac->mgmt_flush_tag=0;
+		}
 		node = node->next ;
 	}
 	set_menu_sensitivity();
