@@ -836,7 +836,7 @@ void	ayttm_prefs_write( void )
 #ifdef __MINGW32__
 	{
 		struct stat stb;
-		if(stat(file,&stb))
+		if(stat(file,&stb) == 0)
 			unlink( file );
 	}
 #endif
