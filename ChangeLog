@@ -1,3 +1,9 @@
+* Wed Apr 30 2003 09:43 GMT [colin]	0.3.0-62
+- src/add_contact_window.c
+Fixes
+- src/edit_account_window.c
+Add ability to view and change ea->ela
+
 * Wed Apr 30 2003 09:43 GMT [colin]	0.3.0-61
 - modules/jabber/jabber.c
 "Fix" seg at user deletion

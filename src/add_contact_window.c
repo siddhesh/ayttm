@@ -191,7 +191,7 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 {
 	grouplist *gl;
 	struct contact *con;
-	gchar *service = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(service_list)->entry));
+	gchar *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(service_list)->entry),0,-1);
 	gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
 	gint service_id = -1;
 	gchar *local_acc = strstr(service, " ") +1;
@@ -203,7 +203,9 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	
 	ea = eb_services[service_id].sc->new_account(find_local_account_by_handle(local_acc, service_id), account);
 	ea->service_id = service_id;
-
+	
+	g_free(service);
+	
 	if (eb_services[service_id].sc->check_login) {
 		char *buf = NULL;
 		char *err = eb_services[service_id].sc->check_login((char *)account, (char *)"");
@@ -306,6 +308,7 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 			}
 		}
 		gtk_combo_set_popdown_strings(GTK_COMBO(service_list), list );
+		gtk_combo_set_value_in_list(GTK_COMBO(service_list), TRUE, FALSE);
 		g_list_free(list);
 		gtk_table_attach(GTK_TABLE(table), service_list, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(service_list);
