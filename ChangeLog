@@ -1,3 +1,10 @@
+* Tue Mar 23 2004 14:49 GMT [edward]	0.4.6-14
+- libproxy/proxy.c
+Added an if statement for PROXY_SOCKS5 in proxy_send/proxy_recv as the
+getsockopt causes MINGW32 to die horrible death. This is a system
+independent change as the only reason that call is needed is for SOCKS5
+support.
+
 * Wed Mar  3 2004 05:47 GMT [philip]	0.4.6-13
 - modules/yahoo2/yahoo.c
 Set active id to NULL when logging out.

@@ -314,7 +314,8 @@ int proxy_recv( int s, void * buff, int len, unsigned int flags )
 	int size;
 
 	
-	getsockopt( s, SOL_SOCKET, SO_TYPE, &type, &size );
+	if( proxy_type == PROXY_SOCKS5 )
+		getsockopt( s, SOL_SOCKET, SO_TYPE, &type, &size );
 	if( proxy_type != PROXY_SOCKS5 || type == SOCK_STREAM )
 	{
 		return recv(s, buff, len, flags );
@@ -346,7 +347,8 @@ int proxy_send( int s, const void *msg, int len, unsigned int flags )
 
 	printf("proxy_send\n");
 	
-	getsockopt( s, SOL_SOCKET, SO_TYPE, &type, &size );
+	if( proxy_type == PROXY_SOCKS5 )
+		getsockopt( s, SOL_SOCKET, SO_TYPE, &type, &size );
 	if( proxy_type != PROXY_SOCKS5 || type == SOCK_STREAM)
 	{
 		if( type != SOCK_DGRAM )
