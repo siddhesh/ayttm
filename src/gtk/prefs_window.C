@@ -832,7 +832,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::CreateModulePanel( GtkWidget *inPa
 	else if ( !strcmp( inPrefs.module_type, "UTILITY" ) )
 		snprintf( name, name_len, "%s:%s", _( "Utilities" ), inPrefs.brief_desc );
 	else
-		snprintf( name, name_len, "%s:%s", _( "Module" ), inPrefs.brief_desc );
+		snprintf( name, name_len, "%s:%s", _( "Other Plugins" ), inPrefs.brief_desc );
 	
 	ay_prefs_window_panel	*new_panel = new_panel = new ay_module_panel( name, inPrefs );
 			
@@ -2087,9 +2087,10 @@ ay_module_panel::ay_module_panel( const char *inTopFrameText, t_module_pref &inP
 // Build
 void	ay_module_panel::Build( GtkWidget *inParent )
 {
+	const bool	has_error = (m_prefs.status_desc != NULL) && (m_prefs.status_desc[0] != '\0');
+	
 	GtkWidget	*info_frame = gtk_frame_new( _( "Info" ) );
 	gtk_widget_show( info_frame );
-	gtk_container_set_border_width( GTK_CONTAINER(info_frame), 0 );
 	
 	GtkWidget	*info_table = gtk_table_new( 4, 4, FALSE );
 	gtk_widget_show( info_table );
@@ -2103,9 +2104,6 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 	AddInfoRow( info_table, row++, _( "Date:" ), m_prefs.date );
 	AddInfoRow( info_table, row++, _( "Path:" ), m_prefs.file_name );
 	
-	if ( (m_prefs.status_desc != NULL) && (m_prefs.status_desc[0] != '\0') )
-		AddInfoRow( info_table, row++, _( "Error:" ), m_prefs.status_desc );
-	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), info_frame, FALSE, FALSE, 5 );
 	
 	GtkWidget	*spacer = gtk_label_new( "" );
@@ -2113,35 +2111,53 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 	gtk_widget_set_usize( spacer, -1, 5 );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), spacer, FALSE, FALSE, 0 );
-	
-	if ( m_prefs.pref_list != NULL )
+
+	if ( has_error )
 	{
-		eb_input_render( m_prefs.pref_list, m_top_vbox );
+		GtkWidget	*frame = gtk_frame_new( _("Plugin Error") );
+		gtk_widget_show( frame );
+
+		GtkWidget	*label = gtk_label_new( m_prefs.status_desc );
+		gtk_widget_show( label );
+		gtk_misc_set_alignment( GTK_MISC(label), 0.0, 0.5 );
+		gtk_label_set_line_wrap( GTK_LABEL(label), TRUE );
+		gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
+		gtk_misc_set_padding( GTK_MISC(label), 5, 5 );
+		gtk_container_add( GTK_CONTAINER(frame), label );
+
+		gtk_box_pack_start( GTK_BOX(m_top_vbox), frame, FALSE, FALSE, 0 );
 	}
 	else
 	{	
-		GtkWidget	*label = gtk_label_new( NULL );
-		gtk_widget_show( label );
-		
-		GString		*labelText = g_string_new( _("[There are no preferences for ") );
-		
-		if ( m_prefs.service_name != NULL )
+		if ( m_prefs.pref_list != NULL )
 		{
-			labelText = g_string_append( labelText, m_prefs.service_name );
+			eb_input_render( m_prefs.pref_list, m_top_vbox );
 		}
 		else
-		{
-			labelText = g_string_append( labelText, "'" );
-			labelText = g_string_append( labelText, m_prefs.brief_desc );
-			labelText = g_string_append( labelText, "'" );
+		{	
+			GtkWidget	*label = gtk_label_new( NULL );
+			gtk_widget_show( label );
+
+			GString		*labelText = g_string_new( _("[There are no preferences for ") );
+
+			if ( m_prefs.service_name != NULL )
+			{
+				labelText = g_string_append( labelText, m_prefs.service_name );
+			}
+			else
+			{
+				labelText = g_string_append( labelText, "'" );
+				labelText = g_string_append( labelText, m_prefs.brief_desc );
+				labelText = g_string_append( labelText, "'" );
+			}
+
+			labelText = g_string_append( labelText, "]" );
+
+			gtk_label_set_text( GTK_LABEL(label), labelText->str );
+			gtk_box_pack_start( GTK_BOX(m_top_vbox), GTK_WIDGET(label), FALSE, FALSE, 2 );
+
+			g_string_free( labelText, TRUE );
 		}
-		
-		labelText = g_string_append( labelText, "]" );
-		
-		gtk_label_set_text( GTK_LABEL(label), labelText->str );
-		gtk_box_pack_start( GTK_BOX(m_top_vbox), GTK_WIDGET(label), FALSE, FALSE, 2 );
-		
-		g_string_free( labelText, TRUE );
 	}
 }
 
@@ -2157,10 +2173,13 @@ void	ay_module_panel::AddInfoRow( GtkWidget *inTable, int inRow, const char *inH
 	GtkWidget	*label = gtk_label_new( inHeader );
 	gtk_misc_set_alignment( GTK_MISC( label ), 1.0, 0.5 );
 	gtk_widget_show( label );
+	gtk_widget_set_usize( label, 65, -1 );
 	gtk_table_attach( GTK_TABLE(inTable), label, 0, 1, inRow, inRow + 1, GTK_SHRINK, GTK_SHRINK, 10, 0 );
 	
 	label = gtk_label_new( inInfo );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 	gtk_widget_show( label );
+	gtk_label_set_line_wrap( GTK_LABEL(label), TRUE );
+	gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
 	gtk_table_attach_defaults( GTK_TABLE(inTable), label, 1, 2, inRow, inRow + 1 );
 }
