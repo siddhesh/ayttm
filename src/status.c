@@ -677,25 +677,10 @@ static void ay_compare_version (const char *version, int warn_again)
 
 static void ay_check_release ( GtkWidget * widget, gpointer userdata )
 {
+	int is_auto = GPOINTER_TO_INT(userdata);
 	char *rss = NULL;
 	int found = 0;
-	char *version = NULL;
-	int is_auto = GPOINTER_TO_INT(userdata);
-	rss = ay_http_get("http://sourceforge.net/export/rss2_projfiles.php?group_id=77614");
-	if (rss != NULL) {
-		if (strstr(rss, "\t\t\t<title>ayttm ")) {
-			/* beginning matches */
-			char *released = NULL;
-			released = strstr(rss, "\t\t\t<title>ayttm ");
-			if (released && strstr(released, " released (")) {
-				/* end matches */
-				version = g_strndup(released + strlen("\t\t\t<title>ayttm "), 
-							strlen("x.x.x"));
-				found = 1;
-			}
-		}
-	}
-	free(rss);
+	char *version = ay_get_last_version();
 	if (version) {
 		eb_debug(DBG_CORE, "Last version: %s\n", version);
 		ay_compare_version(version, !is_auto);

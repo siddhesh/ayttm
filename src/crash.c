@@ -183,7 +183,8 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	GtkWidget *button4;
 	GtkWidget *button5;
 	gchar	  *crash_report;
-
+	gchar     *version = NULL;
+	
 	window1 = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_container_set_border_width(GTK_CONTAINER(window1), 5);
 	gtk_window_set_title(GTK_WINDOW(window1), _("Ayttm has crashed"));
@@ -201,8 +202,14 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_box_pack_start(GTK_BOX(vbox1), hbox1, FALSE, TRUE, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox1), 4);
 
-	label1 = gtk_label_new
-	    (g_strdup_printf(_("%s.\nPlease file a bug report and include the information below."), text));
+	version = ay_get_last_version();
+	if (version && strcmp(version, VERSION))
+		label1 = gtk_label_new
+			(g_strdup_printf(_("%s.\nPlease DO NOT file a bugreport, as a newer version (%s) of ayttm is available."),
+				text, version));
+	else
+		label1 = gtk_label_new
+		    (g_strdup_printf(_("%s.\nPlease file a bug report and include the information below."), text));
 	gtk_widget_show(label1);
 	gtk_box_pack_start(GTK_BOX(hbox1), label1, TRUE, TRUE, 0);
 	gtk_misc_set_alignment(GTK_MISC(label1), 7.45058e-09, 0.5);
@@ -260,11 +267,6 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_container_add(GTK_CONTAINER(hbuttonbox4), button4);
 	GTK_WIDGET_SET_FLAGS(button4, GTK_CAN_DEFAULT);
 
-	button5 = gtk_button_new_with_label(_("Create bug report"));
-	gtk_widget_show(button5);
-	gtk_container_add(GTK_CONTAINER(hbuttonbox4), button5);
-	GTK_WIDGET_SET_FLAGS(button5, GTK_CAN_DEFAULT);
-	
 	gtk_signal_connect(GTK_OBJECT(window1), "delete_event",
 			   GTK_SIGNAL_FUNC(gtk_main_quit), NULL);
 	gtk_signal_connect(GTK_OBJECT(button3),   "clicked",
@@ -272,15 +274,22 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_signal_connect(GTK_OBJECT(button4), "clicked",
 			   GTK_SIGNAL_FUNC(crash_save_crash_log),
 			   crash_report);
-	gtk_signal_connect(GTK_OBJECT(button5), "clicked",
-			   GTK_SIGNAL_FUNC(crash_create_bug_report),
-			   NULL);
-
+	if (!version || !strcmp(version, VERSION)) {
+		button5 = gtk_button_new_with_label(_("Create bug report"));
+		gtk_widget_show(button5);
+		gtk_container_add(GTK_CONTAINER(hbuttonbox4), button5);
+		GTK_WIDGET_SET_FLAGS(button5, GTK_CAN_DEFAULT);
+		gtk_signal_connect(GTK_OBJECT(button5), "clicked",
+				   GTK_SIGNAL_FUNC(crash_create_bug_report),
+				   NULL);
+	}
+	
 	gtk_widget_show(window1);
 
 	gtk_main();
 	return window1;
 }
+
 
 static int str_write_to_file(const gchar *str, const gchar *file)
 {

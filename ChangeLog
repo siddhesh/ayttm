@@ -1,3 +1,11 @@
+* Sun Aug 31 2003 09:18 GMT [colin]	0.4.0-15
+- src/util.[ch] src/status.c 
+Move latest version retrieval to util.c
+- src/crash.c 
+Don't help bugreport creation with old versions
+- src/edit_account_window.c
+Fix bug where chatwindows were always reopened after account edition
+
 * Sun Aug 31 2003 09:18 GMT [colin]	0.4.0-14
 - src/util.c
 Unescape_string still wasn't fixed (thanks Philip for spotting this!)

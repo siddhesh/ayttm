@@ -60,7 +60,11 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 	gint service_id = -1;
 	gchar *local_acc = strstr(service, " ") +1;
 	eb_local_account *ela = NULL;
-	int reshow_chatwindow;
+	int reshow_chatwindow = FALSE;
+	
+	if (account && account->account_contact && account->account_contact->chatwindow)
+		reshow_chatwindow = TRUE;
+		
 	if (strcmp(service, _("[None]")) && strstr(service, "]")) {
 		char *mservice = NULL;
 		*(strstr(service, "]")) = '\0';

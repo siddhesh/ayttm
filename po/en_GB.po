@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
-"POT-Creation-Date: 2003-08-25 00:00+0200\n"
-"PO-Revision-Date: $Date: 2003/08/24 22:04:27 $\n"
+"POT-Creation-Date: 2003-08-25 00:17+0200\n"
+"PO-Revision-Date: $Date: 2003/08/31 16:44:27 $\n"
 "Last-Translator: Philip S Tellis <philip.tellis@gmx.net>\n"
 "Language-Team: Philip S Tellis <philip.tellis@gmx.net>\n"
 "MIME-Version: 1.0\n"
@@ -54,20 +54,21 @@ msgstr ""
 msgid "Could not resolve host."
 msgstr ""
 
-#: modules/aim-toc/aim-toc.c:119 modules/icq-toc/icq-toc.c:119
-#: modules/icq/icq.c:120 modules/msn2/msn.C:195
+#: modules/aim-toc/aim-toc.c:119 modules/icq/icq.c:120
+#: modules/icq-toc/icq-toc.c:119 modules/msn2/msn.C:195
 #: modules/workwizu/workwizu.c:141 src/gtk/prefs_window.C:2226
 msgid "Server:"
 msgstr ""
 
-#: modules/aim-toc/aim-toc.c:126 modules/icq-toc/icq-toc.c:126
-#: modules/icq/icq.c:127 modules/jabber/jabber.c:116 modules/msn2/msn.C:202
-#: modules/workwizu/workwizu.c:148 src/gtk/prefs_window.C:2242
+#: modules/aim-toc/aim-toc.c:126 modules/icq/icq.c:127
+#: modules/icq-toc/icq-toc.c:126 modules/jabber/jabber.c:116
+#: modules/msn2/msn.C:202 modules/workwizu/workwizu.c:148
+#: src/gtk/prefs_window.C:2242
 msgid "Port:"
 msgstr ""
 
 #: modules/aim-toc/aim-toc.c:133 modules/aycryption/aycryption.c:126
-#: modules/icq-toc/icq-toc.c:133 modules/icq/icq.c:134
+#: modules/icq/icq.c:134 modules/icq-toc/icq-toc.c:133
 #: modules/jabber/jabber.c:123 modules/msn2/msn.C:231 modules/smtp/smtp.c:100
 #: modules/workwizu/workwizu.c:162 modules/yahoo2/yahoo.c:232
 msgid "Enable debugging"

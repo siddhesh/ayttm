@@ -1964,3 +1964,23 @@ char * ay_http_get(const char *uri) {
 	close(sock);
 	return result;
 }
+
+char *ay_get_last_version(void) {
+	char *rss = NULL;
+	char *version = NULL;
+	rss = ay_http_get("http://sourceforge.net/export/rss2_projfiles.php?group_id=77614");
+	if (rss != NULL) {
+		if (strstr(rss, "\t\t\t<title>ayttm ")) {
+			/* beginning matches */
+			char *released = NULL;
+			released = strstr(rss, "\t\t\t<title>ayttm ");
+			if (released && strstr(released, " released (")) {
+				/* end matches */
+				version = g_strndup(released + strlen("\t\t\t<title>ayttm "), 
+							strlen("x.x.x"));
+			}
+		}
+	}
+	free(rss);
+	return version;
+}
