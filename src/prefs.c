@@ -311,7 +311,8 @@ static void	s_write_module_prefs( void *inListItem, void *inData )
 	LList			*master_prefs = NULL;
 	LList			*current_prefs = NULL;
 
-
+	eb_debug(DBG_CORE, "Writing prefs for %s\n",plugin_info->name);
+	
 	fprintf( fp, "\t%s\n", plugin_info->name );
 
 	master_prefs = GetPref( plugin_info->name );

@@ -1,3 +1,9 @@
+* Wed Apr 09 2003 21:38 GMT [colin]	0.2.3-87
+- src/main.c src/status.c src/prefs.c
+Add debug
+- src/activity_bar.C
+Check tag before removing activity
+
 * Wed Apr 09 2003 21:38 GMT [colin]	0.2.3-86
 - modules/icq-toc/libtoc/libtoc.c
 Fix undefined symbol

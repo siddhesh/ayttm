@@ -364,7 +364,7 @@ void ay_progress_bar_update_progress(int tag, const unsigned long done)
 void ay_activity_bar_remove(int tag)
 {
 	ay_activity_bar_pack *abp = aw.get_pack_by_tag(tag);
-	if(abp)
+	if(tag && abp)
 		s_cancel_clicked(NULL, abp);
 }
 

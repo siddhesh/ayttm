@@ -112,11 +112,10 @@ static void delete_event( GtkWidget *widget,
 {
 	LList * node = accounts;
 	gchar *userrc = NULL;
-	while(node) {
-		if(node->data && ((eb_local_account*)(node->data))->connected)
-			RUN_SERVICE(((eb_local_account*)(node->data)))->logout(node->data);
-		node = node->next;
-	}
+	
+	eb_debug(DBG_CORE, "Signing out...\n");
+	eb_sign_off_all();	
+	eb_debug(DBG_CORE, "Signed out\n");
 	
 	eb_save_size(contact_window, NULL);
 

@@ -524,12 +524,15 @@ int main(int argc, char *argv[])
 	clean_up_dummies();
 
 	unload_modules(); // Need to unload what we load
+	eb_debug(DBG_CORE, "Shutting sound down\n");
 	sound_shutdown();
+	eb_debug(DBG_CORE, "Removing lock file\n");
 	g_snprintf(buff, 1024, "%s.lock", config_dir);
 #ifndef __MINGW32__
 	if (!disable_console_server)
 		unlink(local.sun_path);
         delete_lock_file(buff);
+	eb_debug(DBG_CORE, "Removed lock file\n");
 #endif
 	return 0;
 
