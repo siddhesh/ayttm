@@ -22,7 +22,9 @@
  *
  */
 
-unsigned int module_version() {return CORE_VERSION;}
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -59,8 +61,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Gaim Buddy List", 
 	"Import the Gaim Buddy List", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/04/30 06:03:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -69,6 +71,7 @@ PLUGIN_INFO plugin_info = {
 
 static void *buddy_list_tag=NULL;
 
+unsigned int module_version() {return CORE_VERSION;}
 int plugin_init()
 {
 	eb_debug(DBG_MOD,"Gaim Buddy List init\n");
@@ -90,9 +93,9 @@ int plugin_finish()
 	return(0);
 }
 
-/*************************************************************************************
+/*******************************************************************************
  *                             End Module Code
- ************************************************************************************/
+ ******************************************************************************/
 
 void import_gaim_accounts(ebmCallbackData *data)
 {

@@ -23,8 +23,6 @@
  * jabber.c
  */
 
-unsigned int module_version() {return CORE_VERSION;}
-
 #define DEBUG
 
 #ifdef __MINGW32__
@@ -85,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.24 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.25 $",
+	"$Date: 2003/04/30 06:03:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -97,6 +95,8 @@ struct service SERVICE_INFO = { "Jabber", -1,
 /* End Module Exports */
 
 static char *eb_jabber_get_color(void) { static char color[]="#88aa00"; return color; }
+
+unsigned int module_version() {return CORE_VERSION;}
 
 static int plugin_init()
 {

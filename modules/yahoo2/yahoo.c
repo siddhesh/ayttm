@@ -27,8 +27,6 @@
  * yahoo.c
  */
 
-unsigned int module_version() {return CORE_VERSION;}
-
 #ifdef __MINGW32__
 # include <winsock2.h>
 # define EINPROGRESS WSAEINPROGRESS
@@ -122,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.38 $",
-	"$Date: 2003/04/29 19:07:29 $",
+	"$Revision: 1.39 $",
+	"$Date: 2003/04/30 06:03:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -133,6 +131,8 @@ struct service SERVICE_INFO = {"Yahoo", -1,
 	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER | SERVICE_CAN_ICONVERT | SERVICE_CAN_MULTIACCOUNT, 
 	NULL};
 /* End Module Exports */
+
+unsigned int module_version() {return CORE_VERSION;}
 
 static int plugin_init()
 {

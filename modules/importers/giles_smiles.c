@@ -20,7 +20,9 @@
  *
  */
 
-unsigned int module_version() {return CORE_VERSION;}
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <glib.h>
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
@@ -29,21 +31,19 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "smileys.h"
 #include "prefs.h"
 
-/*************************************************************************************
+/*******************************************************************************
  *                             Begin Module Code
- ************************************************************************************/
+ ******************************************************************************/
 /*  Module defines */
 #define plugin_info giles_smiles_LTX_plugin_info
-#define plugin_init giles_smiles_LTX_plugin_init
-#define plugin_finish giles_smiles_LTX_plugin_finish
 #define module_version giles_smiles_LTX_module_version
 
 
 /* Function Prototypes */
 static void init_alt_smileys(void);
 static void enable_smileys(ebmCallbackData *data);
-int plugin_init();
-int plugin_finish();
+static int plugin_init();
+static int plugin_finish();
 
 static int ref_count=0;
 static LList *my_smileys=NULL;
@@ -54,8 +54,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Giles Smileys",
 	"Load Giles smileys",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/30 06:03:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -65,7 +65,8 @@ PLUGIN_INFO plugin_info = {
 
 static void *smiley_tag = NULL;
 
-int plugin_init()
+unsigned int module_version() {return CORE_VERSION;}
+static int plugin_init()
 {
 	eb_debug(DBG_MOD,"giles smileys init\n");
 
@@ -81,7 +82,7 @@ int plugin_init()
 	return 0;
 }
 
-int plugin_finish()
+static int plugin_finish()
 {
 	int result = 0;
 
@@ -109,9 +110,9 @@ int plugin_finish()
 	return 0;
 }
 
-/*************************************************************************************
+/*******************************************************************************
  *                             End Module Code
- ************************************************************************************/
+ ******************************************************************************/
 
 #include "pixmaps/standard2/dead20.xpm"
 #include "pixmaps/standard2/embarrased20.xpm"

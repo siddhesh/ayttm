@@ -22,8 +22,6 @@
  *
  */
 
-unsigned int module_version() {return CORE_VERSION;}
-
 #include "intl.h"
 
 #include <stdlib.h>
@@ -74,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Keep notes on contacts", 
 	"Keep notes about your contacts and buddies", 
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/29 08:32:02 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/30 06:03:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -85,6 +83,8 @@ PLUGIN_INFO plugin_info = {
 
 static void *notes_tag1=NULL;
 static void *notes_tag2=NULL;
+
+unsigned int module_version() {return CORE_VERSION;}
 
 static int plugin_init()
 {

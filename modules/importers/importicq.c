@@ -18,7 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-unsigned int module_version() {return CORE_VERSION;}
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <fcntl.h>				
 #include <gtk/gtk.h>
 #include <string.h>
@@ -38,14 +40,13 @@ unsigned int module_version() {return CORE_VERSION;}
 
 /*  Module defines */
 #define plugin_info importicq_LTX_plugin_info
-#define plugin_init importicq_LTX_plugin_init
-#define plugin_finish importicq_LTX_plugin_finish
 #define module_version importicq_LTX_module_version
 
 
 /* Function Prototypes */
-int plugin_init();
-int plugin_finish();
+static int plugin_init();
+static int plugin_finish();
+unsigned int module_version() {return CORE_VERSION;}
 
 static int ref_count=0;
 
@@ -54,8 +55,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import ICQ99 Contact List", 
 	"Import the ICQ99 Contact List", 
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/30 06:03:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -108,7 +109,7 @@ static void import_icq99_contacts(ebmCallbackData * data);
 
 static void *buddy_list_tag=NULL;
 
-int plugin_init()
+static int plugin_init()
 {
 	eb_debug(DBG_MOD,"ICQ99 Contact List init\n");
 	buddy_list_tag=eb_add_menu_item("ICQ99 Contact List", EB_IMPORT_MENU, import_icq99_contacts, ebmIMPORTDATA, NULL);
@@ -117,7 +118,7 @@ int plugin_init()
 	return(0);
 }
 
-int plugin_finish()
+static int plugin_finish()
 {
 	int result;
 
@@ -133,7 +134,7 @@ int plugin_finish()
  *                             End Module Code
  ******************************************************************************/
 
-int wrong_type(struct idxEntry *entry, long type)
+static int wrong_type(struct idxEntry *entry, long type)
 {
         if(type==USERS_DATA)
         {

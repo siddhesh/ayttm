@@ -24,8 +24,6 @@
  *email ivor@happyfragger.com
  */
 
-unsigned int module_version() {return CORE_VERSION;}
-
 #ifdef __MINGW32__
 #define __IN_PLUGIN__
 #endif
@@ -66,14 +64,16 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_UTILITY,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/30 00:04:00 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/30 06:03:59 $",
 	&s_ref_count,
 	middle_init,
 	middle_finish,
 	NULL
 };
 /* End Module Exports */
+
+unsigned int module_version() {return CORE_VERSION;}
 
 static int middle_init( void )
 {

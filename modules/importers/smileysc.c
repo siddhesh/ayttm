@@ -19,8 +19,9 @@
  *
  */
 
-unsigned int module_version() {return CORE_VERSION;}
-
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
@@ -51,8 +52,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Console Smileys",
 	"Load Console smiley theme",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/30 06:03:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -61,6 +62,8 @@ PLUGIN_INFO plugin_info = {
 /* End Module Exports */
 
 static void *smiley_tag = NULL;
+
+unsigned int module_version() {return CORE_VERSION;}
 
 static int plugin_init()
 {

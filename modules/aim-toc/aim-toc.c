@@ -26,7 +26,6 @@
  * aim.c
  * AIM implementation
  */
-unsigned int module_version() {return CORE_VERSION;}
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
@@ -96,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.32 $",
-	"$Date: 2003/04/29 12:40:28 $",
+	"$Revision: 1.33 $",
+	"$Date: 2003/04/30 06:03:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -107,6 +106,7 @@ struct service SERVICE_INFO = { "AIM", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_I
 
 static char *eb_toc_get_color(void) { static char color[]="#000088"; return color; }
 
+unsigned int module_version() {return CORE_VERSION;}
 static int plugin_init()
 {
 	input_list * il = g_new0(input_list, 1);

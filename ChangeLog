@@ -1,3 +1,8 @@
+* Wed Apr 30 2003 06:03 GMT [philip]	0.3.0-59
+- modules/
+put module_version definition after inclusion of config.h
+and include it where not
+
 * Wed Apr 30 2003 05:18 GMT [philip]	0.3.0-58
 - src/main.c src/status.c src/about.c
 Use PACKAGE_STRING instead of PACKAGE VERSION

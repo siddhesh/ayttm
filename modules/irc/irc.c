@@ -24,7 +24,6 @@
  * irc.c
  */
 
-unsigned int module_version() {return CORE_VERSION;}
 #include "intl.h"
 
 #include <string.h>
@@ -84,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.15 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.16 $",
+	"$Date: 2003/04/30 06:03:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -95,6 +94,7 @@ struct service SERVICE_INFO = { "IRC", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_I
 
 static char *eb_irc_get_color(void) { static char color[]="#880088"; return color; }
 
+unsigned int module_version() {return CORE_VERSION;}
 static int plugin_init()
 {
 	eb_debug(DBG_MOD, "IRC\n");

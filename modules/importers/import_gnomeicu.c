@@ -22,7 +22,9 @@
  *
  */
 
-unsigned int module_version() {return CORE_VERSION;}
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -37,9 +39,9 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "messages.h"
 
 
-/*************************************************************************************
+/*******************************************************************************
  *                             Begin Module Code
- ************************************************************************************/
+ ******************************************************************************/
 /*  Module defines */
 #define plugin_info import_gnomeicu_LTX_plugin_info
 #define plugin_init import_gnomeicu_LTX_plugin_init
@@ -59,8 +61,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import GnomeICU Contact List", 
 	"Import the GnomeICU Contact List", 
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/30 06:03:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -69,6 +71,7 @@ PLUGIN_INFO plugin_info = {
 
 static void *buddy_list_tag=NULL;
 
+unsigned int module_version() {return CORE_VERSION;}
 int plugin_init()
 {
 	eb_debug(DBG_MOD, "GnomeICU Contact List init\n");
@@ -90,9 +93,9 @@ int plugin_finish()
 	return(0);
 }
 
-/*************************************************************************************
+/*******************************************************************************
  *                             End Module Code
- ************************************************************************************/
+ ******************************************************************************/
 
 void import_gnomeicu_accounts(ebmCallbackData *data)
 {

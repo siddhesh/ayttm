@@ -19,8 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-unsigned int module_version() {return CORE_VERSION;}
-
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -44,15 +45,15 @@ unsigned int module_version() {return CORE_VERSION;}
 
 /*  Module defines */
 #define plugin_info importlicq_LTX_plugin_info
-#define plugin_init importlicq_LTX_plugin_init
-#define plugin_finish importlicq_LTX_plugin_finish
 #define module_version importlicq_LTX_module_version
 
 
 /* Function Prototypes */
 void import_licq_accounts(ebmCallbackData *data);
-int plugin_init();
-int plugin_finish();
+static int plugin_init();
+static int plugin_finish();
+unsigned int module_version() {return CORE_VERSION;}
+
 
 static int ref_count=0;
 
@@ -61,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Licq Contact List", 
 	"Import the Licq Contact List", 
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/30 06:03:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -71,7 +72,7 @@ PLUGIN_INFO plugin_info = {
 
 static void *buddy_list_tag=NULL;
 
-int plugin_init()
+static int plugin_init()
 {
 	eb_debug(DBG_MOD,"Licq Contact List init\n");
 	buddy_list_tag=eb_add_menu_item("Licq Contact List", EB_IMPORT_MENU, import_licq_accounts, ebmIMPORTDATA, NULL);
@@ -80,7 +81,7 @@ int plugin_init()
 	return(0);
 }
 
-int plugin_finish()
+static int plugin_finish()
 {
 	int result;
 
