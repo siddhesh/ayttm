@@ -3,8 +3,14 @@ TODO 0.3.1
   * Right click context menu on misspelled words - Done
 * Phase in multiple accounts per service
   * add service flag for multi account if service supports it - Done
-  * add contact should add to local account, not to service
-  * local account should be stored in the eb_account struct - partially done
+  * add contact should add to local account, not to service - Done
+  * local account should be stored in the eb_account struct - Done
+  * Modules should be fixed (static things and so on)
+    - MSN 	ok
+    - Yahoo	almost ok (grep FIXME)
+    - *TOC	Half-fixed (some unknown problems like segs)
+    - Jabber	Not checked
+    - IRC	Not checked
 * Yahoo webcam support
 * Standardise on autoconf/automake versions (2.53/1.6) - Done
 
