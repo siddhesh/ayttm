@@ -1,31 +1,36 @@
-* Mon Oct 20 2003 14:51 GMT [elh]	0.4.4-7
+* Tue Oct 21 2003 04:09 GMT [philip]	0.4.3-8
+- ChangeLog, configure
+we're still in 0.4.3 - which was the last release.  0.4.4 is
+a long way off
+
+* Mon Oct 20 2003 14:51 GMT [elh]	0.4.3-7
 - src/ssl_certificate.c
   A few MinGW compile fixes. globals.h should be after unistd.h always.
   netdb.h is a part of winsock2.h for Win32 so added ifdef 
 
-* Mon Oct 20 2003 13:19 GMT [elh]	0.4.4-6
+* Mon Oct 20 2003 13:19 GMT [elh]	0.4.3-6
 - ChangeLog
   configure.ac
   For some reason we never progressed to 0.4.4 from 0.4.3. This was corrected
 
-* Mon Oct 20 2003 10:00 GMT [colin]	0.4.4-5
+* Mon Oct 20 2003 10:00 GMT [colin]	0.4.3-5
 - src/ssl.c
 Missing init
 
-* Sun Oct 19 2003 16:00 GMT [colin]	0.4.4-4
+* Sun Oct 19 2003 16:00 GMT [colin]	0.4.3-4
 - modules/msn2
 fix possible crash
 
-* Sun Oct 19 2003 07:06 GMT [philip]	0.4.4-3
+* Sun Oct 19 2003 07:06 GMT [philip]	0.4.3-3
 - modules/aim-oscar/aim-oscar.c
 line 1578, LList *states was placed after LOG().  C declarations
 should be the first statement in a function.
 
-* Sat Oct 18 2003 23:00 GMT [colin]	0.4.4-2
+* Sat Oct 18 2003 23:00 GMT [colin]	0.4.3-2
 - src/ssl* src/dialog.[ch] modules/msn2 modules/jabber
 Check SSL certificates for validity or change
 
-* Sat Oct 18 2003 10:00 GMT [colin]	0.4.4-1
+* Sat Oct 18 2003 10:00 GMT [colin]	0.4.3-1
 Release
 
 * Sat Oct 18 2003 10:00 GMT [colin]	0.4.3-pre19
