@@ -1,3 +1,7 @@
+* Thu Apr 17 2003 10:35 GMT [colin]	0.2.3-125
+- src/prefs.c
+call proxy_set_proxy when we disable it too
+
 * Thu Apr 17 2003 10:22 GMT [colin]	0.2.3-124
 - modules/irc modules/workwizu
 Proxy support

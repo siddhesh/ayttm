@@ -707,9 +707,10 @@ void	ayttm_prefs_read( void )
 	
 	fclose( fp );
 
+	proxy_set_proxy( iGetLocalPref("proxy_type"), cGetLocalPref("proxy_host"), iGetLocalPref("proxy_port") );
+	
 	if ( iGetLocalPref("proxy_type") != 0 )
 	{
-		proxy_set_proxy( iGetLocalPref("proxy_type"), cGetLocalPref("proxy_host"), iGetLocalPref("proxy_port") );
 		proxy_set_auth( iGetLocalPref("do_proxy_auth"), cGetLocalPref("proxy_user"), cGetLocalPref("proxy_password") );
 	}
 }
@@ -977,9 +978,10 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	
 	ayttm_prefs_write();
 	
+	proxy_set_proxy( iGetLocalPref("proxy_type"), cGetLocalPref("proxy_host"), iGetLocalPref("proxy_port") );
+	
 	if ( inPrefs->advanced.proxy_type != 0 )
 	{
-		proxy_set_proxy( iGetLocalPref("proxy_type"), cGetLocalPref("proxy_host"), iGetLocalPref("proxy_port") );
 		proxy_set_auth( iGetLocalPref("do_proxy_auth"), cGetLocalPref("proxy_user"), cGetLocalPref("proxy_password") );
 	}
 	
