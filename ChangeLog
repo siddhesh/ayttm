@@ -1,4 +1,7 @@
-* Fri May 16 2003 16:05 GMT [edward]	0.3.0-198
+* Fri May 16 2003 16:05 GMT [colin]	0.3.1-pre1
+Freeze ! :)
+
+* Fri May 16 2003 16:05 GMT [colin]	0.3.0-198
 - src/gtk/prefs_window.C
   modules/yahoo2/yahoo.c
   modules/aycryption/aycryption.c
