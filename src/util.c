@@ -183,7 +183,7 @@ char * unescape_string(const char * input)
 {
 	char * result = malloc((strlen(input)+1) * sizeof(char));
 	int ipos=0, opos=0; 
-	while(input[ipos]) {
+	while(input && input[ipos]) {
 		char c = input[ipos++];
 		if(c == '\\') {
 			c = input[ipos++];
