@@ -1864,30 +1864,6 @@ void eb_status_window()
 
 	status_show = iGetLocalPref("status_show_level");
 
-	iconlogin_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconlogin_bm,
-		NULL, (gchar **) login_icon_xpm);
-	iconblank_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconblank_bm,
-		NULL, (gchar **) blank_icon_xpm);
-	iconlogoff_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconlogoff_bm,
-		NULL, (gchar **) logoff_icon_xpm);
-
-	/* handle geometry - ivey */
-
-#ifndef __MINGW32__
-	if (geometry[0] != 0) { 
-		flags = XParseGeometry(geometry, &win_x, &win_y, &win_w, &win_h);
-		gtk_window_set_position(GTK_WINDOW(statuswindow), GTK_WIN_POS_NONE); 
-		gtk_widget_set_uposition(statuswindow, win_x, win_y);
-		gtk_widget_set_usize(statuswindow, win_w, win_h);
-	} else 
-#endif
-	{
-		if (iGetLocalPref("x_contact_window") 
-		&&  iGetLocalPref("y_contact_window"))
-			gtk_widget_set_uposition(statuswindow, 
-					iGetLocalPref("x_contact_window"),
-					iGetLocalPref("y_contact_window"));
-	}
 	statusbox = gtk_vbox_new(FALSE, 0);
 
 	menubox = gtk_handle_box_new();
@@ -1990,17 +1966,37 @@ void eb_status_window()
 	gtk_signal_connect (GTK_OBJECT (statuswindow), "delete_event",
 			    GTK_SIGNAL_FUNC (delete_event), NULL);
 
-
-        {
-                int do_x = iGetLocalPref("x_contact_window");
-                int do_y = iGetLocalPref("y_contact_window");
-		if ( do_x>0 && do_y >0)
-	                gdk_window_move(statuswindow->window, do_x, do_y);
-        }
-	gtk_widget_show(statuswindow);
 	gtk_widget_realize(statuswindow);
 	
 	eb_icon(statuswindow->window);
+	iconlogin_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconlogin_bm,
+		NULL, (gchar **) login_icon_xpm);
+	iconblank_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconblank_bm,
+		NULL, (gchar **) blank_icon_xpm);
+	iconlogoff_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconlogoff_bm,
+		NULL, (gchar **) logoff_icon_xpm);
+
+	/* handle geometry - ivey */
+#ifndef __MINGW32__
+	if (geometry[0] != 0) { 
+		flags = XParseGeometry(geometry, &win_x, &win_y, &win_w, &win_h);
+		gtk_window_set_position(GTK_WINDOW(statuswindow), GTK_WIN_POS_NONE); 
+		gtk_widget_set_uposition(statuswindow, win_x, win_y);
+		gtk_widget_set_usize(statuswindow, win_w, win_h);
+	} else 
+#endif
+	{
+		if (iGetLocalPref("x_contact_window") > 0
+		&&  iGetLocalPref("y_contact_window") > 0)
+			gtk_widget_set_uposition(statuswindow, 
+					iGetLocalPref("x_contact_window"),
+					iGetLocalPref("y_contact_window"));
+	                gdk_window_move(statuswindow->window, 
+					iGetLocalPref("x_contact_window"),
+					iGetLocalPref("y_contact_window"));
+	}	
+
+	gtk_widget_show(statuswindow);
 	
 	update_contact_list ();
 

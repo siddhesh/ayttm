@@ -1,3 +1,7 @@
+* Wed Apr 16 2003 07:44 GMT [colin]	0.2.3-108
+- src/status.c
+Fix GDK warnings (should also fix "removal of restore position pref")
+
 * Wed Apr 16 2003 07:15 GMT [colin]	0.2.3-107
 - */Makefile.am
 Install modules in $libdir instead of $pkgdir/modules (FHS compliance)
