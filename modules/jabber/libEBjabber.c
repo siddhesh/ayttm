@@ -42,7 +42,7 @@ extern void JABBERStatusChange(void *data);
 extern void JABBERAddBuddy(void *data);
 extern void JABBERInstantMessage(void *data);
 extern void JABBERDialog(void *data);
-extern void JABBERListDialog(char **list, void *data);
+extern void JABBERListDialog(const char **list, void *data);
 extern void	JABBERError( char *message, char *title );
 extern void JABBERLogout(void *data);
 extern void JABBERChatRoomMessage(char *id, char *user, char *message);
@@ -165,7 +165,7 @@ char **JCgetJIDList(void)
 		/* Leave room for the last null entry */
 		list=realloc(list, sizeof(char *)*(count+2));
 		eb_debug(DBG_JBR, "current->jid[%p]\n", current->jid);
-		list[count]=strdup(current->jid);
+		list[count]=current->jid;
 		current=current->next;
 		count++;
 	}
@@ -358,7 +358,8 @@ int JABBER_AddContact(JABBER_Conn *JConn, char *handle) {
 			JD->message=strdup(buffer);
 			JD->callback=j_on_pick_account;
 			JD->requestor=strdup(handle);
-			JABBERListDialog(server_list, JD);
+			JABBERListDialog((const char **)server_list, JD);
+			free(server_list);
 			eb_debug(DBG_JBR, "<Creating dialog and leaving\n");
 			free(ojid);
 			return(0);

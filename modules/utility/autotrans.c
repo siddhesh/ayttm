@@ -39,6 +39,7 @@
 #include "util.h"
 #include "tcp_util.h"
 #include "messages.h"
+#include "llist.h"
 #include "platform_defs.h"
 
 
@@ -66,7 +67,8 @@ static int trans_finish();
 static void language_select(ebmCallbackData * data);
 
 static int doTrans = 0;
-static char myLanguage[MAX_PREF_LEN] = "en";
+static int myLanguage = 0;
+static char *languages[11];
 
 static void *tag1;
 static void *tag2;
@@ -79,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.9 $",
-	"$Date: 2003/05/07 14:25:12 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/05/13 05:15:06 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
@@ -95,17 +97,37 @@ static int trans_init()
 	input_list *il = calloc(1, sizeof(input_list));
 	plugin_info.prefs = il;
 
+	languages[0] = "en (English)";
+	languages[1] = "fr (French)";
+	languages[2] = "de (German)";
+	languages[3] = "it (Italian)";
+	languages[4] = "pt (Portuguese)";
+	languages[5] = "es (Spanish)";
+	languages[6] = "ru (Russian)";
+	languages[7] = "ko (Korean)";
+	languages[8] = "ja (Japanese)";
+	languages[9] = "zh (Chinese)";
+	languages[10] = NULL;
+
 	il->widget.checkbox.value = &doTrans;
 	il->widget.checkbox.name = "doTrans";
-	il->widget.checkbox.label = strdup(_("Enable automatic translation"));
+	il->widget.checkbox.label = _("Enable automatic translation");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
-	il->widget.entry.value = myLanguage;
-	il->widget.entry.name = "myLanguage";
-	il->widget.entry.label = strdup(_("My language code:"));
-	il->type = EB_INPUT_ENTRY;
+	il->widget.listbox.value = &myLanguage;
+	il->widget.listbox.name = "myLanguage";
+	il->widget.listbox.label = _("My language code:");
+	{
+		LList *l=NULL;
+		int i;
+		for(i=0; languages[i]; i++)
+			l = l_list_append(l, languages[i]);
+
+		il->widget.listbox.list = l;
+	}
+	il->type = EB_INPUT_LIST;
 
 	eb_debug(DBG_MOD, "Auto-trans initialised\n");
 
@@ -140,6 +162,8 @@ static int trans_finish()
 	
 	while(plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
+		if(il && il->type==EB_INPUT_LIST)
+			l_list_free(il->widget.listbox.list);
 		free(plugin_info.prefs);
 		plugin_info.prefs = il;
 	}
@@ -189,22 +213,6 @@ static void language_select(ebmCallbackData * data)
 	ebmContactData *ecd = (ebmContactData *) data;
 	struct contact *cont;
 	char buf[1024];
-
-	char **languages;
-
-	/* FIXME: do_list_dialog frees the list passed into it. How ridiculous! */
-	languages = (char **) malloc(15 * sizeof(char *));
-	languages[0] = strdup("en (English)");
-	languages[1] = strdup("fr (French)");
-	languages[2] = strdup("de (German)");
-	languages[3] = strdup("it (Italian)");
-	languages[4] = strdup("pt (Portuguese)");
-	languages[5] = strdup("es (Spanish)");
-	languages[6] = strdup("ru (Russian)");
-	languages[7] = strdup("ko (Korean)");
-	languages[8] = strdup("ja (Japanese)");
-	languages[9] = strdup("zh (Chinese)");
-	languages[10] = NULL;
 
 	cont = find_contact_by_nick(ecd->contact);
 
@@ -352,6 +360,7 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 			    const struct contact *contact, const char * s)
 {
 	char *p;
+	char l[3];
 	if (!doTrans) {
 		return strdup(s);
 	}
@@ -360,11 +369,13 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 		return strdup(s);
 	}			// no translation
 
-	if (!strcmp(contact->language, myLanguage)) {
+	strncpy(l, languages[myLanguage], 2);
+	l[2]=0;
+	if (!strcmp(contact->language, l)) {
 		return strdup(s);
 	}			// speak same language
 
-	p = doTranslate(s, myLanguage, contact->language);
+	p = doTranslate(s, l, contact->language);
 	eb_debug(DBG_MOD, "%s translated to %s\n", s, p);
 	return p;
 }
@@ -373,6 +384,7 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 			   const struct contact *contact, const char * s)
 {
 	char *p;
+	char l[3];
 	if (!doTrans) {
 		return strdup(s);
 	}
@@ -381,11 +393,13 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 		return strdup(s);
 	}			// no translation
 
-	if (!strcmp(contact->language, myLanguage)) {
+	strncpy(l, languages[myLanguage], 2);
+	l[2]=0;
+	if (!strcmp(contact->language, l)){
 		return strdup(s);
 	}			// speak same language
 
-	p = doTranslate(s, contact->language, myLanguage);
+	p = doTranslate(s, contact->language, l);
 	return p;
 }
 

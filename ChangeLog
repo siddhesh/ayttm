@@ -1,3 +1,9 @@
+* Tue May 13 2003 04:47 GMT [philip]	0.3.0-189
+- src/dialog.[ch] modules/utility/autotrans.c modules/jabber.c
+let do_list_dialog take a const list
+- utility/autotrans.c
+my language code is a list pref now
+
 * Mon May 12 2003 19:41 GMT [philip]	0.3.0-188
 - src/input_list.[ch] src/prefs.c src/gtk/prefs_window.C
 add EB_INPUT_LIST pref type

@@ -68,7 +68,7 @@ static void list_dialog_callback(GtkWidget *widget,
 	free(ldd);
 }
 
-void do_list_dialog( gchar * message, gchar * title, char **list, void (*action)(char * text, gpointer data), gpointer data )
+void do_list_dialog( char * message, char * title, const char **list, void (*action)(char * text, gpointer data), gpointer data )
 {
 	GtkWidget * dialog_window;
 	GtkWidget * label;
@@ -76,7 +76,7 @@ void do_list_dialog( gchar * message, gchar * title, char **list, void (*action)
 	/*  UNUSED GtkWidget * button_box; */
 	char *Row[2]={NULL, NULL};
 	list_dialog_data *ldata;
-	char **ptr=list;
+	const char **ptr=list;
 
 	eb_debug(DBG_CORE, ">Entering\n");
 	if(list[0]==NULL) {
@@ -99,12 +99,11 @@ void do_list_dialog( gchar * message, gchar * title, char **list, void (*action)
 	gtk_clist_set_column_width (GTK_CLIST(clist), 0, 200);
 	/* Array of pointers to elements, one per column */
 	while(*ptr) {
-		Row[0]=*ptr;
+		Row[0]=strdup(*ptr);
 		ptr++;
 		gtk_clist_append(GTK_CLIST(clist), Row);
 		free(Row[0]);
 	}
-	free(list);
 
 	ldata=calloc(1, sizeof(list_dialog_data));
 	ldata->callback=action;
