@@ -1,3 +1,7 @@
+* Wed May  7 2003 02:23 GMT [colin]	0.3.0-149
+- src/gtk/prefs_window.C
+Fix compile error
+
 * Tue May  6 2003 21:52 GMT [colin]	0.3.0-148
 - modules/acryption/aycryption.c
 Reword things
