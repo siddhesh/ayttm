@@ -1,3 +1,7 @@
+* Tue Sep 30 2003 16:13 GMT [colin]	0.4.2-3
+- modules/msn2/libmsn2/msn_core.C
+Fix crash when https servers are unreacheable
+
 * Sun Sep 28 2003 20:10 GMT [colin]	0.4.2-2
 - po/de_DE.po
 German translation by Christian Becke <christianbecke@web.de>

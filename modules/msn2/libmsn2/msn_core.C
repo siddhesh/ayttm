@@ -648,14 +648,12 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 if(fd == -1 || error)
 	 {
 		 ext_show_error(hdata->conn, "Could not connect to https server.");
-		 ext_closing_connection(hdata->conn);
 		 return;
 	 }
 
 	 ssl_init();
 	 if (!ssl_init_socket(sock)) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
-		 ext_closing_connection(hdata->conn);
 		 return;
 	 }
 	 
@@ -733,7 +731,6 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 if (ext_async_socket(hdata->remote_host, 443, (void *)msn_https_cb2, hdata) < 0) {
 		 if(DEBUG) printf("immediate connect failure to %s\n", hdata->remote_host);    
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server.");
-		 ext_closing_connection(hdata->conn);
 	 }
 }
  	 
@@ -750,13 +747,11 @@ static void msn_https_cb2(int fd, int error, void *data)
 	 if(fd == -1 || error)
 	 {
 		 ext_show_error(hdata->conn, "Could not connect to https server.");
-		 ext_closing_connection(hdata->conn);
 		 return;
 	 }
 
 	 if (!ssl_init_socket(sock)) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
-		 ext_closing_connection(hdata->conn);
 		 return;
 	 }
 	 
