@@ -1,17 +1,23 @@
 Known Issues:
 	0) There is no update to the status window icons to determine
-	if the user is idle or not. They remain an open door. We are 
-	looking into a solution.
+	if the user is idle or not. They will remain an open door when
+	using AIM. We are looking into a solution. 
 
-	1) There is no spell checker support.
+	1) There is a problem when you click into the chat (non-entry)
+	window where occasionally the text will appear somewhere else besides
+	the end.
 
-	2) File transfer support is iffy at best
+	2) There is no spell checker support.
 
-	3) Smiley Themes are untested
+	3) File transfer support is iffy at best
 
-	4) No Yahoo Webcam support
+	4) Smiley Themes are untested
 
-	5) chat_room is untested.
+	5) No Yahoo Webcam support
+
+	6) chat_room is untested.
+
+	7) No Icons
 
 Compilation:
 

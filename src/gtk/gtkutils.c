@@ -132,10 +132,8 @@ void	gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap *outPixmap )
 	if ( (inXPM == NULL) || (outPixmap == NULL) )
 		return;
 		
-#ifndef __MINGW32__
 	tpx = gdk_pixmap_create_from_xpm_d( statuswindow->window, &tbx, NULL, inXPM );
 	gtk_pixmap_set( outPixmap, tpx, tbx );
-#endif
 }
 
 void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos )

@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.37 $",
-	"$Date: 2003/05/16 07:20:18 $",
+	"$Revision: 1.38 $",
+	"$Date: 2003/05/19 18:49:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1069,6 +1069,9 @@ static char **eb_aim_get_status_pixmap( eb_account * account)
 	
 	aad = account->protocol_account_data;
 
+#ifdef __MINGW32__
+	return NULL;
+#endif
 	if (aad->status == AIM_ONLINE)
 		return aim_online_xpm;
 	else
