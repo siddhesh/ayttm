@@ -66,7 +66,7 @@ typedef unsigned long ulong;
 #endif
 
 #define DBG_TOC do_icq_debug
-int do_icq_debug = 1;
+int do_icq_debug = 0;
 
 /*************************************************************************************
  *                             Begin Module Code
@@ -90,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/08 07:39:31 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/08 15:14:48 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

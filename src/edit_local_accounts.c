@@ -262,7 +262,7 @@ static void add_callback(GtkWidget * widget, gpointer data)
 				     checkboxoffxpm, checkboxoffxpmmask);
 	
 	num_accounts++;
-	printf("num_accounts %d\n",num_accounts);
+	eb_debug(DBG_CORE,"num_accounts %d\n",num_accounts);
 	gtk_entry_set_text(GTK_ENTRY(username), "");
 	gtk_entry_set_text(GTK_ENTRY(password), "");
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup), FALSE);

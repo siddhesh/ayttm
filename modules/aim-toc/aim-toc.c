@@ -65,7 +65,7 @@ typedef unsigned long ulong;
 #endif
 
 #define DBG_TOC do_aim_debug
-int do_aim_debug = 1;
+int do_aim_debug = 0;
 
 /*************************************************************************************
  *                             Begin Module Code
@@ -89,8 +89,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/08 12:02:43 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/08 15:14:47 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

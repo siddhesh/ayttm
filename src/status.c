@@ -1774,7 +1774,8 @@ static void menu_set_sensitive(GtkItemFactory *ifactory, const gchar *path,
 {
 	GtkWidget *widget;
 
-	g_return_if_fail(ifactory != NULL);
+	if (ifactory == NULL)
+		return;
 
 	widget = gtk_item_factory_get_item(ifactory, path);
 	if(widget == NULL) {
