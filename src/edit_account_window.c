@@ -59,27 +59,37 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 	gchar *local_acc = strstr(service, " ") +1;
 	eb_local_account *ela = NULL;
 	
-	*(strstr(service, "]")) = '\0';
-	service = strstr(service,"[")+1;
-	
-	printf("service = %s local_acc = %s\n",service, local_acc);
-	service_id = get_service_id( service );
-	ela = find_local_account_by_handle(local_acc, service_id);
+	if (strcmp(service, _("[None]")) && strstr(service, "]")) {
+		*(strstr(service, "]")) = '\0';
+		service = strstr(service,"[")+1;
 
+		printf("service = %s local_acc = %s\n",service, local_acc);
+		service_id = get_service_id( service );
+		ela = find_local_account_by_handle(local_acc, service_id);
+		if (!ela) {
+			ay_do_error(_("Account error"), _("The local account doesn't exist."));
+			return;			
+		}
+		account->ela = ela;
+		account->service_id = service_id;
+	} else if (!strcmp(service, _("[None]"))) {
+		account->ela = NULL; /* let people keep their accounts even if they 
+					can't message them. Maybe they'll readd the 
+					local account later. */
+	} else {
+		ay_do_error(_("Account error"), _("The local account doesn't exist."));
+		return;
+	}
+	
 	g_free(service);
 	
-	account->ela = ela;
-	account->service_id = service_id;
-	
 	gl = find_grouplist_by_name(COMBO_TEXT(group));
-
 	if(!gl) {
 		add_group(COMBO_TEXT(group));
 		gl = find_grouplist_by_name(COMBO_TEXT(group));
 	}
 
 	con = find_contact_in_group_by_nick(COMBO_TEXT(nick), gl);
-
 	if(!con) {
 		con = add_new_contact(COMBO_TEXT(group), COMBO_TEXT(nick), account->service_id);
 	}
@@ -222,8 +232,9 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 					cur_la = strdup(str);
 			}
 		}
+		if (cur_la == NULL) 
+			list = g_list_prepend(list, _("[None]"));
 		gtk_combo_set_popdown_strings(GTK_COMBO(laccount), list);
-		gtk_combo_set_value_in_list(GTK_COMBO(laccount), TRUE, FALSE);
 		g_list_free(list);
 		gtk_table_attach(GTK_TABLE(table), laccount, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(laccount);
@@ -306,6 +317,9 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(laccount)->entry), 
 				cur_la);
 		free(cur_la);	
+	} else {
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(laccount)->entry),
+				_("[None]"));
 	}
 	
 	gtk_frame_set_label(GTK_FRAME(frame), frame_title);

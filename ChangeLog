@@ -1,4 +1,8 @@
 * Wed Apr 30 2003 09:43 GMT [colin]	0.3.0-63
+- src/edit_account_window.c
+Let ea->ela be null if necessary
+
+* Wed Apr 30 2003 09:43 GMT [colin]	0.3.0-63
 - src/edit_local_accounts.c
 Fix ea->ela being shifted after accounts changes
 
