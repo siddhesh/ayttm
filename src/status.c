@@ -1266,13 +1266,18 @@ void contact_update_status(struct contact * ec)
 	   if that one is not logged on, use another) */
 	for (l = ec->accounts; l; l = l->next) {
 		eb_account * account = l->data;
-		if (!ea)
-			ea = account;
-		if (!ea->online && account->online)
-			ea = account;
-		if (ec->default_chatb != ea->service_id && account->online &&
-				ec->default_chatb == account->service_id)
-			ea = account;
+		if(account->online) {
+			if(account->service_id == ec->default_chatb) {
+				ea = account;
+				break;
+			} else if(ea == NULL) {
+				ea = account;
+			}
+		} else if(ea == NULL) {
+			if(account->service_id == ec->default_chatb) {
+				ea = account;
+			}
+		}
 	}
 
 	if (!ea)
@@ -1286,7 +1291,7 @@ void contact_update_status(struct contact * ec)
 	if (ec->icon_handler == -1) {
 		gtkut_set_pixmap(ea->ela, 
 			RUN_SERVICE(ea)->get_status_pixmap(ea), 
-			GTK_PIXMAP(ec->pix));
+			&ec->pix);
 	}
 
 	width = contact_list->allocation.width;
@@ -1349,7 +1354,7 @@ void buddy_update_status(eb_account * ea)
 		if (RUN_SERVICE(ea) && RUN_SERVICE(ea)->get_status_pixmap && ea->pix)
 			gtkut_set_pixmap(ea->ela, 
 				RUN_SERVICE(ea)->get_status_pixmap(ea), 
-				GTK_PIXMAP(ea->pix));
+				&ea->pix);
 	}
 
 	/* since the contact's status info  might be a copy of this

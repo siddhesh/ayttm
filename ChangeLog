@@ -1,3 +1,9 @@
+* Sun Jun  8 2003 15:11 GMT [philip]	0.3.1-26
+- src/gtk/gtkutils.c
+gtkut_set_pixmap was modifying a local copy of the outPixmap
+- src/status.c
+Show the correct icon against contacts.
+
 * Thu Jun  5 2003 22:03 GMT [colin]	0.3.1-25
 - src/chat_window.c src/chat_room.c
 Fix UTF8 chars appearing on windows - patch by Benoit Laniel 

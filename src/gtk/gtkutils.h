@@ -53,7 +53,7 @@ GtkWidget	*gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent );
 */
 GtkWidget	*gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent );
 
-void gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap *outPixmap );
+void gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap **outPixmap );
 
 
 /** Get a widget's position.
