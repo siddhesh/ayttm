@@ -1319,8 +1319,9 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		if (remote_num != current_num)
 			set_tab_red(remote_contact);
 
-	} else if(iGetLocalPref("do_raise_window")) {
-		gdk_window_raise(remote_contact->chatwindow->window->window);	  
+	} else {
+		if(iGetLocalPref("do_raise_window"))
+			gdk_window_raise(remote_contact->chatwindow->window->window);	  
 		gtk_widget_grab_focus(remote_contact->chatwindow->entry);
 	}
 
