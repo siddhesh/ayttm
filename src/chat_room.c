@@ -526,13 +526,11 @@ static void eb_remove_auto_chatroom(eb_local_account *ela, const char *name, int
 	rename(bufftmp, buffin);
 }
 
-static void set_reconnect_on_toggle(GtkWidget * sound_button, gpointer userdata)
+static void set_reconnect_on_toggle(GtkWidget * reconnect_button, gpointer userdata)
 {
   eb_chat_room * cr = (eb_chat_room *)userdata;
-   
-  /*Set the sound_enable variable depending on the toggle button*/
-   
-  if (GTK_TOGGLE_BUTTON (sound_button)->active)
+      
+  if (GTK_TOGGLE_BUTTON (reconnect_button)->active)
     eb_add_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
   else
     eb_remove_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
