@@ -1,7 +1,10 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT([src/main.c])
+dnl We use the new format of AC_INIT
+dnl info --file=autoconf.info --node="Initializing configure" for more info
+AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
-AM_INIT_AUTOMAKE(ayttm, 0.3.0)
+AC_CONFIG_SRCDIR(src/main.c)
+AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
 RELEASE=57
 
 # This is to check modules/core binary compat
