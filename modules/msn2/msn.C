@@ -11,7 +11,7 @@
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program is distributed in the hope thact it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -117,6 +117,7 @@ typedef struct _eb_msn_local_account_data
 	int do_mail_notify_run_script;
 	char do_mail_notify_script_name[MAX_PREF_LEN];
 	int login_invisible;
+	int prompt_password;
 } eb_msn_local_account_data;
 
 
@@ -170,8 +171,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.64 $",
-	"$Date: 2003/10/09 10:35:18 $",
+	"$Revision: 1.65 $",
+	"$Date: 2003/10/10 18:51:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -480,6 +481,13 @@ static void msn_init_account_prefs(eb_local_account *ela)
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
+	il->widget.checkbox.value = &mlad->prompt_password;
+	il->widget.checkbox.name = "prompt_password";
+	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
 	il->widget.checkbox.name = "CONNECT";
 	il->widget.checkbox.label= _("_Connect at startup");
@@ -690,20 +698,12 @@ static void ay_msn_cancel_connect(void *data)
 	eb_msn_logout(ela);
 }
 
-static void eb_msn_login( eb_local_account * account )
+static void eb_msn_finish_login(const char *password, eb_local_account *account)
 {
-	eb_msn_local_account_data * mlad;
-	int port;
-
-	if(account->connected || account->connecting) {
-		eb_debug(DBG_MSN, "called while already logged or logging in\n");
-		return;
-	}
-	
-	account->connecting = 1;
-	
-	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
+	int port=atoi(msn_port);
 	char buff[1024];
+	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
+	
 	snprintf(buff, sizeof(buff), _("Logging in to MSN account: %s"), account->handle);
 	mlad->activity_tag = ay_activity_bar_add(buff, ay_msn_cancel_connect, account);
 
@@ -715,9 +715,32 @@ static void eb_msn_login( eb_local_account * account )
 	  mlad->mc->tags[a].tag_w=-1; }
 
 	ref_count++;
-	msn_init(mlad->mc, account->handle, mlad->password);
-	port=atoi(msn_port);
+	
+	msn_init(mlad->mc, account->handle, password);
 	msn_connect(mlad->mc, msn_server, port);
+}
+
+static void eb_msn_login( eb_local_account * account )
+{
+	eb_msn_local_account_data * mlad;
+	char buff[1024];
+	if(account->connected || account->connecting) {
+		eb_debug(DBG_MSN, "called while already logged or logging in\n");
+		return;
+	}
+	
+	account->connecting = 1;
+	
+	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
+
+	if (mlad->prompt_password) {
+		snprintf(buff, sizeof(buff), _("MSN password for: %s"), account->handle);
+		do_password_input_window(buff, "", 
+				(void(*)(const char*,gpointer))eb_msn_finish_login,
+			       	account);
+	} else {
+		eb_msn_finish_login(mlad->password, account);
+	}
 }
 
 static void eb_msn_connected(eb_local_account * account)

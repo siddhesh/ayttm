@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.39 $",
-	"$Date: 2003/10/10 07:14:22 $",
+	"$Revision: 1.40 $",
+	"$Date: 2003/10/10 18:51:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -335,7 +335,7 @@ static void eb_jabber_login( eb_local_account * account )
     
 	jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
 	if(jlad->prompt_password) {
-		snprintf(buff, sizeof(buff), _("Jabber! Password for: %s"), account->handle);
+		snprintf(buff, sizeof(buff), _("Jabber password for: %s"), account->handle);
 		do_password_input_window(buff, "", eb_jabber_finish_login, account);
 	} else {
 		eb_jabber_finish_login(jlad->password, account);
