@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.52 $",
-	"$Date: 2003/08/12 10:37:06 $",
+	"$Revision: 1.53 $",
+	"$Date: 2003/08/30 12:02:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -307,7 +307,7 @@ static eb_local_account * aim_find_local_account_by_conn(toc_conn * conn)
 		if(ela->service_id == SERVICE_INFO.protocol_id) 
 		{
 			struct eb_aim_local_account_data * alad = (struct eb_aim_local_account_data *)ela->protocol_local_account_data;
-		    if( alad->conn == conn )
+		        if( alad->conn == conn )
 			{
 				return ela;
 			}
@@ -399,7 +399,7 @@ static void eb_aim_chat_update_buddy(toc_conn * conn, char * id,
 	}
 	if(online)
 	{
-		eb_account * ea = find_account_by_handle(user, SERVICE_INFO.protocol_id);
+		eb_account * ea = find_account_with_ela(user, aim_find_local_account_by_conn(conn));
 		if( ea)
 		{
 			eb_chat_room_buddy_arrive(ecr, ea->account_contact->nick, user );
@@ -502,15 +502,17 @@ static void eb_aim_error_message( char * message )
 	ay_do_error( _("AIM Error"), message );
 }
 	
-static void eb_aim_oncoming_buddy(char * user, int online, time_t idle, int evil, int unavailable )
+static void eb_aim_oncoming_buddy(toc_conn *conn, char * user, int online, time_t idle, int evil, int unavailable )
 {
-	eb_account * ea = find_account_by_handle( user, SERVICE_INFO.protocol_id);
+	eb_account * ea = NULL;
 	struct eb_aim_account_data * aad ;
 	struct eb_aim_local_account_data *alad;
        
+	ea = find_account_with_ela( user, aim_find_local_account_by_conn(conn));
 	if(!ea)
 		return;
-
+	
+	
 	alad = ea->ela?(struct eb_aim_local_account_data *)ea->ela->protocol_local_account_data:NULL;
 	aad = ea->protocol_account_data;
 	if (alad && !l_list_find(alad->aim_buddies, ea->handle))
@@ -543,7 +545,7 @@ static void eb_aim_oncoming_buddy(char * user, int online, time_t idle, int evil
 static void eb_aim_toc_chat_im_in( toc_conn * conn, char * id, char * user, char * message )
 {
 	eb_chat_room * ecr = find_chat_room_by_id( id );
-	eb_account * ea = find_account_by_handle(user, SERVICE_INFO.protocol_id);
+	eb_account * ea = find_account_with_ela(user, aim_find_local_account_by_conn(conn));
 	char * message2 = linkify(message);
 
 	if(!ecr)
@@ -571,7 +573,7 @@ static void eb_aim_user_info(toc_conn * conn, char * user, char * message )
 	eb_local_account * reciever = NULL;
 
 
-	sender = find_account_by_handle(user, ela->service_id);
+	sender = find_account_with_ela(user, ela);
 	if(sender==NULL)
 	{
 		eb_account * ea = g_new0(eb_account, 1);
@@ -624,7 +626,7 @@ static void eb_aim_new_user(toc_conn *conn, char * group, char * f_handle)
 	else
 		fname = handle;
 		
-	ea = find_account_by_handle( handle, SERVICE_INFO.protocol_id );
+	ea = find_account_with_ela( handle, ela);
 
 	if(!ea)
 	{
@@ -679,7 +681,7 @@ static void eb_aim_parse_incoming_im(toc_conn * conn, char * user, char * messag
 
 		eb_debug(DBG_TOC, "eb_aim_parse_incoming_im %d %d, %d %d\n", conn->fd, conn->seq_num, alad->conn->fd, alad->conn->seq_num );
 
-		sender = find_account_by_handle(user, ela->service_id);
+		sender = find_account_with_ela(user, ela);
 		if(sender==NULL)
 		{
 			eb_account * ea = g_new0(eb_account, 1);
@@ -988,9 +990,9 @@ static void eb_aim_logout( eb_local_account * account )
 	alad->is_setting_state = 0;
 	
 	/* Make sure each AIM buddy gets logged off from the status window */
-	for(l = alad->aim_buddies; l; l=l->next)
+	for(l = alad->aim_buddies; l && alad->conn; l=l->next)
 	{
-		eb_aim_oncoming_buddy(l->data, FALSE, 0, 0, FALSE);
+		eb_aim_oncoming_buddy(alad->conn, l->data, FALSE, 0, 0, FALSE);
 	}
 
 
@@ -1279,7 +1281,7 @@ static void eb_aim_rename_group(eb_local_account *ela, const char *old_group, co
 	struct eb_aim_local_account_data *alad = (struct eb_aim_local_account_data *)ela->protocol_local_account_data;	
 	for(l = alad->aim_buddies; l; l=l->next)
 	{
-		eb_account *ea = find_account_by_handle(l->data, SERVICE_INFO.protocol_id);
+		eb_account *ea = find_account_with_ela(l->data, ela);
 		if (ea) 
 			eb_debug(DBG_TOC, "checking if we should move %s from %s\n",ea->handle, ea->account_contact->group->name);
 		if (ea && !strcmp(ea->account_contact->group->name, new_group)) {

@@ -1,3 +1,7 @@
+* Sat Aug 30 2003 11:41 GMT [colin]	0.4.0-11
+- modules/aim-toc
+Always use ea->ela instead of SERVICE_INFO.protocol_id
+
 * Sat Aug 30 2003 11:41 GMT [colin]	0.4.0-10
 - modules/irc/irc.c
 Get rid of accounts with no associated ela

@@ -54,7 +54,7 @@ void (*toc_update_file_status)( int tag, unsigned long progress );
 void (*toc_complete_file_recieve)( int tag );
 void (*toc_im_in)(toc_conn  * conn, char * user, char * message );
 void (*toc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
-void (*update_user_status)(char * user, int online, time_t idle, int evil, int unavailable );
+void (*update_user_status)(toc_conn *conn, char * user, int online, time_t idle, int evil, int unavailable );
 void (*toc_error_message)(char * message);
 void (*toc_disconnect)(toc_conn * conn);
 void (*toc_chat_invite)(toc_conn * conn, char * id, char * name, 
