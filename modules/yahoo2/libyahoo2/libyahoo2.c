@@ -2565,7 +2565,7 @@ static struct yahoo_packet * yahoo_getdata(struct yahoo_input_data * yid)
 	DEBUG_MSG(("Yahoo Service: 0x%02x Status: %d", pkt->service,
 				pkt->status));
 	pkt->id = yahoo_get32(yid->rxqueue + pos); pos += 4;
-DEBUG_MSG(("Session ID = %d\n", pkt->id));
+
 	yd->session_id = pkt->id;
 
 	yahoo_packet_read(pkt, yid->rxqueue + pos, pktlen);
