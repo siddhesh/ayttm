@@ -1,3 +1,7 @@
+* Mon Jul 07 2003 20:21 GMT [colin]	0.3.2-12
+- src/chat_room.c
+Fix compilation of aim & icq
+
 * Mon Jul 07 2003 14:37 GMT [edward]	0.3.2-11
 - mingw32/Makefile.am
 Missing some .la files from source distribution

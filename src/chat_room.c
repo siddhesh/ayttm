@@ -798,6 +798,11 @@ void destroy_chat_room (GtkWidget *widget, gpointer data)
 	}
 }
 
+void eb_destroy_chat_room (eb_chat_room *room) 
+{
+	destroy_chat_room(NULL, room);
+}
+
 static void destroy(GtkWidget * widget, gpointer data)
 {
 	eb_chat_room * ecr = data;
