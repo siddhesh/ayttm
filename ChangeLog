@@ -1,4 +1,8 @@
-* Wed Apr 30 2003 12:59 GMT [colin]	0.3.0-82
+* Wed Apr 30 2003 14:00 GMT [philip]	0.3.0-83
+- src/util.c
+compile before commit, not the other way around
+
+* Wed Apr 30 2003 13:39 GMT [colin]	0.3.0-82
 - src/main.c
 fix getopt patch
 
