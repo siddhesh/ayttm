@@ -1611,13 +1611,18 @@ static void yahoo_process_buddydel(struct yahoo_input_data *yid, struct yahoo_pa
 		struct yahoo_pair *pair = l->data;
 		if (pair->key == 1)
 			me = pair->value;
-		if (pair->key == 7)
+		else if (pair->key == 7)
 			who = pair->value;
-		if (pair->key == 65)
+		else if (pair->key == 65)
 			where = pair->value;
-		if (pair->key == 66)
+		else if (pair->key == 66)
 			unk_66 = strtol(pair->value, NULL, 10);
+		else
+			DEBUG_MSG(("unknown key: %d = %s", pair->key, pair->value));
 	}
+
+	if(!who)
+		return;
 	
 	bud = y_new0(struct yahoo_buddy, 1);
 	bud->id = strdup(who);
@@ -1971,7 +1976,7 @@ static void yahoo_yab_read(struct yab *yab, unsigned char *d, int len)
 	data[len]='\0';
 
 	DEBUG_MSG(("Got yab: %s", data));
-	st = strstr(data, "userid=\"");
+	st = en = strstr(data, "userid=\"");
 	if(st) {
 		st += strlen("userid=\"");
 		en = strchr(st, '"'); *en++ = '\0';
