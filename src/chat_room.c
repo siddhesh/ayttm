@@ -609,18 +609,8 @@ void open_join_chat_window()
 	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_name, 1, 2, 0, 1);
 	gtk_widget_show(chat_room_name);
 
-	public_chkbtn = gtk_check_button_new_with_label(_("Chatroom is public"));
-	gtk_table_attach_defaults (GTK_TABLE(table), public_chkbtn, 1, 2, 1, 2);
-	gtk_widget_set_sensitive(public_chkbtn, FALSE);
-	gtk_widget_show(public_chkbtn);
-
-	public_list_btn = gtk_button_new_with_label(_("List public chatrooms..."));
-	gtk_table_attach_defaults (GTK_TABLE(table), public_list_btn, 1, 2, 2, 3);
-	gtk_widget_set_sensitive(public_list_btn, FALSE);
-	gtk_widget_show(public_list_btn);
-
 	label = gtk_label_new(_("Local account: "));
-	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 3, 4);
+	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 1, 2);
 	gtk_widget_show(label);
 
 	chat_room_type = gtk_combo_new();
@@ -628,8 +618,18 @@ void open_join_chat_window()
 	list = g_list_prepend(list, strdup(""));
 	gtk_combo_set_popdown_strings(GTK_COMBO(chat_room_type), list);
 	g_list_free(list);
-	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_type, 1, 2, 3, 4);
+	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_type, 1, 2, 1, 2);
 	gtk_widget_show(chat_room_type);
+
+	public_chkbtn = gtk_check_button_new_with_label(_("Chatroom is public"));
+	gtk_table_attach_defaults (GTK_TABLE(table), public_chkbtn, 1, 2, 2, 3);
+	gtk_widget_set_sensitive(public_chkbtn, FALSE);
+	gtk_widget_show(public_chkbtn);
+
+	public_list_btn = gtk_button_new_with_label(_("List public chatrooms..."));
+	gtk_table_attach_defaults (GTK_TABLE(table), public_list_btn, 1, 2, 3, 4);
+	gtk_widget_set_sensitive(public_list_btn, FALSE);
+	gtk_widget_show(public_list_btn);
 
 	/* set up a frame (hopefully) */
 

@@ -80,6 +80,49 @@ void do_list_dialog( char * message, char * title, const char **list, void (*act
 	do_llist_dialog(message, title, tmp, action, data);
 }
 
+static int sig1 = 0, sig2 = 0;
+static GtkWidget *s_scwin = NULL;
+static gboolean list_dialog_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
+{
+	char c;
+	GtkWidget *clist = GTK_WIDGET(data);
+	int i = 0;
+	GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+
+	if (modifiers == 0) {
+		c = event->keyval;
+		if (c >= GDK_A && c <= GDK_Z) {
+			c += (GDK_a - GDK_A);
+		}
+		
+		if (c >= GDK_a && c <= GDK_z) {
+			char *text=NULL;
+			while (gtk_clist_get_text(GTK_CLIST(clist), i, 0, &text)) {
+				if (s_scwin && text && (text[0] == c
+				|| (text[0]=='#' && text[1]==c) /*irc hack*/ )) {
+					GtkAdjustment *ga;
+					eb_debug(DBG_CORE, "found %s with %c\n", text, c);
+
+					gtk_signal_handler_block(GTK_OBJECT(clist), sig1);
+					gtk_signal_handler_block(GTK_OBJECT(clist), sig2);
+					gtk_clist_select_row(GTK_CLIST(clist), i, 0);
+					
+					gtk_clist_moveto(GTK_CLIST(clist), i, 0, 0.5, 0.5);
+					ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(s_scwin));
+					gtk_adjustment_set_value(ga, (GTK_CLIST(clist)->row_height + 1) * i);
+					gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(s_scwin), ga);
+								
+					gtk_signal_handler_unblock(GTK_OBJECT(clist), sig1);
+					gtk_signal_handler_unblock(GTK_OBJECT(clist), sig2);
+					return TRUE;
+				}
+				i++;
+			}
+		}
+	}
+	return TRUE;
+}
+
 void do_llist_dialog( char * message, char * title, LList *list, void (*action)(char * text, gpointer data), gpointer data )
 {
 	GtkWidget * dialog_window;
@@ -122,11 +165,15 @@ void do_llist_dialog( char * message, char * title, LList *list, void (*action)(
 	ldata=calloc(1, sizeof(list_dialog_data));
 	ldata->callback=action;
 	ldata->data=data;
-	gtk_signal_connect(GTK_OBJECT(clist),
+	gtk_signal_connect(GTK_OBJECT(dialog_window),
+			"key_press_event",
+			GTK_SIGNAL_FUNC(list_dialog_key_press),
+			clist);
+	sig1 = gtk_signal_connect(GTK_OBJECT(clist),
 		"select_row",
 		GTK_SIGNAL_FUNC(list_dialog_callback),
 		ldata);
-	gtk_signal_connect_object(GTK_OBJECT(clist),
+	sig2 = gtk_signal_connect_object(GTK_OBJECT(clist),
 		"select_row",
 		GTK_SIGNAL_FUNC(gtk_widget_destroy),
 		(gpointer)dialog_window);
@@ -134,6 +181,7 @@ void do_llist_dialog( char * message, char * title, LList *list, void (*action)(
 	/* End list construction */
 
 	scwin = gtk_scrolled_window_new(NULL, NULL);
+	s_scwin = scwin;
 	gtk_scrolled_window_add_with_viewport
 		(GTK_SCROLLED_WINDOW(scwin),clist);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),

@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.22 $",
-	"$Date: 2003/06/14 11:32:59 $",
+	"$Revision: 1.23 $",
+	"$Date: 2003/06/27 11:44:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -690,7 +690,8 @@ static void irc_parse (eb_local_account * ela, char *buff)
 	else if (!strncmp(split_buff[1], "322", 3)) /* RPL_LIST */
 	{
 		buff2 = g_strsplit(buff, " ", -1);
-		ila->channel_list = l_list_append(ila->channel_list, strdup(buff2[3]));
+		ila->channel_list = l_list_insert_sorted(ila->channel_list, strdup(buff2[3]),
+					strcasecmp);
 		g_strfreev (buff2);
 	}
 	else if (!strncmp(split_buff[1], "322", 3)) /* RPL_LISTEND */
