@@ -173,8 +173,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/02 08:40:38 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/02 09:09:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1366,7 +1366,7 @@ void ext_got_group(char *id, char *name)
 		eb_name = _("Buddies");
 		t = value_pair_get_value(msn_grouplist, eb_name);
 		if (!t) {
-			msn_grouplist = value_pair_add (msn_grouplist, eb_name, strdup(id));
+			msn_grouplist = value_pair_add (msn_grouplist, eb_name, id);
 			eb_debug(DBG_MSN,"got group id %s, %s\n",id,eb_name);
 		}
 		else {
@@ -1377,7 +1377,7 @@ void ext_got_group(char *id, char *name)
 	eb_name = Utf8ToStr(name);
 	t = value_pair_get_value(msn_grouplist, eb_name);
 	if (!t || !strcmp("-1", t)) {
-		msn_grouplist = value_pair_add (msn_grouplist, eb_name, strdup(id));
+		msn_grouplist = value_pair_add (msn_grouplist, eb_name, id);
 		eb_debug(DBG_MSN,"got group id %s, %s\n",id,eb_name);
 	}
 	if (t) {
@@ -1388,6 +1388,8 @@ void ext_got_group(char *id, char *name)
 	if(strcmp(name,"~") && !find_grouplist_by_name(eb_name)
 	&& !group_mgmt_check_moved(eb_name)) /* if we won't remove it in ten seconds */
 		add_group(eb_name);
+	
+	free(eb_name);
 }
 
 typedef struct _movecb_data

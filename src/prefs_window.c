@@ -1755,9 +1755,9 @@ static void write_module_prefs(FILE *fp)
 		master_prefs=value_pair_remove(master_prefs, "load");
 		current_prefs=eb_input_to_value_pair(epi->pi.prefs);
 		if(epi->status==PLUGIN_LOADED)
-			value_pair_add(current_prefs, "load", "1");
+			current_prefs = value_pair_add(current_prefs, "load", "1");
 		else
-			value_pair_add(current_prefs, "load", "0");
+			current_prefs = value_pair_add(current_prefs, "load", "0");
 		master_prefs=value_pair_update(master_prefs, current_prefs);
 		SetPref(epi->name, master_prefs);
 		value_pair_print_values(master_prefs, fp, 2);

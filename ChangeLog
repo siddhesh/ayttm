@@ -1,3 +1,9 @@
+* Wed Apr 02 2003 09:07 GMT [colin]	0.2.3-pre73
+- src/add_contact_window.c
+  src/prefs_window.c
+  modules/msn2/msn.C
+fix more leaks
+
 * Wed Apr 02 2003 08:34 GMT [philip]	0.2.3-pre72
 - modules/msn2
 free memory allocated in double dimensional array
