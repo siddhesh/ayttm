@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ayttm\n"
-"POT-Creation-Date: 2003-07-16 15:36+0200\n"
+"POT-Creation-Date: 2003-07-19 13:14+0200\n"
 "PO-Revision-Date: 2003-07-03 11:28--100\n"
 "Last-Translator: Colin Leroy <colin@colino.net>\n"
 "Language-Team:  <fabricio@linuxcult.com>\n"
@@ -55,14 +55,14 @@ msgstr "Impossível resolver o host. "
 
 #: modules/aim-toc/aim-toc.c:119 modules/icq-toc/icq-toc.c:119
 #: modules/icq/icq.c:120 modules/msn2/msn.C:188
-#: modules/workwizu/workwizu.c:141 src/gtk/prefs_window.C:2121
+#: modules/workwizu/workwizu.c:141 src/gtk/prefs_window.C:2123
 msgid "Server:"
 msgstr "Servidor:"
 
 #: modules/aim-toc/aim-toc.c:126 modules/icq-toc/icq-toc.c:126
 #: modules/icq/icq.c:127 modules/jabber/jabber.c:116 modules/msn2/msn.C:195
 #: modules/smtp/smtp.c:109 modules/workwizu/workwizu.c:148
-#: src/gtk/prefs_window.C:2137
+#: src/gtk/prefs_window.C:2139
 msgid "Port:"
 msgstr "Porta:"
 
@@ -117,8 +117,8 @@ msgstr "Usuário está atualmente ausente"
 #: src/chat_window.c:1292 src/chat_window.c:1294 src/chat_window.c:2027
 #: src/chat_window.c:2149 src/chat_window.c:2281 src/contact_util.C:363
 #: src/crash.c:460 src/crash.c:479 src/edit_account_window.c:316
-#: src/edit_account_window.c:348 src/status.c:1111 src/status.c:1527
-#: src/status.c:1568 src/util.c:1043 src/util.c:1071 src/util.c:1180
+#: src/edit_account_window.c:348 src/status.c:1163 src/status.c:1579
+#: src/status.c:1620 src/util.c:1043 src/util.c:1071 src/util.c:1180
 msgid "Unknown"
 msgstr "Desconhecido"
 
@@ -774,8 +774,8 @@ msgstr "O arquivo %s foi transferido com sucesso."
 #: modules/msn2/msn.C:1205 modules/msn2/msn.C:1946 modules/yahoo2/yahoo.c:2425
 #: modules/yahoo2/yahoo.c:2466 src/chat_window.c:647 src/chat_window.c:1295
 #: src/contact_util.C:508 src/contact_util.C:512 src/offline_queue_mgmt.c:158
-#: src/offline_queue_mgmt.c:160 src/status.c:1112 src/status.c:1448
-#: src/status.c:1480 src/util.c:1078 src/util.c:1210 src/util.c:1214
+#: src/offline_queue_mgmt.c:160 src/status.c:1164 src/status.c:1500
+#: src/status.c:1532 src/util.c:1078 src/util.c:1210 src/util.c:1214
 msgid "Ignore"
 msgstr "Ignorar"
 
@@ -1593,7 +1593,7 @@ msgstr ""
 msgid "<body bgcolor=#F9E589 width=*><b> %s has left the chat.</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s deixou a conversa. </b></body> "
 
-#: src/chat_room.c:1277 src/status.c:2046
+#: src/chat_room.c:1277 src/status.c:2100
 msgid "Online"
 msgstr "On-line"
 
@@ -2036,7 +2036,7 @@ msgid "Screen Name:"
 msgstr "Nome:"
 
 #. Password Section
-#: src/edit_local_accounts.c:544 src/gtk/prefs_window.C:2193
+#: src/edit_local_accounts.c:544 src/gtk/prefs_window.C:2195
 msgid "Password:"
 msgstr "Senha:"
 
@@ -2424,39 +2424,44 @@ msgstr "Habilite depurar mensagens"
 msgid "Show tooltips in status window"
 msgstr "Usar abas em janelas de conversa"
 
-#: src/gtk/prefs_window.C:2027
+#: src/gtk/prefs_window.C:1968
+#, fuzzy
+msgid "Check for latest version when signing on all"
+msgstr "Restabeleçer última conversação quando abrir uma janela de conversa"
+
+#: src/gtk/prefs_window.C:2029
 msgid "Select your browser"
 msgstr "Selecione seu Navegador"
 
-#: src/gtk/prefs_window.C:2067
+#: src/gtk/prefs_window.C:2069
 msgid "Use a proxy server"
 msgstr "Use um servidor Proxy"
 
-#: src/gtk/prefs_window.C:2070
+#: src/gtk/prefs_window.C:2072
 msgid "Proxy Type"
 msgstr "Tipo de Proxy"
 
-#: src/gtk/prefs_window.C:2091
+#: src/gtk/prefs_window.C:2093
 msgid "HTTP"
 msgstr "HTTP"
 
-#: src/gtk/prefs_window.C:2099
+#: src/gtk/prefs_window.C:2101
 msgid "SOCKS4"
 msgstr "SOCKS4"
 
-#: src/gtk/prefs_window.C:2107
+#: src/gtk/prefs_window.C:2109
 msgid "SOCKS5"
 msgstr "SOCKS5"
 
-#: src/gtk/prefs_window.C:2157
+#: src/gtk/prefs_window.C:2159
 msgid "Proxy requires authentication"
 msgstr "Proxy requer autenticação"
 
-#: src/gtk/prefs_window.C:2171
+#: src/gtk/prefs_window.C:2173
 msgid "User ID:"
 msgstr "ID de Usuário:"
 
-#: src/gtk/prefs_window.C:2299
+#: src/gtk/prefs_window.C:2301
 msgid ""
 "Note: Conversion is made using iconv() which is UNIX98 standard.\n"
 "For list of possible encodings run 'iconv --list'."
@@ -2464,63 +2469,63 @@ msgstr ""
 "Nota: Conversão usa iconv() que é UNIX98 padrão. \n"
 "  Para lista de possíveis codificações execute ' iconv--list'."
 
-#: src/gtk/prefs_window.C:2303
+#: src/gtk/prefs_window.C:2305
 msgid "Use recoding in conversations"
 msgstr "Usar recodificação nas conversações"
 
-#: src/gtk/prefs_window.C:2318
+#: src/gtk/prefs_window.C:2320
 msgid "Local encoding:"
 msgstr "Codificação local:"
 
-#: src/gtk/prefs_window.C:2339
+#: src/gtk/prefs_window.C:2341
 msgid "Remote encoding:"
 msgstr "Codificação Remota:"
 
-#: src/gtk/prefs_window.C:2405 src/status.c:508
+#: src/gtk/prefs_window.C:2407 src/status.c:508
 msgid "Info"
 msgstr "Info"
 
-#: src/gtk/prefs_window.C:2415
+#: src/gtk/prefs_window.C:2417
 msgid "Description:"
 msgstr "Descrição:"
 
-#: src/gtk/prefs_window.C:2416
+#: src/gtk/prefs_window.C:2418
 msgid "Version:"
 msgstr "Versão:"
 
-#: src/gtk/prefs_window.C:2417
+#: src/gtk/prefs_window.C:2419
 msgid "Date:"
 msgstr "Data:"
 
-#: src/gtk/prefs_window.C:2418
+#: src/gtk/prefs_window.C:2420
 msgid "Path:"
 msgstr "Caminho:"
 
-#: src/gtk/prefs_window.C:2419
+#: src/gtk/prefs_window.C:2421
 msgid "Status:"
 msgstr "Estado:"
 
-#: src/gtk/prefs_window.C:2431
+#: src/gtk/prefs_window.C:2433
 msgid "Plugin Error"
 msgstr "Erro de Plugin"
 
-#: src/gtk/prefs_window.C:2470
+#: src/gtk/prefs_window.C:2472
 msgid "[The module '"
 msgstr "[O módulo '"
 
-#: src/gtk/prefs_window.C:2474
+#: src/gtk/prefs_window.C:2476
 msgid "' is not loaded]"
 msgstr "' não está carregado]"
 
-#: src/gtk/prefs_window.C:2476
+#: src/gtk/prefs_window.C:2478
 msgid "' has no preferences]"
 msgstr "' não tem nenhuma preferência]"
 
-#: src/gtk/prefs_window.C:2565
+#: src/gtk/prefs_window.C:2567
 msgid "Unload Module"
 msgstr "Descarregue Módulo"
 
-#: src/gtk/prefs_window.C:2569
+#: src/gtk/prefs_window.C:2571
 msgid "Load Module"
 msgstr "Carregue Módulo"
 
@@ -2764,167 +2769,191 @@ msgstr "Deletar a Conta..."
 msgid "Info..."
 msgstr "Info..."
 
-#: src/status.c:817
+#: src/status.c:659
+#, c-format
+msgid ""
+"A new release of ayttm is available.\n"
+"Last version is %s, while you have %s.\n"
+msgstr ""
+
+#: src/status.c:661
+#, fuzzy
+msgid "New release available !"
+msgstr "Nenhum log disponível"
+
+#: src/status.c:667
+msgid "No new release"
+msgstr ""
+
+#: src/status.c:667
+msgid "You have the latest release of ayttm installed."
+msgstr ""
+
+#: src/status.c:869
 msgid "Account vanished after add_account_line.\n"
 msgstr "Conta desapareceu depois de add_account_line.\n"
 
-#: src/status.c:830
+#: src/status.c:882
 msgid "Account missing while online?\n"
 msgstr "Conta perdida enquanto on-line?\n"
 
-#: src/status.c:1016
+#: src/status.c:1068
 #, c-format
 msgid "%s since %s"
 msgstr "%s desde %s"
 
-#: src/status.c:1416 src/status.c:2100
+#: src/status.c:1468 src/status.c:2154
 msgid "-"
 msgstr "-"
 
-#: src/status.c:1455
+#: src/status.c:1507
 #, c-format
 msgid "%s is now online"
 msgstr "%s está agora on-line"
 
-#: src/status.c:1489
+#: src/status.c:1541
 #, c-format
 msgid "%s is now offline"
 msgstr "%s está agora offline"
 
-#: src/status.c:1704
+#: src/status.c:1756
 msgid "eb_smiley_function: calling callback\n"
 msgstr "eb_smiley_function: calling callback\n"
 
-#: src/status.c:1712
+#: src/status.c:1764
 msgid "eb_import_function: calling callback\n"
 msgstr "eb_import_function: calling callback\n"
 
-#: src/status.c:1722
+#: src/status.c:1774
 msgid "eb_profile_function: calling callback\n"
 msgstr "eb_profile_function: calling callback\n"
 
-#: src/status.c:1861
+#: src/status.c:1913
 msgid "/_Chat"
 msgstr "/_Chat"
 
-#: src/status.c:1862
+#: src/status.c:1914
 msgid "/Chat/Set _status"
 msgstr "/Chat/Definir_estado"
 
-#: src/status.c:1864
+#: src/status.c:1916
 msgid "/Chat/Sign o_n all"
 msgstr "/Chat/E_ntrar todos"
 
-#: src/status.c:1866
+#: src/status.c:1918
 msgid "/Chat/Sign o_ff all"
 msgstr "/Chat/Sa_ir todos"
 
-#: src/status.c:1868 src/status.c:1873 src/status.c:1875
+#: src/status.c:1920 src/status.c:1925 src/status.c:1927
 msgid "/Chat/---"
 msgstr "/Chat/---"
 
-#: src/status.c:1869
+#: src/status.c:1921
 msgid "/Chat/New group _chat..."
 msgstr "/Chat/Novo grupo de _chat..."
 
-#: src/status.c:1871
+#: src/status.c:1923
 msgid "/Chat/Set as _away..."
 msgstr "/Chat/Definir como_ausente..."
 
-#: src/status.c:1874
+#: src/status.c:1926
 msgid "/Chat/_Smileys"
 msgstr "/Chat/_Smileys"
 
-#: src/status.c:1876
+#: src/status.c:1928
 msgid "/Chat/_Quit"
 msgstr "/Chat/_Sair"
 
-#: src/status.c:1878
+#: src/status.c:1930
 msgid "/_Edit"
 msgstr "/_Edite"
 
-#: src/status.c:1879
+#: src/status.c:1931
 msgid "/Edit/_Preferences..."
 msgstr "/Edite/_Preferências..."
 
-#: src/status.c:1881
+#: src/status.c:1933
 msgid "/Edit/_My accounts..."
 msgstr "/Edite/Editar Conta..."
 
-#: src/status.c:1883 src/status.c:1888
+#: src/status.c:1935 src/status.c:1940
 msgid "/Edit/---"
 msgstr "/Edit/---"
 
-#: src/status.c:1884
+#: src/status.c:1936
 msgid "/Edit/Add a con_tact account..."
 msgstr "/Edit/Adicionar uma conta de con_tato..."
 
-#: src/status.c:1886
+#: src/status.c:1938
 msgid "/Edit/Add a _group..."
 msgstr "/Edit/Adicionar um _grupo..."
 
-#: src/status.c:1889
+#: src/status.c:1941
 msgid "/Edit/_Import"
 msgstr "/Edit/_Importar"
 
-#: src/status.c:1890
+#: src/status.c:1942
 msgid "/Edit/Set _profile"
 msgstr "/Edit/Definir_profile"
 
-#: src/status.c:1892
+#: src/status.c:1944
 msgid "/_Help"
 msgstr "/_Ajuda"
 
-#: src/status.c:1894
+#: src/status.c:1946
 msgid "/Help/_Web site..."
 msgstr "/Ajuda/_Web site"
 
-#: src/status.c:1895
+#: src/status.c:1947
 msgid "/Help/_Manual..."
 msgstr "/Ajuda/_Manual"
 
-#: src/status.c:1896 src/status.c:1901
+#: src/status.c:1948 src/status.c:1951 src/status.c:1955
 msgid "/Help/---"
 msgstr "/Ajuda/---"
 
-#: src/status.c:1898
+#: src/status.c:1950
 msgid "/Help/_About Ayttm..."
 msgstr "/Ajuda/Sobr_e Ayttm"
 
-#: src/status.c:1902
+#: src/status.c:1952
+msgid "/Help/_Check for new release"
+msgstr ""
+
+#: src/status.c:1956
 msgid "/Help/Dump structures"
 msgstr "/Ajuda/Estruturas Dump"
 
-#: src/status.c:1929
+#: src/status.c:1983
 #, fuzzy
 msgid "/Chat/Set status"
 msgstr "/Chat/Definir_estado"
 
-#: src/status.c:1930
+#: src/status.c:1984
 msgid "/Chat/New group chat..."
 msgstr "/Chat/Novo grupo de chat..."
 
-#: src/status.c:1931
+#: src/status.c:1985
 msgid "/Chat/Set as away..."
 msgstr "/Chat/Definir como ausente..."
 
-#: src/status.c:1932
+#: src/status.c:1986
 msgid "/Chat/Sign off all"
 msgstr "/Chat/Sair todos"
 
-#: src/status.c:1933
+#: src/status.c:1987
 msgid "/Chat/Sign on all"
 msgstr "/Chat/Entrar todos"
 
-#: src/status.c:2055
+#: src/status.c:2109
 msgid "Contacts"
 msgstr "Contatos"
 
-#: src/status.c:2064
+#: src/status.c:2118
 msgid "Accounts"
 msgstr "Contas"
 
-#: src/status.c:2090
+#: src/status.c:2144
 msgid "Welcome To Ayttm"
 msgstr "Bem-vindo ao Ayttm"
 
@@ -3077,6 +3106,16 @@ msgid "No callback defined in call to eb_generic_menu_function, ignoring call!"
 msgstr ""
 "Nenhum callback definido na chamada a eb_generic_menu_function, ignorando "
 "chamada!"
+
+#: src/util.c:1903
+#, fuzzy
+msgid "Can't connect"
+msgstr "Impossível conectar a %s."
+
+#: src/util.c:1903
+#, fuzzy
+msgid "Connection to the server failed."
+msgstr "Conexão com o servidor Jabber %s falhou! "
 
 #~ msgid "%s: Unknown host."
 #~ msgstr "%s: Host desconhecido."

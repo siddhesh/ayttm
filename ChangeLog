@@ -1,3 +1,8 @@
+* Sun Jul 20 2003 12:14 GMT [colin]	0.3.3-4
+- modules/aim-toc/libtoc/libtoc.c
+- modules/icq-toc/libtoc/libtoc.c
+File transfer fixes
+
 * Sat Jul 19 2003 11:05 GMT [colin]	0.3.3-3
 - src/status.c src/util.[ch] src/prefs.[ch] src/gtk/prefs_window.C
 add version checker

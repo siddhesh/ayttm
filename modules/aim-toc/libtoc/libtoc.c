@@ -164,47 +164,117 @@ static char char_decode( char c )
 	return 0;
 }
 
-static char * base64_decode( const char * input )
+static const char alphabet[] =
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	"0123456789+/";
+
+/* This was borrowed from the Kame source, and then tweaked to our needs */
+static char *base64_encode(const unsigned char *buf, size_t len)
 {
-	char * output = g_new0( char, strlen(input) );
-	int i = 0;
-	int j = 0;
+	char *s = NULL, *rv = NULL;
+	unsigned long tmp;
 
-if(DEBUG)
-	printf("Decoding %s\n", input );
+	s = g_malloc((4 * (len + 1)) / 3 + 1);
 
-
-	for( i = 0, j = 0; input[i]; i+=4, j += 3 )
-	{
-		char value[4];
-		value[0] = char_decode( input[i] );
-		value[1] = char_decode( input[i+1] );
-		value[2] = char_decode( input[i+2] );
-		value[3] = char_decode( input[i+3] );
-
-		value[0] = value[0] << 2;
-		value[0] = value[0] | ( (value[1] & 0x30) >> 4 );
-		value[1] = ( value[1] & 0x0F ) << 4;
-		value[1] = value[1] | ( (value[2] & 0x3C) >> 2 );
-		value[2] = value[2] << 6;
-		value[2] = value[2] | value[3] ;
-
-		output[j] = value[0];
-		output[j+1] = value[1];
-		output[j+2] = value[2];
-		output[j+3] = 0;
-
+	rv = s;
+	while (len >= 3) {
+		tmp = buf[0] << 16 | buf[1] << 8 | buf[2];
+		s[0] = alphabet[tmp >> 18];
+		s[1] = alphabet[(tmp >> 12) & 077];
+		s[2] = alphabet[(tmp >> 6) & 077];
+		s[3] = alphabet[tmp & 077];
+		len -= 3;
+		buf += 3;
+		s += 4;
 	}
-	output[j] = 0;
 
-if(DEBUG) {
-	for(i = 0; i < j; i += 2 )
-	{
-		printf("%c%c", output[i], output[i+1] );
+	/* RFC 1521 enumerates these three possibilities... */
+	switch(len) {
+		case 2:
+			tmp = buf[0] << 16 | buf[1] << 8;
+			s[0] = alphabet[(tmp >> 18) & 077];
+			s[1] = alphabet[(tmp >> 12) & 077];
+			s[2] = alphabet[(tmp >> 6) & 077];
+			s[3] = '=';
+			s[4] = '\0';
+			break;
+		case 1:
+			tmp = buf[0] << 16;
+			s[0] = alphabet[(tmp >> 18) & 077];
+			s[1] = alphabet[(tmp >> 12) & 077];
+			s[2] = s[3] = '=';
+			s[4] = '\0';
+			break;
+		case 0:
+			s[0] = '\0';
+			break;
 	}
-	printf("\n");
+
+	return rv;
 }
-	return output;
+
+
+static char * base64_decode(const char *text)
+{
+	char *out = (char *)malloc(1);
+	char *data = NULL;
+	char tmp = 0;
+	const char *c;
+	gint32 tmp2 = 0;
+	int len = 0, n = 0;
+	if (!text)
+		return;
+
+	c = text;
+
+	while (*c) {
+		if (*c >= 'A' && *c <= 'Z') {
+			tmp = *c - 'A';
+		} else if (*c >= 'a' && *c <= 'z') {
+			tmp = 26 + (*c - 'a');
+		} else if (*c >= '0' && *c <= 57) {
+			tmp = 52 + (*c - '0');
+		} else if (*c == '+') {
+			tmp = 62;
+		} else if (*c == '/') {
+			tmp = 63;
+		} else if (*c == '\r' || *c == '\n') {
+			c++;
+			continue;
+		} else if (*c == '=') {
+			if (n == 3) {
+				out = realloc(out, len + 2);
+				out[len] = (char)(tmp2 >> 10) & 0xff;
+				len++;
+				out[len] = (char)(tmp2 >> 2) & 0xff;
+				len++;
+			} else if (n == 2) {
+				out = realloc(out, len + 1);
+				out[len] = (char)(tmp2 >> 4) & 0xff;
+				len++;
+			}
+			break;
+		}
+		tmp2 = ((tmp2 << 6) | (tmp & 0xff));
+		n++;
+		if (n == 4) {
+			out = realloc(out, len + 3);
+			out[len] = (char)((tmp2 >> 16) & 0xff);
+			len++;
+			out[len] = (char)((tmp2 >> 8) & 0xff);
+			len++;
+			out[len] = (char)(tmp2 & 0xff);
+			len++;
+			tmp2 = 0;
+			n = 0;
+		}
+		c++;
+	}
+
+	out = realloc(out, len + 1);
+	out[len] = 0;
+	data = out;
+	return data;
 }
 
 //ERROR:<Error Code>:Var args
@@ -442,7 +512,7 @@ static void toc_get_file_data( gpointer data, int source, eb_input_condition con
 	toc_file_conn * conn = data;
 	long total_len = ntohl(*((long*)(conn->header2+22)));
 	short header_size =ntohs(*((short*)(conn->header1+4)));
-	int read_size;
+	int read_size, did_read;
 	if( total_len - conn->amount > 1024 )
 	{
 		read_size = 1024;
@@ -452,20 +522,23 @@ static void toc_get_file_data( gpointer data, int source, eb_input_condition con
 		read_size = total_len - conn->amount;
 	}
 
+	printf(" total_len %lu, read_size %d, conn->amount %lu\n", total_len, read_size, conn->amount);
 	if( conn->amount < total_len  
-			&&  (read_size = recv( conn->fd, val, read_size, O_NONBLOCK )) > 0 )
+			&&  (did_read = recv( conn->fd, val, read_size, O_NONBLOCK )) > 0 )
 	{
 		int i;
-		conn->amount += read_size;
-		for( i = 0; i < read_size; i++ )
+		conn->amount += did_read;
+		for( i = 0; i < did_read; i++ )
 		{
 			fprintf(conn->file, "%c", val[i] );
 		}
 		toc_update_file_status(conn->progress, conn->amount);
 			
 	}
+	printf(">total_len %lu, read_size %d, conn->amount %lu\n", total_len, read_size, conn->amount);
 	if( conn->amount >= total_len )
 	{
+		char *theader = (char *)malloc(header_size);
 		fclose(conn->file);
 		*((short*)(conn->header2 + 18)) = 0;
 		*((short*)(conn->header2 + 20)) = 0;
@@ -473,11 +546,14 @@ static void toc_get_file_data( gpointer data, int source, eb_input_condition con
 		conn->header2[1] = 0x04;
 		memcpy(conn->header2+58, conn->header2+34, 4);
 		memcpy(conn->header2+54, conn->header2+22, 4);
+		snprintf(theader, sizeof(theader), "%s%s", conn->header1, conn->header2);
 		fprintf(stderr, "sending final packet\n");
-		send( conn->fd, conn->header1, 6, 0 );
-		send( conn->fd, conn->header2, header_size - 6, 0 );
-		eb_input_remove(conn->handle);
+		if (send( conn->fd, theader, sizeof(theader), 0 ) < 0)
+			goto endtransfer;
+
 		close(conn->fd);
+endtransfer:
+		eb_input_remove(conn->handle);
 		toc_complete_file_recieve(conn->progress);
 		g_free(conn);
 	}
@@ -773,7 +849,7 @@ if(DEBUG)
 		send_flap(conn, DATA, buff);
                 // end hack (user info)
 
-		send_flap(conn, DATA, "toc_set_caps 09461343-4C7F-11D1-8222-444553540000 09461344-4C7F-11D1-8222-444553540000 09461341-4C7F-11D1-8222-444553540000 09461347-4C7F-11D1-8222-444553540000 09461348-4C7F-11D1-8222-444553540000 09461345-4C7F-11D1-8222-444553540000 09461346-4C7F-11D1-8222-444553540000");
+		send_flap(conn, DATA, "toc_set_caps " SEND_FILE_UUID);
 	}
 	else if(!strcmp(c, "CONFIG2"))
 	{
@@ -1082,6 +1158,7 @@ if(DEBUG)
 		while( buff[i] )
 		{
 			char type[10];
+			int size;
 			i++;
 			for(j=0; buff[i] != ':'; i++, j++ )
 			{
@@ -1098,11 +1175,13 @@ if(DEBUG)
 
 
 			file_tlv = base64_decode(tlv);
+if (DEBUG)
+	printf("file_tlv = %s, %s\n", file_tlv, file_tlv+8);
 
 			for( j = strlen(8+file_tlv); j > 0 && file_tlv[8+j] != '\\'; j-- );
 
 			g_snprintf(filename, 255, "%s/%s", getenv("HOME"),
-					   file_tlv +j +9 );
+					   file_tlv +j +8 );
 
 
 if(DEBUG)
@@ -1111,11 +1190,11 @@ if(DEBUG)
 			g_free( file_tlv );
 		}
 
-		if(!strcmp(uuid, "09461343-4C7F-11D1-8222-444553540000"))
+		if(!strcmp(uuid, SEND_FILE_UUID))
 		{
 			toc_file_offer( conn, nick, ip, atoi(port), cookie, filename );
 		}
-		else if(!strcmp(uuid, "09461341-4C7F-11D1-8222-444553540000"))
+		else if(!strcmp(uuid, TALK_UUID))
 		{
 			toc_talk_accept( conn, nick, ip, atoi(port), cookie );
 		}
@@ -1553,10 +1632,9 @@ void toc_file_accept( toc_conn * conn, const char * nick, const char * ip, short
 					  const char * cookie, const char * filename )
 {
 	char message[2048];
-	char uuid[] = "09461343-4C7F-11D1-8222-444553540000";
 
 	g_snprintf( message, 2048, "toc_rvous_accept %s %s %s",
-				aim_normalize(nick), cookie, uuid );
+				aim_normalize(nick), cookie, SEND_FILE_UUID );
 
 	send_flap(conn, DATA, message );
 
@@ -1582,10 +1660,9 @@ void toc_talk_accept( toc_conn * conn, const char * nick, const char * ip, short
 void toc_file_cancel( toc_conn * conn, const char * nick, const char * cookie )
 {
 	char message[2048];
-	char uuid[] = "09461343-4C7F-11D1-8222-444553540000";
 
 	g_snprintf( message, 2048, "toc_rvous_cancel %s %s %s",
-				aim_normalize(nick), cookie, uuid );
+				aim_normalize(nick), cookie, SEND_FILE_UUID );
 
 	send_flap(conn, DATA, message );
 
