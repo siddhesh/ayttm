@@ -1,3 +1,17 @@
+* Tue May  6 2003 18:10 GMT [andy]	0.3.0-146
+- src/gtk/log_window.C
+Fix search for case of two matches right next to each other
+- modules/*most*
+Use new module classification
+Updated name/description
+- src/plugin.[ch]
+  src/plugin_api.h
+  src/prefs.[ch]
+  src/smileys.[ch]
+  src/gtk/gtkutils.[ch]
+  src/gtk/prefs_window.C
+Use new module classification to clean up prefs window
+
 * Tue May  6 2003 14:53 GMT [philip]	0.3.0-145
 - configure.ac
 build modules/aycryption/Makefile as well - I thought it was already here
