@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.19 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.20 $",
+	"$Date: 2004/01/03 14:30:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1500,6 +1500,7 @@ faim_cb_chat_incoming_msg (aim_session_t *sess, aim_frame_t *fr, ...)
 	char *msg;
 
 	eb_chat_room *ecr;
+	eb_account *ea;
 
 	va_start (ap, fr);
 	info = va_arg (ap, aim_userinfo_t *);
@@ -1514,7 +1515,7 @@ faim_cb_chat_incoming_msg (aim_session_t *sess, aim_frame_t *fr, ...)
 		return 1;
 	}
 
-	eb_account *ea = oscar_find_account_with_ela (info->sn, ela, TRUE);
+	ea = oscar_find_account_with_ela (info->sn, ela, TRUE);
 	if (ea) {
 		eb_chat_room_show_message (ecr, ea->account_contact->nick, msg);
 	} else {

@@ -1,3 +1,7 @@
+* Sat Jan 03 2004 14:21 GMT [philip]	0.4.5-26
+- modules/aim-oscar/aim-oscar.c
+declare all variables at start of function - C style
+
 * Fri Dec 26 2003 08:14 GMT [philip]	0.4.5-25
 - modules/yahoo2/libyahoo2
 fix potential segfaults.
