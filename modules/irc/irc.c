@@ -80,10 +80,10 @@ static int ref_count = 0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
-	"IRC Service",
-	"Internet Relay Chat support",
-	"$Revision: 1.18 $",
-	"$Date: 2003/05/01 11:46:20 $",
+	"IRC",
+	"Provides Internet Relay Chat (IRC) support",
+	"$Revision: 1.19 $",
+	"$Date: 2003/05/06 17:04:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -153,10 +153,10 @@ static char do_mail_notify_script_name[MAX_PREF_LEN];
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
-	"MSN Service New",
-	"MSN Messenger support, new library",
-	"$Revision: 1.47 $",
-	"$Date: 2003/05/06 14:28:58 $",
+	"MSN",
+	"Provides MSN Messenger support",
+	"$Revision: 1.48 $",
+	"$Date: 2003/05/06 17:04:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

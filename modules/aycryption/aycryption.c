@@ -78,11 +78,11 @@ static int do_aycryption_debug = 0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY,
+	PLUGIN_FILTER,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.8 $",
-	"$Date: 2003/05/06 14:08:42 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/05/06 17:04:41 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -106,7 +106,7 @@ static int aycryption_init()
        	il = il->next;
 	il->widget.entry.value = mykey;
 	il->widget.entry.name = "mykey";
-	il->widget.entry.label = strdup(_("Private key ID to use for signing:"));
+	il->widget.entry.label = strdup(_("Private key for signing:"));
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);

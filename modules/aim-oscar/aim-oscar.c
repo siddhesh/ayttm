@@ -82,10 +82,10 @@ static int ref_count = 0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
-	"AIM Oscar Service",
-	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.8 $",
-	"$Date: 2003/05/01 11:46:19 $",
+	"AIM Oscar",
+	"Provides AOL Instant Messenger support via the Oscar protocol",
+	"$Revision: 1.9 $",
+	"$Date: 2003/05/06 17:04:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

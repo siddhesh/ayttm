@@ -81,10 +81,10 @@ int do_jabber_debug=0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
-	"Jabber Service", 
-	"Jabber Messenger support", 
-	"$Revision: 1.27 $",
-	"$Date: 2003/05/01 11:46:20 $",
+	"Jabber", 
+	"Provides Jabber Messenger support", 
+	"$Revision: 1.28 $",
+	"$Date: 2003/05/06 17:04:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

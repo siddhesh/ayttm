@@ -58,11 +58,11 @@ static int ref_count=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY, 
-	"Import Gaim Buddy List", 
-	"Import the Gaim Buddy List", 
-	"$Revision: 1.9 $",
-	"$Date: 2003/05/01 08:54:09 $",
+	PLUGIN_IMPORTER, 
+	"Gaim Buddy List",  
+	"Imports your Gaim buddy list into Ayttm", 
+	"$Revision: 1.10 $",
+	"$Date: 2003/05/06 17:04:48 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -96,10 +96,10 @@ static int do_icq_debug=0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
-	"ICQ Service", 
-	"ICQ Protocol Support", 
-	"$Revision: 1.6 $",
-	"$Date: 2003/05/01 11:46:19 $",
+	"ICQ", 
+	"Provides support for the ICQ protocol", 
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/06 17:04:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

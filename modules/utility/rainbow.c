@@ -74,11 +74,11 @@ static int ref_count = 0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY,
+	PLUGIN_FILTER,
 	"Rainbow",
-	"Turns all outgoing messages rainbow colours",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/30 06:03:59 $",
+	"Turns all outgoing messages into rainbow colours using HTML",
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/06 17:04:50 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,
@@ -102,38 +102,38 @@ static int rainbow_init()
 	il = il->next;
 	il->widget.entry.value = sstart_r;
 	il->widget.entry.name = "sstart_r";
-	il->widget.entry.label = strdup(_("Starting R value"));
+	il->widget.entry.label = strdup(_("Starting R value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sstart_g;
 	il->widget.entry.name = "sstart_g";
-	il->widget.entry.label = strdup(_("Starting G value"));
+	il->widget.entry.label = strdup(_("Starting G value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sstart_b;
 	il->widget.entry.name = "sstart_b";
-	il->widget.entry.label = strdup(_("Starting B value"));
+	il->widget.entry.label = strdup(_("Starting B value:"));
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = send_r;
 	il->widget.entry.name = "send_r";
-	il->widget.entry.label = strdup(_("Ending R value"));
+	il->widget.entry.label = strdup(_("Ending R value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = send_g;
 	il->widget.entry.name = "send_g";
-	il->widget.entry.label = strdup(_("Ending G value"));
+	il->widget.entry.label = strdup(_("Ending G value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = send_b;
 	il->widget.entry.name = "send_b";
-	il->widget.entry.label = strdup(_("Ending B value"));
+	il->widget.entry.label = strdup(_("Ending B value:"));
 	il->type = EB_INPUT_ENTRY;
 
 	eb_debug(DBG_MOD, "Rainbow initialised\n");

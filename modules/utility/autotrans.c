@@ -75,11 +75,11 @@ static int ref_count = 0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY,
-	"Auto-translator",
-	"Automatic translation",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/30 06:03:58 $",
+	PLUGIN_FILTER,
+	"Auto-translation",
+	"Automatic translation of messages using Babelfish",
+	"$Revision: 1.8 $",
+	"$Date: 2003/05/06 17:04:50 $",
 	&ref_count,
 	trans_init,
 	trans_finish,

@@ -48,11 +48,11 @@ static LList *my_smileys=NULL;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY,
+	PLUGIN_SMILEY,
 	"Yahoo Smileys",
 	"Load Yahoo smiley theme",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/29 08:32:00 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/05/06 17:04:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

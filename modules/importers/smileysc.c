@@ -49,11 +49,11 @@ static LList *my_smileys=NULL;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY,
-	"Console Smileys",
-	"Load Console smiley theme",
-	"$Revision: 1.6 $",
-	"$Date: 2003/05/02 09:21:52 $",
+	PLUGIN_SMILEY,
+	"Console Smilies",
+	"Provides the console smiley theme",
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/06 17:04:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -72,18 +72,22 @@ static int plugin_init()
 	if(!my_smileys)
 		init_alt_smileys();
   
-	smiley_tag=eb_add_menu_item("Console Smileys", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
+	smiley_tag=eb_add_menu_item("Console Smilies", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
 	if(!smiley_tag) {
 		eb_debug(DBG_MOD,"Error!  Unable to add Console Smiley menu to import menu\n");
 		return -1;
 	}
 
+	ay_add_smiley_set( plugin_info.module_name, my_smileys );
+	
 	return 0;
 }
 
 static int plugin_finish()
 {
 	int result = 0;
+	
+	ay_remove_smiley_set( plugin_info.module_name );
 
 	if(smiley_tag)
 		result = eb_remove_menu_item(EB_IMPORT_MENU, smiley_tag);
@@ -155,7 +159,7 @@ static void reset_smileys(ebmCallbackData *data)
 	smileys = eb_smileys();
 
 	eb_remove_menu_item(EB_IMPORT_MENU, smiley_tag);
-	smiley_tag=eb_add_menu_item("Console Smileys", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
+	smiley_tag=eb_add_menu_item("Console Smilies", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
 }
 
 static void enable_smileys(ebmCallbackData *data)
@@ -166,6 +170,6 @@ static void enable_smileys(ebmCallbackData *data)
 	smileys = my_smileys;
 
 	eb_remove_menu_item(EB_IMPORT_MENU, smiley_tag);
-	smiley_tag=eb_add_menu_item("Default Smileys", EB_IMPORT_MENU, reset_smileys, ebmIMPORTDATA, NULL);
+	smiley_tag=eb_add_menu_item("Default Smilies", EB_IMPORT_MENU, reset_smileys, ebmIMPORTDATA, NULL);
 }
 

@@ -58,11 +58,11 @@ static int ref_count=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY, 
-	"Import GnomeICU Contact List", 
-	"Import the GnomeICU Contact List", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/30 06:03:57 $",
+	PLUGIN_IMPORTER, 
+	"GnomeICU Contact List", 
+	"Imports your GnomeICU contact list into Ayttm", 
+	"$Revision: 1.8 $",
+	"$Date: 2003/05/06 17:04:48 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -59,11 +59,11 @@ static int ref_count=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY, 
-	"Import Everybuddy Settings", 
-	"Import the Everybuddy Settings", 
-	"$Revision: 1.9 $",
-	"$Date: 2003/05/01 16:52:43 $",
+	PLUGIN_IMPORTER, 
+	"Everybuddy Settings", 
+	"Imports your Everybuddy settings into Ayttm", 
+	"$Revision: 1.10 $",
+	"$Date: 2003/05/06 17:04:47 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

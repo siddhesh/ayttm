@@ -93,10 +93,10 @@ static int should_fallback=0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
-	"AIM TOC Service",
-	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.35 $",
-	"$Date: 2003/05/01 11:46:19 $",
+	"AIM TOC",
+	"Provides AOL Instant Messenger support via the TOC protocol",
+	"$Revision: 1.36 $",
+	"$Date: 2003/05/06 17:04:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -123,10 +123,10 @@ int conn_type=0;
 PLUGIN_INFO plugin_info =
 {
 	PLUGIN_SERVICE,
-	"Yahoo2 Service",
-	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.46 $",
-	"$Date: 2003/05/06 08:33:18 $",
+	"Yahoo",
+	"Provides Yahoo Instant Messenger support",
+	"$Revision: 1.47 $",
+	"$Date: 2003/05/06 17:04:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

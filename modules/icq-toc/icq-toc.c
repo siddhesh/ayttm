@@ -93,10 +93,10 @@ static int should_fallback=0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
-	"ICQ TOC Service",
-	"ICQ support via the TOC protocol",
-	"$Revision: 1.33 $",
-	"$Date: 2003/05/01 11:46:20 $",
+	"ICQ TOC",
+	"Provides ICQ support via the TOC protocol",
+	"$Revision: 1.34 $",
+	"$Date: 2003/05/06 17:04:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -70,10 +70,10 @@ static int ref_count=0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
-	"Keep notes on contacts", 
-	"Keep notes about your contacts and buddies", 
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/30 06:03:59 $",
+	"Notes", 
+	"Store notes about your contacts and buddies", 
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/06 17:04:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -109,7 +109,7 @@ static int plugin_init()
 	plugin_info.prefs = il;
 	il->widget.entry.value = notes_editor;
 	il->widget.entry.name = "notes_editor";
-	il->widget.entry.label = _("Notes Editor");
+	il->widget.entry.label = _("Notes Editor:");
 	il->type = EB_INPUT_ENTRY;
 	return(0);
 }

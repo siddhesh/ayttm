@@ -111,10 +111,10 @@ static int reset_typing (gpointer sockp);
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
-	"Workwizu Service",
-	"Workwizu Chat support",
-	"$Revision: 1.12 $",
-	"$Date: 2003/05/01 13:04:28 $",
+	"Workwizu",
+	"Provides Workwizu Chat support",
+	"$Revision: 1.13 $",
+	"$Date: 2003/05/06 17:04:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -51,11 +51,11 @@ static LList *my_smileys=NULL;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY,
-	"Giles Smileys",
-	"Load Giles smileys",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/30 06:03:56 $",
+	PLUGIN_SMILEY,
+	"Giles Smilies",
+	"Provides Giles Hamlin's smiley theme",
+	"$Revision: 1.6 $",
+	"$Date: 2003/05/06 17:04:46 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -68,16 +68,18 @@ static void *smiley_tag = NULL;
 unsigned int module_version() {return CORE_VERSION;}
 static int plugin_init()
 {
-	eb_debug(DBG_MOD,"giles smileys init\n");
+	eb_debug(DBG_MOD,"giles Smilies init\n");
 
 	if(!my_smileys)
 		init_alt_smileys();
   
-	smiley_tag=eb_add_menu_item("Giles Smileys", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
+	smiley_tag=eb_add_menu_item("Giles Smilies", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
 	if(!smiley_tag) {
 		eb_debug(DBG_MOD,"Error!  Unable to add Giles Smiley menu to import menu\n");
 		return -1;
 	}
+
+	ay_add_smiley_set( plugin_info.module_name, my_smileys );
 
 	return 0;
 }
@@ -85,6 +87,8 @@ static int plugin_init()
 static int plugin_finish()
 {
 	int result = 0;
+	
+	ay_remove_smiley_set( plugin_info.module_name );
 
 	if(smiley_tag)
 		result = eb_remove_menu_item(EB_IMPORT_MENU, smiley_tag);
@@ -152,7 +156,7 @@ static void reset_smileys(ebmCallbackData *data)
 	smileys = eb_smileys();
 
 	eb_remove_menu_item(EB_IMPORT_MENU, smiley_tag);
-	smiley_tag=eb_add_menu_item("Giles Smileys", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
+	smiley_tag=eb_add_menu_item("Giles Smilies", EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, NULL);
 }
 
 static void enable_smileys(ebmCallbackData *data)
@@ -163,6 +167,6 @@ static void enable_smileys(ebmCallbackData *data)
 	smileys = my_smileys;
 
 	eb_remove_menu_item(EB_IMPORT_MENU, smiley_tag);
-	smiley_tag=eb_add_menu_item("Default Smileys", EB_IMPORT_MENU, reset_smileys, ebmIMPORTDATA, NULL);
+	smiley_tag=eb_add_menu_item("Default Smilies", EB_IMPORT_MENU, reset_smileys, ebmIMPORTDATA, NULL);
 }
 

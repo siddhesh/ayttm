@@ -61,11 +61,11 @@ static int	s_ref_count = 0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info =
 {
-	PLUGIN_UTILITY,
+	PLUGIN_FILTER,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/30 06:03:59 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/05/06 17:04:50 $",
 	&s_ref_count,
 	middle_init,
 	middle_finish,

@@ -52,11 +52,11 @@ static int ref_count=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
-	PLUGIN_UTILITY, 
-	"Import ICQ99 Contact List", 
-	"Import the ICQ99 Contact List", 
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/30 06:03:57 $",
+	PLUGIN_IMPORTER, 
+	"ICQ99 Contact List", 
+	"Imports your ICQ99 contact list into Ayttm", 
+	"$Revision: 1.6 $",
+	"$Date: 2003/05/06 17:04:48 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

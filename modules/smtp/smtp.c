@@ -70,10 +70,10 @@ static int default_online = 0;
 PLUGIN_INFO plugin_info =
 {
 	PLUGIN_SERVICE,
-	"SMTP Service",
-	"SMTP Service Module",
-	"$Revision: 1.16 $",
-	"$Date: 2003/05/06 07:06:05 $",
+	"SMTP",
+	"Provides Simple Mail Transfer Protocol (SMTP) support",
+	"$Revision: 1.17 $",
+	"$Date: 2003/05/06 17:04:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
