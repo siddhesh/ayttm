@@ -127,15 +127,13 @@ LList * get_all_accounts(int serviceid)
 	LList *newlist = NULL;
 
 	while(node) {
-		LList * g, *g2 = get_eb_accounts(((struct contact*)node->data)->nick);
-		g2 = g;
+		LList * g = get_eb_accounts(((struct contact*)node->data)->nick);
 		while (g) {
 			eb_account *ac = (eb_account *)g->data;
 			if (ac->service_id == serviceid)
 				newlist = l_list_append(newlist, ac->handle);	
 			g = g->next;
 		}
-		l_list_free(g2);
 		node = node->next;
 	}
 
