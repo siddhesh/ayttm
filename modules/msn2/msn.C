@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.57 $",
-	"$Date: 2003/07/09 15:14:32 $",
+	"$Revision: 1.58 $",
+	"$Date: 2003/07/23 18:04:10 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -818,7 +818,7 @@ static void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
 		(eb_msn_local_account_data *)from->protocol_local_account_data;
 
 	if(stat(file, &stats) < 0) {
-		ay_do_error( "MSN Error", "File is not readable." );
+		ay_do_warning( "MSN Error", "File is not readable." );
 		return;
 	}
 	eb_debug(DBG_MSN, "file==%s\n",file);
@@ -1129,7 +1129,7 @@ void ext_filetrans_failed(invitation_ftp * inv, int err, char * msg)
 {
 	char buf[1024];
         snprintf(buf, sizeof(buf), "File transfer failed: %s%s", msg, err?"\n\n(The file sender must have a public IP, and his firewall must allow TCP connections to port 6891.)":"");
-		ay_do_error( "MSN File Transfer", buf );
+		ay_do_warning( "MSN File Transfer", buf );
 	transfer_window * t_win = eb_find_window_by_inv(inv);
 	if (t_win) {
           ay_activity_bar_remove(t_win->window_tag);
@@ -1992,7 +1992,7 @@ void ext_del_list_entry(msnconn * conn, char * list, char * username)
 
 void ext_show_error(msnconn * conn, char * msg)
 {
-	ay_do_error( "MSN Error", msg );
+	ay_do_warning( "MSN Error", msg );
 	eb_debug(DBG_MSN, "MSN: Error: %s\n", msg);
 }
 
@@ -2316,19 +2316,19 @@ void ext_start_netmeeting(char *ip)
 	
 	test=popen("gnomemeeting --version 2>&1","r");
 	if (test==NULL) {
-		ay_do_error( _("GnomeMeeting Error"), _("Cannot run gnomemeeting: presence test failed.") );
+		ay_do_warning( _("GnomeMeeting Error"), _("Cannot run gnomemeeting: presence test failed.") );
 		return;
 	}
 	fgets(buf, sizeof(buf), test);
 	pclose(test);
 	if(!strstr(buf,"GnomeMeeting")) {
-		ay_do_error( _("GnomeMeeting Error"), _("You do not have gnomemeeting installed or it isn't in your PATH.") );
+		ay_do_warning( _("GnomeMeeting Error"), _("You do not have gnomemeeting installed or it isn't in your PATH.") );
 		return;
 	}	
 	test=NULL;
 	test=popen("gnomemeeting --help 2>&1","r");
 	if (test==NULL) {
-		ay_do_error( _("GnomeMeeting Error"), _("Cannot run gnomemeeting: presence test failed.") );
+		ay_do_warning( _("GnomeMeeting Error"), _("Cannot run gnomemeeting: presence test failed.") );
 		return;
 	}
 	while ((fgets(buf, sizeof(buf), test)) != NULL) {
@@ -2338,7 +2338,7 @@ void ext_start_netmeeting(char *ip)
 	pclose(test);	
 	
 	if (!callto_supported) {
-		ay_do_error( _("GnomeMeeting Error"), _("Your gnomemeeting version doesn't support --callto argument; You should update it.") );
+		ay_do_warning( _("GnomeMeeting Error"), _("Your gnomemeeting version doesn't support --callto argument; You should update it.") );
 		return;		
 	}
 	
@@ -2779,7 +2779,7 @@ static void invite_gnomemeeting(ebmCallbackData * data)
 
 	from = find_local_account_by_handle(ecd->local_account,SERVICE_INFO.protocol_id);
 	if (!from) {
-		  ay_do_error( _("MSN Error"), _("Cannot find a valid local account to invite your contact.") );
+		  ay_do_warning( _("MSN Error"), _("Cannot find a valid local account to invite your contact.") );
 		return;
 	}
 		
@@ -2794,7 +2794,7 @@ static void invite_gnomemeeting(ebmCallbackData * data)
 		acc = find_account_for_protocol(cont, SERVICE_INFO.protocol_id); /*FIXME*/
 	}
 	if(!acc) {
-		  ay_do_error( _("MSN Error"), _("Cannot find a valid remote account to invite your contact.") );
+		  ay_do_warning( _("MSN Error"), _("Cannot find a valid remote account to invite your contact.") );
 		return;
 	}
 	eb_debug(DBG_MSN,"inviting %s to GnomeMeeting via %s\n", acc->handle, ecd->local_account);

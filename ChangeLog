@@ -1,3 +1,7 @@
+* Wed Jul 23 2003 18:00 GMT [philip]	0.3.3-10
+- modules/msn2/msn.C
+Generate warnings instead of errors so that dialog boxes are non-modal
+
 * Tue Jul 22 2003 08:55 GMT [philip]	0.3.3-9
 - src/edit_contact_window.c src/add_contact_window.c
 Use option_menu instead of combo box for local accounts/default service
