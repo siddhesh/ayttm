@@ -1492,7 +1492,7 @@ pid_t create_lock_file(char* fname)
 				else {
 					char cmd[1024];
 					fgets(cmd, sizeof(cmd), fd);
-					printf("registered PID is from %s\n",cmd);
+					printf("registered PID [%d] is from %s\n",ourpid,cmd);
 					fclose(fd);
 					if(cmd == NULL || strstr(cmd, "ayttm") == NULL) {
 						fprintf(stderr, _("deleting stale lock file\n"));
