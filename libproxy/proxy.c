@@ -603,10 +603,10 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
     	   sin.sin_family = AF_INET;
 		   printf( "trying to connect to %s on port %d \n", 
 				   inet_ntoa(sin.sin_addr), ntohs(sin.sin_port) );
-         s = connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)); 
+           s = connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)); 
 	   }
 
-	   printf("libproxy; SOCKS5 connection on %d\n", sockfd );
+	   printf("libproxy; SOCKS5 connection on %d (%d)\n", sockfd,s  );
 	   return  s;
    }
    else
@@ -726,6 +726,9 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
    if (!proxy_inited)
 	   proxy_autoinit();
 
+   if (sockfd == -1 && (proxy_type != PROXY_NONE || !callback))
+	   sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   
    switch (proxy_type) {
       case PROXY_NONE:    /* No proxy */
 		{
@@ -742,10 +745,10 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
       case PROXY_HTTP:    /* Http proxy */
 		if ( (tmp=http_connect(sockfd, serv_addr, addrlen)) > 0 ) {
 			if (callback) {
-				callback(tmp, 0, data);
+				callback(sockfd, 0, data);
 				return 0;
 			} else 
-				return tmp;
+				return sockfd;
 		} else {
 			return -1;
 		}
@@ -753,10 +756,10 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
       case PROXY_SOCKS4:  /* SOCKS4 proxy */
 		if ( (tmp=socks4_connect(sockfd, serv_addr, addrlen)) > 0 ) {
 			if (callback) {
-				callback(tmp, 0, data);
+				callback(sockfd, 0, data);
 				return 0;
 			} else 
-				return tmp;
+				return sockfd;
 		} else {
 			return -1;
 		}
@@ -764,10 +767,10 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
       case PROXY_SOCKS5:  /* SOCKS5 proxy */
 		if ( (tmp=socks5_connect(sockfd, serv_addr, addrlen)) > 0 ) {
 			if (callback) {
-				callback(tmp, 0, data);
+				callback(sockfd, 0, data);
 				return 0;
 			} else 
-				return tmp;
+				return sockfd;
 		} else {
 			return -1;
 		}

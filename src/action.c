@@ -150,11 +150,25 @@ void conversation_action(log_info *li, int to_end)
 	
 	output_html = g_strdup_printf("%s/tmp_htmlXXXXXX", tempdir);
 	output_plain = g_strdup_printf("%s/tmp_plainXXXXXX", tempdir);
-	output_fhtml = fdopen(mkstemp(output_html), "w");
-	output_fplain = fdopen(mkstemp(output_plain), "w");
+	close(mkstemp(output_html));
+	close(mkstemp(output_plain));
+	
+	snprintf(buf, 4096, "%s.html", output_html);
+	rename(output_html, buf);
+	g_free(output_html);
+	output_html = g_strdup(buf);
+	
+	snprintf(buf, 4096, "%s.txt", output_plain);
+	rename(output_plain, buf);
+	g_free(output_plain);
+	output_plain = g_strdup(buf);
+	
+	output_fhtml = fopen(output_html, "w");
+	output_fplain = fopen(output_plain, "w");
 	
 	if (output_fhtml == NULL || output_fplain == NULL) {
 		perror("fopen");
+		printf(" %s %s\n", output_html, output_plain);
 		do_error_dialog(_("Cannot use log: Impossible to create temporary file."),_("Action error"));
 		fclose(loginfo->fp);
 		return;
@@ -168,8 +182,7 @@ void conversation_action(log_info *li, int to_end)
 		if (strstr(buf, _("Conversation started on ")) != NULL) {
 			if (firstline) {
 				firstline = 0;
-				continue;
-			} else if (!to_end) {
+			} else if (!to_end && !firstline) {
 				break;
 			}
 		}

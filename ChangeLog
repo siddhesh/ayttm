@@ -1,4 +1,10 @@
-* Thu Apr 17 2003 08:30 GMT [andy]	0.2.3-117
+* Thu Apr 17 2003 08:15 GMT [colin]	0.2.3-118
+- src/action.c
+  src/log_window.c
+Actions: print "Conversation started at"
+         filenames end with .html .txt
+
+* Thu Apr 17 2003 07:30 GMT [andy]	0.2.3-117
 - src/gtk/prefs_window.C
 Fix module pref text entries [it helps if you actually APPLY them] [Bug #722967]
 

@@ -124,6 +124,7 @@ void eb_log_load_information(log_window* lw)
   char posbuf[128];
   gint idx;
   gboolean empty = TRUE;
+  long fpos = 0;
   
   gtk_clist_freeze(GTK_CLIST(lw->date_list)); /* freeze, thaw?  So corny. */
 
@@ -144,7 +145,7 @@ void eb_log_load_information(log_window* lw)
       empty=FALSE;	    
       if ((p1 = strstr(read_buffer, _("Conversation started on "))) != NULL) 
 	  {
-
+	
 	/* extract the date, I am not sure if this is portable (but it
 	   works on my machine, so if someone wants to hack it, go ahead */
 	p1 += strlen(_("Conversation started on "));
@@ -168,7 +169,7 @@ void eb_log_load_information(log_window* lw)
 
 	/* add new gslist entry */
 	gl1 = g_slist_alloc();
-	snprintf(posbuf, sizeof(posbuf), "%lu", ftell(fp));
+	snprintf(posbuf, sizeof(posbuf), "%lu", fpos);
 	gl = g_slist_append(gl, gl1);	
 	gl1 = g_slist_append(gl1, strdup(posbuf));
 	eb_debug(DBG_CORE,"%s at %s\n", p3[0],posbuf);
@@ -197,6 +198,7 @@ void eb_log_load_information(log_window* lw)
 		gl1 = g_slist_append(gl1, strdup(buff1));
 	}
       }
+      fpos = ftell(fp);
     }
     fclose(fp);
   } else {
