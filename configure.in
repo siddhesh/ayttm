@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([src/main.c])
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=pre25
+RELEASE=pre26
 #This is to check modules/core binary compat
 #Bump it up when necessary only (query_callbacks change, struct change etc)
 CORE_VERSION=1
@@ -406,7 +406,8 @@ AC_OUTPUT([Makefile ayttm.spec
                  pixmaps/Makefile
                  sounds/Makefile
                  src/Makefile
-		 src/gtk/Makefile])
+		 src/gtk/Makefile
+		 mingw32/Makefile])
 
 if test "x$host_alias" = "xmingw32" ; then
         echo "editing src/Makefile final time"

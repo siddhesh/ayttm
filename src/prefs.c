@@ -39,6 +39,7 @@
 #include "gtk/prefs_window.h"
 
 #ifdef __MINGW32__
+#include <sys/stat.h>
 #define	snprintf	_snprintf
 #endif
 
@@ -514,32 +515,12 @@ void	ayttm_prefs_init( void )
 	
 	ayttm_prefs_read_file(AYTTMRC);
 	
-#ifdef __MINGW32__
-	snprintf( buff, buff_size, "%s%s", base_dir, BuddyArriveDefault );
-	cSetLocalPref( "BuddyArriveFilename", buff );
-		
-	snprintf( buff, buff_size, "%s%s", base_dir, BuddyLeaveDefault );
-	cSetLocalPref( "BuddyAwayFilename", buff );
-		
-	snprintf( buff, buff_size, "%s%s", base_dir, BuddyLeaveDefault );
-	cSetLocalPref( "BuddyLeaveFilename", buff );
-		
-	snprintf( buff, buff_size, "%s%s", base_dir, SendDefault );
-	cSetLocalPref( "SendFilename", buff );
-		
-	snprintf( buff, buff_size, "%s%s", base_dir, ReceiveDefault );
-	cSetLocalPref( "ReceiveFilename", buff );
-		
-	snprintf( buff, buff_size, "%s%s", base_dir, ReceiveDefault );
-	cSetLocalPref( "FirstMsgFilename", buff );
-#else
 	cSetLocalPref( "BuddyArriveFilename", cGetLocalPref("default_arrive_snd"));
 	cSetLocalPref( "BuddyAwayFilename", cGetLocalPref("default_leave_snd"));
 	cSetLocalPref( "BuddyLeaveFilename", cGetLocalPref("default_leave_snd"));
 	cSetLocalPref( "SendFilename", cGetLocalPref("default_send_snd"));
 	cSetLocalPref( "ReceiveFilename", cGetLocalPref("default_recv_snd"));
 	cSetLocalPref( "FirstMsgFilename", cGetLocalPref("default_recv_snd"));
-#endif
 
 	fSetLocalPref( "SoundVolume", 0.0 );
 
@@ -556,12 +537,7 @@ void	ayttm_prefs_init( void )
 	cSetLocalPref( "remote_encoding", "" );
 
 	/* modules */
-#ifdef __MINGW32__
-	snprintf( buff, buff_size, "%s%s", base_dir, MODULE_DIR);
-	cSetLocalPref( "modules_path", buff );
-#else
 	cSetLocalPref( "modules_path", cGetLocalPref("default_module_path") );
-#endif
 }
 
 static void ayttm_prefs_read_file(char *file)
@@ -825,7 +801,11 @@ void	ayttm_prefs_write( void )
 	fclose( fp );
 
 #ifdef __MINGW32__
-	unlink( file );
+	{
+		struct stat stb;
+		if(stat(file,&stb))
+			unlink( file );
+	}
 #endif
 
 	rename( buff, file );

@@ -1,3 +1,9 @@
+* Fri Apr 25 2003 14:20 GMT [colin]	0.3.0-pre26
+- configure.in
+  mingw32/Makefile.am
+  src/prefs.c
+Fixes for \\ayttmrc support and new prefs for MINGW32 port
+
 * Fri Apr 25 2003 02:40 GMT [colin]	0.3.0-pre25
 - src/gtk/about.c
 Fix too big window, add missing people
