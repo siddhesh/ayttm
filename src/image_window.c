@@ -22,11 +22,11 @@
 #ifdef HAVE_CONFIG_H
 #   include <config.h>
 #endif
-#include "globals.h"
 #include "image_window.h"
 #include "debug.h"
 
 #ifndef HAVE_GDK_PIXBUF
+#include "globals.h"
 
 int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data)
 { 
@@ -50,6 +50,7 @@ void ay_image_window_close(int tag) { }
 # include <stdio.h>
 # include <stdlib.h>
 #endif
+#include "globals.h"
 
 struct ay_image_wnd {
 	GtkWidget *window;

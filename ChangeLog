@@ -1,3 +1,7 @@
+* Fri Sep 14 2003 22:01 GMT [elh]	0.4.1-pre2
+- src/image_window.c
+  More changes for Jasper support on WIn32
+
 * Fri Sep 12 2003 15:30 GMT [philip]	0.4.1-pre1
 - feature freeze
 
