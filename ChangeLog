@@ -1,3 +1,6 @@
+* Fri Apr 18 2003 11:56 GMT [colin]	0.3.0-pre1
+- 0.3.0 freeze
+
 * Fri Apr 18 2003 11:40 GMT [andy]	0.2.3-135
 - libproxy/proxy.c
   src/action.c
