@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # version 0.10.35 of gettext required a different kind of Makefile
 # in intl/  it won't build with our distributed intl/ and must be
@@ -49,9 +49,9 @@ function check_gettext
 
 libtoolize --copy --force --ltdl --automake
 check_gettext
-aclocal=`type -p aclocal-1.7` || aclocal=`type -p aclocal-1.6` || aclocal='aclocal'
+aclocal=`which aclocal-1.7` || aclocal=`which aclocal-1.6` || aclocal='aclocal'
 $aclocal -I m4 $ACLOCAL_FLAGS
 autoheader
-automake=`type -p automake-1.7` || automake=`type -p automake-1.6` || automake='automake'
+automake=`which automake-1.7` || automake=`which automake-1.6` || automake='automake'
 $automake -a -c
 autoconf

@@ -1,3 +1,8 @@
+* Mon Nov 17 2003 08:05 GMT [breser]	0.4.4-22
+- gen
+Switch to #!/bin/sh and use which instead of type -p,
+to be more portable.
+
 * Mon Nov 17 2003 00:11 GMT [breser]	0.4.4-21
 - gen
 Fix syntax error and make more friendly for people without
