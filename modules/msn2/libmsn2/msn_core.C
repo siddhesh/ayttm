@@ -642,7 +642,7 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 https_data *hdata = (https_data *)data;	
 	 
 	 sock->sock = fd;
-	 printf("sock->sock = %d\n",sock->sock);
+	 if (DEBUG) printf("sock->sock = %d\n",sock->sock);
 	 if (DEBUG) printf("entering msn_https_cb1\n");
 	 if(fd == -1 || error)
 	 {
