@@ -1,4 +1,11 @@
-* Fri May 18 2003 22:29 GMT [colin]	0.3.1-pre7
+* Mon May 19 2003 12:51 GMT [edward]	0.3.1-pre8
+- README.WIN32
+  mingw32/ay.iss
+  src/gtk/gtkutils.c
+ifdef out code that causes flashing and update Inno Setup to ship modules
+properly
+
+* Sun May 18 2003 22:29 GMT [colin]	0.3.1-pre7
 - modules/aycryption/aycryption.c
 Warn about msn nastiness
 

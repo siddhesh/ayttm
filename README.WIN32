@@ -1,8 +1,7 @@
 Known Issues:
-	0) AIM support causes a pretty major GTK 'screen' flashing
-	to happen if you let AIM idle while a chat window is also
-	open. I recomment closing your chat windows if you are going to
-	idle.
+	0) There is no update to the status window icons to determine
+	if the user is idle or not. They remain an open door. We are 
+	looking into a solution.
 
 	1) There is no spell checker support.
 

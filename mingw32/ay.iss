@@ -33,7 +33,7 @@ Source: "C:\Program Files\ayttm\libintl-1.dll"; DestDir: "{app}"; Flags: ignorev
 Source: "C:\Program Files\ayttm\libXpm-noX4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\Receive.au"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\Send.au"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\modules\*.*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\*.*"; DestDir: "{app}\modules"; Flags: ignoreversion
 Source: "C:\ayttmrc"; DestDir: "C:\"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
