@@ -1,3 +1,9 @@
+* Wed Apr 16 2003 18:25 GMT [edward]	0.2.3-114
+- makeebdll
+  makedll
+  configure.in
+Changes to fix MINGW32 linkage
+
 * Wed Apr 16 2003 18:25 GMT [andy]	0.2.3-113
 - src/gtk/prefs_window.C
 Fix previous fix for case with no iconv

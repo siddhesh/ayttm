@@ -9,6 +9,7 @@ then
 fi
 cd libltdl
 gcc -I. -I../mingw32 -mno-cygwin -fnative-struct -D__WINDOWS__ -DHAVE_CONFIG_H -UCYGWIN -UCYGWIN32 -c ltdl.c
+ar r libltdl.a ltdl.o
 cd ..
 
 make
