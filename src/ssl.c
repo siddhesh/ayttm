@@ -27,10 +27,10 @@
 #ifdef HAVE_OPENSSL
 #include "ssl.h"
 #include "debug.h"
-#include "globals.h"
 
 #include <glib.h>
 #include <fcntl.h>
+#include "globals.h"
 
 static SSL_CTX *ssl_ctx;
 
@@ -72,9 +72,11 @@ int ssl_init_socket(SockInfo *sockinfo)
 
 int set_block(int fd)
 {
+#ifndef __MINGW32__
   int flags = fcntl(fd, F_GETFL, 0);
   if(flags == -1) return -1;
   return fcntl(fd, F_SETFL, flags ^ O_NONBLOCK);
+#endif
 }
 
 int ssl_init_socket_with_method(SockInfo *sockinfo, SSLMethod method)

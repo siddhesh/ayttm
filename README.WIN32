@@ -23,13 +23,14 @@ Known Issues:
 
 To Install MinGW and necessary libraries.
 	Refer to http://blaniel.free.fr/mingw/
+	Please install the libraries as shown on the webpage
+	http://blaniel.free.fr/mingw/libs.html and in the listed order.
+	Please note that the glib 2.2.0 lists a dependency on pkg-config for
+	compilation but you will need this as well to compile AYTTM. For
+	compilation of AYTTM please install pkg-config.exe BUT not the 
+	included libglib library as its the wrong version.
 
 To BUILD AYTTM:
-
-pkg-config
-	install pkg-config.exe into /usr/local/bin (do not install the libglib
-	that comes with it).
-	cp pkg-config.exe /usr/local/bin
 
 bison
 	cp /c/mingw/share/bison/bison.* /c/mingw/bin

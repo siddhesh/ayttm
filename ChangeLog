@@ -1,3 +1,9 @@
+* Thu Sep 12 2003 15:10 GMT [elh]	0.4.0-25
+- README.WIN32
+  src/ssl.c
+  modules/msn2/libmsn2/msn_core.C
+Updates for Openssl and msn2 support in WIN32 platform
+
 * Thu Sep 11 2003 20:17 GMT [elh]	0.4.0-24
 - README.WIN32
   mingw

@@ -37,6 +37,7 @@
 #include <glib.h>
 #define snprintf _snprintf
 #define sleep(x) Sleep(x)
+#define bzero(x,n) memcpy(x,0,n)
 
 struct timeval zerotime = {0,0};
 #endif
@@ -1549,8 +1550,10 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
     
 #ifndef __MINGW32__
     struct pollfd pfd;
-#endif
     unsigned char c;
+#lese
+    char c;
+#endif
 
 #ifndef __MINGW32__
     pfd.fd=conn->sock;
