@@ -1997,6 +1997,24 @@ void eb_status_window()
 	}	
 
 	gtk_widget_show(statuswindow);
+#ifndef __MINGW32__
+	if (geometry[0] == 0)
+#endif
+	{
+		/* Force a move */
+		if (iGetLocalPref("x_contact_window") > 0
+		&&  iGetLocalPref("y_contact_window") > 0) {
+			/* Clear up any events which will map the window */
+			/* Until the item is mapped you can not move
+			   the window. */
+			while(gtk_events_pending())
+				gtk_main_iteration();
+			/* Move only after cleanup */
+	                gdk_window_move(statuswindow->window, 
+					iGetLocalPref("x_contact_window"),
+					iGetLocalPref("y_contact_window"));
+		}
+	}	
 	
 	update_contact_list ();
 

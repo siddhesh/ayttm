@@ -1,4 +1,8 @@
-* Fri Apr 25 2003 14:20 GMT [colin]	0.3.0-pre26
+* Fri Apr 25 2003 15:14 GMT [edward]	0.3.0-pre27
+- src/status.c
+Fixed movement of window after startup for improper Window Managers
+
+* Fri Apr 25 2003 14:20 GMT [edward]	0.3.0-pre26
 - configure.in
   mingw32/Makefile.am
   src/prefs.c
