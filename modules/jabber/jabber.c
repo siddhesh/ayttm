@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.44 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.45 $",
+	"$Date: 2005/02/13 13:32:27 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -103,18 +103,18 @@ static int plugin_init()
 	input_list * il = g_new0(input_list, 1);
 	eb_debug(DBG_MOD, "Jabber\n");
 	ref_count=0;
-		plugin_info.prefs = il;
-		il->widget.entry.value = jabber_server;
-		il->name = "jabber_server";
-		il->label = _("Default Server:");
-		il->type = EB_INPUT_ENTRY;
+	plugin_info.prefs = il;
+	il->widget.entry.value = jabber_server;
+	il->name = "jabber_server";
+	il->label = _("Default Server:");
+	il->type = EB_INPUT_ENTRY;
 
-		il->next = g_new0(input_list, 1);
-                il = il->next;
-                il->widget.checkbox.value = &do_jabber_debug;
-                il->name = "do_jabber_debug";
-                il->label = _("Enable debugging");
-                il->type = EB_INPUT_CHECKBOX;
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &do_jabber_debug;
+	il->name = "do_jabber_debug";
+	il->label = _("Enable debugging");
+	il->type = EB_INPUT_CHECKBOX;
 	return(0);
 }
 
@@ -153,7 +153,7 @@ typedef struct _eb_jabber_account_data
 
 typedef struct _jabber_info_data
 {
-    char *profile;
+	char *profile;
 } jabber_info_data;
 
 
@@ -202,7 +202,6 @@ static eb_local_account *find_local_account_by_conn(JABBER_Conn *JConn)
 	for (acc = accounts; acc && acc->data; acc=acc->next) {
 		if ( ((eb_local_account *)(acc->data))->service_id == SERVICE_INFO.protocol_id) {
 			eb_jabber_local_account_data *jlad = ((eb_local_account *)(acc->data))->protocol_local_account_data;
-			JABBER_Conn *cconn = JConn;
 			if (jlad->JConn && jlad->JConn == JConn) {
 				eb_debug(DBG_JBR, "found (%s) !\n", ((eb_local_account *)(acc->data))->handle);
 				return (eb_local_account *)(acc->data);
@@ -215,7 +214,6 @@ static eb_local_account *find_local_account_by_conn(JABBER_Conn *JConn)
 		if ( ((eb_local_account *)(acc->data))->service_id == SERVICE_INFO.protocol_id) {
 			eb_local_account *ela = ((eb_local_account *)(acc->data));
 			eb_jabber_local_account_data *jlad = ela->protocol_local_account_data;
-			JABBER_Conn *cconn = JConn;
 			char *user = strdup(JConn->jid);
 			if (*strstr(user, "/"))
 				*strstr(user, "/") = 0;
@@ -236,47 +234,47 @@ static eb_local_account *find_local_account_by_conn(JABBER_Conn *JConn)
 
 static void jabber_dialog_callback( gpointer data, int response )
 {
-    JABBER_Dialog_PTR jd;
+	JABBER_Dialog_PTR jd;
 
-    jd = (JABBER_Dialog_PTR)data;
-    eb_debug(DBG_JBR, "**** response: %i\n", response);
-    if(response)
-    {
-      jd->callback(data);
-    }
-    if(jd->requestor)
-      free(jd->requestor);
-    free(jd->message);
-    free(jd);
+	jd = (JABBER_Dialog_PTR)data;
+	eb_debug(DBG_JBR, "**** response: %i\n", response);
+	if(response)
+	{
+		jd->callback(data);
+	}
+	if(jd->requestor)
+		free(jd->requestor);
+	free(jd->message);
+	free(jd);
 }
 
 static void jabber_list_dialog_callback( char * text, gpointer data )
 {
-    JABBER_Dialog_PTR jd;
+	JABBER_Dialog_PTR jd;
 
-    eb_debug(DBG_JBR, ">\n");
-    jd = (JABBER_Dialog_PTR)data;
-    eb_debug(DBG_JBR, "**** response: %s\n", text);
-    jd->response=text;
-    jd->callback(data);
-    free(jd->message);
-    free(jd->requestor);
-    free(jd->response);
-    free(jd);
-    eb_debug(DBG_JBR, "<");
+	eb_debug(DBG_JBR, ">\n");
+	jd = (JABBER_Dialog_PTR)data;
+	eb_debug(DBG_JBR, "**** response: %s\n", text);
+	jd->response=text;
+	jd->callback(data);
+	free(jd->message);
+	free(jd->requestor);
+	free(jd->response);
+	free(jd);
+	eb_debug(DBG_JBR, "<");
 }
 
 static int eb_jabber_query_connected( eb_account * account )
 {
-    eb_jabber_account_data * jad = account->protocol_account_data;
+	eb_jabber_account_data * jad = account->protocol_account_data;
 
-    eb_debug(DBG_JBR, ">\n");
-    if(ref_count <= 0 ) {
-        jad->status = JABBER_OFFLINE;
-	ref_count = 0;
-    }
-    eb_debug(DBG_JBR, "<, returning: %i\n", jad->status != JABBER_OFFLINE);
-    return jad->status != JABBER_OFFLINE;
+	eb_debug(DBG_JBR, ">\n");
+	if(ref_count <= 0 ) {
+		jad->status = JABBER_OFFLINE;
+		ref_count = 0;
+	}
+	eb_debug(DBG_JBR, "<, returning: %i\n", jad->status != JABBER_OFFLINE);
+	return jad->status != JABBER_OFFLINE;
 
 }
 
@@ -298,11 +296,11 @@ static void eb_jabber_finish_login( const char *password, void *data)
 	eb_jabber_local_account_data * jlad;
 	char buff[1024];
 	int port = 5222;
-    
+	
 	eb_debug(DBG_JBR, ">\n");
 
 	jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
-   
+	
 	account->connected = 0;
 	account->connecting = 1;
 	snprintf(buff, sizeof(buff), _("Logging in to Jabber account: %s"), account->handle);
@@ -313,14 +311,14 @@ static void eb_jabber_finish_login( const char *password, void *data)
 #endif
 	strcpy(jlad->server_port,"5222");
 	}
-    
+	
 #ifdef HAVE_OPENSSL
 	if (jlad->use_ssl)
-		port = atoi(jlad->ssl_server_port);    
+		port = atoi(jlad->ssl_server_port);
 	else
 #endif
 		port = atoi(jlad->server_port);
-   
+	
 	jlad->connect_tag = JABBER_Login(account->handle, (char *)password, 
 			jabber_server, jlad->use_ssl, port);
 }
@@ -332,7 +330,7 @@ static void eb_jabber_login( eb_local_account * account )
 
 	if (account->connected || account->connecting) 
 		return;
-    
+	
 	jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
 	if(jlad->prompt_password || !jlad->password || !strlen(jlad->password)) {
 		snprintf(buff, sizeof(buff), _("Jabber password for: %s"), account->handle);
@@ -345,68 +343,68 @@ static void eb_jabber_login( eb_local_account * account )
 
 void JABBERNotConnected(void *data)
 {
-    JABBER_Conn *JConn = (JABBER_Conn *)data;
-    eb_local_account *ela = NULL;
-    eb_jabber_local_account_data * jlad = NULL;
-    if (!JConn) {
+	JABBER_Conn *JConn = (JABBER_Conn *)data;
+	eb_local_account *ela = NULL;
+	eb_jabber_local_account_data * jlad = NULL;
+	if (!JConn) {
 	eb_debug(DBG_JBR, "No JConn!\n");
-	return;    
-    }
-    ela = find_local_account_by_conn(JConn);
-    if (!ela) {
-	    eb_debug(DBG_JBR, "No ela!\n");
-	    return;
-    }
-    jlad = ela->protocol_local_account_data;
-    
-    ela->connected = ela->connecting = 0;
+	return;
+	}
+	ela = find_local_account_by_conn(JConn);
+	if (!ela) {
+		eb_debug(DBG_JBR, "No ela!\n");
+		return;
+	}
+	jlad = ela->protocol_local_account_data;
+	
+	ela->connected = ela->connecting = 0;
 
-    ay_activity_bar_remove(jlad->activity_tag);
-    jlad->activity_tag = 0;	
+	ay_activity_bar_remove(jlad->activity_tag);
+	jlad->activity_tag = 0;	
 }
 
 void JABBERConnected(void *data)
 {
-    JABBER_Conn *JConn = (JABBER_Conn *)data;
-    eb_local_account *ela = NULL;
-    eb_jabber_local_account_data * jlad = NULL;
-    if (!JConn) {
+	JABBER_Conn *JConn = (JABBER_Conn *)data;
+	eb_local_account *ela = NULL;
+	eb_jabber_local_account_data * jlad = NULL;
+	if (!JConn) {
 	eb_debug(DBG_JBR, "No JConn!\n");
-	return;    
-    }
-    ela = find_local_account_by_conn(JConn);
-    if (!ela) {
-	    eb_debug(DBG_JBR, "No ela!\n");
-	    return;
-    }
-    jlad = ela->protocol_local_account_data;
+	return;
+	}
+	ela = find_local_account_by_conn(JConn);
+	if (!ela) {
+		eb_debug(DBG_JBR, "No ela!\n");
+		return;
+	}
+	jlad = ela->protocol_local_account_data;
 
-    ay_activity_bar_remove(jlad->activity_tag);
-    jlad->activity_tag = 0;
-    
-    jlad->JConn=data;
-    is_setting_state = 1;
-    if(!jlad->JConn)
-    {
-        ela->connected = 0;
-        ela->connecting = 0;
-    	jlad->status=JABBER_OFFLINE;
-    }
-    else
-    {
-        jlad->status=JABBER_ONLINE;
-        ref_count++;
-        is_setting_state = 1;
-        ela->connected = 1;
-        ela->connecting = 0;
+	ay_activity_bar_remove(jlad->activity_tag);
+	jlad->activity_tag = 0;
+	
+	jlad->JConn=data;
+	is_setting_state = 1;
+	if(!jlad->JConn)
+	{
+		ela->connected = 0;
+		ela->connecting = 0;
+		jlad->status=JABBER_OFFLINE;
+	}
+	else
+	{
+		jlad->status=JABBER_ONLINE;
+		ref_count++;
+		is_setting_state = 1;
+		ela->connected = 1;
+		ela->connecting = 0;
 
-    	if(ela->status_menu)
-    	{
-        	eb_debug(DBG_JBR, "eb_jabber_login: status - %i\n", jlad->status);
+		if(ela->status_menu)
+		{
+			eb_debug(DBG_JBR, "eb_jabber_login: status - %i\n", jlad->status);
 		eb_set_active_menu_status(ela->status_menu, jlad->status);
-    	}
-    }
-    is_setting_state = 0;
+		}
+	}
+	is_setting_state = 0;
 }
 
 static void eb_jabber_logout( eb_local_account * account )
@@ -441,11 +439,11 @@ static void eb_jabber_logout( eb_local_account * account )
 }
 
 static void eb_jabber_send_im( eb_local_account * from, eb_account * account_to, 
-					 char * message)
+					char * message)
 {
 	eb_jabber_account_data * jad = account_to->protocol_account_data;
 
-    JABBER_SendMessage(jad->JConn, account_to->handle, message);
+	JABBER_SendMessage(jad->JConn, account_to->handle, message);
 }
 
 static void jabber_account_prefs_init(eb_local_account *ela)
@@ -616,38 +614,38 @@ static void eb_jabber_terminate_chat(eb_account * account )
 {
 	eb_jabber_account_data *jad=account->protocol_account_data;
 
-    JABBER_EndChat(jad->JConn, account->handle);
+	JABBER_EndChat(jad->JConn, account->handle);
 }
 
 static void eb_jabber_add_user(eb_account * account )
 {
-    eb_jabber_account_data *jad=account->protocol_account_data;
-    eb_jabber_local_account_data *jlad = NULL;
-    JABBER_Conn *conn = NULL;
-    if (account->ela) {
+	eb_jabber_account_data *jad=account->protocol_account_data;
+	eb_jabber_local_account_data *jlad = NULL;
+	JABBER_Conn *conn = NULL;
+	if (account->ela) {
 	jlad = (eb_jabber_local_account_data *)(account->ela->protocol_local_account_data);
 	conn = jlad->JConn;
-    } else {
+	} else {
 	conn = jad->JConn;
-    }
-    if (jlad) jlad->jabber_contacts = l_list_append(jlad->jabber_contacts, account->handle);
-    if (jad) JABBER_AddContact(conn, account->handle);
+	}
+	if (jlad) jlad->jabber_contacts = l_list_append(jlad->jabber_contacts, account->handle);
+	if (jad) JABBER_AddContact(conn, account->handle);
 }
 
 static void eb_jabber_del_user(eb_account * account )
 {
-    JABBER_Conn *conn = NULL;
-    eb_jabber_local_account_data *jlad = NULL;
-    if (account->ela) {
-	    jlad = (eb_jabber_local_account_data *)(account->ela->protocol_local_account_data);
-	    conn = jlad->JConn;
-    } else {
+	JABBER_Conn *conn = NULL;
+	eb_jabber_local_account_data *jlad = NULL;
+	if (account->ela) {
+		jlad = (eb_jabber_local_account_data *)(account->ela->protocol_local_account_data);
+		conn = jlad->JConn;
+	} else {
 	eb_jabber_account_data *jad = (eb_jabber_account_data *)(account->protocol_account_data);
 	if (jad) 
-		conn = jad->JConn;    
-    }
-    if(JABBER_RemoveContact(conn, account->handle)==0)
-    	jlad->jabber_contacts = l_list_remove(jlad->jabber_contacts, account->handle);
+		conn = jad->JConn;
+	}
+	if(JABBER_RemoveContact(conn, account->handle)==0)
+		jlad->jabber_contacts = l_list_remove(jlad->jabber_contacts, account->handle);
 }
 
 static eb_account * eb_jabber_new_account(eb_local_account *ela, const char * account )
@@ -686,45 +684,43 @@ static char * eb_jabber_get_status_string( eb_account * account )
 
 static void eb_jabber_set_idle( eb_local_account * account, int idle )
 {
-    if ((idle == 0) && eb_jabber_get_current_state(account) == JABBER_AWAY)
-    {
-        if(account->status_menu)
-        {
-	    eb_set_active_menu_status(account->status_menu, JABBER_ONLINE);
+	if ((idle == 0) && eb_jabber_get_current_state(account) == JABBER_AWAY)
+	{
+		if(account->status_menu)
+		{
+			eb_set_active_menu_status(account->status_menu, JABBER_ONLINE);
+		}
+	}
+	if( idle >= 600 && eb_jabber_get_current_state(account) == JABBER_ONLINE )
+	{
+		if(account->status_menu)
+		{
+			eb_set_active_menu_status(account->status_menu, JABBER_AWAY);
 
-        }
-
-    }
-    if( idle >= 600 && eb_jabber_get_current_state(account) == JABBER_ONLINE )
-    {
-        if(account->status_menu)
-        {
-	    eb_set_active_menu_status(account->status_menu, JABBER_AWAY);
-
-        }
-    }
+		}
+	}
 
 }
 
-static void eb_jabber_set_away( eb_local_account * account, char * message )
+static void eb_jabber_set_away( eb_local_account * account, char * message, int away )
 {
-    if(message)
-    {
-        if(account->status_menu)
-        {
-	    eb_set_active_menu_status(account->status_menu, JABBER_AWAY);
+	if(message)
+	{
+		if(account->status_menu)
+		{
+			eb_set_active_menu_status(account->status_menu, JABBER_AWAY);
 
-        }
-    }
-    else
-    {
-        if(account->status_menu)
-        {
-	    eb_set_active_menu_status(account->status_menu, JABBER_ONLINE);
+		}
+	}
+	else
+	{
+		if(account->status_menu)
+		{
+			eb_set_active_menu_status(account->status_menu, JABBER_ONLINE);
 
-        }
+		}
 
-    }
+	}
 
 }
 
@@ -779,59 +775,61 @@ static eb_chat_room * eb_jabber_make_chat_room( char * name, eb_local_account * 
 }
 
 static void eb_jabber_send_invite( eb_local_account * account, eb_chat_room * room,
-						  char * user, char * message )
+					char * user, char * message )
 {
 	eb_debug(DBG_JBR, "Empty function\n");
 }
 
 static void eb_jabber_get_info( eb_local_account * reciever, eb_account * sender)
 {
-   char buff[1024];
+	char buff[1024];
 
-   eb_debug(DBG_JBR, "Not implemented yet\n");
-   if(sender->infowindow == NULL){
-     sender->infowindow = eb_info_window_new(reciever, sender);
-   }
+	eb_debug(DBG_JBR, "Not implemented yet\n");
+	if(sender->infowindow == NULL){
+	 sender->infowindow = eb_info_window_new(reciever, sender);
+	}
 
-   if(sender->infowindow->info_type == -1 || sender->infowindow->info_data == NULL){
-      if(sender->infowindow->info_data == NULL) {
-        sender->infowindow->info_data = malloc(sizeof(jabber_info_data));
-        ((jabber_info_data *)sender->infowindow->info_data)->profile = NULL;
-        sender->infowindow->cleanup = jabber_info_data_cleanup;
-      }
-      sender->infowindow->info_type = SERVICE_INFO.protocol_id;
-    }
-    if(sender->infowindow->info_type != SERVICE_INFO.protocol_id) {
-       /*hmm, I wonder what should really be done here*/
-       return; 
-    }
-    sprintf(buff,"THIS_IS_NOT_IMPLEMENTED YET(%s)",sender->handle);
-    if( ((jabber_info_data *)sender->infowindow->info_data)->profile != NULL)
-      free(((jabber_info_data *)sender->infowindow->info_data)->profile);
-    ((jabber_info_data *)sender->infowindow->info_data)->profile = malloc(strlen(buff)+1);
-    strcpy(((jabber_info_data *)sender->infowindow->info_data)->profile,buff);
+	if(sender->infowindow->info_type == -1 || sender->infowindow->info_data == NULL){
+		if(sender->infowindow->info_data == NULL) {
+			sender->infowindow->info_data = malloc(sizeof(jabber_info_data));
+			((jabber_info_data *)sender->infowindow->info_data)->profile = NULL;
+			sender->infowindow->cleanup = jabber_info_data_cleanup;
+		}
+		sender->infowindow->info_type = SERVICE_INFO.protocol_id;
+	}
+	if(sender->infowindow->info_type != SERVICE_INFO.protocol_id) {
+		/*hmm, I wonder what should really be done here*/
+		return; 
+	}
+	sprintf(buff,"THIS_IS_NOT_IMPLEMENTED YET(%s)",sender->handle);
+	if( ((jabber_info_data *)sender->infowindow->info_data)->profile != NULL)
+		free(((jabber_info_data *)sender->infowindow->info_data)->profile);
+	((jabber_info_data *)sender->infowindow->info_data)->profile = malloc(strlen(buff)+1);
+	strcpy(((jabber_info_data *)sender->infowindow->info_data)->profile,buff);
 
-    jabber_info_update(sender);
+	jabber_info_update(sender);
 }
 
 
-static void jabber_info_update(eb_account *account) {
-  char buff[1024];
-  info_window *iw=account->infowindow;
-  jabber_info_data * mid = (jabber_info_data *)iw->info_data;
+static void jabber_info_update(eb_account *account)
+{
+	char buff[1024];
+	info_window *iw=account->infowindow;
+	jabber_info_data * mid = (jabber_info_data *)iw->info_data;
 
-  eb_debug(DBG_JBR, "Not implemented yet\n");
-  eb_info_window_clear(iw);
-  sprintf(buff,"Profile for <B>%s</B><BR><HR>",iw->remote_account->handle);
-  eb_info_window_add_info(account, buff, 0, 0, 0);
-  sprintf(buff,"<a href=\"%s\">%s</a>",mid->profile,mid->profile);
-  eb_info_window_add_info(account, buff, 0, 0, 0);
+	eb_debug(DBG_JBR, "Not implemented yet\n");
+	eb_info_window_clear(iw);
+	sprintf(buff,"Profile for <B>%s</B><BR><HR>",iw->remote_account->handle);
+	eb_info_window_add_info(account, buff, 0, 0, 0);
+	sprintf(buff,"<a href=\"%s\">%s</a>",mid->profile,mid->profile);
+	eb_info_window_add_info(account, buff, 0, 0, 0);
 }
 
-static void jabber_info_data_cleanup(info_window *iw){
-  jabber_info_data * mid = (jabber_info_data *)iw->info_data;
-  eb_debug(DBG_JBR, "Entering and leaving\n");
-  if(mid->profile != NULL) free(mid->profile);
+static void jabber_info_data_cleanup(info_window *iw)
+{
+	jabber_info_data * mid = (jabber_info_data *)iw->info_data;
+	eb_debug(DBG_JBR, "Entering and leaving\n");
+	if(mid->profile != NULL) free(mid->profile);
 }
 
 /*	There are no prefs for Jabber at the moment.
@@ -862,7 +860,7 @@ static void eb_jabber_read_prefs_config(LList * values)
 
 static LList * eb_jabber_write_prefs_config()
 {
-	LList * config  = NULL;
+	LList * config = NULL;
 	char buffer[5];
 
 	config = value_pair_add(config, "server", jabber_server);
@@ -1005,12 +1003,12 @@ void JABBERDelBuddy(JABBER_Conn *JConn, void *data)
 	eb_jabber_local_account_data * jlad = NULL;
 	if (!JConn) {
 	eb_debug(DBG_JBR, "No JConn!\n");
-	return;    
+	return;
 	}
 	ela = find_local_account_by_conn(JConn);
 	if (!ela) {
-	    eb_debug(DBG_JBR, "No ela!\n");
-	    return;
+		eb_debug(DBG_JBR, "No ela!\n");
+		return;
 	}
 	jlad = ela->protocol_local_account_data;
 
@@ -1037,33 +1035,33 @@ void JABBERDelBuddy(JABBER_Conn *JConn, void *data)
 
 void JABBERAddBuddy(void *data)
 {
-    struct jabber_buddy *jb = (struct jabber_buddy *)data;
-    eb_account *ea;
-    eb_jabber_account_data *jad;
-    eb_local_account *ela = find_local_account_by_conn(jb->JConn);
-    
-    if(!data)
-        return;
-    
-    if (!ela) {
-	    eb_debug(DBG_JBR, "can't find ela\n");
-	    return;
-    }
-    
-    eb_debug(DBG_JBR, "> - %s\n", jb->jid);
+	struct jabber_buddy *jb = (struct jabber_buddy *)data;
+	eb_account *ea;
+	eb_jabber_account_data *jad;
+	eb_local_account *ela = find_local_account_by_conn(jb->JConn);
+	
+	if(!data)
+		return;
+	
+	if (!ela) {
+		eb_debug(DBG_JBR, "can't find ela\n");
+		return;
+	}
+	
+	eb_debug(DBG_JBR, "> - %s\n", jb->jid);
 
-    ea = find_account_with_ela(jb->jid, ela);
-    if (!ea) {	/* Add an unknown account */
+	ea = find_account_with_ela(jb->jid, ela);
+	if (!ea) {	/* Add an unknown account */
 	ea = eb_jabber_new_account(ela, jb->jid);
-        if ( !find_grouplist_by_name("Unknown" )) {
-          add_group("Unknown");
-        }
-        add_unknown(ea);
-    }
+		if ( !find_grouplist_by_name("Unknown" )) {
+			add_group("Unknown");
+		}
+		add_unknown(ea);
+	}
 	jad=ea->protocol_account_data;
 	/* Add the connection so we know which account a buddy is tied to */
 	jad->JConn=jb->JConn;
-    eb_debug(DBG_JBR, "<\n");
+	eb_debug(DBG_JBR, "<\n");
 }
 
 /*
@@ -1076,34 +1074,34 @@ void JABBERAddBuddy(void *data)
 
 void JABBERInstantMessage(void *data)
 {
-    JABBER_InstantMessage_PTR im = (JABBER_InstantMessage_PTR)data;
-    eb_account *sender = NULL;
-    eb_account *ea;
-    eb_local_account *ela = find_local_account_by_conn(im->JConn);
-    
-    if (!ela) {
-	    eb_debug(DBG_JBR, "no ela\n");
-	    sender = find_account_by_handle(im->sender, SERVICE_INFO.protocol_id);
-	    if (sender)
-		    ela = sender->ela;
-	    if (!ela) {
-		    eb_debug(DBG_JBR, "still no ela !\n");
-	    	    return;
-	    }
-    }
-    
-    eb_debug(DBG_JBR, ">\n");
-    sender = find_account_with_ela(im->sender, ela);
+	JABBER_InstantMessage_PTR im = (JABBER_InstantMessage_PTR)data;
+	eb_account *sender = NULL;
+	eb_account *ea;
+	eb_local_account *ela = find_local_account_by_conn(im->JConn);
+	
+	if (!ela) {
+		eb_debug(DBG_JBR, "no ela\n");
+		sender = find_account_by_handle(im->sender, SERVICE_INFO.protocol_id);
+		if (sender)
+			ela = sender->ela;
+		if (!ela) {
+			eb_debug(DBG_JBR, "still no ela !\n");
+				return;
+		}
+	}
+	
+	eb_debug(DBG_JBR, ">\n");
+	sender = find_account_with_ela(im->sender, ela);
 
-    if (sender == NULL) {
+	if (sender == NULL) {
 	ea = eb_jabber_new_account(ela, im->sender);
 
-        add_unknown(ea);
-        sender = ea;
-    }
+		add_unknown(ea);
+		sender = ea;
+	}
 
-    eb_parse_incoming_message(ela, sender, im->msg);
-    eb_debug(DBG_JBR, "<\n");
+	eb_parse_incoming_message(ela, sender, im->msg);
+	eb_debug(DBG_JBR, "<\n");
 }
 
 /*
@@ -1116,56 +1114,56 @@ void JABBERInstantMessage(void *data)
 
 void JABBERStatusChange(void *data)
 {
-    struct jabber_buddy *jb;
-    eb_account *ea;
-    eb_jabber_account_data *jad;
-    eb_local_account *ela = NULL;
-    
-    if(!data)
-        return;
-    eb_debug(DBG_JBR, ">\n");
-    jb = (struct jabber_buddy *)data;
+	struct jabber_buddy *jb;
+	eb_account *ea;
+	eb_jabber_account_data *jad;
+	eb_local_account *ela = NULL;
+	
+	if(!data)
+		return;
+	eb_debug(DBG_JBR, ">\n");
+	jb = (struct jabber_buddy *)data;
 
-    ela = find_local_account_by_conn(jb->JConn);
-    if (!ela) {
-	    eb_debug(DBG_JBR, "no ela!\n");
-	    return;
-    }
-    ea = find_account_with_ela(jb->jid, ela);
-    if (!ea) {	/* Add an unknown account */
+	ela = find_local_account_by_conn(jb->JConn);
+	if (!ela) {
+		eb_debug(DBG_JBR, "no ela!\n");
+		return;
+	}
+	ea = find_account_with_ela(jb->jid, ela);
+	if (!ea) {	/* Add an unknown account */
 	ea = eb_jabber_new_account(ela, jb->jid);
-        if ( !find_grouplist_by_name("Unknown" )) {
-          add_group("Unknown");
-        }
-        add_unknown(ea);
-    }
-    jad = ea->protocol_account_data;
+		if ( !find_grouplist_by_name("Unknown" )) {
+				add_group("Unknown");
+		}
+		add_unknown(ea);
+	}
+	jad = ea->protocol_account_data;
 
-    eb_debug(DBG_JBR,  "New status for %s is %i\n", jb->jid, jb->status);
-    if (jb->status != JABBER_OFFLINE && jad->status==JABBER_OFFLINE) {
-       jad->status = jb->status;
-       buddy_login(ea);
-    } else if (jb->status == JABBER_OFFLINE && jad->status!=JABBER_OFFLINE) {
-       jad->status = jb->status;
-       buddy_logoff(ea);
-    }
-    jad->status = jb->status;
+	eb_debug(DBG_JBR,  "New status for %s is %i\n", jb->jid, jb->status);
+	if (jb->status != JABBER_OFFLINE && jad->status==JABBER_OFFLINE) {
+		jad->status = jb->status;
+		buddy_login(ea);
+	} else if (jb->status == JABBER_OFFLINE && jad->status!=JABBER_OFFLINE) {
+		jad->status = jb->status;
+		buddy_logoff(ea);
+	}
+	jad->status = jb->status;
 	jad->JConn=jb->JConn;
-    buddy_update_status(ea); 
-    eb_debug(DBG_JBR, "<\n");
+	buddy_update_status(ea); 
+	eb_debug(DBG_JBR, "<\n");
 }
 
 void JABBERListDialog(const char **list, void *data)
 {
-    JABBER_Dialog_PTR jd;
+	JABBER_Dialog_PTR jd;
 
-    if(!data || !list)
-        return;
+	if(!data || !list)
+		return;
 
-    jd = (JABBER_Dialog_PTR)data;
-    eb_debug(DBG_JBR, "Calling do_list_dialog\n");
-    do_list_dialog(jd->message, jd->heading, list, jabber_list_dialog_callback, (gpointer)jd);
-    eb_debug(DBG_JBR, "Returned from do_list_dialog\n");
+	jd = (JABBER_Dialog_PTR)data;
+	eb_debug(DBG_JBR, "Calling do_list_dialog\n");
+	do_list_dialog(jd->message, jd->heading, list, jabber_list_dialog_callback, (gpointer)jd);
+	eb_debug(DBG_JBR, "Returned from do_list_dialog\n");
 }
 
 /*
@@ -1177,16 +1175,16 @@ void JABBERListDialog(const char **list, void *data)
 
 void JABBERDialog(void *data)
 {
-    JABBER_Dialog_PTR jd;
+	JABBER_Dialog_PTR jd;
 
-    if(!data)
-        return;
-    eb_debug(DBG_JBR, ">\n");
-    jd = (JABBER_Dialog_PTR)data;
-    eb_do_dialog(jd->message, jd->heading, jabber_dialog_callback, (gpointer)jd);
-    eb_debug(DBG_JBR, "<\n");
-              
-    return;
+	if(!data)
+		return;
+	eb_debug(DBG_JBR, ">\n");
+	jd = (JABBER_Dialog_PTR)data;
+	eb_do_dialog(jd->message, jd->heading, jabber_dialog_callback, (gpointer)jd);
+	eb_debug(DBG_JBR, "<\n");
+
+	return;
 }
 
 /*
@@ -1199,34 +1197,34 @@ void JABBERDialog(void *data)
 
 void JABBERLogout(void *data)
 {
-    JABBER_Conn *JConn = (JABBER_Conn *)data;
-    eb_local_account *ela = NULL;
-    eb_jabber_local_account_data * jlad = NULL;
-    if (!JConn) {
+	JABBER_Conn *JConn = (JABBER_Conn *)data;
+	eb_local_account *ela = NULL;
+	eb_jabber_local_account_data * jlad = NULL;
+	if (!JConn) {
 	eb_debug(DBG_JBR, "No JConn!\n");
-	return;    
-    }
-    ela = find_local_account_by_conn(JConn);
-    if (!ela) {
-	    eb_debug(DBG_JBR, "No ela!\n");
-	    return;
-    }
-    jlad = ela->protocol_local_account_data;
-    
-    if (ref_count >0)
-	    ref_count--;
-    is_setting_state = 1;
+	return;
+	}
+	ela = find_local_account_by_conn(JConn);
+	if (!ela) {
+		eb_debug(DBG_JBR, "No ela!\n");
+		return;
+	}
+	jlad = ela->protocol_local_account_data;
+	
+	if (ref_count >0)
+		ref_count--;
+	is_setting_state = 1;
 
-    eb_debug(DBG_JBR, ">\n");
-    ela->connected = 0;
-    ela->connecting = 0;
-    if(ela->status_menu) {
-        eb_debug(DBG_JBR, "Setting menu to JABBER_OFFLINE\n");
+	eb_debug(DBG_JBR, ">\n");
+	ela->connected = 0;
+	ela->connecting = 0;
+	if(ela->status_menu) {
+		eb_debug(DBG_JBR, "Setting menu to JABBER_OFFLINE\n");
 	eb_set_active_menu_status(ela->status_menu, JABBER_OFFLINE);
-    }
-    is_setting_state = 0;
-    JABBERNotConnected(JConn);
-    eb_debug(DBG_JBR, "<\n");
+	}
+	is_setting_state = 0;
+	JABBERNotConnected(JConn);
+	eb_debug(DBG_JBR, "<\n");
 }
 
 void	JABBERError( char *message, char *title )
@@ -1265,7 +1263,6 @@ static int eb_jabber_send_typing_stop(void *data)
 	eb_local_account *from = tcd->from;
 	eb_account *to = tcd->to;
 	eb_jabber_local_account_data *jlad = (eb_jabber_local_account_data *)from->protocol_local_account_data;
-	eb_jabber_account_data *jad = (eb_jabber_account_data *)to->protocol_account_data;	
 	/* Stop typing notify is always sent */
 	/*
 	if (!iGetLocalPref("do_typing_notify"))
@@ -1281,7 +1278,6 @@ static int eb_jabber_send_typing_stop(void *data)
 static int eb_jabber_send_typing( eb_local_account * from, eb_account * to )
 {
 	eb_jabber_local_account_data *jlad = (eb_jabber_local_account_data *)from->protocol_local_account_data;
-	eb_jabber_account_data *jad = (eb_jabber_account_data *)to->protocol_account_data;	
 	jabber_typing_callback_data *tcd = (jabber_typing_callback_data *)malloc(sizeof(jabber_typing_callback_data));
 	
 	if (!iGetLocalPref("do_typing_notify"))
