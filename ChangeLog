@@ -1,3 +1,7 @@
+* Sat May  3 2003 13:01 GMT [colin]	0.3.0-118
+- configure.ac modules/Makefile.am
+Allow optional building of smtp module
+
 * Sat May  3 2003 13:01 GMT [colin]	0.3.0-117
 - src/chat_room.c
 New style system messages

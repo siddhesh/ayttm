@@ -258,6 +258,8 @@ AC_ARG_ENABLE(workwizu, AC_HELP_STRING([--enable-workwizu],
 		[include workwizu service]))
 AC_ARG_ENABLE(broken_icq, AC_HELP_STRING([--enable-broken-icq],
 		[include broken icq service instead of working one]))
+AC_ARG_ENABLE(yahoo, AC_HELP_STRING([--enable-smtp],
+		[include smtp service]))
 AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
 		[exclude aim-toc service]))
 AC_ARG_ENABLE(icq_toc, AC_HELP_STRING([--disable-icq-toc],
@@ -310,6 +312,9 @@ if test "$enable_jabber" != no; then
 fi
 if test "$enable_broken_icq" == yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq"
+fi
+if test "$enable_smtp" == yes; then
+	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR smtp"
 fi
 if test "$enable_aim_toc" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aim-toc"
@@ -403,6 +408,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  modules/icq/libicq/Makefile
                  modules/importers/Makefile
                  modules/irc/Makefile
+		 modules/smtp/Makefile
                  modules/jabber/Makefile
                  modules/jabber/libjabber/Makefile
                  modules/jabber/libjabber/include/Makefile
