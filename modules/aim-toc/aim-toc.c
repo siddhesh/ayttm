@@ -96,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.31 $",
-	"$Date: 2003/04/29 08:31:58 $",
+	"$Revision: 1.32 $",
+	"$Date: 2003/04/29 12:40:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -426,17 +426,15 @@ static void eb_aim_oncoming_buddy(char * user, int online, time_t idle, int evil
 {
 	eb_account * ea = find_account_by_handle( user, SERVICE_INFO.protocol_id);
 	struct eb_aim_account_data * aad ;
-	struct eb_aim_local_account_data *alad = ea->ela?(struct eb_aim_local_account_data *)ea->ela->protocol_local_account_data:NULL;
-	if(ea)
-	{
-		aad = ea->protocol_account_data;
-		if (alad && !l_list_find(alad->aim_buddies, ea->handle))
-			alad->aim_buddies = l_list_append(alad->aim_buddies, ea->handle);
-	}
-	else
-	{
+	struct eb_aim_local_account_data *alad;
+       
+	if(!ea)
 		return;
-	}
+
+	alad = ea->ela?(struct eb_aim_local_account_data *)ea->ela->protocol_local_account_data:NULL;
+	aad = ea->protocol_account_data;
+	if (alad && !l_list_find(alad->aim_buddies, ea->handle))
+		alad->aim_buddies = l_list_append(alad->aim_buddies, ea->handle);
 
 
 	if (online && (aad->status == AIM_OFFLINE))

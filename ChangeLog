@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 12:42 GMT [philip]	0.3.0-40
+- modules/*-toc/*-toc.c
+fix bug 729150
+
 * Tue Apr 29 2003 12:42 GMT [edward]	0.3.0-39
 - mingw32/Makefile.am 
   mingw32/gdk/Makefile.am
