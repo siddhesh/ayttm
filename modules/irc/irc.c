@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.34 $",
-	"$Date: 2003/08/07 06:13:27 $",
+	"$Revision: 1.35 $",
+	"$Date: 2003/08/07 06:21:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1184,7 +1184,7 @@ static void irc_login( eb_local_account * account)
 		ay_irc_cancel_connect(account);
 		return;
 	}
-	printf("tag %d\n",tag);
+
 	ila->connect_tag = tag;
 }
 
