@@ -803,6 +803,7 @@ int proxy_connect_host (char *host, int port, void *cb, void *data, void *scb)
 	{
 		do_error_dialog("Could not resolve host.", "Proxy error");
 		perror("ghbn");
+		return -1;
 	}
 	sin.sin_addr.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
 	sin.sin_family = AF_INET;
