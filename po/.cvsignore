@@ -3,3 +3,5 @@ Makefile.in
 POTFILES
 *.gmo
 *.pot
+*.po.poedit
+*.po.bac
