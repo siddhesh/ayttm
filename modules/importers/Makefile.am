@@ -2,7 +2,7 @@ AM_CFLAGS = $(GTK_CFLAGS) -I$(top_srcdir)/src
 
 EXTRA_DIST = 
 
-pkglib_LTLIBRARIES = import_gaim.la import_gnomeicu.la importlicq.la importicq.la smileysc.la giles_smiles.la 
+pkglib_LTLIBRARIES = import_gaim.la import_gnomeicu.la importlicq.la import_everybuddy.la importicq.la smileysc.la giles_smiles.la 
 # msn_smileys.la yahoo_smileys.la
 
 import_gaim_la_SOURCES = import_gaim.c
@@ -16,6 +16,9 @@ importicq_la_LDFLAGS = -module -avoid-version
 
 importlicq_la_SOURCES = importlicq.c
 importlicq_la_LDFLAGS = -module -avoid-version
+
+import_everybuddy_la_SOURCES = import_everybuddy.c
+import_everybuddy_la_LDFLAGS = -module -avoid-version
 
 smileysc_la_SOURCES = smileysc.c
 smileysc_la_LDFLAGS = -module -avoid-version

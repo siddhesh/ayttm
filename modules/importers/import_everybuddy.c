@@ -1,0 +1,240 @@
+/*
+ * Ayttm 
+ *
+ * Copyright (C) 2003, the Ayttm team
+ * 
+ * Ayttm is derivative of Everybuddy
+ * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+unsigned int module_version() {return CORE_VERSION;}
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+#ifdef __MINGW32__
+#define __IN_PLUGIN__ 1
+#endif
+#include "globals.h"
+#include "account.h"
+#include "service.h"
+#include "dialog.h"
+#include "prefs.h"
+#include "util.h"
+#include "plugin_api.h"
+#include "pixmaps/ok.xpm"
+#include "pixmaps/cancel.xpm"
+#include "intl.h"
+/*************************************************************************************
+ *                             Begin Module Code
+ ************************************************************************************/
+/*  Module defines */
+#define plugin_info import_everybuddy_LTX_plugin_info
+#define plugin_init import_everybuddy_LTX_plugin_init
+#define plugin_finish import_everybuddy_LTX_plugin_finish
+
+/* Function Prototypes */
+void import_eb_accounts(ebmCallbackData *data);
+int plugin_init();
+int plugin_finish();
+
+static int ref_count=0;
+
+/*  Module Exports */
+PLUGIN_INFO plugin_info = {
+	PLUGIN_UTILITY, 
+	"Import Everybuddy Settings", 
+	"Import the Everybuddy Settings", 
+	"$Revision: 1.1 $",
+	"$Date: 2003/04/29 07:03:08 $",
+	&ref_count,
+	plugin_init,
+	plugin_finish
+};
+/* End Module Exports */
+
+static void *buddy_list_tag=NULL;
+
+int plugin_init()
+{
+	eb_debug(DBG_MOD,"EB Buddy List init\n");
+	buddy_list_tag=eb_add_menu_item("Everybuddy Settings", EB_IMPORT_MENU, import_eb_accounts, ebmIMPORTDATA, NULL);
+	if(!buddy_list_tag)
+		return(-1);
+	return(0);
+}
+
+int plugin_finish()
+{
+	int result;
+
+	result=eb_remove_menu_item(EB_IMPORT_MENU, buddy_list_tag);
+	if(result) {
+		g_warning("Unable to remove eb Buddy List menu item from import menu!");
+		return(-1);
+	}
+	return(0);
+}
+
+/*************************************************************************************
+ *                             End Module Code
+ ************************************************************************************/
+
+static GtkWidget *window;
+static GtkWidget *vbox;
+static GtkWidget *hbox;
+static GtkWidget *accountsbutton;
+static GtkWidget *contactsbutton;
+static GtkWidget *prefsbutton;
+static GtkWidget *awaybutton;
+static GtkWidget *okbutton;
+static GtkWidget *cancelbutton;
+static GtkWidget *label;
+static int eb_imp_window_open = 0;
+
+static void ok_callback(GtkWidget * widget, gpointer data) {
+	
+	char buff[1024];
+		
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(accountsbutton))) {
+		snprintf(buff, 1024, "%s/.everybuddy/accounts", getenv("HOME"));
+		if (!load_accounts_from_file(buff)) {
+			ay_do_error(_("Import error"), _("Cannot import accounts.\nCheck that ~/.everybuddy/accounts exists and is readable."));
+		}
+	}
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(contactsbutton))) {
+		snprintf(buff, 1024, "%s/.everybuddy/contacts", getenv("HOME"));
+		if (!load_contacts_from_file(buff)) {
+			ay_do_error(_("Import error"), _("Cannot import contacts.\nCheck that ~/.everybuddy/contacts exists and is readable."));
+		}		
+	}
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(prefsbutton))) {
+		/* prefs we want to save */
+		char saved[7][MAX_PREF_LEN];
+		strncpy( saved[0], cGetLocalPref("BuddyArriveFilename"), MAX_PREF_LEN );
+		strncpy( saved[1], cGetLocalPref("BuddyAwayFilename"), MAX_PREF_LEN );
+		strncpy( saved[2], cGetLocalPref("BuddyLeaveFilename"), MAX_PREF_LEN );
+		strncpy( saved[3], cGetLocalPref("SendFilename"), MAX_PREF_LEN );
+		strncpy( saved[4], cGetLocalPref("ReceiveFilename"), MAX_PREF_LEN );
+		strncpy( saved[5], cGetLocalPref("FirstMsgFilename"), MAX_PREF_LEN );
+		strncpy( saved[6], cGetLocalPref("modules_path"), MAX_PREF_LEN );
+
+		snprintf(buff, 1024, "%s/.everybuddy/prefs", getenv("HOME"));
+		ayttm_prefs_read_file(buff);
+		
+		cSetLocalPref("BuddyArriveFilename", saved[0]);
+		cSetLocalPref("BuddyAwayFilename", saved[1]);
+		cSetLocalPref("BuddyLeaveFilename", saved[2]);
+		cSetLocalPref("SendFilename", saved[3]);
+		cSetLocalPref("ReceiveFilename", saved[4]);
+		cSetLocalPref("FirstMsgFilename", saved[5]);
+		cSetLocalPref("modules_path", saved[6]);
+		
+		ayttm_prefs_write();
+	}
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(awaybutton))) {
+		FILE *in = NULL, *out = NULL;
+		snprintf(buff, 1024, "%s/.everybuddy/away_messages", getenv("HOME"));
+		in = fopen(buff, "r");
+		if (in) {
+			snprintf(buff, 1024, "%saway_messages", config_dir);
+			out = fopen(buff, "a");
+			if (!out) {
+				ay_do_error(_("Import error"), _("Cannot save away messages.\nCheck that ~/.ayttm/away_messages is writable."));
+			} else {
+				while (fgets(buff, 1024, in) != NULL)
+					fputs(buff, out);
+
+				fclose(out);
+			}
+			fclose(in);
+		} else {
+			ay_do_error(_("Import error"), _("Cannot import away messages.\nCheck that ~/.everybuddy/away_messages exists and is readable."));			
+		}
+	}
+	gtk_widget_destroy(window);
+}
+
+static void cancel_callback(GtkWidget * widget, gpointer data) {
+	gtk_widget_destroy(window);
+}
+
+static void destroy_callback(GtkWidget * widget, gpointer data) {
+	eb_imp_window_open = 0;
+}
+
+
+void import_eb_accounts(ebmCallbackData *data)
+{
+	if (!eb_imp_window_open) {
+		eb_imp_window_open = 1;
+		window = gtk_window_new(GTK_WINDOW_DIALOG);
+		gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_MOUSE);
+		gtk_window_set_title(GTK_WINDOW(window), _("Import parameters"));
+		gtk_widget_realize(window);
+		gtk_container_set_border_width(GTK_CONTAINER(window), 5);
+		
+		vbox = gtk_vbox_new(FALSE, 5);
+		
+		label = gtk_label_new(_("Select which parts of your everybuddy configuration to import.\n"));
+		
+		accountsbutton  = gtk_check_button_new_with_label(_("Import local accounts"));
+		contactsbutton  = gtk_check_button_new_with_label(_("Import contacts"));
+		prefsbutton     = gtk_check_button_new_with_label(_("Import preferences"));
+		awaybutton      = gtk_check_button_new_with_label(_("Import away messages"));
+		
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(accountsbutton), TRUE);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(contactsbutton), TRUE);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(prefsbutton), TRUE);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(awaybutton), TRUE);
+		
+		okbutton = do_icon_button(_("OK"), ok_xpm, window);
+		cancelbutton = do_icon_button(_("Cancel"), cancel_xpm, window);
+
+		hbox = gtk_hbox_new(FALSE, 5);
+		gtk_box_pack_start(GTK_BOX(hbox), okbutton, FALSE, FALSE, 2);
+		gtk_box_pack_start(GTK_BOX(hbox), cancelbutton, FALSE, FALSE, 2);
+
+		gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 2);
+		gtk_box_pack_start(GTK_BOX(vbox), accountsbutton, FALSE, FALSE, 2);
+		gtk_box_pack_start(GTK_BOX(vbox), contactsbutton, FALSE, FALSE, 2);
+		gtk_box_pack_start(GTK_BOX(vbox), prefsbutton, FALSE, FALSE, 2);
+		gtk_box_pack_start(GTK_BOX(vbox), awaybutton, FALSE, FALSE, 2);
+		gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 2);
+		
+		gtk_container_add (GTK_CONTAINER(window), vbox);
+		gtk_signal_connect(GTK_OBJECT(okbutton), "clicked",
+				GTK_SIGNAL_FUNC(ok_callback), NULL);
+		gtk_signal_connect(GTK_OBJECT(cancelbutton), "clicked",
+				GTK_SIGNAL_FUNC(cancel_callback), NULL);
+		gtk_signal_connect(GTK_OBJECT(window), "destroy",
+			   	GTK_SIGNAL_FUNC(destroy_callback), NULL);
+		
+		gtk_widget_show(vbox);
+		gtk_widget_show(hbox);
+		gtk_widget_show(accountsbutton);
+		gtk_widget_show(contactsbutton);
+		gtk_widget_show(prefsbutton);
+		gtk_widget_show(awaybutton);
+		gtk_widget_show(okbutton);
+		gtk_widget_show(cancelbutton);
+		gtk_widget_show(label);
+
+		gtk_widget_show(window);
+	}
+}

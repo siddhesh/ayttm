@@ -59,7 +59,7 @@ typedef struct _ptr_list
 
 static LList 	*s_global_prefs = NULL;
 
-static void ayttm_prefs_read_file(char *file);
+void ayttm_prefs_read_file(char *file);
 
 static int s_compare_ptr_key( const void *a, const void *b )
 {
@@ -540,7 +540,7 @@ void	ayttm_prefs_init( void )
 	cSetLocalPref( "modules_path", cGetLocalPref("default_module_path") );
 }
 
-static void ayttm_prefs_read_file(char *file)
+void ayttm_prefs_read_file(char *file)
 {
 	const int		buffer_size = 1024;
 	char			buff[buffer_size];

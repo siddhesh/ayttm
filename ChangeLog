@@ -1,3 +1,9 @@
+* Tue Apr 29 2003 06:29 GMT [colin]	0.3.0-32
+- modules/importers/Makefile.am
+  modules/importers/import_everybuddy.c ** ADDED **
+  src/prefs.[ch]
+Add EB importer
+
 * Tue Apr 29 2003 06:35 GMT [philip]	0.3.0-31
 - modules/yahoo2
 possibly fix infinite read loop if file transfer connect fails
