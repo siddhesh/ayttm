@@ -1745,19 +1745,19 @@ static struct yab * yahoo_getyab(struct yahoo_input_data *yid)
 	DEBUG_MSG(("rxlen is %d, rxqueue is %s", yid->rxlen, yid->rxqueue));
 
 	/* start with <record */
-	while(pos < yid->rxlen-strlen("<record")+1 
+	while(pos < yid->rxlen-strlen("<record") 
 			&& memcmp(yid->rxqueue + pos, "<record", strlen("<record")))
 		pos++;
 
-	if(pos >= yid->rxlen-1)
+	if(pos >= yid->rxlen-strlen("<record"))
 		return NULL;
 
 	end = pos+2;
 	/* end with /> */
-	while(end < yid->rxlen-strlen("/>")+1 && memcmp(yid->rxqueue + end, "/>", strlen("/>")))
+	while(end < yid->rxlen-strlen("/>") && memcmp(yid->rxqueue + end, "/>", strlen("/>")))
 	       	end++;
 
-	if(end >= yid->rxlen-1)
+	if(end >= yid->rxlen-strlen("/>"))
 		return NULL;
 
 	yab = y_new0(struct yab, 1);

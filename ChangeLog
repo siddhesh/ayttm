@@ -1,3 +1,7 @@
+* Thu Apr 24 2003 19:40 GMT [philip]	0.3.0-pre24
+- modules/yahoo2/libyahoo2/libyahoo2.c
+try to fix bug 727057
+
 * Thu Apr 24 2003 12:55 GMT [andy]	0.3.0-pre23
 - src/gtk/prefs_window.C
 Fix GTK 'double-line' problem
