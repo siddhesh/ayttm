@@ -2724,7 +2724,7 @@ void yahoo_get_url_handle(int id, const char *url,
 	if(!yd)
 		return;
 
-	return yahoo_get_url_fd(id, url, yd, callback, data);
+	yahoo_get_url_fd(id, url, yd, callback, data);
 }
 
 const char * yahoo_get_profile_url( void )

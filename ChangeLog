@@ -1,3 +1,7 @@
+* Fri Apr 18 2003 21:15 GMT [philip]	0.3.0-pre6
+- modules/yahoo2/yahoo.c
+remove int return in void context
+
 * Fri Apr 18 2003 20:20 GMT [andy]	0.3.0-pre5
 - src/gtk/prefs_window.C
 Better plugin error indication
