@@ -1,0 +1,46 @@
+* Project homepage (where to bugreport and so):
+===============================================
+	http://savannah.nongnu.org/projects/ayttm/
+	
+* How to help & be helped
+=========================
+  - bugreports:
+    If you experience a fatal bug (segfault), you can file a bugreport
+    on savannah's bugtracker. The more precise it is, the easier we'll 
+    find out how to fix it. In particular, a backtrace is really 
+    useful. After a crash you should have a `core' file in your 
+    working directory ($HOME if run via a window manager). run gdb with 
+    it:
+    $ gdb `which ayttm` core
+    then at the gdb prompt, type 'bt full':
+    (gdb) bt full
+    and copy/paste the result to your bugreport.
+    You can also easily, automatically get stacktraces by running 
+    ./configure --enable-crash-dialog. It'll popup the stack trace every
+    time ayttm segfaults.
+
+  - If you experience lots of segfaults after an update (in particular 
+    for CVS updates), it is probably caused by a change in a structure
+    shared between core and modules. Try a "make clean && make && sudo
+    make install" instead of simply "make && sudo make install".
+  - If you are a developer and fix a bug or add a feature, we certainly
+    want to hear from you :) Please send a patch (ideally, against CVS)
+    to savannah's patchtracker. use `cvs diff -u`.
+  - Translations: The existing translations are quite out of date after
+    the fork. I plan to update the french one, but that'll be when i'll
+    have more time, could be quite long. If you want to submit a 
+    translation (or an update to one of the existing), you're very 
+    welcome.
+
+* General
+=========
+  Ayttm is an integrated messenger, which means you can be logged on 
+  more than one of the supported services at once. You can then chat
+  with people on the services where you have an account. 
+  Your "online friends" are grouped by contacts (a contact can have
+  more than one account), and by groups (Buddies, etc). You can order
+  your contacts by groups by either drag and dropping them, or by 
+  editing the contact. You can order your contacts' accounts only by
+  editing the account, yet.
+
+I should write more in this README, too...

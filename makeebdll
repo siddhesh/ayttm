@@ -1,0 +1,7 @@
+#!/bin/sh
+dlltool --export-all --output-def ayttm.def src/*.o src/gtk/*.o libproxy/*.o
+dlltool --dllname ayttm.exe --def ayttm.def --output-lib libayttm.a
+dlltool --dllname ayttm.exe --output-exp ayttm.exp --def ayttm.def
+gcc -mno-cygwin -fnative-struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -D_REENTRANT -Wall -g -I.. -I./libproxy -o ayttm.exe -Wl,--subsystem,windows,--base-file,ayttm.base ayttm.exp src/*.o src/gtk/*.o libproxy/*.o /target/lib/intl.lib /target/lib/iconv.lib /target/lib/dirent.lib libltdl/ltdl.o  -L/target/lib -lgdk -lgtk -lglib-2.0 -lwinmm -lws2_32 -lwst -lmsvcrt40
+dlltool --dllname ayttm.exe --base-file ayttm.base --output-exp ayttm.exp --def ayttm.def
+gcc -mno-cygwin -fnative-struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -D_REENTRANT -Wl,--subsystem,windows -Wall -g -I.. -I./libproxy -o ayttm.exe ayttm.exp src/*.o src/gtk/*.o libproxy/*.o /target/lib/intl.lib /target/lib/iconv.lib /target/lib/dirent.lib libltdl/ltdl.o  -L/target/lib -lgdk -lgtk -lglib-2.0 -lwinmm -lws2_32 -lwst -lmsvcrt40

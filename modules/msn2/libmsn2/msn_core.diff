@@ -1,0 +1,20 @@
+Index: msn_core.C
+===================================================================
+RCS file: /var/lib/cvs/everybuddy/modules/msn2/libmsn2/msn_core.C,v
+retrieving revision 1.26
+diff -u -r1.26 msn_core.C
+--- msn_core.C	14 Jun 2002 21:31:12 -0000	1.26
++++ msn_core.C	4 Jul 2002 11:33:27 -0000
+@@ -90,8 +90,10 @@
+ 
+ void msn_show_verbose_error(msnconn * conn, int errcode)
+ {
+-  snprintf(buf, 1024, "An error has occurred while communicating with the MSN Messenger server: %s (code %d)", errors[errcode], errcode);
+-  ext_show_error(conn, buf);
++  if(errcode != 215) {
++    snprintf(buf, 1024, "An error has occurred while communicating with the MSN Messenger server: %s (code %d)", errors[errcode], errcode);
++    ext_show_error(conn, buf);
++  }
+ }
+ 
+ void msn_invite_user(msnconn * conn, char * rcpt)

@@ -1,0 +1,519 @@
+/*
+ * Ayttm
+ *
+ * Copyright (C) 2003, the Ayttm team
+ * 
+ * Ayttm is derivative of Everybuddy
+ * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+/*
+ * main.c
+ * yipee
+ */
+
+#include "intl.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <locale.h>
+
+#ifdef __MINGW32__
+#include <winsock2.h>
+int WinVer;
+#else
+#include <sys/un.h>
+#include <sys/socket.h>
+#endif
+
+#if defined( _WIN32 )
+#include <direct.h>
+#define mkdir( x, y )	_mkdir( x )
+#endif
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+#include "status.h"
+#include "plugin.h"
+#include "gtk_globals.h"
+#include "dialog.h"
+#include "util.h"
+#include "sound.h"
+#include "smileys.h"
+#include "console_session.h"
+#include "crash.h"
+#include "prefs_window.h"
+
+
+#define PACKAGE "ayttm"
+
+/* globals */
+char geometry[256];
+
+#ifdef CRASH_DIALOG
+gchar *startup_dir;
+gchar *argv0;
+static int crash;
+static gchar *crash_param;
+#endif
+
+static void eb_cli_ver ()
+{
+	printf("Ayttm v%s-%s\n", VERSION, RELEASE);
+	printf("Copyright (C) 2003 The Ayttm team\n");
+	printf("Ayttm comes with NO WARRANTY, to the extent permitted"
+	       " by law.\n");
+	printf("You may redistribute copies of Ayttm under the terms of the\n");
+	printf("GNU General Public License.  For more information about these\n");
+	printf("matters, see the file named COPYING.\n");
+	printf("\nAyttm is brought to you by (in no order): Torrey Searle, \n");
+	printf("Jared Peterson, Ben Rigas, Alex Wheeler, Robert Lazzurs, Meredydd Luff,\n");
+	printf("Vance Lankhaar, Erik Inge Bolso, Colin Leroy, Philip Tellis, Jeff Miller,\n");
+	printf("and Troy Morrison.\n");
+	printf("\nFor more information on Ayttm, visit the website at\n");
+	printf("         http://www.nongnu.org/ayttm/\n");
+	return;
+}
+
+struct option_help
+{
+	const char   s_opt;
+	const char * l_opt;
+	const char * help;
+};
+
+static struct option_help options [] =
+{
+	{'h', "help",       "Display this help and exit"},
+	{'v', "version",    "Output version information and exit"},
+	{'g', "geometry",   "Set position of main window"},
+	{'d', "config-dir", "Specify configuration directory"},
+	{'D', "disable-server",    "Disable console message server"},
+	{'c', "contact",    "Specify contact to send a message to via console server"},
+	{'m', "message",    "Specify the message to send via console server"},
+	{' ', NULL,        "-c and -m must be used toegether"},
+	{'\0', NULL,         NULL}
+};
+
+
+
+static void eb_cli_help (const char * cmd)
+{
+	unsigned int i = 0;
+
+	printf("Usage: %s [OPTION]...\n", cmd);
+	printf("An integrated instant messenger program.\n");
+	printf("Supports AIM, ICQ, MSN, Yahoo!, Jabber, and IRC.\n\n");
+
+#if defined (HAVE_GETOPT) || defined (HAVE_GETOPT_LONG)
+
+	for (i = 0; options [i].help != NULL; i++) {
+#ifdef HAVE_GETOPT_LONG
+
+		printf ("  %c%c  %2s%15s  %s\n",
+		  (options [i].s_opt == ' ' ? ' ' : '-'),
+		  options [i].s_opt,
+		  (options [i].l_opt == NULL ? "  " : "--"),
+		  options [i].l_opt,
+		  options [i].help);
+
+#else /* HAVE_GETOPT_LONG */
+
+  /* Leaves HAVE_GETOPT */
+		printf ("  %c%c  %s\n",
+		  (options [i].s_opt == ' ' ? ' ' : '-'),
+		  options [i].s_opt,
+		  options [i].help);
+
+#endif /* HAVE_GETOPT_LONG */
+	}
+
+#endif /* defined (HAVE_GETOPT) || defined (HAVE_GETOPT_LONG) */
+
+	return;
+}
+
+
+/* Global variable, referenced in globals.h */
+char config_dir[1024] = "";
+GtkWidget *current_parent_widget = NULL;
+
+
+static void start_login(gboolean new)
+{
+   	if (new)
+		eb_new_user();
+	else {
+		eb_status_window();
+		if ( iGetLocalPref("do_login_on_startup") )
+			eb_sign_on_all() ;
+	}
+}
+ 
+int main(int argc, char *argv[])
+{
+
+	int c = 0;
+	int sock;
+	int len;
+#ifndef __MINGW32__
+	struct sockaddr_un local;
+	int disable_console_server = FALSE;
+#else
+	struct sockaddr_in local;
+	int disable_console_server = TRUE;
+#endif
+	char message[4096] = "";
+	char contact[256] = "";
+	gchar buff[1024];
+	struct stat stat_buf;
+	gboolean accounts_success = FALSE;
+
+	pid_t pid;
+	const char * cmd = argv [0];
+
+	srand(time(NULL));
+	setlocale(LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
+
+	geometry[0] = 0;
+
+/* Setup default value for config_dir */
+#if defined( _WIN32 )
+	{
+		OSVERSIONINFO vi;
+		vi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+		GetVersionEx(&vi);
+		switch(vi.dwMajorVersion)
+		{
+			case 3:
+				// switch(vi.dwMinorVersion)
+				// {
+					// case 51: // v3.51
+						// exit 51;//unknown
+					// default:
+						// exit -1;
+				// }
+				exit(-3); // We do not support v3.51
+				break;
+			case 4:
+				switch(vi.dwMinorVersion)
+				{
+					case 0:
+						if(vi.dwPlatformId == VER_PLATFORM_WIN32_NT)
+							WinVer = 1;
+						else
+							exit(-95); // Win95
+						break;
+					case 10:
+						WinVer = 0; // Win98
+						break;
+					case 90:
+						WinVer = 0; // WinMe
+						break;
+					default:
+						exit(-4); // unknown
+						break;
+				}
+				break;
+			case 5:
+				switch(vi.dwMinorVersion)
+				{
+					case 0:
+						WinVer = 1; // Win2000
+						break;
+					case 1:
+						WinVer = 1; // WinXP
+						break;
+					case 2:
+						WinVer = 1; // WinNetServer
+						break;
+					default:
+						exit(-5); // Unknown
+						break;
+				}
+				break;
+			default:
+				exit(-1); //unknown
+				break;
+		}
+		if (WinVer == 0) { // lesser windows
+			strcpy(config_dir, "/.ayttm/");
+		} else {
+			_snprintf(config_dir, 1024, "%s/ayttm/",getenv("USERPROFILE"));
+		}
+	}
+#else
+	gtk_set_locale ();
+	g_snprintf(config_dir, 1024, "%s/.ayttm/",getenv("HOME"));
+#endif
+
+#if defined ( HAVE_GETOPT ) || defined ( HAVE_GETOPT_LONG )
+	while (1) {
+#ifdef HAVE_GETOPT_LONG
+		static struct option long_options[] = 
+		{
+	    	{"version", no_argument, NULL, 'v'},
+		{"help", no_argument, NULL, 'h'},
+	    	{"geometry", required_argument, NULL, 'g'},
+	    	{"activate-goad-server", required_argument, NULL, 'a'},
+	    	{"disable-server", no_argument, NULL, 'D'},
+	    	{"contact", required_argument, NULL, 'c'},
+	    	{"message", required_argument, NULL, 'm'},
+	    	{"config-dir", required_argument, NULL, 'd'},
+#ifdef CRASH_DIALOG
+	    	{"crash", required_argument, NULL, 'C'},
+#endif
+	    	{0, 0, 0, 0}
+		};
+    
+		int option_index = 0;
+
+		c = getopt_long(argc, argv, "vhg:a:d:Dc:m:", long_options, &option_index);
+#else /* HAVE_GETOPT_LONG */
+/* Either had getopt_long or getopt or both so getopt should be here */
+		c = getopt (argc, argv, "vhg:a:d:Dc:m:");
+#endif
+		/* Detect the end of the options. */
+
+		if (c == -1)
+			break;
+
+		switch (c) {
+		    case 'v':           /* version information */
+		        eb_cli_ver ();
+		        exit(0);
+			break;
+
+		    case 'h':           /* help information */
+		    case '?':
+  		        eb_cli_help (cmd);
+			exit (0);
+		        break;
+
+		    case 'g':
+			strncpy(geometry, optarg, sizeof(geometry));
+			break;
+
+		    case ':':
+			printf("Try 'ayttm --help' for more information.\n");
+			exit(0);
+
+		    case 'a':
+			printf("hi\n");
+			break;
+
+		    case 'D':
+			printf("Disabling console message server.\n");
+			disable_console_server = TRUE;
+			break;
+
+		    case 'c':
+			strncpy(contact, optarg, sizeof(contact));
+			break;
+
+		    case 'm':
+			strncpy(message, optarg, sizeof(message));
+			break;
+
+#ifdef CRASH_DIALOG
+		    case 'C':
+			crash = 1;    
+			crash_param = strdup(optarg);
+			break;
+#endif			
+		    case 'd':
+			strncpy(config_dir, optarg, sizeof(config_dir));
+			/*Make sure we have directory delimiter */
+#if defined( _WIN32 )
+			if (config_dir[strlen(config_dir)-1]!='\\')
+				strcat(config_dir, "\\");
+#else
+			if (config_dir[strlen(config_dir)-1]!='/')
+				strcat(config_dir, "/");
+#endif
+			if (stat(config_dir, &stat_buf)==-1)
+			{
+				perror(config_dir);
+				exit(errno);
+			}
+			if (!S_ISDIR(stat_buf.st_mode))
+			{
+				printf("config-dir %s is not a directory!\n", config_dir);
+				exit(1);
+			}
+			break;
+		}
+	} 
+    
+#ifdef CRASH_DIALOG
+	startup_dir = g_get_current_dir();
+	argv0 = g_strdup(argv[0]);
+	if (crash) {
+		gtk_set_locale();
+		gtk_init(&argc, &argv);
+		eb_read_prefs();
+		crash_main(crash_param);
+		return 0;
+	}
+	crash_install_handlers();
+#endif
+
+#endif
+
+	if (strlen(message) > 0 && strlen(contact) > 0) {
+#ifndef __MINGW32__
+		struct sockaddr_un remote;
+#else
+		struct sockaddr_in remote;
+#endif
+		short length;
+		int ret;
+
+#ifndef __MINGW32__
+		sock = socket(AF_UNIX, SOCK_STREAM, 0);
+		strncpy(remote.sun_path, config_dir, sizeof(remote.sun_path));
+		strncat(remote.sun_path, "eb_socket",
+			sizeof(remote.sun_path)-strlen(remote.sun_path));
+		remote.sun_family = AF_UNIX;
+		len = strlen(remote.sun_path) + sizeof(remote.sun_family) +1;
+#else
+		sock = socket(AF_INET, SOCK_STREAM, 0);
+#endif
+		if (connect(sock, (struct sockaddr*)&remote, len) == -1 ) {
+			perror("connect");
+			exit(1);
+		}
+		length = strlen(contact)+1;
+		write(sock, &length, sizeof(short));
+		write(sock, contact, length);
+		length = strlen(message)+1;
+		write(sock, &length, sizeof(short));
+		write(sock, message, length);
+		read(sock, &ret, sizeof(int));
+		close(sock);
+		exit(ret);
+	}
+
+	sound_init();
+
+	gtk_set_locale();
+	gtk_init(&argc, &argv);
+	
+/*	g_snprintf(buff, 1024, "%s",config_dir);*/
+
+	/* Mizhi 04-04-2001 */
+	g_snprintf(buff, 1024, "%s.lock", config_dir);
+	if ((pid = create_lock_file(buff)) > 0) {
+#ifndef __MINGW32__
+		struct sockaddr_un remote;
+#else
+		struct sockaddr_in remote;
+#endif
+		short length;
+		int ret;
+#ifndef __MINGW32__
+		sock = socket(AF_UNIX, SOCK_STREAM, 0);
+		strncpy(remote.sun_path, config_dir, sizeof(remote.sun_path));
+		strncat(remote.sun_path, "eb_socket",
+			sizeof(remote.sun_path)-strlen(remote.sun_path));
+		remote.sun_family = AF_UNIX;
+		len = strlen(remote.sun_path) + sizeof(remote.sun_family) +1;
+#else
+		sock = socket(AF_INET, SOCK_STREAM, 0);
+#endif
+		if (connect(sock, (struct sockaddr*)&remote, len) == -1 ) {
+			perror("connect");
+			g_snprintf(buff, 1024, _("Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot be connected."), pid);
+			/* TODO make sure this one is modal */
+			do_error_dialog(buff, _("Already logged on"));
+			exit(1);
+		}
+		length = strlen("focus-ayttm")+1;
+		write(sock, &length, sizeof(short));
+		write(sock, "focus-ayttm", length);
+		read(sock, &ret, sizeof(int));
+		close(sock);
+		exit(ret);
+	}
+
+	gtk_set_locale ();
+	g_snprintf(buff, 1024, "%s",config_dir);
+
+	mkdir(buff, 0700);
+	g_snprintf(buff, 1024, "%slogs",config_dir);
+	mkdir(buff, 0700);
+
+	if (!disable_console_server) {
+#ifndef __MINGW32__
+		sock = socket(AF_UNIX, SOCK_STREAM, 0);
+		strncpy(local.sun_path, config_dir, sizeof(local.sun_path));
+		strncat(local.sun_path, "eb_socket",
+			sizeof(local.sun_path)-strlen(local.sun_path));
+		unlink(local.sun_path);
+		local.sun_family = AF_UNIX;
+		len = strlen(local.sun_path) + sizeof(local.sun_family) +1;
+#else
+		sock = socket(AF_INET, SOCK_STREAM, 0);
+#endif
+		if (bind(sock, (struct sockaddr *)&local, len) == -1) {
+			perror("Unable to handle console connections.  bind");
+			exit(1);
+		}
+		if (listen(sock, 5) == -1) {
+			perror("Unable to handle console connections. listen");
+			exit(1);
+		}
+		eb_input_add(sock, EB_INPUT_READ, console_session_init, NULL);
+	}
+
+	/* Initalize the menus that are available through the plugin_api */
+	init_menus();
+
+	eb_read_prefs();
+
+	/* Load all the modules in the module_path preference, details can be found in the preferences module tab */
+	load_modules();
+
+	accounts_success = load_accounts();
+	if (accounts_success)
+		load_contacts();
+
+	start_login(!accounts_success);
+
+        init_smileys();
+	gtk_main();
+
+	clean_up_dummies();
+
+	unload_modules(); // Need to unload what we load
+	sound_shutdown();
+	g_snprintf(buff, 1024, "%s.lock", config_dir);
+#ifndef __MINGW32__
+	if (!disable_console_server)
+		unlink(local.sun_path);
+        delete_lock_file(buff);
+#endif
+	return 0;
+
+}

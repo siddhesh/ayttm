@@ -1,0 +1,43 @@
+This module sends a message via SMTP.  You need to specify your SMTP host
+and port in config.
+
+Each contact is an email address, your account is also an email address.
+At present the contact password isn't used, but it may be in future if I
+support SMTP Auth.
+
+To send a mail, type the entire message in the text area.  To add any
+header fields, you must first add the Subject header.
+
+Start your message with Subject: subject.  Put other headers on lines 
+after that - one line per header.  The first line that doesn't look like a 
+header is your body.  To force the body, leave a blank line between header 
+and body.
+
+eg:
+1:
+This is a simple message
+
+
+
+2:
+Subject: subject
+this is a message with a subject
+
+
+3:
+Subject: subject
+From: Philip Tellis
+message with other headers
+
+
+4:
+From: philip
+simple message.  above line is part of message body
+
+
+5:
+Subject: subject
+
+From: test
+blank line forces everything after it to be message body
+

@@ -1,0 +1,78 @@
+			CONNECTIONS TO THE MSN SERVERS
+				---------------
+
+	1) Set up a connection
+
+	Create a new msnconn object. No need to do anything other than:
+		msnconn * mc = new msnconn;
+
+	Then, initialise it with your username and password. This is done 
+with the msn_init() function, for example:
+		msn_init(mc, "blip109@hotmail.com", "MY_PASSWORD");
+
+
+	2) Connect it to the server
+
+	Use the msn_conect() function on your connection. For example:
+		msn_connect(mc, "messenger.msn.com", 1863);
+
+	(Note: you will always want to connect to messenger.msn.com on 
+	port 1863 if you want to connect to the Microsoft servers. As far 
+	as I know, no non-Microsoft MSN server implementations exist)
+
+
+	3) Send to polling
+
+	You must have some setup whereby the msn_incoming() function 
+is called for each socket. Enter that loop now, as otherwise no dialogue 
+with the MSN server can take place.
+
+	Once any connection is ready to use, the "ready" member of the 
+msnconn object will become true. The function
+ext_new_connection(msnconn * conn) will also be called at this time. When 
+for any reason a connection is closed, before doing so the function 
+ext_closing_connection(msnconn * conn) is called. NOTE - that function 
+does NOT need to do anything to the connection itself, as it will be 
+cleaned up whatever happens. This callback is only for convenience's sake, 
+to notify the program that this connection is not longer valid. There is 
+no need to unregister the associated socket either - that will be handles 
+by the cleanup function.
+
+	To close a connection, call msn_clean_up(msnconn * conn) on it. 
+The associated socket will be closed, all component parts (and the object 
+itself) will be deleted, and the socket will be unregistered.
+
+
+
+			NEW EMAIL NOTIFICATION
+				-------
+	When the username is a MSN or Hotmail email address, the MSN 
+Messenger server is able to notify Messenger clients of any new mail at 
+that address.
+	Once you sign on, you will receive a call to
+ext_initial_email(msnconn * conn, int unread_inbox, int unread_folders). 
+As you might guess, this informs the client of how many unread email 
+messages are in the user's inbox and other folders respectively.
+
+
+	Also, if new email arrives while the client is signed on, a call 
+will be made to ext_new_mail_arrived(msnconn * conn, char * from_addr, 
+char * subject), with the sending address and subject as indicated.
+
+
+
+			FRIENDLYNAME MANAGEMENT
+				-------
+
+	On logging in to a Notification Server, you are informed of your 
+friendlyname by a call to ext_got_friendlyname(msnconn * conn, char * 
+friendlyname). This is the Friendlyname you had when you last logged out.
+
+	Once logged in, you may change your FriendlyName by calling 
+msn_set_friendlyname(msnconn * conn, char * friendlyname). Again, this 
+process is asynchronous, so do not assume that any change has taken place 
+until you receive a call to ext_got_friendlyname() with the new 
+FriendlyName.
+
+	You are notified of another user's FriendlyName change by a call 
+to ext_buddy_set(), this time with the new FriendlyName.

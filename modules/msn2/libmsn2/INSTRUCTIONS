@@ -1,0 +1,143 @@
+	These are the instructions first released with the library. 
+They tell you how to compile and run the simple text-based wrapper I 
+have put together for this library. If you want to write for this 
+library, your best bet is to look at the API docs in the APIdoc/ 
+directory.
+
+
+		*** NEW MSNLIB INSTRUCTIONS ***
+
+Compilation instructions:
+
+	Run "make". A binary called "msntest" will be produced. If 
+anything fails, contact me and I'll be able to fix it quite quickly.
+
+			--------------------
+
+Running/usage instructions:
+
+	The text-based wrapper currently gives tons of output on stdout, 
+and user interaction on stderr and stdin. Hence, my preferred mode of 
+operation is this:
+
+(1)	Start up two xterms, and figure out which pts one of them is using 
+(echo Hello > /dev/pts/X works if you go through them all).
+
+(2)	In the *other one*, run the binary as follows:
+		$ ./msntest > /dev/pts/3
+
+	(in this example, the pts of the other xterm is 3)
+
+(3)	You will see a username and password prompt on the xterm from 
+which you ran the program (henceforth the "console"), and diagnostics on 
+the other xterm (henceforth the "display"). BEWARE - the password is 
+echoed as you type it! (I told you this was alpha software :-) )
+
+How to use it:
+
+	When you see the ">" prompt on the console (as defined above), 
+you can type a command. Wait until you see "Message from Hotmail(Hotmail)" 
+on the display before you try any of these, though!
+
+	You can type in various commands that do various things:
+
+*	status - This command changes your status. It is followed by one 
+of the following:
+   NLN - Online
+   BSY - Busy.
+   IDL - Idle.
+   BRB - Be Right Back.
+   AWY - Away From Computer.
+   PHN - On The Phone.
+   LUN - Out To Lunch.
+   HDN - Hidden (YMMV - haven't researched yet)
+
+	Example - this sets you as "On the Phone":
+
+	> status PHN
+
+*	msg    - This command sends an instant message to someone (the 
+logistics of the switchboard session are hidden from the user). The 
+command is followed by the username to send a message to, then the message 
+(all on one line!)
+
+	Example - this one says hello to me:
+
+	> msg blip109@hotmail.com Hello, there!
+
+*	add    - This command adds someone to the specified list. The 
+lists you can add to are as follows:
+
+	FL - Forward List (ordinary contacts list)
+	AL - Allow list (these people are allowed to see when you're 
+		online)
+	BL - Block List
+	RL - Reverse List (these are all the people who have you in their 
+		FLs. If you see a notice on the display saying 
+		that someone has been added to your RL, then you must add 
+		them you your AL before they can talk to you. You cannot 
+		add to this list manually)
+
+
+	Example: These commands would add me to your contacts, then allow 
+			me to talk to you:
+
+		> add FL blip109@hotmail.com
+		> add AL blip109@hotmail.com
+
+*	del    - delete someone from a list. The list names and syntax are 
+exactly the same as for the "add" command.
+
+*	quit   - This one is obvious - it quits the program.
+
+Messages from others appear in the display window, preceded by "Message 
+from X:" and the message's MIME headers.
+
+
+		Have fun, and send me the bug reports!
+
+								Meredydd
+
+
+			------------------------
+
+
+The following is a copy of my original email announcement to the list, 
+sent on 29/12/01. The basic assertions about state of the library are 
+still pretty accrate!
+
+
+First, Happy Christmas to everyone!
+
+I've been with the project for 6 months now, even if unofficially for half 
+of it :-), and it's time to present something I've been promising for 
+quite a long time now - the MSN library rewrite!
+
+OK, don't get too excited. The tarball I attach to this email has nothing 
+whatsoever to do with Everybuddy. It is a very basic standalone text-based 
+wrapper to the new MSN library. It supports messages, state changes, on- 
+and offline notifications, but no buddy, allow, block, or reverse lists 
+(This was added in the 5/2/02 release). The file INSTRUCTIONS within the 
+tarball contains how-to-use instructions.
+
+DISCLAIMER:
+
+(1)	This software is broken. It will coredump, it will disconnect, it 
+will do weird things and give several tons of diagnostic output whenever 
+anything happens. YMMV.
+
+(2)	SEND IT TO ME! If it doesn't work, for goodness' sake don't keep 
+quiet about it! I'm here to help - blip109@hotmail.com, blip110 when I'm 
+using this thing, blip109 on AIM if your MSN is currently so broken yuo 
+can't use it.
+
+Mucho thanks to Vance Lankhaar for helping me splat the first few bugs, 
+and to Rob (as always) for being so patient with me when everything went 
+coredump-shaped!
+
+Enjoy it, have fun, find lots of juicy bugs for me,
+
+Meredydd Luff
+
+
+		---------------------------------------

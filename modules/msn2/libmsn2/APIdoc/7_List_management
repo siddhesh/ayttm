@@ -1,0 +1,93 @@
+			    LIST MANAGEMENT
+			-----------------------
+
+	List management in this library is simple. You must know the 
+basics of the MSN list and synchronisation concepts (section 1) before this 
+section will make any sense.
+
+
+
+(1) Synchronisation
+	Call msn_sync_lists(msnconn * conn, int serial), passing it the NS 
+connection and the latest list serial number (if you don't have any 
+previous record of the lists, or for some other reason you just want the 
+entire list, put a 0 for this parameter).
+
+	When the latest serial number is received, the function 
+ext_latest_serial(msnconn * conn, int serial) will be called, with that 
+connection and the latest serial number.
+
+	When the synchronisation is complete, the function 
+ext_got_info(msnconn * conn, syncinfo * info) will be called. If there has 
+been no change, and the info with the serial number provided is 
+up-to-date, then a NULL pointer will be passed. Otherwise, a syncinfo 
+object will be passed, containing all the relevant information. The 
+syncinfo class has the following public members:
+
+	llist * fl	- llist containing the FL as userdata objects 
+					(explained later)
+	llist * rl	- llist containing the RL
+	llist * al	- llist containing the AL
+	llist * bl	- llist containing the BL
+	int serial	- the latest serial number
+	char blp	- the BLP value ('A' or 'B')
+	char gtc	- the GTC value ('A' or 'N')
+
+	The data is TRANSIENT - it will be deleted the moment the callback 
+returns. However, the desctructor checks whether all the llist pointers 
+are NULL before deleting them. If you want to keep the llist's, simply set 
+their pointers in the syncinfo object to NULL. In future, a return value 
+will be available to request that the entire object not be deleted after 
+the function returns.
+
+(2) Reverse-list checking
+	After the sync is performed, a check is made on the Reverse List. 
+If there is an user on the Reverse List that is not on one of the Allow 
+or Block lists, the function
+ext_new_RL_entry(msnconn * conn, char * username, char * password)
+is called.  NOTE - It is up to the client to follow the recommendation of 
+the GTC value - no checking is done by either the library or the server.
+
+(3) Notification of changes
+	Changes to any of the lists, but especially the RL, can also occur 
+while the client is running. If this happens, the function 
+ext_new_list_entry(msnconn * conn, char * list, char * username)
+is called. This also happens after you have added a user to one of your 
+lists. Until this confirmation is received, you should not assume that any 
+change has actually been made to the list on the server. Note that the 
+friendlyname is NOT given, as until the user actually signs on no-one has 
+a *clue* what their friendlyname will be. Until they next come online (at 
+which point the friendlyname will be given to ext_buddy_set() ), use the 
+username as a temporary friendlyname.
+
+***Note from Vance*** The MSN server does *NOT* update your FL,AL,RL, or BL
+when someones's friendlyname changes. At the moment, Meredydd and I are not
+agreeing on who should do this. I'm off the opinion that the program, not
+the library, should update the list on the MSN server. He (at the last
+time we talked about it) was of the opinion that neither should do it. So,
+I guess I should put my money where my mouth is, and write some code. Look
+for a request function in the future that allows you to set the friendlyname
+of any contact.
+
+***Meredydd's reply***
+Indeed, this is the case. However, a person's friendlyname is never definite
+until they have logged on, at which point you get the *correct* friendlyname
+in a call to ext_buddy_set(). Yes, at some point in the near future I will
+make the FL update automatically whenever ext_buddy_set() is called, but until
+then, regard the friendlyname obtained from any list as suspect.
+
+
+(4) Adding and deleting users to/from lists
+	This is done by calling either:
+msn_add_to_list(msnconn * conn, char * list, char * username)
+	or:
+msn_del_from_list(msnconn * conn, char * list, char * username)
+
+	As always, you must pass the main (NS) connection to these 
+functions as the "conn" parameter. The "list" parameter should be "FL", 
+"RL", "AL", or "BL".
+
+	After a call to one of these functions, do NOT assume that any 
+change has been made before you receive a call to ext_new_list_entry() 
+(see above), or ext_del_list_entry(msnconn * conn, char * list, char * 
+username, char * friendlyname).

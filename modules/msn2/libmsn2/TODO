@@ -1,0 +1,18 @@
+Key:
+
+TODO:		*
+Untested:	+
+Done:		-
+
+Post-2.0:
+*	Buddy groups
+*	Persistent lists
+*	Voice/video chat
+
+2.0:
+
+-	File transfer (both ways!)
+-	Connection-based errors
+-	MSNP7
+-	Mail notification
+

@@ -1,0 +1,67 @@
+				THINGS TO IMPLEMENT
+				------------------
+
+	Before you can get anywhere with MSN, you must implement a certain 
+subset of the functions. Everything else may be left as "dummy" functions 
+for now, but you MUST implement the following:
+
+(1)	int ext_connect_socket(char * server, char * port)
+
+	This code should make a TCP connection to the specified server and 
+port, and return a UNIX file descriptor for that connection, or -1 on 
+error.
+
+(2)	void ext_register_sock(int fd, int reading, int writing)
+
+	"fd" is a UNIX file descriptor. This function must set whatever 
+poling function is in place to call msn_handle_incoming()  whenever there 
+is incoming data on that socket (if "reading" is non-zero) or the socket 
+will not block on writing (if "writing" is non-zero), or both (if 
+both!=0).
+
+(3)	void ext_unregister_sock(int fd)
+
+	This socket has been closed and is now of no more interest for 
+polling purposes. Remove it from whatever internal list you are 
+maintaining.
+
+(4)	void ext_print_error(msnconn * conn, char * string)
+	void ext_debug(char * format, ...)
+
+	Both of these are in fact optional, but it is advisable to at 
+least put a printf() into them (if you're really lazy, copy and paste the 
+implementation from msn_interface.C), otherwise you cannot see any debug 
+or error messages!
+
+***	Note about connection-based errors:
+	
+	I know this probably isn't the right place to say this, but I 
+don't know where else: when an error is reported, the connection it 
+occurred on is also always passed. This may, however, be the first time 
+your code has ever seen this object, as the error may have occurred before 
+the object was ready enough to notify the rest of the program about. 
+When coding advanced error-display functions, bear this in mind!
+
+(5)	Polling loop
+
+	When control is outside the MSN library (ie in your program), you 
+must periodically check for incoming data on any of the sockets the 
+library has registered interest in (with ext_register_sock()), and call 
+void msn_handle_incoming(int fd, int readable, int writable) when traffic 
+is received on any file descriptor. (The parameter "fd" should be the 
+file descriptor with  incoming traffic, and "reading" and "writing" 
+should be non-zero if the socket is available for reading or writing 
+respectively).
+
+	If any socket has closed, the function
+void msn_handle_close(int fd) should be called with the appropriate file 
+descriptor. This will result in a call to ext_unregister_sock for that 
+file descriptor, and a tidy cleanup.
+
+
+
+
+
+
+	If you want a "quick start": For everything else, you can just 
+look in  msn_interface.h, and implement appropriate dummy functions.

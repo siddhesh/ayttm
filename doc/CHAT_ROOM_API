@@ -1,0 +1,81 @@
+Everybuddy Chat Room/Conference Implementation Notes
+
+This document describes the internal workings of the chat room functions
+of Everybuddy.  It is only of use to you if you plan to work on the code.
+
+NOMENCLATURE:
+
+	"Chat Room" -- the virtual channel where a group chat takes place.
+	"Chat Room Buddy" -- participant in a Chat Room.
+
+DATA STRUCTURES (from chat_room.h):
+
+typedef struct _eb_chat_room_buddy
+{
+	gchar alias[255]; /* These might be different (like in the case of ICQ) */
+	gchar handle[255];
+} eb_chat_room_buddy;
+
+typedef struct _eb_chat_room
+{
+	gboolean  connected;
+	gchar     id[255];         /* The ROOM's ID */
+	gchar     room_name[1024];
+	GtkWidget *window;         /* The Chat Room window */
+	GtkWidget *conversation;   /* The upper part of the window */
+	GtkWidget *entry;          /* The textentry for talking back :) */
+	GtkWidget *online;         /* GtkCList: list of members in the Chat Room */
+
+	GList     *fellas;  /* holds a list of eb_chat_room_buddy structs */
+
+	eb_local_account *chat_room_account; /* local account in the chat room */
+	void *protocol_local_chat_room_data; /* for protocol-specific storage */
+} eb_chat_room;
+
+UI FUNCTIONS (from chat_room.c):
+
+	/* Handles receipt of a remote chat room message and updates the
+	   conversation widget */
+
+	void eb_chat_room_show_message(eb_chat_room *room,
+			gchar *user, gchar *message);
+
+	/* Creates the UI to handle the chat room */
+
+	void eb_join_chat_room(eb_chat_room *room);
+
+
+        /* Someone arrived in chat room */
+        void eb_chat_room_buddy_arrive( eb_chat_room * room,
+                        gchar * alias, gchar * handle )
+
+        /* Someone left the chat room */
+        void eb_chat_room_buddy_leave( eb_chat_room * room,
+                        gchar * handle )
+
+
+CALLBACKS (from service.h, defined in the services):
+
+	/* Send "public" message to all participants in a Chat Room. */
+	void eb_(module name)_send_chat_room_message(eb_chat_room *room, gchar *message);
+
+	/* Join a chat room */
+	void eb_(module name)_join_chat_room(eb_chat_room *room);
+
+	/* Leave a chat room */
+	void eb_(module name)_leave_chat_room(eb_chat_room *room);
+
+
+=================================================================
+
+here is the flow of control
+
+when you try joining a chat room, eb_start_chat_room gets called
+this in turn calls the make_chat_room callback as defind in service.h
+and appends it to the list of available chat rooms
+
+make_chat_room creates the chat room and also tries to initiate a connection
+(if any are required).
+
+once the person has successfully entered the chat room/conference the service 
+calls eb_join_chat_room() to display the group chat window

@@ -1,0 +1,91 @@
+ABOUT THE ZEPHYR FUNCTIONALITY IN EVERYBUDDY
+
+Sourav K. Mandal <Sourav.Mandal@ikaran.com>
+Thu Feb 01 2001
+
+
+SUMMARY
+
+Zephyr is a UDP, server-mediated messaging system developed by MIT for use on
+its Athena network; it is now used by other networks as well.  Zephyr's
+strength is providing low-overhead messaging on high-speed networks.  The 
+system also supports authenticated messaging using MIT's Kerberos, if the 
+functionality is enabled in clients -- this is the usual deployment.
+
+This document provides information about Everybuddy's interface with this 
+system.
+
+
+INSTALLATION
+
+* The Zephyr library is included in the Everybuddy source
+  distribution.
+
+* Use "configure --enable-zephyr" to include Zephyr support.
+
+* To enable KerberosIV in Zephyr:
+- Obtain Kerberos (libs and devel); KerberosV includes KerberosIV compatibility
+  support.
+- Use "--with-krb4-dir=dir" to specify top dir of KerberosIV installation.
+- The configure script seeks KerberosIV support by default, providing that 
+  it knows the correct location (by default or with the specification of the
+  directory).  Use "--disable-krb4" to forcibly disable KerberosIV in Zephyr.
+
+* Hesiod is not currently used.  In the future, however, if there is a demand
+  for a feature to retrieve the personal info for buddies, Hesiod may be used.
+
+
+TODO
+
+* Allow user to specify subscriptions.
+
+* AIM-style multi-chat for wildcard Zephyr subscriptions.
+
+* Translate between HTML and Zephyr formatting codes, e.g. "<I>text</I>" ->
+  "@i[text]", etc.  The routines in which to implement this already exist
+  ("zephyr_msg_decode", "zephyr_msg_encode").
+  
+* Make the user info HTML layout better with use of tables, if and when 
+  Everybuddy moves over to the standard GtkHTML.
+
+
+CAVEATS
+
+* The Zephyr system is based on UDP and is server, and therefore is optimal
+  for high-speed networks such as in a university.  Zephyr can be flaky on slow
+  or high-latency connections, such as modem dialup.
+
+* For Zephyr buddies who do not net/realm announce, the client must 
+  continuously check the status of buddies, exacerbating performance problems 
+  on slow connections.  This is ameliorated greatly in this implementation by 
+  the use of asynchronous user location requests in Zephyr.
+
+* One must still have a running Zephyr HM (host manager) on the client 
+  machines, as the Zephyr module does not implement the HM functionality.
+  It does, however, replace zwgc and zwrite/xzwrite/znol/xzewd.
+
+* The module flushes all locations when logging in and logging off by default, 
+  to prevent zombie location entries in the Zephyr server databases.  This 
+  can cause annoying problems with forced invisibility if you use Zephyr in 
+  multiple places at once, and it can be deactivated in the preferences.
+
+* When specifying Zephyr accounts for contacts, the "@<realm>" must be
+  appended, such as "mike@KERBEROS.REALM.ORG" instead of just "mike".  This 
+  allows contacts to have accounts in multiple realms.
+
+* While the module is designed to work with Kerberos, it should work without
+  it, as determined at compile time.  This is yet to be tested thoroughly.
+
+
+AUTHOR(S)
+
+* Core implementation
+
+Sourav K. Mandal <Sourav.Mandal@ikaran.com>
+http://www.ikaran.com/Sourav.Mandal/
+
+* Advice concerning asynchronous locating
+
+Zachary M. Loafman <zml@zml.net>
+http://zml.net/
+

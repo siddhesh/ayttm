@@ -1,0 +1,75 @@
+#!/bin/bash
+if [ X"$1" != X"noconfig" ]
+then
+	ACLOCAL_FLAGS='-I mingw32'
+	CFLAGS='-mno-cygwin -fnative-struct -I/target/include -I/target/include/glib-2.0 -I/target/include/glib'
+	export CFLAGS ACLOCAL_FLAGS
+	./gen
+	./configure -build="mingw32" -host="mingw32"
+fi
+cd libltdl
+gcc -I. -I../mingw32 -mno-cygwin -fnative-struct -D__WINDOWS__ -DHAVE_CONFIG_H -UCYGWIN -UCYGWIN32 -c ltdl.c
+cd ..
+
+make
+
+if [ $? != 0 ]; then exit; fi
+
+#
+# Make all DLLs for MINGW32
+if [ X"$*" != X"clean" ]
+then
+	
+	#
+	# rebuild eb for DLL linkage
+	./makeebdll
+	cp ayttm.exe /cygdrive/c/Program\ Files/ayttm
+
+	#
+	# need .la files
+	rm -f /cygdrive/c/Program\ Files/ayttm/modules/*.la
+	# cp mingw32/*.la /cygdrive/c/Program\ Files/ayttm/modules
+	cp sounds/*.au /cygdrive/c/Program\ Files/ayttm
+
+	#
+	# rebuild all plugins as DLLs.
+	cd modules/importers
+	# msn_smiles yahoo_smiles
+        for x in import_gaim import_gnomeicu importicq importlicq smileysc # giles_smiles
+	do
+                ../../makedll $x gcc
+		cp $x.dll /cygdrive/c/Program\ Files/ayttm/modules
+		cp ../../mingw32/$x.la /cygdrive/c/Program\ Files/ayttm/modules
+	done
+        cd ../utility
+        for x in rainbow autotrans # notes middle
+        do
+                ../../makedll $x gcc
+                cp $x.dll /cygdrive/c/Program\ Files/ayttm/modules
+		cp ../../mingw32/$x.la /cygdrive/c/Program\ Files/ayttm/modules
+        done
+	cd ../aim-toc
+        ../../makedll aim-toc gcc libtoc/libtoc.o
+	cp aim-toc.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../../mingw32/aim-toc.la /cygdrive/c/Program\ Files/ayttm/modules
+        cd ../icq-toc
+        ../../makedll icq-toc gcc libtoc/libtoc.o
+        cp icq-toc.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../../mingw32/icq-toc.la /cygdrive/c/Program\ Files/ayttm/modules
+        cd ../yahoo2
+        ../../makedll yahoo gcc libyahoo2/*.o
+        cp yahoo.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../../mingw32/yahoo2.la /cygdrive/c/Program\ Files/ayttm/modules
+        cd ../irc
+        ../../makedll irc gcc
+        cp irc.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../../mingw32/irc.la /cygdrive/c/Program\ Files/ayttm/modules
+	cd ../msn2
+	../../makedll msn c++ libmsn2/*.o
+        cp msn.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../../mingw32/msn2.la /cygdrive/c/Program\ Files/ayttm/modules
+	cd ../jabber
+	../../makedll jabber gcc libEBjabber.o libjabber/*.o libxode/*.o
+        cp jabber.dll /cygdrive/c/Program\ Files/ayttm/modules
+	cp ../../mingw32/jabber.la /cygdrive/c/Program\ Files/ayttm/modules
+fi

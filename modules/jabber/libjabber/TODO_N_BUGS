@@ -1,0 +1,15 @@
+Known bugs:
+-  Sometimes users go offline, and their status changes to offline, but they don't appear to go offline.
+-  No support for group chat:
+	It's a module on the server.  Should be there soon...
+-  Deleting contacts works manually, but when notified that another
+	user has unsubscribed you, the display does not update to reflect
+	that the user has been deleted when you agree to delete them.
+-  Contacts are not added based upon local file
+-  When moving a user from one group to another, the user is sent an
+	unsubscribe followed by a subscribe request.
+-  Unlogged-in accounts still show online
+
+TODOs:
+-  Make debugging depend upon command-line flag or env var.
+-  Reconnect to the server on a disconnect.

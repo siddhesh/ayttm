@@ -1,0 +1,21 @@
+- Make ayttm fully stable in stable releases, I know this is not an easy thing 
+  to do but it can be done.
+
+- Native file transfer for all protocols.
+
+- Use pspell for spell-checker
+
+- ugly things in prefs window (too big entry for font size, etc)
+
+- clean up the code
+
+- login on startup should be in account settings, not global settings
+
+- recoding and filtering in chatrooms
+
+- connect should be non-blocking - implemented. 
+  Jabber and IRC need to use it.
+
+- use our own linked list routines - partially done
+
+- Tools/Set as away.../Manage away messages (modify/delete)

@@ -1,0 +1,24 @@
+In order to compile AYTTM on WIN32 platforms you must first install cygwin
+and its development environment as we will be using the MINGW32 portion 
+of it. In addition you will need to get the runtime and development
+GTK and GLIB archives from http://www.gimp.org/win32. You want the version
+1.2 of GTK not the 2.0. Unzip these into the /target directory when using
+a cygwin shell.
+
+To Generate the program for WIN32 runtime once you have cygwin installed
+
+	./mingw
+
+
+Known Issues:
+
+	1) Browser Support always opens a new window.
+
+	2) Occasionally a line will overwrite a previous line as the 
+	   response window scrolls.
+
+	3) There is no spell checker support.
+
+	4) File transfer support is iffy at best
+
+	5) Yahoo is busted

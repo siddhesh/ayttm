@@ -1,0 +1,6 @@
+.deps
+.libs
+Makefile
+Makefile.in
+zephyr.la
+zephyr_mod.lo

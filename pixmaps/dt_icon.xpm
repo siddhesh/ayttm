@@ -1,0 +1,22 @@
+/* XPM */
+static char *dt_icon_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"12 12 4 1",
+"  c #336699",
+". c magenta",
+"X c #9999ff",
+"o c None",
+/* pixels */
+"oooooooooooo",
+"oooooooooooo",
+"o          o",
+"o XXXXXXXX o",
+"o XXXXXXXX o",
+"oo XXXXXX oo",
+"oo XXXXXX oo",
+"o XXXXXXXX o",
+"o XXXXXXXX o",
+"o          o",
+"oooooooooooo",
+"oooooooooooo"
+};

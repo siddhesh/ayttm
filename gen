@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# version 0.10.35 of gettext required a different kind of Makefile
+# in intl/  it won't build with our distributed intl/ and must be
+# overwritten
+function check_gettext
+{
+	VERSION=`gettext --version | head -1 | cut -d' ' -f4` 
+	MAJOR=`echo $VERSION | cut -d'.' -f1` 
+	MINOR=`echo $VERSION | cut -d'.' -f2` 
+	MICRO=`echo $VERSION | cut -d'.' -f3` 
+ 
+	if test $MAJOR -gt 0; then
+		return
+	elif test $MAJOR -eq 0; then
+	   if test $MINOR -gt 10; then
+		return
+	   elif test $MINOR -eq 10 -a $MICRO -gt 35; then
+		return
+	   fi
+	fi
+
+	# now we know they have an old version.  check if it's already
+	# been gettextized
+
+	C_VERSION=`sed s/.*gettext-// intl/VERSION`
+
+	if test "$VERSION" = "$C_VERSION"; then
+		# already run gettextize
+		return
+	fi
+
+	#gettextize --force --copy
+	
+	# running gettextize is too harsh and destructive.  give the user
+	# the option
+
+	echo "************************************************************"
+	echo "Your version of gettext ($VERSION) is older than 0.10.38 and"
+	echo "is not compatible with the version that we distribute.  You"
+	echo "should either upgrade to version 0.10.38 (0.10.39 preferred)"
+	echo "or run gettextize --force --copy before proceeding."
+	echo ""
+	echo "$0 will not continue until you have fixed this."
+	echo "************************************************************"
+
+	exit 1
+}
+
+libtoolize --copy --force --ltdl --automake
+check_gettext
+aclocal -I m4 $ACLOCAL_FLAGS
+autoheader
+automake -a -c
+autoconf

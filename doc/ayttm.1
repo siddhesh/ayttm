@@ -1,0 +1,298 @@
+.\" Copyright (c) 1999, Laurel Fan
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
+.\" USA.
+.TH EVERYBUDDY 1
+.SH NAME
+everybuddy \- Universal Instant Messaging client
+.SH SYNOPSIS
+.TP 5
+\fBeverybuddy\fR
+.SH DESCRIPTION
+This man page documents \fBEverybuddy\fR, version 0.2.0.
+.PP
+\fBEverybuddy\fR is designed to become a Universal Instant Messaging
+client designed to seamlessly integrate all existing Instant Messaging
+clients and provide a single consistent user interface.
+.PP
+Currently, \fBEverybuddy\fR supports AIM, ICQ, Yahoo, and MSN.  Support for
+IRC is planned.
+.PP
+The following sections describe how to use \fBEverybuddy\fR.
+.TP
+.TP
+\fINomenclature\fR
+Definition of terms used in Everybuddy (and this page)
+.TP
+\fIAccounts\fR
+How to use your online messenger accounts.
+.TP
+\fIContact list\fR
+How to use and edit your contact list.
+.TP
+\fICommunication\fR
+How to send instant messages and files.
+.TP
+\fIPreferences\fR
+What the preferences do.
+.SH NOMENCLATURE
+Here's a quick overview of the naming conventions used in Everybuddy.
+.TP
+\fIACCOUNT\fR
+An \fBaccount\fR has two parts.  There is a \fBservice\fR and a \fBhandle\fR.
+The common way for describing an account will be \fITOC/Zilding\fR or 
+\fIICQ/12345678\fR.
+.TP
+\fICONTACT\fR
+A \fBcontact\fR is the representation of a real person, comprised of an
+identifying nickname nad a collection of \fBaccounts\fR that the person has.
+.TP
+\fIHANDLE\fR
+A \fBhandle\fR is how a person can be referred to while logged into a \fBservice\fR.
+On AIM, an example of a \fBhandle\fR would be \fIZilding\fR.  On ICQ, an 
+example of a \fBhandle\fR would be \fI12345678\fR.
+.TP
+\fI SERVICE\fR
+A \fBservice\fR is a protocol and a server.  For example, the AIM \fBservice\fR
+uses the \fITOC\fR protocol (or Oscar...) and the server \fItoc.oscar.aol.com\fR.
+The reason the separation is made between the protocol and the server is that
+it is possible, in the future, that (if there are many open protocols) there
+may be several separate servers with the same protocol (or one server
+supporting multiple protocols) , and they will be considered separate 
+\fBservices\fR.
+.SH ACCOUNTS
+The first time you start \fBEverybuddy\fR, you will be presented
+with a dialog box.  Select a server, either AIM, ICQ, Yahoo or MSN.  Then 
+enter your AIM screen name, ICQ UIN, Yahoo Username, or MSN User Name in the
+\fIHandle\fR field and enter the password in the \fIPassowrd\fR field.  To 
+add multiple accounts, click the \fIAdd\fR button.  You must use existing
+accounts, because \fBEverybuddy\fR does not yet support creating accounts.
+You may add accounts later by selecting \fIEdit Accounts\fR from the
+\fITools\fR menu.
+.SH CONTACT LIST
+The \fBEverybuddy\fR contact list contains \fIGroups\fB,
+\fIContacts\fR, and \fIAccounts\fR.  A \fIGroup\fR  is a collection
+of \fIContacts\fR.  A \fIContact\fR is a person, who has one or more
+\fIAccounts\fR.
+.PP
+You may import contact lists from some other instant messaging clients by
+selecting \fIImport\fR from the \fIFile\fR menu.  You can also edit
+your contact list under the \fIEdit Contacts\fR tab.
+.PP
+To add a new contact, under the \fIEdit Contacts\fR tab,
+click on the \fIAdd\fR button.  In the \fIAdd Contact\fR dialog: In the
+\fIProtocol\fR field, select the service, AIM, ICQ, Yahoo, or MSN, that their 
+account is on.  Enter their online handle in the \fIAccount\fR field.
+Select the group you would like them to be a member of in the \fIGroup\fR
+field.
+Enter their name in the \fIContact\fR field.  (You can create a new group
+or contact on the fly by typing into the \fIGroup\fR and \fIContact\fR fields
+instead of selecting one of the options.)  By default, the
+\fIContact\fR will be
+the same as the \fIAccount\fR, but it does not have to be.  Click on the
+\fIAdd\fR button in the \fIAdd Contact\fR dialog.
+.PP
+To add an account to an existing contact, under the \fIEdit
+Contacts\fR tab, click on the \fIAdd\fR button.
+Fill in the \fIProtocol\fR, \fIAccount\fR, and \fIGroup\fR fields as
+above, and select the contact's name in the \fIContact\fR field.
+Click on the \fIAdd\fR button in the \fIAdd Contact\fR dialog.
+.PP
+To create a new group, add a new account as above, and instead of
+selecting an existing group in the \fIGroup\fR field, enter the name
+of the group you wish to create.
+.PP
+To delete a group, contact, or account, click on its name in the
+\fIEdit Contacts\fR tab, then click on the \fIRemove\fR button.
+.PP
+The default protocol is the protocol (AIM, ICQ, Yahoo or MSN) that 
+\fBEverybuddy\fR will try first when communicating with a contact.  
+You can change this by double clicking on the name of the contact in
+\fIEdit Contacts\fR tab.
+.SH COMMUNICATION
+The \fIStatus\fR tab shows your contact list, either all of them or
+only the contacts who are online, depending on the \fIOnline Only\fR
+and \fIShow All\fR buttons.  Idle and Away status are also shown for
+each account.
+.SS Messages
+To send a message to a contact, double
+click on the contact or account under the \fIStatus\fR tab,
+and type your message in the field at the bottom of the conversation
+window.  Messages received from a contact will use the existing
+conversation window with the contact or will open a new one if it does
+not exist.  If the \fIIgnore unknown users\fR option is selected, messages
+from an unknown person will be ignored.  Otherwise, such messages will add 
+the unknown person to your contact list in the \fIUnknown\fR group, and will 
+open a conversation window with an \fIAdd\fR button, which you can click on to 
+add them to your contact list.
+.SS Files
+To send a file to a contact, right click on the contact or account
+under the \fIStatus\fR tab, select \fISend File\fR, choose a file
+to send in the file selection window, and click on \fIOK\fR.
+If the selected protocol does not provide a file send service (or if it
+hasn't been implemented yet), then \fBEverybuddy\fR will use its own
+file transfer mechanism.  This only works between two \fBEverybuddy\fR 
+clients.  And even then, it usually requires great amounts of incense and
+several holy prayer rituals to ensure successful file transmission.
+.SS Group Chat
+To join a group chat, select \fIGroup Chat\fR from the \fITools\fR
+menu, select the \fIService Type\fR, and enter the name of the chat
+room, then click \fIJoin\fR.
+.PP
+To create a new chat room, do the above, and enter a new name in the
+\fIChat Room Name field\fB.
+.PP
+Invite users with the \fIInvite User\fR button in the chat room window
+that will appear.
+.PP
+To leave the chat room, close its window.
+.SH PREFERENCES
+The preferences are accessed by selecting \fIPreferences\fR from the
+\fITools\fR menu.
+.SS Logs
+The \fILog all conversations\fR option logs all sent and received
+messages to \fI~/.everybuddy/logs/\fR.
+.PP
+AIM messages contain formatting and font information as HTML. Set
+\fIStrip HTML tags\fR to keep these out of the logs.
+.SS Sound
+Set \fIEnable sounds for sending/recieving messages\fR to hear a sound
+every time you send or receive a message.  (Gosh, imagine that.)
+.PP
+Set \fIEnable signon/signoff sounds\fR to play a sound every time
+someone in your contact list logs on or off of their service.
+.SS Chat
+Set \fISend idle/away status to servers\fR if you want the servers
+and other users to know when you've been idle.
+.PP
+Set \fIRaise wndow on incomming message\fR if you want the conversation 
+window (if one exists) for a contact to be raised automatically when they 
+send a message.
+.PP
+Set \fITimestamp when a user logs on/off\fR if you want the conversation
+window (if one exists) for a contact to reflects timestamps from the remote
+party logging on or off of their service.
+.PP
+Set \fIIgnore unknown users\fR if you want to ignore all messages from
+Unknown users.  Note that if you set this option, the \fBUnknown\fR group
+will be hidden as well.
+.PP
+Set \fIEnable multi-line chat\fR for a multi-line input window.
+.PP
+When \fIPress enter to send\fR is not set, messages are sent with
+Enter, and newlines are typed with Shift-Enter.  When it is set,
+messages are sent with Ctrl-Enter and newlines are typed with
+Enter.  This option only affects multi-line chat.
+Set \fITimestamps on Messages\fR to show timestamps for messages in the
+conversation window.
+.SS Connections
+This section allows you to set the servers to use for each service.
+You probably do not have to change these.
+.SS Proxy
+If you aren't behind a firewall, set \fIDirect Connection\fR.  Otherwise,
+set either \fIUse HTTP Proxy\fR or \fIUse SOCKS5 Proxy\fR and enter the
+\fIProxy Server\fR and \fIProxy Port\fR.  If you are unsure of these
+settings, ask your system administrator.  Note: Not all services
+are available through proxy, please see the README for details.
+.SH FILES
+$(HOME)/.everybuddy/accounts \- information about your accounts
+.br
+$(HOME)/.everybuddy/contacts \- contact/buddy list
+.br
+$(HOME)/.everybuddy/files/ \- storage of received files
+.br
+$(HOME)/.everybuddy/logs/ \- conversation logs
+.br
+$(HOME)/.everybuddy/prefs \- preferences
+.SH BUGS
+\fBEverybuddy\fR is in \fBvery\fR early stages of development, so it is not
+completely stable and some features of the underlying services are not yet 
+supported.
+.SH BUG REPORTS
+If you find a bug in \fBEverybuddy\fR, please send electronic mail
+to \fBeverybuddy@valhalla.marko.net\fR.  Please include your operating system
+and its version, the version of \fBEverybuddy\fR, and the C compiler you
+used to compile it.
+.PP
+Before sending a bug report, please verify that you have the latest 
+version of \fBEverybuddy\fR.  Many bugs (major and minor) are fixed 
+at each release, and if yours is out of date, the problem may already 
+have been solved.
+.PP
+Bug reports that include diffs to correct them get higher priority than
+those that do not.
+.SH SEE ALSO
+\fIhttp://www.everybuddy.com/\fR
+.br
+.SH LICENSE
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+.PP
+This program is distributed in the hope that it will be useful, but
+\fBWITHOUT ANY WARRANTY\fR; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License 
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple PLace, Suite 330, Boston, MA  02111-1307  USA
+.SH AUTHORS
+The authors of \fBEverybuddy\fR are:
+.PP
+Torrey Searle <tsearle@uci.edu>
+.br
+Jim Duchek <jimduchek@ou.edu>
+.br
+Rob Flynn <rflynn@blueridge.net>
+.br
+Ben Rigas <ben@american-computer.net>
+.br
+Jeramey Crawford <jacrawf@marko.net>
+.br
+Jeff Miller <jm9468@cnsvax.albany.edu>
+.br
+Jared Peterson <jared@web-feats.net>
+.br
+Troy Morrison <troy@akropolys.com>
+.PP
+The manpage was written by Laurel Fan <lf25@andrew.cmu.edu>.
+.SH ACKNOWLEDGEMENTS
+Special thanks to Mark Spencer, initial creator of GAIM, for all of the
+tremendous support he has given.
+.PP
+\fBEverybuddy\fR uses the following excellent libraries:
+.TP 
+\fBlibmsn2\fR
+For the MSN service, written by Meredydd Luff.
+.TP
+\fBlibicq\fR
+For the ICQ service, from http://www.korsoft.com/gicq/
+.TP
+\fBlibyahoo2\fR
+For the Yahoo service, written by Philip Tellis for \fBEverybuddy\fR.
+.TP
+\fBlibtoc\fR
+For the AIM service, written by Torrey Searle specifically for \fBEverybuddy\fR.
+\fBjabber\fR
+The Jabber support in \fBEverybuddy\fR done by Alex Wheeler.
+\fBirc\fR
+The IRC support in \fBEverybuddy\fR done by Erik Inge Bolso

@@ -1,0 +1,5 @@
+/* Created with The GIMP */
+#define line_wrap_width 6
+#define line_wrap_height 9
+static unsigned char line_wrap_bits[] = {
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };

@@ -1,0 +1,23 @@
+HOWTO translate Yattm ?
+
+* if you want to make a translation in a new langage
+	* get any .po file in this directory
+	* rename it to LL.po, where LL is your language code
+	* update the translations ;-)
+	* send your file to ayttm-users@nongnu.org
+	  or, if you have cvs write access, add it, plus:
+	  - add your language code to ALL_LINGUAS in configure.in
+
+* if you want to update a translation (and as long as you don't update the .po file manually)
+	* as xgettext isn't nice, you'll have to
+	* replace every _() by gettext() in the C files
+	* go to ayttm main folder and type
+	  xgettext [path/to/files/file.C] 
+	* it'll give you a messages.po you can concatenate to the 
+	  existing .po
+	* replace every gettext() by _() in the source files (for
+	  the sake of readability ;-)
+
+Thanks :-)
+Colin <colin@colino.net>
+

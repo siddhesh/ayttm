@@ -1,0 +1,2678 @@
+* Mon Mar 31 2003 11:22 GMT [colin]	0.2.3-pre65
+- src/log_window.c
+Fix negative length in strncpy
+
+* Mon Mar 31 2003 04:40 GMT [philip]	0.2.3-pre64
+- modules/msn2/libmsn2/msn_bittybits.C
+check return value of select > 0
+
+* Sat Mar 29 2003 12:10 GMT [colin]	0.2.3-pre63
+- modules/msn2/libmsn2/msn_bittybits.C
+use select instead of poll
+
+* Sat Mar 29 2003 12:10 GMT [colin]	0.2.3-pre62
+- modules/utility/rainbow.c 
+  modules/jabber/jabber.c
+  modules/aim-toc/libtoc/libtoc.[ch]
+  modules/icq-toc/libtoc/libtoc.c
+  modules/workwizu/workwizu.c
+  modules/irc/irc.c
+"-Wall" cleans
+
+* Sat Mar 29 2003 05:07 GMT [edward]	0.2.3-pre61
+- makeebdll
+Build tool to just windows interface for MINGW32
+
+* Fri Mar 28 2003 19:31 GMT [edward]	0.2.3-pre60
+- modules/yahoo2/yahoo.c
+  src/chat_window.c
+  src/gtk/extgtktext.c
+FIxed MINGW32 cut-n-paste/refresh GUI issues
+Fixed Yahoo by removing async connect for MINGW32 only
+
+* Fri Mar 28 2003 16:27 GMT [colin]	0.2.3-pre59
+- src/add_contact_window.c src/away_window.c src/edit_account_window.c
+  src/edit_contact_window.c src/smileys.c src/trigger.c
+Micro fixes to GUI (alignment...)
+
+* Fri Mar 28 2003 15:16 GMT [edward]	0.2.3-pre58
+- modules/aim-toc/libtoc/libtoc.c
+- modules/icq-toc/libtoc/libtoc.c
+Fixed buffer/null user issue in permit/deny add code
+
+* Thu Mar 27 2003 21:43 GMT [edward]	0.2.3-pre57
+- src/smileys.c
+Fixed segfault when ipos went out of scope.
+
+* Thu Mar 27 2003 19:47 GMT [colin]	0.2.3-pre56
+- modules/*-toc/libtoc/libtoc.c
+Add missing returns (maybe fix segfault ?)
+
+* Thu Mar 27 2003 19:47 GMT [colin]	0.2.3-pre55
+- modules/msn2/msn.C
+Fix missing return (thanks Andy!)
+
+* Thu Mar 27 2003 19:47 GMT [colin]	0.2.3-pre54
+- src/util.c
+Fix double-launching (thanks to Rahul Saxena for the report)
+
+* Thu Mar 27 2003 18:47 GMT [andy]	0.2.3-pre53
+- modules/icq-toc/libtoc/libtoc.[ch]
+Fix -Wall warnings
+
+* Thu Mar 27 2003 16:47 GMT [colin]	0.2.3-pre52
+- modules/aim-toc modules/icq-toc
+allow contacts to see us online
+
+* Thu Mar 27 2003 16:54 GMT [edward]	0.2.3-pre51
+- README.WIN32
+- modules/yahoo2/libyahoo2/yahoo2.h
+MINGW32 defines
+
+* Thu Mar 27 2003 14:14 GMT [colin]	0.2.3-pre50
+- modules/aim-toc modules/icq-toc
+Catch error on NEW_BUDDY_REPLY2
+
+* Thu Mar 27 2003 12:55 GMT [philip]	0.2.3-pre49
+- modules/msn2
+Fix memory leaks
+
+* Wed Mar 26 2003 20:00 GMT [colin]	0.2.3-pre48
+- src/smileys.c
+Blindly try to fix bug #2950 (segfault in insert_smiley_cb)
+
+* Wed Mar 26 2003 18:45 GMT [philip]	0.2.3-pre47
+- modules/aim-toc modules/icq-toc
+Fix segfault (I'm really stupid - explicit callback with NULL and not
+checking it :( )
+
+* Wed Mar 26 2003 18:45 GMT [philip]	0.2.3-pre46
+- src/util.c
+check dummy group as well in find_account_by_handle so that we don't open
+multiple chat windows when chatting with a dummy
+
+* Wed Mar 26 2003 18:02 GMT [edward]	0.2.3-pre45
+- src/prefs_window.c
+Added unlink as rename on windows can not overwrite a file
+
+* Wed Mar 26 2003 17:55 GMT [edward]	0.2.3-pre44
+- modules/msn2/libmsn2/msn_bittybits.C
+  modules/msn2/libmsn2/msn_core.C
+Moved code for MINGW32 compile. added sleep -> Sleep mapping 
+
+* Wed Mar 26 2003 17:55 GMT [colin]	0.2.3-pre43
+- modules/icq-toc/icq-toc.c modules/aim-toc/aim-toc.c
+If someone talks to you on TOC protocol he _has_ to be
+online, if he isn't it's an inconsistency
+
+* Wed Mar 26 2003 17:02 GMT [edward]	0.2.3-pre42
+- src/prefs_window.c
+Incorrect directory path for Win98...
+
+* Wed Mar 26 2003 16:27 GMT [edward]	0.2.3-pre41
+- src/util.c
+  src/account.c
+Mismatched sizes of vars in make_safe_filename and callers.
+
+* Wed Mar 26 2003 16:17 GMT [colin]	0.2.3-pre40
+- modules/msn2
+Fix socket reads at least (i hope...)
+
+* Wed Mar 26 2003 13:23 GMT [colin]	0.2.3-pre39
+- src/crash.c
+Print the signal
+
+* Wed Mar 26 2003 13:53 GMT [edward]	0.2.3-pre38
+- modules/yahoo2/yahoo.c
+Fixed ifdefs for _snprintf redefine looks like there was an || when there
+should not have been
+
+* Wed Mar 26 2003 13:23 GMT [edward]	0.2.3-pre37
+- mingw
+- mingw32/giles_smiles.la  ** NEW FILE **
+- mingw32/notes.la ** NEW FILE **
+- modules/aim-toc/aim-toc.c
+- modules/aim-toc/libtoc/libtoc.c
+- modules/icq-toc/icq-toc.c
+- modules/icq-toc/libtoc/libtoc.c
+- modules/irc/irc.c
+- modules/jabber/libEBjabber.c
+- modules/msn2/msn.C
+- modules/msn2/libmsn2/msn_core.C
+- modules/utility/autotrans.c
+- modules/utility/notes.c
+- modules/utility/rainbow.c
+- modules/yahoo2/yahoo.c
+- modules/yahoo2/libyahoo2/libyahoo2.c
+- modules/yahoo2/libyahoo2/yahoo_httplib.c
+- src/account.c
+- src/chat_window.c
+- src/input_list.c
+- src/log_window.c
+- src/main.c
+- src/message_parse.c
+- src/offline_queue_mgmt.c
+- src/plugin.c
+- src/service.c
+- src/status.c
+- src/util.c
+More MINGW32 snprintf to _snprintf mapping per Andy
+Added some mingw32 .la files
+Fixed build process to build things properly
+
+* Wed Mar 26 2003 07:45 GMT [colin]	0.2.3-pre36
+- src/edit_local_accounts.c
+forbid multiple accounts for a service (for now)
+
+* Wed Mar 26 2003 07:45 GMT [colin]	0.2.3-pre35
+- src/edit_local_accounts.c
+Log out connected services before updating
+
+* Wed Mar 26 2003 07:45 GMT [colin]	0.2.3-pre34
+- modules/msn2/libmsn2/msn_bittybits.C
+longer timeout
+- modules/msn2/libmsn2/msn_core.C
+Check numargs 
+
+* Wed Mar 26 2003 01:45 GMT [edward]	0.2.3-pre33
+- src/Makefile.am
+Defaults
+
+* Wed Mar 26 2003 01:40 GMT [edward]	0.2.3-pre32
+- modules/aim-toc/libtoc/libtoc.c
+- modules/icq-toc/libtoc/libtoc.c
+snprintf to g_snprintf addition
+
+* Wed Mar 26 2003 01:35 GMT [edward]	0.2.3-pre31
+- src/chat_window.c
+  src/input_list.c
+  src/log_window.c
+  src/plugin.c
+  src/prefs_window.c
+  src/service.c
+  src/status.c
+  src/gtk/gtk_eb_html.c
+  src/gtk/gtkspell.c
+snprintf to g_snprintf addition
+
+* Wed Mar 26 2003 00:03 GMT [colin]	0.2.3-pre30
+- modules/irc
+same
+
+* Tue Mar 25 2003 22:03 GMT [colin]	0.2.3-pre29
+- modules/workwizu
+same
+
+* Tue Mar 25 2003 22:03 GMT [colin]	0.2.3-pre28
+- modules/icq-toc modules/aim-toc
+strcpy/strncpy, strcat/strncat, sprintf/snprintf
+
+* Tue Mar 25 2003 22:03 GMT [colin]	0.2.3-pre27
+- src
+strcpy => strncpy where dangerous
+
+* Tue Mar 25 2003 22:03 GMT [colin]	0.2.3-pre26
+- modules/msn2
+sprintf => snprintf
+strcpy  => strncpy
+
+* Tue Mar 25 2003 22:03 GMT [colin]	0.2.3-pre25
+- src/trigger.c
+  src/input_list.c
+fix strange things
+
+* Tue Mar 25 2003 22:03 GMT [colin]	0.2.3-pre24
+- src/[lots of files]
+sprintf => snprintf
+strcat  => strncat
+
+* Tue Mar 25 2003 21:17 GMT [edward]	0.2.3-pre23
+- src/prefs_window.c
+  modules/icq-toc/icq-toc.c
+Updates for MINGW32 regarding link
+
+* Tue Mar 25 2003 21:17 GMT [edward]	0.2.3-pre22
+- mingw
+  mingw32/aim-toc.la
+  mingw32/autotrans.la
+  mingw32/icq-toc.la
+  mingw32/icq.la
+  mingw32/import_gaim.la
+  mingw32/import_gnomeicu.la
+  mingw32/importicq.la
+  mingw32/importlicq.la
+  mingw32/irc.la
+  mingw32/jabber.la
+  mingw32/middle.la
+  mingw32/msn2.la
+  mingw32/msn_smileys.la
+  mingw32/rainbow.la
+  mingw32/smileysc.la
+  mingw32/yahoo2.la
+  mingw32/yahoo_smileys.la
+  src/main.c
+  src/prefs_window.c
+Updates for MINGW32 defines for Specific Win OS type
+
+* Tue Mar 25 2003 17:29 GMT [edward]	0.2.3-pre21
+- makedll
+  makeebdll
+  libproxy/libproxy.h
+  modules/aim-toc/libtoc/libtoc.c
+  modules/icq-toc/libtoc/libtoc.c
+More MINGW32 patches to get aim/icq-toc to build
+
+* Tue Mar 25 2003 14:24 GMT [colin]	0.2.3-pre20
+- src/status.c
+Add a check, just to be sure
+
+* Tue Mar 25 2003 14:24 GMT [colin]	0.2.3-pre19
+- modules/aim-toc/libtoc/libtoc.h
+- modules/icq-toc/libtoc/libtoc.h
+fix implicit declarations
+
+* Tue Mar 25 2003 14:24 GMT [edward]	0.2.3-pre18
+- src/status.c
+Fix window positioning on windows and braindead Window managers
+
+* Tue Mar 25 2003 14:24 GMT [colin]	0.2.3-pre17
+- src/prefs_window.c
+remove useless statement
+
+* Tue Mar 25 2003 14:24 GMT [colin]	0.2.3-pre16
+- src/status.c
+Fix window positioning on windows (maybe)
+
+* Tue Mar 25 2003 14:24 GMT [colin]	0.2.3-pre15
+- src/status.c
+printf=>eb_debug
+
+* Tue Mar 25 2003 13:02 GMT [colin]	0.2.3-pre14
+- src/status.c
+Fix submenu which could have been used unitialized (actually, it
+couldn't, but well)
+
+* Tue Mar 25 2003 13:02 GMT [colin]	0.2.3-pre13
+- src/offline_queue_mgmt.c
+Fix assignment to const 
+
+* Tue Mar 25 2003 13:02 GMT [colin]	0.2.3-pre12
+- modules/msn2/libmsn2/msn_bittybits.C
+Handle the unlikely case where the conn could be closed during
+the read loop
+
+* Tue Mar 25 2003 12:42 GMT [colin]	0.2.3-pre11
+- modules/msn2/libmsn2/msn_bittybits.C
+Fix MSN hanging when receiving very long messages
+
+* Tue Mar 25 2003 10:19 GMT [colin]	0.2.3-pre10
+- src/gtk/about.c
+Add Tahir
+
+* Tue Mar 25 2003 07:41 GMT [colin]	0.2.3-pre9
+- po/POTFILES.in po/fr.po
+Translation update
+
+* Tue Mar 25 2003 07:41 GMT [colin]	0.2.3-pre8
+- src/status.c
+Modify the flush timeout for each service so that the file
+won't be read/written twice concurrently on slow computers
+
+* Tue Mar 25 2003 02:16 GMT [edward]	0.2.3-pre7
+- makeebdll
+  mingw
+  src/tcp_utils.h
+  modules/yahoo2/libyahoo2/libyahoo2.c
+  modules/yahoo2/libyahoo2/yahoo_httplib.c
+  modules/utility/rainbow.c
+  modules/utility/notes.c
+  modules/utility/autotrans.c
+  modules/icq-toc/libtoc/libtoc.c
+  modules/aim-toc/aim-toc.c
+Ifdefs to link MINGW32 port also icq-toc libtoc made calls to toc_ instead of
+icqtoc_ routines. Most of these are related to snprintf to g_snprintf mapping.
+However it looks like proxy.o makes a callback to src/tcp_utils.c which I 
+think breaks a barrier somewhere. We need to rethink this, but in this case
+it breaks the building of aim and icq.
+
+* Mon Mar 24 2003 23:46 GMT [colin]	0.2.3-pre6
+- modules/irc/irc.c
+Show errors to users, not stderr
+
+* Mon Mar 24 2003 23:06 GMT [colin]	0.2.3-pre5
+- modules/irc/irc.c
+Explain why adding a login fails
+
+* Mon Mar 24 2003 22:41 GMT [colin]	0.2.3-pre4
+- src/chat_room.c src/chat_window.c
+Try to prevent a segfault when remote account didn't existed
+while clicking him in chatroom
+Fix 0.2.3-pre3 forgotten commit :-/
+
+* Mon Mar 24 2003 22:30 GMT [colin]	0.2.3-pre3
+- src/status.c
+  src/offline_mgmt_flush.c
+Only add callback once
+
+* Mon Mar 24 2003 20:22 GMT [colin]	0.2.3-pre2
+- src/offline_mgmt_flush.c
+Should not try to flush if still connecting
+Should not try only once when connecting && !connected
+
+* Mon Mar 24 2003 15:27 GMT [colin]	0.2.3-pre1
+- configure.in
+0.2.3 Feature freeze! :)
+
+* Mon Mar 24 2003 14:30 GMT [edward]	0.2.2-103
+- configure.in
+  modules/yahoo2/libyahoo2/libyahoo.c
+  modules/yahoo2/yahoo.c
+  modules/importers/importlicq.c
+More MINGW32 updates for msn compilation and EINPROGRESS errno which is
+NOT in WIN32 plus importlicq.c was not able to compile without a time.h
+include
+
+* Mon Mar 24 2003 10:53 GMT [colin]	0.2.2-102
+- modules/workwizu/workwizu.c
+Async connect
+
+* Mon Mar 24 2003 10:53 GMT [edward]	0.2.2-101
+- configure.in
+  modules/msn2/libmsn2/msn_bittybits.C
+  src/status.c
+  src/account.c
+  src/browser.c
+  src/console_session.c
+  src/crash.c
+  src/image_window.c
+  src/offline_queue_mgmt.c
+  src/tcp_util.c
+  src/util.c
+Added __MINGW32__ ifdef/define code for WIN32 port
+Actually this happened yesterday around -95 :(
+
+* Mon Mar 24 2003 10:52 GMT [philip]	0.2.2-100
+- modules/yahoo2/
+Async connect for login
+
+* Mon Mar 24 2003 10:15 GMT [andy]	0.2.2-99
+- src/chat_room.c
+  src/chat_window.c
+  src/plugin.c
+  src/prefs_window.c
+  src/status.c
+  src/util.c
+Fix -Wall warnings
+
+* Mon Mar 24 2003 10:10 GMT [colin]	0.2.2-98
+- src/gtk/about.c
+Add Edward 
+
+* Mon Mar 24 2003 10:05 GMT [colin]	0.2.2-97
+- src/edit_local_accounts.c
+Fix bug where password wasn't updated (but written) after Modify
+
+* Mon Mar 24 2003 09:52 GMT [colin]	0.2.2-96
+- libproxy modules/aim-toc modules/icq-toc
+Implement async connect
+Fix status keeping online when login errors happened
+
+* Mon Mar 24 2003 08:15 GMT [philip]	0.2.2-95
+- modules/msn2/msn.C modules/yahoo2/yahoo.c
+Comment out closing of activity windows too
+
+* Sun Mar 23 2003 22:15 GMT [colin]	0.2.2-94
+- modules/msn2/msn.C modules/yahoo2/yahoo.c
+Comment activity windows for now
+
+* Sun Mar 23 2003 22:15 GMT [colin]	0.2.2-93
+- modules/msn2/msn.C
+close activity when logging out, it may be due to login error
+
+* Sun Mar 23 2003 18:30 GMT [philip]	0.2.2-92
+- src/progress_window.[ch]
+- modules/yahoo2/yahoo.c
+make activity bars easier to use - they are still single bar per window
+- modules/msn2/msn.C
+use activity bar on connect
+
+* Sun Mar 23 2003 16:10 GMT [philip]	0.2.2-91
+- modules/yahoo2/yahoo.c
+better connecting message
+
+* Sun Mar 23 2003 16:05 GMT [philip]	0.2.2-90
+- modules/msn2/msn.C
+explicitly typecast callbacs to (void *) so that msn will compile.
+
+* Sun Mar 23 2003 13:22 GMT [colin]	0.2.2-89
+- src/util.c
+Fix bug where group renaming didn't move logs
+
+* Sun Mar 23 2003 10:34 GMT [colin]	0.2.2-88
+- modules/aim-toc modules/icq-toc
+Avoid namespace collisions (i know it's ugly)
+
+* Sun Mar 23 2003 10:34 GMT [colin]	0.2.2-87
+- modules/msn2
+Error checking
+
+* Sun Mar 23 2003 10:34 GMT [colin]	0.2.2-86
+- modules/msn2
+Use async socket connection (hope it's right this time)
+
+* Sat Mar 22 2003 23:51 GMT [colin]	0.2.2-85
+- src/status.c src/gtk/gtkutils.[ch]
+Remember window position
+
+* Sat Mar 22 2003 23:51 GMT [colin]	0.2.2-84
+- src/status.c src/prefs_window.c
+Remember last status displayed (online|contacts|accounts)
+
+* Sat Mar 22 2003 21:00 GMT [colin]	0.2.2-83
+- src/dialog.c pixmaps/question.xpm pixmaps/warning.xpm
+Add icons to dialogs
+
+* Sat Mar 22 2003 20:39 GMT [colin]	0.2.2-82
+- src/add_contact_window.c src/edit_contact_window.c
+  src/edit_group_window.c
+Fix ugly windows
+
+* Sat Mar 22 2003 20:30 GMT [philip]	0.2.2-81
+- src/progress_window.[ch]
+Add activity bad
+- modules/yahoo2/yahoo.c
+show activity bar while connecting
+
+* Sat Mar 22 2003 19:48 GMT [colin]	0.2.2-80
+- src/edit_local_accounts.c src/add_contact_window.c
+Reword labels
+
+* Sat Mar 22 2003 19:48 GMT [colin]	0.2.2-79
+- modules/yahoo2/yahoo.c
+Fix change_user_name
+
+* Sat Mar 22 2003 19:03 GMT [colin]	0.2.2-78
+- modules/msn2
+fix segfault when closing conn after having refused SIP
+
+* Sat Mar 22 2003 18:45 GMT [philip]	0.2.2-77
+- modules/yahoo2/libyahoo2/libyahoo2.c
+don't crash on duplicate login
+
+* Sat Mar 22 2003 12:05 GMT [philip]	0.2.2-76
+- made irc and jabber also selectable at configure time - enabled by default
+
+* Sat Mar 22 2003 12:05 GMT [colin]	0.2.2-75
+- src/chat_room.c src/away_window.c src/dialog.c src/edit_account_window.c
+  src/prefs_window.c
+Remove code duplication
+
+* Sat Mar 22 2003 12:05 GMT [colin]	0.2.2-74
+- src/dialog.c
+Plug ESC and ENTER in dialogs
+
+* Sat Mar 22 2003 11:47 GMT [colin]	0.2.2-73
+- src modules/msn2
+Reword a few dialogs
+
+* Sat Mar 22 2003 10:20 GMT [colin]	0.2.2-72
+- src/dialog.[ch]
+Nicer dialogs
+
+* Sat Mar 22 2003 10:20 GMT [colin]	0.2.2-71
+- src/status.[ch]
+GtkWidget->void for easier inclusion
+
+* Fri Mar 21 2003 02:48 GMT [colin]	0.2.2-70
+- modules/msn2/msn.C
+fix segfaults if remote disconnects abruptly while 
+negociating file transfer
+
+* Fri Mar 21 2003 19:45 GMT [colin]	0.2.2-69
+- src/status.[ch] src/chat_window.c
+Same in chatwindow
+
+* Fri Mar 21 2003 19:45 GMT [colin]	0.2.2-68
+- src/status.c
+Nicer submenus in contact|account menus
+
+* Fri Mar 21 2003 18:29 GMT [colin]	0.2.2-67
+- src/status.c
+Add specific menu items to accounts too
+
+* Fri Mar 21 2003 16:15 GMT [colin]	0.2.2-66
+- modules/msn2/msn.C
+Fix segfault when typing in "timed-out" chatrooms
+
+* Fri Mar 21 2003 13:14 GMT [colin]	0.2.2-65
+- src/status.c
+g_free -> free and include stdlib.h
+- modules/msn2/libmsn2/msn_core.C
+don't send call when we invite contact - he'll do it
+
+* Fri Mar 21 2003 13:00 GMT [philip]	0.2.2-64
+- modules/msn2/libmsn2/msn_core.C
+fixed some memory leaks
+
+* Fri Mar 21 2003 15:37 GMT [philip]	0.2.2-63
+- src/util.c
+convert_eol -> handle empty strings correctly.
+
+* Fri Mar 21 2003 10:45 GMT [philip]	0.2.2-62
+- src/plugin_api.[ch]
+void *eb_menu_item_set_protocol -> void eb_menu_item_set_protocol - since it
+returns nothing
+other minor warnings removed in various files
+- configure.in
+disabled icq by default
+
+* Fri Mar 21 2003 09:58 GMT [colin]	0.2.2-61
+- modules/msn2
+We can now invite people
+
+* Thu Mar 20 2003 10:33 GMT [colin]	0.2.2-60
+- src/chat_window.c src/status.c
+- src/plugin_api.h
+We may need to know the local account
+
+* Thu Mar 20 2003 10:22 GMT [colin]	0.2.2-59
+- src/chat_window.c
+initialize ebmContactData->remote_account
+
+* Thu Mar 20 2003 10:04 GMT [colin]	0.2.2-58
+- src/chat_window.c
+- src/status.c
+- src/plugin.h src/plugin_api.[ch]
+- src/util.[ch]
+Protocol-specific context-menu items
+
+* Thu Mar 20 2003 09:15 GMT [philip]	0.2.2-57
+- modules/yahoo2
+Fetch addressbook only after we get the cookies from the server
+
+* Thu Mar 20 2003 00:16 GMT [colin]	0.2.2-56
+- modules/msn2
+Cancelling incoming file transfers is now OK
+
+* Thu Mar 20 2003 00:16 GMT [colin]	0.2.2-55
+- modules/msn2
+Differentiate between netmeeting requests and SIP
+requests (and don't handle SIP)
+
+* Wed Mar 19 2003 23:14 GMT [colin]	0.2.2-54
+- modules/msn2
+better error handling in file transfer
+- src/progress_window.[ch]
+optional callback when transfer window is closed
+
+* Wed Mar 19 2003 18:15 GMT [colin]	0.2.2-53
+- modules/msn2/msn.C
+sleep before running gnomemeeting (due to official splashscreens)
+
+* Wed Mar 19 2003 16:25 GMT [philip]	0.2.2-52
+- Added preliminary image viewing support (will be used for webcam)
+
+* Wed Mar 19 2003 16:00 GMT [colin]	0.2.2-51
+- modules/msn2/msn.C
+Better gnomemeeting detection (and better error reporting)
+
+* Wed Mar 19 2003 16:00 GMT [colin]	0.2.2-50
+- modules/msn2
+Support incoming voice requests via gnomemeeting
+Untested as gnomemeeting with support for callto:// URIs need gtk2
+Should work :)
+
+* Wed Mar 19 2003 10:36 GMT [colin]	0.2.2-49
+- configure.in 
+- modules/aim-oscar
+Some fixes to aim-oscar (at least it compiles and loads)
+
+* Tue Mar 18 2003 09:04 GMT [colin]	0.2.2-48
+- src/status.c src/contact.h
+Better tooltip handling (no tooltip when no info & info stored in 
+contact struct)
+
+* Tue Mar 18 2003 09:04 GMT [colin]	0.2.2-47
+- modules/yahoo2/yahoo.c
+Be sure to print an error
+
+* Mon Mar 17 2003 23:59 GMT [colin]	0.2.2-46
+- modules/msn2
+try to fix more leaks
+
+* Mon Mar 17 2003 23:12 GMT [colin]	0.2.2-45
+- src/edit_local_accounts.c
+- src/status.c
+fix leaks
+
+* Mon Mar 17 2003 19:25 GMT [philip]	0.2.2-44
+- modules/yahoo2/yahoo.c
+Remove extra parentheses from custom away messages too.
+
+* Mon Mar 17 2003 19:15 GMT [philip]	0.2.2-43
+- src/llist.[ch]
+add l_list_empty and l_list_singleton which are faster than doing
+l_list_length==0 or l_list_length==1
+also changed files that used above constructs.
+
+* Mon Mar 17 2003 15:37 GMT [colin]	0.2.2-42
+- src/status.
+fix a leak
+fix an unnecessary (buggy) update
+
+* Mon Mar 17 2003 15:10 GMT [colin]	0.2.2-41
+- modules/msn2/msn.C
+Add user to BL when not allowing them (or we have a 
+popup every time we login)
+
+* Mon Mar 17 2003 15:01 GMT [colin]	0.2.2-40
+- src/status.c
+Tooltip to track people status
+
+* Mon Mar 17 2003 14:42 GMT [colin]	0.2.2-39
+- src/status.c
+- modules/*/*c
+Move status parentheses ("(Idle)", ...) from modules to core
+
+* Mon Mar 17 2003 08:00 GMT [philip]	0.2.2-38
+- src/util.[ch]
+fix segfault when merging two accounts
+
+* Sun Mar 16 2003 21:25 GMT [andy]	0.2.2-37
+- src/globals.h
+  src/main.c
+Move declaration of geometry into main.c from globals.h
+- src/console_session.c
+Reorder includes for darwin compilation [<sys/types.h> before <sys/un.h> because types.h is not included in un.h]
+- src/tcp_util.c
+Eliminate obsolete <values.h> by using INT_MAX instead of MAXINT [for darwin compilation]
+
+* Sun Mar 16 2003 18:29 GMT [philip]	0.2.2-36
+- modules/yahoo2/libyahoo2/libyahoo2.c
+fix memory leak in non pager connections
+fix possible double deletion for yahoo buddies which would have happened after fixing that
+memory leak
+
+* Sun Mar 16 2003 15:00 GMT [andy]	0.2.2-35
+- src/chat_window.c
+  src/prefs_window.c
+Fix compile when we don't have iconv
+
+* Sun Mar 16 2003 13:00 GMT [andy]	0.2.2-34
+- src/chat_room.c
+  src/chat_room.h
+  src/chat_window.c
+  src/nomodule.c
+  src/offline_queue_mgmt.c
+  src/plugin_api.c
+  src/status.c
+  src/tcp_util.c
+Fix -Wall compiler warnings
+
+* Sun Mar 16 2003 12:33 GMT [colin]	0.2.2-33
+- modules/jabber/libEBjabber.c
+Fix (?) registration
+
+* Sat Mar 15 2003 12:55 GMT [colin]	0.2.2-32
+- modules/msn2/*/*
+Implement ~message() (maybe less memleaks ?)
+
+* Sat Mar 15 2003 12:55 GMT [colin]	0.2.2-31
+- src/offline_queue_mgmt.c
+Handle ignore and unignore
+- src/status.c
+Better connected check
+- modules/msn2/msn.C
+Add and remove from BL on ignore/unignore events
+
+* Sat Mar 15 2003 11:20 GMT [andy]	0.2.2-30
+- src/util.c
+fixed crash when confirming the addition of a new contact [create_contact() needed a return value...]
+fix a couple of compiler warnings about if... else ambiguity
+
+* Fri Mar 14 2003 16:06 GMT [philip]	0.2.2-29
+- modules/yahoo2/libyahoo2/libyahoo2.c
+don't request unnecessary items along with yab (merge from libyahoo2)
+
+* Fri Mar 14 2003 04:45 GMT [philip]	0.2.2-28
+- modules/yahoo2/yahoo.c
+make account comparisons consistently case insensitive
+- modules/yahoo2/libyahoo2/libyahoo2.c
+announce online status earlier
+
+* Thu Mar 13 2003 18:23 GMT [colin]	0.2.2-27
+- modules/msn2/libmsn/msn_core.C
+fix segfault with (invalid) null messages
+
+* Thu Mar 13 2003 11:15 GMT [colin]	0.2.2-26
+- src/chat_room.c
+init_loginfo before calling module-specific code
+
+* Fri Mar 07 2003 16:06 GMT [colin]	0.2.2-25
+- src/log_window.c
+Fix a buffer overflow found by Yann
+
+* Fri Mar 07 2003 16:06 GMT [colin]	0.2.2-24
+- src/status.c
+Try to prevent a segfault [?]
+
+* Fri Mar 07 2003 13:52 GMT [colin]	0.2.2-23
+- modules/msn/msn.C
+Try to explain why file transfers may fail
+
+* Fri Mar 07 2003 13:50 GMT [colin]	0.2.2-22
+- modules/msn2/libmsn2/msn_core.C
+Don't add NULL invitations to the invitations list
+Recognize (not support :() Voice invitations
+
+* Fri Mar 07 2003 10:42 GMT [colin]	0.2.2-21
+- src/util.c
+Avoid mess when moving account to same contact
+
+* Wed Mar 05 2003 17:38 GMT [philip]	0.2.2-20
+- src/offline_queue_mgmt.c
+Add string.h for prototype of strstr
+
+* Wed Mar 05 2003 15:16 GMT [colin]	0.2.2-19
+- src/chat_room.c
+use alias instead of handle for the log
+
+* Wed Mar 05 2003 14:37 GMT [colin]	0.2.2-18
+- src/chat_room.c
+use alias too to find accounts back
+
+* Wed Mar 05 2003 14:18 GMT [colin]	0.2.2-17
+- modules/msn.C
+Don't use friendlyname, rather account->account_contact->nick
+
+* Wed Mar 05 2003 14:18 GMT [colin]	0.2.2-16
+- src/chat_window.c
+Prevent a segfault 
+
+* Wed Mar 05 2003 11:25 GMT [colin]	0.2.2-15
+- src/chat_room.[ch]
+Prepare for special colors
+
+* Wed Mar 05 2003 11:25 GMT [colin]	0.2.2-14
+- modules/msn2/msn.C
+use friendlynames as possible
+
+* Wed Mar 05 2003 11:25 GMT [colin]	0.2.2-13
+- src/chat_room.c
+fix a possible segfault
+
+* Wed Mar 05 2003 04:30 GMT [philip]	0.2.2-12
+- modules/msn2/libmsn2/msn_core.C
+delete -> delete []
+
+* Thu Mar 04 2003 16:44 GMT [colin]	0.2.2-11
+- src/log_window.[ch] src/chat_room.c
+Chatroom logging :)
+
+* Thu Mar 04 2003 15:10 GMT [colin]	0.2.2-10
+- src/log_window.[ch] src/chat_window.[ch] src/chat_room.[ch]
+Clean logging a bit
+
+* Thu Mar 04 2003 15:10 GMT [colin]	0.2.2-9
+- src/browser.c src/log_window.[ch] src/smileys.c
+  src/util.c
+Add log:///file "protocol", which open a log_window with the
+corresponding file (will soon be useful)
+
+* Thu Mar 04 2003 14:13 GMT [colin]	0.2.2-8
+- src/util.c
+connected -> connected || connecting
+
+* Tue Mar 04 2003 05:30 GMT [philip]	0.2.2-7
+- modules/yahoo2/libyahoo2/libyahoo2.c
+fix read past end of buffer in yahoo_getyab
+merge in fixes from libyahoo2
+
+* Mon Mar 03 2003 18:50 GMT [philip]	0.2.2-6
+- src/contact_parser.y
+fix reference to invalid memory if contact language is NULL
+- src/util.c
+use calloc instead of gmalloc0
+
+* Sun Mar 02 2003 12:44 GMT [colin]	0.2.2-5
+- src/offline_queue_mgmt.c
+Fix trailing \n in last token of ay_strplit
+
+* Sun Mar 02 2003 12:02 GMT [colin]	0.2.2-4
+- src/offline_queue_mgmt.c
+Fix a segfault
+
+* Wed Feb 28 2003 10:50 GMT [colin]
+- modules/msn2/libmsn2
+Fix `make msntest`
+
+* Wed Feb 28 2003 10:50 GMT [colin]	0.2.2-3
+- modules/msn2/libmsn2/msn_core.C
+don't use non-blocking connections for now, it is broken for 
+an unknown reason
+
+* Wed Feb 28 2003 10:50 GMT [colin]	0.2.2-2
+- modules/msn2/
+implement non-blocking connections
+
+* Wed Feb 26 2003 15:57 GMT [colin]	0.2.2-1
+- src/chat_window.c
+Fix conversation restoring with do_strip_html=1
+
+* Wed Feb 26 2003 15:57 GMT [colin]	0.2.2-0
+Release 0.2.2
+
+* Thu Feb 21 2003 08:50 GMT [colin]	0.2.2-0pre4
+- modules/workwizu/workwizu.c
+Fix problem with strings containing ':'
+
+* Thu Feb 21 2003 08:50 GMT [colin]	0.2.2-0pre3
+- modules/msn2/msn.C
+set friendlyname before setting online status (so people
+see it immediately, not at next login)
+
+* Thu Feb 20 2003 18:30 GMT [philip]	0.2.2-0pre2
+- src/chat_window.c
+set tab_cw to NULL to avoid crash if not using tabbed chat
+
+* Thu Feb 20 2003 18:19 GMT [colin]	0.2.2-0pre1
+- configure.in
+Maybe one day i won't mess with version numbers :)
+
+* Thu Feb 20 2003 11:21 GMT [colin]	0.2.2-pre1
+- configure.in
+Feature-freeze ;-)
+
+* Thu Feb 20 2003 09:01 GMT [colin]	0.2.1-138
+- src/chat_window.c
+trim names in tabs
+opening new chat_windows should not change the size
+
+* Tue Feb 12 2003 10:09 GMT [colin]	0.2.1-137
+- src/message_parse.c
+revert last commit (bug wasn't here)
+- src/status.c
+fix bug introduced in -125
+- src/util.c
+fix segfault if dummy_group doesn't exist
+
+* Tue Feb 12 2003 09:53 GMT [colin]	0.2.1-136
+- src/message_parse.c
+be sure to reset status label after 30 seconds
+
+* Tue Feb 11 2003 06:17 GMT [philip]	0.2.1-135
+- src/util.[ch]
+- src/main.c
+- modules/yahoo2/yahoo.c
+add add_dummy_contact to create a temporary contact that isn't really
+added to your buddy list or saved in the buddy file.  useful in yahoo
+where you can chat with anyone, even if he's not on your buddy list, and
+where you have a 100 buddy limit.
+
+* Fri Feb 9 2003 09:58 GMT [colin]	0.2.1-134
+- src/util.[ch]
+add int connected_local_accounts(void) function
+- src/status.c
+Better setting of menu sensitivity
+
+* Fri Feb 7 2003 19:50 GMT [philip]	0.2.1-133
+- src/tcp_util.[ch]
+some cleanup and bugfixes, added tcp_writeline
+- modules/smtp
+now uses an asynchronous connect.  use it as a sample implementation
+
+* Fri Feb 7 2003 09:58 GMT [philip]	0.2.1-132
+- src/tcp_util.[ch]
+added asynchronous connect
+
+* Fri Feb 7 2003 08:27 GMT [colin]	0.2.1-131
+- src/chat_window.c src/chat_room.c
+fix leaks
+
+* Fri Feb 7 2003 08:27 GMT [colin]	0.2.1-130
+- modules/msn2/libmsn2/msn_core.C
+Update error strings (thanks to http://www.hypothetic.org/docs/msn/ !)
+
+* Fri Feb 7 2003 08:20 GMT [philip]	0.2.1-129
+- modules/utility/autotrans.c
+babelfish now works again
+- src/chat_window.c, modules/utility/filters...
+all filters return a new string which is freed in teh filter_walk
+- src/util.c
+ditto with convert_eol
+
+* Fri Feb 7 2003 05:13 GMT [philip]	0.2.1-128
+- modules/yahoo2
+changed yahoo_add_yab to yahoo_set_yab - since it modifies as well
+ 
+* Thu Feb 6 2003 14:22 GMT [colin]	0.2.1-127
+- src/chat_room.c
+make people clickable in the clist
+
+* Thu Feb 6 2003 10:24 GMT [philip]	0.2.1-126
+- modules/icq/icq.c
+ref_count++ and ref_count-- when connect and disconnect actually happen,
+not when we hope they happen.
+gets rid of unable to unload icq module error
+
+* Thu Feb 6 2003 09:12 GMT [colin]	0.2.1-125
+- src/away_window.c
+fix buggy algorithm
+use a gtk_text to take the away message
+- src/chat_window.c modules/aim-toc/aim-toc.c
+free get_away_message() result
+- src/status.c
+remove \n from status if necessary
+remove some ugly code duplication
+
+* Thu Feb 6 2003 09:12 GMT [colin]	0.2.1-124
+- src/chat_room.[ch] 
+- src/chat_window.[ch]
+- src/util.c
+- modules/aim-oscar/aim-oscar.c
+- modules/aim-toc/aim-toc.c
+- modules/icq/icq.c
+- modules/icq-toc/icq-toc.c
+- modules/irc/irc.c
+- modules/jabber/jabber.c
+- modules/msn2/msn.C
+- modules/workwizu/workwizu.c
+- modules/yahoo2/yahoo.c
+chat_window and chat_room structs cleaning
+
+* Thu Feb 6 2003 08:48 GMT [philip]	0.2.1-123
+- src/offline_queue_mgmt.[ch]
+- src/util.[ch]
+- src/status.c
+offline contact management queue functions moved to a separate file
+
+* Thu Feb 6 2003 08:42 GMT [philip]	0.2.1-122
+- src/mem_util.[ch]
+constant arguments
+
+* Wed Feb 5 2003 15:20 GMT [philip]	0.2.1-121
+- modules/yahoo2/
+add support for modifying addressbook entries
+
+* Wed Feb 5 2003 10:46 GMT [colin]	0.2.1-120
+- src/smileys.c
+Fix problem when multiple html tags were followed by a smiley
+
+* Wed Feb 5 2003 08:30 GMT [philip]	0.2.1-119
+- src/prefs_window.c
+plugin prefs: Ok/Cancel buttons even if no prefs for this plugin
+
+* Wed Feb 5 2003 07:23 GMT [philip]	0.2.1-118
+- src/util.c
+don't move a contact if moving to himself
+don't merge contact with contact in another group if not moving to that group
+
+* Wed Feb 5 2003 06:34 GMT [philip]	0.2.1-117
+- src/prefs_window.c
+fixed plugin prefs not loading
+PLUGIN_PREF was == 0 ==> if(pref_type != 0) never entered
+enable debugging as soon as possible (as soon as the pref is read from file)
+
+* Mon Feb 3 2003 11:10 GMT [andy]	0.2.1-116
+- modules/msn2/libmsn2/msn_core.C
+Check for null pointer
+
+* Mon Feb 3 2003 11:10 GMT [andy]	0.2.1-115
+- src/Makefile.am
+- src/edit_local_accounts.c
+- src/main.c
+- src/plugin.c
+- src/prefs.c
+- src/prefs.h
+- src/status.c
+- src/prefs_window.[ch] ** NEW FILES **
+Move prefs window stuff to its own file from prefs.c
+This was most of prefs.c - there's more cleanup to do before
+some of the other stuff [eb_read_prefs() / write_prefs()] can move
+back to prefs.c
+
+* Mon Feb 3 2003 09:36 GMT [colin]	0.2.1-114
+- src/util.c
+rename_nick_log breaks if oldlog == newlog
+
+* Sat Feb 1 2003 19:22 GMT [philip]	0.2.1-113
+- src/util.[ch]
+escape/unescape string takes const
+
+* Fri Jan 31 2003 23:10 GMT [colin]	0.2.1-112
+- modules/msn2/msn.C modules/msn2/libmsn2/msn_core.C
+Fix problem when adding group
+
+* Fri Jan 31 2003 13:23 GMT [philip]	0.2.1-111
+- src/service.h src/value_pair.c
+made some functions accept const args
+- modules/aim-toc,icq,irc,jabber,msn2,yahoo2
+change to reflect above
+
+* Fri Jan 31 2003 13:04 GMT [colin]	0.2.1-110
+- src/chat_window.c
+Try to fix this conversation restore thingy once again
+
+* Fri Jan 31 2003 11:46 GMT [philip]	0.2.1-109
+- src/help_menu.c
+new url for ayttm manual
+- src/status.c
+put back entry for ayttm manual, changed some of the hot keys to avoid
+duplicates
+
+* Fri Jan 31 2003 07:21 GMT [philip]	0.2.1-108
+- src/plugin_api.c
+free callback data - was a memory leak
+- src/add_contact_window.c
+Defer writing contact list until account is actually added
+- src/util.c
+Fix the move contact if already added code - it was segfaulting since
+add_contact_window expected a modal dialog, but we changed to a modeless
+prompt.
+Defer writing contact_mgmt_queue until we're certain this is what the
+user wants to do
+Update the contact list when it's done
+move_account should also write_contact_list when done
+
+* Fri Jan 31 2003 06:12 GMT [philip]	0.2.1-107
+- modules/yahoo2/yahoo.c
+Don't allow login to be called when connection is in connecting
+state.
+
+* Thu Jan 30 2003 15:03 GMT [colin]	0.2.1-106
+- src/chat_room.c
+fix colour when no timestamping
+let the timestamp colour also change for contrast.
+
+* Thu Jan 30 2003 14:33 GMT [philip]	0.2.1-105
+- src/gtk/gtk_eb_html.c
+ok, this time really fixed the colours
+- src/chat_window.c
+let the timestamp colour also change for contrast.
+
+* Thu Jan 30 2003 12:12 GMT [colin]	0.2.1-104
+- modules/aim-toc
+implement add_group, del_group, rename_group
+fix login-related logic bugs
+
+* Thu Jan 30 2003 09:58 GMT [philip]	0.2.1-103
+- src/gtk/gtk_eb_html.c
+fix contrast when background is dark, but not that dark :/
+
+* Thu Jan 30 2003 09:37 GMT [colin]	0.2.1-102
+- modules/msn2
+Edit contact after having allowed him
+
+* Thu Jan 30 2003 09:37 GMT [colin]	0.2.1-101
+- modules/aim-toc
+Fix debug
+implement change_group() callback (TODO: add_group, del_group, 
+rename_group)
+
+* Thu Jan 30 2003 08:20 GMT [philip]	0.2.1-100
+- src/message_parse.[ch]
+- modules/*
+remove SERVICE_INFO from eb_parse_incoming_message - it isn't used
+
+* Thu Jan 30 2003 07:25 GMT [philip]	0.2.1-99
+- modules/yahoo2/yahoo.c
+fix addressbook bug if only first name set
+
+* Thu Jan 30 2003 06:48 GMT [philip]	0.2.1-98
+- src/chat_window.c
+variable name typo message -> text
+
+* Thu Jan 30 2003 05:24 GMT [philip]	0.2.1-97
+- src/chat_room.c src/chat_window.c
+Check for get_smileys before trying to use it
+- src/smileys.c
+if(RUN_SERVICE(account)) -> if(RUN_SERVICE(account)->get_smileys)
+
+* Wed Jan 29 2003 20:00 GMT [philip]	0.2.1-96
+- modules/yahoo2/yahoo.c
+Update contact list when we get a buddy name update
+
+* Wed Jan 29 2003 19:14 GMT [colin]	0.2.1-95
+- `find . -name "*.[Cch]"`
+Copyright sed "s///"
+
+* Wed Jan 29 2003 17:20 GMT [colin]	0.2.1-94
+- src/chat_window.c
+Fix bug with sound's toggle button
+
+* Wed Jan 29 2003 15:33 GMT [colin]	0.2.1-93
+- src/util.[ch]
+Add group_mgmt_check_moved() so the modules can know
+whether they shouldn't locally re-add a deleted group
+- modules/msn2/msn.C
+Use it
+
+* Wed Jan 29 2003 15:20 GMT [philip]	0.2.1-92
+- modules/yahoo2/
+change_user_name implemented
+free_local_account implemented
+Added creating addressbook entries.
+TODO: handle duplicate address book entries
+
+* Wed Jan 29 2003 15:13 GMT [colin]	0.2.1-91
+- modules/msn2/msn.C
+Remove 0.2.1-82 hack (it's fixed in 0.2.1-86 ;-))
+
+* Wed Jan 29 2003 15:13 GMT [colin]	0.2.1-90
+- modules/msn2/msn.C
+Fix bug with default group
+
+* Wed Jan 29 2003 14:54 GMT [colin]	0.2.1-89
+- src/util.[ch]
+offline group management (sync problems to fix)
+
+* Wed Jan 29 2003 13:29 GMT [philip]	0.2.1-88
+- src/util.[ch] src/service.[ch]
+major cleanups to utility functions
+
+* Wed Jan 29 2003 12:28 GMT [colin]	0.2.1-87
+- src/service.h
+Modules should be able to free their protocol_account_data
+
+* Wed Jan 29 2003 10:40 GMT [colin]	0.2.1-86
+- src/util.c src/edit_contact_window.c
+Fix contact renaming (when another contact with the same name
+already exists).
+
+* Wed Jan 29 2003 09:45 GMT [colin]	0.2.1-85
+- src/util.[ch]
+plug change_user_name
+
+* Wed Jan 29 2003 09:12 GMT [philip]	0.2.1-84
+- src/service.[ch]
+gchar->char, gint->int, gboolean->ing
+added change_user_name to callbacks
+
+* Wed Jan 29 2003 09:06 GMT [philip]	0.2.1-83
+- src/llist.c
+fixed bug in l_list_insert_sorted which messed up if item was last
+in the list
+
+* Tue Jan 28 2003 13:07 GMT [colin]	0.2.1-82
+- modules/msn2/msn.C
+don't rename contact to friendyname if already existing
+(hack, should _fix_ it)
+
+* Tue Jan 28 2003 10:33 GMT [colin]	0.2.1-81
+- modules/*/*c
+Modules SHOULD NOT modify core's globals
+
+* Tue Jan 28 2003 10:33 GMT [colin]	0.2.1-80
+- src/chat_room.c
+fix chat_rooms-related segfaults in util.c
+- modules/workwizu/workwizu.c
+paranoid inits
+
+* Tue Jan 28 2003 09:26 GMT [colin]	0.2.1-79
+- src/chat_window.c
+begin grouping gtk things together
+
+* Tue Jan 28 2003 06:15 GMT [colin]	0.2.1-78
+- src/gtkspell.[ch] src/gtkutils.[ch]
+moved to gtk/
+
+* Tue Jan 28 2003 06:15 GMT [philip]	0.2.1-77
+- modules/{aim-toc,icq,msn2,yahoo2}/Makefile.am
+put GTK_CFLAGS back
+- modules/aim-toc/libtoc/libtoc.[ch]
+g{char,int,boolean} -> {char,int,int}
+- modules/irc/irc.c, modules/jabber/jabber.c
+get_status_pixmap
+- modules/service.h
+remove gdk
+
+* Tue Jan 28 2003 00:32 GMT [colin]	0.2.1-76
+- src/gtk ** NEW **
+- src/gtk_eb_html.[ch] src/extgtktext.[ch]
+- src/Makefile.am configure.in
+Move some gtk stuff to a specific directory
+
+* Mon Jan 27 2003 21:29 GMT [colin]	0.2.1-75
+- modules/icq
+Get rid of gtk deps
+- modules/icq-toc
+Get rid of gtk deps (untested)
+
+* Mon Jan 27 2003 18:15 GMT [colin]	0.2.1-74
+- src/log_window.c
+Don't f*ck up original buffer
+
+* Mon Jan 27 2003 17:55 GMT [colin]	0.2.1-73
+- modules/*/Makefile.am
+Remove GTK_CFLAGS
+- modules/yahoo2/yahoo.c
+Oops, fix a compile error
+
+* Mon Jan 27 2003 17:31 GMT [colin]	0.2.1-72
+- modules/aim-toc
+Get rid of gtk deps
+
+* Mon Jan 27 2003 17:08 GMT [colin]	0.2.1-71
+- src/gtkutils[ch]
+New files (gtk utilities)
+- lots of files
+Remove some more gtk dependencies in modules
+
+* Mon Jan 27 2003 16:12 GMT [colin]	0.2.1-70
+- src/account_parser.y src/contact_parser.y
+gchar -> char
+
+* Mon Jan 27 2003 12:08 GMT [colin]	0.2.1-69
+- src/status.c
+Remove a stupid useless debug
+
+* Mon Jan 27 2003 13:35 GMT [philip]	0.2.1-68
+- modules/irc/irc.c
+use eb_set_active_menu_status to set menu status
+- modules/utility/middle.c, modules/utility/rainbow.c
+gchar -> char, gint -> int
+- src/account.h
+no longer depends on glib
+added entry for eb_local_account* to eb_account
+- src/chat_window.c, src/plugin.h, src/plugin_api.[ch], src/status.c
+GList -> LList
+- src/contact.h, src/message_parse.h, src/prefs.c, src/util.[ch]
+gchar, gint, gboolean -> char, int, int
+- src/llist.[ch]
+add l_list_nth
+- src/sound.c
+add <glib.h>	it's really needed here
+
+* Mon Jan 27 2003 11:45 GMT [colin]	0.2.1-67
+- modules/msn2/msn.C modules/msn2/libmsn2/msn_core.C
+Fix group deletion for certain accounts
+
+* Mon Jan 27 2003 08:55 GMT [philip]	0.2.1-66
+- src/chat_room.c
+check for NULL account when conferencing with someone not on our buddy list
+- modules/yahoo2/yahoo.c
+remove duplicate joined/left message in conference
+
+* Mon Jan 27 2003 08:35 GMT [philip]	0.2.1-65
+- modules/yahoo2/yahoo.c
+Disable conference typing - not supported
+Set chat_room service_id
+
+* Mon Jan 27 2003 05:31 GMT [philip]	0.2.1-64
+- src/about.c src/crash.c src/main.c src/status.c
+put back the - between VERSION and RELEASE.  First release should be 1
+
+* Sun Jan 26 2003 22:27 GMT [colin]	0.2.1-63
+- modules/msn2
+specific debug for msn
+
+* Sun Jan 26 2003 19:36 GMT [philip]	0.2.1-62
+- src/status.c
+Don't let window automatically resize width when contacts change status
+This was so annoying!
+
+* Sun Jan 26 2003 11:35 GMT [philip]	0.2.1-61
+- src/browser.c console_session.c extgtktext.c file_select.c
+- src/gtk_eb_html.c plugin_api.c service.c sound.c speech.c
+remove references to intl.h where there aren't any strings to translate
+
+* Sun Jan 26 2003 11:25 GMT [philip]	0.2.1-60
+- modules/yahoo2/libyahoo2/yahoo_httplib.c
+initialise epos to avoid possible segfaul
+
+* Sun Jan 26 2003 08:35 GMT [philip]	0.2.1-59
+- jabber works again
+
+* Sun Jan 26 2003 08:30 GMT [philip]	0.2.1-58
+- src/sound.h
+forgot to commit this one.  gchar -> char
+
+* Sun Jan 26 2003 06:15 GMT [philip]	0.2.1-57
+- modules/importers/msn_smileys.c
+- modules/importers/smileysc.c
+- modules/importers/yahoo_smileys.c
+GList -> LList, and some static stuff
+
+* Sun Jan 26 2003 06:03 GMT [philip]	0.2.1-56
+- src/globals.h
+removed glib.h, gchar -> char, gint -> int
+- src/input_list.c
+doesn't require intl.h
+- mem_util.h
+don't redeclare snprintf, strdup, etc..., make TRUE/FALSE an enum
+- value_pair.c
+Cosmetics, remove glib (no longer required)
+
+* Sun Jan 26 2003 01:31:26 GMT [andy]	0.2.1-55
+- modules/jabber/jabber.c
+Fix my overzealous static mods [Mea Culpa]
+
+* Sat Jan 25 2003 13:12 GMT [philip]	0.2.1-54
+- modules/aim-toc/aim-toc.c
+- modules/icq/icq.c
+use eb_set_active_menu_status to set the menu status
+
+* Sat Jan 25 2003 10:20 GMT [colin]	0.2.1-53
+- modules/workwizu
+GList -> LList
+
+* Sat Jan 25 2003 00:08 GMT [colin]	0.2.1-52
+- src/chat_window.c
+Put back status changes because people want it :)
+- modules/msn2/msn.C
+Log status changes
+
+* Fri Jan 24 2003 20:35 GMT [philip]	0.2.1-51
+- src/value_pair.[ch], src/input_list.[ch]
+and everything that depends on these
+Changed GList to LList
+
+* Fri Jan 24 2003 16:58 GMT [colin]	0.2.1-50
+- src/prefs.c
+Reword some labels, fix fontsize entry size
+
+* Fri Jan 24 2003 16:37 GMT [colin]	0.2.1-49
+- src/smileys.c
+Fix (i hope) smileys containing <>
+
+* Fri Jan 24 2003 15:45 GMT [colin]	0.2.1-48
+- src/chat_window.c
+Don't log status changes - useless & ugly
+
+* Fri Jan 24 2003 15:45 GMT [andy]	0.2.1-47
+- modules/utility/autotrans.c
+- modules/utility/middle.c
+- modules/utility/notes.c
+- modules/utility/rainbow.c
+Yet more include cleanups and addition of statics
+
+* Fri Jan 24 2003 14:34 GMT [colin]	0.2.1-46
+- src/llist.c
+Another segfault less :)
+
+* Fri Jan 24 2003 14:29 GMT [colin]	0.2.1-45
+- src/externs.h 
+- modules/utility/autotrans.c middle.c rainbow.c
+Use LList instead of GList
+
+* Fri Jan 24 2003 13:57 GMT [colin]	0.2.1-44
+- src/llist.c
+Fix segfaults
+
+* Fri Jan 24 2003 13:30 GMT [philip]	0.2.1-43
+- modules/yahoo2/libyahoo2
+added support for reading yahoo addressbook
+- src/llist.[ch]
+fixed prepend
+- src/almost all files
+- modules/aim-toc, modules/msn2, modules/yahoo2, modules/importers
+changed GList to LList in most places.
+Only places left are:
+- any place that sends a GList to a combo box
+- value_pair.[ch]
+- service.[ch]
+
+* Fri Jan 24 2003 11:45 GMT [andy]	0.2.1-42
+- modules/aim-toc/aim-toc.c
+- modules/icq/icq.c
+- modules/irc/irc.c
+- modules/jabber/jabber.c
+- src/about.c
+- src/edit_account_window.c
+- src/edit_contact_window.c
+- src/info_window.c
+- src/info_window.h
+Yet more include cleanups and addition of statics
+Changed name of clear_info_window() to eb_info_window_clear() for consistency
+
+* Fri Jan 24 2003 11:05 GMT [colin]	0.2.1-41
+- src/crash.c
+Avoid useless bugreports (we really have to fix this
+automake problems :()
+
+* Fri Jan 24 2003 10:33 GMT [colin]	0.2.1-40
+- src/log_window.[ch] src/chat_window.c 
+Fix bug: font ignoring prefs weren't ignored on
+Log view nor on conv. restoring
+- src/extgtktext.c
+add a missing \n
+- src/edit_account_window.c src/edit_contact_window.c
+Cosmetics
+
+* Fri Jan 24 2003 10:10 GMT [philip]	0.2.1-39
+- libproxy/libproxy.h - doesn't need config.h
+
+* Fri Jan 24 2003 10:10 GMT [philip]	0.2.1-38
+- src/llist.[ch]
+Added l_list_prepend, l_list_concat, l_list_insert_sorted and l_list_find
+
+* Fri Jan 24 2003 08:00 GMT [colin]	0.2.1-37
+- src/sound.c
+Cosmetics
+
+* Fri Jan 24 2003 08:00 GMT [colin]	0.2.1-36
+- src/util.[ch]
+Cosmetics
+
+* Fri Jan 24 2003 07:05 GMT [colin]	0.2.1-35
+- src/chat_window.c src/info_window.c
+more cosmetics
+
+* Fri Jan 24 2003 05:45 GMT [philip]	0.2.1-34
+- src/browser.c
+GdkWindow * -> void * if not in Win32.
+Also, browser.c doesn't use gtk - at all.
+- ChangeLog
+Hmmm, looks like Colin's logging in French time ;)
+
+* Fri Jan 24 2003 05:23 GMT [colin]	0.2.1-33
+- src/main.c src/edit_local_accounts.c src/status.c
+- src/util.[ch] src/service.[ch]
+Cosmetics
+
+* Fri Jan 24 2003 04:36 GMT [colin]	0.2.1-32
+- src/editcontacts.c ** REMOVED **
+- src/edit_local_accounts.c ** NEW FILE **
+Use a better name for this file
+
+* Fri Jan 24 2003 00:27:09 GMT [andy]	0.2.1-31
+- src/account.c
+- src/chat_room.c
+- src/chat_window.c
+- src/dialog.c
+- src/main.c
+- src/nomodule.c
+- src/smileys.c
+- src/status.c
+More include cleanups and addition of statics
+
+* Thu Jan 23 2003 23:10 GMT [andy]	0.2.1-30
+- src/browser.c
+- src/browser.h
+- src/crash.c
+- src/gtk_eb_html.c
+- src/help_menu.c
+- modules/msn2/msn.C
+- modules/yahoo2/yahoo.c
+Remove open_url_nw [it was the same as open_url()]
+Cleanup browser.c
+
+* Thu Jan 23 2003 07:45 GMT [philip]	0.2.1-29
+- modules/yahoo2/yahoo.c
+service_callbacks is malloc'ed again.  it is freed in unload_module
+
+* Thu Jan 23 2003 06:30 GMT [philip]	0.2.1-28
+- src/dialog.[ch]
+added do_message_dialog - which can be set as modal or modeless
+- modules/aim, icq, importers, utility, sms, yahoo2
+changed some do_error_dialog calls to do_message_dialog call - modeless
+- src/account.c
+changed g_snprintf to snprintf
+
+* Thu Jan 23 2003 06:15 GMT [philip]	0.2.1-27
+- modules/yahoo2/yahooc.
+No more NULL you've got new mail messages
+
+* Thu Jan 23 2003 06:05 GMT [philip]	0.2.1-26
+- added llist.[ch] and mem_util.[ch]
+
+* Thu Jan 23 2003 05:10 GMT [philip]	0.2.1-25
+- modules/yahoo2/yahoo.c
+Made all local functions and variables static
+struct service_callbacks is static - so that it is automatically
+deallocated when the program terminates
+
+* Wed Jan 22 2003 07:23 GMT [philip]	0.2.1-24
+- src/prefs.c
+Added a browse button for alternate browser.
+We need the same for dictionary.
+
+* Tue Jan 21 2003 20:03 GMT [colin]	0.2.1-23
+- src/prefs.c
+HTML debugging (stable) goes to hidden prefs
+
+* Tue Jan 21 2003 14:57 GMT [philip]	0.2.1-22
+Yahoo group rename enabled
+
+* Tue Jan 21 2003 13:04 GMT [colin]	0.2.1-21
+- src/util.[ch] src/edit_group_window.c
+rename_group function
+rename_group and add_group call modules functions
+if available
+- src/service.h
+add_group and rename_group callbacks 
+- modules/msn2
+implement group add and group rename
+
+* Tue Jan 21 2003 12:09 GMT [colin]	0.2.1-20
+- src/util.c
+Delete contact if it has no more accounts
+
+* Tue Jan 21 2003 11:45 GMT [philip]	0.2.1-19
+- modules/yahoo2/*
+Implemented group rename, now just wait till the core catches up
+
+* Tue Jan 21 2003 11:00 GMT [philip]	0.2.1-18
+- modules/yahoo2/libyahoo2/libyahoo2.c
+Fixed utf8 encoding for sending offline messages
+
+* Tue Jan 21 2003 10:26 GMT [colin]	0.2.1-17
+- src/chat_window.c
+Cleaner way to go to end of text (conv restore)
+
+* Tue Jan 21 2003 10:02 GMT [colin]	0.2.1-16
+-src/status.c
+Forgot g_free()
+
+* Tue Jan 21 2003 09:19 GMT [colin]	0.2.1-15
+- src/status.c
+Update window title when people log(in|off)
+
+* Tue Jan 21 2003 05:25 GMT [philip]	0.2.1-14
+- src/chat_room.c
+- src/chat_window.c
+- src/smileys.[ch]
+show_smileys_cb doesn't need a GtkWidget
+- src/smileys.[ch]
+More static functions
+- src/dialog.h
+- src/util.h
+Comment the fact that #include in sound.c needs to be fixed
+
+* Tue Jan 21 2003 01:08 GMT [andy]	0.2.1-13
+- src/add_contact_window.c
+- src/extgtktext.c
+- src/plugin.c
+- src/plugin.h
+- src/sound.c
+- src/trigger.c
+More static functions and header cleanup
+
+* Mon Jan 20 2003 20:10 GMT [philip]	0.2.1-12
+- src/account.c
+- src/add_contact_window.[ch]
+- src/chat_room.c
+- src/chat_window.[ch]
+- src/log_window.h
+- src/message_parse.c
+- src/nomodule.c
+- src/sound.[ch]
+- src/util.c
+More clean ups to add to andy's and code formatting
+- src/dialog.[ch]
+Moved types from dialog.h to dialog.c - they are only used in there
+- src/gtk_eb_html.h
+Doesn't really use gtk
+- src/status.[ch]
+Removed gtk dependency
+
+* Mon Jan 20 2003 18:04 GMT [andy]	0.2.1-11
+- src/add_contact_window.h
+- src/chat_room.h
+- src/editcontacts.c
+- src/service.h
+- src/util.h
+Re-clean some un-cleaned header cleanup :-)
+- src/away_window.h
+- src/browser.h
+- src/console_session.h
+- src/gtk_eb_html.h
+Added ifndef guards
+- src/message_parse.c
+- src/prefs.c
+- src/util.c
+Made some functions and vars static
+
+* Mon Jan 20 2003 14:11 GMT [colin]	0.2.1-10
+- modules/msn2/msn.C
+Group names too are Utf8 encoded...
+
+* Mon Jan 20 2003 14:11 GMT [colin]	0.2.1-9
+- src/service.h sr/util.c
+Add a del_group() callback (deletes a group server-side)
+- modules/msn2/msn.C
+implement group deletion
+
+* Mon Jan 20 2003 14:04 GMT [andy]	0.2.1-8
+- src/prefs.c
+Cleanup the plugin prefs window
+
+* Mon Jan 20 2003 12:26 GMT [philip]	0.2.1-7
+- src/triggerdecls.h is back in trigger.h.  sorry andy, I should have left it
+alone the first time.
+- removed refs to triggerdecls.h from all files that used it
+- src/away_window.h 
+remove all gtk references.
+remove prototypes for show_away and show_away2 and struct _away - they only 
+used in away_window.c
+replace GtkWidget * away_message with gchar * get_away_message() - and patch
+all files that use it (chat_window.c, aim-toc.c)
+
+* Mon Jan 20 2003 09:59 GMT [colin]	0.2.1-6
+- src/account.[ch] src/util.c 
+Add deletion support to offline contact mgmt
+Add connecting flag to eb_local_account
+- modules/msn2/msn.C modules/yahoo2/yahoo.c
+Use connecting flag
+
+* Mon Jan 20 2003 08:00 GMT [philip]	0.2.1-5
+- Fixed the spec file - file paths are correct and gdb added to requires in 
+case the rpm is compiled with --enable-crash-dialog
+
+* Mon Jan 20 2003 06:52 GMT [philip]	0.2.1-5
+- Changed ChangeLog to use GMT only
+
+* Sun Jan 19 2003 23:12 GMT [colin]	0.2.1-5
+- src/main.c
+Read prefs before loading modules (or their settings won't be set)
+
+* Sun Jan 19 2003 13:57 GMT [philip]	0.2.1-4
+- Cleaned up Makefiles to use AM_CFLAGS instead of CFLAGS
+ok, I didn't really do all this in 4 minutes, I did both changes yesterday
+- uh, forgot to mention.  added #include <string.h> to plugin_api.c
+
+* Sun Jan 19 2003 13:53 GMT [philip]	0.2.1-3
+- sync'ed yahoo with libyahoo2
+- sanitised the version numbers... pre comes before, not after a release
+
+* Sun Jan 19 2003 10:50 GMT [colin]	0.2.1pre2
+- src/status.c src/util.c src/util.h
+First version of offline contact management cacheing
+
+* Sun Jan 19 2003 10:50 GMT [colin]	0.2.1pre1
+- modules/msn2/msn.C modules/msn2/libmsn2/msn_core.C
+Set correct group when adding user
+Hide "already on list" error because we don't care
+
+* Sun Jan 19 2003 01:49 GMT [colin]	0.2.1
+- src/about.c src/crash.c src/main.c src/status.c
+Remove - in version strings
+Release 0.2.1
+
+* Fri Jan 18 2003 11:40 GMT [colin]	0.2-125
+- src/util.c src/util.h src/add_contact_window.c
+Forbid contact & account move/add/del when not
+online (avoid messing up server-side lists)
+
+* Fri Jan 18 2003 11:00 GMT [colin]	0.2-124
+- src/crash.c
+Fix a format string error
+- modules/jabber/libxode/xstream.c
+Initialize err
+
+* Fri Jan 18 2003 00:02 GMT [colin]	0.2-123
+- src/Makefile.am
+Put back explicit deps on defaults.h for now
+
+* Fri Jan 17 2003 23:19 GMT [colin]	0.2-122
+- src/main.c
+Reordered loading things so we can properly init
+default prefs when they don't exist
+- src/prefs.c
+If prefs don't exist, write them
+- src/plugin_api.c
+Don't add twice the same thing in profile menu
+
+* Fri Jan 17 2003 20:00 GMT [colin]	0.2-121
+- src/prefs.c src/gtk_eb_html.c
+Sorted out fonts strangenesses and bugs (thanks 
+to Philip!)
+
+* Fri Jan 17 2003 19:00 GMT [colin]	0.2-120
+- modules/msn2/libmsn2/msn_core.C
+dump no-content-type packets
+
+* Fri Jan 17 2003 19:00 GMT [colin]	0.2-119
+- src/service.c
+Fix crash with log renaming when new log existed
+and not old one
+
+* Fri Jan 17 2003 16:47 GMT [colin]	0.2-118
+- configure.in
+Enable crash dialog by default
+
+* Fri Jan 17 2003 15:43 GMT [colin]	0.2-117
+- modules/msn2/msn.C
+More utf8 decoding in friendlynames
+Less leaks
+
+* Fri Jan 17 2003 15:21 GMT [philip]	0.2-116
+- commented out workwizu from configure.in
+
+* Fri Jan 17 2003 15:09 GMT [colin]	0.2-116
+- modules/msn2/msn.C
+Friendlynames are utf8 encoded
+
+* Fri Jan 17 2003 15:01 GMT [philip]	0.2-115
+- added missing to .cvsignore
+- removed explicit dependency on defaults.h
+
+* Thu Jan 16 2003 21:38 GMT [colin]	0.2-114
+- src/crash.c
+remove useless filename and its g_free()
+- src/status.c
+put back the web site in help menu
+
+* Thu Jan 16 2003 20:21 GMT [philip]	0.2-113
+- Changed ChangeLog format
+
+* Thu Jan 16 2003 19:58 GMT [philip]	0.2-113
+- configure.in
+changed version number scheme.  after hyphen goes into RELEASE
+
+* Thu Jan 16 2003 19:32 GMT [philip]	0.2-112
+- Makefile.am src/Makefile.am configure.in
+spec file is generated
+desktop files are placed in the correct directories
+- ayttm.spec removed
+- ayttm.spec.in added
+- help_menu.c main.c fixed the url
+- crash.c
+gchar * filename;
+g_free(filename);
+where's the alloc?
+
+* Thu Jan 16 2003 17:22 GMT [colin]  0.2-111
+- src/account.c
+src/add_contact_window.h
+src/chat_window.c
+src/log_window.c
+src/service.c
+src/service.h
+src/util.c
+src/util.h
+Better log handling
+- filename is now Group-Nick
+- old logs will get renamed to the new format
+- "concatenation" of two contacts within a single
+one will merge the two logs (without messing 
+with dates, though)
+
+* Thu Jan 16 2003 14:31 GMT [colin]  0.2-110
+- src/chat_room.c
+Uh, 0.2-107 was actually worse than before
+
+* Thu Jan 16 2003 14:00 GMT [colin]  0.2-109
+- modules/msn2/msn.C
+Don't launch connchecker too soon
+
+* Thu Jan 16 2003 13:57 GMT [colin]  0.2-108
+- src/prefs.c
+Fix segfault when modules' prefs window
+was closed using WM's X button
+
+* Thu Jan 16 2003 12:14 GMT [colin]  0.2-107
+- src/chat_room.c
+src/util.c
+	Preventive fix(?) for a strange segfault
+
+* Thu Jan 16 2003 13:02 GMT [philip]	0.2-106
+- many files
+changed yattm to ayttm
+- sounds/, Makefile.am
+install sounds in $(pkgdatadir)/sounds instead of
+$(datadir)/sounds/ayttm
+
+* Thu Jan 16 2003 12:14 GMT [colin]  0.2-105
+- modules/aim-toc/yahoo.c ** REMOVED **
+Useless file
+
+* Thu Jan 16 2003 10:12 GMT [colin]	0.2-104
+- modules/workwizu/workwizu.c
+Fix an include
+
+* Thu Jan 16 2003 09:44 GMT [philip]	0.2-103
+- almost everything
+code cleanups.  moved some headers around, removed gtk 
+dependencies in many places.
+changed gtk_timeout_* and gdk_input_* to eb_timeout_* and
+eb_input_* - everywhere.
+hmmm... that's about all I can think of... see the diff
+for full changes
+
+* Thu Jan 16 2003 04:51 GMT [philip]	0.2-102
+- modules/yahoo2/yahoo.c
+Default path for downloaded files is ~
+- src/file_select.c
+Remove typecast from void *
+
+* Wed Jan 15 2003 17:55 GMT (GMT+5:30) [philip] 0.2-101
+- modules/yahoo2/yahoo.c
+FREE() is only defined if not already
+
+* Wed Jan 15 2003 17:12 GMT [colin]	0.2-100
+- modules/msn2/msn.C
+Fix contact moving between groups
+when group didn't exist on server
+
+* Wed Jan 15 2003 17:12 GMT [colin]	0.2-99
+- src/chat_room.c
+Better fix for last bug
+
+* Wed Jan 15 2003 17:12 GMT [colin]	0.2-98
+- src/chat_room.c
+Remove leaving people from the typing
+persons list
+
+* Wed Jan 15 2003 17:06 GMT [colin]	0.2-97
+- src/chat_room.c
+Popup chat rooms like chat windows,
+according to the pref
+
+* Wed Jan 15 2003 14:02 GMT [colin]	0.2-96
+- src/util.[ch]
+Added rename_contact() function
+- src/edit_account_window.c
+Use this function
+- modules/msn2/msn.C
+Rename contacts to friendlyname when 
+their name equals their account name
+
+* Wed Jan 15 2003 13:10 GMT [colin]	0.2-95
+- modules/msn2
+Update client-side friend's groups
+when accounts do not exist
+
+* Wed Jan 15 2003 12:48 GMT [philip]	0.2-94
+- modules/yahoo2
+updates to yahoo to handle proper utf-8 on incoming and outgoing
+messages
+
+* Wed Jan 15 2003 [colin]	0.2-93
+- modules/msn2
+Update server-side friends' list
+when moving a contact between groups
+
+* Wed Jan 15 2003 [philip]	0.2-92
+- src/browser.c
+uh... one doesn't free an array, also, free what you malloc,
+g_free what you g_new.
+
+* Wed Jan 15 2003 [colin]	0.2-91
+- modules/msn2/msn.C
+don't check connection by default
+
+* Wed Jan 15 2003 [colin]	0.2-90
+- modules/msn2/libmsn2/msn_bittybits.C
+remove alarm() hack - it segfaults
+
+* Tue Jan 14 2003 [colin]	0.2-89
+- src/about.c
+src/add_contact_window.c
+src/away_window.c
+src/console_session.c
+src/contact_actions.c
+src/dialog.c
+src/edit_account_window.c
+src/edit_contact_window.c
+src/edit_group_window.c
+src/editcontacts.c
+src/file_select.c
+src/info_window.c
+src/log_window.c
+src/nomodule.c
+src/progress_window.c
+src/status.c
+src/trigger.c
+Remove config.h where it's useless
+
+* Tue Jan 14 2003 [colin]	0.2-88
+- modules/yahoo2/yahoo.c
+Had the utf8 code been tested... Not sure ;)
+
+* Tue Jan 14 2003 [colin]	0.2-87
+- [whole bunch of files]
+s/eb_parse_incomming_message/eb_parse_incoming_message
+
+* Tue Jan 14 2003 [colin]	0.2-86
+- src/extgtktext.c
+Check param, it'll avoid segfaults
+
+* Tue Jan 14 2003 [colin]	0.2-85
+- src/log_window.c
+	Fixed another segfault/bug
+
+* Tue Jan 14 2003 [philip]	0.2-84
+- modules/yahoo2/yahoo.c
+modules/yahoo2/libyahoo2/yahoo_httplib.c
+merged in some changes from everybuddy and changed
+../../../config.h to <config.h>
+
+* Tue Jan 14 2003 [philip]	0.2-83
+- modules/yahoo2/yahoo.c
+changed hack for accents to proper UTF-8 decoding
+thanks to Alan Humpherys
+
+* Mon Jan 13 2003 [colin]	0.2-82
+- modules/msn2/libmsn2/msn_core.C
+Remove an error popup which is not
+necessarily an error
+
+* Mon Jan 13 2003 [colin]	0.2-81
+- modules/msn2
+Try to fight buffer overflows and read()
+timeouts
+
+* Mon Jan 13 2003 [colin]	0.2-80
+- src/browser.c
+Better escaping of the url
+
+* Mon Jan 13 2003 [colin]	0.2-79
+- src/browser.c
+Clean old buggy netscape code
+Mozilla is now the default browser
+- modules/msn2/msn.C
+Forgotten commit
+
+* Mon Jan 13 2003 [colin]	0.2-78
+- src/prefs.c
+Reload prefs after validating
+src/value_pair.c
+	Remove existing key before readding it
+
+* Mon Jan 13 2003 [colin]	0.2-77
+- src/crash.[ch] ** NEW **
+configure.in
+src/main.c
+src/Makefile.am
+	Add crash handler (./configure --enable-crash-handler)
+
+* Mon Jan 13 2003 [colin]	0.2-76
+- src/chat_room.c
+Always add chat rooms to the static GList
+(fixes typing status in CR opened by others)
+
+* Mon Jan 13 2003 [philip]	0.2-75
+- modules/*/Makefile.am
+added -avoid-version to prevent making so.0, so.0.0 and so.0.0.0
+cd modules; make uninstall clean install
+
+* Mon Jan 13 2003 [philip]	0.2-74
+- modules/yahoo2/yahoo.c
+hack for accented characters
+- src/about.c
+added my name
+
+* Mon Jan 13 2003 [colin]	0.2-73
+- modules/workwizu/workwizu.c
+Check NULLs once again
+
+* Mon Jan 13 2003 [colin]	0.2-72
+- src/chat_room.c
+Conversation timestamps & service color
+
+* Mon Jan 13 2003 [colin]	0.2-71
+- modules/workwizu/workwizu.c
+Old clients compatibility
+
+* Mon Jan 13 2003 [colin]	0.2-70
+- src/chat_room.c
+src/chat_window.c
+src/smileys.c
+	Check NULL buffers 
+
+* Mon Jan 13 2003 [colin]	0.2-69
+- modules/msn2/libmsn2/msn_bittybits.C
+Fix a segfault at reconnection
+
+* Mon Jan 13 2003 [colin]	0.2-68
+- modules/workwizu/workwizu.[ch]
+Module fixing
+- src/chat_room.c
+Update title after having set service_id
+Update title with * when something happens
+
+* Mon Jan 13 2003 [colin]	0.2-67
+- modules/workwizu/workwizu.c
+remove printf()s
+- modules/msn2/msn.C
+Make the connection checker less
+sensitive
+
+* Mon Jan 13 2003 [colin]	0.2-66
+- src/util.[ch]
+Add find_chatrooms_with_remote_account()
+- src/chat_room.[ch]
+Display typing status
+- src/message_parse.c
+Display typing status in chatrooms
+
+* Mon Jan 13 2003 [colin]	0.2-65
+- src/chat_room.[ch]
+src/service.h
+modules/msn2/msn.C
+modules/yahoo2/yahoo.c
+modules/workwizu/workwizu.c
+	Send typing status in chatrooms
+
+* Mon Jan 13 2003 [colin]	0.2-64
+- [lots of files]
+s/perfered/preferred/
+
+* Sun Jan 12 2003 [colin]	0.2-63
+- src/chat_window.c
+Improvements to conversation restoring
+(freeze/thaw, add ended if not found)
+
+* Sun Jan 12 2003 [colin]	0.2-62
+- src/log_window.c
+src/chat_window.[ch]
+po/fr.po
+	Fix logging
+
+* Sun Jan 12 2003 [colin]	0.2-61
+- modules/msn/msn.C
+src/prefs.h
+	Fix msn relocations errors
+
+* Sun Jan 12 2003 [colin]	0.2-60
+- src/chat_room.c
+Forgot things for the chatroom names ;)
+
+* Sun Jan 12 2003 [colin]	0.2-59
+- src/chat_room.[ch]
+modules/msn2/msn.C
+modules/workwizu/workwizu.c
+	Nicer chatroom names
+
+* Sun Jan 12 2003 [colin]	0.2-58
+- modules/msn2/libmsn/msn_core.C
+Check FIXMEs
+
+* Sun Jan 12 2003 [colin]	0.2-57
+- modules/icq/libicq/config.h ** REMOVED **
+modules/icq/libicq/icqconfig.h ** NEW **
+modules/icq/libicq/config.c
+modules/icq/libicq/libicq.c
+modules/icq/libicq/Makefile.am
+	Change config.h to icqconfig.h
+
+* Sat Jan 11 2003 [andy]	0.2-56
+- [19 files]
+Fixes for -Wall [mainly includes]
+
+* Sat Jan 11 2003 [andy]	0.2-55
+- modules/icq/icq.c
+modules/msn2/msn.C
+modules/workwizu/workwizu.c
+modules/yahoo2/yahoo.c
+src/browser.c
+src/chat_room.c
+src/chat_window.c
+src/globals.h
+src/gtk_eb_html.c
+src/main.c
+src/prefs.c
+src/service.c
+src/smileys.c
+src/smileys.h
+src/status.c
+Use pref functions to access prefs
+
+* Fri Jan 10 2003 [colin]	0.2-54
+- src/chat_room.c
+src/chat_window.c
+src/prefs.c
+po/fr.po
+	s/dictionnary/dictionary
+Use spell checker Colin :)
+
+* Fri Jan 10 2003 [colin]	0.2-53
+- po/fr.po
+Update
+- src/gtkspell.c
+Display error popup
+
+* Fri Jan 10 2003 [colin]	0.2-52
+- src/gtkspell.c
+Translate messages
+- src/prefs.c
+src/chat_window.c
+src/chat_root.c
+	Specify ispell dictionnary
+- po/fr.po
+po/POTFILES.in
+Add gtkspell.c
+
+* Fri Jan 10 2003 [colin]	0.2-51
+- po/fr.po
+Update translation
+
+* Fri Jan 10 2003 [colin]	0.2-50
+- src/status.c
+Select corresponding list item when right-clicking in the contact-list
+
+* Fri Jan 10 2003 [colin]	0.2-49
+- src/dialog.c
+Change microscopic OK buttons to bigger ones
+
+* Fri Jan 10 2003 [colin]	0.2-48
+- src/status.c
+src/dialog.[ch]
+	Changed more menus with "..." and separators
+
+
+* Fri Jan 10 2003 [andy]	0.2-47
+- src/chat_room.c
+src/chat_window.c
+src/globals.h
+src/prefs.c
+Use pref functions to access prefs
+src/sound.c
+Use pref functions to access prefs
+Format, header, and static cleanups
+src/statuc.c
+Use pref functions to access prefs
+Change some menus to indicate 'more to come' [i.e. add ...]
+
+* Fri Jan 10 2003 [colin]	0.2-46
+- src/chat_room.c
+src/chat_room.h
+Multiline edit
+
+* Fri Jan 10 2003 [colin]	0.2-45
+- src/about.c
+src/add_contact_window.c
+src/away_window.c
+src/chat_room.c
+src/chat_window.c
+src/dialog.c
+src/edit_group_window.c
+src/editcontacts.c
+Replace buggy gtk_window_set_focus() calls with better gtk_widget_grab_focus()
+(Better focus handling)
+
+* Fri Jan 10 2003 [colin]	0.2-44
+- modules/msn2/msn.C
+Fix segfaults in chatroom
+
+* Thu Jan 09 2003 [colin]	0.2-43
+- modules/workwizu/workwizu.c
+Fix type overflow
+
+* Thu Jan 09 2003 [colin]	0.2-42
+- src/chat_window.c
+Close smiley window when closing a tab
+
+* Thu Jan 09 2003 [yann]	0.2-41
+- Add 2 french translations
+
+* Thu Jan 09 2003 [colin]	0.2-40
+- modules/msn2/libmsn2/msn_core.C
+modules/msn2/libmsn2/msn_interface.[Ch]
+modules/msn2/msn.C
+Connection checking by setting friendlyname is not compatible with 
+unverified email addresses
+
+* Thu Jan 09 2003 [colin]	0.2-39
+- src/about.c
+src/away_window.c
+src/chat_room.c
+src/dialog.c
+src/edit_group_window.c
+src/editcontacts.c
+src/util.c
+Try to set default focuses a bit better
+
+* Thu Jan 09 2003 [colin]	0.2-38
+- src/editcontacts.c
+Yet another try to stabilize these four lines of code :-/
+- src/chat_room.c
+Be sure not to add twice the same person to the chat-room
+
+
+* Thu Jan 09 2003 [colin]	0.2-37
+- src/editcontacts.c
+Another segfault fix
+
+* Thu Jan 09 2003 [colin]	0.2-36
+- src/chat_room.c
+Init name if not set
+Show only online protocols
+
+* Thu Jan 09 2003 [colin]	0.2-35
+- "cleaning 2"
+
+- src/about.c
+remove unused var
+- main.c
+add missing include
+- src/chat_room.[ch]
+- src/chat_window.[ch]
+remove smiley selector...
+- src/smileys.[ch]
+... factorize it
+
+* Thu Jan 09 2003 [colin]	0.2-34
+- "cleaning"
+
+- src/util.c
+modules/aim-oscar/aim-oscar.c
+modules/aim-toc/aim-toc.c
+modules/icq-toc/icq-toc.c
+modules/yahoo2/yahoo.c	  
+Segfault prevention
+- modules/workwizu/workwizu.c
+More debug
+- modules/workwizu/workwizu.h
+Missing prototype
+
+
+* Wed Jan 08 2003 [colin]	0.2-33
+- src/chat_room.[ch]
+Smiley selector
+
+* Wed Jan 08 2003 [colin]	0.2-32
+- po/fr.po
+Update translation
+
+* Wed Jan 08 2003 [andy]	0.2-31
+- src/about.[ch]
+Separate Yattm & Everybuddy developer lists
+
+* Wed Jan 08 2003 [colin]	0.2-30
+- modules/workwizu/workwizu.[ch]
+Chatroom support, fixes
+
+* Wed Jan 08 2003 [colin]	0.2-29
+- modules/msn2/msn.C
+Remove buggy smiley
+
+* Wed Jan 08 2003 [colin]	0.2-28
+- src/chat_room.c
+Display contact nickname in
+"joined chat" line
+
+* Wed Jan 08 2003 [colin]	0.2-27
+- pixmaps/msn/moon.xpm
+pixmaps/msn/rainbow.xpm
+pixmaps/msn/devil.xpm
+pixmaps/msn/photo.xpm
+Forgot these ones
+- src/smileys.c
+Add them
+
+* Wed Jan 08 2003 [colin]	0.2-26
+- pixmaps/msn/brheart.xpm
+pixmaps/msn/clock.xpm
+pixmaps/msn/deadflower.xpm
+pixmaps/msn/film.xpm
+pixmaps/msn/flower.xpm
+pixmaps/msn/handcuffs.xpm
+pixmaps/msn/heart.xpm
+The last missing MSN smileys
+- src/smileys.c
+These smileys added
+
+* Wed Jan 08 2003 [colin]	0.2-25
+- src/smileys.c
+Include Yann's smileys
+
+* Wed Jan 08 2003 [yann]	0.2-24
+- pixmaps/msn/angel.xpm ** NEW **
+pixmaps/msn/bat.xpm ** NEW **
+pixmaps/msn/neutral.xpm ** NEW **
+More MSN smileys
+
+* Wed Jan 08 2003 [colin]	0.2-23
+- pixmaps/msn/boy.xpm ** NEW **
+pixmaps/msn/bulb.xpm ** NEW **
+pixmaps/msn/cake.xpm ** NEW **
+pixmaps/msn/cat.xpm ** NEW **
+pixmaps/msn/coffee.xpm ** NEW **
+pixmaps/msn/dog.xpm ** NEW **
+pixmaps/msn/email.xpm ** NEW **
+pixmaps/msn/gift.xpm ** NEW **
+pixmaps/msn/girl.xpm ** NEW **
+pixmaps/msn/kiss.xpm ** NEW **
+pixmaps/msn/phone.xpm ** NEW **
+pixmaps/msn/question.xpm ** NEW **
+pixmaps/msn/runback.xpm ** NEW **
+pixmaps/msn/run.xpm ** NEW **
+pixmaps/msn/star.xpm ** NEW **
+pixmaps/msn/sun.xpm ** NEW **
+pixmaps/msn/thumbdown.xpm ** NEW **
+pixmaps/msn/thumbup.xpm ** NEW **
+Add some missing (not microsoft-copyrighted) 
+MSN smileys
+- src/smileys.c
+Load these smileys
+- modules/msn2/msn.C
+Fix worried and confused smileys
+
+* Wed Jan 08 2003 [andy]	0.2-22
+- src/account_parser.y
+src/account_scanner.l
+src/away_window.c
+src/chat_room.h
+src/chat_window.h
+src/contact_actions.c
+src/contact_parser.y
+src/contact_scanner.l
+src/dialog.c
+src/gtk_eb_html.c
+src/info_window.c
+src/info_window.h
+src/input_list.c
+src/message_parse.h
+src/nomodule.c
+src/nomodule.h
+src/status.h
+Yet more header cleanups
+Some minor code cleanups
+
+* Tue Jan 07 2003 [colin]	0.2-21
+- modules/workwizu/workwizu.c
+Fix status updates
+Add prefs (server & co)
+
+* Tue Jan 07 2003 [colin]	0.2-20
+- modules/workwizu ** NEW **
+Add workwizu module
+- configure.in 
+Add workwizu module
+
+* Tue Jan 07 2003 [colin]	0.2-19
+- modules/msn2/msn.C
+Prevent a buffer overflow
+
+* Mon Jan 06 2003 [colin]	0.2-18
+- AUTHORS src/about.c 
+Add Andy to AUTHORS 
+
+* Mon Jan 06 2003 [colin]	0.2-17
+- src/editcontacts.c
+Fix segfault when last account is modified
+
+* Mon Jan 06 2003 [colin]	0.2-16
+- src/dialog.c Show error dialogs near mouse
+- modules/msn2/libmsn2/msn_core.C Show an error when the server is in BSOD mode
+
+* Mon Jan 06 2003 [colin]	0.2-15
+- src/add_contact_window.c
+Check account validity when adding a friend
+Thanks to Yann <yann@yannos.com> for reporting this ;)
+
+* Sun Jan 05 2003 [colin]	0.2-14
+- modules/msn2/libmsn2/msn_core.C
+Try to prevent a segfault happening on x86
+
+* Sun Jan 05 2003 [andy]	0.2-13
+- src/externs.h ** REMOVED
+src/triggerdecls.h ** REMOVED [merged into trigger.h]
+src/Makefile.am
+src/about.c
+src/about.h
+src/account.c
+src/contact_parser.y
+src/contactlist.c
+src/gtk_globals.h
+src/main.c
+src/status.c
+src/trigger.c
+src/trigger.h
+Merged triggerdecls.h into trigger.h
+More header cleanup stuff
+
+* Sun Jan 05 2003 [colin]	0.2-12
+- modules/msn2/msn.C modules/msn2/libmsn2/msn_core.C
+Better handling of the BL (block list)
+
+* Sun Jan 05 2003 [colin]	0.2-11
+- modules/msn2/msn.C
+Re-add existing contacts to FL and AL enabled MSN lists now synced both 
+ways (login change or new install)
+
+* Sat Jan 04 2003 [colin]	0.2-10
+- src/add_contact_window.[ch] new get_all_accounts(int serviceid) function
+- modules/msn2/msn.C modules/msn2/msn_core.[Ch]
+Everything ready to automatically re-add existing contacts to FL and AL if 
+necessary
+- disabled for now but not for long
+
+* Sat Jan 04 2003 [andy]	0.2-9
+- modules/msn2/1 ** REMOVED [!]
+src/add_unknown_account.c ** REMOVED
+src/netscape_remote.c ** REMOVED
+src/netscape_remote.h ** REMOVED
+src/contact-update.pl ** REMOVED
+src/update.pl ** REMOVED
+po/POTFILES.in
+src/Makefile.am
+src/main.c
+Removed unused files
+Removed unnecessary checks in main for updating old format files
+
+* Sat Jan 04 2003 [colin]	0.2-8
+- modules/msn2/msn.C Try to fix a possible infinite loop
+
+* Sat Jan 04 2003 [colin]	0.2-7
+- src/editcontacts.c Prevent a segfault
+
+* Sat Jan 04 2003 [andy]	0.2-6
+- src/Makefile.am src/dialog.h
++ others for header changes
+Move progress_window header stuff into its own file from dialog.h
+Merge defaults_win32.h into defaults.h [in src/Makefile.am]
+
+* Sat Jan 04 2003 [colin]	0.2-5
+- src/account.c
+src/chat_window.c
+src/contact_parser.y
+src/input_list.c
+src/prefs.c
+src/value_pair.c
+modules/msn2/msn.C
+modules/msn2/libmsn2/msn_bittybits.C
+Valgrinding around (some memleaks plugged)
+
+* Sat Jan 04 2003 [colin]	0.2-4
+- src/prefs.h <lots of files ;-)> Another include patch by Andy
+
+* Thu Jan 02 2003 [colin]	0.2-3
+- src/main.c
+src/status.[ch]
+src/console_session.c
+Use socket to bring existing yattm to front in case of duplicate launch 
+
+* Thu Jan 02 2003 [colin]	0.2-2
+- modules/msn ** REMOVED **
+modules/yahoo ** REMOVED **
+configure.in 
+Remove old msn and yahoo libs
+
+* Thu Jan 02 2003 [colin]	0.2-1
+- src/add_contact_window.c
+src/away_window.c
+src/chat_room.c
+src/contact_actions.c
+src/dialog.c
+src/edit_account_window.c
+src/edit_contact_window.c
+src/edit_group_window.c
+src/editcontacts.c
+src/info_window.c
+src/intl.h
+src/log_window.c
+src/message_parse.c
+src/nomodule.c
+src/progress_window.c
+src/trigger.c
+src/util.c
+Add missing config.h include
+
+* Thu Jan 02 2003 [colin]	0.2
+- 0.2 release
+
+* Thu Jan 02 2003 [colin]	0.1-26
+- src/account.h Added extern "C" {} for msn2
+- modules/msn2/msn.C New contacts now get the friendlyname
+
+* Thu Jan 02 2003 [colin]	0.1-25
+- src/status.c Dnd improvements
+
+* Thu Jan 02 2003 [colin]	0.1-24
+- modules/msn2/msn.C
+Forgot to check the auto reconnection pref before reconnecting
+
+* Wed Jan 01 2003 [colin]	0.1-23
+- modules/msn2/msn.C
+Automatic reconnection option for unexpected drops (unexpected does _not_ 
+include "logged in from elsewhere")
+
+* Wed Jan 01 2003 [colin]	0.1-22
+- libproxy/proxy.c
+src/browser.c
+src/chat_room.c
+src/globals.h
+src/main.c
+src/message_parse.c
+src/status.c
+More include fixes by Andy
+
+* Wed Jan 01 2003 [colin]	0.1-21
+- src/browser.c
+src/chat_window.c
+src/extgtktext.c
+src/globals.h
+src/plugin.c
+src/prefs.c
+src/sound.c
+src/util.c
+Various cleanups & pointer comparison buglet fixes - by Andy again
+
+* Wed Jan 01 2003 [colin]	0.1-20
+- src/chat_window.c Fix bug where contextmenu items had to be double-clicked 
+to be activated.
+
+* Wed Jan 01 2003 [colin]	0.1-19
+- modules/msn2/msn.C Connection check was too strict
+
+* Wed Jan 01 2003 [colin]	0.1-18
+- src/add_contact_window.c
+src/chat_window.c
+src/editcontacts.c
+src/extgtktext.c
+src/log_window.c
+src/plugin.h
+src/prefs.c
+src/status.c
+-Wall warning fixes by Andy, once again :)
+Happy new year everyone! 
+
+* Tue Dec 31 2002 [colin]	0.1-17
+- src/away_window.c
+src/status.c
+src/browser.c
+src/chat_room.c
+src/message_parse.c
+Warning fixes, thanks to Andy for his patch
+
+* Mon Dec 30 2002 [colin]	0.1-16
+- modules/msn2/ Added a connection check to avoid silent disconnections as they 
+happened. Ugly hack ;)
+
+* Mon Dec 30 2002 [colin]	0.1-15
+- src/status.c Translate itemfactory items
+- po/fr.po Update translation
+
+* Mon Dec 30 2002 [colin]	0.1-14
+- modules/yahoo2/libyahoo.c Changed check for u_char definition
+- configure.in Use XFT2
+- INSTALL Update doc
+
+* Sun Dec 29 2002 [colin]	0.1-13
+- src/prefs.c More layout cleaning
+
+* Sun Dec 29 2002 [colin]	0.1-12
+- src/chat_window.c
+Make chat_windows focus when double-clicking an account, based on a patch
+by Lee Leahu <penguin365@dyweni.com>.
+
+* Fri Dec 27 2002 [colin]	0.1-11
+- src/editcontacts.c, src/status.c
+Make accounts editing nicer (no more restart required)
+
+* Fri Dec 27 2002 [colin]	0.1-10
+- src/extgtktext.c
+Fix a segfault in advance_mark_n
+Change a g_warning to eb_debug
+
+* Fri Dec 27 2002 [colin]	0.1-9
+- src/util.c add <smiley> tag to stripped ones
+- src/log_window.c Fix search results selections
+
+* Fri Dec 27 2002 [colin]	0.1-8
+
+- modules/msn2/libmsn2/msn_core.C
+modules/importers/import_gnomeicu.c
+modules/utility/rainbow.c
+modules/utility/autotrans.c
+modules/utility/middle.c
+modules/utility/notes.c
+modules/importers/giles_smiles.c
+modules/importers/smileysc.c
+modules/importers/import_gaim.c
+modules/importers/importicq.c
+modules/importers/importlicq.c
+src/status.c
+src/sound.c
+src/prefs.c
+changed printf to eb_debug
+
+* Fri Dec 27 2002 [colin]	0.1-7
+- src/about.c
+src/add_contact_window.c
+src/away_window.c
+src/chat_room.c
+src/chat_window.c
+src/dialog.c
+src/edit_account_window.c
+src/editcontacts.c
+src/edit_group_window.c
+src/info_window.c
+src/log_window.c
+src/prefs.c
+src/progress_window.c
+src/trigger.c
+Position windows near the mouse
+
+* Fri Dec 27 2002 [colin]	0.1-6
+- modules/yahoo2/yahoo.c, modules/aim-toc/aim.c
+Make "set profile" menu items more easy to understand
+
+* Thu Dec 26 2002 [colin]	0.1-5
+- src/status.c some menu cleanup, save user accels
+
+* Thu Dec 26 2002 [colin]	0.1-4
+- src/message_parse.c change a char[] to char *
+
+* Thu Dec 26 2002 [colin]	0.1-3
+- src/message_parse.c use existing port number
+
+* Thu Dec 26 2002 [colin]	0.1-2
+- src/chat_window.c code deduping
+
+* Mon Dec 23 2002 [colin]	0.1-1
+- real fix for contact auth callback
+- sync yahoo2 bugfixes
+- new icon ;)
+- fix default font sizes for xft
+- add version to main win
+- smiley selection popup position fixed
+- main window width saved
+- "pounce user" trigger renamed "send message" and implemented
+
+* Sat Dec 21 2002 [colin] 	0.1
+Initial fork from everybuddy
+- useless prefs hidden
+- prefs strangenesses fixed
+- some prefs defaults changed (non-intrusiveness by default)
+- smileys and links in the group chats
+- dropped msn and yahoo smileys
+- sounds changed
+- menu refactoring
+- applet support dropped
+- drag and drop contacts between groups
+- a few segfaults fixed
+- msn list management reviewed 

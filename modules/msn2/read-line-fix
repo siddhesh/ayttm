@@ -1,0 +1,2365 @@
+Only in libmsn2: .#msn_bittybits.C.1.6
+Only in libmsn2: .#msn_bittybits.h.1.1.1.1
+Only in libmsn2: .#msn_core.C.1.42
+Only in libmsn2: .#msn_core.C.1.44
+Only in libmsn2: .#msn_core.C.1.45
+Only in libmsn2: .cvsignore
+Only in libmsn2: .deps
+Only in libmsn2: .libs
+Only in libmsn2: APIdoc
+Only in libmsn2: COPYING
+Only in libmsn2: CVS
+Only in libmsn2: Changelog
+Only in libmsn2: INSTRUCTIONS
+Only in libmsn2: Makefile
+diff -ur msn-eb-lite/msn_bittybits.C libmsn2/msn_bittybits.C
+--- msn-eb-lite/msn_bittybits.C	Sun Feb  9 15:17:39 2003
++++ libmsn2/msn_bittybits.C	Wed Mar 26 20:25:57 2003
+@@ -6,66 +6,122 @@
+ #include <unistd.h>
+ #include <ctype.h>
+ 
++#ifndef __MINGW32__
++#include <sys/poll.h>
++#endif
++
+ #include "msn_core.h"
+ #include "msn_interface.h"
+ #include "msn_bittybits.h"
++#include <errno.h>
++#include <time.h>
+ 
+-char ** msn_read_line(int sock, int * numargs)
++char ** msn_read_line(msnconn *conn, int * numargs)
+ {
+   // Right, this is quite a task. Step One is to read the thing in.
+   char ** retval;
+   char c;
+-  int pos=0, numspaces=0;
+-
+-  while(1)
++  int should_terminate=0;
++  int sock = conn->sock;
++  int finished = 0;
++#ifndef __MINGW32__
++  struct pollfd pfd;
++  struct timespec delay;
++  
++  pfd.fd=sock;
++  pfd.events=POLLIN;
++
++  delay.tv_sec = 0;
++  delay.tv_nsec = 10000000;
++#endif
++  do
+   {
++    
+     if(read(sock, &c, 1)<1)
+     {
+-      printf("What the..?!\n"); //DEBUG
+-      return NULL;
++      if (errno == EAGAIN) {  
++#ifdef __MINGW32__
++	int j;
++	for (int i=0; i<10000000;i++)
++		j=i;
++#else
++	int res=0;
++	if((res=poll(&pfd,1,5000))==0) {
++		*numargs=0;
++		return NULL;
++	} else if (res > 0) {
++		continue;
++	} else {
++		*numargs=-1;
++		return NULL;
++	}
++	
++#endif
++	continue;
++      } else if (errno) {
++	printf("error %d %s\n",errno, strerror(errno));
++        printf("What the.. (%d) (%s)?!\n", sock, conn->readbuf); //DEBUG
++	*numargs=-1;
++	return NULL;      
++      }	else if(conn->type==CONN_FTP)
++         { conn->numspaces++; conn->readbuf[conn->pos]='\0'; finished=1; break; }	      
+     }
+-    if(c=='\r') { continue; }
+-    if(c=='\n') { numspaces++; buf[pos]='\0'; break; }
+-    if(c==' ') { numspaces++; }
+-    buf[pos]=c;
+-    pos++;
++
++    if(conn->pos == 1249) {conn->readbuf[conn->pos]='\0'; continue; }
++    if(c=='\r' || conn->pos > 1249) { continue; }
++    if(c=='\n') { conn->numspaces++; conn->readbuf[conn->pos]='\0'; finished=1; break; }
++    if(c==' ') { conn->numspaces++; }
++    conn->readbuf[conn->pos]=c;
++    conn->pos++;
++  }
++#ifndef __MINGW32__
++  while(poll(&pfd, 1, 0)==1);
++#else
++  while (1);
++#endif
++  if (!finished) {
++	  *numargs=0;
++	  return NULL;
+   }
++  
++  if(conn->numspaces==0) { printf("What the..?\n"); *numargs=-1; return NULL; }
+ 
+-  if(numspaces==0) { printf("What the..?\n"); return NULL; }
+-
+-  retval=new char * [numspaces];
+-  retval[0]=new char[strlen(buf)+1];
+-  strcpy(retval[0], buf);
+-  *numargs=numspaces;
++  retval=new char * [conn->numspaces];
++  retval[0]=new char[strlen(conn->readbuf)+1];
++  strcpy(retval[0], conn->readbuf); /* long enough */
++  *numargs=conn->numspaces;
+ 
+   // OK, take it as read (boom, boom!)
+   // Now we cruise through the string, changing all spaces to null 0's and setting
+   // a pointer at the beginning of each substring
+ 
+-  pos=0;
+-  numspaces=1; // pointer #0 is already set at the beginning
++  conn->pos=0;
++  conn->numspaces=1; // pointer #0 is already set at the beginning
+   while(1)
+   {
+-    if(retval[0][pos]==' ')
++    if(retval[0][conn->pos]==' ')
+     {
+-      retval[0][pos]='\0';
+-      retval[numspaces]=retval[0]+pos+1;
+-      numspaces++;
+-      pos++;
++      retval[0][conn->pos]='\0';
++      retval[conn->numspaces]=retval[0]+conn->pos+1;
++      conn->numspaces++;
++      conn->pos++;
+       continue;
+     }
+-    if(retval[0][pos]=='\0') { break; }
++    if(retval[0][conn->pos]=='\0') { break; }
+ 
+-    pos++;
++    conn->pos++;
+   }
+ 
++  conn->pos = conn->numspaces = 0;
++  memset(conn->readbuf,0, sizeof(conn->readbuf));
++
+   return retval;
+ }
+ 
+ void msn_clean_up(msnconn * conn)
+ {
+   llist * connlist;
+-  connlist=connections;
++  connlist=msnconnections;
+ 
+   if(conn->type!=CONN_FTP)
+   { ext_closing_connection(conn); }
+@@ -76,6 +132,10 @@
+     if(connlist->data==conn) { break; }
+     connlist=connlist->next;
+   }
++  if (conn->callbacks != NULL) {
++	  delete conn->callbacks; // delete the callback data
++	  conn->callbacks=NULL;
++  }
+ 
+   close(conn->sock);
+   ext_unregister_sock(conn->sock);
+@@ -84,7 +144,7 @@
+   if(connlist->next!=NULL)
+   { connlist->next->prev=connlist->prev; }
+   if(connlist->prev!=NULL)
+-  { connlist->prev->next=connlist->next; } else { connections=connlist->next; }
++  { connlist->prev->next=connlist->next; } else { msnconnections=connlist->next; }
+   connlist->prev=NULL; // no recursive destructors, please...
+   connlist->next=NULL;
+   connlist->data=NULL; // already deleted the conn object
+@@ -118,9 +178,11 @@
+     if(call->trid==trid)
+     {
+       if(list->next!=NULL)
+-      { list->next->prev=list->prev; }
++	      { list->next->prev=list->prev; }
+       if(list->prev!=NULL)
+-      { list->prev->next=list->next; } else { conn->callbacks=NULL; }
++	      { list->prev->next=list->next; } 
++      else 
++	      { conn->callbacks=NULL; }
+       list->prev=NULL; // no recursive destructors
+       list->next=NULL;
+       delete list;
+diff -ur msn-eb-lite/msn_bittybits.h libmsn2/msn_bittybits.h
+--- msn-eb-lite/msn_bittybits.h	Sun Feb  9 15:17:39 2003
++++ libmsn2/msn_bittybits.h	Wed Mar 26 15:34:57 2003
+@@ -10,7 +10,7 @@
+           numargs       Gets set to the number of arguments
+         Returns:        A NULL-terminated array of strings, or NULL on error
+ */
+-char ** msn_read_line(int sock, int * numargs);
++char ** msn_read_line(msnconn *conn, int * numargs);
+ 
+ void msn_clean_up(msnconn * conn);
+ 
+diff -ur msn-eb-lite/msn_core.C libmsn2/msn_core.C
+--- msn-eb-lite/msn_core.C	Sun Feb  9 15:17:39 2003
++++ libmsn2/msn_core.C	Wed Mar 26 20:25:57 2003
+@@ -7,14 +7,20 @@
+ #include <string.h>
+ 
+ #include <errno.h>
+-#include <sys/time.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#ifndef __MINGW32__
++#include <sys/poll.h>
++#endif
+ #include <fcntl.h>
+ #include <time.h>
+ 
+ #include <sys/types.h>
++#ifdef __MINGW32__
++#include <winsock2.h>
++#else
+ #include <sys/socket.h> // for the accept() in filetrans code
++#endif
+ #include <sys/stat.h>
+ 
+ #include "md5.h"
+@@ -23,17 +29,28 @@
+ #include "msn_bittybits.h"
+ #include "msn_interface.h"
+ 
+-//#define DEBUG 1
++#ifdef __MINGW32__
++#include <glib.h>
++#define snprintf _snprintf
++#define sleep(x) Sleep(x)
++
++struct timeval zerotime = {0,0};
++#endif
++
++extern int do_msn_debug;
++#define DEBUG do_msn_debug
+ 
+ // Define all those extern'ed variables in msn_core.h:
+-llist * connections=NULL;
++llist * msnconnections=NULL;
+ 
+ int next_trid=10;
+-char buf[1024]; // used for anything temporary
++char buf[1250]; // used for anything temporary
+ 
+ char * errors[1000];
+ char default_error_msg[]="Unknown error code";
+@@ -56,47 +73,59 @@
+   errors[207]=msn_permstring("Already logged in");
+   errors[208]=msn_permstring("Invalid username");
+   errors[209]=msn_permstring("Invalid friendly name");
+-  errors[210]=msn_permstring("List full");
++  errors[210]=msn_permstring("User list full");
+   errors[215]=msn_permstring("This user is already on this list or in this session");
+   errors[216]=msn_permstring("Not on list");
++  errors[217]=msn_permstring("Contact is not online");
+   errors[218]=msn_permstring("Already in this mode");
+   errors[219]=msn_permstring("This user is already in the opposite list");
+   errors[280]=msn_permstring("Switchboard server failed");
+   errors[281]=msn_permstring("Transfer notification failed");
++  
+   errors[300]=msn_permstring("Required fields missing");
+   errors[302]=msn_permstring("Not logged in");
++  
+   errors[500]=msn_permstring("Internal server error");
+   errors[501]=msn_permstring("Database server error");
+   errors[510]=msn_permstring("File operation failed at server");
+   errors[520]=msn_permstring("Memory allocation failed on server");
++  errors[540]=msn_permstring("Wrong CHL value sent to server");
++  
+   errors[600]=msn_permstring("The server is too busy");
+   errors[601]=msn_permstring("The server is unavailable");
+-  errors[602]=msn_permstring("A Peer Notification Server is down");
++  errors[602]=msn_permstring("Peer Notification Server is down");
+   errors[603]=msn_permstring("Database connection failed");
+-  errors[604]=msn_permstring("Server going down for maintenance");
++  errors[604]=msn_permstring("Server going down (mayday, time to reboot ;-)) for maintenance");
++  
+   errors[707]=msn_permstring("Server failed to create connection");
+   errors[711]=msn_permstring("Blocking write failed on server");
+   errors[712]=msn_permstring("Session overload on server");
+   errors[713]=msn_permstring("You have been too active recently. Slow down!");
+   errors[714]=msn_permstring("Too many sessions open");
+-  errors[715]=msn_permstring("Not expected");
++  errors[715]=msn_permstring("Not expected (probably no permission to set friendlyname)");
+   errors[717]=msn_permstring("Bad friend file on server");
+-  errors[911]=msn_permstring("Authentication failed. Check that you typed your username and password correctly.");
++  
++  errors[911]=msn_permstring("Authentication failed. Check that you typed your username (which has to contain the @domain.tld part) and password correctly.");
+   errors[913]=msn_permstring("This action is not allowed while you are offline");
+   errors[920]=msn_permstring("This server is not accepting new users");
+ 
+-  msn_add_to_llist(connections, conn);
++  msn_add_to_llist(msnconnections, conn);
+ }
+ 
+ void msn_show_verbose_error(msnconn * conn, int errcode)
+ {
+-  snprintf(buf, 1024, "An error has occurred while communicating with the MSN Messenger server: %s (code %d)", errors[errcode], errcode);
+-  ext_show_error(conn, buf);
++  if(errcode != 215 && errcode != 216 && errcode != 219
++	&& errcode != 224 && errcode != 225) {
++    snprintf(buf, 1024, "An error has occurred while communicating with the MSN Messenger server: \n\n %s (code %d).", errors[errcode], errcode);
++    ext_show_error(conn, buf);
++  }
++  if(errcode == 715)
++    ext_disable_conncheck();
+ }
+ 
+ void msn_invite_user(msnconn * conn, char * rcpt)
+ {
+-  sprintf(buf, "CAL %d %s\r\n", next_trid++, rcpt);
++  snprintf(buf, sizeof(buf), "CAL %d %s\r\n", next_trid++, rcpt);
+   write(conn->sock, buf, strlen(buf));
+ }
+ 
+@@ -122,7 +151,7 @@
+   {
+     llist * list;
+ 
+-    list=connections;
++    list=msnconnections;
+     while(1)
+     {
+       msnconn * c;
+@@ -151,24 +180,24 @@
+   {
+     if(msg->font==NULL)
+     {
+-      sprintf(header, "MIME-Version: 1.0\r\nContent-Type: %s\r\n\r\n", (msg->content==NULL)?("text/plain; charset=UTF-8"):(msg->content));
++      snprintf(header, sizeof(header), "MIME-Version: 1.0\r\nContent-Type: %s\r\n\r\n", (msg->content==NULL)?("text/plain; charset=UTF-8"):(msg->content));
+     } else {
+       char * fontname=msn_encode_URL(msg->font);
+       char ef[2] = {'\0', '\0'};
+       if(msg->bold) { ef[0]='B'; }
+       if(msg->underline) { ef[0]='U'; }
+ 
+-      sprintf(header, "MIME-Version: 1.0\r\nContent-Type: %s\r\nX-MMS-IM-Format: FN=%s; EF=%s; CO=%s; CS=0; PF=%d\r\n\r\n",
++      snprintf(header, sizeof(header), "MIME-Version: 1.0\r\nContent-Type: %s\r\nX-MMS-IM-Format: FN=%s; EF=%s; CO=%s; CS=0; PF=%d\r\n\r\n",
+         (msg->content==NULL)?("text/plain"):(msg->content), fontname, ef, msg->colour, msg->fontsize);
+ 
+       delete fontname;
+     }
+   } else {
+-    strcpy(header, msg->header);
++    strncpy(header, msg->header, sizeof(header));
+   }
+ 
+ 
+-  sprintf(buf, "MSG %d N %d\r\n%s", next_trid, strlen(header)+strlen(msg->body), header);
++  snprintf(buf, sizeof(buf), "MSG %d N %d\r\n%s", next_trid, strlen(header)+strlen(msg->body), header);
+   write(conn->sock, buf, strlen(buf));
+   write(conn->sock, msg->body, strlen(msg->body));
+   next_trid++;
+@@ -177,9 +206,14 @@
+ void msn_send_typing(msnconn * conn)
+ {
+   char header[]="MIME-Version: 1.0\r\nContent-Type: text/x-msmsgscontrol\r\nTypingUser: ";
+-  char * username=((authdata_SB *)conn->auth)->username;
+-
+-  sprintf(buf, "MSG %d U %d\r\n%s%s\r\n\r\n\r\n",
++  char * username=NULL;
++  
++  if (conn && ((authdata_SB *)conn->auth) && ((authdata_SB *)conn->auth)->username)
++    username=((authdata_SB *)conn->auth)->username;
++  else 
++    return;
++  
++  snprintf(buf, sizeof(buf), "MSG %d U %d\r\n%s%s\r\n\r\n\r\n",
+         next_trid++, strlen(header)+strlen(username)+6, header, username);
+ 
+   write(conn->sock, buf, strlen(buf));
+@@ -187,44 +221,53 @@
+ 
+ void msn_add_to_list(msnconn * conn, char * list, char * username)
+ {
+-  sprintf(buf, "ADD %d %s %s %s\r\n", next_trid++, list, username, username);
++  snprintf(buf, sizeof(buf), "ADD %d %s %s %s\r\n", next_trid++, list, username, username);
++if(DEBUG)
++  printf("%s\n",buf);
++
+   write(conn->sock, buf, strlen(buf));
+ }
+ 
+ void msn_del_from_list(msnconn * conn, char * list, char * username)
+ {
+-  sprintf(buf, "REM %d %s %s\r\n", next_trid++, list, username);
++  snprintf(buf, sizeof(buf), "REM %d %s %s\r\n", next_trid++, list, username);
++if(DEBUG)
++  printf("%s\n",buf);
++  
+   write(conn->sock, buf, strlen(buf));
+ }
+ 
+ void msn_set_GTC(msnconn * conn, char c)
+ {
+-  sprintf(buf, "GTC %d %c\r\n", next_trid++, c);
++  snprintf(buf, sizeof(buf), "GTC %d %c\r\n", next_trid++, c);
+   write(conn->sock, buf, strlen(buf));
+ }
+ 
+ void msn_set_BLP(msnconn * conn, char c)
+ {
+-  sprintf(buf, "BLP %d %cL\r\n", next_trid++, c);
++  snprintf(buf, sizeof(buf), "BLP %d %cL\r\n", next_trid++, c);
+   write(conn->sock, buf, strlen(buf));
+ }
+ 
+-void msn_set_friendlyname(msnconn * conn, char * friendlyname)
++int msn_set_friendlyname(msnconn * conn, char * friendlyname)
+ {
+   char * username;
+-
++  int res;
++  
+   username=((authdata_NS *)conn->auth)->username;
+-  sprintf(buf, "REA %d %s %s\r\n", next_trid++, username, msn_encode_URL(friendlyname));
+-  write(conn->sock, buf, strlen(buf));
++  snprintf(buf, sizeof(buf), "REA %d %s %s\r\n", next_trid++, username, msn_encode_URL(friendlyname));
++  res = write(conn->sock, buf, strlen(buf));
++  
++  return (res);
+ }
+ 
+ void msn_sync_lists(msnconn * conn, int version)
+ {
+-  syncinfo * info=new syncinfo;
+-
++  syncinfo *info=new syncinfo;
++  ext_syncing_lists(1);
+   info->serial=version;
+ 
+-  sprintf(buf, "SYN %d %d\r\n", next_trid, version);
++  snprintf(buf, sizeof(buf), "SYN %d %d\r\n", next_trid, version);
+   write(conn->sock, buf, strlen(buf));
+ 
+   msn_add_callback(conn, msn_syncdata, next_trid, info);
+@@ -232,17 +275,30 @@
+   next_trid++;
+ }
+ 
++int is_on_list(char *handle, llist *lst) 
++{
++	llist *olist;
++	userdata *ocontact;
++	for(olist=lst; olist != NULL && olist->data != NULL; olist=olist->next) {
++		ocontact = (userdata *)olist->data;
++		if(!strcasecmp(ocontact->username, handle))
++			return 1;
++	}
++	return 0;
++	
++}
+ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
+ {
+   syncinfo * info=(syncinfo *)data;
+ 
+   if(!strcmp(args[0], "SYN"))
+   {
+-    if(info->serial==atoi(args[2]))
++    if(numargs >=3 && info->serial==atoi(args[2]))
+     {
+-      delete info;
+-      info=NULL;
++    /*  delete info;
++      info=NULL;*/
+       msn_del_callback(conn, trid);
++      ext_syncing_lists(0);
+       ext_got_info(conn, NULL);
+       return;
+     } else {
+@@ -253,26 +309,28 @@
+ 
+   if(!strcmp(args[0], "LST"))
+   {
+-    if(!strcmp(args[2], "FL"))
++    if(numargs >=3 && !strcmp(args[2], "FL"))
+     {
+       if(!strcmp(args[5], "0"))
+       {
+         info->fl=NULL; info->complete|=LST_FL;
+-      } else {
++      } else if (numargs >=7) {
+         userdata * newuser=new userdata();
+         newuser->username=msn_permstring(args[6]);
+         newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
++	newuser->groups=msn_permstring(args[8]);
++	ext_got_friend(newuser->username, newuser->groups);
+         msn_add_to_llist(info->fl, newuser);
+         if(atoi(args[4])==atoi(args[5]))
+         { info->complete|=LST_FL; }
+       }
+     }
+-    if(!strcmp(args[2], "RL"))
++    if(numargs >=3 && !strcmp(args[2], "RL"))
+     {
+       if(!strcmp(args[5], "0"))
+       {
+         info->rl=NULL; info->complete|=LST_RL; // no mates! :-)
+-      } else {
++      } else if (numargs >=7) {
+         userdata * newuser=new userdata();
+         newuser->username=msn_permstring(args[6]);
+         newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
+@@ -281,12 +339,12 @@
+         { info->complete|=LST_RL; }
+       }
+     }
+-    if(!strcmp(args[2], "AL"))
++    if(numargs >=3 && !strcmp(args[2], "AL"))
+     {
+       if(!strcmp(args[5], "0"))
+       {
+         info->al=NULL; info->complete|=LST_AL;
+-      } else {
++      } else if (numargs >=7) {
+         userdata * newuser=new userdata();
+         newuser->username=msn_permstring(args[6]);
+         newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
+@@ -295,12 +353,12 @@
+         { info->complete|=LST_AL; }
+       }
+     }
+-    if(!strcmp(args[2], "BL"))
++    if(numargs >=3 && !strcmp(args[2], "BL"))
+     {
+       if(!strcmp(args[5], "0"))
+       {
+         info->bl=NULL; info->complete|=LST_BL;
+-      } else {
++      } else  if (numargs >=7) {
+         userdata * newuser=new userdata();
+         newuser->username=msn_permstring(args[6]);
+         newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
+@@ -310,15 +368,19 @@
+       }
+     }
+   }
+-
+-  if(!strcmp(args[0], "GTC"))
++  
++  if(numargs >=7 && !strcmp(args[0], "LSG"))
++  {
++	  ext_got_group(args[5], msn_decode_URL(args[6]));
++  }
++  if(numargs >=4 && !strcmp(args[0], "GTC"))
+   {
+     info->gtc=args[3][0];
+     info->complete|=COMPLETE_GTC;
+     ext_got_GTC(conn, args[3][0]);
+   }
+ 
+-  if(!strcmp(args[0], "BLP"))
++  if(numargs >=4 && !strcmp(args[0], "BLP"))
+   {
+     info->blp=args[3][0];
+     info->complete|=COMPLETE_BLP;
+@@ -329,36 +391,64 @@
+   {
+     msn_del_callback(conn, trid);
+     msn_check_rl(conn, info);
++    ext_syncing_lists(0);
+     ext_got_info(conn, info);
+-    delete info;
++   /* delete info; */
+   }
+ }
+ 
+ void msn_check_rl(msnconn * conn, syncinfo * info)
+ {
+-  llist * flist; // FL
++  llist * list; // FL
+   llist * olist; // other list
+-  userdata * fcontact;
++  llist * flist;
++  userdata * contact;
+   userdata * ocontact;
+ 
+   int is_on_list;
+   int a=0;
+ 
++  list = info->fl;
++  while (list != NULL) {
++    int is_on_al=0;
++
++    contact = (userdata *)list->data;
++if(DEBUG)    
++    printf("checking if %s is on AL\n",contact->username);
++    
++    for(olist=info->al; olist != NULL && olist->data != NULL; olist=olist->next) {
++      ocontact = (userdata *)olist->data;
++      if(!strcasecmp(ocontact->username, contact->username))
++          is_on_al=1;
++      if (is_on_al)
++	  break;
++    }
++    if (!is_on_al) {
++if(DEBUG)    
++       printf("  adding %s to AL\n",contact->username);
++
++       msn_add_to_list(conn, "AL", contact->username);
++    }
++    list=list->next;
++  }
++  
+   flist=info->rl;
+ 
+   while(flist!=NULL)
+   {
++    userdata * fcontact=(userdata *)flist->data;
+     is_on_list=0;
+ 
+-    fcontact=(userdata *)flist->data;
+-
+     a=0;
+     for(olist=info->al; a<2; olist=info->bl, a++)
+     {
+       while(olist!=NULL)
+       {
+         ocontact=(userdata *)olist->data;
+-        if(!strcmp(ocontact->username, fcontact->username))
++if(DEBUG)
++        printf("Comparing %s to %s\n", ocontact->username, fcontact->username);
++
++        if(!strcasecmp(ocontact->username, fcontact->username))
+         {
+           is_on_list=1;
+           break;
+@@ -406,7 +496,7 @@
+ 
+   info->auth->tag=tag;
+ 
+-  sprintf(buf, "XFR %d SB\r\n", next_trid);
++  snprintf(buf, sizeof(buf), "XFR %d SB\r\n", next_trid);
+   write(nsconn->sock, buf, strlen(buf));
+ 
+   msn_add_callback(nsconn, msn_SBconn_2, next_trid, info);
+@@ -426,6 +516,7 @@
+     return;
+   }
+ 
++  if (numargs < 6) return;
+   info->auth->cookie=msn_permstring(args[5]);
+   info->auth->sessionID=NULL;
+ 
+@@ -435,7 +526,7 @@
+   newconn->type=CONN_SB;
+   newconn->ready=0;
+ 
+-  msn_add_to_llist(connections, newconn);
++  msn_add_to_llist(msnconnections, newconn);
+ 
+   int port=1863;
+   char * c;
+@@ -458,6 +549,7 @@
+ 
+   msn_del_callback(conn, trid);
+ 
++  if (numargs < 3) return;
+   if(strcmp(args[2], "OK"))
+   {
+     msn_show_verbose_error(conn, atoi(args[0]));
+@@ -469,7 +561,7 @@
+   {
+     ext_got_SB(conn, auth->tag);
+   } else {
+-    sprintf(buf, "CAL %d %s\r\n", next_trid, auth->rcpt);
++    snprintf(buf, sizeof(buf), "CAL %d %s\r\n", next_trid, auth->rcpt);
+     write(conn->sock, buf, strlen(buf));
+ 
+     delete auth->rcpt;
+@@ -481,46 +573,29 @@
+   ext_new_connection(conn);
+ }
+ 
+-void msn_handle_incoming(int sock, int readable, int writable)
++void msn_handle_incoming(msnconn *conn, int readable, int writable,
++		char **args, int numargs)
+ {
+   // First, we find which msnconn this socket belongs to
+ 
+-  llist * list;
+-  msnconn * conn;
+   callback * call;
+-
+-  char ** args;
+-  int numargs;
++  int sock = conn->sock;
+   int trid;
+ 
+-  list=connections;
+-
+-  if(list==NULL) { return; }
+-
+-  while(1)
+-  {
+-    conn=(msnconn *)list->data;
+-    if(conn->sock==sock)
+-    { break; }
+-    list=list->next;
+-    if(list==NULL)
+-    { printf("Network traffic not for us\n"); return; } // not for us
+-  }
+-
+   // first, siphon off any file transfer traffic to the special handler
+   if(conn->type==CONN_FTP)
+-  { msn_handle_filetrans_incoming(conn, readable, writable); return; }
++  { //msn_handle_filetrans_incoming(conn, readable, writable, args, numargs); 
++	  printf("WHY THE FUCK IS CONN_FTP HANDLED HERE?\n");
++    return; }
+ 
+   // OK, it's for us. If it's readable, parse it, then deliver it to the appropriate handler
+ 
+   if(!readable) { return; }
+ 
+-  args=msn_read_line(sock, &numargs);
+-
+   if(args==NULL)
+   { msn_clean_up(conn); return; }
+ 
+-  if(!strcmp(args[0], "XFR") && !strcmp(args[2], "NS"))
++  if(numargs >=3 && !strcmp(args[0], "XFR") && !strcmp(args[2], "NS"))
+   {
+     delete conn->callbacks; // delete the callback data
+     conn->callbacks=NULL;
+@@ -531,7 +606,7 @@
+     char * c;
+     int port=1863;
+ 
+-    if((c=strstr(args[3], ":"))!=NULL)
++    if(numargs >=4 && (c=strstr(args[3], ":"))!=NULL)
+     {
+       *c='\0';
+       c++;
+@@ -539,18 +614,21 @@
+     }
+ 
+     msn_connect(conn, args[3], port);
++    delete [] args;
+     return;
+   }
+ 
+   if(!strcmp(args[0], "RNG"))
+   {
+     msn_handle_RNG(conn, args, numargs);
++    delete [] args;
+     return;
+   }
++  
++  if(numargs >=2)
++	  trid=atoi(args[1]);
+ 
+-  trid=atoi(args[1]);
+-
+-  list=conn->callbacks;
++  llist *list=conn->callbacks;
+ 
+   if(list!=NULL && trid>0)
+   {
+@@ -560,8 +638,7 @@
+       if(call->trid==trid)
+       {
+         (call->func)(conn, trid, args, numargs, call->data);
+-        delete args[0];
+-        delete args;
++        delete [] args;
+         return;
+       }
+       list=list->next;
+@@ -571,8 +648,7 @@
+ 
+   msn_handle_default(conn, args, numargs);
+ 
+-  delete args[0];
+-  delete args;
++  delete [] args;
+ }
+ 
+ void msn_handle_close(int sock)
+@@ -582,7 +658,7 @@
+   llist * list;
+   msnconn * conn;
+ 
+-  list=connections;
++  list=msnconnections;
+ 
+   if(list==NULL) { return; }
+ 
+@@ -593,7 +669,8 @@
+     { break; }
+     list=list->next;
+     if(list==NULL)
+-    { printf("Socket close not for us\n"); return; } // not for us
++    { if(DEBUG) printf("Socket close not for us\n"); 
++    return; } // not for us
+   }
+ 
+   msn_clean_up(conn);
+@@ -636,7 +713,7 @@
+     return;
+   }
+ 
+-  if(!strcmp(args[0], "CHG"))
++  if(numargs >=3 && !strcmp(args[0], "CHG"))
+   {
+     ext_changed_state(conn, args[2]);
+     return;
+@@ -683,42 +760,69 @@
+     msn_handle_OUT(conn, args, numargs);
+     return;
+   }
+-
+-  if(isdigit(args[0][0]))
++  
++  if(numargs >=5 && !strcmp(args[0], "ADG"))
++  {
++	  ext_got_group(args[4], msn_decode_URL(args[3]));
++	  return;
++  }
++    
++  if(isdigit(args[0][0]) && strlen(args[0])>2)
+   {
+     msn_show_verbose_error(conn, atoi(args[0]));
+     if(conn->type==CONN_SB)
+     {
+-      #ifdef DEBUG
++      if(DEBUG)
+       printf("As it is a Switchboard connection, terminating on error.\n");
+-      #endif
++      
+       msn_clean_up(conn);
+     }
+     return;
+   }
+ 
+-  #ifdef DEBUG
+-  printf("Don't know what to do with this one, ignoring it:\n"); // DEBUG
+-  for(int a=0; a<numargs; a++)
+-  {
+-    printf("%s ", args[a]);
+-  }
+-  printf("\n");
+-  #endif
++  if(DEBUG) {
++    printf("Don't know what to do with this one, ignoring it:\n"); // DEBUG
++    for(int a=0; a<numargs; a++)
++    {
++      printf("%s ", args[a]);
++    }
++    printf("\n");
++  }  
+ }
+ 
+ void msn_handle_MSG(msnconn * conn, char ** args, int numargs)
+ {
+-  int msglen;
+-  char * msg;
++  int msglen, remaining;
++  char * msg = NULL;
+   char * mime;
+   char * body;
+   char * tmp;
++  int tries = 0;
++  if (numargs < 4)
++	  return;
+ 
+   msglen=atoi(args[3]);
+ 
+-  msg=new char[msglen+1];
+-  read(conn->sock, msg, msglen);
++  msg=(char *)malloc(msglen+1);
++  memset(msg,'\0',msglen);
++  ext_unregister_sock(conn->sock);
++
++  remaining=msglen;
++  do {
++	  char tbuf[1250]="";
++	  int i=read(conn->sock, tbuf, remaining);
++	  if (errno == EAGAIN || i < remaining) {
++		  sleep(1);
++		  tries++;
++	  }
++	  if (i>=0) {
++	  	remaining -= i;
++  	  }
++	  strncat(msg, tbuf, msglen-strlen(msg));
++  } while (remaining > 0 && tries < 6);
++  
++  ext_register_sock(conn->sock, 1, 0);
++  
+   msg[msglen]='\0';
+ 
+   mime=msg;
+@@ -729,7 +833,7 @@
+   if((strstr(mime, "TypingUser")!=NULL) || (strstr(mime, "TypeingUser")!=NULL))
+   { // the second of the above two is a workaround for a spelling bug in the Jabber MSN transport
+     ext_typing_user(conn, args[1], msn_decode_URL(args[2]));
+-    delete msg;
++    free(msg);
+     return;
+   }
+ 
+@@ -740,21 +844,26 @@
+   char * content; // content-type
+ 
+   content=msn_find_in_mime(mime, "Content-Type");
+-  if(content==NULL) { ext_show_error(conn, "MSG with no Content-type set"); delete msg; return; }
+-  #ifdef DEBUG
+-  printf("Content type: \"%s\"\n", content);
+-  #endif
++  if(content==NULL) { 
++	  printf("mime:%s\n",mime);
++	  printf("body:%s\n",body);
++	  delete msg; 
++	  return; 
++  }
++  if(DEBUG)
++    printf("Content type: \"%s\"\n", content);
++  
+   if((tmp=strstr(content, "; charset"))!=NULL) { *tmp='\0'; }
+ 
+   if(!strcmp(content, "text/plain"))
+   {
+     message * msg=new message;
+-    msg->header=mime;
+-    msg->body=body;
++    msg->header=strdup(mime);
++    msg->body=(body != NULL) ? strdup(body):strdup("");
+     msg->font=NULL;
+     msg->content=msn_find_in_mime(mime, "Content-Type"); // include any "charset=" I've chopped off
+-
+     ext_got_IM(conn, args[1], msn_decode_URL(args[2]), msg);
++    delete msg;    
+   } else if(!strcmp(content, "text/x-msmsgsinitialemailnotification")) {
+     char * unread_ibc;
+     char * unread_folc;
+@@ -777,12 +886,12 @@
+   } else if(!strcmp(content, "text/x-msmsgsinvite")) {
+     msn_handle_invite(conn, args[1], msn_decode_URL(args[2]), mime, body);
+   } else {
+-    #ifdef DEBUG
+-    printf("Unknown content-type: \"%s\"\n", content);
+-    #endif
++    if(DEBUG)
++      printf("Unknown content-type: \"%s\"\n", content);
++    
+   }
+   delete content;
+-  delete msg;
++  free(msg);
+ }
+ 
+ char * msn_find_in_mime(char * mime, char * header)
+@@ -794,13 +903,9 @@
+   {
+     retval=mime;
+   } else {
+-    char * tmp=new char[strlen(header)+3];
+-    strcpy(tmp, "\r\n");
+-    strcat(tmp, header);
+     retval=strstr(mime, header);
+     if(retval==NULL) { return NULL; }
+     retval+=2;
+-    delete tmp;
+   }
+ 
+   while(*retval!=':') { retval++; }
+@@ -820,7 +925,8 @@
+     }
+     pos++;
+   }
+-  printf("Invalid MIME header - WTF?!\n");
++  
++  /* Should not be reached if header found */
+   return NULL;
+ }
+ 
+@@ -836,15 +942,20 @@
+   while(1)
+   {
+     if(l==NULL)
+-    { if(!inv_is_out) { l=conn->invitations_out; inv_is_out=1; continue; } else { break; } }
++    { if(!inv_is_out) { l=conn->invitations_out; inv_is_out=1; continue; } 
++      else { break; } }
+     inv=(invitation *)l->data;
++    if(inv) {
++if(DEBUG)
+     printf("invitation: checking %s against %s\n", inv->cookie, cookie);
++
+     if(!strcmp(inv->cookie, cookie))
+     { break ; }
++    }
+     inv=NULL;
+     l=l->next;
+   }
+-
++  delete cookie;
+ 
+   if(!strcmp(command, "INVITE"))
+   {
+@@ -855,10 +966,20 @@
+ 
+     if(!inv_is_out && inv->app==APP_FTP)
+     {
++if(DEBUG)
+       printf("Downloading file from remote host..\n");
++
+       msn_recv_file((invitation_ftp *)inv, body);
+     } else if(inv_is_out && inv->app==APP_FTP) {
+       msn_send_file((invitation_ftp *)inv, body);
++    } else if(!inv_is_out && inv->app == APP_NETMEETING) {
++	    char *ip = msn_find_in_mime(body, "IP-Address");
++	    /* got a voice invitation and we agreed */
++	    ext_start_netmeeting(ip);
++	    free(ip);
++    } else if(inv_is_out && inv->app == APP_NETMEETING) {
++            msn_finish_netmeeting_inv(conn, (invitation_voice *)inv,
++			    msn_find_in_mime(body,"\nIP-Address"));
+     }
+   } else if(!strcmp(command, "CANCEL") || !strcmp(command, "REJECT")) {
+     if(inv==NULL)
+@@ -877,9 +998,18 @@
+         msn_del_from_llist(conn->invitations_in, inv);
+       }
+       delete inv;
++    } else {
++      ext_show_error(conn,"Contact refused our invitation.\n");
++      if(inv_is_out)
++      {
++        msn_del_from_llist(conn->invitations_out, inv);
++      } else {
++        msn_del_from_llist(conn->invitations_in, inv);
++      }
++      delete inv;
+     }
+   } else {
+-    printf("Argh, don't support %s yet!\n", command);
++    printf("Argh, don't support %s yet!\n(%s)", command,body);
+   }
+ 
+   delete command;
+@@ -892,7 +1022,8 @@
+ 
+   char * tmp1=NULL;
+   char * tmp2=NULL;
+-
++  int recognized = 0;
++  
+   appname=msn_find_in_mime(body, "Application-Name");
+   invitation * invg=NULL;
+ 
+@@ -910,18 +1041,58 @@
+     inv->filesize=atol(tmp2);
+ 
+     ext_filetrans_invite(conn, from, friendlyname, inv);
++    if(tmp1!=NULL) { delete tmp1; tmp1=NULL;}
++    if(tmp2!=NULL) { delete tmp2; tmp1=NULL;}
++  } else if ((tmp1=msn_find_in_mime(body, "Session-Protocol")) != NULL) {
++    tmp2=msn_find_in_mime(body, "Context-Data");
++    invitation_voice * inv=new invitation_voice;
++    invg=inv;	  
++    invg->app=tmp2 ? APP_VOICE:APP_NETMEETING;
++    invg->other_user=msn_permstring(from);
++    invg->cookie=msn_find_in_mime(body, "Invitation-Cookie");
++    invg->conn=conn;
++    inv->sessionid=msn_find_in_mime(body, "Session-ID");
++
++    if(invg->app == APP_VOICE) {
++	/* 
++	   SIP doesn't seem really fun to implement
++	
++	   http://www.radvision.com/papers/C1_What_is_SIP.html 
++	   http://www.cs.ucl.ac.uk/staff/J.Crowcroft/mmbook/book/node185.html
++	   http://www.cs.columbia.edu/~kns10/software/siplib/ <<<<<==== this is for the one who'll implement it here ;-)
++	   http://www.linphone.org/ <= probably simpler ;-)
++	   RFC3428
++	 */
++	ext_show_error(conn, "Your contact tries to use the "
++			"SIP MSN Voice Protocol. " 
++			"SIP isn't supported yet.\n"
++			"You may ask your contact to use netmeeting, which "
++			"is supported.");
++	delete tmp2;
++	delete tmp1;
++	msn_netmeeting_reject(inv);
++	msn_del_from_llist(conn->invitations_in, invg);
++	delete invg;
++	invg=NULL;
++	recognized = 1;
++    } else {
++	ext_netmeeting_invite(conn, from, friendlyname, inv);
++
++	if(tmp1!=NULL) { delete tmp1; tmp1=NULL;}
++	if(tmp2!=NULL) { delete tmp2; tmp1=NULL;}
++    }
+   }
+-  if(tmp1!=NULL) { delete tmp1; }
+-  if(tmp2!=NULL) { delete tmp2; }
++  
+ 
+   delete appname;
+ 
+-  if(invg==NULL)
++  if(invg==NULL && !recognized)
+   {
+     ext_show_error(conn, "Unknown invitation type!");
+   }
+-
+-  msn_add_to_llist(conn->invitations_in, invg);
++  else {
++    msn_add_to_llist(conn->invitations_in, invg);
++  }
+ }
+ 
+ void msn_recv_file(invitation_ftp * inv, char * msg_body)
+@@ -947,7 +1118,7 @@
+   msnconn * conn=new msnconn;
+   conn->type=CONN_FTP;
+ 
+-  sprintf(buf, "Connecting to %s:%d\n", remote, port);
++  snprintf(buf, sizeof(buf), "Connecting to %s:%d\n", remote, port);
+   ext_filetrans_progress(inv, buf, 0, 0);
+ 
+   conn->sock=ext_connect_socket(remote, port);
+@@ -975,20 +1146,50 @@
+ 
+   conn->auth=auth;
+ 
+-  msn_add_to_llist(connections, conn);
++  msn_add_to_llist(msnconnections, conn);
+ 
+   write(conn->sock, "VER MSNFTP\r\n", strlen("VER MSNFTP\r\n"));
+ }
+ 
+ 
++void msn_filetrans_cancel(invitation_ftp * inv)
++{
++  llist *l;
++
++  if (!inv)
++	  return;
++  inv->cancelled = 1;
++}
++
++void msn_filetrans_cancel_clean(invitation_ftp *inv) 
++{
++  llist * l;
++  msnconn * conn;
++  // one of the two below will fail, but it will do so safely and quietly
++  msn_del_from_llist(inv->conn->invitations_in, inv);
++  msn_del_from_llist(inv->conn->invitations_out, inv);
++
++  l=msnconnections;
++
++  while(1)
++  {
++    if(l==NULL) { delete inv; return; } // Hmm, couldn't find it...
++
++    conn=(msnconn *)l->data;
++
++    if(conn->type==CONN_FTP && ((authdata_FTP *)(conn->auth))->inv==inv)
++    { break; }
++
++    l=l->next;
++  }
++
++  msn_clean_up(conn);	
++}
++
+ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
+ {
+   authdata_FTP * auth=(authdata_FTP *)conn->auth;
+ 
+-  #ifdef DEBUG
+-  printf("Incoming from file sender\n");
+-  #endif
+-
+   if(auth->direction==MSNFTP_RECV)
+   {
+     if(!readable) { return; } // not interested...
+@@ -998,13 +1199,13 @@
+       char ** args;
+       int numargs;
+ 
+-      args=msn_read_line(conn->sock, &numargs);
++      args=msn_read_line(conn, &numargs);
+ 
+       if(args==NULL) { msn_clean_up(conn); return; }
+ 
+       if(!strcmp(args[0], "VER"))
+       {
+-        sprintf(buf, "USR %s %s\r\n", auth->username, auth->cookie);
++        snprintf(buf, sizeof(buf), "USR %s %s\r\n", auth->username, auth->cookie);
+         write(conn->sock, buf, strlen(buf));
+         ext_filetrans_progress(auth->inv, "Negotiating", 0, 0);
+       } else if (!strcmp(args[0], "FIL")) {
+@@ -1014,51 +1215,88 @@
+           ext_filetrans_failed(auth->inv, errno, strerror(errno));
+           msn_del_from_llist(conn->invitations_in, auth->inv);
+           msn_clean_up(conn);
+-          delete args[0];
+-          delete args;
++          delete [] args;
+           return;
+         }
+ 
+         write(conn->sock, "TFR\r\n", strlen("TFR\r\n"));
+       }
+-      delete args[0];
+-      delete args;
++      if (!strcmp(args[0], "CCL")) {
++	if(DEBUG) printf("got CCL\n");
++	msn_clean_up(conn);      
++      }
++      delete [] args;
+       auth->num_ignore=3;
+     }
+ 
+-    fd_set readfd;
+-    struct timeval timeout={0, 0};
+-    FD_ZERO(&readfd);
+-    FD_SET(conn->sock, &readfd);
++    
++    if (auth->inv->cancelled) {
++	    write(conn->sock,"CCL\r\n",5);
++	    if(DEBUG) printf("Cancelling reception\n");
++	    ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Connection dropped");
++	    msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
++            msn_clean_up(conn);
++	    return;
++    }
++    
++#ifndef __MINGW32__
++    struct pollfd pfd;
++#endif
+     char c;
+ 
+-    while(select(conn->sock+1, &readfd, NULL, NULL, &timeout)==1)
++#ifndef __MINGW32__
++    pfd.fd=conn->sock;
++    pfd.events=POLLIN;
++
++    while(poll(&pfd, 1, 0)==1)
++#else
++    fd_set fds;
++    FD_ZERO(&fds);
++    FD_SET(conn->sock,&fds);
++    ext_unregister_sock(conn->sock);
++    if (DEBUG) printf("unregistered FTP sock\n");
++    
++    while(select(conn->sock+1,&fds,NULL,NULL,&zerotime))
++#endif
+     {
+       if(read(conn->sock, &c, 1)<1)
+       {
++	ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Connection dropped");
++	msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
+         msn_clean_up(conn);
+         return;
+       }
+       if(auth->num_ignore>0)
+       {
++	if(auth->num_ignore == 3 && c == 1) {
++		ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Cancelled by remote user");
++		msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
++		msn_clean_up(conn);      
++		return;
++	}
+         auth->num_ignore--;
+         continue;
+       }
+       auth->bytes_done++;
+       write(auth->fd, &c, 1);
+       if(auth->bytes_done==auth->inv->filesize)
+-      {
+-        write(conn->sock, "BYE 16777989\r\n", strlen("BYE 16777989"));
++      { 
++        write(conn->sock, "BYE 16777989\r\n", strlen("BYE 16777989\r\n"));
+         ext_filetrans_success(auth->inv);
+ 
+         msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
++        msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
+         msn_clean_up(conn);
+         return;
+       }
+       if(auth->bytes_done%2045==0) { auth->num_ignore=3; }
++      if(auth->bytes_done%1024==0) 
++        ext_filetrans_progress(auth->inv, "Receiving file", auth->bytes_done, auth->inv->filesize);
++      if(auth->bytes_done%8192==0) /* force getting out of loop to be able to do something else */
++	      return;
+     }
+-
+-    ext_filetrans_progress(auth->inv, "Receiving file", auth->bytes_done, auth->inv->filesize);
++    ext_register_sock(conn->sock, 1, 0);
++    if (DEBUG) printf("registered again\n");
+   } else {
+     // We are sending
+ 
+@@ -1092,9 +1330,10 @@
+         char ** args;
+         int numargs;
+ 
++
+         if(!readable) { return; } // not interested...
+ 
+-        if((args=msn_read_line(conn->sock, &numargs))==NULL)
++        if((args=msn_read_line(conn, &numargs))==NULL)
+         {
+           perror("read() failed");
+           ext_filetrans_failed(auth->inv, errno, strerror(errno));
+@@ -1105,22 +1344,23 @@
+ 
+         if(!strcmp(args[0], "VER"))
+         {
+-          sprintf(buf, "VER MSNFTP\r\n");
++          snprintf(buf, sizeof(buf), "VER MSNFTP\r\n");
+           write(conn->sock, buf, strlen(buf));
+           ext_filetrans_progress(auth->inv, "Negotiating", 0, 0);
+         }
+ 
+         if(!strcmp(args[0], "USR"))
+         {
+-          if(strcmp(args[2], auth->cookie))  // if they DIFFER
++          if(numargs >=3 && strcmp(args[2], auth->cookie))  // if they DIFFER
+           {
+             ext_filetrans_failed(auth->inv, errno, strerror(errno));
+             msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
+             msn_clean_up(conn);
++	    delete [] args;
+             return;
+           }
+ 
+-          sprintf(buf, "FIL %lu\r\n", auth->inv->filesize);
++          snprintf(buf, sizeof(buf), "FIL %lu\r\n", auth->inv->filesize);
+           write(conn->sock, buf, strlen(buf));
+         }
+ 
+@@ -1133,6 +1373,7 @@
+             ext_filetrans_failed(auth->inv, errno, "Could not open file for reading");
+             msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
+             msn_clean_up(conn);
++	    delete [] args;
+             return;
+           }
+ 
+@@ -1140,27 +1381,67 @@
+           // say that the socket is writable, and then the fun starts...
+           ext_filetrans_progress(auth->inv, "Sending data", 0, 0);
+         }
++	delete [] args;
+       } else {
++	      
+         // just pumping data now
+ 
+-        fd_set writefd;
+-        FD_ZERO(&writefd);
+-        FD_SET(conn->sock, &writefd);
+-        struct timeval tout={0, 0};
++#ifndef __MINGW32__
++        struct pollfd pfd;
++	struct pollfd pin;
++#endif
+         char c;
+-
+-        while(select(conn->sock+1, NULL, &writefd, NULL, &tout)==1)
++#ifndef __MINGW32__
++        pfd.fd=conn->sock;
++        pfd.events=POLLOUT;
++	pin.fd=conn->sock;
++	pin.events=POLLIN;
++        while(poll(&pfd, 1, 0)==1)
++#else
++        fd_set fds;
++        FD_ZERO(&fds);
++        FD_SET(conn->sock,&fds);
++        while(select(conn->sock+1,NULL,&fds,NULL,&zerotime))
++#endif
+         {
+           if(auth->bytes_done%2045==0)
+           {
++#ifdef __MINGW32__
++	    char check[3];
++#else
+             unsigned char check[3];
++	    if (poll(&pin, 1, 0)==1) {
++		int numargs;
++		char **args =msn_read_line(conn, &numargs);
++		/* TODO Check if args is NULL */
++		if (!strcmp(args[0],"CCL")) {
++			/* remote cancelled reception */
++        		ext_filetrans_failed(auth->inv, 0, "Remote user cancelled");
++        		msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
++			msn_clean_up(conn);
++			delete [] args;
++			return;
++		}
++		delete [] args;
++    
++	    }
++#endif
+             int to_go=(auth->inv->filesize-auth->bytes_done>2045)?(2045):(auth->inv->filesize-auth->bytes_done);
+ 
+-
+-            check[0]='\0';
+-            check[1]=to_go%256;
+-            check[2]=to_go/256;
+-            write(conn->sock, check, 3);
++            if (!auth->inv->cancelled) {
++        	    check[0]='\0';
++        	    check[1]=to_go%256;
++        	    check[2]=to_go/256;
++		    write(conn->sock, check, 3);
++	    } else {
++		    check[0]=1;
++		    check[1]=0;
++		    check[2]=0;
++		    write(conn->sock, check, 3);
++		    msn_filetrans_cancel_clean(auth->inv);
++		    return;
++	    }
++            
+           }
+ 
+           if(read(auth->fd, &c, 1)<1)
+@@ -1176,9 +1457,11 @@
+ 
+           if(auth->bytes_done==auth->inv->filesize)
+           {
+-            ext_filetrans_success(auth->inv);
+-
+-            msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
++	    if(auth->inv) {
++	            ext_filetrans_success(auth->inv);
++        	    msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
++        	    msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
++	    }
+             msn_clean_up(conn);
+             return;
+           }
+@@ -1214,7 +1497,7 @@
+ 
+   ext_register_sock(conn->sock, 1, 0);
+ 
+-  msn_add_to_llist(connections, conn);
++  msn_add_to_llist(msnconnections, conn);
+ 
+   authdata_FTP * auth=new authdata_FTP;
+ 
+@@ -1232,7 +1515,13 @@
+   msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
+ 
+ 
+-  sprintf(buf, "Invitation-Command: ACCEPT\r\nInvitation-Cookie: %s\r\nIP-Address: %s\r\nPort: %d\r\nAuthCookie: %s\r\nLaunch-Application: FALSE\r\nRequest-Data: IP-Address:\r\n\r\n",
++  snprintf(buf, sizeof(buf), "Invitation-Command: ACCEPT\r\n"
++		  "Invitation-Cookie: %s\r\n"
++		  "IP-Address: %s\r\n"
++		  "Port: %d\r\n"
++		  "AuthCookie: %s\r\n"
++		  "Launch-Application: FALSE\r\n"
++		  "Request-Data: IP-Address:\r\n\r\n",
+     inv->cookie, ext_get_IP(), port, auth->cookie);
+ 
+   msg->body=msn_permstring(buf);
+@@ -1253,6 +1542,7 @@
+ 
+   auth=(authdata_SB *)conn->auth;
+ 
++  if (numargs < 3) return;
+   if(!strcmp(args[1], auth->username)) { return; }
+ 
+   msn_add_to_llist(conn->users, new char_data(msn_permstring(args[1])));
+@@ -1271,6 +1561,7 @@
+   msnconn * newSBconn=new msnconn;
+   authdata_SB * auth=new authdata_SB;
+ 
++  if (numargs < 5) return;
+   newSBconn->type=CONN_SB;
+   newSBconn->auth=auth;
+ 
+@@ -1279,7 +1570,7 @@
+   auth->cookie=msn_permstring(args[4]);
+   auth->msg=NULL;
+ 
+-  msn_add_to_llist(connections, newSBconn);
++  msn_add_to_llist(msnconnections, newSBconn);
+ 
+   char * c;
+   int port=1863;
+@@ -1300,6 +1591,7 @@
+ 
+   list=conn->users;
+ 
++  if (numargs < 2) return;
+   ext_user_left(conn, args[1]);
+ 
+   while(list!=NULL)
+@@ -1331,17 +1623,20 @@
+   char * buddy;
+   char * state;
+   char * friendlyname;
+-
++ 
+   if(!strcmp(args[0], "ILN"))
+   {
++    if (numargs < 5) return;
+     friendlyname=args[4];
+     buddy=args[3];
+     state=args[2];
+   } else if(!strcmp(args[0], "FLN")) {
++    if (numargs < 2) return;
+     buddy=args[1];
+     ext_buddy_offline(conn, buddy);
+     return;
+   } else {
++    if (numargs < 4) return;    
+     friendlyname=args[3];
+     buddy=args[2];
+     state=args[1];
+@@ -1352,9 +1647,13 @@
+ 
+ void msn_handle_ADD(msnconn * conn, char ** args, int numargs)
+ {
++  if (numargs == 7) return; /* group add */
++  if (numargs < 5) return;	
+   if(!strcmp(args[2], "RL"))
+   {
++if(DEBUG)
+     printf("Via ADD:\n");
++    if (numargs < 6) return;
+     ext_new_RL_entry(conn, args[4], msn_decode_URL(args[5]));
+   }
+ 
+@@ -1364,6 +1663,8 @@
+ 
+ void msn_handle_REM(msnconn * conn, char ** args, int numargs)
+ {
++  if (numargs == 6) return; /* group change */	
++  if (numargs < 5) return;
+   ext_del_list_entry(conn, args[2], args[4]);
+   ext_latest_serial(conn, atoi(args[3]));
+ }
+@@ -1371,18 +1672,21 @@
+ 
+ void msn_handle_BLP(msnconn * conn, char ** args, int numargs)
+ {
++  if (numargs < 4) return;
+   ext_got_BLP(conn, args[3][0]);
+   ext_latest_serial(conn, atoi(args[3]));
+ }
+ 
+ void msn_handle_GTC(msnconn * conn, char ** args, int numargs)
+ {
++  if (numargs < 4) return;
+   ext_got_GTC(conn, args[3][0]);
+   ext_latest_serial(conn, atoi(args[3]));
+ }
+ 
+ void msn_handle_REA(msnconn * conn, char ** args, int numargs)
+ {
++  if (numargs < 5) return;
+   ext_latest_serial(conn, atoi(args[2]));
+   ext_got_friendlyname(conn, msn_decode_URL(args[4]));
+ }
+@@ -1393,24 +1697,25 @@
+   md5_byte_t digest[16];
+   int a;
+ 
++  if (numargs < 3) return;
+   md5_init(&state);
+   md5_append(&state, (md5_byte_t *)(args[2]), strlen(args[2]));
+   md5_append(&state, (md5_byte_t *)"Q1P7W2E4J9R8U3S5", 16);
+   md5_finish(&state, digest);
+ 
+-  sprintf(buf, "QRY %d msmsgs@msnmsgr.com 32\r\n", next_trid++);
++  snprintf(buf, sizeof(buf), "QRY %d msmsgs@msnmsgr.com 32\r\n", next_trid++);
+   write(conn->sock, buf, strlen(buf));
+ 
+   for(a=0; a<16; a++)
+   {
+-    sprintf(buf, "%02x", digest[a]);
++    snprintf(buf, sizeof(buf), "%02x", digest[a]);
+     write(conn->sock, buf, strlen(buf));
+   }
+ }
+ 
+ void msn_handle_OUT(msnconn * conn, char ** args, int numargs)
+ {
+-  if(numargs!=1)
++  if(numargs>1)
+   {
+     if(!strcmp(args[1], "OTH"))
+     {
+@@ -1428,13 +1733,16 @@
+ {
+    message * msg=new message;
+ 
+-   sprintf(buf, "Invitation-Command: CANCEL\r\nInvitation-Cookie: %s\r\nCancel-Code: REJECT\r\n",
++   snprintf(buf, sizeof(buf), "Invitation-Command: CANCEL\r\n"
++		   "Invitation-Cookie: %s\r\n"
++		   "Cancel-Code: REJECT\r\n",
+      inv->cookie);
+    msg->body=msn_permstring(buf);
+    msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
+    msn_send_IM(inv->conn, NULL, msg);
+    delete msg;
+ 
++if(DEBUG)
+    printf("Rejecting file transfer\n");
+ 
+    msn_del_from_llist(inv->conn->invitations_in, inv);
+@@ -1446,46 +1754,78 @@
+ 
+    delete inv->filename;
+    inv->filename=msn_permstring(dest);
+-   sprintf(buf, "Invitation-Command: ACCEPT\r\nInvitation-Cookie: %s\r\nLaunch-Application: FALSE\r\nRequest-Data: IP-Address\r\n\r\n",
++   snprintf(buf, sizeof(buf), "Invitation-Command: ACCEPT\r\n"
++		   "Invitation-Cookie: %s\r\n"
++		   "Launch-Application: FALSE\r\n"
++		   "Request-Data: IP-Address\r\n\r\n",
+      inv->cookie);
+    msg->body=msn_permstring(buf);
+    msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
+    msn_send_IM(inv->conn, NULL, msg);
+    delete msg;
+ 
++if(DEBUG)
+    printf("Accepting file transfer\n");
+ }
+ 
+-void msn_filetrans_cancel(invitation_ftp * inv)
++void msn_netmeeting_reject(invitation_voice * inv)
+ {
+-  llist * l;
+-  msnconn * conn;
+-
+-  // one of the two below will fail, but it will do so safely and quietly
+-  msn_del_from_llist(inv->conn->invitations_in, inv);
+-  msn_del_from_llist(inv->conn->invitations_out, inv);
++   message * msg=new message;
+ 
+-  l=connections;
++   snprintf(buf, sizeof(buf), "Invitation-Command: CANCEL\r\n"
++		   "Invitation-Cookie: %s\r\n"
++		   "Cancel-Code: REJECT\r\n",
++     inv->cookie);
++   msg->body=msn_permstring(buf);
++   msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
++   msn_send_IM(inv->conn, NULL, msg);
++   delete msg;
+ 
+-  while(1)
+-  {
+-    if(l==NULL) { delete inv; return; } // Hmm, couldn't find it...
++if(DEBUG)
++   printf("Rejecting netmeeting\n");
+ 
+-    conn=(msnconn *)l->data;
++   msn_del_from_llist(inv->conn->invitations_in, inv);
++}
+ 
+-    if(conn->type==CONN_FTP && ((authdata_FTP *)(conn->auth))->inv==inv)
+-    { break; }
++void msn_netmeeting_accept(invitation_voice * inv)
++{
++   message * msg=new message;
+ 
+-    l=l->next;
+-  }
++   if (inv->app == APP_NETMEETING) {
++     if(DEBUG) printf("ACCEPTING NETMEETING\n");
++     snprintf(buf, sizeof(buf), "Invitation-Command: ACCEPT\r\n"
++		   "Invitation-Cookie: %s\r\n"
++		   "Launch-Application: TRUE\r\n"
++		   "Session-ID: %s\r\n"
++		   "Session-Protocol: SM1\r\n"
++		   "Request-Data: IP-Address:\r\n"
++		   "IP-Address: %s\r\n\r\n",
++     inv->cookie,
++     inv->sessionid,
++     ext_get_IP());
++   } else { /* SIP voice ... will be supported one day or another */
++     if (DEBUG) printf("ACCEPTING VOICE\n");
++     snprintf(buf, sizeof(buf), "Invitation-Command: ACCEPT\r\n"
++		   "Invitation-Cookie: %s\r\n"
++		   "Launch-Application: FALSE\r\n"
++		   "Session-ID: %s\r\n"
++		   "Context-Data: Requested:SIP_A,;Capabilities:SIP_A,;\r\n"
++		   "Session-Protocol: SM1\r\n"
++		   "Request-Data: IP-Address:\r\n"
++		   "IP-Address: %s\r\n\r\n",
++     inv->cookie,
++     inv->sessionid,
++     ext_get_IP());
++	   
++   }
++   msg->body=msn_permstring(buf);
++   msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
++   msn_send_IM(inv->conn, NULL, msg);
++   delete msg;
+ 
+-  authdata_FTP * auth=(authdata_FTP *)conn->auth;
+-  delete auth->inv;
+-  auth->inv=NULL;
+-  delete auth;
+-  conn->auth=NULL;
++if(DEBUG)
++   printf("Accepting netmeeting\n");
+ 
+-  msn_clean_up(conn);
+ }
+ 
+ invitation_ftp * msn_filetrans_send(msnconn * conn, char * path)
+@@ -1493,7 +1833,7 @@
+   struct stat st_info;
+ 
+   if(stat(path, &st_info)<0)
+-  { ext_show_error(conn, "Could not open file"); return NULL; }
++  { ext_show_error(conn, "Could not open file."); return NULL; }
+ 
+   invitation_ftp * inv=new invitation_ftp;
+ 
+@@ -1520,7 +1860,12 @@
+ 
+   msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
+ 
+-  sprintf(buf, "Application-Name: File transfer\r\nApplication-GUID: {5D3E02AB-6190-11d3-BBBB-00C04F795683}\r\nInvitation-Command: INVITE\r\nInvitation-Cookie: %s\r\nApplication-File: %s\r\nApplication-FileSize: %lu\r\n\r\n",
++  snprintf(buf, sizeof(buf), "Application-Name: File transfer\r\n"
++		  "Application-GUID: {5D3E02AB-6190-11d3-BBBB-00C04F795683}\r\n"
++		  "Invitation-Command: INVITE\r\n"
++		  "Invitation-Cookie: %s\r\n"
++		  "Application-File: %s\r\n"
++		  "Application-FileSize: %lu\r\n\r\n",
+     inv->cookie, basename, inv->filesize);
+ 
+   msg->body=msn_permstring(buf);
+@@ -1536,30 +1881,27 @@
+   return inv;
+ }
+ 
+-void msn_connect(msnconn * conn, char * server, int port)
++static void msn_connect_cb(int fd, int error, void *data)
+ {
+-  conn->ready=0;
+-
+-  if(conn->type==CONN_SB)
+-  {
++    msnconn *conn = (msnconn *)data;	
+     authdata_SB * auth=(authdata_SB *)conn->auth;
+-
+-    if((conn->sock=ext_connect_socket(server, port))==-1)
++    if(fd == -1 || error)
+     {
+-      ext_show_error(conn, "Could not connect to switchboard server");
++      ext_show_error(conn, "Could not connect to switchboard server.");
++      ext_closing_connection(conn);
+       return;
+     }
+-
++    conn->sock=fd;
+     ext_register_sock(conn->sock, 1, 0);
+ 
+     if(auth->sessionID==NULL)
+     {
+-      sprintf(buf, "USR %d %s %s\r\n", next_trid, auth->username, auth->cookie);
++      snprintf(buf, sizeof(buf), "USR %d %s %s\r\n", next_trid, auth->username, auth->cookie);
+       write(conn->sock, buf, strlen(buf));
+ 
+       msn_add_callback(conn, msn_SBconn_3, next_trid, NULL);
+     } else {
+-      sprintf(buf, "ANS %d %s %s %s\r\n", next_trid, auth->username, auth->cookie, auth->sessionID);
++      snprintf(buf, sizeof(buf), "ANS %d %s %s %s\r\n", next_trid, auth->username, auth->cookie, auth->sessionID);
+       write(conn->sock, buf, strlen(buf));
+ 
+       ext_new_connection(conn);
+@@ -1568,11 +1910,12 @@
+     }
+ 
+     next_trid++;
++}
+ 
+-    return;
+-  } // Otherwise, it's a Notification Server (NS)
+-
++static void msn_connect_cb2(int fd, int error, void *data)
++{
+   connectinfo * info;
++  msnconn *conn = (msnconn *)data;	
+ 
+   info=new connectinfo;
+ 
+@@ -1581,25 +1924,52 @@
+   info->username=msn_permstring( ((authdata_NS *)conn->auth)->username);
+   info->password=msn_permstring( ((authdata_NS *)conn->auth)->password);
+ 
+-  conn->ready=0;
+-  if((conn->sock=ext_connect_socket(server, port))==-1)
++  if(fd==-1 || error)
+   {
+-    ext_show_error(conn, "Could not connect to MSN server");
++    ext_show_error(conn, "Could not connect to MSN server.");
++    ext_closing_connection(conn);
+     return;
+   }
+-
++  conn->sock = fd;
++  
+   ext_register_sock(conn->sock, 1, 0);
+ 
+-  #ifdef DEBUG
++  if(DEBUG)
+   printf("Connected\n"); // DEBUG
+-  #endif
++  
+ 
+-  sprintf(buf, "VER %d MSNP7\r\n", next_trid);
++  snprintf(buf, sizeof(buf), "VER %d MSNP7\r\n", next_trid);
+   write(conn->sock, buf, strlen(buf));
+   msn_add_callback(conn, msn_connect_2, next_trid, (callback_data *)info);
+   next_trid++;
+ }
+ 
++void msn_connect(msnconn * conn, char * server, int port)
++{
++  conn->ready=0;
++
++  if(conn->type==CONN_SB)
++  {
++    if (ext_async_socket(server, port, (void *)msn_connect_cb, conn) < 0) {
++	if(DEBUG) printf("immediate connect failure\n");    
++	ext_show_error(conn, "Could not connect to MSN server.");
++	ext_closing_connection(conn);
++    }
++    //conn->sock = ext_connect_socket(server,port);
++    //msn_connect_cb(conn->sock,0,conn);
++    return;
++  }
++  conn->ready = 0;
++  if (ext_async_socket(server, port, (void *)msn_connect_cb2, conn) < 0) {
++	  if(DEBUG) printf("immediate connect2 failure\n"); 
++	  ext_show_error(conn, "Could not connect to MSN server.");   
++	  ext_closing_connection(conn);
++  }
++  //conn->sock = ext_connect_socket(server,port);
++  //msn_connect_cb2(conn->sock,0,conn);
++  
++}
++
+ // Further connection functions:
+ 
+ void msn_connect_2(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
+@@ -1609,9 +1979,10 @@
+   info=(connectinfo *)data;
+   msn_del_callback(conn, trid);
+ 
++  if (numargs < 3) return;
+   if(strcmp(args[0], "VER") || strcmp(args[2], "MSNP7")) // if either *differs*...
+   {
+-    ext_show_error(NULL, "Protocol negotiation failed");
++    ext_show_error(NULL, "MSN Protocol negotiation failed.");
+     delete info;
+     ext_unregister_sock(conn->sock);
+     close(conn->sock);
+@@ -1619,7 +1990,7 @@
+     return;
+   }
+ 
+-  sprintf(buf, "USR %d MD5 I %s\r\n", next_trid, info->username);
++  snprintf(buf, sizeof(buf), "USR %d MD5 I %s\r\n", next_trid, info->username);
+   write(conn->sock, buf, strlen(buf));
+ 
+   msn_add_callback(conn, msn_connect_3, next_trid, data);
+@@ -1637,6 +2008,7 @@
+   info=(connectinfo *)data;
+   msn_del_callback(conn, trid);
+ 
++  if (numargs < 5) return;
+   if(isdigit(args[0][0]))
+   {
+     msn_show_verbose_error(conn, atoi(args[0]));
+@@ -1652,12 +2024,12 @@
+   md5_append(&state, (md5_byte_t *)(info->password), strlen(info->password));
+   md5_finish(&state, digest);
+ 
+-  sprintf(buf, "USR %d MD5 S ", next_trid);
++  snprintf(buf, sizeof(buf), "USR %d MD5 S ", next_trid);
+   write(conn->sock, buf, strlen(buf));
+ 
+   for(a=0; a<16; a++)
+   {
+-    sprintf(buf, "%02x", digest[a]);
++    snprintf(buf, sizeof(buf), "%02x", digest[a]);
+     write(conn->sock, buf, 2);
+   }
+ 
+@@ -1673,7 +2045,7 @@
+ 
+   info=(connectinfo *)data;
+   msn_del_callback(conn, trid);
+-
++  
+   if(isdigit(args[0][0]))
+   {
+     msn_show_verbose_error(conn, atoi(args[0]));
+@@ -1682,8 +2054,9 @@
+     return;
+   }
+ 
++  if (numargs < 5) return;
+   ext_got_friendlyname(conn, msn_decode_URL(args[4]));
+-
++  
+   delete info;
+ 
+   next_trid++;
+@@ -1694,6 +2067,7 @@
+ 
+ void msn_SB_ans(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
+ {
++  if (numargs < 3) return;
+   if(!strcmp(args[0], "ANS") && !strcmp(args[2], "OK"))
+   { return; }
+ 
+@@ -1707,6 +2081,7 @@
+ 
+   if(!strcmp(args[0], "IRO"))
+   {
++    if (numargs < 6) return;
+     if(!strcmp(args[4], ((authdata_SB *)conn->auth)->username)) { return; }
+     msn_add_to_llist(conn->users, new char_data(msn_permstring(args[4])));
+     ext_user_joined(conn, args[4], msn_decode_URL(args[5]), 1);
+@@ -1719,30 +2094,123 @@
+ 
+ void msn_set_state(msnconn * conn, char * state)
+ {
+-  sprintf(buf, "CHG %d %s\r\n", next_trid, state);
++  snprintf(buf, sizeof(buf), "CHG %d %s\r\n", next_trid, state);
+   write(conn->sock, buf, strlen(buf));
+   next_trid++;
+ }
+ 
+-/*
+-void msn_connect_3(msnconn * conn, char ** args, int numargs, callback_data * data)
++void msn_add_group(msnconn *conn, char *newgroup) {
++	if (newgroup == NULL) {
++		if(DEBUG)
++		printf("Groupname is null !\n");
++
++		return;
++	}
++
++	snprintf(buf, sizeof(buf), "ADG %d %s 0\r\n", next_trid,  msn_encode_URL(newgroup));
++	write(conn->sock, buf, strlen(buf));
++	next_trid++;
++}
++
++void msn_change_group(msnconn *conn, char *handle, char *oldgroup, char *newgroup) {
++	if (newgroup == NULL) {
++if(DEBUG)
++		printf("Group doesn't exist !\n");
++
++		return;
++	}
++	snprintf(buf, sizeof(buf), "ADD %d FL %s %s %s\r\n", next_trid, handle, handle, newgroup);
++	write(conn->sock, buf, strlen(buf));
++	next_trid++;
++	if (oldgroup != NULL) {
++		snprintf(buf, sizeof(buf), "REM %d FL %s %s\r\n", next_trid, handle, oldgroup);
++		write(conn->sock, buf, strlen(buf));
++		next_trid++;
++	}
++}
++
++void msn_del_group(msnconn *conn, char *group_id) {
++	if (group_id == NULL) {
++		if(DEBUG)
++			printf("Group_id is null !\n");
++		return;
++	}
++
++	snprintf(buf, sizeof(buf), "RMG %d %s\r\n", next_trid,  group_id);
++	write(conn->sock, buf, strlen(buf));
++	next_trid++;
++	if (DEBUG)
++		printf("deleted group id %s\n",group_id);
++}
++
++void msn_rename_group(msnconn *conn, char *id, char *newname) {
++	if (newname == NULL || id == NULL) {
++if(DEBUG)
++		printf("Groupname or ID is null !\n");
++
++		return;
++	}
++
++	snprintf(buf, sizeof(buf), "REG %d %s %s 0\r\n", next_trid, id, msn_encode_URL(newname));
++	write(conn->sock, buf, strlen(buf));
++	next_trid++;
++}
++
++invitation_voice * msn_invite_netmeeting(msnconn *conn)
+ {
+-  connectinfo * info;
++  invitation_voice * inv=new invitation_voice;
++  inv->app=APP_NETMEETING;
++  inv->cookie=new char[64];
++  inv->sessionid = new char[42];
++  sprintf(inv->cookie, "%d", rand());
++  inv->conn=conn;
++  snprintf(inv->sessionid,42,"{%08X-%04X-%04X-%04X-%012X}",
++			rand(),(unsigned short)(rand()),
++		  	(unsigned short)(rand()),
++		  	(unsigned short)(rand()),
++		        rand());
+ 
+-  info=(connectinfo *)data;
+-  msn_del_callback(conn, trid);
+-  trid++;
++  message * msg = new message;
++  msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
++  
++  snprintf(buf, sizeof(buf), "Application-Name: NetMeeting\r\n"
++		  "Application-GUID: {44BBA842-CC51-11CF-AAFA-00AA00B6015C}\r\n"
++		  "Session-Protocol: SM1\r\n"
++		  "Invitation-Command: INVITE\r\n"
++		  "Invitation-Cookie: %s\r\n"
++		  "Session-ID: %s\r\n\r\n",
++		  inv->cookie,
++		  inv->sessionid);
+ 
+-  if(isdigit(args[0][0]))
+-  {
+-    msn_print_verbose_error(conn, atoi(args[0]));
+-    delete info;
+-    return;
+-  }
++  msg->body=msn_permstring(buf);
+ 
+-  sprintf(buf, "INF %d\r\n", trid, info->username);
+-  write(conn.sock, buf, strlen(buf));
++  msn_send_IM(conn, NULL, msg);
+ 
+-  msn_add_callback(conn, msn_connect_4, trid, data);
++  msn_add_to_llist(conn->invitations_out, inv);
++
++  if(DEBUG) printf("sent invitation!\n");
++  delete msg;
++  return inv;
++
++}
++
++static void msn_finish_netmeeting_inv(msnconn *conn, invitation_voice *inv, char *ip) 
++{
++  message * msg = new message;
++  msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
++  
++  snprintf(buf, sizeof(buf), "Invitation-Command: ACCEPT\r\n"
++		  "Invitation-Cookie: %s\r\n"
++		  "Session-ID: %s\r\n"
++		  "Launch-Application: TRUE\r\n"
++		  "IP-Address: %s\r\n\r\n",
++		  inv->cookie,
++		  inv->sessionid,
++		  ext_get_IP());
++  
++  msg->body=msn_permstring(buf);
++
++  msn_send_IM(conn, NULL, msg);
++  ext_start_netmeeting(NULL);
++  delete msg;
+ }
+-*/
+Only in libmsn2: msn_core.diff
+diff -ur msn-eb-lite/msn_core.h libmsn2/msn_core.h
+--- msn-eb-lite/msn_core.h	Sun Feb  9 15:17:39 2003
++++ libmsn2/msn_core.h	Wed Mar 26 16:15:02 2003
+@@ -1,6 +1,11 @@
+ /* msn_core.h  - prototypes for msn_core.C */
+ #ifndef MSN_CORE_H
+ #define MSN_CORE_H
++#ifdef __MINGW32__
++#include <winsock2.h>
++#define write(a,b,c) send(a,b,c,0)
++#define read(a,b,c)  recv(a,b,c,0)
++#endif
+ 
+ class llist_data // inherit it
+ {};
+@@ -42,7 +47,21 @@
+ 
+   char * content; // Content-type
+ 
+-  message() { header=NULL; font=NULL; content=NULL; }
++  message() { 
++	  header=NULL; 
++	  font=NULL; 
++	  content=NULL;
++	  body=NULL; }
++	  
++  ~message() { 
++	  if (header) free(header);
++	  if (font) free(font);
++	  if (content) free(content);
++	  if (body) free(body);
++	  header=NULL; 
++	  font=NULL; 
++	  content=NULL;
++	  body=NULL; }
+ };
+ 
+ class userdata : public llist_data
+@@ -50,8 +69,9 @@
+   public:
+   char * username;
+   char * friendlyname;
++  char * groups;
+   userdata() { username=friendlyname=NULL; }
+-  ~userdata() { if(username!=NULL) { delete username; } if(friendlyname!=NULL) { delete friendlyname; } }
++  ~userdata() { if(username!=NULL) { delete username; } if(friendlyname!=NULL) { delete friendlyname; } if(groups!=NULL) { delete groups; } }
+ };
+ 
+ class authdata
+@@ -70,7 +90,17 @@
+   llist * callbacks;
+   authdata * auth;
+ 
+-  msnconn() { users=NULL; callbacks=NULL; invitations_out=NULL; invitations_in=NULL; }
++  int pos, numspaces;
++  char readbuf[1250];
++  
++  msnconn() { 
++	users=NULL; 
++  	callbacks=NULL; 
++  	invitations_out=NULL; 
++  	invitations_in=NULL; 
++	pos=numspaces=0;
++	memset(readbuf,0,sizeof(readbuf));
++	}
+   ~msnconn()
+   {
+     if(users!=NULL) { delete users; }
+@@ -116,12 +146,15 @@
+   char * cookie;
+   char * other_user;
+   msnconn * conn;
+-
+-  invitation() { cookie=other_user=NULL; }
++  int cancelled;
++  
++  invitation() { cookie=other_user=NULL; cancelled=0;}
+   ~invitation() { if(cookie!=NULL) { delete cookie; } if(other_user!=NULL) { delete other_user; } }
+ };
+ 
+ #define APP_FTP 1       // NOTE: this is MSN file transfer, which is NOTHING to do with ordinary FTP!
++#define APP_VOICE 2
++#define APP_NETMEETING 3
+ 
+ class invitation_ftp : public invitation
+ {
+@@ -129,11 +162,21 @@
+   char * filename;
+   long unsigned filesize;
+ 
+-  invitation_ftp() { filename=NULL; }
++  invitation_ftp() { filename=NULL;}
+   ~invitation_ftp()
+     { if(filename!=NULL) { delete filename; } }
+ };
+ 
++class invitation_voice : public invitation
++{
++  public:
++  char * sessionid;
++
++  invitation_voice() { sessionid=NULL; }
++  ~invitation_voice()
++    { if(sessionid!=NULL) { delete sessionid; } }
++};
++
+ 
+ class authdata_FTP : public authdata
+ {
+@@ -171,7 +214,7 @@
+ };
+ 
+ 
+-extern llist * connections;
++extern llist * msnconnections;
+ extern int next_trid;
+ extern char buf[]; // Used for anything temporary
+ 
+@@ -193,10 +236,20 @@
+ 
+ void msn_filetrans_reject(invitation_ftp * inv);
+ 
++void msn_filetrans_cancel(invitation_ftp * inv);
++
++void msn_netmeeting_accept(invitation_voice * inv);
++
++void msn_netmeeting_reject(invitation_voice * inv);
++
++invitation_voice * msn_invite_netmeeting(msnconn *conn);
++
+ invitation_ftp * msn_filetrans_send(msnconn * conn, char * path);
+ 
+ void msn_sync_lists(msnconn * conn, int version);
+ 
++int is_on_list(char *handle, llist *lst) ;
++
+ #define LST_FL  1
+ #define LST_RL  2
+ #define LST_AL  4
+@@ -232,7 +285,7 @@
+   }
+ };
+ 
+-void msn_set_friendlyname(msnconn * conn, char * friendlyname);
++int msn_set_friendlyname(msnconn * conn, char * friendlyname);
+ 
+ void msn_sync_lists(msnconn * conn, int version);
+ void msn_add_to_list(msnconn * conn, char * list, char * user);
+@@ -259,7 +312,7 @@
+ void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_data * data);
+ void msn_SBconn_3(msnconn * conn, int trid, char ** args, int numargs, callback_data * data);
+ 
+-void msn_handle_incoming(int sock, int readable, int writable);
++void msn_handle_incoming(msnconn *conn, int readable, int writable, char **args, int nargs);
+ 
+ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable);
+ 
+@@ -323,4 +376,8 @@
+ // Connecting to switchboards:
+ void msn_SB_ans(msnconn * conn, int trid, char ** args, int numargs, callback_data * data);
+ 
++void msn_add_group(msnconn *conn, char *newgroup);
++void msn_del_group(msnconn *conn, char *group);
++void msn_change_group(msnconn *conn, char *handle, char *oldgroup, char *newgroup);
++void msn_rename_group(msnconn *conn, char *id, char *newname);
+ #endif // MSN_CORE_H
+Only in libmsn2: msn_core.lo
+Only in libmsn2: msn_core.o
+diff -ur msn-eb-lite/msn_interface.C libmsn2/msn_interface.C
+--- msn-eb-lite/msn_interface.C	Sun Feb  9 15:17:39 2003
++++ libmsn2/msn_interface.C	Wed Mar 19 16:27:55 2003
+@@ -21,6 +21,7 @@
+ struct pollfd socks[21];
+ 
+ int countsocks(void);
++int do_msn_debug = 1;
+ 
+ msnconn * mainconn;
+ 
+@@ -308,6 +309,17 @@
+   msn_filetrans_accept(inv, "tmp.out");
+ }
+ 
++void ext_neetmeeting_invite(msnconn * conn, char * username, char * friendlyname, invitation_voice * inv)
++{
++  printf("Got netmeeting invitation from %s (%s)\n", friendlyname, username);
++  msn_netmeeting_reject(inv);
++}
++
++void ext_start_netmeeting(char *ip)
++{
++	printf("run `gnomemeeting -c callto://%s`\n",ip);
++}
++
+ void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long sent, unsigned long total)
+ {
+   printf("File transfer: %s\t(%lu/%lu bytes sent)\n", status, sent, total);
+@@ -367,6 +379,11 @@
+   return(s);
+ }
+ 
++int ext_async_socket(char *host, int port, void *cb, void *conn)
++{
++	/* not implemented */
++}
++
+ int ext_server_socket(int port)
+ {
+   int s;
+@@ -390,6 +407,8 @@
+   return s;
+ }
+ 
++void ext_disable_conncheck(void){}
++
+ char * ext_get_IP(void)
+ {
+   struct hostent * hn;
+@@ -399,4 +418,16 @@
+   hn = gethostbyname(buf2);
+ 
+   return inet_ntoa( *((struct in_addr*)hn->h_addr));
+-}
+\ No newline at end of file
++}
++
++void ext_got_group(char *id, char *name) 
++{
++	printf("got group id %s, %s\n",id,name);
++}
++void ext_got_friend(char *name, char *groups) 
++{
++	printf("got friend %s, %s\n",name,groups);
++}
++void ext_syncing_lists(int state)
++{
++}
+diff -ur msn-eb-lite/msn_interface.h libmsn2/msn_interface.h
+--- msn-eb-lite/msn_interface.h	Sun Feb  9 15:17:39 2003
++++ libmsn2/msn_interface.h	Wed Mar 19 16:27:19 2003
+@@ -10,7 +10,7 @@
+ */
+ 
+ void handle_command(void);
+-
++void ext_update_contact(char *username);
+ void ext_register_sock(int s, int read, int write);
+ void ext_unregister_sock(int s);
+ 
+@@ -53,6 +53,8 @@
+ void ext_new_mail_arrived(msnconn * conn, char * from, char * subject);
+ 
+ void ext_filetrans_invite(msnconn * conn, char * username, char * friendlyname, invitation_ftp * inv);
++void ext_netmeeting_invite(msnconn * conn, char * username, char * friendlyname, invitation_voice * inv);
++void ext_start_netmeeting(char *ip);
+ 
+ void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long recv, unsigned long total);
+ 
+@@ -77,8 +79,16 @@
+         Return:         Nothing
+ */
+ int ext_connect_socket(char * server, int port);
++int ext_async_socket(char *host, int port, void *cb, void *conn);
+ 
+ int ext_server_socket(int port);
+ 
+ char * ext_get_IP(void);
+ 
++void ext_update_local_contact(char *c);
++
++void ext_disable_conncheck(void);
++
++void ext_got_group(char *id, char *name);
++void ext_got_friend(char *name, char *groups);
++void ext_syncing_lists(int state);
+Only in libmsn2: msntest

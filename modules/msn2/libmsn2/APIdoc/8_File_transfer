@@ -1,0 +1,96 @@
+				FILE TRANSFER
+				-------------
+
+
+	MSN Messenger file transfer occurs on a Switchboard session. The
+person who wishes to send the file initiates the transaction. When the
+transfer has been negotiated in the Switchboard session, the receiving
+user makes a TCP connection to the sending user and retrieves the file.
+This, of course, means that it is IMPOSSIBLE to send files from a machine
+behind a NAT firewall to one outside it (receiving from behind a NAT is
+OK, as long as the sender is not behind a NAT). Another thing to note is
+that owing to the direct-connection nature of the transfer, (a) the MSN
+servers never see the contents of a file, and (b) two machines behind the
+*same* NAT firewall will exchange files perfectly happily, as they will
+use SB messages to negotiate the transfer, and internal IP addresses for
+the rest of it.
+
+	(1)	When someone else initiates the transfer
+
+	A call is made to ext_filetrans_invite(msnconn * conn, char *
+from, invitation_ftp * inv). The connection is the Switchboard connection 
+through which the other user requested the transfer. The invitation_ftp 
+class represents the current status of the invitation to this file 
+transfer. In contrast to the ordinary transient nature of data passed 
+to a callback, this pointer *CAN* be kept and referred to at any later 
+time, until the invitation is accepted or denied.
+
+	To reject an invitation, call
+msn_filetrans_reject(invitation_ftp * inv). The invitation_ftp object will
+cease to exist, and the invitation will be rejected.
+
+	To accept an invitation, call
+msn_filetrans_accept( invitation_ftp * inv, char * dest), with the same 
+connection object and invitation_ftp object. The "dest" parameter is the 
+file into which the incoming data is put. It may be the same as the 
+suggested filename in the invitation_ftp object, or it may not. WARNING - 
+you must specify the full path for this filename, and if you are basing it 
+on the suggested filename, it is YOUR responsibility to check that no 
+"../" in the filename has been used to place it somewhere unintended. Of 
+course, a GUI "save as" dialog will probably avert this problem, but if 
+you are not using one, just beware. The invitation_ftp object can still be 
+referred to, and will be used (as detailed below) to show the progress of 
+the file transfer.
+
+	While the file transfer is in progress, periodic calls will be made
+to ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long
+bytes_received, unsigned long total_bytes) - "status" is a status string 
+such as "Connecting" or "Receiving data", suitable for display in a 
+progress window.
+
+	The file transfer can be cancelled at any point after accepting it,
+by calling msn_filetrans_cancel(invitation_ftp * inv). Once this call has
+been made, the invitation_ftp object is deleted, and no further reference
+may be made to it.
+
+	If not cancelled, the file transfer will eventually terminate with
+one of the following callbacks:
+
+	If the transfer fails at any point, you will receive a call to
+ext_filetrans_failed(invitation_ftp * inv, int error, char * errormsg).
+The "error" parameter is the value of "errno" directly after the system
+call that failed ("errno" itself will not necessarily be
+preserved, as it may have been set to "success" by the various system
+calls required to clean up after the failure). If it is 0 (success), then
+the error was at a higher level than a failed system call, and the error
+string will be from the MSN library itself. PLEASE NOTE that
+ext_show_error() is NOT called in this case - it is assumed that
+ext_filetrans_failed() will handle all necessary error reporting.
+
+	If the file transfer succeeds, the file will be completely written
+to the path and filename you specified, and you will receive a call to
+ext_filetrans_success(invitation_ftp * inv).
+
+	Also please note that after either of these last two calls
+returns, the invitation_ftp object is deleted, and should no longer be
+referred to by anything.
+
+
+
+
+	(2)	When you initiate the transfer
+
+	If you want to send a file, call
+msn_filetrans_send(msnconn * conn, char * filename), with a Switchboard 
+connection (which should be one-on-one with the user to which you want to 
+send the file - There Can Be Only One). This function returns a pointer to 
+the invitation_ftp object for that invitation, or NULL if the file could 
+not be found (in the latter case, ext_filetrans_failed() will also be 
+called, as above).
+
+	While the file is being transferred, calls to 
+ext_filetrans_progress() will be made as detailed above. A file send 
+in progress can also be cancelled by msn_filetrans_cancel() as above.
+
+	As above, ext_filetrans_success() or ext_filetrans_failed() will 
+be called on termination of the file transfer.

@@ -1,0 +1,32 @@
+				INDEX
+			------------------------
+
+
+	This is the API documentation for Meredydd Luff's MSN 
+library, version 2.x. Feel free to email me (m_luff@wincoll.ac.uk)
+or message me (blip109 on AOL, blip109@hotmail.com on MSN (not email), 
+modula7 on Yahoo) if you find any inaccuracy or are having a problem.
+
+	These docs are divided into several sections:
+
+(1)	A quick "user's guide" to the MSN protocol - just enough general 
+	knowledge to allow you to understand the rest of these docs.
+
+(2)	Basic architecture of the library
+
+(3)	Miscellaneous things to implement
+
+(4)	Connections to the MSN servers, email notification and managing 
+	FriendlyNames
+
+(5)	Changing state and privacy settings
+
+(6)	Sending and receiving instant messages
+
+(7)	Managing the lists on the server
+
+(8)	File transfer
+
+
+  (here the manuscript breaks off into indecipherable spidery handwriting. 
+	The last few words visible are, "Use the Source, Luke...")

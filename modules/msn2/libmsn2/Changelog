@@ -1,0 +1,134 @@
+--- Unreleased 2.x alpha
+
+Sun Apr 21:
+		Tested - MSNP7 does now work
+		Implemented mail notification
+		Wrote mail notification API docs
+		Did some more work on file transfer (receiving)
+		Fixed a logic bug when scanning the RL
+		(Vance Lankhaar, vance@pcsscreston.ca)
+		Encapsulated messages in message object
+		Updated API docs accordingly
+
+Mon Apr 8:
+		Did a lot more on file transfer - wrote API docs for 
+		receiving a file, made a decent start on the code to fit 
+		them. Nowhere near finished though.
+
+		WARNING - API DOCS AND CODE ARE NOW OUT OF SYNC
+
+Fri Apr 5:
+		Implemented MIME header retrieval properly
+		Fixed a memory leak in msn_handle_MSG ('msg' wasn't freed)
+		Started on file transfer.
+
+Thu Apr 4:
+		Became Enlightened by keyhack (IRC nick on 
+		openprojects.net) on the subject of file transfer - 
+		generalised (with the aid of some packet dumps from Vance) 
+		to voice/video chat, but again, didn't touch the code
+
+Sat Mar 30:
+		Fixed a few typos in the API docs
+		(Vance Lankhaar, vance@pcsscreston.ca)
+
+Fri Mar 29:
+		MSNP7 support, including CHL responses
+		Errors are now reported along with the connection that 
+		caused them. API docs updated accordingly.
+		Reverse-engineered groups, but didn't touch the code
+
+
+				------------
+
+		Here the source tree forks. The 1.x tree continues, 
+		picking	up bugfixes but remaining the same. The 2.x 
+		tree acquires an ambitious TODO (distributed as 
+		WHAT_YOU_ARE_MISSING in v1.x).
+
+			THIS IS THE 2.X BRANCH
+
+--- Version 1.2
+
+Thu Mar 14:
+		Changed call of ext_new_connection for an answer to an SB 
+		session so that it is called BEFORE ext_user_joined.
+
+Wed Mar 13:
+		Fixed a segfault (remove-from-llist code didn't set the
+		main pointer to NULL when deleting the first item in 
+		several places)
+
+--- Version 1.1b
+
+Fri Feb 15:
+		Added URL encoding and friendlyname support
+		Removed friendlyname information in list add callbacks 
+		because it's just the same as the username
+
+		Released as 1.1b
+
+
+--- Version 1.0b:
+
+Fri Feb 15:
+		Added OUT support. Released as 1.0b-r2
+
+--- Alpha stages (no version numbers):
+
+
+Thu Feb 14:
+		Fixed spin when socket closes unexpectedly
+		Added functions and callbacks for inviting users and being 
+		notified of their arrival/departure from the SB session
+		Added API docs for the above
+		Added the ability to send typing notifications, and added 
+		API docs for the function. Tested msn_send_typing(), then 
+		removed the horrible kludge that let me test it, so it's 
+		no longer testable from the sample implementation
+		*** BETA RELEASE ***
+
+
+Wed Feb 13:
+		Added even more debug output to sample implementation
+		Fixed a big fat segfault when closing a connection
+		Found that the friendlyname decoding doesn't work
+		Capitalised the T in "Content-Type" - can now talk to 
+		normal MSN clients
+		Added NAK support and a callback, so the program is now 
+		notified if a message did not get through to all concerned
+		Added the NAK callback to the API docs
+		Fixed friendlyname decoding
+		Added GTC/BLP modification functions and callbacks, and 
+		documented them
+
+Tue Feb 12:
+		A ton of new stuff - new callbacks for state changes, new 
+		connections, found & fixed another segfault
+		Added *lots* of debug output to sample implementation
+		Added "proper" way of setting up SB sessions (and made the 
+		"ready" indicator work right) - the lib now conforms to 
+		its own API docs :^)
+		Added decoding for friendly names, can't test without 
+		someone else
+		API docs now full, accurate, and in sync with the code 
+		itself
+
+		I think we can start thinking about integrating now...
+
+Sun Feb 10:
+		Basic API docs
+
+		Fixed a segfault when a buddy goes offline
+		(Martin Stevens, budgester@budge.net)
+
+Tue Feb 05:	FIRST ALPHA RELEASE (whoopeee!)
+		Added callbacks and commands for list synchronisation and 
+		management (adding and deleting contacts). Things still
+		have to be done manually. Updated commands reference to 
+		tell people how to do this. Made a start on the API docs.
+
+Thu Jan 22:	Fixed order of #includes in msn_interface.C
+		(Martin Stevens, budgester@budge.net)
+
+Thu Jan 22:	Started Changelog

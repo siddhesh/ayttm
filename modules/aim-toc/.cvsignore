@@ -1,0 +1,6 @@
+.deps
+.libs
+Makefile
+Makefile.in
+aim-toc.la
+aim-toc.lo

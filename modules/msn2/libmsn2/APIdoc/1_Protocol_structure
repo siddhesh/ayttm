@@ -1,0 +1,81 @@
+			MSN MESSENGER PROTOCOL STRUCTURE
+				------------------
+
+	Note - this document is just intended to provide as much knowledge 
+of the structure of the MSN protocol as you need to use this library. For 
+a full discussion, see the specification released on the IETF website.
+
+
+
+
+
+***	Steps in using MSN messenger:	******
+
+
+(1)	An initial connection is made, to the Dispatch Server 
+(messenger.msn.com). This server quickly refers you to a Notification 
+Server.
+
+(2)	A connection is made to the Notification Server, and the user 
+authenticates. On this connection, contact lists are managed (more about 
+them later), state-changes are made (Online/Busy/Phone/etc), and 
+notifications about buddies are received.
+
+(3)	To make a conversation, a request is made (via the Notification 
+Server) for a Switchboard  session. This is like a "chat space" created on 
+the fly. The NS creates this chat space and refers you to it.
+
+(4)	A connection is made to the Switchbaord Server (henceforth SB), 
+the client authenticates, and enters the chat space. Other user(s) are 
+invited into this chat space, and messages can be sent into the chat 
+space. Messages sent into the chat space are received by everyone there - 
+private chats are achieved by creating a spearate chat space.
+
+
+
+
+
+
+***	Lists:	******
+
+
+	There is a bewildering array of lists in the MSN protocol. Each is 
+stored on the server, along with a couple of other preferences (see 
+below). The lists are:
+
+	FL	(Forward List - your list of contacts)
+	RL	(Reverse List - the list of users who have you on their 
+		Forward List)
+	AL	Allow List (users allowed to talk to you and see your 
+		state)
+	BL	Block List (ignored users)
+
+
+	The preferences are:
+
+	BLP	Privacy setting - should the server allow messages from 
+		people not explicitly in your AL or BL? "AL" (shortened to 
+		the single character 'A' within this lib) allows the 
+		message to be delivered, and "BL" (abbreviated to 'B') 
+		does not allow the message to be delivered.
+
+	GTC	Preferred course of action if a user turns up in your RL
+		who is not in your AL or BL yet - 'A' means prompt the 
+		user whether to allow or block, and 'N' means to add to 
+		the AL automatically.
+
+
+***	Usernames and FriendlyNames:	***
+
+	Each user has two names.
+
+(1) The username
+
+	The username is any valid Microsoft Passport. Initially, the only 
+possible usernames were @hotmail.com, but now that is no longer the case.
+
+(2) The FriendlyName
+
+	A user's FriendlyName is long, can have spaces, and does not have 
+to be unique. A friendlyname can be changed by the user, and is supplied 
+to other clients along with virtually everything that they do.

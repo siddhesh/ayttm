@@ -1,0 +1,56 @@
+Summary: 	A Universal Instant Messaging Client 
+Name: 		@PACKAGE@
+Version: 	@VERSION@
+Release:	@RELEASE@
+Group: 		Applications/Internet
+License: 	GPL
+URL: 		http://www.nongnu.org/ayttm/
+Source: 	%{name}-%{version}.tar.gz
+Buildroot: 	%{_tmppath}/%{name}-%{version}-%{release}-root
+Requires:	@REQUIRES@
+
+%description
+Ayttm is designed to become a Universal Instant Messaging client, seamlessly
+integrating all existing Instant Messaging clients and providing a single
+consistant user interface. Currently, Ayttm supports sending and receiving
+messages through AOL, ICQ, Yahoo, MSN and Jabber. IRC support is possibly
+planned to be incorporated in future releases.
+
+%prep
+%setup 
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make DESTDIR=$RPM_BUILD_ROOT install
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+# Install documentation.
+%doc COPYING AUTHORS README ChangeLog
+# Install man page.
+%{_mandir}/man*/*
+# Icons and sounds
+%{_datadir}/pixmaps/ayttm.png
+%{_datadir}/@PACKAGE@/sounds/*
+# Red Hat menu (doesn't do any damage on other distros)
+%{_datadir}/gnome/apps/Internet/@PACKAGE@.desktop
+%{_datadir}/applnk/Internet/@PACKAGE@.desktop
+# Install the modules
+%{_datadir}/@PACKAGE@/modules/*.a   
+%{_datadir}/@PACKAGE@/modules/*.la  
+%{_datadir}/@PACKAGE@/modules/*.so 
+# Install translations
+%{_datadir}/locale/*/LC_MESSAGES/@PACKAGE@.mo
+# Lastly, the binary itself
+%{_bindir}/@PACKAGE@
+
+%changelog
+@CHANGELOG@
+

@@ -1,0 +1,564 @@
+/*
+ * Ayttm 
+ *
+ * Copyright (C) 2003, the Ayttm team
+ * 
+ * Ayttm is derivative of Everybuddy
+ * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+#include "intl.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include <gdk/gdkprivate.h>
+#include <gdk/gdkkeysyms.h>
+
+#include "dialog.h"
+#include "gtk_globals.h"
+
+#include "pixmaps/ayttm.xpm"
+#include "pixmaps/tb_yes.xpm"
+#include "pixmaps/tb_no.xpm"
+#include "pixmaps/ok.xpm"
+#include "pixmaps/warning.xpm"
+#include "pixmaps/question.xpm"
+
+typedef struct _list_dialog_data {
+	void (*callback)(char *value, void *data);
+	void *data;
+} list_dialog_data;
+
+typedef struct _text_input_window
+{
+	void (*callback)(char *value, void *data);
+	void *data;
+	GtkWidget *window;
+	GtkWidget *text;
+} text_input_window;
+
+static GdkPixmap *icon_pm = NULL;
+static GdkBitmap *icon_bm = NULL;
+
+/*------------------------------------------------------------------------*/
+/* Function for making buttons											  */
+/*------------------------------------------------------------------------*/
+
+static void set_option(GtkWidget * w, int * data )
+{
+	*data = !(*data);	
+}
+
+GtkWidget *eb_button(const char *text, int *value, GtkWidget *page)
+{
+    GtkWidget *button;
+    button = gtk_check_button_new_with_label(text);
+    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(button), *value);
+    gtk_box_pack_start(GTK_BOX(page), button, FALSE, FALSE, 0);
+    gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(set_option), value);
+    gtk_widget_show(button);
+    return button;
+}
+
+GtkWidget *eb_push_button(const char *text, GtkWidget *page)
+{
+    GtkWidget *button;
+    button = gtk_button_new_with_label(text);
+    gtk_box_pack_start(GTK_BOX(page), button, FALSE, FALSE, 0);
+    gtk_widget_show(button);
+    return button;
+}
+
+/*
+  eb_radio function
+*/
+
+GSList * eb_radio (GSList * group, const char * text, int curr_val,
+		   int set_val, GtkWidget *page, void * set_element)
+{
+  GtkWidget * radio;
+
+  /* Create Button w/ or w/out text, as requested */
+  if (text == NULL)
+    {
+      radio = gtk_radio_button_new (group);
+    }
+  else
+    {
+      radio = gtk_radio_button_new_with_label (group, text);
+    }
+
+  /* select this button if it should be */
+  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON(radio),
+			       (curr_val == set_val));
+
+  /* add this button to whatever box given */
+  gtk_box_pack_start (GTK_BOX(page), radio, FALSE, FALSE, 0);
+
+  /* Set the callback that we're told to set and the argument */
+  gtk_signal_connect(GTK_OBJECT(radio), "clicked",
+		     GTK_SIGNAL_FUNC(set_element), (void *) set_val);
+
+  /* Make this visible */
+  gtk_widget_show (radio);
+
+  /* Return the group */
+  return (gtk_radio_button_group (GTK_RADIO_BUTTON(radio)));
+}
+
+/*
+ * Generalized menu functions ;)
+ */
+
+GtkWidget * eb_menu_button (GtkMenu * menu, gchar * label,
+			    GtkSignalFunc callback_func,
+			    gpointer callback_arg)
+{
+  GtkWidget * button;
+  if (label == NULL)
+	  button = gtk_menu_item_new();
+  else
+	  button = gtk_menu_item_new_with_label(label);
+  if(callback_func != NULL)
+	  gtk_signal_connect(GTK_OBJECT(button), "activate",
+		    callback_func, callback_arg);
+  gtk_menu_append(menu, button);
+  gtk_widget_show(button);
+
+  return (button);
+}
+
+GtkWidget * eb_menu_submenu (GtkMenu * menu, gchar * label,
+			     GtkWidget *submenu, int nb)
+{
+  GtkWidget * button;
+  
+  button = gtk_menu_item_new_with_label(label);
+  gtk_widget_set_sensitive(button, nb>0);
+	  
+  gtk_menu_append(GTK_MENU(menu), button);
+
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (button), submenu);
+  gtk_widget_show(button);
+
+  return (button);
+}
+
+/*
+ * End generalized menu functions
+ */
+
+
+
+/*------------------------------------------------------------------------*/
+/* Function for creating Ayttm Icon on Windows                       */
+/*------------------------------------------------------------------------*/
+
+void eb_icon(GdkWindow *w)
+{
+	GdkAtom icon_atom;
+	glong data[2];
+        if (icon_pm == NULL) {
+                icon_pm = gdk_pixmap_create_from_xpm_d(w, &icon_bm,
+                          NULL, (gchar **)ayttm_xpm);
+        }
+
+#ifndef __MINGW32__
+		data[0] = ((GdkPixmapPrivate *)icon_pm)->xwindow;
+		data[1] = ((GdkPixmapPrivate *)icon_bm)->xwindow;
+
+		icon_atom = gdk_atom_intern( "KWM_WIN_ICON", FALSE);
+		gdk_property_change (w, icon_atom, icon_atom,
+				32, GDK_PROP_MODE_REPLACE,
+				(guchar *)data, 2);
+#endif
+        gdk_window_set_icon(w, NULL, icon_pm, icon_bm);
+}
+
+static void list_dialog_callback(GtkWidget *widget,
+			gint row,
+			gint column,
+			GdkEventButton *event,
+			gpointer data)
+{
+	gchar *text;
+	list_dialog_data *ldd = data;
+
+	gtk_clist_get_text(GTK_CLIST(widget), row, column, &text);
+	ldd->callback(strdup(text), ldd->data);
+	free(ldd);
+}
+
+void do_list_dialog( gchar * message, gchar * title, char **list, void (*action)(char * text, gpointer data), gpointer data )
+{
+	GtkWidget * dialog_window;
+	GtkWidget * label;
+	GtkWidget * clist;
+	/*  UNUSED GtkWidget * button_box; */
+	char *Row[2]={NULL, NULL};
+	list_dialog_data *ldata;
+	char **ptr=list;
+
+	eb_debug(DBG_CORE, ">Entering\n");
+	if(list[0]==NULL) {
+		eb_debug(DBG_CORE, ">Leaving as list[0]==NULL\n");
+		return;
+	}
+	dialog_window = gtk_dialog_new();
+
+	gtk_widget_realize(dialog_window);
+	gtk_window_set_title(GTK_WINDOW(dialog_window), title );
+
+	label = gtk_label_new(message);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->vbox),
+		label, FALSE, FALSE, 5);
+
+	/* Convert the **list to a LList */
+	clist = gtk_clist_new(1);	/* Only 1 column */
+	gtk_clist_set_selection_mode(GTK_CLIST(clist), GTK_SELECTION_SINGLE);
+	gtk_clist_set_column_width (GTK_CLIST(clist), 0, 200);
+	/* Array of pointers to elements, one per column */
+	while(*ptr) {
+		Row[0]=*ptr;
+		ptr++;
+		gtk_clist_append(GTK_CLIST(clist), Row);
+		free(Row[0]);
+	}
+	free(list);
+
+	ldata=calloc(1, sizeof(list_dialog_data));
+	ldata->callback=action;
+	ldata->data=data;
+	gtk_signal_connect(GTK_OBJECT(clist),
+		"select_row",
+		GTK_SIGNAL_FUNC(list_dialog_callback),
+		ldata);
+	gtk_signal_connect_object(GTK_OBJECT(clist),
+		"select_row",
+		GTK_SIGNAL_FUNC(gtk_widget_destroy),
+		(gpointer)dialog_window);
+	gtk_widget_show(clist);
+	/* End list construction */
+
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->action_area), 
+						clist, FALSE, FALSE, 5 );
+
+	gtk_widget_show_all(dialog_window);
+	eb_debug(DBG_CORE, ">Leaving, all done\n");
+}
+
+GtkWidget * do_icon_button (char *label, char **xpm, GtkWidget *w) {
+	GtkWidget *button;
+	GtkWidget *blabel;
+	GtkWidget *hbox;
+	GtkWidget *iconwid;
+	GdkPixmap *icon;
+	GdkBitmap *mask;
+
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	/* w may not be realised, prefer to use statuswindow if it is */
+	if (!w->window && statuswindow)
+		icon = gdk_pixmap_create_from_xpm_d(statuswindow->window, &mask, NULL, xpm);
+	else
+		icon = gdk_pixmap_create_from_xpm_d(w->window, &mask, NULL, xpm);
+	
+	iconwid = gtk_pixmap_new(icon, mask);
+	blabel = gtk_label_new(label);
+
+	gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), blabel, FALSE, FALSE, 2);
+
+	gtk_widget_show(iconwid);
+	gtk_widget_show(blabel);
+	gtk_widget_show(hbox);
+	
+	button = gtk_button_new();
+
+	gtk_widget_show(hbox);
+
+	gtk_container_add (GTK_CONTAINER (button), hbox);
+	gtk_widget_set_usize(button, button->requisition.width<100?100:button->requisition.width, 25);
+
+	gtk_widget_show(button);
+	return button;
+}
+
+typedef struct _dialog_buttons {
+	GtkWidget *yes;
+	GtkWidget *no;
+} dialog_buttons;
+
+static void dialog_close(GtkWidget *widget, GdkEventAny *event, gpointer data)
+{
+	dialog_buttons *b = (dialog_buttons *)data;
+	if (event->type == GDK_KEY_PRESS) {
+		if (((GdkEventKey *)event)->keyval == GDK_Escape) {
+			gtk_signal_emit_by_name(GTK_OBJECT(b->no), "clicked");
+		} else if (((GdkEventKey *)event)->keyval == GDK_KP_Enter) {
+			gtk_signal_emit_by_name(GTK_OBJECT(b->yes), "clicked");
+		} else if (((GdkEventKey *)event)->keyval == GDK_Return) {
+			gtk_signal_emit_by_name(GTK_OBJECT(b->yes), "clicked");
+		}
+			
+	}
+}
+
+void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widget, gpointer data), gpointer data )
+{
+	GtkWidget *dialog_window;
+	GtkWidget *label;
+	GtkWidget *hbox2, *hbox_xpm;
+	GtkWidget *iconwid;
+	GdkPixmap *icon;
+	GdkBitmap *mask;
+	GtkWidget *button;
+	dialog_buttons *buttons = g_new0(dialog_buttons, 1);
+	
+	dialog_window = gtk_dialog_new();
+	label = gtk_label_new(message);
+	gtk_widget_set_usize(label, 240, -1);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+	gtk_widget_show(label);
+
+	gtk_misc_set_alignment (GTK_MISC (label), 0.1, 0.5);
+
+	hbox_xpm = gtk_hbox_new(FALSE,5);
+	
+	icon = gdk_pixmap_create_from_xpm_d(statuswindow?statuswindow->window:NULL, &mask, NULL, question_xpm);
+	iconwid = gtk_pixmap_new(icon, mask);
+	
+	gtk_box_pack_start(GTK_BOX(hbox_xpm), iconwid, TRUE, TRUE, 20);
+	gtk_box_pack_start(GTK_BOX(hbox_xpm), label, TRUE, TRUE, 5);
+	gtk_widget_show(iconwid);
+	gtk_widget_show(label);
+
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->vbox), hbox_xpm, TRUE, TRUE, 5);
+	gtk_widget_show(hbox_xpm);
+		
+	button = do_icon_button(_("No"), tb_no_xpm, dialog_window);
+	
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 		   GTK_SIGNAL_FUNC(action), data );
+	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
+			                  GTK_SIGNAL_FUNC(gtk_widget_destroy),
+							  (gpointer)dialog_window);
+	gtk_object_set_user_data(GTK_OBJECT(button), (gpointer)0);
+	gtk_widget_show(button);
+	
+	buttons->no = button;
+	
+	hbox2 = gtk_hbox_new(FALSE,0);
+	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 0);
+
+	button = do_icon_button(_("Yes"), tb_yes_xpm, dialog_window);
+	
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 		   GTK_SIGNAL_FUNC(action), data );
+	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
+			                  GTK_SIGNAL_FUNC(gtk_widget_destroy),
+							  (gpointer)dialog_window);
+	gtk_object_set_user_data(GTK_OBJECT(button), (gpointer)1);
+	gtk_widget_show(button);
+
+	buttons->yes = button;
+	
+	gtk_signal_connect(GTK_OBJECT(dialog_window), "key_press_event",
+			   GTK_SIGNAL_FUNC(dialog_close), buttons);
+	
+	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 0);
+
+	gtk_widget_show(hbox2);
+	
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->action_area), 
+						hbox2, TRUE, TRUE, 0);
+	
+	gtk_container_set_border_width(GTK_CONTAINER(dialog_window), 5);
+	gtk_widget_realize(dialog_window);
+	gtk_window_set_title(GTK_WINDOW(dialog_window), title );
+	gtk_window_set_position(GTK_WINDOW(dialog_window), GTK_WIN_POS_MOUSE);
+	gtk_widget_set_usize(dialog_window, 350, 
+				dialog_window->requisition.height<150? 150:dialog_window->requisition.height);
+
+	gtk_widget_show(dialog_window);
+}
+
+	
+	
+
+/*------------------------------------------------------------------------*/
+/*  The dialog for getting an error                                       */
+/*------------------------------------------------------------------------*/
+
+void
+do_message_dialog(char *message, char *title, int modal)
+{
+	GtkWidget *d;
+	GtkWidget *label;
+	GtkWidget *close, *hbox2, *hbox_xpm;
+	GtkWidget *iconwid;
+	GdkPixmap *icon;
+	GdkBitmap *mask;
+	dialog_buttons *buttons = g_new0(dialog_buttons, 1);
+	
+	d = gtk_dialog_new();
+	label = gtk_label_new(message);
+	gtk_widget_set_usize(label, 240, -1);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+	gtk_widget_show(label);
+	
+	close = do_icon_button(_("OK"), ok_xpm, d);
+	
+	gtk_misc_set_alignment (GTK_MISC (label), 0.1, 0.5);
+	
+	hbox_xpm = gtk_hbox_new(FALSE,5);
+	
+	icon = gdk_pixmap_create_from_xpm_d(statuswindow?statuswindow->window:NULL, &mask, NULL, warning_xpm);
+	iconwid = gtk_pixmap_new(icon, mask);
+	
+	gtk_box_pack_start(GTK_BOX(hbox_xpm), iconwid, TRUE, TRUE, 20);
+	gtk_box_pack_start(GTK_BOX(hbox_xpm), label, TRUE, TRUE, 5);
+	gtk_widget_show(iconwid);
+	gtk_widget_show(label);
+
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(d)->vbox), hbox_xpm, TRUE, TRUE, 5);
+	gtk_widget_show(hbox_xpm);
+	
+	hbox2 = gtk_hbox_new(FALSE,0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_end(GTK_BOX(hbox2), close, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(d)->action_area), hbox2, TRUE, TRUE, 0);
+		
+	/* so text isn't up against the border */
+	gtk_container_set_border_width(GTK_CONTAINER(d), 5);
+	gtk_widget_realize(d);
+	gtk_window_set_title(GTK_WINDOW(d), title);
+	gtk_window_set_position(GTK_WINDOW(d), GTK_WIN_POS_MOUSE);
+	gtk_signal_connect_object(GTK_OBJECT(close), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), GTK_OBJECT(d));
+	
+	buttons->yes = buttons->no = close;
+	gtk_signal_connect(GTK_OBJECT(d), "key_press_event", 
+			GTK_SIGNAL_FUNC(dialog_close), buttons);
+
+	gtk_window_set_modal(GTK_WINDOW(d), modal);
+	gtk_widget_set_usize(d, 350, d->requisition.height<150? 150:d->requisition.height);
+	gtk_widget_show(d);
+	gtk_widget_grab_focus(close);
+}
+
+void
+do_error_dialog(char *message, char *title)
+{
+	do_message_dialog(message, title, 1);
+}
+
+/*
+ * The following methods are for the text input window
+ */
+
+static void input_window_destroy(GtkWidget * widget, gpointer data)
+{
+	g_free(data);
+}
+
+static void input_window_ok(GtkWidget * widget, gpointer data)
+{
+	text_input_window * window = (text_input_window*)data;
+	char * text = gtk_editable_get_chars(GTK_EDITABLE(window->text), 0, -1);
+	window->callback(text, window->data);
+}
+
+void do_text_input_window(gchar * title, gchar * value, 
+		void (*action)(char * text, gpointer data), 
+		gpointer data )
+{
+	GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
+	GtkWidget * frame = gtk_frame_new(NULL); 
+	GtkWidget * hbox;
+	GtkWidget * hbox2;
+	GtkWidget * separator;
+	GtkWidget * button;
+
+	text_input_window * input_window = g_new0(text_input_window, 1);
+	input_window->callback = action;
+	input_window->data = data;
+
+	input_window->window = gtk_window_new(GTK_WINDOW_DIALOG);
+	gtk_window_set_position(GTK_WINDOW(input_window->window), GTK_WIN_POS_MOUSE);
+    	gtk_widget_realize(input_window->window);
+
+	gtk_container_set_border_width(GTK_CONTAINER(input_window->window), 5);
+	gtk_frame_set_label(GTK_FRAME(frame), title);
+
+	input_window->text = gtk_text_new(NULL, NULL);
+	gtk_widget_set_usize(input_window->text, 400, 200);
+	gtk_text_insert(GTK_TEXT(input_window->text),
+			NULL, NULL, NULL, value, strlen(value));
+	gtk_text_set_editable(GTK_TEXT(input_window->text),
+			TRUE);
+
+	gtk_container_add(GTK_CONTAINER(frame), input_window->text);
+	gtk_widget_show(input_window->text);
+
+	gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
+	gtk_widget_show(frame);
+
+
+	separator = gtk_hseparator_new();
+	gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
+	gtk_widget_show(separator);
+
+	hbox2 = gtk_hbox_new(TRUE, 5);
+
+  	gtk_widget_set_usize(hbox2, 100,25);
+
+	button = do_icon_button(_("OK"), ok_xpm, input_window->window);
+	     
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_ok,
+			input_window);
+
+	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
+				  GTK_SIGNAL_FUNC(gtk_widget_destroy),
+				  GTK_OBJECT(input_window->window));
+	     
+	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
+	gtk_widget_show(button);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+		
+	gtk_box_pack_end(GTK_BOX(hbox),hbox2, FALSE, FALSE, 0);
+	gtk_widget_show(hbox2);      
+      
+  	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_show(hbox);
+
+	gtk_container_add(GTK_CONTAINER(input_window->window), vbox);
+	gtk_widget_show(vbox);
+
+    	gtk_window_set_title(GTK_WINDOW(input_window->window), title);
+	eb_icon(input_window->window->window);
+
+	gtk_signal_connect(GTK_OBJECT(input_window->window), "destroy",
+			GTK_SIGNAL_FUNC(input_window_destroy), input_window);
+
+	gtk_widget_show(input_window->window);
+		
+
+}
+
