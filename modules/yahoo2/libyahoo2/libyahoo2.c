@@ -3381,6 +3381,8 @@ void yahoo_login(int id, int initial)
 	 */
 	if(tag > 0)
 		ccd->tag = tag;
+	else
+		YAHOO_CALLBACK(ext_yahoo_login_response)(yd->client_id, YAHOO_LOGIN_SOCK, NULL);
 }
 
 

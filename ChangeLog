@@ -1,3 +1,9 @@
+* Sat Dec 20 2003 08:17 GMT [philip]	0.4.5-15
+- modules/yahoo2/yahoo.c
+set ela->connecting to 0 only after complete connect is through
+- modules/yahoo2/libyahoo2/libyahoo2.c
+call ext_yahoo_login_response with _SOCK if connect returned error
+
 * Fri Dec 19 2003 19:15 GMT [philip]	0.4.5-14
 - modules/image_filter/video_capture.c
 - modules/image_filter/ayttm_streamer_wrapper.sh

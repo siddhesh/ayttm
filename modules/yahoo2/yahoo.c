@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.82 $",
-	"$Date: 2003/12/19 19:22:56 $",
+	"$Revision: 1.83 $",
+	"$Date: 2003/12/20 08:21:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1847,7 +1847,7 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	unsigned char *image = NULL, *image2000=NULL;
-	unsigned int length = 0;
+	long length = 0;
 	unsigned int timestamp;
 
 	if(!video_grab_frame) {
@@ -3019,7 +3019,6 @@ static void _yahoo_connected(int fd, int error, void * data)
 	eb_local_account * ela = ccd->ela;
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 
-	ela->connecting=0;
 	conn = l_list_remove(conn, ccd);
 
 	ccd->callback(fd, error, ccd->data);
