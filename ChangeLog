@@ -1,3 +1,7 @@
+* Fri May 18 2003 22:29 GMT [colin]	0.3.1-pre7
+- modules/aycryption/aycryption.c
+Warn about msn nastiness
+
 * Sun May 18 2003 16:00 GMT [philip]	0.3.1-pre6
 - modules/yahoo2/yahoo.c
 Display proper error messages when the remote user closes a webcam

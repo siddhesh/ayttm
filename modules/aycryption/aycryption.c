@@ -89,9 +89,10 @@ static int do_aycryption_debug = 0;
 PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Aycryption",
-	"Encrypts messages with GPG",
-	"$Revision: 1.12 $",
-	"$Date: 2003/05/16 18:47:02 $",
+	"Encrypts messages with GPG.\n"
+	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
+	"$Revision: 1.13 $",
+	"$Date: 2003/05/18 22:31:11 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
