@@ -1,3 +1,11 @@
+* Tue May  6 2003 14:26 GMT [edward]	0.3.0-142
+- mingw
+  src/browser.c
+  src/chat_window.c
+  configure.ac
+Fixes to get MINGW32 port to compile once more and attempt to fix the
+AIM produced error in Chat WIndow
+
 * Tue May  6 2003 13:39 GMT [colin]	0.3.0-141
 - modules/aycryption/aycryption.c
 More info (will be moved to a window later or sooner)

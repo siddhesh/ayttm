@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=141
+RELEASE=142
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -414,7 +414,6 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  modules/icq/Makefile
                  modules/icq/libicq/Makefile
                  modules/importers/Makefile
-		 modules/aycryption/Makefile
                  modules/irc/Makefile
 		 modules/smtp/Makefile
                  modules/jabber/Makefile
@@ -435,11 +434,6 @@ AC_CONFIG_FILES([Makefile ayttm.spec
 		 src/gtk/Makefile
 		 mingw32/Makefile])
 
-if test "x$host_alias" = "xmingw32" ; then
-	echo "editing src/Makefile final time"
-        cat src/Makefile | sed 's/^LIBS = .*/LIBS = \$(EB_LIBS)/' > .ACE
-	cp -f .ACE src/Makefile
-fi
 
 AC_OUTPUT
 

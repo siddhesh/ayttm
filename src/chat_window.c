@@ -1733,7 +1733,9 @@ void eb_chat_window_display_status(eb_account * remote,
 	else
 		tmp = g_strdup_printf(" ");
 
+#ifndef __MINGW32__
 	gtk_label_set_text( GTK_LABEL(remote_contact->chatwindow->status_label), tmp );
+#endif
 	g_free(tmp);
 }
 

@@ -132,10 +132,7 @@ void open_url(GdkWindow *w, char *url) {
 
 	if (!strncmp("log://", url, 6)) {
 		/*internal handling*/
-		log_window *lw = NULL;
-		lw = eb_log_window_new(NULL);
-		lw->filename = strdup(url+6);
-		eb_log_load_information(lw);
+		ay_log_window_file_create( url+6 );
 		return;
 	}
 

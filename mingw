@@ -6,6 +6,10 @@ then
 	export CFLAGS ACLOCAL_FLAGS
 	./gen
 	./configure -build="mingw32" -host="mingw32"
+	echo "editing src/Makefile final time"
+        cat src/Makefile | sed 's/) -lproxy/)/' > .ACE
+        cat .ACE | sed 's/^LIBS = .*/LIBS = \$(EB_LIBS)/' > src/Makefile
+	#cp -f .ACE src/Makefile
 fi
 cd libltdl
 gcc -I. -I../mingw32 -mno-cygwin -fnative-struct -D__WINDOWS__ -DHAVE_CONFIG_H -UCYGWIN -UCYGWIN32 -c ltdl.c
