@@ -1476,7 +1476,8 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
 					   GTK_SIGNAL_FUNC(destroy), chat_room );
 	gtk_widget_show(chat_room->window);
-
+	gdk_window_raise(chat_room->window->window);
+	
 	/*then mark the fact that we have joined that room*/
 	chat_room->connected = 1;
 

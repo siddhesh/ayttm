@@ -1,3 +1,7 @@
+* Wed Jul 09 2003 21:30 GMT [colin]	0.3.2-23
+- src/chat_room.c
+Raise window
+
 * Wed Jul 09 2003 21:30 GMT [colin]	0.3.2-22
 - src/smileys.[ch]
 - src/chat_room.c src/chat_window.c src/gtk/gtk_eb_html.[ch]
