@@ -1195,10 +1195,12 @@ static chat_window* find_tabbed_chat_window()
 	
 	while (l1 && l1->data) {
 		chat_window *cw = (chat_window *)l1->data;
-		eb_debug(DBG_CORE, "testing %s\n", cw->contact->nick);
-		if (cw->notebook) {
-			eb_debug(DBG_CORE, "found %s\n", cw->contact->nick);
-			return cw;
+		if (cw && cw->window) {
+			eb_debug(DBG_CORE, "testing %s\n", cw->contact->nick);
+			if (cw->notebook) {
+				eb_debug(DBG_CORE, "found %s\n", cw->contact->nick);
+				return cw;
+			}
 		}
 		l1 = l1->next;
 	}
@@ -1974,6 +1976,9 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 				       NULL);
 
 			gtk_widget_show(cw->notebook);
+			
+			gtk_signal_connect(GTK_OBJECT(cw->window), "delete_event",
+			   GTK_SIGNAL_FUNC(cw_close_win), (gpointer)cw);
 		} else {
 			cw->window = tab_cw->window;
 			cw->notebook = tab_cw->notebook;

@@ -1,3 +1,11 @@
+* Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-9
+- src/chat_window.c
+Fix a crash when using the window close button with tabs
+
+* Sat Sep 27 2003 00:00 GMT [philip]	0.4.1-8bis
+- src/smileys.c
+Fix very old crash due to smiley window - Thanks to Nicolas Peninguy !
+
 * Thu Sep 26 2003 21:21 GMT [elh]	0.4.1-8
 - src/smileys.h 
   mingw32/ay.iss

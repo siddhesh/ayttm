@@ -44,7 +44,7 @@ static tDeveloperInfo sAyttmDevTeam[AYTTM_TEAM_SIZE] =
 
 /* Kudos */
 
-#define	KUDOS_SIZE	(5)
+#define	KUDOS_SIZE	(6)
 
 static tDeveloperInfo sKudosPeople[KUDOS_SIZE] =
 {
@@ -52,7 +52,8 @@ static tDeveloperInfo sKudosPeople[KUDOS_SIZE] =
 	{"Ben Reser", 		"<ben@reser.org>", 			"Patches, MDK RPMs"},
 	{"Lee Leahu", 		"<penguin365@dyweni.com>", 	"Patches"},
 	{"Richard Ellis",	"<rellis9@yahoo.com>",		"Patches"},
-	{"Paul Rhodes",		"<withnail@users.sf.net>",	"Patches"}
+	{"Paul Rhodes",		"<withnail@users.sf.net>",	"Patches"},
+	{"Nicolas Peninguy",	"<npml@free-anatole.net>",	"Patches"}
 };
 
 /* Everybuddy developers */
