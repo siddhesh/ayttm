@@ -78,6 +78,7 @@
 
 #include "pixmaps/yahoo_online.xpm"
 #include "pixmaps/yahoo_away.xpm"
+#include "pixmaps/yahoo_sms.xpm"
 
 #if defined(HAVE_GLIB)
 # include <glib.h>
@@ -125,8 +126,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.47 $",
-	"$Date: 2003/05/06 17:04:50 $",
+	"$Revision: 1.48 $",
+	"$Date: 2003/05/08 08:47:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1634,7 +1635,12 @@ static void eb_yahoo_authorize_callback(gpointer data, int result)
 
 	if(result) {
 		if(!find_account_with_ela(ay->who, ela)) {
-			eb_account *ea = eb_yahoo_new_account(ela, ay->who);
+			eb_account *ea = find_account_by_handle(ay->who, ela->service_id);
+			struct contact *c = NULL;
+			if(ea)
+				c = ea->account_contact;
+			ea = eb_yahoo_new_account(ela, ay->who);
+			ea->account_contact = c;
 			add_unknown_account_window_new(ea);
 		}
 	} else {
@@ -1917,18 +1923,12 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 		snprintf(buff, sizeof(buff), _("Could not log into Yahoo service due to unknown state: %d\n"), succ);
 	}	
 	
-	ay_activity_bar_remove(ylad->connect_progress_tag);
+	if(ylad->connect_progress_tag)
+		ay_activity_bar_remove(ylad->connect_progress_tag);
 	ylad->connect_progress_tag = 0;
 
-	ela->connected = 0;
-	ylad->status = YAHOO_STATUS_OFFLINE;
 	ay_do_error( _("Yahoo Error"), buff );
 	eb_yahoo_logout(ela);
-	is_setting_state = 1;
-	if (ela->status_menu) {
-		eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_OFFLINE);
-	}
-	is_setting_state = 0;
 }
 
 static void eb_yahoo_logout(eb_local_account * ela)
@@ -2479,10 +2479,13 @@ static char **eb_yahoo_get_status_pixmap(eb_account * ea)
 
 	yad = ea->protocol_account_data;
 
-	if(yad->away < 0 || yad->away > 1)
+	if(yad->away < 0)
 		WARNING(("%s->away is %d", ea->handle, yad->away));
 
-	if (yad->away )
+	/* Don't translate this string */
+	if (yad->status_message && !strcmp(yad->status_message, "I'm on SMS"))
+		return yahoo_sms_xpm;
+	else if (yad->away )
 		return yahoo_away_xpm;
 	else
 		return yahoo_online_xpm;
