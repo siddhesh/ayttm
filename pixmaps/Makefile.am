@@ -1,6 +1,5 @@
-PIXMAP_DIRS = console_smileys standard2 msn
+PIXMAP_DIRS = msn
 
-#msn_rip yahoo_rip
 # we won't use SUBDIRS because there's no point putting a makefile in
 # each pixmap directory just for EXTRA_DIST
 # instead we'll use a dist-hook target and hope it's supported by all

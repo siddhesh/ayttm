@@ -1,3 +1,7 @@
+* Fri May  9 2003 09:30 GMT [philip]	0.3.0-169
+- modules/smileys/ pixmaps/
+Move console smileys and giles smileys to new smiley themer
+
 * Fri May  9 2003 06:36 GMT [philip]	0.3.0-168
 - modules/smileys/smiley-themer.c
 Unload module even if one of our themes is currently active
