@@ -191,8 +191,8 @@ AC_ARG_WITH(openssl-prefix, AC_HELP_STRING([--with-openssl-prefix=PFX],
 SSL_INCLUDES=
 SSL_LIBDIR=
 if test "$with_openssl_prefix" != ""; then
-	SSL_INCLUDES="-I${with_openss_prefixl}/include"
-	SSL_LIBDIR="-L${with_openss_prefixl}/lib"
+	SSL_INCLUDES="-I${with_openssl_prefix}/include"
+	SSL_LIBDIR="-L${with_openssl_prefix}/lib"
 fi
 
 AC_MSG_CHECKING(for openssl)
