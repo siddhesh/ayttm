@@ -37,7 +37,7 @@
 #include <glib.h>
 #define snprintf _snprintf
 #define sleep(x) Sleep(x)
-#define bzero(x,n) memcpy(x,0,n)
+#define bzero(x,n) memset(x,0,n)
 
 struct timeval zerotime = {0,0};
 #endif
