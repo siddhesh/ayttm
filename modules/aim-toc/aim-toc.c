@@ -90,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.11 $",
-	"$Date: 2003/04/08 18:23:18 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/04/08 18:30:51 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -784,6 +784,7 @@ static void eb_aim_logged_in (toc_conn *conn)
 		eb_set_active_menu_status(ela->status_menu, AIM_ONLINE);
 
 	is_setting_state = 0;
+	ela->connecting = 0;
 	ela->connected = 1;
 	
 	toc_add_buddy(alad->conn,ela->handle,
@@ -1196,14 +1197,44 @@ static int eb_aim_handle_url(const char *url)
 			if (message)
 				message += strlen("message=");
 			
+			if(!find_account_by_handle(screenname, SERVICE_INFO.protocol_id))
+				eb_aim_new_user(_("Unknown"), screenname);
+			
 			if(eb_send_message(screenname, message, SERVICE_INFO.protocol_id))
 				goto ok;
 			else
 				goto err;
+		} else if (!strncmp(action,"addbuddy?",9)) {
+			char *screenname = strstr(action,"screenname=");
+			char *groupname = strstr(action,"groupname=");
+			char *end = NULL;
+			
+			if (!screenname)
+				goto err;
+			
+			screenname += strlen("screenname=");
+			end = strstr(screenname,"&");
+
+			if (end)
+				*end='\0';			
+			
+			if (groupname)
+				groupname += strlen("groupname=");
+			
+			if (groupname) {
+				eb_aim_new_user(groupname, screenname);
+			} else {
+				eb_aim_new_user(_("Buddies"), screenname);
+			}
+			goto ok;
 		}
 		goto err;
+	} else {
+		goto silent_err;
 	}
 err:
+	do_error_dialog(_("This URL isn't supported by AIM module."),_("AIM error"));
+silent_err:
 	res = 0;
 ok:
 	if (str)
