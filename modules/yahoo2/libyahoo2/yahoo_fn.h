@@ -30,7 +30,7 @@ struct yahoo_fn
 	union {
 		unsigned char *table;
 		int arg1;
-	      };
+	      } arg1_u;
 	int arg2; /* arguments */
 };
 

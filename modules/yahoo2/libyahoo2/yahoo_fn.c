@@ -4594,18 +4594,18 @@ int yahoo_xfrm( int table, int depth, int seed )
       case IDENT:
          return seed;
       case XOR:
-         seed ^= xfrm->arg1;
+         seed ^= xfrm->arg1_u.arg1;
          break;
       case MULADD:
-         seed = seed * xfrm->arg1 + xfrm->arg2;
+         seed = seed * xfrm->arg1_u.arg1 + xfrm->arg2;
          break;
       case LOOKUP:
-         arg = xfrm->table;
+         arg = xfrm->arg1_u.table;
          seed = arg[A( seed )] | arg[B( seed )] << 8 | arg[C( seed )] << 16
             | arg[D( seed )] << 24;
          break;
       case BITFLD:
-         arg = xfrm->table;
+         arg = xfrm->arg1_u.table;
          for( j = 0, z = 0; j < 32; j++ )
             z = ((( seed >> j ) & 1 ) << arg[j] ) | ( ~( 1 << arg[j] ) & z );
          seed = z;
