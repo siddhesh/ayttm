@@ -722,7 +722,7 @@ void eb_chat_room_buddy_arrive( eb_chat_room * room, gchar * alias, gchar * hand
 			return;
 	}
 
-        buf = g_strdup_printf(_("<i>%s (%s) has joined the chat</i>"), alias, handle);
+        buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s (%s) has joined the chat.</b></body>"), alias, handle);
         eb_chat_room_show_3rdperson(room, buf);
 	
 	eb_chat_room_private_log_reference(room, alias, handle);
@@ -739,7 +739,11 @@ void eb_chat_room_buddy_leave( eb_chat_room * room, gchar * handle )
 	LList * node = find_chat_room_buddy(room, handle);
 
         gchar *buf;
-        buf = g_strdup_printf(_("<i>%s has left the chat</i>"), handle);
+	if (node) {
+		eb_chat_room_buddy * ecrb = node->data;
+	        buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat.</b></body>"), ecrb->alias, handle);
+	} else
+		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s has left the chat.</b></body>"), handle);
         eb_chat_room_show_3rdperson(room, buf);
 	g_free(buf);
 
