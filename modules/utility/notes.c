@@ -74,8 +74,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Notes", 
 	"Store notes about your contacts and buddies", 
-	"$Revision: 1.9 $",
-	"$Date: 2004/06/28 14:55:36 $",
+	"$Revision: 1.10 $",
+	"$Date: 2004/08/10 20:43:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -96,6 +96,8 @@ static void rename_notes(char *onick, char *nnick)
 #ifndef __MINGW32__
 	pid_t pid;
 #endif
+	if (strcmp(onick,nnick) == 0)
+		return;
 	eb_debug(DBG_MOD, "> Rename %s to %s",onick,nnick);
 	snprintf(cmd1, 1024, "%s/%s", notes_dir, onick);
 	snprintf(cmd2, 1024, "%s/%s", notes_dir, nnick);

@@ -1,3 +1,7 @@
+* Tue Aug 10 2004 20:45 GMT [edward] 0.4.6-26
+- Update to notes utility. Fix added for 929347 had issues.
+  modules/utility/notes.c
+
 * Tue Jul 14 2004 17:50 GMT [edward] 0.4.6-25
 - Update for RH73 to README
   README.LINUX
