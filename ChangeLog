@@ -1,3 +1,7 @@
+* Tue Jul 08 2003 13:48 GMT [colin]	0.3.2-16
+- modules/irc/irc.c
+ela fixes
+
 * Tue Jul 08 2003 05:08 GMT [philip]	0.3.2-15
 - src/smileys.[ch] src/chat_room.c src/chat_window.c
 merge chat_room and chat_window in smileys code, and make

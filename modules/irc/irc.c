@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.30 $",
-	"$Date: 2003/07/07 10:37:38 $",
+	"$Revision: 1.31 $",
+	"$Date: 2003/07/08 13:44:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1487,20 +1487,20 @@ static void irc_add_user( eb_account * account )
 {
 	/* find the proper local account */
 	irc_account *ia = (irc_account *) account->protocol_account_data;
-	LList * node;
+	eb_local_account * ela = account->ela;
 
-	for( node = accounts; node; node = node->next )
+	if (ela == NULL) {
+		eb_debug(DBG_MOD, "ela == NULL!\n");
+		return;
+	}
+	
+	if (ela->service_id == SERVICE_INFO.protocol_id)
 	{
-		eb_local_account * ela = (eb_local_account *)(node->data);
-		
-		if (ela->service_id == SERVICE_INFO.protocol_id)
-		{
-			irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
+		irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
 
-			if (!strcmp(ila->server, ia->server))
-			{
-				ila->friends = l_list_append( ila->friends, account );
-			}
+		if (!strcmp(ila->server, ia->server))
+		{
+			ila->friends = l_list_append( ila->friends, account );
 		}
 	}
 
@@ -1511,19 +1511,19 @@ static void irc_del_user( eb_account * account )
 {
 	/* find the proper local account */
 	irc_account *ia = (irc_account *) account->protocol_account_data;
-	LList * node;
+	eb_local_account * ela = account->ela;
 
-	for( node = accounts; node; node = node->next )
+	if (ela == NULL) {
+		eb_debug(DBG_MOD, "ela == NULL!\n");
+		return;
+	}
+	
+	if (ela->service_id == SERVICE_INFO.protocol_id)
 	{
-		eb_local_account * ela = (eb_local_account *)(node->data);
-		
-		if (ela->service_id == SERVICE_INFO.protocol_id)
+		irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
+		if (ia && ia->server && !strcmp(ila->server, ia->server))
 		{
-			irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
-			if (ia && ia->server && !strcmp(ila->server, ia->server))
-			{
-				ila->friends = l_list_remove( ila->friends, account );
-			}
+			ila->friends = l_list_remove( ila->friends, account );
 		}
 	}
 
