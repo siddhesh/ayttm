@@ -58,6 +58,7 @@ typedef struct _ptr_list
 
 static LList 	*s_global_prefs = NULL;
 
+static void ayttm_prefs_read_file(char *file);
 
 static int s_compare_ptr_key( const void *a, const void *b )
 {
@@ -511,6 +512,8 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_play_first", 1 );
 	iSetLocalPref( "do_play_receive", 1 );
 	
+	ayttm_prefs_read_file(AYTTMRC);
+	
 #ifdef __MINGW32__
 	snprintf( buff, buff_size, "%s%s", base_dir, BuddyArriveDefault );
 	cSetLocalPref( "BuddyArriveFilename", buff );
@@ -530,12 +533,12 @@ void	ayttm_prefs_init( void )
 	snprintf( buff, buff_size, "%s%s", base_dir, ReceiveDefault );
 	cSetLocalPref( "FirstMsgFilename", buff );
 #else
-	cSetLocalPref( "BuddyArriveFilename", BuddyArriveDefault );
-	cSetLocalPref( "BuddyAwayFilename", BuddyLeaveDefault );
-	cSetLocalPref( "BuddyLeaveFilename", BuddyLeaveDefault );
-	cSetLocalPref( "SendFilename", SendDefault );
-	cSetLocalPref( "ReceiveFilename", ReceiveDefault );
-	cSetLocalPref( "FirstMsgFilename", ReceiveDefault );
+	cSetLocalPref( "BuddyArriveFilename", cGetLocalPref("default_arrive_snd"));
+	cSetLocalPref( "BuddyAwayFilename", cGetLocalPref("default_leave_snd"));
+	cSetLocalPref( "BuddyLeaveFilename", cGetLocalPref("default_leave_snd"));
+	cSetLocalPref( "SendFilename", cGetLocalPref("default_send_snd"));
+	cSetLocalPref( "ReceiveFilename", cGetLocalPref("default_recv_snd"));
+	cSetLocalPref( "FirstMsgFilename", cGetLocalPref("default_recv_snd"));
 #endif
 
 	fSetLocalPref( "SoundVolume", 0.0 );
@@ -554,14 +557,14 @@ void	ayttm_prefs_init( void )
 
 	/* modules */
 #ifdef __MINGW32__
-	snprintf( buff, buff_size, "%s%s", base_dir, MODULE_DIR );
+	snprintf( buff, buff_size, "%s%s", base_dir, MODULE_DIR);
 	cSetLocalPref( "modules_path", buff );
 #else
-	cSetLocalPref( "modules_path", MODULE_DIR );
+	cSetLocalPref( "modules_path", cGetLocalPref("default_module_path") );
 #endif
 }
 
-void	ayttm_prefs_read( void )
+static void ayttm_prefs_read_file(char *file)
 {
 	const int		buffer_size = 1024;
 	char			buff[buffer_size];
@@ -569,7 +572,7 @@ void	ayttm_prefs_read( void )
 	FILE			*fp = NULL;
 	
 	
-	snprintf( buff, buffer_size, "%sprefs",config_dir );
+	snprintf( buff, buffer_size, "%s",file );
 	
 	fp = fopen( buff, "r" );
 	
@@ -713,6 +716,14 @@ void	ayttm_prefs_read( void )
 	{
 		proxy_set_auth( iGetLocalPref("do_proxy_auth"), cGetLocalPref("proxy_user"), cGetLocalPref("proxy_password") );
 	}
+}
+
+void	ayttm_prefs_read( void )
+{
+	const int		buffer_size = 1024;
+	char			buff[buffer_size];
+	snprintf( buff, buffer_size, "%sprefs",config_dir );
+	ayttm_prefs_read_file(buff);
 }
 
 void	ayttm_prefs_write( void )

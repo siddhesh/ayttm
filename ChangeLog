@@ -1,4 +1,12 @@
-* Thu Apr 17 2003 18:00 GMT [philip]	0.2.3-131
+* Fri Apr 18 2003 00:54 GMT [colin]	0.2.3-132
+- src/prefs.c
+Use AYTTMRC file instead of #defines for the defaults
+- Makefile.am
+Remove quotes in ayttmrc - my bad
+- src/Makefile.am
+Remove useless stuff from defaults.h
+
+* Fri Apr 18 2003 00:30 GMT [colin]	0.2.3-131
 - src/util.c
 try to fix a seg
 - src/crash.c

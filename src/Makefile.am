@@ -59,11 +59,6 @@ defaults.h: Makefile
 	@echo \#define MODULE_DIR \"\\\\modules\" >> defaults.h;
 	@echo \#define AYTTMRC  \"\\\\@PACKAGE@rc\" >> defaults.h;
 	@echo "#else" >> defaults.h;
-	@echo \#define BuddyArriveDefault \"${pkgdatadir}/sounds/BuddyArrive.au\" >> defaults.h;
-	@echo \#define BuddyLeaveDefault \"${pkgdatadir}/sounds/BuddyLeave.au\" >> defaults.h;
-	@echo \#define SendDefault \"${pkgdatadir}/sounds/Send.au\" >> defaults.h;
-	@echo \#define ReceiveDefault \"${pkgdatadir}/sounds/Receive.au\" >> defaults.h;
-	@echo \#define SpeechProgramDefault \"/usr/lib/ViaVoiceTTS/samples/cmdlinespeak/cmdlinespeak\" >> defaults.h;
 	@echo \#define MODULE_DIR \"${libdir}/@PACKAGE@\" >> defaults.h;
 	@echo \#define AYTTMRC  \"${sysconfdir}/@PACKAGE@rc\" >> defaults.h;
 	@echo "#endif" >> defaults.h;

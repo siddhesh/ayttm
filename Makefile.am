@@ -28,11 +28,11 @@ CLEANFILES = $(Utilities_DATA) $(gnome_DATA)
 @PACKAGE@rc: Makefile
 	@rm -f @PACKAGE@rc >/dev/null 2>&1;
 	@echo version=\"@VERSION@-@RELEASE@\" > @PACKAGE@rc
-	@echo default_arrive_snd=\"${pkgdatadir}/sounds/BuddyArrive.au\" >> @PACKAGE@rc
-	@echo default_leave_snd=\"${pkgdatadir}/sounds/BuddyLeave.au\" >> @PACKAGE@rc
-	@echo default_send_snd=\"${pkgdatadir}/sounds/Send.au\" >> @PACKAGE@rc
-	@echo default_recv_snd=\"${pkgdatadir}/sounds/Receive.au\" >> @PACKAGE@rc
-	@echo default_module_path=\"${libdir}/@PACKAGE@\" >> @PACKAGE@rc
+	@echo default_arrive_snd=${pkgdatadir}/sounds/BuddyArrive.au >> @PACKAGE@rc
+	@echo default_leave_snd=${pkgdatadir}/sounds/BuddyLeave.au >> @PACKAGE@rc
+	@echo default_send_snd=${pkgdatadir}/sounds/Send.au >> @PACKAGE@rc
+	@echo default_recv_snd=${pkgdatadir}/sounds/Receive.au >> @PACKAGE@rc
+	@echo default_module_path=${libdir}/@PACKAGE@ >> @PACKAGE@rc
 
 ayttm.spec: ChangeLog
 
