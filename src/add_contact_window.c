@@ -192,7 +192,7 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 {
 	grouplist *gl;
 	struct contact *con;
-	gchar *service = gtk_widget_get_name(gtk_menu_get_active(GTK_MENU(gtk_option_menu_get_menu(GTK_OPTION_MENU(service_list)))));
+	gchar *service = strdup(gtk_widget_get_name(gtk_menu_get_active(GTK_MENU(gtk_option_menu_get_menu(GTK_OPTION_MENU(service_list))))));
 	gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
 	gchar *mservice = NULL;
 	gint service_id = -1;

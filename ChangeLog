@@ -1,3 +1,7 @@
+* Wed Oct  8 2003 11:07 GMT [colin]	0.4.2-14
+- src/add_contact_window.c
+Fix extraneous free()
+
 * Wed Oct  8 2003 06:07 GMT [philip]	0.4.2-13
 - modules/yahoo2/
 Fix double processing of format string leading to crash and possible
