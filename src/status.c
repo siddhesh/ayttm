@@ -157,6 +157,19 @@ static void edit_group_callback(GtkWidget * w, grouplist * g)
 	edit_group_window_new(g);
 }
 
+static void sort_group_callback(GtkWidget *w, grouplist *g)
+{
+	LList *l=g->members, *sorted=NULL;
+
+	while(l) {
+		sorted = l_list_insert_sorted(sorted, l->data, (LListCompFunc)contact_cmp);
+		l=l_list_remove_link(l, l);
+	}
+
+	g->members = sorted;
+	update_contact_list();
+}
+
 static void add_to_group_callback(GtkWidget *widget, grouplist *g)
 {
 	show_add_contact_to_group_window(g);
@@ -364,6 +377,9 @@ static void group_menu(GdkEventButton * event, gpointer d )
 
 	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Group..."),
 			GTK_SIGNAL_FUNC(offer_remove_group_callback), d);
+	
+	gtkut_create_menu_button (GTK_MENU(menu), _("Sort"),
+			GTK_SIGNAL_FUNC(sort_group_callback), grp);
 	
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
 		 	event->button, event->time );

@@ -609,7 +609,7 @@ LList * find_chatrooms_with_remote_account(eb_account *remote)
 			for (others = ecr->fellows; others && others->data; others = others->next) {
 				eb_chat_room_buddy *ecrb = others->data;
 				if(!strcmp(remote->handle, ecrb->handle)) {
-					result = l_list_append(result, ecr);
+					result = l_list_prepend(result, ecr);
 					eb_debug(DBG_CORE, "Found %s in %s\n",remote->handle, ecr->room_name);
 					break;
 				}
@@ -927,7 +927,7 @@ void add_group( char * name )
 	
 	strncpy(eg->name, name, sizeof(eg->name));
 
-	groups = l_list_append( groups, eg );
+	groups = l_list_prepend( groups, eg );
 	add_group_line(eg);
 
 	for( node = accounts; node; node = node->next ) {
@@ -982,7 +982,7 @@ void rename_group( grouplist *current_group, char * new_name )
 
 
 /* compares two contact names */
-static int contact_cmp(const void * a, const void * b)
+int contact_cmp(const void * a, const void * b)
 {
 	const struct contact *ca=a, *cb=b;
 	return strcasecmp(ca->nick, cb->nick);
@@ -1045,7 +1045,7 @@ static void add_account_verbose( char * contact, eb_account * ea, int verbosity 
 		contact_mgmt_queue_add(ea, MGMT_ADD, c?c->group->name:_("Unknown"));
 	}
 	if (c) {
-		c->accounts = l_list_append( c->accounts, ea );
+		c->accounts = l_list_prepend( c->accounts, ea );
 		ea->account_contact = c;
 		RUN_SERVICE(ea)->add_user(ea);
 
@@ -1153,7 +1153,7 @@ void add_unknown_with_name( eb_account * ea, char * name )
 	struct contact * con = add_new_contact(_("Unknown"), 
 			(name && strlen(name))?name:ea->handle, ea->service_id);
 	
-	con->accounts = l_list_append( con->accounts, ea );
+	con->accounts = l_list_prepend( con->accounts, ea );
 	ea->account_contact = con;
 	ea->icon_handler = ea->status_handler = -1;
 	if(find_suitable_local_account_for_remote(ea, NULL))
@@ -1193,48 +1193,55 @@ static void handle_group_change(eb_account *ea, char *og, char *ng)
 
 }
 
-struct contact * move_account (struct contact * con, eb_account *ea)
+/**
+ * Move an account from one contact to another
+ * @new_con - the contact to move the account to
+ * @ea      - the account to move
+ *
+ * @return  - the old contact
+ */
+struct contact * move_account (struct contact * new_con, eb_account *ea)
 {
-	struct contact *c = ea->account_contact;
-	char *new_group = con->group->name;
-	char *old_group = c->group->name;
+	struct contact *old_con = ea->account_contact;
+	char *new_group = new_con->group->name;
+	char *old_group = old_con->group->name;
 
-	if (c != con) {
+	if (old_con != new_con) {
 
 		handle_group_change(ea, old_group, new_group);
 
-		c->accounts = l_list_remove(c->accounts, ea);
-
+		old_con->accounts = l_list_remove(old_con->accounts, ea);
 		remove_account_line(ea);
-		if(l_list_empty(c->accounts)) {
-			remove_contact(c);
-			c=NULL;
+
+		new_con->accounts = l_list_prepend(new_con->accounts, ea);
+		ea->account_contact = new_con;
+
+		if(l_list_empty(old_con->accounts)) {
+			remove_contact(old_con);
+			old_con=NULL;
 		} else {
 			LList *l;
-			c->online = 0;
-			for(l=c->accounts; l; l=l->next)
+			old_con->online = 0;
+			for(l=old_con->accounts; l; l=l->next)
 				if(((eb_account *)l->data)->online)
-					c->online++;
-			if(!c->online)
-				remove_contact_line(c);
+					old_con->online++;
+			if(!old_con->online)
+				remove_contact_line(old_con);
 			else
-				add_contact_and_accounts(c);
+				add_contact_and_accounts(old_con);
 		}
 
-		con->accounts = l_list_append(con->accounts, ea);
-
-		ea->account_contact = con;
 		if(ea->online) {
-			con->online++;
-			add_contact_line(con);
+			new_con->online++;
+			add_contact_line(new_con);
 		}
 	}
 	
-	add_contact_and_accounts(con);
+	add_contact_and_accounts(new_con);
 
 	write_contact_list();
 
-	return c;
+	return old_con;
 }
 
 void move_contact (char * group, struct contact * c)
@@ -1492,12 +1499,9 @@ LList * get_groups()
 {
 	LList * node = NULL;
   	LList * newlist = NULL;
-	node = groups;
 	
-	while(node) {
-		newlist=l_list_append(newlist, ((grouplist *)node->data)->name);
-		node=node->next;
-	}
+	for(node=groups; node; node = l_list_next(node))
+		newlist=l_list_prepend(newlist, ((grouplist *)node->data)->name);
 	
 	return newlist;
 }
