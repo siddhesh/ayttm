@@ -1,4 +1,7 @@
-AM_CFLAGS = $(GTK_CFLAGS) -I$(top_srcdir)/src -DAYTTM_SMILEY_DIR=\"${pkgdatadir}/smileys\"
+AM_CFLAGS = $(GTK_CFLAGS) -I$(top_srcdir)/src -DAYTTM_SMILEY_DIR=\"${smileydir}\"
+
+smileydir = ${pkgdatadir}/smileys
+smiley_DATA =
 
 pkglib_LTLIBRARIES = smiley-themer.la
 
