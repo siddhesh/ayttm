@@ -60,8 +60,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Everybuddy Settings", 
 	"Import the Everybuddy Settings", 
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/29 07:03:08 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/29 07:05:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -197,11 +197,6 @@ void import_eb_accounts(ebmCallbackData *data)
 		contactsbutton  = gtk_check_button_new_with_label(_("Import contacts"));
 		prefsbutton     = gtk_check_button_new_with_label(_("Import preferences"));
 		awaybutton      = gtk_check_button_new_with_label(_("Import away messages"));
-		
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(accountsbutton), TRUE);
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(contactsbutton), TRUE);
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(prefsbutton), TRUE);
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(awaybutton), TRUE);
 		
 		okbutton = do_icon_button(_("OK"), ok_xpm, window);
 		cancelbutton = do_icon_button(_("Cancel"), cancel_xpm, window);
