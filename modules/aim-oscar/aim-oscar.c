@@ -28,7 +28,6 @@
  * AIM implementation
  */
 
-unsigned int module_version() {return CORE_VERSION;}
 #define DEBUG	1
 
 #include <gtk/gtk.h>
@@ -72,6 +71,7 @@ typedef unsigned long ulong;
 #define plugin_finish aim_oscar_LTX_plugin_finish
 #define module_version aim_oscar_LTX_module_version
 
+unsigned int module_version() {return 16;}
 
 /* Function Prototypes */
 int plugin_init();
@@ -84,13 +84,13 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.10 $",
-	"$Date: 2003/06/04 22:07:18 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/07/20 16:42:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
 };
-struct service SERVICE_INFO = { "AIM", -1, FALSE, TRUE, FALSE, TRUE, NULL };
+struct service SERVICE_INFO = { "AIM-oscar", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER, NULL };
 /* End Module Exports */
 
 static char *eb_aim_get_color(void) { static char color[]="#000088"; return color; }
@@ -247,7 +247,7 @@ char *aim_normalize(char *s)
 /*the callback to call all callbacks :P */
 
 
-void eb_aim_callback(void *data, int source, eb_input_condition condition )
+static void eb_aim_callback(void *data, int source, eb_input_condition condition )
 {
   eb_local_account * ela = data;
   struct eb_aim_local_account_data * alad =
@@ -1007,11 +1007,6 @@ int eb_aim_auth_success(struct aim_session_t * sess, struct command_rx_struct * 
   return 1;
 }
 
-
-
-//int eb_aim_parse_userinfo(struct command_rx_struct *command, ...);
-//int eb_aim_pwdchngdone(struct command_rx_struct *command, ...);
-
 /*   callbacks used by EveryBuddy    */
 gboolean eb_aim_query_connected(eb_account * account)
 {
@@ -1019,7 +1014,7 @@ gboolean eb_aim_query_connected(eb_account * account)
 	return aad->status != AIM_OFFLINE;
 }
 
-eb_account * eb_aim_new_account( const char * account )
+eb_account * eb_aim_new_account( eb_local_account * ela, const char * account )
 {
 	eb_account * a = g_new0(eb_account, 1);
 	struct eb_aim_account_data * aad = g_new0(struct eb_aim_account_data, 1);
@@ -1028,7 +1023,7 @@ eb_account * eb_aim_new_account( const char * account )
 	strcpy(a->handle, account);
 	a->service_id = SERVICE_INFO.protocol_id;
 	aad->status = AIM_OFFLINE;
-	
+	a->ela = ela;
 	return a;
 }
 

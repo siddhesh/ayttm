@@ -1343,8 +1343,7 @@ int toc_signon( const char * username, const char * password,
 	strncpy(conn->server, server, sizeof(conn->server));
 	conn->port = port;
 
-
-	return connect_address(get_address(server), port,toc_signon_cb, conn);
+	return toc_async_socket(server, port, toc_signon_cb, conn);
 	
 }
 

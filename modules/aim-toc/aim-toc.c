@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.47 $",
-	"$Date: 2003/06/29 07:34:43 $",
+	"$Revision: 1.48 $",
+	"$Date: 2003/07/20 16:42:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -847,6 +847,32 @@ static void ay_aim_cancel_connect(void *data)
 	eb_aim_logout(ela);
 }
 
+static void ay_toc_connect_status(const char *msg, void *data)
+{
+  toc_conn *conn = (toc_conn *)data;
+  char *handle = conn->username;
+  eb_local_account *ela = NULL;
+  
+  if (!handle) return;
+  
+  ela = find_local_account_by_handle(handle, SERVICE_INFO.protocol_id);
+  if (!ela) { 
+	  return;
+  }else {
+	  struct eb_aim_local_account_data *alad =
+			(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+	  if (!alad) return;
+	  ay_activity_bar_update_label(alad->activity_tag, msg);
+  }
+}
+
+
+static int eb_aim_async_socket(char *host, int port, void *cb, void *data)
+{
+  int tag = proxy_connect_host(host, port, cb, data, (void *)ay_toc_connect_status);
+  
+  return tag;
+}
 
 static void eb_aim_login( eb_local_account * account )
 {
@@ -1425,6 +1451,7 @@ struct service_callbacks * query_callbacks()
 	toc_new_user = eb_aim_new_user;
 	toc_new_group = eb_aim_new_group;
 	toc_logged_in = eb_aim_logged_in;
+	toc_async_socket = eb_aim_async_socket;
 	
 	sc = g_new0( struct service_callbacks, 1 );
 	sc->query_connected = eb_aim_query_connected;

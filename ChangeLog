@@ -1,3 +1,8 @@
+* Sun Jul 20 2003 12:14 GMT [colin]	0.3.3-5
+- modules/aim-toc/
+- modules/icq-toc/
+Use standard async socket instead of connect_address()
+
 * Sun Jul 20 2003 12:14 GMT [colin]	0.3.3-4
 - modules/aim-toc/libtoc/libtoc.c
 - modules/icq-toc/libtoc/libtoc.c

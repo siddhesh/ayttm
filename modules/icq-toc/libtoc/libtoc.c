@@ -1320,7 +1320,7 @@ int icqtoc_signon( const char * username, const char * password,
 	conn->port = port;
 
 
-	return connect_address(get_address(server), port,icqtoc_signon_cb, conn);
+	return icqtoc_async_socket(server, port, icqtoc_signon_cb, conn);
 	
 }
 

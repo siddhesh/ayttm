@@ -305,7 +305,7 @@ faim_export int aim_rxdispatch(struct aim_session_t *sess)
 {
   int i = 0;
   struct command_rx_struct *workingPtr = NULL;
-  
+  printf("aim_rxdispatchhehe\n");
   if (sess->queue_incoming == NULL) {
     faimdprintf(1, "parse_generic: incoming packet queue empty.\n");
     return 0;

@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.37 $",
-	"$Date: 2003/06/28 11:31:00 $",
+	"$Revision: 1.38 $",
+	"$Date: 2003/07/20 16:42:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -890,8 +890,33 @@ static void eb_icq_logout( eb_local_account * account )
 	{
 		eb_icq_oncoming_buddy(l->data, FALSE, 0, 0, FALSE);
 	}
+}
+
+static void ay_toc_connect_status(const char *msg, void *data)
+{
+  toc_conn *conn = (toc_conn *)data;
+  char *handle = conn->username;
+  eb_local_account *ela = NULL;
+  
+  if (!handle) return;
+  
+  ela = find_local_account_by_handle(handle, SERVICE_INFO.protocol_id);
+  if (!ela) { 
+	  return;
+  } else {
+	  struct eb_icq_local_account_data *alad =
+			(struct eb_icq_local_account_data *)ela->protocol_local_account_data;
+	  if (!alad) return;
+	  ay_activity_bar_update_label(alad->activity_tag, msg);
+  }
+}
 
 
+static int eb_icq_async_socket(char *host, int port, void *cb, void *data)
+{
+  int tag = proxy_connect_host(host, port, cb, data, (void *)ay_toc_connect_status);
+  
+  return tag;
 }
 
 static void eb_icq_send_im( eb_local_account * account_from,
@@ -1289,6 +1314,7 @@ struct service_callbacks * query_callbacks()
 	icqtoc_new_user = eb_icq_new_user;
 	icqtoc_new_group = eb_icq_new_group;
 	icqtoc_logged_in = eb_icq_logged_in;
+	icqtoc_async_socket = eb_icq_async_socket;
 	
 	sc = g_new0( struct service_callbacks, 1 );
 	sc->query_connected = eb_icq_query_connected;

@@ -68,6 +68,7 @@ void (*toc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,
 
 void (*toc_user_info)(toc_conn  * conn, char * user, char * message );
 void (*toc_logged_in)(toc_conn *conn);
+int  (*toc_async_socket)(char *host, int port, void *cb, void *data);
 
 void toc_callback( toc_conn * conn );
 int toc_signon( const char * username, const char * password,
