@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=158
+RELEASE=159
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -276,8 +276,6 @@ AC_ARG_ENABLE(broken_icq, AC_HELP_STRING([--enable-broken-icq],
 		[include broken icq service instead of working one]))
 AC_ARG_ENABLE(smtp, AC_HELP_STRING([--enable-smtp],
 		[include smtp service]))
-AC_ARG_ENABLE(zephyr, AC_HELP_STRING([--enable-zephyr],
-		[include Zephyr service]))
 AC_ARG_ENABLE(aycryption, AC_HELP_STRING([--disable-aycryption],
 		[exclude encryption utility]))
 AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
@@ -344,38 +342,6 @@ if test "$enable_aycryption" != no; then
 fi
 
 ### End Optional Service  options ######################################
-
-### Begin Zephyr-related options ######################################
-
-with_krb4_dir=/usr/kerberos
-
-AC_ARG_ENABLE(krb4, AC_HELP_STRING([--disable-krb4],
-		[disable KerberosIV in Zephyr]))
-AC_ARG_WITH(krb4-dir, AC_HELP_STRING([--with-krb4-dir=dir],
-		[specify top dir of KerberosIV installation (default: /usr/kerberos]))
-
-#echo "DEBUG: zephyr_val = $zephyr_val"
-if test "$enable_zephyr" = yes; then
-  AC_MSG_CHECKING(support for Zephyr)
-#  echo "DEBUG: krb4_val = $krb4_val"
-#  echo "DEBUG: krb4_dir = $krb4_dir"
-  OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR zephyr"
-  ZEPHYR_CFLAGS=""
-  ZEPHYR_LIBS=""
-  if test "$enable_krb4" = yes; then
-    ZEPHYR_CFLAGS="$ZEPHYR_CFLAGS -I$krb4_dir/include -I$krb4_dir/include/kerberosIV"
-    ZEPHYR_LIBS="$ZEPHYR_LIBS -L$krb4_dir/lib"
-  fi
-  AC_SUBST(ZEPHYR_CFLAGS)
-  AC_SUBST(ZEPHYR_LIBS)
-  if test "$enable_krb4" = yes; then
-    AC_CHECK_HEADERS(krb.h krb_err.h)
-    AC_CHECK_LIB(krb4, krb_mk_req, [ZEPHYR_LIBS="$ZEPHYR_LIBS -lkrb4"
-	AC_DEFINE(HAVE_KRB4, , Define if we use kerberos 4 for Zephyr)], 
-	[AC_MSG_WARN(
-	[*** krb4 not found -- Zephyr service will be unauthenticated ***])])
-  fi
-fi
 
 AC_ARG_ENABLE(all-warnings, AC_HELP_STRING([--enable-all-warnings],
 		[enable all compiler warnings - for developers]))
