@@ -41,7 +41,7 @@
 %%
 
 start:
-	group_list { temp_groups = $1; }
+	group_list { groups = $1; }
 ;
 
 group_list:
@@ -115,8 +115,12 @@ contact:
 		free(c);
 		
 		c = value_pair_get_value( $2, "DEFAULT_PROTOCOL" );
-		cur_contact->default_filetransb = cur_contact->default_chatb = get_service_id(c);
-		free(c);
+		if(c) {
+			cur_contact->default_filetransb = cur_contact->default_chatb = get_service_id(c);
+			free(c);
+		} else {
+			cur_contact->default_filetransb = cur_contact->default_chatb = -1;
+		}
 		cur_contact->group = cur_group;
 		cur_contact->icon_handler = -1;
 		value_pair_free($2);
@@ -129,7 +133,11 @@ contact:
 ;	
 
 account_list:
- 	account account_list{ $$ = l_list_insert_sorted( $2, $1, account_cmp); }
+ 	account account_list { 
+		$$ = l_list_insert_sorted( $2, $1, account_cmp); 
+		if(cur_contact->default_chatb == -1)
+			cur_contact->default_filetransb = cur_contact->default_chatb = $1->service_id;
+	}
 |	EPSILON { $$ = 0; }
 
 ;

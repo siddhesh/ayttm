@@ -70,5 +70,9 @@ int group_cmp(const void *a, const void *b);
 LList * get_group_names( void );
 LList * get_group_contact_names( grouplist * group );
 
+/* contacts file */
+void write_contacts_to_fh(FILE *fp);
+void load_contacts_from_fh(FILE *fp);
+
 #endif
 

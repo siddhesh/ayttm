@@ -739,7 +739,7 @@ LList * get_group_contact_names( grouplist * group )
  * Writes the entire contact list to file
  * @param	fp	A file pointer to write to
  */
-void write_contact_list_to_fh(FILE *fp)
+void write_contacts_to_fh(FILE *fp)
 {
 	LList *lg, *lc, *la;
 
@@ -790,4 +790,27 @@ void write_contact_list_to_fh(FILE *fp)
 		fprintf( fp, "</GROUP>\n" );
 	}
 }
+
+/**
+ * Loads the contacts from file
+ * @param	fp	A file pointer to read from
+ */
+void load_contacts_from_fh(FILE *fp)
+{
+	extern int contactparse();
+	extern FILE *contactin;
+	LList *cts = NULL;
+	
+	contactin = fp;
+
+	contactparse();
+
+	fclose(fp);
+	
+	if (groups)
+		update_contact_list();	
+
+	return 1;
+}
+
 

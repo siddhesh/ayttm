@@ -1,3 +1,9 @@
+* Sun Aug 17 2003 06:00 GMT [philip]	0.3.3-27
+- po/es.po
+Ryan fixed the problem with dup strings in es.po
+- src/contact_parser.y
+fix bug 788549
+
 * Tue Aug  12 2003 06:12 GMT [colin]	0.3.3-26
 - modules/aim-toc/aim-toc.c
 Fix bug #786905 (NULL ela)

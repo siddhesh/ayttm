@@ -24,7 +24,7 @@ AC_DEFUN(AM_PATH_GARTS,
 
   AC_ARG_WITH(arts-prefix,[  --with-arts-prefix=PFX   Prefix where ARTS is installed (optional)],
               arts_prefix="$withval", arts_prefix="")
-  AC_ARG_ENABLE(arts,[  --disable-arts       Do not include support for ARTS])
+  AC_ARG_ENABLE(arts,[  --disable-arts          Do not include support for ARTS])
 
   # try to automatically find artsc-config
   AC_PATH_PROG(ARTSC_CONFIG, artsc-config, no, $PATH:/opt/kde2/bin)

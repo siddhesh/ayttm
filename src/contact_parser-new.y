@@ -15,37 +15,18 @@
 
 	extern int Line_contact;
 	#define contacterror(error) printf("Parse error on line %d: %s\n", Line_contact, error );
-	static struct contact * cur_contact = NULL;
-	static grouplist * cur_group = NULL;
+	static struct contact *cur_contact = NULL;
+	static grouplist *cur_group = NULL;
 	extern int contactlex();
-
-	static int group_cmp(const void * a, const void * b)
-	{
-		const grouplist *ga=(grouplist *)a, *gb=(grouplist *)b;
-		return strcasecmp(ga->name, gb->name);
-	}
-
-	static int contact_cmp(const void * a, const void * b)
-	{
-		const struct contact *ca=(struct contact *)a, *cb=(struct contact *)b;
-		return strcasecmp(ca->nick, cb->nick);
-	}
-
-	static int account_cmp(const void * a, const void * b)
-	{
-		eb_account *ca=(eb_account *)a, *cb=(eb_account *)b;
-		return strcasecmp(ca->handle, cb->handle);
-	}
-	
 %}
 
 %union {
-	LList * vals;
-	value_pair * val;
-	grouplist * grp;
-	char * string;
-	eb_account * acnt;
-	struct contact * cntct;
+	LList *vals;
+	value_pair *val;
+	grouplist *grp;
+	char *string;
+	eb_account *ea;
+	struct contact *con;
 }
 
 %token <string> IDENTIFIER
@@ -53,9 +34,9 @@
 %type <vals> group_list
 %type <grp> group
 %type <vals> contact_list
-%type <cntct> contact
+%type <con> contact
 %type <vals> account_list
-%type <acnt> account
+%type <ea> account
 %type <vals> value_list
 %type <val> key_pair
 %%
@@ -63,7 +44,7 @@
 start:
 	group_list 
 	{
-		temp_groups = $1;
+		groups = $1;
 	}
 ;
 
@@ -75,7 +56,7 @@ group_list:
 group:
 	GROUP value_list
 	{
-		char * c;
+		char *c;
 		c = value_pair_get_value( $2, "NAME" );
 		cur_group = add_group(c);
 		g_free(c);

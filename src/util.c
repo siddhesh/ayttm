@@ -550,7 +550,7 @@ eb_account * find_suitable_remote_account( eb_account * first, struct contact * 
 	if (possibility)
 		return possibility;
 	
-	if( first && first->ela->connected && (can_offline_msg(eb_services[first->service_id]) || 
+	if( first && first->ela && first->ela->connected && (can_offline_msg(eb_services[first->service_id]) || 
 			 RUN_SERVICE(first)->query_connected(first)) )
 		return first;
 	

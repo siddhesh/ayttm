@@ -6,13 +6,13 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Ayttm\n"
 "POT-Creation-Date: 2003-05-24 09:35+0530\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: $Date: 2003/08/17 06:13:40 $\n"
 "Last-Translator: Sepio <sepio_astucio@yahoo.es>\n"
 "Language-Team: Sepio <sepio_astucio@yahoo.es>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: libproxy/proxy.c:475 libproxy/proxy.c:477 libproxy/proxy.c:479
@@ -542,12 +542,7 @@ msgstr ""
 msgid "IMPORTANTE %s:CLIENTINFO ACTION CLIENTINFO PING VERSION: Utiliza CLIENTINFO <COMANDO>; para obtener información más específica.\n"
 msgstr ""
 
-#: modules/irc/irc.c:915
-#, c-format
-msgid "IMPORTANTE %s: CLIENTINFO: ACTION contiene las descripciones de las acciones para atmosphere\n"
-msgstr ""
-
-#: modules/irc/irc.c:919
+#: modules/irc/irc.c:915 modules/irc/irc.c:919
 #, c-format
 msgid "IMPORTANTE %s: CLIENTINFO: ACTION contiene las descripciones de las acciones para atmosphere\n"
 msgstr ""
@@ -1315,10 +1310,6 @@ msgstr ""
 msgid "No se ha especificado cuenta local."
 msgstr ""
 
-#: src/add_contact_window.c:214
-msgid "La cuenta local no existe."
-msgstr ""
-
 #: src/add_contact_window.c:222 src/crash.c:516
 msgid "Error"
 msgstr ""
@@ -1429,6 +1420,7 @@ msgstr ""
 
 #: src/chat_room.c:461 src/edit_account_window.c:72
 #: src/edit_account_window.c:83
+#: src/add_contact_window.c:214
 msgid "La cuenta local no existe."
 msgstr ""
 
@@ -1489,6 +1481,7 @@ msgstr ""
 
 #. Send message Section
 #: src/chat_room.c:1147 src/chat_window.c:896 src/chat_window.c:2128
+#: src/trigger.c:291
 msgid "Enviar mensaje"
 msgstr ""
 
@@ -2328,6 +2321,7 @@ msgid "Estado:"
 msgstr ""
 
 #: src/gtk/prefs_window.C:2394
+#: src/plugin.c:156 src/plugin.c:484
 msgid "Error de Plugin"
 msgstr ""
 
@@ -2420,10 +2414,6 @@ msgid ""
 "El plugin %s no se ha cargado adecuadamente debido a un error:\n"
 "\n"
 "%s"
-msgstr ""
-
-#: src/plugin.c:156 src/plugin.c:484
-msgid "Error de Plugin"
 msgstr ""
 
 #. Only update status on a plugin that is not already loaded
@@ -2795,10 +2785,6 @@ msgstr ""
 
 #: src/trigger.c:290
 msgid "Mostrar diálogo de aviso"
-msgstr ""
-
-#: src/trigger.c:291
-msgid "Enviar mensaje"
 msgstr ""
 
 #. Section for letting the user know which trigger they are editing
