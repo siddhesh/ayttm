@@ -190,6 +190,29 @@ struct yahoo_buddy {
 	struct yab *yab_entry;
 };
 
+enum yahoo_search_type {
+	YAHOO_SEARCH_KEYWORD = 0,
+	YAHOO_SEARCH_YID,
+	YAHOO_SEARCH_NAME
+};
+
+enum yahoo_search_gender {
+	YAHOO_GENDER_NONE = 0,
+	YAHOO_GENDER_MALE,
+	YAHOO_GENDER_FEMALE
+};
+
+enum yahoo_search_agerange {
+	YAHOO_AGERANGE_NONE = 0
+};
+
+struct yahoo_found_contact {
+	char *id;
+	char *gender;
+	char *location;
+	int age;
+	int online;
+};
 
 /*
  * Function pointer to be passed to http get/post and send file

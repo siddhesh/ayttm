@@ -1,3 +1,12 @@
+* Fri Dec 12 2003 06:56 GMT [philip]	0.4.5-5
+- modules/yahoo2/libyahoo2/yahoo_httplib.c
+fix file receiving - sometimes the sender would not be
+ready to send, and our non blocking read was returning with
+EAGAIN.  We now check for this.
+The fix is a hack that just polls continuously until read is
+ready.  We need to change this at some point to actually use
+an asynchronous wait.
+
 * Thu Dec 11 2003 06:26 GMT [philip]	0.4.5-4
 - modules/icq-toc/icq-toc.c
 printf -> eb_debug

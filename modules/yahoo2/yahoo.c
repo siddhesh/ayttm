@@ -134,8 +134,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.77 $",
-	"$Date: 2003/12/10 10:28:55 $",
+	"$Revision: 1.78 $",
+	"$Date: 2003/12/12 07:00:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -945,6 +945,7 @@ static void eb_yahoo_save_file_callback(gpointer data, int fd, eb_input_conditio
 	}
 
 	yftd->transferred += count;
+	LOG(("total size: %ld, transferred: %ld\n", yftd->fsize, yftd->transferred));
 	ay_progress_bar_update_progress(yftd->progress, yftd->transferred);
 	while(count > 0 && (c=write(file, buffer, count)) < count) 
 		count -= c;
@@ -954,7 +955,7 @@ static void eb_yahoo_got_url_handle(int id, int fd, int error,
 		const char *filename, unsigned long size, void *data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
-	char label[1024];
+	char label[1024]="     ";	/* 5 spaces so that label[5]==NULL */
 
 	if(error || fd<=0) {
 		WARNING(("yahoo_get_url_handle returned (%d) %s", error, strerror(error)));
@@ -965,8 +966,12 @@ static void eb_yahoo_got_url_handle(int id, int fd, int error,
 		return;
 	}
 
+	LOG(("Passed in filename: %s user chosen filename: %s\n", filename, yftd->fname));
+
 	if(!filename)
 		filename = yftd->fname;
+	if(!yftd->fsize)
+		yftd->fsize = size;
 
 	yftd->file = open(filename, O_WRONLY|O_CREAT|O_TRUNC, 
 			S_IRUSR|S_IWUSR);
@@ -1002,6 +1007,8 @@ static void eb_yahoo_save_file(const char *filename, gpointer data)
 	FREE(yftd->fname);
 	yftd->fname = g_strdup(filename);
 
+	LOG(("Got filename: %s\n", filename));
+
 	yahoo_get_url_handle(yftd->id, yftd->url, eb_yahoo_got_url_handle, yftd);
 }
 
@@ -1009,7 +1016,7 @@ static void eb_yahoo_accept_file(gpointer data, int result)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	if(result) {
-		char *filepath;
+		char *filepath, *tmp;
 
 		if(yftd->fname)
 			filepath = strdup(yftd->fname);
@@ -1018,7 +1025,14 @@ static void eb_yahoo_accept_file(gpointer data, int result)
 
 		if(strchr(filepath, '?'))
 			*(strchr(filepath, '?')) = '\0';
+		tmp = strrchr(filepath, '/');
+		if(tmp) {
+			tmp = strdup(tmp+1);
+			free(filepath);
+			filepath=tmp;
+		}
 
+		LOG(("yahoo told us file is: %s\n", filepath));
 		if(do_prompt_save_file)
 			ay_do_file_selection(filepath, _("Save file as"), eb_yahoo_save_file, yftd);
 		else
@@ -1049,7 +1063,8 @@ static void ext_yahoo_got_file(int id, char *from, char *url, long expires, char
 	yftd->id = id;
 	yftd->from = g_strdup(from);
 	yftd->url = g_strdup(url);
-	yftd->fname = (fname?g_strdup(fname):NULL);
+	if(fname)
+		yftd->fname = g_strdup(fname);
 	yftd->fsize = fsize;
 	yftd->expires = expires;
 	eb_do_dialog(buff, _("Yahoo File Transfer"), eb_yahoo_accept_file, yftd);
@@ -2014,6 +2029,11 @@ static void ext_yahoo_typing_notify(int id, char *who, int stat)
 		else
 			eb_update_status(ea, NULL);
 	}
+}
+
+static void ext_yahoo_got_search_result(int id, 
+		int found, int start, int total, YList *contacts)
+{
 }
 
 static void ext_yahoo_game_notify(int id, char *who, int stat)
@@ -3414,6 +3434,8 @@ static void register_callbacks()
 	yc.ext_yahoo_chat_userjoin = ext_yahoo_chat_userjoin;
 	yc.ext_yahoo_chat_userleave = ext_yahoo_chat_userleave;
 	yc.ext_yahoo_chat_message = ext_yahoo_chat_message;
+
+	yc.ext_yahoo_got_search_result = ext_yahoo_got_search_result;
 
 	yc.ext_yahoo_got_webcam_image = ext_yahoo_got_webcam_image;
 	yc.ext_yahoo_webcam_invite = ext_yahoo_webcam_invite;
