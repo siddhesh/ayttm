@@ -399,11 +399,10 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 		id = get_service_id(service);
 		if (accounts
 		    && (ela = find_local_account_by_handle(user, id))) {
-			/* If the account exists, just 
-			   update the password and logout
-			 */
 			LList *config = NULL;
 			config = eb_services[id].sc->write_local_config(ela);
+			config = value_pair_remove(config, "SCREEN_NAME");
+			config = value_pair_add(config, "SCREEN_NAME", user);
 			config = value_pair_remove(config, "PASSWORD");
 			config = value_pair_add(config, "PASSWORD", pass);
 			config = value_pair_remove(config, "CONNECT");
