@@ -1,10 +1,12 @@
 #!/bin/bash
 
-[ ! -x /usr/bin/streamer -o ! -x /usr/bin/ppmtojpeg ] && exit -1
+[ $1 = "-d" ] && DIR=$2 || DIR=~/.ayttm
 
-OUTFILE=`mktemp -q /tmp/ayttm-$UID-XXXXXX` || exit -2
-/usr/bin/streamer -q -f ppm -o $OUTFILE 2>/dev/null
-cat $OUTFILE | /usr/bin/ppmtojpeg
-rm -f $OUTFILE
+LOCK=$DIR/webcam_grab.lock
+[ -e $LOCK ] && exit 0
+touch $LOCK
+
+/usr/bin/streamer -q -f jpeg -o /dev/stdout OUTFILE 2>/dev/null
+rm -f $LOCK
 
 exit 0

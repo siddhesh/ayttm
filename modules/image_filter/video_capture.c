@@ -41,15 +41,15 @@
 static int plugin_init();
 static int plugin_finish();
 
-static char frame_grabber[MAX_PREF_LEN]= AYTTM_BIN_DIR "/ayttm_streamer_wrapper.sh";
+static char frame_grabber[MAX_PREF_LEN]= AYTTM_BIN_DIR "/ayttm_streamer_wrapper.sh -d %d";
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Video Capture",
 	"Capture video images from some source",
-	"$Revision: 1.1 $",
-	"$Date: 2003/12/19 19:22:56 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/12/21 07:37:25 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -93,10 +93,26 @@ static int plugin_finish()
 
 static long int grab_frame(unsigned char **image)
 {
-	FILE *grabber_fp = popen(frame_grabber, "r");
+	FILE *grabber_fp;
 	unsigned char buff[1024];
 	unsigned char *outbuf=NULL;
 	long int nsize=0, n;
+
+	char *cmd = strdup(frame_grabber);
+	while(strstr(cmd, "%d")) {
+		char *tmp = strstr(cmd, "%d");
+		char *rest=NULL;
+		if(*(tmp+2))
+			rest = strdup(tmp+2);
+		*tmp = NULL;
+		cmd = ay_string_append(cmd, eb_config_dir());
+		if(rest)
+			cmd = ay_string_append(cmd, rest);
+	}
+
+	grabber_fp = popen(cmd, "r");
+	ay_free(cmd);
+
 	if(!grabber_fp)
 		return -1;
 

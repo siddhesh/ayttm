@@ -1,3 +1,9 @@
+* Sun Dec 21 2003 07:33 GMT [philip]	0.4.5-17
+- modules/image_filter/ayttm_streamer_wrapper.sh
+don't race.  create a lock file
+- modules/yahoo2/yahoo.c
+tweaks, fix segfaults and don't allow duplicate My webcam windows.
+
 * Sat Dec 20 2003 15:14 GMT [philip]	0.4.5-16
 - modules/yahoo2/yahoo.c
 Ok, I think webcam broadcast works... I've seen myself, and I'm green!
