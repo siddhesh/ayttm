@@ -1,3 +1,8 @@
+* Tue Apr 29 2003 14:09 GMT [colin]	0.3.0-46
+- src/prefs.[ch] src/gtk/prefs_window.[Ch] 
+  src/gtk/gtk_eb_html.c
+Font face pref
+
 * Tue Apr 29 2003 13:26 GMT [philip]	0.3.0-45
 - configure.ac
 Changes to properly build mingw32 makefiles

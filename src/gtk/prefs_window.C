@@ -262,6 +262,7 @@ class ay_chat_panel : public ay_prefs_window_panel
 		struct prefs::chat &m_prefs;
 		
 		GtkWidget		*m_font_size_entry;
+		GtkWidget		*m_font_face_entry;
 };
 
 /// Chat:Tabs prefs panel
@@ -1360,7 +1361,8 @@ void	ay_sound_files_panel::s_soundvolume_changed( GtkAdjustment *adjust, void *d
 ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &inPrefs )
 :	ay_prefs_window_panel( inTopFrameText ),
 	m_prefs( inPrefs ),
-	m_font_size_entry( NULL )
+	m_font_size_entry( NULL ),
+	m_font_face_entry( NULL )
 {
 }
 
@@ -1380,7 +1382,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label );
 
-	const int	buff_len = 10;
+	const int	buff_len = MAX_PREF_LEN;
 	char		buff[buff_len];
 	
 	m_font_size_entry = gtk_entry_new();
@@ -1392,15 +1394,36 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtk_widget_show( m_font_size_entry );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
+	
+	hbox = gtk_hbox_new( FALSE, 0 );
+
+	label = gtk_label_new( _("Font face: ") );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+	gtk_widget_show( label );
+
+	m_font_face_entry = gtk_entry_new();
+	gtk_widget_set_usize( m_font_face_entry, 200, -1 );
+	g_snprintf( buff, buff_len, "%s", m_prefs.font_face );
+
+	gtk_entry_set_text( GTK_ENTRY(m_font_face_entry), buff );
+	gtk_box_pack_start( GTK_BOX(hbox), m_font_face_entry, FALSE, FALSE, 0 );
+	gtk_widget_show( m_font_face_entry );
+	gtk_widget_show( hbox );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 }
 
 // Apply
 void	ay_chat_panel::Apply( void )
 {
-	const char	*ptr = gtk_entry_get_text( GTK_ENTRY(m_font_size_entry) );
+	char	*ptr = gtk_entry_get_text( GTK_ENTRY(m_font_size_entry) );
 	
 	if ( ptr != NULL )
 		m_prefs.font_size = atoi( ptr );
+	
+	ptr = gtk_entry_get_text( GTK_ENTRY(m_font_face_entry) );
+	
+	if ( ptr != NULL )
+		strncpy(m_prefs.font_face, ptr, MAX_PREF_LEN );
 }
 
 ////////////////

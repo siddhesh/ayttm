@@ -488,6 +488,7 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_enter_send", 1 );
 	iSetLocalPref( "do_ignore_unknown", 0 );
 	iSetLocalPref( "FontSize", 4 );
+	cSetLocalPref( "FontFace", "helvetica" );
 	iSetLocalPref( "do_multi_line", 1 );
 	iSetLocalPref( "do_raise_window", 0 );
 	iSetLocalPref( "do_send_idle_time", 0 );
@@ -751,6 +752,7 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_enter_send=%d\n", iGetLocalPref("do_enter_send") );
 	fprintf( fp, "do_ignore_unknown=%d\n", iGetLocalPref("do_ignore_unknown") );
 	fprintf( fp, "FontSize=%d\n", iGetLocalPref("FontSize") );
+	fprintf( fp, "FontFace=%s\n", cGetLocalPref("FontFace") );
 	fprintf( fp, "do_multi_line=%d\n", iGetLocalPref("do_multi_line") );
 	fprintf( fp, "do_raise_window=%d\n", iGetLocalPref("do_raise_window") );
 	fprintf( fp, "do_send_idle_time=%d\n", iGetLocalPref("do_send_idle_time") );
@@ -834,6 +836,7 @@ void	ayttm_prefs_show_window( void )
 	/* chat prefs */
 	prefs->chat.do_ignore_unknown     = iGetLocalPref("do_ignore_unknown");
 	prefs->chat.font_size	          = iGetLocalPref("FontSize");
+	strncpy( prefs->chat.font_face, cGetLocalPref("FontFace"), MAX_PREF_LEN );
 	prefs->chat.do_raise_window       = iGetLocalPref("do_raise_window");	
 	prefs->chat.do_send_idle_time     = iGetLocalPref("do_send_idle_time");
 	prefs->chat.do_ignore_fore        = iGetLocalPref("do_ignore_fore");
@@ -926,6 +929,7 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	/* chat */
 	iSetLocalPref( "do_ignore_unknown", inPrefs->chat.do_ignore_unknown );
 	iSetLocalPref( "FontSize", inPrefs->chat.font_size );
+	cSetLocalPref( "FontFace", inPrefs->chat.font_face );
 	iSetLocalPref( "do_raise_window", inPrefs->chat.do_raise_window );
 	iSetLocalPref( "do_send_idle_time", inPrefs->chat.do_send_idle_time );
 	iSetLocalPref( "do_ignore_fore", inPrefs->chat.do_ignore_fore );

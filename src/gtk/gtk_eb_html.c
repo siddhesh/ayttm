@@ -361,7 +361,7 @@ static font_stack * _font_stack_init()
 	fs->font_size = 3;
 	fs->font_ptsize = iGetLocalPref("FontSize") + 5;
 
-	strcpy(fs->font_name, "helvetica");
+	strcpy(fs->font_name, cGetLocalPref("FontFace"));
 	return fs;
 }
 
