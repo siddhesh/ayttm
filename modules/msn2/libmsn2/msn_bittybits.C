@@ -239,7 +239,7 @@ int msn_count_llist(llist * list)
   return retval;
 }
 
-char * msn_permstring(char * s)
+char * msn_permstring(const char * s)
 {
   char * retval = NULL;
 

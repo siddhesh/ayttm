@@ -170,7 +170,7 @@ class ay_general_panel : public ay_prefs_window_panel
 	
 	private:	// Gtk callbacks
 		static void		s_toggle_checkbox( GtkWidget *widget, int *data );
-		static void		s_set_browser_path( char *selected_filename, void *data );
+		static void		s_set_browser_path( const char *selected_filename, void *data );
 		static void		s_get_alt_browser_path( GtkWidget *t_browser_browse_button, int *data );
 		
 	private:
@@ -218,7 +218,7 @@ class ay_sound_files_panel : public ay_prefs_window_panel
 		virtual void	Apply( void );
 	
 	private:	// Gtk callbacks
-		static void		s_setsoundfilename( char *selected_filename, void *data );
+		static void		s_setsoundfilename( const char *selected_filename, void *data );
 		static void		s_getsoundfile( GtkWidget *widget, void *data );
 		static void		s_testsoundfile( GtkWidget *widget, void *data );
 		static void		s_soundvolume_changed( GtkAdjustment *adjust, void *data );
@@ -1056,7 +1056,7 @@ void	ay_general_panel::s_toggle_checkbox( GtkWidget *widget, int *data )
 }
 
 // s_set_browser_path
-void	ay_general_panel::s_set_browser_path( char *selected_filename, void *data )
+void	ay_general_panel::s_set_browser_path( const char *selected_filename, void *data )
 {
 	if ( selected_filename == NULL )
 		return;
@@ -1075,9 +1075,9 @@ void	ay_general_panel::s_get_alt_browser_path( GtkWidget *t_browser_browse_butto
 	ay_general_panel	*the_panel = reinterpret_cast<ay_general_panel *>( data );
 	assert( the_panel != NULL );
 
-	char	*alt_browser_text = gtk_entry_get_text( GTK_ENTRY(the_panel->m_alternate_browser_entry) );
-	eb_do_file_selector( alt_browser_text, _("Select your browser"),
-		ay_general_panel::s_set_browser_path, the_panel );
+	const char	*alt_browser_text = gtk_entry_get_text( GTK_ENTRY(the_panel->m_alternate_browser_entry) );
+	
+	ay_do_file_selection( alt_browser_text, _("Select your browser"), s_set_browser_path, the_panel );
 }
 
 
@@ -1251,7 +1251,7 @@ GtkWidget	*ay_sound_files_panel::AddSoundVolumeSelectionBox( const char *inLabel
 // ay_sound_files_panel callbacks
 
 // s_setsoundfilename
-void	ay_sound_files_panel::s_setsoundfilename( char *selected_filename, void *data )
+void	ay_sound_files_panel::s_setsoundfilename( const char *selected_filename, void *data )
 {
 	if ( selected_filename == NULL )
 		return;
@@ -1309,7 +1309,43 @@ void	ay_sound_files_panel::s_getsoundfile( GtkWidget *widget, void *data )
 	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
 	assert( cb_data != NULL );
 	
-	eb_do_file_selector( NULL, _("Select a file to use"), s_setsoundfilename, cb_data );
+	const ay_sound_files_panel	*the_panel = cb_data->m_panel;
+	GtkEntry					*sound_entry = NULL;
+	
+	switch( cb_data->m_sound_id ) 
+	{
+		case SOUND_BUDDY_ARRIVE: 	
+			sound_entry = GTK_ENTRY(the_panel->m_arrivesound_entry);
+			break;
+		
+		case SOUND_BUDDY_LEAVE:	
+			sound_entry = GTK_ENTRY(the_panel->m_leavesound_entry);
+			break;
+		
+		case SOUND_SEND:		
+			sound_entry = GTK_ENTRY(the_panel->m_sendsound_entry);
+			break;
+		
+		case SOUND_RECEIVE:		
+			sound_entry = GTK_ENTRY(the_panel->m_receivesound_entry);
+			break;
+		
+		case SOUND_BUDDY_AWAY: 	
+			sound_entry = GTK_ENTRY(the_panel->m_awaysound_entry);
+			break;
+		
+		case SOUND_FIRSTMSG:		
+			sound_entry = GTK_ENTRY(the_panel->m_firstmsgsound_entry);
+			break;
+		
+		default:
+			assert( false );
+			break;
+	}
+	
+	const char	*current_sound = gtk_entry_get_text( sound_entry );
+	
+	ay_do_file_selection( current_sound, _("Select a file to use"), s_setsoundfilename, cb_data );
 }
 
 // s_testsoundfile

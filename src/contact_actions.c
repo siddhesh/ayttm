@@ -32,38 +32,39 @@
 #include "file_select.h"
 
 
-static void send_file_callback(char *selected_filename, gpointer data)
+static void send_file_callback( const char *selected_filename, void *data )
 {
-	eb_account *ea = (eb_account *)data;
-	eb_account * x_fer_account;
+	eb_account	*ea = (eb_account *)data;
+	eb_account	*x_fer_account = NULL;
     
-	if(!selected_filename)
-		return;
-
-	if(!ea)  // Accout is offline
+	if ( (selected_filename == NULL) || (ea == NULL) )
 		return;
         
 	x_fer_account = find_suitable_file_transfer_account(ea, ea->account_contact);
 
-	if(x_fer_account) {
-		eb_local_account * ela = find_suitable_local_account(NULL, x_fer_account->service_id);
-		RUN_SERVICE(ela)->send_file(ela, x_fer_account, selected_filename);
-	} else {
-		eb_local_account * ela = find_suitable_local_account(NULL, ea->service_id);
-		strncpy(filename, selected_filename, sizeof(filename));
-		RUN_SERVICE(ela)->send_im(ela, ea, "EB_COMMAND SEND_FILE");
+	if ( x_fer_account != NULL )
+	{
+		eb_local_account	*ela = find_suitable_local_account( NULL, x_fer_account->service_id );
+		
+		RUN_SERVICE(ela)->send_file( ela, x_fer_account, (char *)selected_filename );
+	}
+	else
+	{
+		eb_local_account	*ela = find_suitable_local_account( NULL, ea->service_id );
+		
+		strncpy( filename, selected_filename, sizeof(filename) );
+		RUN_SERVICE(ela)->send_im( ela, ea, "EB_COMMAND SEND_FILE" );
 	}
 }
 
-void eb_do_send_file(eb_account *ea)
+void eb_do_send_file( eb_account *ea )
 {
-	eb_do_file_selector(NULL, _("Select file to send"), send_file_callback, ea);
+	ay_do_file_selection( NULL, _("Select file to send"), send_file_callback, ea );
 }
 
-void eb_view_log(struct contact *contact)
+void eb_view_log( struct contact *contact )
 {
-	if(contact->logwindow == NULL) {
-		contact->logwindow = eb_log_window_new(contact);
-	}
+	if ( contact->logwindow == NULL )
+		contact->logwindow = eb_log_window_new( contact );
 }
 

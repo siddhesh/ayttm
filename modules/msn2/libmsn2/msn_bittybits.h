@@ -26,7 +26,7 @@ void msn_del_from_llist(llist *& listp, llist_data * data);
 
 int msn_count_llist(llist * list);
 
-char * msn_permstring(char * s);
+char * msn_permstring(const char * s);
 
 char * msn_decode_URL(char * s);
 char * msn_encode_URL(char * s);

@@ -22,17 +22,17 @@
  *
  */ 
 
-#ifndef _FILE_SELECT_H__
-#define _FILE_SELECT_H__
+#ifndef __UI_FILE_SELECTION_DLG_H__
+#define __UI_FILE_SELECTION_DLG_H__
+
+#include "file_select.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef	void	(t_file_selection_callback)( const char *inSelectedFile, void *inData );
-
-void	ay_do_file_selection( const char *inDefaultFile, const char *inWindowTitle, 
+void	ay_ui_do_file_selection( const char *inDefaultFile, const char *inWindowTitle, 
 			 t_file_selection_callback *inCallback, void *inData );
 
 #ifdef __cplusplus

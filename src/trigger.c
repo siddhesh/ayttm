@@ -162,11 +162,12 @@ void do_trigger_offline(struct contact *con)
     }
 }
 
-static void browse_done(char * filename, gpointer data)
+static void browse_done( const char * filename, void *data )
 {
-	if(!filename)
+	if ( filename == NULL )
 		return;
-  gtk_entry_set_text(GTK_ENTRY(parameter), filename);
+
+	gtk_entry_set_text( GTK_ENTRY(parameter), filename );
 }
 
 static void set_button_callback(GtkWidget* widget, struct contact * con)
@@ -190,9 +191,9 @@ void destroy_window()
   gtk_widget_destroy(edit_trigger_window);
 }
 
-static void browse_file(GtkWidget* widget, gpointer data)
+static void browse_file( GtkWidget* widget, gpointer data )
 {
-	eb_do_file_selector(NULL, _("Select parameter"), browse_done, NULL);
+	ay_do_file_selection( NULL, _("Select parameter"), browse_done, NULL );
 }
 
 

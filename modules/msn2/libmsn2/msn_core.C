@@ -1784,7 +1784,7 @@ if(DEBUG)
    msn_del_from_llist(inv->conn->invitations_in, inv);
 }
 
-void msn_filetrans_accept(invitation_ftp * inv, char * dest)
+void msn_filetrans_accept(invitation_ftp * inv, const char * dest)
 {
    message * msg=new message;
 

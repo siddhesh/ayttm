@@ -154,8 +154,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.40 $",
-	"$Date: 2003/04/30 19:20:47 $",
+	"$Revision: 1.41 $",
+	"$Date: 2003/04/30 21:56:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -170,8 +170,6 @@ static void eb_msn_set_current_state( eb_local_account * account, gint state );
 
 static int plugin_init()
 {
-	int count=0;
-
 	eb_debug(DBG_MSN, "MSN\n");
 
 	ref_count=0;
@@ -522,7 +520,7 @@ static void eb_msn_authorize_callback( gpointer data, int response );
 static void eb_msn_filetrans_callback( gpointer data, int response );
 static void eb_msn_netmeeting_callback( gpointer data, int response );
 static int eb_msn_authorize_user ( char * username, char * friendlyname );
-static void eb_msn_filetrans_accept(char * filename, void * invitation);
+static void eb_msn_filetrans_accept(const char * filename, void * invitation);
 
 
 static gboolean eb_msn_query_connected( eb_account * account )
@@ -1028,7 +1026,7 @@ static void eb_msn_filetrans_callback( gpointer data, int response )
 
   if(response) {
     eb_debug(DBG_MSN, "accepting transfer\n");
-    eb_do_file_selector(filepath, _("Save file as"), eb_msn_filetrans_accept, (void *)inv);
+    ay_do_file_selection(filepath, _("Save file as"), eb_msn_filetrans_accept, (void *)inv);
   }
   else {
     eb_debug(DBG_MSN, "rejecting transfer\n");
@@ -1058,7 +1056,7 @@ static void eb_msn_netmeeting_callback( gpointer data, int response )
   }
 }
 
-static void eb_msn_filetrans_accept(char * filename, void * inv_vd)
+static void eb_msn_filetrans_accept(const char * filename, void * inv_vd)
 {
   invitation_ftp * inv=(invitation_ftp *)inv_vd;
   char label[1024];

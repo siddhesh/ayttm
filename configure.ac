@@ -5,11 +5,11 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=72
+RELEASE=73
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
-CORE_VERSION=6
+CORE_VERSION=7
 
 AM_CONFIG_HEADER(config.h)
 

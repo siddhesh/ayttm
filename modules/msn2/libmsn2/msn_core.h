@@ -239,7 +239,7 @@ void msn_send_IM(msnconn * conn, char * rcpt, message * msg);
 
 void msn_send_typing(msnconn * conn);
 
-void msn_filetrans_accept(invitation_ftp * inv, char * dest);
+void msn_filetrans_accept(invitation_ftp * inv, const char * dest);
 
 void msn_filetrans_reject(invitation_ftp * inv);
 

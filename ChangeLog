@@ -1,3 +1,20 @@
+* Wed Apr 30 2003 22:55 GMT [andy]	0.3.0-73
+- src/ui_file_selection_dlg.h	 		** ADDED **
+  src/gtk/file_selection_dlg.C	 		** ADDED **
+  modules/msn2/libmsn2/msn_core.diff	** REMOVED **
+  modules/msn2/msn.C
+  modules/yahoo2/yahoo.c
+  src/Makefile.am
+  src/contact_actions.c
+  src/file_select.[ch]
+  src/trigger.c
+  src/gtk/Makefile.am
+  src/gtk/prefs_window.C
+Move file selection into gtk dir
+- modules/msn2/libmsn2/msn_bittybits.[Ch]
+  modules/msn2/libmsn2/msn_core.[Ch]
+consts
+
 * Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-72
 - src/status.c
 Prevent segfault when trying to add a contact with nonavailable service 
