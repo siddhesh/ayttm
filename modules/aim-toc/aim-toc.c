@@ -88,8 +88,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:52 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/04 09:15:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -866,6 +866,9 @@ static eb_local_account * eb_aim_read_local_config(LList * pairs)
 	str = value_pair_get_value(pairs, "PASSWORD");
 	strncpy(ala->password, str, 255);
 	free( str );
+	str = value_pair_get_value(pairs,"CONNECT");
+	ela->connect_at_startup=(str && !strcmp(str,"1"));
+	free(str);
 
 
 	str = value_pair_get_value(pairs, "PROFILE");
@@ -894,7 +897,12 @@ static LList * eb_aim_write_local_config( eb_local_account * account )
 	list = value_pair_add(list, "SCREEN_NAME", account->handle);
 	list = value_pair_add(list, "PASSWORD", alad->password);
 	list = value_pair_add(list, "PROFILE", alad->aim_info);
-
+	
+	if (account->connect_at_startup)
+		list = value_pair_add (list, "CONNECT", "1");
+	else 
+		list = value_pair_add (list, "CONNECT", "0");
+	
 	return list;
 }
 			

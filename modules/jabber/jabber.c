@@ -78,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:52 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/04 09:15:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -304,7 +304,7 @@ static void eb_jabber_send_im( eb_local_account * from, eb_account * account_to,
 static eb_local_account * eb_jabber_read_local_account_config( LList * values )
 {
 	char buff[255];
-	char * name, *pass;
+	char * name, *pass,*str;
 
 	eb_local_account * ela = NULL;
 	eb_jabber_local_account_data *jlad = NULL;
@@ -335,6 +335,10 @@ static eb_local_account * eb_jabber_read_local_account_config( LList * values )
 			ela->protocol_local_account_data = jlad;
 		}
 	}
+	str = value_pair_get_value(values,"CONNECT");
+	ela->connect_at_startup=(str && !strcmp(str,"1"));
+	free(str);
+
 	return ela;
 }
 
@@ -354,6 +358,14 @@ static LList * eb_jabber_write_local_config( eb_local_account * account )
 	strcpy(val->value, jlad->password );
 	vals = l_list_append( vals, val );
 
+	val = g_new0( value_pair, 1 );
+	strcpy( val->key, "CONNECT" );
+	if (account->connect_at_startup)
+		strcpy( val->value, "1");
+	else 
+		strcpy( val->value, "0");
+	
+	vals = l_list_append( vals, val );
 	return vals;
 }
 

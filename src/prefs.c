@@ -410,7 +410,6 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "status_show_level", 2 );
 
 	/* general */
-	iSetLocalPref( "do_login_on_startup", 0 );
 	iSetLocalPref( "do_ayttm_debug", 0 );
 	iSetLocalPref( "do_ayttm_debug_html", 0 );
 	iSetLocalPref( "do_plugin_debug", 0 );
@@ -682,7 +681,6 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "status_show_level=%d\n", iGetLocalPref("status_show_level") );
 	
 	/* general */
-    fprintf( fp, "do_login_on_startup=%d\n", iGetLocalPref("do_login_on_startup") );
     fprintf( fp, "do_ayttm_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
     fprintf( fp, "do_ayttm_debug_html=%d\n", iGetLocalPref("do_ayttm_debug_html") );
     fprintf( fp, "do_plugin_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
@@ -773,7 +771,6 @@ void	ayttm_prefs_show_window( void )
 
 	
 	/* general prefs */
-	prefs->general.do_login_on_startup   = iGetLocalPref("do_login_on_startup");
 	prefs->general.do_ayttm_debug        = iGetLocalPref("do_ayttm_debug");
 	prefs->general.use_alternate_browser = iGetLocalPref("use_alternate_browser");
 	strncpy( prefs->general.alternate_browser, cGetLocalPref("alternate_browser"), MAX_PREF_LEN );
@@ -863,7 +860,6 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	assert( inPrefs != NULL );
 	
 	/* general */
-	iSetLocalPref( "do_login_on_startup", inPrefs->general.do_login_on_startup );
 	iSetLocalPref( "do_ayttm_debug", inPrefs->general.do_ayttm_debug );
 	iSetLocalPref( "do_plugin_debug", inPrefs->general.do_ayttm_debug );
 	iSetLocalPref( "use_alternate_browser", inPrefs->general.use_alternate_browser );

@@ -173,8 +173,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/04 08:20:56 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/04/04 09:15:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -813,7 +813,7 @@ eb_local_account * eb_msn_read_local_account_config( LList * values )
 
 	eb_local_account * ela;
 	eb_msn_local_account_data *  mlad;
-
+	char *str;
 	if(!values)
 		return NULL;
 
@@ -829,6 +829,10 @@ eb_local_account * eb_msn_read_local_account_config( LList * values )
 	strncpy( buff, ela->handle , sizeof(buff));
 	c = strtok( buff, "@" );
 	strncpy(ela->alias, buff , sizeof(ela->alias));
+
+	str = value_pair_get_value(values,"CONNECT");
+	ela->connect_at_startup=(str && !strcmp(str,"1"));
+	free(str);
 
 	mlad->status = MSN_OFFLINE;
 	ela->protocol_local_account_data = mlad;
@@ -852,6 +856,15 @@ LList * eb_msn_write_local_config( eb_local_account * account )
 	val = g_new0( value_pair, 1 );
 	strcpy(val->key, "PASSWORD");
 	strncpy(val->value, mlad->password, sizeof(val->value));
+	vals = l_list_append( vals, val );
+
+	val = g_new0( value_pair, 1 );
+	strcpy( val->key, "CONNECT" );
+	if (account->connect_at_startup)
+		strcpy( val->value, "1");
+	else 
+		strcpy( val->value, "0");
+	
 	vals = l_list_append( vals, val );
 
 	return vals;

@@ -41,9 +41,12 @@
 #include "pixmaps/tb_trash.xpm"
 #include "pixmaps/tb_edit.xpm"
 #include "pixmaps/tb_preferences.xpm"
+#include "pixmaps/checkbox_on.xpm"
+#include "pixmaps/checkbox_off.xpm"
 
 enum
 {
+	CONNECT,
 	USER_NAME,
 	PASSWORD,
 	SERVICE_TYPE
@@ -58,11 +61,15 @@ static GtkWidget * password;
 static GtkWidget * service_type;
 static GtkWidget * mod_button;
 static GtkWidget * del_button;
+static GtkWidget * connect_at_startup;
 static gint selected_row = -1;
 static gboolean is_open = FALSE;
 static gint num_accounts = 0;
 
-
+static GdkPixmap *checkboxonxpm = NULL;
+static GdkPixmap *checkboxonxpmmask = NULL;
+static GdkPixmap *checkboxoffxpm = NULL;
+static GdkPixmap *checkboxoffxpmmask = NULL;
 
 static void	rebuild_set_status_menu( void )
 {
@@ -86,10 +93,25 @@ static void read_contacts()
 	account_row text;
 	LList * node;
 
+	if (checkboxonxpm == NULL)
+		checkboxonxpm = gdk_pixmap_create_from_xpm_d(statuswindow->window, 
+							&checkboxonxpmmask, NULL,
+							checkbox_on_xpm);
+	if (checkboxoffxpm == NULL)
+		checkboxoffxpm = gdk_pixmap_create_from_xpm_d(statuswindow->window, 
+							&checkboxoffxpmmask, NULL,
+							checkbox_off_xpm);
+	
+	gtk_clist_set_column_auto_resize(GTK_CLIST(account_list), 0, TRUE);
+	gtk_clist_set_column_auto_resize(GTK_CLIST(account_list), 1, TRUE);
+	
 	for (node = accounts; node; node = node->next) {
 		eb_local_account * ela = node->data;
+		int row=0;
 		LList * pairs = RUN_SERVICE(ela)->write_local_config(ela);
 
+		text[CONNECT] = "";
+		
 		text[SERVICE_TYPE] = eb_services[ela->service_id].name;
 
 		text[USER_NAME] = value_pair_get_value(pairs, "SCREEN_NAME");
@@ -97,8 +119,14 @@ static void read_contacts()
 		text[PASSWORD] = value_pair_get_value(pairs, "PASSWORD");
 
 		/* gtk_clist_append copies our strings, so we don't need to */
-		gtk_clist_append(GTK_CLIST(account_list), text);
+		row = gtk_clist_append(GTK_CLIST(account_list), text);
 
+		if (ela->connect_at_startup)
+			gtk_clist_set_pixmap(GTK_CLIST(account_list), row, CONNECT,
+				     checkboxonxpm, checkboxonxpmmask);
+		else
+			gtk_clist_set_pixmap(GTK_CLIST(account_list), row, CONNECT,
+				     checkboxoffxpm, checkboxoffxpmmask);
 		free(text[USER_NAME]);
 		free(text[PASSWORD]);
 		
@@ -115,6 +143,7 @@ static void selection_unmade(GtkWidget *clist,
 {
 	gtk_entry_set_text(GTK_ENTRY(username),  "");
 	gtk_entry_set_text(GTK_ENTRY(password),  "");
+	
 }
 
 static void selection_made(GtkWidget      *clist,
@@ -127,7 +156,9 @@ static void selection_made(GtkWidget      *clist,
 	gchar *entry_name;
 	gchar *entry_pass;
 	gchar *entry_service;
-
+	GdkPixmap *pix = NULL;
+	GdkBitmap *bmp = NULL;
+	
 	selected_row = row;
 
 	/* Put data in selected row into the entry boxes for revision */
@@ -135,9 +166,24 @@ static void selection_made(GtkWidget      *clist,
 	gtk_clist_get_text(GTK_CLIST(clist), row, USER_NAME, &entry_name); 
 	gtk_clist_get_text(GTK_CLIST(clist), row, PASSWORD, &entry_pass); 
 	gtk_clist_get_text(GTK_CLIST(clist), row, SERVICE_TYPE, &entry_service); 
+	gtk_clist_get_pixmap(GTK_CLIST(clist), row, CONNECT, &pix, &bmp);
+
+	if (column == CONNECT) {
+		if (pix == checkboxonxpm)
+			gtk_clist_set_pixmap(GTK_CLIST(clist), row, CONNECT,
+				     checkboxoffxpm, checkboxoffxpmmask);
+		else
+			gtk_clist_set_pixmap(GTK_CLIST(clist), row, CONNECT,
+				     checkboxonxpm, checkboxonxpmmask);
+		return;
+	}
+	
+	
 	gtk_entry_set_text(GTK_ENTRY(username),  entry_name);
 	gtk_entry_set_text(GTK_ENTRY(password),  entry_pass);
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(service_type)->entry), entry_service);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup), 
+				     (pix == checkboxonxpm));
 	
 	gtk_widget_set_sensitive(mod_button, TRUE);
 	gtk_widget_set_sensitive(del_button, TRUE);
@@ -178,7 +224,7 @@ static void add_callback(GtkWidget * widget, gpointer data)
 {
 	char * text[3];
 	char * error_message = NULL;
-	int i;
+	int i, row;
 	
 	text[USER_NAME] = gtk_entry_get_text(GTK_ENTRY(username));
 	text[PASSWORD] = gtk_entry_get_text(GTK_ENTRY(password));
@@ -207,11 +253,19 @@ static void add_callback(GtkWidget * widget, gpointer data)
 		}
 	}
 	
-	gtk_clist_append(GTK_CLIST(account_list), text);
+	row = gtk_clist_append(GTK_CLIST(account_list), text);
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(connect_at_startup)))
+		gtk_clist_set_pixmap(GTK_CLIST(account_list), row, CONNECT,
+				     checkboxonxpm, checkboxonxpmmask);
+	else
+		gtk_clist_set_pixmap(GTK_CLIST(account_list), row, CONNECT,
+				     checkboxoffxpm, checkboxoffxpmmask);
+	
 	num_accounts++;
 	printf("num_accounts %d\n",num_accounts);
 	gtk_entry_set_text(GTK_ENTRY(username), "");
 	gtk_entry_set_text(GTK_ENTRY(password), "");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup), FALSE);
 }
 
 static void modify_callback(GtkWidget * widget, gpointer data)
@@ -249,6 +303,13 @@ static void modify_callback(GtkWidget * widget, gpointer data)
 	
 	/* update selected row in list */
 	
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(connect_at_startup)))
+		gtk_clist_set_pixmap(GTK_CLIST(account_list), selected_row, CONNECT,
+				     checkboxonxpm, checkboxonxpmmask);
+	else
+		gtk_clist_set_pixmap(GTK_CLIST(account_list), selected_row, CONNECT,
+				     checkboxoffxpm, checkboxoffxpmmask);
+	
 	gtk_clist_set_text(GTK_CLIST(account_list), 
 			selected_row, USER_NAME, text[USER_NAME]);
 	
@@ -262,6 +323,7 @@ static void modify_callback(GtkWidget * widget, gpointer data)
 
 	gtk_entry_set_text(GTK_ENTRY(username), "");
 	gtk_entry_set_text(GTK_ENTRY(password), "");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup), FALSE);
 }
 
 static void cancel_callback(GtkWidget *widget, gpointer data)
@@ -301,9 +363,18 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 	eb_sign_off_all();
 	
 	for (i = 0; i < num_accounts; i++) {
+		int tmp_connect = 0;
+		GdkPixmap *pix;
+		GdkBitmap *bmp;
+		
 		gtk_clist_get_text(GTK_CLIST(account_list), i, SERVICE_TYPE, &service); 
 		gtk_clist_get_text(GTK_CLIST(account_list), i, USER_NAME, &user); 
 		gtk_clist_get_text(GTK_CLIST(account_list), i, PASSWORD, &pass); 
+		
+		gtk_clist_get_pixmap(GTK_CLIST(account_list), i, CONNECT, &pix, &bmp);
+		if (pix == checkboxonxpm)
+			tmp_connect = 1;
+		
 		id=get_service_id(service);
 		if (accounts && (ela = find_local_account_by_handle(user, id))) {
 			/* If the account exists, just 
@@ -313,6 +384,8 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 			config = eb_services[id].sc->write_local_config(ela);
 			config = value_pair_remove(config, "PASSWORD");
 			config = value_pair_add(config, "PASSWORD", pass);
+			config = value_pair_remove(config, "CONNECT");
+			config = value_pair_add(config, "CONNECT", tmp_connect?"1":"0");
 			fprintf(fp, "<ACCOUNT %s>\n", service);
 			value_pair_print_values(config, fp, 1);	
 			fprintf(fp, "</ACCOUNT>\n");
@@ -331,6 +404,9 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 					ela->service_id=id;
 				new_accounts = l_list_append(new_accounts, ela);
 				config = eb_services[id].sc->write_local_config(ela);
+				config = value_pair_remove(config, "CONNECT");
+				config = value_pair_add(config, "CONNECT", tmp_connect?"1":"0");
+
 				fprintf(fp, "<ACCOUNT %s>\n", service);
 				value_pair_print_values(config, fp, 1);	
 				fprintf(fp, "</ACCOUNT>\n");
@@ -384,9 +460,10 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 		
 void eb_new_user()
 {
-	char * text[] ={_("Screen Name"), 
+	char * text[] ={_("C"),
+			_("Screen Name"), 
 			_("Password"), 
-			_("Service Type")};
+			_("Service")};
 	GtkWidget * box;
 	GtkWidget * window_box;
 	GtkWidget * hbox;
@@ -396,6 +473,7 @@ void eb_new_user()
 	GtkWidget * toolbar;
 	GtkWidget * toolitem;
 	GtkWidget * separator;
+	GtkWidget * check;
 	GList * list;
 	GdkPixmap *icon;
 	GdkBitmap *mask;
@@ -408,7 +486,7 @@ void eb_new_user()
 	account_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_position(GTK_WINDOW(account_window), GTK_WIN_POS_MOUSE);
 	gtk_widget_realize(account_window);
-	account_list = gtk_clist_new_with_titles(3,text); 
+	account_list = gtk_clist_new_with_titles(4,text); 
 	gtk_clist_set_column_visibility(GTK_CLIST(account_list), PASSWORD, FALSE);
 	gtk_container_set_border_width(GTK_CONTAINER(account_window), 5);
 	gtk_signal_connect(GTK_OBJECT(account_list), "select_row",
@@ -426,7 +504,8 @@ void eb_new_user()
 	/*Screen Name Section*/
    
 	label = gtk_label_new(_("Screen Name:"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
 	username = gtk_entry_new();
 	gtk_box_pack_start(GTK_BOX(box), username, FALSE, FALSE, 2);
@@ -435,7 +514,8 @@ void eb_new_user()
 	/*Password Section*/
    
 	label = gtk_label_new(_("Password:"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 5);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
 	password = gtk_entry_new();
 	gtk_entry_set_visibility(GTK_ENTRY(password), FALSE);
@@ -445,7 +525,8 @@ void eb_new_user()
 	/*Service Type Section*/
    
 	label = gtk_label_new(_("Service Type:"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 5);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
 	service_type = gtk_combo_new();
 	list = llist_to_glist(get_service_list(), 1);
@@ -454,6 +535,12 @@ void eb_new_user()
 	g_list_free(list);
 	gtk_widget_show(service_type);
 	gtk_box_pack_start(GTK_BOX(box), service_type, FALSE, FALSE, 2);
+
+	/*Connect at startup Section*/
+   
+	connect_at_startup = gtk_check_button_new_with_label (_("Connect at startup"));
+	gtk_widget_show(connect_at_startup);
+	gtk_box_pack_start(GTK_BOX(box), connect_at_startup, FALSE, FALSE, 5);
 	
 	gtk_box_pack_start(GTK_BOX(hbox), box, FALSE, FALSE, 2);  
 	gtk_widget_show(box);

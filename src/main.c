@@ -163,8 +163,7 @@ static void start_login(gboolean new)
 		eb_new_user();
 	else {
 		eb_status_window();
-		if ( iGetLocalPref("do_login_on_startup") )
-			eb_sign_on_all() ;
+		eb_sign_on_startup() ;
 	}
 }
  

@@ -70,8 +70,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/04 08:20:58 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/04 09:15:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -204,6 +204,9 @@ static eb_local_account *eb_smtp_read_local_account_config(LList * pairs)
 	str = value_pair_get_value(pairs, "PASSWORD");
 	strncpy(sla->password, str, sizeof(sla->password));
 	free( str );
+	str = value_pair_get_value(pairs,"CONNECT");
+	ela->connect_at_startup=(str && !strcmp(str,"1"));
+	free(str);
 
 	sla->status = SMTP_STATUS_OFFLINE;
 
@@ -230,6 +233,15 @@ static LList *eb_smtp_write_local_config(eb_local_account * account)
 	strcpy(vp->value, sla->password);
 
 	list = l_list_append(list, vp);
+
+	vp = g_new0( value_pair, 1 );
+	strcpy( vp->key, "CONNECT" );
+	if (account->connect_at_startup)
+		strcpy( vp->value, "1");
+	else 
+		strcpy( vp->value, "0");
+	
+	list = l_list_append( list, vp );
 
 	return list;
 }

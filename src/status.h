@@ -60,6 +60,7 @@ void contact_update_status(struct contact * ec);
 void buddy_login(eb_account * ea);
 void buddy_logoff(eb_account * ea);
 void eb_sign_on_all(void);
+void eb_sign_on_startup(void);
 void eb_sign_off_all(void);
 
 void eb_import_window(void *import_submenuitem);

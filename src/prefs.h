@@ -54,7 +54,6 @@ struct prefs
 {
 	struct
 	{
-		int		do_login_on_startup;
 		int		do_ayttm_debug;
 		int		use_alternate_browser;
 		char	alternate_browser[MAX_PREF_LEN];

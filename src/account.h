@@ -59,6 +59,7 @@ typedef struct local_account {
 	LList * status_menu;
         void *protocol_local_account_data;
 	int mgmt_flush_tag;
+	int connect_at_startup;
 } eb_local_account;
 
 typedef struct account {

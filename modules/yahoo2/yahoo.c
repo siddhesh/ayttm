@@ -121,8 +121,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/04 08:21:00 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/04 09:15:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1715,6 +1715,10 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 	str = value_pair_get_value(pairs, "PASSWORD");
 	strncpy(ylad->password, str, 255);
 	free( str );
+	
+	str = value_pair_get_value(pairs,"CONNECT");
+	ela->connect_at_startup=(str && !strcmp(str,"1"));
+	free(str);
 
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = ylad;
@@ -1740,6 +1744,15 @@ static LList *eb_yahoo_write_local_config(eb_local_account * ela)
 	strcpy(vp->value, yla->password);
 
 	list = l_list_append(list, vp);
+
+	vp = g_new0( value_pair, 1 );
+	strcpy( vp->key, "CONNECT" );
+	if (ela->connect_at_startup)
+		strcpy( vp->value, "1");
+	else 
+		strcpy( vp->value, "0");
+	
+	list = l_list_append( list, vp );
 
 	return list;
 }

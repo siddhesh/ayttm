@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ Service", 
 	"ICQ Protocol Support", 
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:52 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/04 09:15:42 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1058,6 +1058,10 @@ static eb_local_account * icq_read_local_config(LList * pairs)
 	strncpy(ila->password, str, 255);
 	free( str );
 	
+	str = value_pair_get_value(pairs,"CONNECT");
+	ela->connect_at_startup=(str && !strcmp(str,"1"));
+	free(str);
+	
 	set_status = STATUS_OFFLINE;
 	
 	ela->service_id = SERVICE_INFO.protocol_id;
@@ -1086,6 +1090,15 @@ static LList * icq_write_local_config( eb_local_account * account )
 	strcpy( vp->key, "PASSWORD" );
 	strcpy( vp->value, ila->password );
 
+	list = l_list_append( list, vp );
+	
+	vp = g_new0( value_pair, 1 );
+	strcpy( vp->key, "CONNECT" );
+	if (account->connect_at_startup)
+		strcpy( vp->value, "1");
+	else 
+		strcpy( vp->value, "0");
+	
 	list = l_list_append( list, vp );
 	
 	return list;

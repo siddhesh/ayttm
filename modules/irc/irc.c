@@ -85,8 +85,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/02 14:30:31 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/04 09:15:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1267,7 +1267,7 @@ static eb_local_account * irc_read_local_config(LList * pairs)
 
 	char *temp = NULL;
 	char *temp2 = NULL;
-
+	char *str = NULL;
 	ela->protocol_local_account_data = ila;
 	ila->status = IRC_OFFLINE;
 
@@ -1303,6 +1303,9 @@ static eb_local_account * irc_read_local_config(LList * pairs)
 				free( temp );
 				temp = NULL;
 			}
+			str = value_pair_get_value(pairs,"CONNECT");
+			ela->connect_at_startup=(str && !strcmp(str,"1"));
+			free(str);
 
 			return (ela);
 		}
@@ -1334,6 +1337,15 @@ static LList * irc_write_local_config( eb_local_account * account )
 	strcpy( vp->key, "PASSWORD");
 	strncpy( vp->value, ila->password, 254 );
 
+	list = l_list_append( list, vp );
+	
+	vp = g_new0( value_pair, 1 );
+	strcpy( vp->key, "CONNECT" );
+	if (account->connect_at_startup)
+		strcpy( vp->value, "1");
+	else 
+		strcpy( vp->value, "0");
+	
 	list = l_list_append( list, vp );
 	return list;
 }

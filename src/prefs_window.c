@@ -208,8 +208,6 @@ static void build_general_prefs(GtkWidget *prefs_note) {
 
     vbox = gtk_vbox_new(FALSE, 0);
 
-    eb_button(_("Log in on startup"), &s_prefs->general.do_login_on_startup, vbox);
-
 #ifdef HAVE_ISPELL
     hbox = gtk_hbox_new(FALSE, 0);
     dictionary_entry = gtk_entry_new();

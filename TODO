@@ -9,13 +9,9 @@
 
 - clean up the code
 
-- login on startup should be in account settings, not global settings
-
 - recoding and filtering in chatrooms
 
 - connect should be non-blocking - implemented. 
   Jabber and IRC need to use it.
 
 - use our own linked list routines - partially done
-
-- Tools/Set as away.../Manage away messages (modify/delete)

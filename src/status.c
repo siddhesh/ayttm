@@ -649,16 +649,26 @@ static void eb_status( GtkCheckMenuItem * widget, gpointer stats )
 	set_menu_sensitivity();
 }
 
-void eb_sign_on_all() 
+static void eb_sign_on_predef(int all) 
 {
 	LList *node = accounts ;
 	while(node) {
 		eb_local_account *ac = (eb_local_account*)(node->data);
-		if (!ac->connected)
+		if (!ac->connected && (all || ac->connect_at_startup))
 			RUN_SERVICE(ac)->login(ac) ;
 		node = node->next ;
 	}
 	set_menu_sensitivity();
+}
+
+void eb_sign_on_all() 
+{
+	eb_sign_on_predef(1);
+}
+
+void eb_sign_on_startup() 
+{
+	eb_sign_on_predef(0);
 }
 
 void eb_sign_off_all() 

@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/04 00:32:25 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/04 09:15:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1222,6 +1222,15 @@ LList * eb_aim_write_local_config ( eb_local_account * account )
 	strcpy( vp->key, "PASSWORD" );
 	strcpy( vp->value, ala->password );
 
+	list = l_list_append( list, vp );
+
+	vp = g_new0( value_pair, 1 );
+	strcpy( vp->key, "CONNECT" );
+	if (account->connect_at_startup)
+		strcpy( vp->value, "1");
+	else 
+		strcpy( vp->value, "0");
+	
 	list = l_list_append( list, vp );
 
 	return list;

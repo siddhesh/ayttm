@@ -106,8 +106,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/04 08:20:59 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/04 09:15:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -773,6 +773,7 @@ static int reset_typing (gpointer sockp) {
 eb_local_account *eb_workwizu_read_local_config (LList *values)
 {
 	eb_local_account *ela;
+	char *str;
 	wwz_account_data *wad = g_new0(wwz_account_data,1);
 	if (values == NULL)
 		return NULL;
@@ -782,6 +783,10 @@ eb_local_account *eb_workwizu_read_local_config (LList *values)
 	ela->handle   = value_pair_get_value(values, "SCREEN_NAME");
 	wad->password = value_pair_get_value(values, "PASSWORD");
 	
+	str = value_pair_get_value(values,"CONNECT");
+	ela->connect_at_startup=(str && !strcmp(str,"1"));
+	free(str);
+
 	ela->protocol_local_account_data = wad;
 	
 	strncpy(ela->alias, ela->handle, 255);
@@ -807,6 +812,15 @@ LList *eb_workwizu_write_local_config (eb_local_account *account)
 	strncpy(pair->value, wad->password, 1024);	
 	vals = l_list_append(vals, pair);
 	
+	pair = g_new0( value_pair, 1 );
+	strcpy( pair->key, "CONNECT" );
+	if (account->connect_at_startup)
+		strcpy( pair->value, "1");
+	else 
+		strcpy( pair->value, "0");
+	
+	vals = l_list_append( vals, pair );
+
 	return vals;	
 }
 
