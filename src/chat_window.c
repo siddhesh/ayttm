@@ -754,7 +754,7 @@ static GtkWidget *get_local_accounts(chat_window *cw)
 	/* Check to see if we have at least 2 local accounts suitable for the remote account */
 	first_act = find_local_account_for_remote(cw->preferred, TRUE);
 	subsequent_act = find_local_account_for_remote(NULL, TRUE);
-	if(!first_act || !subsequent_act)
+	if(!first_act || !subsequent_act || first_act == subsequent_act)
 		return(NULL);
 
 	first_act = find_local_account_for_remote(cw->preferred, TRUE);
@@ -777,6 +777,7 @@ static GtkWidget *get_local_accounts(chat_window *cw)
 		GTK_SIGNAL_FUNC(change_local_account_on_click), cwa);
 		gtk_widget_show(button);
 	} while( (subsequent_act = find_local_account_for_remote(NULL, TRUE)));
+	
 	gtk_widget_show(label);
 	gtk_widget_show(submenu);
 
