@@ -1,3 +1,7 @@
+* Thu Jan 29 2004 05:12 GMT [philip]	0.4.6-6
+- modules/yahoo2/
+ext_yahoo_remove handler accepts client_id as well - merge in from libyahoo2
+
 * Thu Jan 29 2004 05:10 GMT [philip]	0.4.6-5
 - modules/yahoo2/libyahoo2/yahoo_fn.c
 Braces around initialiser for anonymous union
