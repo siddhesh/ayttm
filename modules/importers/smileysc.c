@@ -52,8 +52,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Console Smileys",
 	"Load Console smiley theme",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/30 06:03:57 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/05/02 09:21:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -126,6 +126,7 @@ static int plugin_finish()
 #include "pixmaps/console_smileys/kiss.xpm"
 #include "pixmaps/console_smileys/heyy.xpm"
 #include "pixmaps/console_smileys/blush.xpm"
+#include "pixmaps/console_smileys/worried.xpm"
 
 static void init_alt_smileys()
 {
@@ -137,7 +138,7 @@ static void init_alt_smileys()
 	my_smileys=add_smiley(my_smileys, "biglaugh", laugh_xpm);
 	my_smileys=add_smiley(my_smileys, "tongue", tongue_xpm);
 	my_smileys=add_smiley(my_smileys, "cooldude", cooldude_xpm);
-	my_smileys=add_smiley(my_smileys, "worried", blank_xpm);
+	my_smileys=add_smiley(my_smileys, "worried", worried_xpm);
 	my_smileys=add_smiley(my_smileys, "grin", grin_xpm);
 	my_smileys=add_smiley(my_smileys, "blank", blank_xpm);
 	my_smileys=add_smiley(my_smileys, "oh", oh_xpm);
