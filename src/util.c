@@ -181,8 +181,14 @@ char * escape_string(const char * input)
 }
 char * unescape_string(const char * input)
 {
-	char * result = malloc((strlen(input)+1) * sizeof(char));
+	char * result = NULL;
 	int ipos=0, opos=0; 
+
+	if (!input) 	
+		return strdup("");
+	
+	result = malloc((strlen(input)+1) * sizeof(char));
+
 	while(input && input[ipos]) {
 		char c = input[ipos++];
 		if(c == '\\') {
