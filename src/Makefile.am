@@ -63,7 +63,7 @@ defaults.h: Makefile
 	@echo \#define SendDefault \"${pkgdatadir}/sounds/Send.au\" >> defaults.h;
 	@echo \#define ReceiveDefault \"${pkgdatadir}/sounds/Receive.au\" >> defaults.h;
 	@echo \#define SpeechProgramDefault \"/usr/lib/ViaVoiceTTS/samples/cmdlinespeak/cmdlinespeak\" >> defaults.h;
-	@echo \#define MODULE_DIR \"${pkgdatadir}/modules\" >> defaults.h;
+	@echo \#define MODULE_DIR \"${libdir}/@PACKAGE@\" >> defaults.h;
 	@echo "#endif" >> defaults.h;
 	@echo "#endif" >> defaults.h;
 

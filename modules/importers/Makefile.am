@@ -1,10 +1,8 @@
-libdir = $(pkgdatadir)/modules
-
 AM_CFLAGS = $(GTK_CFLAGS) -I$(top_srcdir)/src
 
 EXTRA_DIST = 
 
-lib_LTLIBRARIES = import_gaim.la import_gnomeicu.la importlicq.la importicq.la smileysc.la giles_smiles.la 
+pkglib_LTLIBRARIES = import_gaim.la import_gnomeicu.la importlicq.la importicq.la smileysc.la giles_smiles.la 
 # msn_smileys.la yahoo_smileys.la
 
 import_gaim_la_SOURCES = import_gaim.c

@@ -1,3 +1,8 @@
+* Wed Apr 16 2003 07:15 GMT [colin]	0.2.3-107
+- */Makefile.am
+Install modules in $libdir instead of $pkgdir/modules (FHS compliance)
+Patch by Ben Reser
+
 * Tue Apr 15 2003 18:05 GMT [philip]	0.2.3-106
 - src/chat_window.c src/edit_account_window.c
 Put Add Contact icon in chatwindow for contacts in

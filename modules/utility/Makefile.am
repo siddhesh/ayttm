@@ -1,10 +1,8 @@
-libdir = $(pkgdatadir)/modules
-
 AM_CFLAGS = $(GLIB_CFLAGS) -I$(top_srcdir)/src
 
 EXTRA_DIST = 
 
-lib_LTLIBRARIES = notes.la middle.la rainbow.la autotrans.la
+pkglib_LTLIBRARIES = notes.la middle.la rainbow.la autotrans.la
 
 notes_la_SOURCES = notes.c
 notes_la_LDFLAGS = -module -avoid-version

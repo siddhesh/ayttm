@@ -1,5 +1,4 @@
-libdir = $(pkgdatadir)/modules
-lib_LTLIBRARIES = irc.la
+pkglib_LTLIBRARIES = irc.la
 
 AM_CFLAGS = $(GTK_CFLAGS) -I$(top_srcdir)/src
 
