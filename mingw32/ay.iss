@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=Ayttm
-AppVerName=Ayttm v0.4.1-pre3
+AppVerName=Ayttm 0.4.2-6
 AppPublisherURL=http://ayttm.sourceforge.net
 AppSupportURL=http://ayttm.sourceforge.net
 AppUpdatesURL=http://ayttm.sourceforge.net
@@ -18,8 +18,8 @@ Name: "quicklaunchicon"; Description: "Create a &Quick Launch icon"; GroupDescri
 
 [Files]
 Source: "C:\Program Files\ayttm\ayttm.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\Send.au"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\BuddyLeave.au"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\setup.bat"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\README.WIN32"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\COPYING"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libcharset-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libcrypto-0.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -41,22 +41,61 @@ Source: "C:\Program Files\ayttm\libjpeg-62.dll"; DestDir: "{app}"; Flags: ignore
 Source: "C:\Program Files\ayttm\libltdl-3.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libssl-0.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libXpm-noX4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\Receive.au"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\BuddyArrive.au"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\modules\*.*"; DestDir: "{app}\modules"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\README.WIN32"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\COPYING"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\ayttmrc"; DestDir: "C:\"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\smileys\console_smileys\*.*"; DestDir: "{app}\smileys\console_smileys"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\smileys\giles_smiles\*.*"; DestDir: "{app}\smileys\giles_smiles"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\etc\ayttmrc"; DestDir: "{app}\etc"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\sounds\Send.au"; DestDir: "{app}\sounds"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\sounds\BuddyLeave.au"; DestDir: "{app}\sounds"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\sounds\Receive.au"; DestDir: "{app}\sounds"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\sounds\BuddyArrive.au"; DestDir: "{app}\sounds"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\lib\gdk-pixbuf\loaders\libpixbufloader-jpeg.dll"; DestDir: "{app}\lib\gdk-pixbuf\loaders"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\smileys\Console Smileys\*.*"; DestDir: "{app}\smileys\Console Smileys"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\smileys\Giles Smiles\*.*"; DestDir: "{app}\smileys\Giles Smiles"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\aim-toc.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\aim-toc.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\autotrans.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\autotrans.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\icq-toc.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\icq-toc.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\import_everybuddy.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\import_everybuddy.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\import_gaim.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\import_gaim.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\import_gnomeicu.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\import_gnomeicu.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\importicq.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\importicq.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\importlicq.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\importlicq.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\irc.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\irc.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\jabber.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\jabber.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\middle.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\middle.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\msn2.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\msn2.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\notes.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\notes.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\rainbow.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\rainbow.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\smiley-themer.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\smiley-themer.la"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\yahoo2.dll"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\modules\yahoo2.la"; DestDir: "{app}\modules"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
+[INI]
+Filename: "{app}\Ayttm.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://ayttm.sourceforge.net"
+
 [Icons]
-Name: "{group}\Ayttm"; Filename: "{app}\ayttm.exe"
-Name: "{group}\Uninstall Ayttm"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\Ayttm"; Filename: "{app}\ayttm.exe"; Tasks: desktopicon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Ayttm"; Filename: "{app}\ayttm.exe"; Tasks: quicklaunchicon
+Name: "{group}\Ayttm"; Filename: "{app}\Ayttm.exe"
+Name: "{group}\Ayttm on the Web"; Filename: "{app}\Ayttm.url"
+Name: "{userdesktop}\Ayttm"; Filename: "{app}\Ayttm.exe"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Ayttm"; Filename: "{app}\Ayttm.exe"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\ayttm.exe"; Description: "Launch Ayttm"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\setup.bat"; Parameters: "{app}"
+Filename: "{app}\Ayttm.exe"; Description: "Launch Ayttm"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: files; Name: "{app}\Ayttm.url"
 

@@ -26,6 +26,9 @@
 
 #ifdef __MINGW32__
 typedef long __off32_t;
+#define AYTTM_DELIM ";"
+#else
+#define AYTTM_DELIM ":"
 #endif
 #include <sys/types.h>
 #include <dirent.h> /* Routines to read directories to find modules */
@@ -265,9 +268,9 @@ void load_modules( void )
 
 	/* Use a thread-safe strtok */
 #ifdef HAVE_STRTOK_R
-	cur_path=strtok_r(modules_path, ":", &tok_buf);
+	cur_path=strtok_r(modules_path, AYTTM_DELIM, &tok_buf);
 #else
-	cur_path=strtok(modules_path, ":");
+	cur_path=strtok(modules_path, AYTTM_DELIM);
 #endif
 	if(!cur_path)
 		cur_path=MODULE_DIR;

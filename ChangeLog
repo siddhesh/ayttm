@@ -1,3 +1,9 @@
+* Thu Oct  9 2003 19:13 GMT [elh]	0.4.3-pre3
+- src/plugin.c
+  mingw32/setup.bat
+  mingw32/Makefile.am
+Updates to support a different deliminator for module path on Win32 Platforms.
+
 * Thu Oct  9 2003 09:10 GMT [colin]	0.4.3-pre2
 - src/dialog.[ch]
 add do_password_input_window()
