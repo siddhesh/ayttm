@@ -71,6 +71,8 @@
 #include "tcp_util.h"
 #include "messages.h"
 #include "dialog.h"
+#include "mem_util.h"
+#include "video.h"
 
 #include "yahoo2.h"
 #include "yahoo2_callbacks.h"
@@ -121,7 +123,6 @@ static char filetransfer_port[MAX_PREF_LEN]="80";
 static char webcam_host[MAX_PREF_LEN]="webcam.yahoo.com";
 static char webcam_description[MAX_PREF_LEN]="";
 static char webcam_port[MAX_PREF_LEN]="5100";
-static char webcam_path[MAX_PREF_LEN]="";
 static int conn_type=0;
 
 static void * mywebcam_chat_menu_tag=0;
@@ -135,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.81 $",
-	"$Date: 2003/12/18 19:38:38 $",
+	"$Revision: 1.82 $",
+	"$Date: 2003/12/19 19:22:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -198,14 +199,6 @@ static int plugin_init()
 	il->label= _("Webcam Port:");
 	il->type = EB_INPUT_ENTRY;
 
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.entry.value = webcam_path;
-	il->name = "webcam_path";
-	il->label= _("Webcam Image Path:");
-	il->type = EB_INPUT_ENTRY;
-
-	
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.listbox.value = &conn_type;
@@ -1853,34 +1846,34 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 	int id = GPOINTER_TO_INT(data);
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
-	unsigned char *image = NULL;
+	unsigned char *image = NULL, *image2000=NULL;
 	unsigned int length = 0;
 	unsigned int timestamp;
-	FILE *f_image = NULL;
-	struct stat s_image;
+
+	if(!video_grab_frame) {
+		WARNING(("No frame grabber found"));
+		ay_do_warning(_("Yahoo Webcam"), _("Could not read images from your webcam, could not find a video grabber.") );
+	}
 
 	if(ylad->webcam_start == 0)
 		ylad->webcam_start = (unsigned int)get_time();
 
 	timestamp = (unsigned int)(get_time() - ylad->webcam_start);
-	if (stat(webcam_path, &s_image) == -1)
-		return 0;
-	length = s_image.st_size;
-	image = y_new0(unsigned char, length);
-
-	if ((f_image = fopen(webcam_path, "rb")) != NULL) {
-		fread(image, length, 1, f_image);
-		fclose(f_image);
-	} else {
-		WARNING(("Error reading from %s\n", webcam_path));
-		ay_do_warning(_("Yahoo Webcam"), _("Could not read images from your webcam, please check the webcam image path.") );
+	if((length = video_grab_frame(&image)) <= 0) {
+		WARNING(("Error reading from video grabber"));
+		ay_do_warning(_("Yahoo Webcam"), _("Could not read images from your webcam, grabber returned an error.") );
 		ylad->webcam_timeout=ylad->webcam_start=0;
 		return 0;
 	}
 
+	if(image_2_jpc)
+		image2000 = image_2_jpc(image, &length);
+	else
+		image2000 = ay_memdup(image, length);
+	ay_free(image);
 	LOG(("Sending a webcam image (%d bytes)", length));
-	yahoo_webcam_send_image(id, image, length, timestamp);
-	FREE(image);
+	yahoo_webcam_send_image(id, image2000, length, timestamp);
+	ay_free(image2000);
 	return 1;
 }
 

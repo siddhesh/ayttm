@@ -65,7 +65,8 @@ static int last_tag = 0;
 static LList *images = NULL;
 
 
-unsigned char *(*image_2_jpg)(const unsigned char *in_img, long *size) = NULL;
+unsigned char *(*image_2_jpg)(const unsigned char *, long *) = NULL;
+unsigned char *(*image_2_jpc)(const unsigned char *, long *) = NULL;
 
 static struct ay_image_wnd * get_image_wnd_by_tag(int tag)
 {

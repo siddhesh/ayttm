@@ -1,3 +1,12 @@
+* Fri Dec 19 2003 19:15 GMT [philip]	0.4.5-14
+- modules/image_filter/video_capture.c
+- modules/image_filter/ayttm_streamer_wrapper.sh
+added video grabber based on streamer (xawtv)
+- src/video.[ch]
+api for video grabber
+- modules/yahoo2/yahoo.c
+use it
+
 * Thu Dec 18 2003 19:31 GMT [philip]	0.4.5-13
 - modules/yahoo2/yahoo.c
 Webcam sending probably works, but I'm behind a firewall, so can't test
