@@ -7,12 +7,12 @@ TODO 0.3.1
 
 
 TODO later
-- Make ayttm fully stable in stable releases, I know this is not an easy thing 
-  to do but it can be done.
 - Native file transfer for all protocols.
-- ugly things in prefs window (too big entry for font size, etc)
 - clean up the code
 - recoding and filtering in chatrooms
-- connect should be non-blocking - implemented. 
-  IRC need to use it.
+- Non-blocking connection in IRC
 - use our own linked list routines - partially done
+- Yahoo voice support ? 
+
+eternal TODO
+- Make ayttm fully stable in stable releases. 
