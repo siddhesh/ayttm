@@ -34,9 +34,9 @@ planned to be incorporated in future releases.
 
 %build
 %if "%{nodebug}" == "0"
-%configure
+%configure --enable-smtp
 %else
-%configure --disable-crash-dialog
+%configure --disable-crash-dialog --enable-smtp
 %endif
 make
 

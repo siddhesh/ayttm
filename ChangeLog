@@ -1,3 +1,6 @@
+* Sat May 24 2003 09:15 GMT [philip]	0.3.1-1
+- Ready to release 0.3.1
+
 * Wed May 22 2003 19:36 GMT [edward]	0.3.1-pre13
 - README.WIN32
   modules/aim-toc/aim-toc.c
@@ -35,7 +38,6 @@ ifdef out code that causes flashing and update Inno Setup to ship modules
 properly
 
 * Sun May 18 2003 22:29 GMT [colin]	0.3.1-pre7
->>>>>>> 1.383
 - modules/aycryption/aycryption.c
 Warn about msn nastiness
 
