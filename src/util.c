@@ -1565,7 +1565,12 @@ void rename_nick_log(char *oldgroup, char *oldnick, char *newgroup, char *newnic
 	make_safe_filename(buff, newnick, newgroup);
 	strncpy(newnicklog, buff, 255);
 
+#ifdef _WIN32
+	/* Win32 file structure is case insensitive */
+	if (!strcasecmp(oldnicklog, newnicklog))
+#else
 	if (!strcmp(oldnicklog, newnicklog))
+#endif
 		return;
 
 	if ((test = fopen(newnicklog,"r")) != NULL && strcmp(oldnicklog,newnicklog)) {

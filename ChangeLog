@@ -1,3 +1,7 @@
+* Mon Dec 15 2003 18:35 UTC [elh]	0.4.5-11
+- src/util.c
+fix to get log file renaming working - plasmoida (bug 859659)
+
 * Mon Dec 15 2003 10:08 GMT [philip]	0.4.5-10
 - src/status.c
 ok, it was still getting too wide.  this is pretty much trial and error
