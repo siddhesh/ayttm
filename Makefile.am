@@ -47,6 +47,9 @@ endif
 win32-install:
 	cd mingw32; make install
 
+win32-release:
+	cd mingw32; make release
+
 ayttm.spec: ChangeLog
 
 dist: ayttm.spec

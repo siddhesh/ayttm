@@ -35,3 +35,6 @@ install: ayttmrc
 	cp ../modules/utility/.libs/*.{dll,la} /c/Program\ Files/ayttm/modules
 	cp ../modules/yahoo2/.libs/*.{dll,la} /c/Program\ Files/ayttm/modules
 	cp ../modules/msn2/.libs/*.{dll,la} /c/Program\ Files/ayttm/modules
+
+release: install
+	strip /c/Program\ Files/ayttm/*.dll
