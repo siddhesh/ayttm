@@ -30,6 +30,7 @@
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
+#include <sys/types.h>	/* for darwin - un.h does not include it */
 #include <sys/socket.h>
 #include <sys/un.h>
 #endif
