@@ -775,8 +775,10 @@ void	ayttm_prefs_show_window( void )
 	prefs->general.use_alternate_browser = iGetLocalPref("use_alternate_browser");
 	strncpy( prefs->general.alternate_browser, cGetLocalPref("alternate_browser"), MAX_PREF_LEN );
 
+#ifdef HAVE_ISPELL
 	prefs->general.do_spell_checking     = iGetLocalPref("do_spell_checking");
 	strncpy( prefs->general.spell_dictionary, cGetLocalPref("spell_dictionary"), MAX_PREF_LEN );
+#endif
 
 	/* logging prefs */
 	prefs->logging.do_logging            = iGetLocalPref("do_logging");
@@ -865,8 +867,10 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	iSetLocalPref( "use_alternate_browser", inPrefs->general.use_alternate_browser );
 	cSetLocalPref( "alternate_browser", inPrefs->general.alternate_browser );
 	
+#ifdef HAVE_ISPELL
 	iSetLocalPref( "do_spell_checking", inPrefs->general.do_spell_checking );
 	cSetLocalPref( "spell_dictionary", inPrefs->general.spell_dictionary );
+#endif
 	
 	/* logging */
 	iSetLocalPref( "do_logging", inPrefs->logging.do_logging );

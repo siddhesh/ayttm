@@ -1,3 +1,7 @@
+* Fri Apr 05 2003 11:10 GMT [philip]	0.2.3-19
+- src/prefs.c
+Do spell checking prefs only if HAVE_ISPELL defined
+
 * Fri Apr 05 2003 11:00 GMT [philip]	0.2.3-18
 - src/image_window.c
 uh, forgot to include config.h
