@@ -71,7 +71,8 @@ char bentity[1024], eentity[1024];
 char bvalue[1024], evalue[1024];
 	 
 
-static void (*mycallback)(char * msg);
+static void (*mycallback)(char * msg, void *cbdata);
+static void *mycbdata;
 
 static void write_data();
 static void select_data_cb(GtkCList *clist, gint row, gint column,
@@ -399,7 +400,7 @@ static void save_data (void)
 	}
 	
 	if (mycallback)
-		mycallback(a_message->str);
+		mycallback(a_message->str, mycbdata);
 
 	g_string_free(a_title, TRUE);
 	g_string_free(a_message, TRUE);
@@ -418,7 +419,8 @@ void show_data_choicewindow(
 		char *ok_button_label,
 		char *entityname,
 		char *valuename,
-		void (*cb)(char *data)
+		void (*cb)(char *msg, void *data),
+		void *cbdata
 		)
 {
 	if ( !data_open ) {
@@ -434,6 +436,7 @@ void show_data_choicewindow(
 		
 		snprintf(datatype, 1024, "%s", dtype);
 		mycallback = cb;
+		mycbdata = cbdata;
 		
 		snprintf(bentity, 1024, "<%s>", entityname);
 		snprintf(eentity, 1024, "</%s>", entityname);

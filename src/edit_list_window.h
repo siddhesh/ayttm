@@ -28,5 +28,6 @@ void show_data_choicewindow(
 		char *ok_button_label,
 		char *entityname,
 		char *valuename,
-		void (*cb)(char *data)
+		void (*cb)(char *msg, void *data),
+		void *cbdata
 		);

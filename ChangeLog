@@ -1,3 +1,8 @@
+* Tue Apr 29 2003 14:09 GMT [colin]	0.3.0-48
+- src/away_window.[ch]
+  src/edit_list_window.[ch]
+Forgot to have a callback data
+
 * Tue Apr 29 2003 14:09 GMT [colin]	0.3.0-47
 - src/away_window.[ch]
   src/edit_list_window.[ch] ** ADDED **

@@ -50,7 +50,7 @@ gint is_away = 0;
 static GtkWidget *awaybox;
 static GtkWidget *away_message_text_entry;
 
-static void show_away(gchar *a_message);
+static void show_away(gchar *a_message, void *unused);
 
 static void imback()
 {
@@ -68,10 +68,9 @@ void show_away_choicewindow(void *w, void *data)
 		gdk_window_raise (awaybox->window);
 		return;
 	}
-	
 	snprintf(file, 1024, "%saway_messages", config_dir);
 	show_data_choicewindow(file, _("Away message"), _("Set away"),
-				"AWAY_MESSAGE", "MESSAGE", show_away);
+				"AWAY_MESSAGE", "MESSAGE", show_away, NULL);
 }
 
 static void destroy_away()
@@ -89,11 +88,11 @@ static void destroy_away()
 }
 
 
-static void show_away(gchar *a_message)
+static void show_away(gchar *a_message, void *unused)
 {
 	LList * list;
 	eb_local_account * ela = NULL;
-
+	
 	if (!is_away) {
 		GtkWidget *label;
 		GtkWidget *vbox;
