@@ -169,8 +169,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.62 $",
-	"$Date: 2003/08/06 21:32:12 $",
+	"$Revision: 1.63 $",
+	"$Date: 2003/08/29 12:46:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2255,7 +2255,7 @@ void ext_got_IM(msnconn * conn, char * username, char * friendlyname, message * 
         ea->service_id = SERVICE_INFO.protocol_id;
         mad->status = MSN_ONLINE;
         ea->protocol_account_data = mad;
-
+	ea->ela = ela;
         add_dummy_contact(friendlyname, ea);
         sender = ea;
     }

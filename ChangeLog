@@ -1,3 +1,7 @@
+* Fri Aug 29 2003 12:41 GMT [colin]	0.4.0-8
+- modules/msn2/msn.C
+Ack! a null pointer bug was here since three minor versions!
+
 * Tue Aug 26 2003 12:09 GMT [colin]	0.4.0-7
 - src/chat_window.[ch] src/chat_room.c src/util.c src/edit_account_window.c
 Clean a bit tabbed chatwindows
