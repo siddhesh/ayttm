@@ -1,3 +1,8 @@
+* Mon Apr 07 2003 15:50 GMT [edward]	0.2.3-53
+- modules/yahoo/libyahoo2/yahoo_httplib.c
+  src/tcp_utils.c
+MINGW32 fixes
+
 * Mon Apr 07 2003 15:11 GMT [colin]	0.2.3-52
 - modules/yahoo/yahoo.c
 Fix contacts' icon and status staying online after login/logout

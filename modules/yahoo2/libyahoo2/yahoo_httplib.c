@@ -40,11 +40,6 @@ char *strchr (), *strrchr ();
 # endif
 #endif
 
-#ifdef __MINGW32__
-# include <winsock2.h>
-# define write(a,b,c) send(a,b,c,0)
-# define read(a,b,c)  recv(a,b,c,0)
-#endif
 
 #include <errno.h>
 #include <unistd.h>
@@ -56,7 +51,10 @@ char *strchr (), *strrchr ();
 
 #include "yahoo_debug.h"
 #ifdef __MINGW32__
-#define snprintf _snprintf
+# include <winsock2.h>
+# define write(a,b,c) send(a,b,c,0)
+# define read(a,b,c)  recv(a,b,c,0)
+# define snprintf _snprintf
 #endif
 
 extern enum yahoo_log_level log_level;

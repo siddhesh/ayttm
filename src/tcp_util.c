@@ -54,6 +54,10 @@
 
 /* so the compiler tells us about mismatches */
 #include "tcp_util.h"
+#ifdef __MINGW32__
+#define snprintf _snprintf
+#define hstrerror strerror
+#endif
 
 
 /**
