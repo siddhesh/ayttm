@@ -1,9 +1,13 @@
-* Mon Apr 28 2003 06:29 GMT [colin]	0.3.0-30
+* Tue Apr 29 2003 06:35 GMT [philip]	0.3.0-31
+- modules/yahoo2
+possibly fix infinite read loop if file transfer connect fails
+
+* Tue Apr 29 2003 06:29 GMT [colin]	0.3.0-30
 - src
 Fix load_contacts_from_file (concurrent accesses to groups list
 was not a good idea ;-))
 
-* Mon Apr 28 2003 04:28 GMT [colin]	0.3.0-29
+* Tue Apr 29 2003 04:28 GMT [colin]	0.3.0-29
 - src/status.[ch] src/edit_local_accounts.c
   src/account.[ch] 
 add load_accounts_from_file() and load_contacts_from_file() 

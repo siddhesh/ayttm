@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.34 $",
-	"$Date: 2003/04/28 18:58:00 $",
+	"$Revision: 1.35 $",
+	"$Date: 2003/04/29 06:42:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -866,7 +866,7 @@ static void eb_yahoo_got_url_handle(int id, int fd, int error,
 	eb_yahoo_file_transfer_data *yftd = data;
 	char label[1024];
 
-	if(fd<=0) {
+	if(error || fd<=0) {
 		WARNING(("yahoo_get_url_handle returned (%d) %s", error, strerror(error)));
 		FREE(yftd->from);
 		FREE(yftd->url);
