@@ -1,3 +1,7 @@
+* Sat May 10 2003 10:30 GMT [philip]	0.3.0-172
+- src/util.[ch] src/chat_window.c src/contact_actions.c
+possibly better matching of local account to remote
+
 * Fri May  9 2003 21:00 GMT [philip]	0.3.0-171
 - src/status.c src/plugin.c src/plugin_api.c
 - modules/smileys/smiley-themer.c

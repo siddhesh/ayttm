@@ -135,7 +135,7 @@ eb_account * account_hash::find(const char * handle, const eb_local_account * el
 
 #define ONLINE(ela) (ela->connected || ela->connecting)
 /* compares two contact names */
-static int contact_cmp(const void * a, const void * b)
+int contact_cmp(const void * a, const void * b)
 {
 	const struct contact *ca=a, *cb=b;
 	return strcasecmp(ca->nick, cb->nick);

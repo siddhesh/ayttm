@@ -82,6 +82,7 @@ char * linkify( char * input );
 char * escape_string(const char * input);
 char * unescape_string(const char * input);
 
+eb_local_account * find_suitable_local_account_for_remote( eb_account * ea, eb_local_account *preferred );
 eb_local_account * find_suitable_local_account( eb_local_account * first,
 						int second );
 eb_local_account * find_local_account_for_remote( eb_account *remote, int online );

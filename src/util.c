@@ -490,6 +490,26 @@ eb_local_account * find_suitable_local_account( eb_local_account * first, int se
 	return NULL;
 }
 
+/**
+ * Find a local account that can currently send messages to a given remote account
+ * @ea	- the remote account to send messages to
+ * @ela - a preferred local account if any, can be NULL
+ *
+ * @return a local account that can send messages to the given remote account, first
+ * priority given to preferred account, second priority given to attached account,
+ * last priority given to an account with the same service id
+ */
+eb_local_account * find_suitable_local_account_for_remote( eb_account *ea, eb_local_account *ela)
+{
+	if(ela && (ela->connected || ela->connecting))
+		return ela;
+
+	if(ea->ela && (ea->ela->connected || ea->ela->connecting))
+		return ea->ela;
+
+	return find_suitable_local_account(NULL, ea->service_id);
+}
+
 /* if contact can offline message, return the account, otherwise, return null */
 
 eb_account * can_offline_message( struct contact * con )
@@ -835,20 +855,20 @@ void strip_html(char * text)
 }
 
 
-int remove_account( eb_account * a )
+int remove_account( eb_account * ea )
 {
-	struct contact * c = a->account_contact;
+	struct contact * c = ea->account_contact;
 
-	if (!find_suitable_local_account(NULL, a->service_id)) 
-		contact_mgmt_queue_add(a, MGMT_DEL, NULL);
+	if (!find_suitable_local_account_for_remote(ea, NULL)) 
+		contact_mgmt_queue_add(ea, MGMT_DEL, NULL);
   
 
-	buddy_logoff(a);
-	remove_account_line(a);
-	c->accounts = l_list_remove(c->accounts, a);
+	buddy_logoff(ea);
+	remove_account_line(ea);
+	c->accounts = l_list_remove(c->accounts, ea);
 
-	RUN_SERVICE(a)->del_user(a);
-	g_free(a);
+	RUN_SERVICE(ea)->del_user(ea);
+	g_free(ea);
 
 	if (l_list_empty(c->accounts)) {
 		remove_contact(c);
@@ -985,19 +1005,19 @@ static void move_account_yn(void * data, int result)
 	free(rad);
 }
 
-static void add_account_verbose( char * contact, eb_account * account, int verbosity )
+static void add_account_verbose( char * contact, eb_account * ea, int verbosity )
 {
 	struct relocate_account_data * rad; 
 	struct contact * c = find_contact_by_nick( contact );
-	eb_account * ea;
-	if(account->ela)
-		ea = find_account_with_ela(account->handle, account->ela);
+	eb_account * account;
+	if(ea->ela)
+		account = find_account_with_ela(ea->handle, ea->ela);
 	else
-		ea = find_account_by_handle(account->handle, account->service_id);
+		account = find_account_by_handle(ea->handle, ea->service_id);
 
-	if(ea) {
-		if(!strcasecmp(ea->account_contact->group->name, _("Unknown"))) {
-			move_account(c, ea);
+	if(account) {
+		if(!strcasecmp(account->account_contact->group->name, _("Unknown"))) {
+			move_account(c, account);
 		} else {
 			char buff[2048];
 			snprintf(buff, sizeof(buff), 
@@ -1006,14 +1026,14 @@ static void add_account_verbose( char * contact, eb_account * account, int verbo
 					"\tGroup: %s\n"
 					"\tContact: %s\n"
 					"\nShould I move it?"),
-					ea->handle,
-					ea->account_contact->group->name,
-					ea->account_contact->nick );
+					account->handle,
+					account->account_contact->group->name,
+					account->account_contact->nick );
 
 			/* remove this contact if it was newly created */
 			if(verbosity) {
 				rad = calloc(1, sizeof(struct relocate_account_data));
-				rad->account = ea;
+				rad->account = account;
 				rad->contact = c;
 				eb_do_dialog(buff, _("Error: account exists"), move_account_yn, rad);
 			} else if( c && l_list_empty(c->accounts))
@@ -1021,32 +1041,32 @@ static void add_account_verbose( char * contact, eb_account * account, int verbo
 		}
 		return;
 	}
-	if (!find_suitable_local_account(account->ela, account->service_id)) {
-		contact_mgmt_queue_add(account, MGMT_ADD, c?c->group->name:_("Unknown"));
+	if (!find_suitable_local_account_for_remote(ea, NULL)) {
+		contact_mgmt_queue_add(ea, MGMT_ADD, c?c->group->name:_("Unknown"));
 	}
 	if (c) {
-		c->accounts = l_list_append( c->accounts, account );
-		account->account_contact = c;
-		RUN_SERVICE(account)->add_user(account);
+		c->accounts = l_list_append( c->accounts, ea );
+		ea->account_contact = c;
+		RUN_SERVICE(ea)->add_user(ea);
 
 		if(!strcmp(c->group->name, _("Ignore")) && 
-			RUN_SERVICE(account)->ignore_user)
-			RUN_SERVICE(account)->ignore_user(account);
+			RUN_SERVICE(ea)->ignore_user)
+			RUN_SERVICE(ea)->ignore_user(ea);
 	}
 	else 
-		add_unknown_with_name(account, contact);
+		add_unknown_with_name(ea, contact);
 
 	update_contact_list();
 	write_contact_list();
 }
 
-void add_account_silent ( char * contact, eb_account * account )
+void add_account_silent ( char * contact, eb_account * ea )
 {
-	add_account_verbose(contact, account, FALSE);
+	add_account_verbose(contact, ea, FALSE);
 }
-void add_account( char * contact, eb_account * account )
+void add_account( char * contact, eb_account * ea )
 {
-	add_account_verbose(contact, account, TRUE);
+	add_account_verbose(contact, ea, TRUE);
 }
 
 static void add_contact( char * group, struct contact * user )
@@ -1136,7 +1156,7 @@ void add_unknown_with_name( eb_account * ea, char * name )
 	con->accounts = l_list_append( con->accounts, ea );
 	ea->account_contact = con;
 	ea->icon_handler = ea->status_handler = -1;
-	if(find_suitable_local_account(NULL, ea->service_id))
+	if(find_suitable_local_account_for_remote(ea, NULL))
 		RUN_SERVICE(ea)->add_user(ea);
 	else {
 		contact_mgmt_queue_add(ea, MGMT_ADD, ea->account_contact->group->name);
@@ -1155,7 +1175,7 @@ static void handle_group_change(eb_account *ea, char *og, char *ng)
 	if(!strcasecmp(ng, og))
 		return;
 
-	if (!find_suitable_local_account(NULL, ea->service_id)) {
+	if (!find_suitable_local_account_for_remote(ea, NULL)) {
 		contact_mgmt_queue_add(ea, MGMT_MOV, ng);
 	}
 		
@@ -1176,7 +1196,7 @@ static void handle_group_change(eb_account *ea, char *og, char *ng)
 struct contact * move_account (struct contact * con, eb_account *ea)
 {
 	struct contact *c = ea->account_contact;
-	char * new_group = con->group->name;
+	char *new_group = con->group->name;
 	char *old_group = c->group->name;
 
 	if (c != con) {
@@ -1266,13 +1286,16 @@ void move_contact (char * group, struct contact * c)
 void rename_contact( struct contact * c, char *newname) 
 {
 	LList *l = NULL;
-	struct contact *con;
+	struct contact *con=NULL;
 	
 	if(!c || !strcmp(c->nick, newname))
 		return;
 
 	eb_debug(DBG_CORE,"Renaming %s to %s\n",c->nick, newname);
-	con = find_contact_in_group_by_nick(newname, c->group);
+
+	/* name differs in case only */
+	if(strcasecmp(c->nick, newname))
+		con = find_contact_in_group_by_nick(newname, c->group);
 	if(con) {
 		eb_debug(DBG_CORE,"found existing contact\n");
 		rename_nick_log(c->group->name, c->nick, c->group->name, con->nick);
@@ -1284,11 +1307,11 @@ void rename_contact( struct contact * c, char *newname)
 		write_contact_list();
 		
 	} else {
-		eb_debug(DBG_CORE,"no existing contact\n");
+		eb_debug(DBG_CORE,"no existing contact, or case change only\n");
 
         	rename_nick_log(c->group->name, c->nick, c->group->name, newname);
-        	strncpy(c->nick, newname, 254);
-        	c->nick[254] = '\0';
+        	strncpy(c->nick, newname, sizeof(c->nick)-1);
+        	c->nick[sizeof(c->nick)-1] = '\0';
 		if (c->label)
 			gtk_label_set_text(GTK_LABEL(c->label), newname);
 		l = c->accounts;
@@ -1296,7 +1319,7 @@ void rename_contact( struct contact * c, char *newname)
 			eb_account *ea = l->data;
 
 			if (RUN_SERVICE(ea)->change_user_name) {
-				if (!find_suitable_local_account(NULL, ea->service_id))
+				if (find_suitable_local_account_for_remote(ea, NULL))
 					contact_mgmt_queue_add(ea, MGMT_REN, newname);
 				else
 					RUN_SERVICE(ea)->change_user_name(ea, newname);
@@ -1700,7 +1723,7 @@ void ay_dump_cts (void)
 					ct,
 					ct->nick,
 					ct->language,
-					ct->trigger,
+					&ct->trigger,
 					ct->trigger.type,
 					ct->trigger.action,
 					ct->trigger.param,

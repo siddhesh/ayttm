@@ -62,6 +62,7 @@ void move_contact(struct contact * contact, grouplist * new_group);
 void move_account(eb_account * account, struct contact * new_contact);
 
 /* util methods */
+int contact_cmp(const void * ct_a, const void * ct_b);
 LList * get_group_names( void );
 LList * get_group_contact_names( grouplist * group );
 

@@ -271,12 +271,12 @@ static void eb_save_size( GtkWidget * widget, gpointer data )
 
 static void get_info(GtkWidget * w, eb_account *ea )
 {
-	eb_local_account * el;
+	eb_local_account * ela;
 
 	if(ea && RUN_SERVICE(ea)->get_info) {
-		el = find_suitable_local_account(NULL, ea->service_id);
-		if (el)
-			RUN_SERVICE(ea)->get_info(el ,ea);  
+		ela = find_suitable_local_account_for_remote(ea, NULL);
+		if (ela)
+			RUN_SERVICE(ea)->get_info(ela ,ea);  
 		else
 			eb_debug(DBG_CORE, "Couldn't find suitable local account for info request");
 	} else {

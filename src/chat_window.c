@@ -469,7 +469,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	/*determine what is the best local account to use*/
 
 	if(!data->local_user)
-		data->local_user = find_suitable_local_account(data->preferred->ela, data->preferred->service_id); 
+		data->local_user = find_suitable_local_account_for_remote(data->preferred, data->preferred->ela); 
 
 	if(!data->local_user) {
 		cw_put_message(data, _("<body bgcolor=#F9E589 width=*><b> Cannot send message - no local account found.</b></body>\n"),0,0,0);
@@ -940,7 +940,7 @@ static void send_typing_status(chat_window *cw)
 			if(!cw->preferred) /* The remote user is not online */
 				return;
 		}
-		cw->local_user=find_suitable_local_account(cw->local_user, cw->preferred->service_id);
+		cw->local_user=find_suitable_local_account_for_remote(cw->preferred, cw->local_user);
 		if(cw->local_user==NULL) 
 			return;
 
@@ -1418,7 +1418,7 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 	eb_local_account *account = NULL;
 
 	if (remote_account)
-		account = find_suitable_local_account (NULL, remote_account->service_id);
+		account = find_suitable_local_account_for_remote (remote_account, NULL);
 
 	if (!remote_contact->chatwindow || !remote_contact->chatwindow->window) {
 		if (remote_contact->chatwindow)
@@ -1464,7 +1464,7 @@ void eb_chat_window_display_account(eb_account * remote_account)
 	
 	remote_contact = remote_account->account_contact;
 	
-	account = find_suitable_local_account(NULL, remote_account->service_id);
+	account = find_suitable_local_account_for_remote(remote_account, NULL);
 
 	if(!remote_contact)
 		return;

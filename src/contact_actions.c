@@ -42,15 +42,12 @@ static void send_file_callback( const char *selected_filename, void *data )
         
 	x_fer_account = find_suitable_file_transfer_account(ea, ea->account_contact);
 
-	if ( x_fer_account != NULL )
-	{
-		eb_local_account	*ela = find_suitable_local_account( NULL, x_fer_account->service_id );
+	if ( x_fer_account != NULL ) {
+		eb_local_account *ela = find_suitable_local_account_for_remote( x_fer_account, NULL );
 		
 		RUN_SERVICE(ela)->send_file( ela, x_fer_account, (char *)selected_filename );
-	}
-	else
-	{
-		eb_local_account	*ela = find_suitable_local_account( NULL, ea->service_id );
+	} else {
+		eb_local_account *ela = find_suitable_local_account_for_remote( ea, NULL );
 		
 		strncpy( filename, selected_filename, sizeof(filename) );
 		RUN_SERVICE(ela)->send_im( ela, ea, "EB_COMMAND SEND_FILE" );
