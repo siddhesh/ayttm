@@ -218,6 +218,19 @@ static void send_typing_status(eb_chat_room *cr)
 	}
 }
 
+void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num)
+{
+	LList *w = NULL;
+	for (w = chat_rooms; w; w = w->next) {
+		eb_chat_room *cr = (eb_chat_room *)w->data;
+		if (cr->notebook_child == page->child) {
+			set_tab_normal(cr);
+			eb_chat_room_update_window_title(cr, FALSE);
+			return;
+		}
+	}	
+}
+
 static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
   eb_chat_room *cr = (eb_chat_room *)data;

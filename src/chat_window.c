@@ -1165,9 +1165,11 @@ static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage
 				set_tab_normal(c->chatwindow);
 				ENTRY_FORCE_FOCUS(c->chatwindow);
 				eb_update_window_title_to_tab (page_num, FALSE);
+				return;
 			}
 		}
 	}
+	eb_chat_room_notebook_switch(notebook, page, page_num);
 }
 
 
