@@ -1,4 +1,8 @@
-* Fri Jun 27 2003 03:37 GMT [colin]	0.3.1-42
+* Fri Jun 27 2003 12:05 GMT [colin]	0.3.1-43
+- modules/irc/irc.c
+Add server to ea->handle if necessary
+
+* Fri Jun 27 2003 11:50 GMT [colin]	0.3.1-42
 - src/chat_room.c
 Change join window items order (more intuitive)
 - src/dialog.c
