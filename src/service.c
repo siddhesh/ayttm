@@ -136,7 +136,6 @@ static void reload_service_accounts(int service_id)
 			nela->service_id = oela->service_id;
 			node->data=nela;
 			//FIXME: This should probably be left to the service to clean up, though at this point, it may not exist
-			free(oela->handle);
 			free(oela->protocol_local_account_data);
 			free(oela);
 		}

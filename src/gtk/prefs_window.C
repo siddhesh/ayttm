@@ -109,7 +109,6 @@ class ay_prefs_window
 		};
 		
 		static const char	*s_titles[PANEL_MAX];
-		static GtkAccelGroup	*s_accel_group;
 
 	private:	// Gtk callbacks
 		static void		s_tree_item_selected( GtkWidget *widget, gpointer data );
@@ -128,6 +127,7 @@ class ay_prefs_window
 		
 		struct prefs		&m_prefs;
 		GtkWidget		*m_prefs_window_widget;	///< the actual dialog widget
+		GtkWidget		*m_notebook_widget;
 		
 		GtkTree			*m_tree;
 		GList			*m_panels;		///< a list of the panels (ay_prefs_window_panel *)
@@ -143,6 +143,7 @@ class ay_prefs_window_panel
 		virtual ~ay_prefs_window_panel( void );
 		
 		void		SetNotebookID( int inID ) { m_notebook_id = inID; }
+		int		GetNotebookID( void ) { return m_notebook_id; }
 		
 		const char	*Name( void ) const { return( m_name ); }
 		GtkWidget	*TopLevelWidget( void ) { return( m_super_vbox ); }
@@ -158,6 +159,7 @@ class ay_prefs_window_panel
 		static ay_prefs_window_panel	*CreateModulePanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_module_pref &inPrefs );
 		static ay_prefs_window_panel	*CreateAccountPanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_account_pref &inPrefs );
 
+		GtkAccelGroup	*m_accel_group;
 	protected:
 		GtkWidget	*m_super_vbox;
 		GtkWidget	*m_top_vbox;
@@ -168,9 +170,9 @@ class ay_prefs_window_panel
 	private:
 		void	AddTopFrame( const char *in_text );
 		
-		const char					*m_name;
-		int							m_notebook_id;
-		struct prefs				*m_prefs;
+		const char			*m_name;
+		int				m_notebook_id;
+		struct prefs			*m_prefs;
 		ay_prefs_window::ePanelID	m_panel_id;
 };
 
@@ -507,7 +509,6 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 };
 
 ay_prefs_window	*ay_prefs_window::s_only_prefs_window = NULL;
-GtkAccelGroup	*ay_prefs_window::s_accel_group = NULL;
 
 ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 :	m_prefs( inPrefs ),
@@ -524,9 +525,6 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
 	
-	s_accel_group = gtk_accel_group_new();
-	gtk_window_add_accel_group(GTK_WINDOW(m_prefs_window_widget), s_accel_group);
-
 	gint height=460;
 	if(height > gdk_screen_height() - 40)
 		height = gdk_screen_height() - 40;
@@ -548,13 +546,13 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtk_tree_set_view_lines( m_tree, FALSE );
 	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(scrolled_win), GTK_WIDGET(m_tree) );
 	
-	GtkWidget	*notebook = gtk_notebook_new();
-	gtk_widget_set_usize( notebook, 410, -1 );
-	gtk_notebook_set_show_tabs( GTK_NOTEBOOK(notebook), FALSE );
+	m_notebook_widget = gtk_notebook_new();
+	gtk_widget_set_usize( m_notebook_widget, 410, -1 );
+	gtk_notebook_set_show_tabs( GTK_NOTEBOOK(m_notebook_widget), FALSE );
 	
 	for ( int i = 0; i < PANEL_MAX; i++ )
 	{
-		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::Create( m_prefs_window_widget, notebook, m_prefs,
+		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::Create( m_prefs_window_widget, m_notebook_widget, m_prefs,
 				static_cast<ePanelID>(i), s_titles[i] );
 		
 		if ( the_panel == NULL )
@@ -566,9 +564,9 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 		
 		if ( top_level_w != NULL )
 		{
-			gtk_notebook_append_page( GTK_NOTEBOOK(notebook), top_level_w, gtk_label_new( s_titles[i] ) );
+			gtk_notebook_append_page( GTK_NOTEBOOK(m_notebook_widget), top_level_w, gtk_label_new( s_titles[i] ) );
 			
-			the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(notebook), top_level_w ) );
+			the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(m_notebook_widget), top_level_w ) );
 			
 			AddToTree( the_panel->Name(), the_panel );
 		}
@@ -581,7 +579,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	{
 		t_account_pref		*pref_info = reinterpret_cast<t_account_pref *>(account_pref->data);
 		
-		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::CreateAccountPanel( m_prefs_window_widget, notebook, *pref_info );
+		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::CreateAccountPanel( m_prefs_window_widget, m_notebook_widget, *pref_info );
 		
 		if ( the_panel != NULL )
 		{
@@ -591,9 +589,9 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 
 			if ( top_level_w != NULL )
 			{
-				gtk_notebook_append_page( GTK_NOTEBOOK(notebook), top_level_w, NULL );
+				gtk_notebook_append_page( GTK_NOTEBOOK(m_notebook_widget), top_level_w, NULL );
 
-				the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(notebook), top_level_w ) );
+				the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(m_notebook_widget), top_level_w ) );
 
 				AddToTree( the_panel->Name(), the_panel );
 			}
@@ -609,7 +607,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	{
 		t_module_pref		*pref_info = reinterpret_cast<t_module_pref *>(module_pref->data);
 		
-		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::CreateModulePanel( m_prefs_window_widget, notebook, *pref_info );
+		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::CreateModulePanel( m_prefs_window_widget, m_notebook_widget, *pref_info );
 		
 		if ( the_panel != NULL )
 		{
@@ -619,9 +617,9 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 
 			if ( top_level_w != NULL )
 			{
-				gtk_notebook_append_page( GTK_NOTEBOOK(notebook), top_level_w, NULL );
+				gtk_notebook_append_page( GTK_NOTEBOOK(m_notebook_widget), top_level_w, NULL );
 
-				the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(notebook), top_level_w ) );
+				the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(m_notebook_widget), top_level_w ) );
 
 				AddToTree( the_panel->Name(), the_panel );
 			}
@@ -630,14 +628,14 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 		module_pref = module_pref->next;
 	}
 	
-	gtk_widget_show( notebook );
+	gtk_widget_show( m_notebook_widget );
 	gtk_widget_show( GTK_WIDGET(m_tree) );
 	gtk_widget_show( scrolled_win );
 	gtk_widget_show( main_hbox );
 
 	GtkWidget	*prefs_vbox = gtk_vbox_new( FALSE, 7 );
 	gtk_widget_show( prefs_vbox );
-	gtk_box_pack_start( GTK_BOX(prefs_vbox), notebook, TRUE, TRUE, 0 );
+	gtk_box_pack_start( GTK_BOX(prefs_vbox), m_notebook_widget, TRUE, TRUE, 0 );
 
 	// OK Button
 	GtkWidget	*hbox2 = gtk_hbox_new( TRUE, 5 );
@@ -844,7 +842,21 @@ void	ay_prefs_window::s_tree_item_selected( GtkWidget *widget, gpointer data )
 {
 	ay_prefs_window_panel	*the_panel = reinterpret_cast<ay_prefs_window_panel *>( data );
 
+	for(GList *iter = s_only_prefs_window->m_panels; iter; iter=g_list_next(iter))
+	{
+		ay_prefs_window_panel *old_panel = reinterpret_cast<ay_prefs_window_panel *>(iter->data);
+		if(old_panel->GetNotebookID() == gtk_notebook_get_current_page(
+					GTK_NOTEBOOK(s_only_prefs_window->m_notebook_widget)))
+		{
+			gtk_window_remove_accel_group(GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget),
+					the_panel->m_accel_group);
+			break;
+		}
+	}
+		
 	the_panel->Show();
+	gtk_window_add_accel_group(GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget), 
+			the_panel->m_accel_group);
 }
 
 // s_delete_event_callback
@@ -892,6 +904,8 @@ ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
 	if ( inTopFrameText )
 		AddTopFrame( inTopFrameText );
 
+	m_accel_group = gtk_accel_group_new();
+
 	m_top_scrollbox = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(m_top_scrollbox), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	gtk_box_pack_start( GTK_BOX(m_super_vbox), GTK_WIDGET(m_top_scrollbox), TRUE, TRUE, 0 );
@@ -905,7 +919,7 @@ ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
 
 GtkWidget *ay_prefs_window_panel::_gtkut_button( const char *inText, int *inValue, GtkWidget *inPage )
 {
-	return gtkut_button( inText, inValue, inPage, ay_prefs_window::s_accel_group );
+	return gtkut_button( inText, inValue, inPage, m_accel_group );
 }		
 
 // Create
@@ -2982,9 +2996,6 @@ void	ay_account_panel::RenderAccountPrefs( void )
 {
 	input_list	*the_list = m_prefs.pref_list;
 
-	GtkAccelGroup *accel_group = ay_prefs_window::s_accel_group;
-
-	
 	while ( the_list != NULL )
 	{
 		switch ( the_list->type )
@@ -2995,12 +3006,12 @@ void	ay_account_panel::RenderAccountPrefs( void )
 			case EB_INPUT_CHECKBOX:
 				{
 					char	*item_label = NULL;
-					
+
 					if ( the_list->widget.checkbox.label != NULL )
 						item_label = the_list->widget.checkbox.label;
 					else
 						item_label = the_list->widget.checkbox.name;
-						
+
 					_gtkut_button( item_label, the_list->widget.checkbox.value, m_top_container );
 					the_list->widget.checkbox.saved_value = *(the_list->widget.checkbox.value);
 				}
@@ -3010,14 +3021,14 @@ void	ay_account_panel::RenderAccountPrefs( void )
 				{
 					GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
 					gtk_widget_show( hbox );
-						
+
 					char	*item_label = NULL;
-					
+
 					if ( the_list->widget.entry.label != NULL )
 						item_label = the_list->widget.entry.label;
 					else
 						item_label = the_list->widget.entry.name;
-					
+
 					GtkWidget	*label = gtk_label_new( "" );
 					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
 					gtk_widget_show( label );
@@ -3027,7 +3038,7 @@ void	ay_account_panel::RenderAccountPrefs( void )
 
 					GtkWidget	*widget = gtk_entry_new();
 					gtk_widget_show( widget );
-					gtk_widget_add_accelerator(widget, "grab_focus", accel_group,
+					gtk_widget_add_accelerator(widget, "grab_focus", m_accel_group,
 							key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 					the_list->widget.entry.entry = widget;
 					gtk_entry_set_text( GTK_ENTRY(widget), the_list->widget.entry.value );
@@ -3038,7 +3049,7 @@ void	ay_account_panel::RenderAccountPrefs( void )
 
 				}
 				break;
-			
+
 			case EB_INPUT_PASSWORD:
 				{
 					GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
@@ -3061,7 +3072,7 @@ void	ay_account_panel::RenderAccountPrefs( void )
 					GtkWidget	*widget = gtk_entry_new();
 					gtk_entry_set_visibility(GTK_ENTRY(widget), FALSE);
 					gtk_widget_show( widget );
-					gtk_widget_add_accelerator(widget, "grab_focus", accel_group,
+					gtk_widget_add_accelerator(widget, "grab_focus", m_accel_group,
 							key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 					the_list->widget.entry.entry = widget;
 					gtk_entry_set_text( GTK_ENTRY(widget), the_list->widget.entry.value );
@@ -3113,7 +3124,7 @@ void	ay_account_panel::RenderAccountPrefs( void )
 					gtk_option_menu_set_history(GTK_OPTION_MENU(menu), 
 							*the_list->widget.listbox.value);
 
-					gtk_widget_add_accelerator(menu, "grab_focus", accel_group,
+					gtk_widget_add_accelerator(menu, "grab_focus", m_accel_group,
 							key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 
 					gtk_box_pack_start( GTK_BOX(hbox), menu, FALSE, FALSE, 0 );

@@ -32,6 +32,7 @@
 
 #include "llist.h"
 #include "input_list.h"
+#include "prefs.h"
 
 struct contact;
 
@@ -52,8 +53,8 @@ typedef struct _grouplist
 
 typedef struct local_account {
         int service_id;
-        char *handle;
-	char alias[255];
+        char handle[MAX_PREF_LEN];
+	char alias[MAX_PREF_LEN];
         int connected;
         int connecting;
 	void * status_button; /* GtkWidget */
