@@ -17,7 +17,7 @@
 - Modules path changed to comply with FHS (read README!)
 
 * New features
-- "Actions": lets you run arbitrary command with your 
+- "Actions": lets you run arbitrary commands with your 
   conversation logs (print, mail, view in browser,...)
 - New away messages system (allows deletion)
 - Login on startup now on a per-account basis
