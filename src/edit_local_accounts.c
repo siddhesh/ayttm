@@ -347,7 +347,8 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 	eb_local_account *ela = NULL;
 
 	if (gtk_entry_get_text(GTK_ENTRY(username)) != NULL
-	&&  strlen(gtk_entry_get_text(GTK_ENTRY(username))) > 0) {
+	&&  strlen(gtk_entry_get_text(GTK_ENTRY(username))) > 0
+	&& num_accounts == 0) {
 		add_callback(widget,data);
 	}
 	

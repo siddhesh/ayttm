@@ -4,7 +4,7 @@ HOWTO translate Yattm ?
 	* get any .po file in this directory
 	* rename it to LL.po, where LL is your language code
 	* update the translations ;-)
-	* send your file to ayttm-users@nongnu.org
+	* send your file to ayttm-users@lists.sf.net
 	  or, if you have cvs write access, add it, plus:
 	  - add your language code to ALL_LINGUAS in configure.in
 

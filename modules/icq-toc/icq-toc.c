@@ -89,8 +89,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/04 09:15:43 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/04 11:54:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -853,7 +853,7 @@ static eb_local_account * eb_icq_read_local_config(LList * pairs)
 	char		*str = NULL;
 	
 	
-	strncpy(ala->icq_info,  "Visit the Ayttm website at <a href=\"http://www.nongnu.org/ayttm/\">www.nongnu.org/ayttm</a>",
+	strncpy(ala->icq_info,  "Visit the Ayttm website at <a href=\"http://ayttm.sf.net/\">ayttm.sf.net</a>",
 			sizeof(ala->icq_info));
 
 	

@@ -348,7 +348,7 @@ static void crash_save_crash_log(GtkButton *button, const gchar *text)
  */
 static void crash_create_bug_report(GtkButton *button, const gchar *data)
 {
-	open_url(NULL,"http://savannah.nongnu.org/bugs/?func=addbug&group=ayttm");
+	open_url(NULL,"http://sourceforge.net/tracker/?func=add&group_id=77614&atid=550744");
 }
 
 /*!

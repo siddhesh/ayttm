@@ -32,11 +32,11 @@
 
 void show_manual()
 {
-  open_url(NULL, "http://www.nongnu.org/ayttm/ayttm-manual/");
+  open_url(NULL, "http://ayttm.sf.net/ayttm-manual/");
 }
 
 void show_website()
 {
-  open_url(NULL, "http://www.nongnu.org/ayttm/");
+  open_url(NULL, "http://ayttm.sf.net/");
 }
 

@@ -90,7 +90,7 @@ static void eb_cli_ver ()
 	printf("Vance Lankhaar, Erik Inge Bolso, Colin Leroy, Philip Tellis, Jeff Miller,\n");
 	printf("and Troy Morrison.\n");
 	printf("\nFor more information on Ayttm, visit the website at\n");
-	printf("         http://www.nongnu.org/ayttm/\n");
+	printf("         http://ayttm.sf.net/\n");
 	return;
 }
 

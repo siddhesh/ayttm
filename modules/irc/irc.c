@@ -85,8 +85,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/04 09:15:43 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/04 11:54:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -847,7 +847,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		/* Reply as per the CTCP pseudo-RFC with a NOTICE, not a PRIVMSG */
 		if (strstr(buff, "\001VERSION\001"))
 		{
-			g_snprintf(message, BUF_LEN, "NOTICE %s :\001VERSION Ayttm:%s:http://www.nongnu.org/ayttm/\001\n", nick, VERSION);
+			g_snprintf(message, BUF_LEN, "NOTICE %s :\001VERSION Ayttm:%s:http://ayttm.sf.net/\001\n", nick, VERSION);
 		}
 		else if (strstr(buff, "\001PING"))
 		{

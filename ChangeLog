@@ -1,6 +1,10 @@
 * Fri Apr 05 2003 11:47 GMT [colin]	0.2.3-20
 - modules/*toc/libtoc/libtoc.c
 select() timeout after 1 second
+- modules/aim-toc/aim-toc.c modules/icq-toc/icq-toc.c
+  modules/irc/irc.c po/translation-howtos src/crash.c
+  src/edit_local_accounts.c src/help_menu.c src/main.c
+nongnu.org -> sf.net
 
 * Fri Apr 05 2003 11:10 GMT [philip]	0.2.3-19
 - src/prefs.c
