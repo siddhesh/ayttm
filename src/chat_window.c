@@ -1608,6 +1608,14 @@ void eb_log_status_changed(eb_account *ea, gchar *status)
 			ea->account_contact->chatwindow->logfile == NULL)
 		return;
 	
+	/* only current account */
+	if (ea->account_contact->chatwindow->preferred != ea)
+		return;
+	
+	/* only if this is the correct local account */
+	if (ea->ela != ea->account_contact->chatwindow->local_user)
+		return;
+	
 	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#F9E589 width=*><b> %s changed status to %s @ %s.</b></body>"),
 		   ea->account_contact->nick, ((status && status[0])?status:_("(Online)")), 
 		   g_strchomp(asctime(localtime(&my_time))));
