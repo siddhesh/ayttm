@@ -60,6 +60,8 @@ extern struct hostent	*proxy_gethostbyname2( const char *host, int type ) ;
 int	proxy_send( int s, const void *msg, int len, unsigned int flags );
 int	proxy_recv( int s, void * buff, int len, unsigned int flags );
 
+extern int proxy_get_proxy(void);
+
 /* connect functions */
 extern int	proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen,
 				void *cb, void *data, void *scb );

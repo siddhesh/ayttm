@@ -850,6 +850,10 @@ static int conn_nok( int sockfd, void *cb, void *data )
 	}	
 }
 
+int proxy_get_proxy( ) {
+	return proxy_type;
+}
+
 int proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data, void *scb )
 {
    int tmp;
