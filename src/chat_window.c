@@ -1368,7 +1368,8 @@ static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer 
 		if ((event->keyval >= GDK_a && event->keyval <= GDK_z)
 		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) {
 			return chat_auto_complete(cw->entry, session_words, event);
-		} else if (event->keyval == GDK_Tab || event->keyval == GDK_Right) {
+		} else if (event->keyval == GDK_Tab 
+	/* #980589 Right Arrow Key not avail || event->keyval == GDK_Right */) {
 			chat_auto_complete_validate(cw->entry);
 			return TRUE;
 		} else if (event->keyval==GDK_space || ispunct(event->keyval)) {

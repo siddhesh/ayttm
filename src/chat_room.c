@@ -304,7 +304,8 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) ) {
 	  	return chat_auto_complete(cr->entry, cr->fellows, event)
 				|| (iGetLocalPref("do_auto_complete") && chat_auto_complete(cr->entry, session_words, event));
-  } else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab || event->keyval == GDK_Right)) {
+  } else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab 
+	/* #980589 Right Arrow Key not avail  || event->keyval == GDK_Right */)) {
 		chat_auto_complete_validate(cr->entry);
 		return TRUE;
   } else if (iGetLocalPref("do_auto_complete") && event->keyval == GDK_space) {

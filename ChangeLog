@@ -1,3 +1,8 @@
+* Mon Jul 12 2004 18:15 GMT [edward] 0.4.6-22
+- #980589 Right Arrow Key not avail
+  src/chat_window.c
+  src/chat_room.c
+
 * Mon Jul 12 2004 14:23 GMT [edward] 0.4.6-21
 - Upgraded automake support for 1.8, fixed error in nl.po that mandrake build did 
   not work. Tested mandrake-9.2 build and small fixes and updates to README for bug
