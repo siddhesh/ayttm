@@ -1,3 +1,7 @@
+* Fri May  9 2003 19:10 GMT [philip]	0.3.0-170
+- modules/smileys/smiley-themer.c
+Add meta information for smiley themes
+
 * Fri May  9 2003 09:30 GMT [philip]	0.3.0-169
 - modules/smileys/ pixmaps/
 Move console smileys and giles smileys to new smiley themer

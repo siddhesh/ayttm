@@ -54,14 +54,18 @@ static char last_selected[MAX_PREF_LEN]="";
 
 static char rcfilename[]="aysmile.rc";
 
+#ifndef FREE
+# define FREE(x) if(x){free(x); x=NULL;}
+#endif
+
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.5 $",
-	"$Date: 2003/05/09 06:43:44 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/05/09 19:11:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -130,30 +134,48 @@ static int reload_prefs()
 
 struct smiley_theme {
 	char *name;
+	char *description;
+	char *author;
+	char *copyright;
+	char *date;
+	char *revision;
+
 	LList *smileys;
 	void *menu_tag;
 };
 
 static LList *themes=NULL;
 
+static void unload_theme(struct smiley_theme * theme)
+{
+	if(smileys == theme->smileys)
+		reset_smileys((ebmCallbackData *)theme);
+
+	if(theme->name)
+		ay_remove_smiley_set(theme->name);
+	if(theme->menu_tag)
+		eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
+
+	while(theme->smileys) {
+		struct smiley_struct *smiley = theme->smileys->data;
+		XpmFree(smiley->pixmap);
+		FREE(smiley);
+		theme->smileys = l_list_remove_link(theme->smileys, theme->smileys);
+	}
+	FREE(theme->name);
+	FREE(theme->description);
+	FREE(theme->author);
+	FREE(theme->copyright);
+	FREE(theme->date);
+	FREE(theme->revision);
+	FREE(theme);
+}
+
 static void unload_themes()
 {
 	while(themes) {
 		struct smiley_theme *theme = themes->data;
-		if(smileys == theme->smileys)
-			reset_smileys((ebmCallbackData *)theme);
-		
-		ay_remove_smiley_set(theme->name);
-		if(theme->menu_tag)
-			eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
-
-		while(theme->smileys) {
-			struct smiley_struct *smiley = theme->smileys->data;
-			XpmFree(smiley->pixmap);
-			free(smiley);
-			theme->smileys = l_list_remove_link(theme->smileys, theme->smileys);
-		}
-		free(theme->name);
+		unload_theme(theme);
 		themes = l_list_remove_link(themes, themes);
 	}
 }
@@ -186,66 +208,107 @@ static int smiley_readline(char *ptr, int maxlen, FILE * fp)
 	return (n);
 }
 
-static LList * load_theme(const char *theme_name)
+static int splitline(char *buff, char **key, char **value)
 {
-	LList *_smileys=NULL;
+	char *tmp;
+
+	if(!buff[0] || buff[0] == '#')
+		return 0;
+	if(strchr(buff, '=') <= buff)
+		return 0;
+
+	/* remove leading spaces */
+	for(; *buff && isspace(*buff); buff++)
+		;
+
+	if(!*buff)		/* empty key */
+		return 0;
+
+	*key = buff;
+
+	*value = strchr(buff, '=');
+	**value='\0';
+
+	/* remove trailing spaces */
+	for(tmp=buff; *tmp && !isspace(*tmp); tmp++)
+		;
+	if(*tmp)
+		*tmp='\0';
+
+	buff = (*value)+1;
+	/* remove leading spaces of value */
+	for(; *buff && isspace(*buff); buff++)
+		;
+
+	if(!*buff)		/* empty value */
+		return 0;
+
+	*value = buff;
+
+	/* remove trailing spaces */
+	for(tmp=buff+strlen(buff)-1; tmp >= buff && isspace(*tmp); tmp--)
+		*tmp='\0';
+
+	return 1;
+}
+
+static struct smiley_theme * load_theme(const char *theme_name)
+{
 	FILE *themerc;
 	char buff[1024];
+	struct smiley_theme *theme;
+
 	snprintf(buff, sizeof(buff), "%s/%s/%s",
 			smiley_directory, theme_name, rcfilename);
 
 	if(!(themerc = fopen(buff, "rt")))
 		return NULL;
 
+	theme = calloc(1, sizeof(struct smiley_theme));
+
 	while((smiley_readline(buff, sizeof(buff), themerc))>0) {
-		char *key, *filename, *tmp, filepath[1024];
 		char **smiley_data;
-		if(!buff[0] || buff[0] == '#')
-			continue;
-		if(strchr(buff, '=') <= buff)
-			continue;
+		char filepath[1024];
+		char *key, *value;
 
-		for(key = buff; *key && isspace(*key); key++)
-			;
-
-		if(!*key)		/* empty key */
+		if(!splitline(buff, &key, &value))
 			continue;
 
-		filename = strchr(key, '=');
-		*filename='\0';
-		for(tmp=key; *tmp && !isspace(*tmp); tmp++)
-			;
-		if(*tmp)
-			*tmp='\0';
-		for(++filename; *filename && isspace(*filename); filename++)
-			;
+		if(key[0] == '%') {
+			key++;
+			if(!strcmp(key, "name"))
+				theme->name = strdup(value);
+			else if(!strcmp(key, "desc"))
+				theme->description = strdup(value);
+			else if(!strcmp(key, "author"))
+				theme->author = strdup(value);
+			else if(!strcmp(key, "date"))
+				theme->date = strdup(value);
+			else if(!strcmp(key, "revision"))
+				theme->revision = strdup(value);
+		} else {
+			snprintf(filepath, sizeof(filepath), "%s/%s/%s",
+					smiley_directory, theme_name, value);
 
-		if(!*filename)		/* empty filename */
-			continue;
+			if(XpmReadFileToData(filepath, &smiley_data) != XpmSuccess) {
+				continue;
+			}
 
-		for(tmp=filename; *tmp && !isspace(*tmp); tmp++)
-			;
-		if(*tmp)
-			*tmp='\0';
-
-		
-		snprintf(filepath, sizeof(filepath), "%s/%s/%s",
-				smiley_directory, theme_name, filename);
-
-		printf("loading %s - ", filepath);
-		if(XpmReadFileToData(filepath, &smiley_data) != XpmSuccess) {
-			printf("failed\n");
-			continue;
+			theme->smileys = add_smiley(theme->smileys, key, smiley_data);
 		}
-
-		printf("%p\n", smiley_data);
-
-		_smileys = add_smiley(_smileys, key, smiley_data);
 	}
 	
 	fclose(themerc);
 
-	return _smileys;
+	if(!theme->smileys) {
+		unload_theme(theme);
+		return NULL;
+	}
+
+	if(!theme->name)
+		theme->name = strdup(theme_name);
+
+	return theme;
 }
 
 static void reset_smileys(ebmCallbackData *data)
@@ -288,9 +351,7 @@ static void load_themes()
 		if(entry->d_name[0]=='.')
 			continue;
 
-		theme = calloc(1, sizeof(struct smiley_theme));
-		theme->name = strdup(entry->d_name);
-		if(!(theme->smileys = load_theme(theme->name)))
+		if(!(theme = load_theme(entry->d_name)))
 			continue;
 
 		theme->menu_tag=eb_add_menu_item(theme->name, EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, theme);

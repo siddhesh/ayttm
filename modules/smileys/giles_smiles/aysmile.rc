@@ -1,10 +1,13 @@
 #
 # Giles' Smiley theme for ayttm
 #
-##name=Giles' Smileys
-##desc=An alternate smiley theme
-##author=Giles Hamlin
-#
+
+%name	=	Giles Smileys
+%desc	=	An alternate smiley theme by Giles Hamlin
+%author	=	Giles Hamlin
+%date	=	$Date: 2003/05/09 19:11:52 $
+%revision=	$Revision: 1.2 $
+
 
 dead	=	dead.xpm
 blank	=	embarrased.xpm

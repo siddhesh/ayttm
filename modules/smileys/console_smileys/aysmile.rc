@@ -1,10 +1,13 @@
 #
 # Console Smiley theme for ayttm
 #
-##name=Console Smileys
-##desc=Bare minimum smiley theme for those who prefer the console
-##author=Philip S Tellis
-#
+
+%name	=	Console Smileys
+%desc	=	Bare minimum smiley theme for those who prefer the console
+%author	=	Philip S Tellis
+%date	=	$Date: 2003/05/09 19:11:51 $
+%revision=	$Revision: 1.2 $
+
 
 smile	=	smile.xpm
 sad	=	sad.xpm
