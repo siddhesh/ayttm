@@ -1,5 +1,9 @@
+* Mon Oct 27 2003 17:20 GMT [colin]	0.4.4-4
+- src/status.c
+Don't log status changes containing numbers
+
 * Mon Oct 27 2003 11:20 GMT [colin]	0.4.4-3-too ;-)
--po/pt_BR.po
+- po/pt_BR.po
 update Brazilian translation (thanks Fabricio!)
 
 * Sun Oct 26 2003 17:30 GMT [colin]	0.4.4-3

@@ -355,6 +355,7 @@ static void update_status_message(gchar * message )
 		create_log_window();
 
 	if(status_bar) {
+		int i = 0;
 		char *tstamp_mess = NULL;
 		time_t t;
 		struct tm * cur_time;
@@ -366,6 +367,12 @@ static void update_status_message(gchar * message )
 				 cur_time->tm_min, 
 				cur_time->tm_sec,
 			 	message);
+		
+		for (i = 0; i < strlen(message); i++) {
+        		if (isdigit(message[i])) {
+                		return;
+        		}
+		}
 		
 		if (last_inserted) {
 			if (!strcmp(last_inserted,message))
