@@ -673,7 +673,7 @@ struct contact * find_contact_in_group_by_nick( char * nick , grouplist *gl )
 	return NULL;
 }
 
-eb_account * find_account_by_handle( const char * handle, int type )
+static eb_account * find_account_with_id_or_ela( const char * handle, int service_id, eb_local_account *ela )
 {
 	LList *l1, *l2, *l3;
 
@@ -693,7 +693,9 @@ eb_account * find_account_by_handle( const char * handle, int type )
 			for(l3 = ((struct contact*)l2->data)->accounts; l3; l3=l3->next) {
 				eb_account * ea = l3->data;
 
-				if(ea->service_id == type && !strcasecmp(handle, ea->handle))
+				if(ea->ela == ela 
+				&& ea->service_id == service_id
+				&& !strcasecmp(handle, ea->handle))
 					return ea;
 			}
 		}
@@ -703,6 +705,31 @@ eb_account * find_account_by_handle( const char * handle, int type )
 			break;
 	}
 	return NULL;
+}
+
+eb_account * find_account_by_handle( const char * handle, int service_id)
+{
+	LList *w = accounts;
+	eb_account *found = NULL;
+	for (; w; w = w->next) {
+		eb_local_account *ela = (eb_local_account *)w->data;
+		if (ela->service_id == service_id)
+			found = find_account_with_ela(handle, ela);
+		if (found) {
+			eb_debug(DBG_CORE, "%s: found ea with ela: %s\n", handle, ela->handle);
+			return found;
+		}
+	}
+	/* if the right ela isn't found, return possible ea with no ela */
+	found = find_account_with_id_or_ela(handle, service_id, NULL);
+	if (found)
+		eb_debug(DBG_CORE, "%s: found ea with ela (should be null): %p\n", handle, found->ela);
+	return found;
+}
+
+eb_account * find_account_with_ela( const char * handle, eb_local_account *ela)
+{
+	return find_account_with_id_or_ela(handle, ela->service_id, ela);
 }
 
 eb_local_account * find_local_account_by_handle( char * handle, int type)

@@ -100,6 +100,7 @@ struct contact * find_contact_by_handle( char * handle );
 struct contact * find_contact_by_nick( const char * nick);
 struct contact * find_contact_in_group_by_nick( char * nick, grouplist *gl );
 eb_account * find_account_by_handle( const char * handle, int type );
+eb_account * find_account_with_ela( const char * handle, eb_local_account *ela );
 eb_local_account * find_local_account_by_handle( char * handle, int type );
 void strip_html(char * text);
 int remove_account( eb_account * a );

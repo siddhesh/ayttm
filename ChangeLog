@@ -1,3 +1,8 @@
+* Tue Apr 29 2003 11:30 GMT [colin]	0.3.0-36
+- src/util.[ch]
+add find_account_with_ela(char *, eb_local_account *)
+to be used :)
+
 * Tue Apr 29 2003 08:30 GMT [colin]	0.3.0-35
 - modules/*/*
 define module_version plugin_LTX_module_version
