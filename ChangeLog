@@ -1,3 +1,7 @@
+* Wed Jun  4 2003 04:30 GMT [philip]	0.3.1-20
+- modules/aim-toc/aim-toc.c
+Update aol smileys from Laura Vance
+
 * Tue Jun  3 2003 07:00 GMT [philip]	0.3.1-19
 - src/chat_window.c
 try to fix the do_raise_window problem

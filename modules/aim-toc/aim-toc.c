@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.41 $",
-	"$Date: 2003/06/02 15:48:07 $",
+	"$Revision: 1.42 $",
+	"$Date: 2003/06/04 04:40:33 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -216,6 +216,59 @@ static void aim_info_update(eb_account *sender);
  * the following variable is a hack, it if we are changing the selection
  * don't let the corresponding set_current_state get called again
  */
+
+static LList *psmileys = NULL;
+
+static void toc_init_smileys()
+{
+	psmileys=add_protocol_smiley(psmileys, ":-)", "smile");
+	psmileys=add_protocol_smiley(psmileys, ":)", "smile");
+	psmileys=add_protocol_smiley(psmileys, "=)", "smile");
+	
+	psmileys=add_protocol_smiley(psmileys, ":-(", "sad");
+	psmileys=add_protocol_smiley(psmileys, ":(", "sad");
+	
+	psmileys=add_protocol_smiley(psmileys, ";-)", "wink");
+	psmileys=add_protocol_smiley(psmileys, ";)", "wink");
+	
+	psmileys=add_protocol_smiley(psmileys, ":-D", "biglaugh");
+	psmileys=add_protocol_smiley(psmileys, ":D", "biglaugh");
+
+	psmileys=add_protocol_smiley(psmileys, ":-P", "tongue");
+	psmileys=add_protocol_smiley(psmileys, ":P", "tongue");
+
+	psmileys=add_protocol_smiley(psmileys, ":-p", "tongue");
+	psmileys=add_protocol_smiley(psmileys, ":p", "tongue");
+
+	psmileys=add_protocol_smiley(psmileys, ":-S", "worried");
+	psmileys=add_protocol_smiley(psmileys, ":S", "worried");
+	psmileys=add_protocol_smiley(psmileys, ":-s", "worried");
+	psmileys=add_protocol_smiley(psmileys, ":s", "worried");
+
+	psmileys=add_protocol_smiley(psmileys, ":-/", "worried");
+	psmileys=add_protocol_smiley(psmileys, ":/", "worried");
+
+	psmileys=add_protocol_smiley(psmileys, ">:-O", "angry");
+	psmileys=add_protocol_smiley(psmileys, ">:O", "angry");
+	psmileys=add_protocol_smiley(psmileys, ">:-o", "angry");
+	psmileys=add_protocol_smiley(psmileys, ">:o", "angry");
+
+	psmileys=add_protocol_smiley(psmileys, ":'(", "cry");
+
+	psmileys=add_protocol_smiley(psmileys, ":-*", "kiss");
+	psmileys=add_protocol_smiley(psmileys, "O:-)", "angel");
+	psmileys=add_protocol_smiley(psmileys, "=-O", "oh");
+	psmileys=add_protocol_smiley(psmileys, ":-[", "blush");
+	psmileys=add_protocol_smiley(psmileys, "8-)", "cooldude");
+}
+
+static LList *eb_toc_get_smileys(void)
+{
+	if(!psmileys)
+		toc_init_smileys();
+
+	return psmileys;
+}
 
 static char * eb_aim_check_login(char * user, char * pass)
 {
@@ -1384,7 +1437,7 @@ struct service_callbacks * query_callbacks()
 	sc->write_prefs_config = eb_aim_write_prefs_config;
 
 	sc->get_color = eb_toc_get_color;
-	sc->get_smileys = eb_default_smileys;
+	sc->get_smileys = eb_toc_get_smileys;
 	
 	sc->change_group = eb_aim_change_group;
 	sc->add_group = eb_aim_add_group;
