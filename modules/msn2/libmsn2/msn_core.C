@@ -43,11 +43,11 @@ extern int do_msn_debug;
 // Define all those extern'ed variables in msn_core.h:
 llist * msnconnections=NULL;
 
-int next_trid=10;
-char buf[1250]; // used for anything temporary
+static int next_trid=10;
+static char buf[1250]; // used for anything temporary
 
-char * errors[1000];
-char default_error_msg[]="Unknown error code";
+static const char * errors[1000];
+static const char default_error_msg[]="Unknown error code";
 
 static void msn_finish_netmeeting_inv(msnconn *conn, invitation_voice *inv, char *ip);
 
@@ -581,8 +581,7 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
 {
   // First, we find which msnconn this socket belongs to
 
-  callback * call;
-  int sock = conn->sock;
+  callback * call = NULL;
   int trid;
 
   // first, siphon off any file transfer traffic to the special handler
@@ -606,7 +605,7 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
     ext_unregister_sock(conn->sock);
     close(conn->sock);
 
-    char * c;
+    char * c = NULL;
     int port=1863;
 
     if(numargs >=4 && (c=strstr(args[3], ":"))!=NULL)
@@ -1153,14 +1152,12 @@ void msn_recv_file(invitation_ftp * inv, char * msg_body)
 
 void msn_filetrans_cancel(invitation_ftp * inv)
 {
-  llist *l;
-
   if (!inv)
 	  return;
   inv->cancelled = 1;
 }
 
-void msn_filetrans_cancel_clean(invitation_ftp *inv) 
+static void msn_filetrans_cancel_clean(invitation_ftp *inv) 
 {
   llist * l;
   msnconn * conn;

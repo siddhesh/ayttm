@@ -25,7 +25,8 @@
 #include "console_session.h"
 
 #include <stdlib.h>
-#include <sys/types.h>
+#include <string.h>
+
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
@@ -44,7 +45,7 @@ static void console_session_close(int * session)
 	g_free(session);
 }
 
-void console_session_get_command(void *data, int source, eb_input_condition condition )
+static void console_session_get_command(void *data, int source, eb_input_condition condition )
 {
 	char * contact_name;
 	char * message;

@@ -29,37 +29,32 @@
 #ifdef __MINGW32__
 #define __IN_PLUGIN__
 #endif
-#include <glib.h>
+
 #include "intl.h"
-#include <stdio.h>
+
 #include <string.h>
 #include <stdlib.h>
-#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <ctype.h>
+
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
 #include <sys/socket.h>
-#endif
-#include <sys/stat.h>
-#ifndef __MINGW32__
 #include <sys/poll.h>
-#endif
-#include <fcntl.h>
-#ifndef __MINGW32__
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #endif
-#include <errno.h>
-#include <ctype.h>
+
 #include "dialog.h"
 #include "info_window.h"
 #include "value_pair.h"
-#include "input_list.h"
 #include "plugin_api.h"
 #include "progress_window.h"
 #include "activity_bar.h"
-#include "account.h"
 #include "util.h"
 #include "status.h"
 #include "service.h"
@@ -68,16 +63,13 @@
 #include "msn_core.h"
 #include "msn_bittybits.h"
 #include "message_parse.h"
-#include "chat_window.h"
 #include "browser.h"
 #include "smileys.h"
 #include "file_select.h"
 #include "add_contact_window.h"
-#include "prefs.h"
 #include "offline_queue_mgmt.h"
 #include "tcp_util.h"
 
-#include <glib.h>
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #define sleep(a) Sleep(a)
@@ -106,36 +98,34 @@ class transfer_window : public llist_data
   int window_tag;
 };
 
-llist * chatrooms=NULL;
-llist * transfer_windows = NULL;
-llist * waiting_auth_callbacks = NULL;
+static llist * chatrooms=NULL;
+static llist * transfer_windows = NULL;
+static llist * waiting_auth_callbacks = NULL;
 
-eb_chat_room * eb_msn_get_chat_room(msnconn * conn);
-void eb_msn_clean_up_chat_room(msnconn * conn);
-char * realloc_cpp(char * s);
-char * g_realloc_cpp(gchar * s);
-eb_account * eb_msn_new_account( const char * account );
+static eb_chat_room * eb_msn_get_chat_room(msnconn * conn);
+static void eb_msn_clean_up_chat_room(msnconn * conn);
+static eb_account * eb_msn_new_account( const char * account );
 
-LList * psmileys=NULL;
+static LList * psmileys=NULL;
 
 /* Function Prototypes */
 extern "C"
 {
-int plugin_init();
-int plugin_finish();
+static int plugin_init();
+static int plugin_finish();
 struct service_callbacks * query_callbacks();
 //char * msn_create_mail_initial_notify (int unread_ibc, int unread_fold);
 //char * msn_create_new_mail_notify (char * from, char * subject);
 static char *Utf8ToStr(const char *in);
 static char *StrToUtf8(const char *in);
-void eb_msn_format_message (message * msg);
+static void eb_msn_format_message (message * msg);
 static char *eb_msn_get_color(void) { static char color[]="#aa0000"; return color; }
-void close_conn(msnconn *conn);
-void eb_msn_change_group(eb_account * ea, const char *new_group);
-void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char *new_group);
+static void close_conn(msnconn *conn);
+static void eb_msn_change_group(eb_account * ea, const char *new_group);
+static void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char *new_group);
 static void invite_gnomemeeting(ebmCallbackData * data);
 
-LList *eb_msn_get_smileys(void) { return psmileys; }
+static LList *eb_msn_get_smileys(void) { return psmileys; }
 }
 
 typedef struct {
@@ -174,8 +164,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.12 $",
-	"$Date: 2003/04/05 15:02:02 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/04/06 00:08:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -184,10 +174,11 @@ PLUGIN_INFO plugin_info = {
 struct service SERVICE_INFO = { "MSN", -1, FALSE, TRUE, TRUE, FALSE, NULL };
 /* End Module Exports */
 
-static void *mi1, *mi2;
-void eb_msn_set_current_state( eb_local_account * account, gint state );
+static void *mi1 = NULL;
+static void *mi2 = NULL;
+static void eb_msn_set_current_state( eb_local_account * account, gint state );
 
-int plugin_init()
+static int plugin_init()
 {
 	int count=0;
 
@@ -431,7 +422,7 @@ int plugin_init()
         return(0);
 }
 
-int plugin_finish()
+static int plugin_finish()
 {
 	while(plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
@@ -446,9 +437,9 @@ int plugin_finish()
  *                             End Module Code
  ******************************************************************************/
 
-LList *msn_contacts = NULL;
+static LList *msn_contacts = NULL;
 
-transfer_window * eb_find_window_by_inv(invitation_ftp * inv) {
+static transfer_window * eb_find_window_by_inv(invitation_ftp * inv) {
   llist * l = transfer_windows;
   while(l!=NULL) {
     if( ((transfer_window *)l->data)->inv == inv )
@@ -457,7 +448,7 @@ transfer_window * eb_find_window_by_inv(invitation_ftp * inv) {
   return NULL;
 }
 
-transfer_window * eb_find_window_by_tag(int tag) {
+static transfer_window * eb_find_window_by_tag(int tag) {
   llist * l = transfer_windows;
   while(l!=NULL) {
     if( ((transfer_window *)l->data)->window_tag == tag )
@@ -499,7 +490,7 @@ typedef struct _msn_info_data
     gchar *profile;
 } msn_info_data;
 
-msnconn *mainconn=NULL;
+static msnconn *mainconn=NULL;
 
 /* Use this struct to hold any service specific information you need about
  * local accounts
@@ -528,13 +519,13 @@ class pending_invitation : public llist_data
   ~pending_invitation() { if(dest!=NULL) { delete dest; } if(path!=NULL) { delete path; } }
 };
 
-llist * pending_invitations=NULL;
+static llist * pending_invitations=NULL;
 
-void eb_msn_terminate_chat( eb_account * account );
-void eb_msn_add_user( eb_account * account );
-void eb_msn_del_user( eb_account * account );
-void eb_msn_login( eb_local_account * account );
-void eb_msn_logout( eb_local_account * account );
+static void eb_msn_terminate_chat( eb_account * account );
+static void eb_msn_add_user( eb_account * account );
+static void eb_msn_del_user( eb_account * account );
+static void eb_msn_login( eb_local_account * account );
+static void eb_msn_logout( eb_local_account * account );
 static void eb_msn_authorize_callback( gpointer data, int response );
 static void eb_msn_filetrans_callback( gpointer data, int response );
 static void eb_msn_netmeeting_callback( gpointer data, int response );
@@ -542,7 +533,7 @@ static int eb_msn_authorize_user ( char * username, char * friendlyname );
 static void eb_msn_filetrans_accept(char * filename, void * invitation);
 
 
-gboolean eb_msn_query_connected( eb_account * account )
+static gboolean eb_msn_query_connected( eb_account * account )
 {
     eb_msn_account_data * mad = (eb_msn_account_data *)account->protocol_account_data;
     eb_debug(DBG_MSN,"msn ref_count=%d\n",ref_count);
@@ -560,7 +551,7 @@ void ext_disable_conncheck() {
     }	
 }
 
-void eb_msn_filetrans_cancel(int tag)
+static void eb_msn_filetrans_cancel(int tag)
 {
 	transfer_window *w = eb_find_window_by_tag(tag);
 	if (w && w->inv) {
@@ -603,7 +594,7 @@ static int checkconn(msnconn *conn) {
 	return 1;
 }
 
-void eb_msn_login( eb_local_account * account )
+static void eb_msn_login( eb_local_account * account )
 {
 	eb_msn_local_account_data * mlad;
 	int port;
@@ -631,7 +622,7 @@ void eb_msn_login( eb_local_account * account )
 	msn_connect(mlad->mc, msn_server, port);
 }
 
-void eb_msn_connected(eb_local_account * account)
+static void eb_msn_connected(eb_local_account * account)
 {
 	eb_msn_local_account_data * mlad;
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
@@ -650,7 +641,7 @@ void eb_msn_connected(eb_local_account * account)
 	ay_activity_bar_remove(mlad->connect_tag);
 }
 
-void eb_msn_logout( eb_local_account * account )
+static void eb_msn_logout( eb_local_account * account )
 {
 	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
 	LList *l;
@@ -684,7 +675,7 @@ void eb_msn_logout( eb_local_account * account )
 		ref_count--;
 }
 
-int eb_msn_send_typing( eb_local_account * from, eb_account * account_to )
+static int eb_msn_send_typing( eb_local_account * from, eb_account * account_to )
 {
     llist * list;
 
@@ -716,7 +707,7 @@ int eb_msn_send_typing( eb_local_account * from, eb_account * account_to )
     return 10;
 }
 
-int eb_msn_send_cr_typing( eb_chat_room *chatroom )
+static int eb_msn_send_cr_typing( eb_chat_room *chatroom )
 {
     msnconn * conn=(msnconn *)chatroom->protocol_local_chat_room_data;
 
@@ -731,7 +722,7 @@ int eb_msn_send_cr_typing( eb_chat_room *chatroom )
 }
 
 
-void eb_msn_send_im( eb_local_account * from, eb_account * account_to,
+static void eb_msn_send_im( eb_local_account * from, eb_account * account_to,
 					 gchar * mess)
 {
 	message * msg = new message;
@@ -756,7 +747,7 @@ void eb_msn_send_im( eb_local_account * from, eb_account * account_to,
         delete msg;
 }
 
-void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
+static void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
 {
         struct stat stats;
 	eb_msn_local_account_data *mlad =
@@ -812,7 +803,7 @@ void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
         msn_new_SB(mlad->mc, NULL);
 }
 
-eb_local_account * eb_msn_read_local_account_config( LList * values )
+static eb_local_account * eb_msn_read_local_account_config( LList * values )
 {
 	char buff[255];
 	char * c = NULL;
@@ -848,7 +839,7 @@ eb_local_account * eb_msn_read_local_account_config( LList * values )
 	return ela;
 }
 
-LList * eb_msn_write_local_config( eb_local_account * account )
+static LList * eb_msn_write_local_config( eb_local_account * account )
 {
 	value_pair * val;
 	LList * vals = NULL;
@@ -877,7 +868,7 @@ LList * eb_msn_write_local_config( eb_local_account * account )
 }
 
 
-eb_account * eb_msn_read_account_config( LList * config, struct contact * contact)
+static eb_account * eb_msn_read_account_config( LList * config, struct contact * contact)
 {
 	char *tmp = NULL;
 	eb_account * ea = g_new0(eb_account, 1);
@@ -903,7 +894,7 @@ eb_account * eb_msn_read_account_config( LList * config, struct contact * contac
 	return ea;
 }
 
-LList * eb_msn_get_states()
+static LList * eb_msn_get_states()
 {
 	LList * list = NULL;
 	list = l_list_append( list, (void *)"Online" );
@@ -918,13 +909,13 @@ LList * eb_msn_get_states()
 	return list;
 }
 
-gint eb_msn_get_current_state( eb_local_account * account )
+static gint eb_msn_get_current_state( eb_local_account * account )
 {
 	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
 	return mlad->status;
 }
 
-void eb_msn_set_current_state( eb_local_account * account, gint state )
+static void eb_msn_set_current_state( eb_local_account * account, gint state )
 {
 	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
 
@@ -955,7 +946,7 @@ void eb_msn_set_current_state( eb_local_account * account, gint state )
 	mlad->status=state;
 }
 
-char * eb_msn_check_login(char * user, char * pass)
+static char * eb_msn_check_login(char * user, char * pass)
 {
    if(strchr(user,'@') == NULL) {
       return strdup(_("MSN logins must have @domain.tld part."));
@@ -963,7 +954,7 @@ char * eb_msn_check_login(char * user, char * pass)
    return NULL;
 }
 
-void eb_msn_terminate_chat(eb_account * account )
+static void eb_msn_terminate_chat(eb_account * account )
 {}
 
 static void eb_msn_authorize_callback( gpointer data, int response )
@@ -1096,7 +1087,7 @@ void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long r
         update_progress(tag, recv);
 }
 
-void eb_msn_add_user(eb_account * account )
+static void eb_msn_add_user(eb_account * account )
 {
 	msn_contacts = l_list_append(msn_contacts, account->handle);
 	if (mainconn != NULL && !listsyncing) {
@@ -1109,7 +1100,7 @@ void eb_msn_add_user(eb_account * account )
         }	
 }
 
-void eb_msn_del_user(eb_account * account )
+static void eb_msn_del_user(eb_account * account )
 {
 	msn_contacts = l_list_remove(msn_contacts, account->handle);
 	if (mainconn != NULL) {
@@ -1118,7 +1109,7 @@ void eb_msn_del_user(eb_account * account )
         }
 }
 
-eb_account * eb_msn_new_account( const char * account )
+static eb_account * eb_msn_new_account( const char * account )
 {
 	eb_account * ea = (eb_account *)g_new0(eb_account, 1);
 	eb_msn_account_data * mad = (eb_msn_account_data *)g_new0( eb_msn_account_data, 1 );
@@ -1154,7 +1145,7 @@ static void eb_msn_unignore_user(eb_account *ea, const char *new_group)
 	}
 }
 
-char **eb_msn_get_status_pixmap( eb_account * account)
+static char **eb_msn_get_status_pixmap( eb_account * account)
 {
 	eb_msn_account_data * mad = (eb_msn_account_data *)account->protocol_account_data;
 
@@ -1164,13 +1155,13 @@ char **eb_msn_get_status_pixmap( eb_account * account)
 		return msn_away_xpm;
 }
 
-gchar * eb_msn_get_status_string( eb_account * account )
+static gchar * eb_msn_get_status_string( eb_account * account )
 {
 	eb_msn_account_data * mad = (eb_msn_account_data *)account->protocol_account_data;
 	return msn_status_strings[mad->status];
 }
 
-void eb_msn_set_idle( eb_local_account * account, gint idle )
+static void eb_msn_set_idle( eb_local_account * account, gint idle )
 {
     if( idle >= 600 && eb_msn_get_current_state(account) == MSN_ONLINE )
     {
@@ -1182,7 +1173,7 @@ void eb_msn_set_idle( eb_local_account * account, gint idle )
     }
 }
 
-void eb_msn_set_away( eb_local_account * account, char * message )
+static void eb_msn_set_away( eb_local_account * account, char * message )
 {
     if(message)
     {
@@ -1225,7 +1216,7 @@ void eb_msn_set_away( eb_local_account * account, char * message )
     }
 }
 
-void eb_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
+static void eb_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
 {
 	message * msg=new message;
 	char *tmp = StrToUtf8(mess);
@@ -1252,12 +1243,12 @@ void eb_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
         eb_chat_room_show_message(room, room->local_user->handle, mess);
 }
 
-void eb_msn_join_chat_room( eb_chat_room * room )
+static void eb_msn_join_chat_room( eb_chat_room * room )
 {
 	room->connected = TRUE;
 }
 
-void eb_msn_leave_chat_room( eb_chat_room * room )
+static void eb_msn_leave_chat_room( eb_chat_room * room )
 {
   if (!room || !room->protocol_local_chat_room_data) 
 	  return; /* already cleaned by conn timeout */
@@ -1269,7 +1260,7 @@ void eb_msn_leave_chat_room( eb_chat_room * room )
   room->protocol_local_chat_room_data=NULL; // (got cleaned up by the above line)
 }
 
-int is_waiting_auth(char *name) 
+static int is_waiting_auth(char *name) 
 {
   llist * l=waiting_auth_callbacks;
 
@@ -1307,7 +1298,7 @@ static int eb_msn_authorize_user (char * username, char * friendlyname)
   } else return 0;	 
 }
 
-eb_chat_room * eb_msn_make_chat_room( gchar * name, eb_local_account * account )
+static eb_chat_room * eb_msn_make_chat_room( gchar * name, eb_local_account * account )
 {
 	eb_chat_room * ecr = g_new0(eb_chat_room, 1);
 
@@ -1323,21 +1314,18 @@ eb_chat_room * eb_msn_make_chat_room( gchar * name, eb_local_account * account )
 	return ecr;
 }
 
-void eb_msn_send_invite( eb_local_account * account, eb_chat_room * room,
+static void eb_msn_send_invite( eb_local_account * account, eb_chat_room * room,
 						  char * user, char * message )
 {
         msn_invite_user( ((msnconn *)room->protocol_local_chat_room_data), user );
 }
 
-void eb_msn_get_info( eb_local_account * reciever, eb_account * sender)
+static void eb_msn_get_info( eb_local_account * reciever, eb_account * sender)
 {
     gchar buff[1024];
     g_snprintf(buff, 1024, "http://members.msn.com/%s", sender->handle);
     open_url(NULL, buff);
 }
-
-void msn_info_update(info_window *iw)
-{}
 
 void ext_got_friend(char *name, char *groups) 
 {
@@ -1421,7 +1409,7 @@ typedef struct _movecb_data
 
 static int finish_group_move(movecb_data *tomove);
 
-void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char *new_group)
+static void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char *new_group)
 {
 	char *oldid = NULL, *newid = NULL;
 	const char *int_new_group = NULL, *int_old_group;
@@ -1465,7 +1453,7 @@ void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char
 	free( newid );
 }
 
-void eb_msn_change_group(eb_account * ea, const char *new_group)
+static void eb_msn_change_group(eb_account * ea, const char *new_group)
 {
 	eb_msn_real_change_group(ea,ea->account_contact->group->name, new_group);
 }
@@ -1492,7 +1480,7 @@ static int finish_group_move(movecb_data *tomove)
 	return TRUE;
 }
 
-void eb_msn_del_group(const char *group) 
+static void eb_msn_del_group(const char *group) 
 {
 	char *id = NULL;
 	
@@ -1518,7 +1506,7 @@ void eb_msn_del_group(const char *group)
 	free( id );
 }
 
-void eb_msn_add_group(const char *group) 
+static void eb_msn_add_group(const char *group) 
 {
 	char *id = NULL;
 	
@@ -1538,7 +1526,7 @@ void eb_msn_add_group(const char *group)
 		free( id );
 }
 
-void eb_msn_rename_group(const char *ogroup, const char *ngroup) 
+static void eb_msn_rename_group(const char *ogroup, const char *ngroup) 
 {
 	char *id = NULL;
 	
@@ -1559,15 +1547,15 @@ void eb_msn_rename_group(const char *ogroup, const char *ngroup)
 		free( id );
 }
 
-input_list * eb_msn_get_prefs()
+static input_list * eb_msn_get_prefs()
 {
 	return(NULL);
 }
 
-void eb_msn_read_prefs_config(LList * values)
+static void eb_msn_read_prefs_config(LList * values)
 {}
 
-LList * eb_msn_write_prefs_config()
+static LList * eb_msn_write_prefs_config()
 {
 	return(NULL);
 }
@@ -1623,7 +1611,7 @@ struct service_callbacks * query_callbacks()
 	return sc;
 }
 
-void eb_msn_incoming(void *data, int source, eb_input_condition condition)
+static void eb_msn_incoming(void *data, int source, eb_input_condition condition)
 {
         if(condition&EB_INPUT_EXCEPTION)
         {
@@ -1757,7 +1745,7 @@ void ext_got_info(msnconn * conn, syncinfo * info)
   if (conncheck_handler == -1 && do_check_connection)
      conncheck_handler = eb_timeout_add(10000, (eb_timeout_function)checkconn, (gpointer)conn);
 
-  for(existing; existing != NULL && existing->data != NULL; existing = existing->next) {
+  for( ; existing != NULL && existing->data != NULL; existing = existing->next) {
 	 char *cnt = (char*) existing->data;
 	 eb_account *ea = find_account_by_handle(cnt, SERVICE_INFO.protocol_id);
 	 if (ea && strcmp(ea->account_contact->group->name, _("Ignore"))) {
@@ -1811,7 +1799,7 @@ void ext_show_error(msnconn * conn, char * msg)
   eb_debug(DBG_MSN, "MSN: Error: %s\n", msg);
 }
 
-int get_status_num(char *status)
+static int get_status_num(char *status)
 {
 	int count=0;
 	for(count=0;count<=MSN_OFFLINE;count++)
@@ -1995,7 +1983,7 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
           delete pfs;
           break;
         } else if (pfs->app == APP_NETMEETING && !strcmp(pfs->dest, username)) {
-	  invitation_voice * inv = msn_invite_netmeeting(conn);
+	  msn_invite_netmeeting(conn);
 	  msn_del_from_llist(pending_invitations, pfs);
 	  delete pfs;
 	  break;
@@ -2295,7 +2283,7 @@ void ext_closing_connection(msnconn * conn)
   eb_debug(DBG_MSN, "Closed connection with socket %d\n", conn->sock);
 }
 
-void close_conn(msnconn *conn) {
+static void close_conn(msnconn *conn) {
 	ext_closing_connection(conn);
 }
 
@@ -2487,7 +2475,7 @@ static char *Utf8ToStr(const char *in)
 ** Input: head - the headers ; msg - the message
 ** Output: the formatted message
 */
-void eb_msn_format_message (message * msg)
+static void eb_msn_format_message (message * msg)
 {
 	char * retval       = NULL;
 
@@ -2512,7 +2500,7 @@ void eb_msn_format_message (message * msg)
 }
 
 
-eb_chat_room * eb_msn_get_chat_room(msnconn * conn)
+static eb_chat_room * eb_msn_get_chat_room(msnconn * conn)
 {
   llist * l=chatrooms;
 
@@ -2531,7 +2519,7 @@ eb_chat_room * eb_msn_get_chat_room(msnconn * conn)
   return NULL;
 }
 
-void eb_msn_clean_up_chat_room(msnconn * conn)
+static void eb_msn_clean_up_chat_room(msnconn * conn)
 {
   llist * l=chatrooms;
 
@@ -2556,20 +2544,6 @@ void eb_msn_clean_up_chat_room(msnconn * conn)
 void ext_syncing_lists(int state) 
 {
 	listsyncing = state;	
-}
-
-char * realloc_cpp(char * s)  // this is an ugly hack and loses performance, but what do you do?
-{
-  char * retval=msn_permstring(s);
-  free(s);
-  return retval;
-}
-
-char * g_realloc_cpp(char * s)  // this is an ugly hack and loses performance, but what do you do?
-{
-  char * retval=msn_permstring(s);
-  g_free(s);
-  return retval;
 }
 
 static void invite_gnomemeeting(ebmCallbackData * data)
@@ -2618,7 +2592,7 @@ static void invite_gnomemeeting(ebmCallbackData * data)
           // the user we want to talk to
           if(users!=NULL && users->next==NULL && !strcmp(((char_data *)users->data)->c, acc->handle))
           {
-	    invitation_voice * inv = msn_invite_netmeeting(c);
+	    	msn_invite_netmeeting(c);
 
             return;
           }

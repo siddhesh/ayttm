@@ -1,3 +1,13 @@
+* Sun Apr 06 2003 00:05 GMT [andy]	0.2.3-37
+- modules/jabber/jabber.c
+  modules/msn2/msn.C
+  modules/msn2/libmsn2/msn_bittybits.C
+  modules/msn2/libmsn2/msn_core.[Ch]
+  src/console_session.c
+  src/edit_local_accounts.c
+  src/service.c
+Fix warnings/includes/statics
+
 * Sat Apr 05 2003 21:00 GMT [philip]	0.2.3-36
 - modules/yahoo2
 add more logging

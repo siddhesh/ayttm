@@ -215,8 +215,6 @@ class callback : public llist_data
 
 
 extern llist * msnconnections;
-extern int next_trid;
-extern char buf[]; // Used for anything temporary
 
 void msn_init(msnconn * conn, char * username, char * password);
 

@@ -14,14 +14,13 @@
 #include "msn_interface.h"
 #include "msn_bittybits.h"
 #include <errno.h>
-#include <time.h>
+#include <sys/time.h>
 
 char ** msn_read_line(msnconn *conn, int * numargs)
 {
   // Right, this is quite a task. Step One is to read the thing in.
   char ** retval;
   char c;
-  int should_terminate=0;
   int sock = conn->sock;
   int finished = 0;
   fd_set inp;

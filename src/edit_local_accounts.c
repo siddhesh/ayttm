@@ -474,7 +474,6 @@ void eb_new_user()
 	GtkWidget * toolbar;
 	GtkWidget * toolitem;
 	GtkWidget * separator;
-	GtkWidget * check;
 	GList * list;
 	GdkPixmap *icon;
 	GdkBitmap *mask;

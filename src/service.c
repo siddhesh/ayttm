@@ -24,40 +24,40 @@
 
 #include "intl.h"
 
-#include <gtk/gtk.h>
 #include <gdk/gdkprivate.h>
 #ifndef __MINGW32__
 # include <gdk/gdkx.h>
 # include <X11/Xlib.h>
 #endif
-#include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <stdlib.h>
 #include <assert.h>
 
 #include "service.h"
 #include "globals.h"
-#include "account.h"
 #include "chat_window.h"
 #include "dialog.h"
 #include "util.h"
 #include "nomodule.h"
 #include "plugin_api.h"
 #include "value_pair.h"
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 #ifdef HAVE_MIT_SAVER_EXTENSION
 #include <X11/extensions/scrnsaver.h>
 #endif /* HAVE_MIT_SAVER_EXTENSION */
 
+#ifdef __MINGW32__
+#define snprintf _snprintf
+#endif
 
 static guint idle_timer;
 static time_t lastsent = 0;
 static int is_idle = 0;
+
+#ifdef HAVE_MIT_SAVER_EXTENSION
 static int scrnsaver_ext = 0;
+#endif
+
 int NUM_SERVICES=0;		/* Used in prefs.c */
 
 
@@ -305,12 +305,15 @@ static int check_idle()
 
 void add_idle_check()
 {
-	int eventnum, errornum;
 	idle_timer = eb_timeout_add(5000, (GtkFunction)check_idle, NULL);
 	serv_touch_idle();
 #ifdef HAVE_MIT_SAVER_EXTENSION
-	if (XScreenSaverQueryExtension(gdk_display, &eventnum, &errornum)) {
-		scrnsaver_ext = 1;
+	{
+		int	eventnum;
+		int	errornum;
+		
+		if (XScreenSaverQueryExtension(gdk_display, &eventnum, &errornum))
+			scrnsaver_ext = 1;
 	}
 #endif
 }

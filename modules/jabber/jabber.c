@@ -51,6 +51,7 @@ typedef unsigned long ulong;
 #include "plugin_api.h"
 #include "smileys.h"
 #include "gtk_globals.h"
+#include "activity_bar.h"
 
 #include "pixmaps/jabber_online.xpm"
 #include "pixmaps/jabber_away.xpm"
@@ -78,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/05 11:45:50 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/06 00:08:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
