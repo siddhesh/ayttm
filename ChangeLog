@@ -1,3 +1,10 @@
+* Tue May 18 2004 18:54 GMT [colin]	0.4.6-15
+- src/crash.c
+eat SIGPIPE
+- modules/msn2
+avoid a segfault
+
+
 * Tue Mar 23 2004 14:49 GMT [edward]	0.4.6-14
 - libproxy/proxy.c
 Added an if statement for PROXY_SOCKS5 in proxy_send/proxy_recv as the

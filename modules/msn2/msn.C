@@ -172,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.76 $",
-	"$Date: 2004/01/05 11:54:19 $",
+	"$Revision: 1.77 $",
+	"$Date: 2004/05/18 18:55:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2026,11 +2026,11 @@ void ext_got_info(msnconn * conn, syncinfo * info)
 		 ea = find_account_by_handle(cnt, SERVICE_INFO.protocol_id); /* get orphaned */
 	 if (ea && strcmp(ea->account_contact->group->name, _("Ignore"))
 	 && (ea->ela == ela || ea->ela == NULL)) {
-		 if (!is_on_list(cnt,info->al)) {
+		 if (info && !is_on_list(cnt,info->al)) {
 			 eb_debug(DBG_MSN,"adding %s to al\n",cnt);
 		     msn_add_to_list(mlad->mc, "AL", cnt);
 		 }
-		 if (!is_on_list(cnt,info->fl)) {
+		 if (info && !is_on_list(cnt,info->fl)) {
 			 eb_debug(DBG_MSN,"adding %s to fl\n",cnt);
 		     msn_add_to_list(mlad->mc, "FL", cnt);
 		 }

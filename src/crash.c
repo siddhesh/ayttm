@@ -81,6 +81,7 @@ static const gchar	*get_lib_version		(void);
 static const gchar	*get_operating_system		(void);
 static gboolean		 is_crash_dialog_allowed	(void);
 static void		 crash_handler			(int sig);
+static void		 dummy_handler			(int sig);
 static void		 crash_cleanup_exit		(void);
 
 /***/
@@ -128,6 +129,10 @@ void crash_install_handlers(void)
 #ifdef SIGTERM
 	signal(SIGTERM, crash_handler);
 	sigaddset(&mask, SIGTERM);
+#endif
+#ifdef SIGPIPE
+	signal(SIGPIPE, dummy_handler);
+	sigaddset(&mask, SIGPIPE);
 #endif
 
 	sigprocmask(SIG_UNBLOCK, &mask, 0);
@@ -501,6 +506,14 @@ static const gchar *get_operating_system(void)
 static gboolean is_crash_dialog_allowed(void)
 {
 	return !getenv("AYTTM_NO_CRASH");
+}
+
+/*!
+ *\bried	this handler eats the signal
+ */
+static void dummy_handler(int sig)
+{
+	return;
 }
 
 /*!
