@@ -236,7 +236,7 @@ void ay_activity_window::remove_pack(ay_activity_bar_pack *abp)
 ay_activity_bar_pack * ay_activity_window::get_pack_by_tag(int tag)
 {
 	LList *l;
-	for(l = packs; l; l = l_list_next(packs)) {
+	for(l = packs; l; l = l_list_next(l)) {
 		ay_activity_bar_pack *abp = (ay_activity_bar_pack *)l->data;
 		if(abp->tag == tag) {
 			return abp;

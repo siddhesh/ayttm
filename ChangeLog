@@ -1,3 +1,7 @@
+* Sat Apr 05 2003 08:53 GMT [colin]	0.2.3-27
+- src/activity_bar.C
+fix infinite loop
+
 * Sat Apr 05 2003 08:53 GMT [colin]	0.2.3-26
 - modules/workwizu/workwizu.c
 Add activity bar
