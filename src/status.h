@@ -63,6 +63,7 @@ void eb_sign_on_all(void);
 void eb_sign_on_startup(void);
 void eb_sign_off_all(void);
 
+void eb_smiley_window(void *smiley_submenuitem);
 void eb_import_window(void *import_submenuitem);
 void eb_profile_window(void *profile_submenuitem);
 void eb_set_status_window(void *set_status_submenuitem);

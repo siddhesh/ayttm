@@ -525,6 +525,20 @@ static int init_menu(char *menu_name, menu_func redraw_menu, ebmType type)
 	return(0);
 }
 
+static void rebuild_smiley_menu( void )
+{
+	GtkWidget *smiley_submenuitem;
+
+	smiley_submenuitem = GetPref("widget::smiley_submenuitem");
+	if(!smiley_submenuitem) {
+		eb_debug(DBG_CORE, "Not rebuilding smiley menu, it's never been built.\n");
+		return;
+	}
+	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(smiley_submenuitem));
+	eb_smiley_window(smiley_submenuitem);
+	gtk_widget_draw(GTK_WIDGET(smiley_submenuitem), NULL);
+}
+
 static void rebuild_import_menu( void )
 {
 	GtkWidget *import_submenuitem;
@@ -558,6 +572,7 @@ int init_menus()
 {
 	init_menu(EB_PROFILE_MENU, rebuild_profile_menu, ebmPROFILEDATA);
 	init_menu(EB_IMPORT_MENU, rebuild_import_menu, ebmIMPORTDATA);
+	init_menu(EB_SMILEY_MENU, rebuild_smiley_menu, ebmSMILEYDATA);
 	/* The chat window menu is dynamically redrawn */
 	init_menu(EB_CHAT_WINDOW_MENU, NULL, ebmCONTACTDATA);
 	init_menu(EB_CONTACT_MENU, NULL, ebmCONTACTDATA);

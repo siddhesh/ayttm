@@ -63,6 +63,8 @@ typedef struct {
 /* Names of menus and the data structure passed to callbacks for them */
 #define EB_IMPORT_MENU "IMPORT MENU"
 #define IS_ebmImportData(x) (x->CDType==ebmIMPORTDATA)
+#define EB_SMILEY_MENU "SMILEY MENU"
+#define IS_ebmSmileyData(x) (x->CDType==ebmSMILEYDATA)
 #define EB_PROFILE_MENU "PROFILE MENU"
 #define IS_ebmProfileData(x) (x->CDType==ebmPROFILEDATA)
 #define EB_CHAT_WINDOW_MENU "CHAT MENU"
@@ -73,7 +75,8 @@ typedef enum {
 	ebmCALLBACKDATA=10,
 	ebmIMPORTDATA,
 	ebmCONTACTDATA,
-	ebmPROFILEDATA
+	ebmPROFILEDATA,
+	ebmSMILEYDATA
 } ebmType;
 
 typedef struct {
@@ -81,6 +84,8 @@ typedef struct {
 	void *user_data;
 } ebmCallbackData;
 
+
+typedef void ebmSmileyData;
 
 typedef struct {
 	ebmCallbackData cd;
@@ -99,6 +104,7 @@ typedef void (*eb_menu_callback) (ebmCallbackData *data);
 
 ebmCallbackData *ebmProfileData_new(eb_local_account * ela);
 ebmImportData *ebmImportData_new();
+ebmSmileyData *ebmSmileyData_new();
 ebmContactData *ebmContactData_new();
 void eb_set_active_menu_status(LList *status_menu, int status);
 void eb_do_dialog(char *message, char *title, eb_callback_action action, void *data);
@@ -113,6 +119,7 @@ void eb_do_dialog(char *message, char *title, eb_callback_action action, void *d
 void *eb_add_menu_item(char *label, char *menu_name, eb_menu_callback callback, ebmType type, void *data);
 /* FIXME: Want an eb_add_menu_item_condition function */
 /* tag comes from a call to eb_add_menu_item, returns 0 on success */
+int eb_activate_menu_item(char *menu_name, void *tag);
 int eb_remove_menu_item(char *menu_name, void *tag);
 void eb_menu_item_set_protocol(void *item, char * protocol);
 

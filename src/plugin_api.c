@@ -115,6 +115,32 @@ void *eb_add_menu_item(char *label, char *menu_name, eb_menu_callback callback, 
 	return((void *)mid);
 }
 
+int eb_activate_menu_item(char *menu_name, void *tag)
+{
+	menu_data *md=NULL;
+	menu_item_data *mid=tag;
+
+	if(mid) {
+		eb_debug(DBG_CORE, ">Request to activate %s from menu %s\n", mid->label, menu_name);
+	}
+	if(!tag) {
+		eb_debug(DBG_CORE, "<Received request to activate from menu %s, with empty tag\n", menu_name);
+		return(-1);
+	}
+	md=GetPref(menu_name);
+	if(!md) {
+		eb_debug(DBG_CORE, "<Requested menu %s does not exist, returning failure\n", menu_name);
+		return(-1);
+	}
+	md->active = mid;
+	if(md->redraw_menu) {
+		eb_debug(DBG_CORE, "Calling redraw_menu\n");
+		md->redraw_menu();
+	}
+	eb_debug(DBG_CORE, "<Returning success\n");
+	return(0);
+}
+
 int eb_remove_menu_item(char *menu_name, void *tag)
 {
 	menu_data *md=NULL;

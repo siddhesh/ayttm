@@ -1658,6 +1658,14 @@ static GtkWidget* MakeStatusMenu(eb_local_account * ela)
 	return ela->status_button;
 }
 
+static void eb_smiley_function(GtkWidget *widget, gpointer data) {
+	menu_item_data *mid = data;
+
+	assert(data);
+	fprintf(stderr, _("eb_smiley_function: calling callback\n"));
+	mid->callback(mid->user_data);
+}
+
 static void eb_import_function(GtkWidget *widget, gpointer data) {
 	menu_item_data *mid = data;
 
@@ -1710,6 +1718,41 @@ void eb_profile_window(void * v_profile_submenuitem)
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(profile_submenuitem), profile_menu);
 	gtk_widget_show(profile_menu);
 	gtk_widget_show(profile_submenuitem);
+}
+
+void eb_smiley_window(void *v_smiley_submenuitem)
+{
+	GtkWidget * smiley_submenuitem = v_smiley_submenuitem;
+	GtkWidget *label;
+	GSList *group = NULL;
+	LList *list=NULL;
+	GtkWidget * smiley_menu = gtk_menu_new();
+	menu_data *md=NULL;
+	menu_item_data *mid=NULL;
+
+	label = gtk_tearoff_menu_item_new();
+	gtk_menu_append(GTK_MENU(smiley_menu), label);
+	gtk_widget_show(label);
+
+
+	md = GetPref(EB_SMILEY_MENU);
+	if(md) {
+		for(list = md->menu_items; list; list  = list->next ) {
+			mid=(menu_item_data *)list->data;
+			eb_debug(DBG_CORE, "adding smiley item: %s\n", mid->label);
+			label = gtk_radio_menu_item_new_with_label(group, mid->label);
+			group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(label));
+			if(md->active == mid)
+				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(label), TRUE);
+			gtk_menu_append(GTK_MENU(smiley_menu), label);
+			gtk_signal_connect(GTK_OBJECT(label), "activate",
+					eb_smiley_function, mid);
+			gtk_widget_show(label);
+		}
+	}
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(smiley_submenuitem), smiley_menu);
+	gtk_widget_show(smiley_menu);
+	gtk_widget_show(smiley_submenuitem);
 }
 
 void eb_import_window(void *v_import_submenuitem)
@@ -1774,6 +1817,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/File/Sign o_ff all"),	"<control>F", eb_sign_off_all, 0, NULL },
 	{ N_("/File/---"),		NULL,         NULL, 0, "<Separator>" },
 	{ N_("/File/_Import"),	NULL, 	    NULL, 0, NULL },
+	{ N_("/File/_Smileys"),	NULL, 	    NULL, 0, NULL },
 	{ N_("/File/Set _profile"),	NULL, 	    NULL, 0, NULL },
 	{ N_("/File/---"),		NULL,         NULL, 0, "<Separator>" },
 	{ N_("/File/_Quit"),		"<control>Q", delete_event, 0, NULL },
@@ -1881,11 +1925,15 @@ void ay_set_submenus(void)
 	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Import");
 	eb_import_window(submenuitem);
 	SetPref("widget::import_submenuitem", submenuitem);
-	
+
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Smileys");
+	eb_smiley_window(submenuitem);
+	SetPref("widget::smiley_submenuitem", submenuitem);
+
 	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set profile");
 	eb_profile_window(submenuitem);
 	SetPref("widget::profile_submenuitem", submenuitem);
-	
+
 	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set status");
 	eb_set_status_window(submenuitem);
 	SetPref("widget::set_status_submenuitem", submenuitem);

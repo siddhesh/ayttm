@@ -68,6 +68,7 @@ typedef struct {
 typedef void (*menu_func)();
 typedef struct {
 	LList *menu_items;	/* A LList of menu_item_data elements */
+	menu_item_data *active; /* Currently active menu item - for radio menus */
 	menu_func redraw_menu;	/* The function to call when the menu is changed */
 	ebmType type;		/* What kind of data structure do we send back? */
 } menu_data;

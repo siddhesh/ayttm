@@ -48,6 +48,7 @@ static int plugin_init();
 static int plugin_finish();
 static int reload_prefs();
 
+static int is_setting_state=0;
 static int ref_count=0;
 static char smiley_directory[MAX_PREF_LEN]=AYTTM_SMILEY_DIR;
 static char last_selected[MAX_PREF_LEN]="";
@@ -64,8 +65,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.6 $",
-	"$Date: 2003/05/09 19:11:50 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/09 21:06:55 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -79,7 +80,6 @@ unsigned int module_version() {return CORE_VERSION;}
 static void load_themes();
 static void unload_themes();
 static void enable_smileys(ebmCallbackData *data);
-static void reset_smileys(ebmCallbackData *data);
 static void activate_theme_by_name(const char *name);
 
 static int plugin_init()
@@ -142,19 +142,28 @@ struct smiley_theme {
 
 	LList *smileys;
 	void *menu_tag;
+
+	int core;
 };
 
 static LList *themes=NULL;
 
 static void unload_theme(struct smiley_theme * theme)
 {
+	if(theme->core) {
+		ay_remove_smiley_set(theme->name);
+		if(theme->menu_tag)
+			eb_remove_menu_item(EB_SMILEY_MENU, theme->menu_tag);
+		return;
+	}
+
 	if(smileys == theme->smileys)
-		reset_smileys((ebmCallbackData *)theme);
+		smileys = eb_smileys();
 
 	if(theme->name)
 		ay_remove_smiley_set(theme->name);
 	if(theme->menu_tag)
-		eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
+		eb_remove_menu_item(EB_SMILEY_MENU, theme->menu_tag);
 
 	while(theme->smileys) {
 		struct smiley_struct *smiley = theme->smileys->data;
@@ -162,6 +171,7 @@ static void unload_theme(struct smiley_theme * theme)
 		FREE(smiley);
 		theme->smileys = l_list_remove_link(theme->smileys, theme->smileys);
 	}
+
 	FREE(theme->name);
 	FREE(theme->description);
 	FREE(theme->author);
@@ -311,54 +321,53 @@ static struct smiley_theme * load_theme(const char *theme_name)
 	return theme;
 }
 
-static void reset_smileys(ebmCallbackData *data)
-{
-	struct smiley_theme *theme = (struct smiley_theme *)data;
-
-	/* Set smileys back to default regardless of what they are now */
-	smileys = eb_smileys();
-
-	strcpy(last_selected, "");
-
-	eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
-	theme->menu_tag=eb_add_menu_item(theme->name, EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, theme);
-}
-
 static void enable_smileys(ebmCallbackData *data)
 {
 	struct smiley_theme *theme = (struct smiley_theme *)data;
 
-	if(!theme || !theme->smileys)
+	if(is_setting_state || !theme || !theme->smileys)
 		return;
 
 	smileys = theme->smileys;
 
-	strncpy(last_selected, theme->name, sizeof(last_selected)-1);
+	is_setting_state = 1;
+	eb_activate_menu_item(EB_SMILEY_MENU, theme->menu_tag);
+	is_setting_state = 0;
 
-	eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
-	theme->menu_tag=eb_add_menu_item("Default Smilies", EB_IMPORT_MENU, reset_smileys, ebmIMPORTDATA, theme);
+	strncpy(last_selected, theme->name, sizeof(last_selected)-1);
 }
 
 static void load_themes()
 {
+	struct smiley_theme *theme;
 	struct dirent *entry;
 	DIR *theme_dir = opendir(smiley_directory);
 	if(!theme_dir)
 		return;
 
+	theme = calloc(1, sizeof(struct smiley_theme));
+	theme->name = _("Default");
+	theme->smileys = eb_smileys();
+	theme->core = 1;
+
+	theme->menu_tag=eb_add_menu_item(theme->name, EB_SMILEY_MENU, enable_smileys, ebmSMILEYDATA, theme);
+	if(!theme->menu_tag) {
+		eb_debug(DBG_MOD,"Error!  Unable to add Smiley menu to smiley menu\n");
+		free(theme);
+	} else
+		themes = l_list_prepend(themes, theme);
+
 	while((entry=readdir(theme_dir))) {
-		struct smiley_theme *theme;
 		if(entry->d_name[0]=='.')
 			continue;
 
 		if(!(theme = load_theme(entry->d_name)))
 			continue;
 
-		theme->menu_tag=eb_add_menu_item(theme->name, EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, theme);
+		theme->menu_tag=eb_add_menu_item(theme->name, EB_SMILEY_MENU, enable_smileys, ebmSMILEYDATA, theme);
 		if(!theme->menu_tag) {
-			eb_debug(DBG_MOD,"Error!  Unable to add Smiley menu to import menu\n");
-			l_list_free(theme->smileys);
-			free(theme->name);
+			eb_debug(DBG_MOD,"Error!  Unable to add Smiley menu to smiley menu\n");
+			unload_theme(theme);
 			continue;
 		}
 
