@@ -105,6 +105,7 @@ LList *incoming_message_filters=NULL;
 			 GET_CHAT_WINDOW(x2); \
 			 gtk_widget_grab_focus(x2->entry); \
 }
+#define ENTRY_FORCE_FOCUS(x) { gtk_widget_grab_focus(x->entry); }
 
 #ifdef HAVE_ICONV_H
 
@@ -1122,7 +1123,7 @@ static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage
 			c = (struct contact*)l2->data;
 			if (c->chatwindow && c->chatwindow->notebook_child == page->child) {
 				set_tab_normal(c);
-				ENTRY_FOCUS(c->chatwindow);
+				ENTRY_FORCE_FOCUS(c->chatwindow);
 				eb_update_window_title_to_tab (page_num, FALSE);
 			}
 		}
@@ -1456,6 +1457,8 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 
 		current = find_tabbed_chat_window();
 		GET_CHAT_WINDOW(current);
+		gtk_signal_handler_block_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
+                                         chat_notebook_switch_callback, remote_contact->chatwindow);
 		if (current && current!=remote_contact->chatwindow) {
 			char *text = gtk_editable_get_chars(GTK_EDITABLE(current->entry),0,-1);
 			if (strlen(text) == 0) {
@@ -1469,6 +1472,8 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 				   (remote_contact->chatwindow->notebook), page_num);
 			ENTRY_FOCUS(remote_contact->chatwindow);
 		}
+		gtk_signal_handler_unblock_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
+                                         chat_notebook_switch_callback, remote_contact->chatwindow);
 	}
 }
 
@@ -1520,6 +1525,8 @@ void eb_chat_window_display_account(eb_account * remote_account)
 
 		current = find_tabbed_chat_window();
 		GET_CHAT_WINDOW(current);
+		gtk_signal_handler_block_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
+                                         chat_notebook_switch_callback, remote_contact->chatwindow);
 		if (current && current!=remote_contact->chatwindow) {
 			char *text = gtk_editable_get_chars(GTK_EDITABLE(current->entry),0,-1);
 			if (strlen(text) == 0) {
@@ -1533,6 +1540,8 @@ void eb_chat_window_display_account(eb_account * remote_account)
 				   (remote_contact->chatwindow->notebook), page_num);
 			ENTRY_FOCUS(remote_contact->chatwindow);
 		}
+		gtk_signal_handler_unblock_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
+                                         chat_notebook_switch_callback, remote_contact->chatwindow);
 	}
 	remote_contact->chatwindow->preferred = remote_account;
 }

@@ -99,10 +99,11 @@ char * get_local_addresses()
 		int i=0;
 
 		do {
-			buff[i] = fgetc(f);
-			if(buff[i]=='\r' || buff[i]=='\n' || buff[i]==EOF)
+			int r = fgetc(f);
+			buff[i] = (char)r;
+			if(buff[i]=='\r' || buff[i]=='\n' || r==EOF)
 				buff[i]='\0';
-			else if(i >= sizeof(buff)) {
+			else if(i >= sizeof(buff)-1) {
 				buff[i]='\0';
 				/*return error?*/
 			}
