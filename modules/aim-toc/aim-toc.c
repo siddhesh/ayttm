@@ -89,8 +89,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/04 19:38:17 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/05 10:52:13 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -747,12 +747,14 @@ static void eb_aim_logged_in (toc_conn *conn)
 	if(!alad->conn)
 	{
 		g_warning("FAILED TO CONNECT TO AIM SERVER!!!!!!!!!!!!");
+		do_error_dialog(_("Cannot connect to AIM due to network problem."), _("AIM Error"));		
 		eb_aim_logout(ela);
 		return;
 	}
 	if(alad->conn->fd == -1 )
 	{
 		g_warning("eb_aim UNKNOWN CONNECTION PROBLEM");
+		do_error_dialog(_("Cannot connect to AIM due to network problem."), _("AIM Error"));
 		eb_aim_logout(ela);
 		return;
 	}

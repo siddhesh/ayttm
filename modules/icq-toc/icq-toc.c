@@ -90,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/04 19:38:18 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/05 10:52:13 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -748,12 +748,14 @@ static void eb_icq_logged_in (toc_conn *conn)
 	if(!alad->conn)
 	{
 		g_warning("FAILED TO CONNECT TO icq SERVER!!!!!!!!!!!!");
+		do_error_dialog(_("Cannot connect to ICQ due to network problem."), _("ICQ Error"));		
 		eb_icq_logout(ela);
 		return;
 	}
 	if(alad->conn->fd == -1 )
 	{
 		g_warning("eb_icq UNKNOWN CONNECTION PROBLEM");
+		do_error_dialog(_("Cannot connect to ICQ due to network problem."), _("ICQ Error"));
 		eb_icq_logout(ela);
 		return;
 	}
