@@ -1,3 +1,11 @@
+* Sun May 11 2003 17:10 GMT [andy]	0.3.0-185
+- modules/aycryption/select-keys.c
+  src/contact_parser.y
+  src/status.c
+Fix warnings
+- src/image_window.c
+Fix compile when jasper not installed
+
 * Sun May 11 2003 14:27 GMT [philip]	0.3.0-184
 - configure.ac
 make webcam support optional
