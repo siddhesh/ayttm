@@ -211,7 +211,7 @@ char *get_service_name( int service_id )
 	if ((service_id >= 0) && (service_id < NUM_SERVICES))
 		return (eb_services[service_id].name);
 
-	fprintf(stderr, "warning: unknown service id: %d\n", service_id);
+	eb_debug(DBG_CORE, "warning: unknown service id: %d\n", service_id);
 	return "unknown";
 }
 

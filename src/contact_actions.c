@@ -64,6 +64,11 @@ void eb_do_send_file( eb_account *ea )
 
 void eb_view_log( struct contact *contact )
 {
+	if ( !contact ) {
+		eb_debug(DBG_CORE, "Contact is null!\n");
+		return;
+	}
+
 	if ( contact->logwindow == NULL )
 		contact->logwindow = eb_log_window_new( contact );
 }
