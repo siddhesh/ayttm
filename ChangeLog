@@ -1,3 +1,7 @@
+* Mon Dec 15 2003 10:08 GMT [philip]	0.4.5-10
+- src/status.c
+ok, it was still getting too wide.  this is pretty much trial and error
+
 * Sat Dec 13 2003 09:56 GMT [colin]	0.4.5-9
 - modules/jabber/libEBJabber.c
 Apply patch 856271 from Wes Hardaker (fixes presence)

@@ -394,7 +394,7 @@ static void update_status_message(gchar * message )
 		gtk_label_set_text(GTK_LABEL(status_message), message);
 
 		if (iGetLocalPref("do_noautoresize")) {
-			gtk_widget_set_usize(status_message, status_bar->allocation.width-5, -1);
+			gtk_widget_set_usize(status_message, status_bar->allocation.width-10, -1);
 		}
 		gtk_widget_show(status_message);
 		gtk_eb_html_add(EXT_GTK_TEXT(status_message_window_text), tstamp_mess, 0, 0, 0);
