@@ -198,11 +198,13 @@ class authdata_FTP : public authdata
   invitation_ftp * inv;
   int fd;
   unsigned long bytes_done;
+  unsigned long last_done;
   int num_ignore;
+  int must_read;
   int direction;
   int connected;
 
-  authdata_FTP() { cookie=username=NULL; inv=NULL; fd=-1; bytes_done=num_ignore=connected=0; }
+  authdata_FTP() { cookie=username=NULL; inv=NULL; fd=-1; must_read=last_done=bytes_done=num_ignore=connected=0; }
   ~authdata_FTP()
   {
     if(cookie!=NULL) { delete [] cookie; }

@@ -1576,11 +1576,17 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
       }
       if(auth->num_ignore>0)
       {
+	auth->last_done = 0;          
 	if(auth->num_ignore == 3 && c == 1) {
 		ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Cancelled by remote user.");
 		msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
-		msn_clean_up(conn);      
+		msn_clean_up(conn);  
 		return;
+	} else if (auth->num_ignore == 2) {
+		auth->must_read=c;
+	} else if (auth->num_ignore == 1) {
+		auth->must_read+=c*256;
+		auth->last_done = auth->bytes_done;
 	}
         auth->num_ignore--;
         continue;
@@ -1597,7 +1603,9 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
         msn_clean_up(conn);
         return;
       }
-      if(auth->bytes_done%2045==0) { auth->num_ignore=3; }
+      if(auth->bytes_done - auth->last_done == auth->must_read) { 
+	      auth->num_ignore=3; 
+      }
       if(auth->bytes_done%1024==0) {
 	char fstatus[1024];
 	snprintf(fstatus, 1024, "Receiving %s...", auth->inv->filename);
@@ -1722,7 +1730,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 		int numargs;
 		char **args =msn_read_line(conn, &numargs);
 		/* TODO Check if args is NULL */
-		if (!strcmp(args[0],"CCL")) {
+		if (args && args[0] && !strcmp(args[0],"CCL")) {
 			/* remote cancelled reception */
         		ext_filetrans_failed(auth->inv, 0, "Remote user cancelled transfer.");
         		msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
