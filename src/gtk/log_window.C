@@ -595,7 +595,7 @@ gboolean ay_log_window::s_search_callback( GtkWidget *widget, GdkEventKey *event
 				gtk_editable_set_position ( editable, found_pos );
 				gtk_editable_select_region( editable, found_pos, found_pos + search_text_len );
 				
-				lw->m_search_pos_in_buffer = (found_pos + search_text_len + 1);
+				lw->m_search_pos_in_buffer = (found_pos + search_text_len);
 				
 				eb_debug( DBG_CORE, "log search - FOUND [%s] - m_search_pos_in_buffer: [%ld]\n",
 					search_text, lw->m_search_pos_in_buffer );
