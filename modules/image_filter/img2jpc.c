@@ -31,8 +31,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.3 $",
-	"$Date: 2003/12/22 20:40:12 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/12/23 08:54:21 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -49,8 +49,20 @@ static unsigned char * img_2_jpc(const unsigned char *in_img, long *size);
 static unsigned char *(*old_img_2_jpg)(const unsigned char *, long *) = NULL;
 static unsigned char *(*old_img_2_jpc)(const unsigned char *, long *) = NULL;
 
+static int do_jpc_encoding=0;
+
 static int plugin_init()
 {
+	input_list *il = g_new0(input_list, 1);
+
+	eb_debug(DBG_MOD, "yahoo2\n");
+
+	plugin_info.prefs = il;
+	il->widget.checkbox.value = &do_jpc_encoding;
+	il->name = "do_jpc_encoding";
+	il->label= _("Send JPEG2000 images (creates huge data transfers)");
+	il->type = EB_INPUT_CHECKBOX;
+
 	old_img_2_jpg = image_2_jpg;
 	image_2_jpg = img_2_jpg;
 
@@ -65,6 +77,8 @@ static int plugin_finish()
 	image_2_jpg = old_img_2_jpg;
 
 	image_2_jpc = old_img_2_jpc;
+
+	g_free(plugin_info.prefs);
 
 	return 0;
 }
@@ -149,6 +163,8 @@ static unsigned char * img_2_jpg(const unsigned char *in_img, long *size)
 static unsigned char * img_2_jpc(const unsigned char *in_img, long *size)
 {
 	static int outfmt;
+	if(!do_jpc_encoding)
+		return ay_memdup(in_img, *size);
 	if(!outfmt)
 		outfmt = jas_image_strtofmt("jpc");
 	return img_2_img(in_img, size, outfmt, "jpc");

@@ -1,3 +1,7 @@
+* Tue Dec 22 2003 08:51 GMT [philip]	0.4.5-23
+- modules/image_filter/img2jpc.c
+Make jpeg2000 encoding a pref, off by default
+
 * Mon Dec 22 2003 20:35 GMT [philip]	0.4.5-22
 - modules/image_filter/img2jpc.c
 don't store output format in a static, because it changes. this should
