@@ -1,3 +1,8 @@
+* Thu Oct  9 2003 20:17 GMT [nicolas]	0.4.3-pre4
+- modules/aim-oscar/aim-oscar.c
+Better connection error checking, add account prefs, parse
+permit/deny settings, deal with nicknames case changes.
+
 * Thu Oct  9 2003 19:13 GMT [elh]	0.4.3-pre3
 - src/plugin.c
   mingw32/setup.bat
@@ -31,7 +36,7 @@ also ended up fixing a memory leak
 Add prefs for debug messages, better connection error report, use an
 activity bar instead of a progress bar.
 Use snprintf everywhere to avoid bo. (patch by colin)
-	
+
 * Wed Oct  8 2003 11:07 GMT [colin]	0.4.2-14
 - src/add_contact_window.c
 Fix extraneous free()
