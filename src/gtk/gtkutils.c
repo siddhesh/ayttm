@@ -44,9 +44,9 @@ static void	s_set_option( GtkWidget *inWidget, int *ioData )
 
 GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage )
 {
-	assert( inValue != NULL );
-	
 	GtkWidget	*button = gtk_check_button_new_with_label( inText );
+	
+	assert( inValue != NULL );
 	
 	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(button), *inValue );
 	gtk_box_pack_start( GTK_BOX(inPage), button, FALSE, FALSE, 0 );
@@ -96,12 +96,13 @@ GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidge
 
 void	gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap *outPixmap )
 {
-	if ( (inXPM == NULL) || (outPixmap == NULL) )
-		return;
-		
 	GdkPixmap	*tpx = NULL;
 	GdkBitmap	*tbx = NULL;
 	
+	
+	if ( (inXPM == NULL) || (outPixmap == NULL) )
+		return;
+		
 	tpx = gdk_pixmap_create_from_xpm_d( statuswindow->window, &tbx, NULL, inXPM );
 	gtk_pixmap_set( outPixmap, tpx, tbx );
 }
@@ -193,11 +194,11 @@ GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText,
 GtkWidget	*gtkut_create_menu_button( GtkMenu *inMenu, const char *inLabel,
 	GtkSignalFunc inSignalFunc, void *inCallbackData )
 {
-	assert( inMenu != NULL );
-	
 	GtkWidget *button = NULL;
 
-		
+	
+	assert( inMenu != NULL );
+	
 	if ( inLabel == NULL )
 		button = gtk_menu_item_new();
 	else

@@ -1,3 +1,7 @@
+* Sun Apr 27 2003 15:10 GMT [andy]	0.3.0-7
+- src/gtk/gtkutils.ch
+Fix declaration-first problem
+
 * Sun Apr 27 2003 15:10 GMT [andy]	0.3.0-6
 - src/platform_defs.h		** ADDED **
   libproxy/proxy.c
