@@ -27,6 +27,7 @@
  * tcp/ip utilities
  *
  */
+#include "intl.h"
 
 #include <string.h>
 #ifndef __MINGW32__

@@ -1,3 +1,7 @@
+* Fri Apr 05 2003 09:20 GMT [andy]	0.2.3-15
+- src/tcp_util.c
+Add missing include [intl.h]
+
 * Thu Apr 04 2003 09:11 GMT [colin]	0.2.3-14
 - bunch of files
 Remove do_login_on_startup pref and make it per-account
