@@ -715,9 +715,10 @@ int http_tunnel_init(int sockfd, struct sockaddr *serv_addr, int addrlen )
 	/* step two : do  proxy tunneling init */
 	char cmd[200];
 	char *inputline;
+	int auth_tried = 0;
 	unsigned short realport=ntohs(((struct sockaddr_in *)serv_addr)->sin_port);
    
-	sprintf(cmd,"CONNECT %s:%d HTTP/1.0\r\n",proxy_realhost,realport);
+	sprintf(cmd,"CONNECT %s:%d HTTP/1.1\r\n",proxy_realhost,realport);
 	if ( proxy_auth != NULL ) {
 	    strcat( cmd, "Proxy-Authorization: Basic " );
 	    strcat( cmd, proxy_auth );
@@ -739,6 +740,17 @@ int http_tunnel_init(int sockfd, struct sockaddr *serv_addr, int addrlen )
 	if (!strstr(inputline, "200")) {
 		    /* Check if proxy authorization needed */
 		   if ( strstr( inputline, "407" ) ) {
+		       while(proxy_recv_line(sockfd,&inputline) > 0) {
+			       free(inputline);
+		       }
+		       do_error_dialog(_("HTTP proxy error: Authentication required."), _("Proxy error"));
+		       return( -2 );
+		   }
+		   if ( strstr( inputline, "403" ) ) {
+		       while(proxy_recv_line(sockfd,&inputline) > 0) {
+			       free(inputline);
+		       }
+		       do_error_dialog(_("HTTP proxy error: permission denied."), _("Proxy error"));
 		       return( -2 );
 		   }
 		   free(inputline);

@@ -1,3 +1,7 @@
+* Thu Apr 17 2003 14:56 GMT [colin]	0.2.3-128
+- libproxy
+HTTP proxying works (auth too)
+
 * Thu Apr 17 2003 13:27 GMT [colin]	0.2.3-127
 - libproxy
 Auth works with socks5
