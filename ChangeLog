@@ -1,3 +1,10 @@
+* Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-81
+- src/chat_window.c
+Check offline messaging button state even if 
+data->preferred isn't null
+I18n some strings
+Explain if you're offline
+
 * Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-80
 - modules/aim-toc/aim-toc.c
 remove a printf

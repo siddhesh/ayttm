@@ -451,10 +451,15 @@ void send_message(GtkWidget *widget, gpointer d)
 			data->preferred = can_offline_message(data->contact);
 		} else {
 			cw_put_message(data, "<hr>",0,0,0);
-			cw_put_message(data, "<b>Cannot send message - user is offline.</b>",0,0,0);
+			cw_put_message(data, _("<b>Cannot send message - user is offline.</b>"),0,0,0);
 			cw_put_message(data, "<hr>",0,0,0);
 			return;
 		}
+	} else if (!data->preferred->online && !data->contact->send_offline) {
+		cw_put_message(data, "<hr>",0,0,0);
+		cw_put_message(data, _("<b>Cannot send message - user is offline.</b>"),0,0,0);
+		cw_put_message(data, "<hr>",0,0,0);
+		return;		
 	}
 
 	if(data->local_user && data->local_user->service_id != data->preferred->service_id)
@@ -468,8 +473,12 @@ void send_message(GtkWidget *widget, gpointer d)
 	if(!data->local_user)
 		data->local_user = find_suitable_local_account(data->local_user, data->preferred->service_id); 
 
-	if(!data->local_user)
-		return;
+	if(!data->local_user) {
+		cw_put_message(data, "<hr>",0,0,0);
+		cw_put_message(data, _("<b>Cannot send message - no local account found.</b>"),0,0,0);
+		cw_put_message(data, "<hr>",0,0,0);
+		return;		
+	}
 	
 	eb_update_window_title(data, FALSE);
 
@@ -652,7 +661,7 @@ static void send_file (GtkWidget * sendf_button, gpointer userdata)
 
 	if ( data->contact->online == 0 ) {
 		cw_put_message(data, "<hr>", 0,0,0);
-		cw_put_message(data, "<b>Cannot send message - user is offline.</b>", 0, 0, 0);
+		cw_put_message(data, _("<b>Cannot send message - user is offline.</b>"), 0, 0, 0);
 		cw_put_message(data, "<hr>", 0,0,0);
 		return;
 	}
