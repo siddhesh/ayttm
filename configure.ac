@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=133
+RELEASE=134
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -227,7 +227,12 @@ if test "$enable_xft" = yes ; then
     CFLAGS="$CFLAGS $XFT_CFLAGS"
     LDFLAGS="$LDFLAGS $XFT_LDFLAGS"
     AC_CHECK_HEADER(X11/Xft/Xft.h, [
-	AC_CHECK_LIB(Xft, XftFontOpen,have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS"],, -L/usr/X11R6/lib -lX11)
+	AC_CHECK_LIB(Xft, XftFontOpen, 
+            have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS"], 
+            [AC_CHECK_LIB(Xft, XftFontOpen,
+                have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS"], ,
+                -L/usr/X11R6/lib -lX11 -lfontconfig)],
+            -L/usr/X11R6/lib -lX11)
     ])
   if test "$have_xft" = yes; then
     AC_DEFINE(HAVE_LIBXFT, , Define if we are to use AA)

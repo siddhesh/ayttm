@@ -1,3 +1,7 @@
+* Tue May  6 2003 05:30 GMT [philip]	0.3.0-134
+- configure.ac
+Check if libfontconfig needed for xft
+
 * Mon May  5 2003 22:00 GMT [andy]	0.3.0-133
 - src/gtk/log_window.C
 Rewrite log searching
