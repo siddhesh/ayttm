@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.91 $",
-	"$Date: 2004/03/03 05:45:52 $",
+	"$Revision: 1.92 $",
+	"$Date: 2004/06/16 08:24:29 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -3252,8 +3252,10 @@ static void yahoo_init_smileys()
 	psmileys=add_protocol_smiley(psmileys, ">:)", "devil");
 	psmileys=add_protocol_smiley(psmileys, ">:-)", "devil");
 
-	psmileys=add_protocol_smiley(psmileys, "=:-)", "alien");
-	psmileys=add_protocol_smiley(psmileys, "=:)", "alien");
+	psmileys=add_protocol_smiley(psmileys, "=:-)", "bug");
+	psmileys=add_protocol_smiley(psmileys, "=:)", "bug");
+
+	psmileys=add_protocol_smiley(psmileys, ">-)", "alien");
 
 	psmileys=add_protocol_smiley(psmileys, "8-}", "silly");
 
@@ -3267,11 +3269,14 @@ static void yahoo_init_smileys()
 
 	psmileys=add_protocol_smiley(psmileys, "=P~", "drooling");
 
-	psmileys=add_protocol_smiley(psmileys, "(:|", "tired");
+	psmileys=add_protocol_smiley(psmileys, "(:|", "yawn");
 
 	psmileys=add_protocol_smiley(psmileys, "o:)", "angel");
 	psmileys=add_protocol_smiley(psmileys, "O:)", "angel");
 	psmileys=add_protocol_smiley(psmileys, "0:)", "angel");
+	psmileys=add_protocol_smiley(psmileys, "o:-)", "angel");
+	psmileys=add_protocol_smiley(psmileys, "O:-)", "angel");
+	psmileys=add_protocol_smiley(psmileys, "0:-)", "angel");
 
 	psmileys=add_protocol_smiley(psmileys, ":((", "cry");
 	psmileys=add_protocol_smiley(psmileys, ":-((", "cry");
@@ -3280,6 +3285,7 @@ static void yahoo_init_smileys()
 	psmileys=add_protocol_smiley(psmileys, ":-))", "biglaugh");
 
 	psmileys=add_protocol_smiley(psmileys, ":*", "kiss");
+	psmileys=add_protocol_smiley(psmileys, ":-*", "kiss");
 
 	psmileys=add_protocol_smiley(psmileys, ":o)", "clown");
 	psmileys=add_protocol_smiley(psmileys, ":O)", "clown");
@@ -3288,17 +3294,18 @@ static void yahoo_init_smileys()
 
 	psmileys=add_protocol_smiley(psmileys, "*-:)", "lightbulb");
 
-	psmileys=add_protocol_smiley(psmileys, ":)", "smile");	
-	psmileys=add_protocol_smiley(psmileys, ":-)", "smile");
-
 	psmileys=add_protocol_smiley(psmileys, ":(", "sad");	
 	psmileys=add_protocol_smiley(psmileys, ":-(", "sad");
+
+	psmileys=add_protocol_smiley(psmileys, ";))", "heehee");	
 
 	psmileys=add_protocol_smiley(psmileys, ";;)", "eyelash");	
 	psmileys=add_protocol_smiley(psmileys, ";;-)", "eyelash");
 
 	psmileys=add_protocol_smiley(psmileys, ";)", "wink");	
 	psmileys=add_protocol_smiley(psmileys, ";-)", "wink");
+
+	psmileys=add_protocol_smiley(psmileys, "\\:d/", "dancing");
 
 	psmileys=add_protocol_smiley(psmileys, ":D", "grin");	
 	psmileys=add_protocol_smiley(psmileys, ":-D", "grin");
@@ -3315,10 +3322,22 @@ static void yahoo_init_smileys()
 	psmileys=add_protocol_smiley(psmileys, ":b", "glasses");
 	psmileys=add_protocol_smiley(psmileys, ":-b", "glasses");
 
+	psmileys=add_protocol_smiley(psmileys, "#:S", "whew");
+	psmileys=add_protocol_smiley(psmileys, "#:-S", "whew");
+	psmileys=add_protocol_smiley(psmileys, "#:s", "whew");
+	psmileys=add_protocol_smiley(psmileys, "#:-s", "whew");
+
+	psmileys=add_protocol_smiley(psmileys, ":SS", "nail_biting");
+	psmileys=add_protocol_smiley(psmileys, ":-SS", "nail_biting");
+	psmileys=add_protocol_smiley(psmileys, ":ss", "nail_biting");
+	psmileys=add_protocol_smiley(psmileys, ":-ss", "nail_biting");
+
 	psmileys=add_protocol_smiley(psmileys, ":S", "worried");
 	psmileys=add_protocol_smiley(psmileys, ":-S", "worried");
 	psmileys=add_protocol_smiley(psmileys, ":s", "worried");
 	psmileys=add_protocol_smiley(psmileys, ":-s", "worried");
+
+	psmileys=add_protocol_smiley(psmileys, ">:/", "bring_it");
 
 	psmileys=add_protocol_smiley(psmileys, ":/", "confused");
 	psmileys=add_protocol_smiley(psmileys, ":-/", "confused");
@@ -3345,6 +3364,9 @@ static void yahoo_init_smileys()
 	psmileys=add_protocol_smiley(psmileys, ":O", "oh");
 	psmileys=add_protocol_smiley(psmileys, ":-o", "oh");
 	psmileys=add_protocol_smiley(psmileys, ":-O", "oh");
+
+	psmileys=add_protocol_smiley(psmileys, "~:>", "chicken");	
+	psmileys=add_protocol_smiley(psmileys, "~o)", "coffee");	
 
 	psmileys=add_protocol_smiley(psmileys, ":>", "heyyy");	
 	psmileys=add_protocol_smiley(psmileys, ":->", "heyyy");
@@ -3373,6 +3395,8 @@ static void yahoo_init_smileys()
 
 	psmileys=add_protocol_smiley(psmileys, "[-(", "flying");
 
+	psmileys=add_protocol_smiley(psmileys, "[-x", "shame");
+
 	psmileys=add_protocol_smiley(psmileys, ":@)", "pig");
 
 	psmileys=add_protocol_smiley(psmileys, "8-|", "rolling_eyes");
@@ -3385,7 +3409,66 @@ static void yahoo_init_smileys()
 
 	psmileys=add_protocol_smiley(psmileys, "**==", "usflag");
 
+	psmileys=add_protocol_smiley(psmileys, "%%-", "luck");
 	psmileys=add_protocol_smiley(psmileys, "@};-", "rose");
+
+	psmileys=add_protocol_smiley(psmileys, ">:D<", "hugs");
+
+	psmileys=add_protocol_smiley(psmileys, "=((", "broken_heart");
+
+	psmileys=add_protocol_smiley(psmileys, "l-)", "loser");
+	psmileys=add_protocol_smiley(psmileys, "L-)", "loser");
+
+	psmileys=add_protocol_smiley(psmileys, "<:-p", "party");
+	psmileys=add_protocol_smiley(psmileys, "<:-P", "party");
+
+	psmileys=add_protocol_smiley(psmileys, "@-)", "hypnotised");
+
+	psmileys=add_protocol_smiley(psmileys, ":^o", "liar");
+	psmileys=add_protocol_smiley(psmileys, ":^O", "liar");
+
+	psmileys=add_protocol_smiley(psmileys, ":w", "waiting");
+	psmileys=add_protocol_smiley(psmileys, ":W", "waiting");
+	psmileys=add_protocol_smiley(psmileys, ":-w", "waiting");
+	psmileys=add_protocol_smiley(psmileys, ":-W", "waiting");
+
+	psmileys=add_protocol_smiley(psmileys, ":-<", "sigh");
+	psmileys=add_protocol_smiley(psmileys, ":<", "sigh");
+
+	psmileys=add_protocol_smiley(psmileys, ">:p", "phbbbt");
+	psmileys=add_protocol_smiley(psmileys, ">:P", "phbbbt");
+
+	psmileys=add_protocol_smiley(psmileys, "=))", "rotfl");
+
+	psmileys=add_protocol_smiley(psmileys, ":-\"", "whistle");
+
+	psmileys=add_protocol_smiley(psmileys, "b-(", "black_eye");
+
+	psmileys=add_protocol_smiley(psmileys, ":)>-", "peace");
+
+	psmileys=add_protocol_smiley(psmileys, ":-\"", "whistling");
+
+	psmileys=add_protocol_smiley(psmileys, "(%)", "yinyang");
+
+	psmileys=add_protocol_smiley(psmileys, "(*)", "star");
+
+	psmileys=add_protocol_smiley(psmileys, ":-@", "sore_ears");
+
+	psmileys=add_protocol_smiley(psmileys, "^:)^", "not_worthy");
+
+	psmileys=add_protocol_smiley(psmileys, ":-j", "just_kidding");
+
+	psmileys=add_protocol_smiley(psmileys, ":)", "smile");	
+	psmileys=add_protocol_smiley(psmileys, ":-)", "smile");
+
+	psmileys=add_protocol_smiley(psmileys, ":-l", "frustrated");
+	psmileys=add_protocol_smiley(psmileys, "[-o<", "praying");
+	psmileys=add_protocol_smiley(psmileys, "$-)", "money_eyes");
+
+	psmileys=add_protocol_smiley(psmileys, "o->", "hiro");
+	psmileys=add_protocol_smiley(psmileys, "o=>", "billy");
+	psmileys=add_protocol_smiley(psmileys, "o-+", "april");
+
 }
 
 static LList *eb_yahoo_get_smileys(void)

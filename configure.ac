@@ -1,11 +1,11 @@
 # Process this file with autoconf to produce a configure script.
 dnl We use the new format of AC_INIT
 dnl info --file=autoconf.info --node="Initializing configure" for more info
-AC_INIT(Ayttm, 0.4.6, ayttm-users@lists.sourceforge.net)
+AC_INIT([Ayttm], [0.4.6], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=15
+RELEASE=16
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -182,8 +182,8 @@ AC_ARG_ENABLE(webcam, AC_HELP_STRING([--disable-webcam],
 
 AC_ARG_WITH(jasper-prefix, AC_HELP_STRING([--with-jasper-prefix],
 		[Path where jasper include and lib directories can be found]))
-AC_ARG_ENABLE(jasper-filter, AC_HELP_STRING([--enable-jasper-filter],
-		[Build a jasper based jpeg2000 filter (not GPL)]))
+AC_ARG_ENABLE(jasper-filter, AC_HELP_STRING([--disable-jasper-filter],
+		[Build a jasper based jpeg2000 filter]))
 
 if test "$enable_webcam" != "no"; then
     AM_PATH_GDK_PIXBUF(, [AC_DEFINE(HAVE_GDK_PIXBUF, 1, [Define if you have gdk-pixbuf])],
@@ -201,6 +201,7 @@ if test "$enable_webcam" != "no"; then
 	[JASPER_LIBS="-ljasper -lm -ljpeg"
 	AC_MSG_RESULT(yes)], 
 	[AC_MSG_RESULT(no)
+	enable_jasper_filter="no"
 	AC_MSG_WARN([Unable to find jasper, you won't be able to view webcams])])
     LIBS=$ac_check_lib_save_LIBS
 
@@ -418,7 +419,7 @@ AC_SUBST(HOST)
 AC_SUBST(RC)
 
 AM_CONDITIONAL(MINGW32, test $use_mingw = yes)
-AM_CONDITIONAL(BUILD_JASPER_FILTER, test "$enable_jasper_filter" = "yes")
+AM_CONDITIONAL(BUILD_JASPER_FILTER, test "$enable_jasper_filter" != "no")
 
 AC_CONFIG_FILES([Makefile ayttm.spec
                  doc/Makefile
