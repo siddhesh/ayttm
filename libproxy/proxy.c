@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
 
 #ifdef __MINGW32__
 #define sleep(a)	Sleep(a)
@@ -250,8 +252,10 @@ proxy_recv_line (int sock, char **resultp)
     while (1)
     {
 	char ch;
-	if (recv (sock, &ch, 1, 0) < 0)
+	if (recv (sock, &ch, 1, 0) < 0) {
 	    fprintf (stderr, "recv() error from  proxy server\n");
+	    return -1;
+        }
 	c = ch;
 
 	if (c == EOF)
@@ -476,7 +480,6 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
 	   if(bind(sockfd, (struct sockaddr*)&bind_addr, sizeof(bind_addr)) < 0 )
 	   {
 		   perror("bind");
-		   exit(0);
 	   }
 	   getsockname( sockfd, (struct sockaddr*)&bind_addr, &size );
    }
@@ -530,7 +533,6 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
    if( buff[1] != 0x00 )
    {
 	   fprintf(stderr, "No Acceptable Methods");
-	   exit(0);
    }
 
    buff[0] = 0x05; //use socks5
@@ -619,7 +621,6 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
 	   printf("\n");
 	   fprintf(stderr, "SOCKS error number %d\n", buff[1] );
 	   close(sockfd);
-	   exit(0);
 	   return -1;
    }
 }
@@ -719,6 +720,28 @@ int proxy_connect_host (char *host, int port, void *cb, void *data)
 
 }
 
+static int conn_ok(int sockfd, void *cb, void *data)
+{
+	ay_socket_callback callback = (ay_socket_callback)cb;
+	if (callback) {
+		callback(sockfd, 0, data);
+		return 0;
+	} else {
+		return sockfd;
+	}	
+}
+
+static int conn_nok(int sockfd, void *cb, void *data)
+{
+	ay_socket_callback callback = (ay_socket_callback)cb;
+	if (callback) {
+		callback(-1, ECONNREFUSED, data);
+		return 0;
+	} else {
+		return -1;
+	}	
+}
+
 int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data)
 {
    int tmp;
@@ -743,36 +766,24 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
 		break;
 		}
       case PROXY_HTTP:    /* Http proxy */
-		if ( (tmp=http_connect(sockfd, serv_addr, addrlen)) > 0 ) {
-			if (callback) {
-				callback(sockfd, 0, data);
-				return 0;
-			} else 
-				return sockfd;
+		if ( (tmp=http_connect(sockfd, serv_addr, addrlen)) >= 0 ) {
+			return conn_ok(sockfd, callback, data);
 		} else {
-			return -1;
+			return conn_nok(sockfd, callback, data);
 		}
 		break;
       case PROXY_SOCKS4:  /* SOCKS4 proxy */
-		if ( (tmp=socks4_connect(sockfd, serv_addr, addrlen)) > 0 ) {
-			if (callback) {
-				callback(sockfd, 0, data);
-				return 0;
-			} else 
-				return sockfd;
+		if ( (tmp=socks4_connect(sockfd, serv_addr, addrlen)) >= 0 ) {
+			return conn_ok(sockfd, callback, data);
 		} else {
-			return -1;
+			return conn_nok(sockfd, callback, data);
 		}
 		break;
       case PROXY_SOCKS5:  /* SOCKS5 proxy */
-		if ( (tmp=socks5_connect(sockfd, serv_addr, addrlen)) > 0 ) {
-			if (callback) {
-				callback(sockfd, 0, data);
-				return 0;
-			} else 
-				return sockfd;
+		if ( (tmp=socks5_connect(sockfd, serv_addr, addrlen)) >= 0 ) {
+			return conn_ok(sockfd, callback, data);
 		} else {
-			return -1;
+			return conn_nok(sockfd, callback, data);
 		}
 		break;
       default:

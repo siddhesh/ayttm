@@ -1,3 +1,7 @@
+* Thu Apr 17 2003 08:15 GMT [colin]	0.2.3-119
+- libproxy
+socks4 & socks5 work
+
 * Thu Apr 17 2003 08:15 GMT [colin]	0.2.3-118
 - src/action.c
   src/log_window.c
