@@ -1,3 +1,7 @@
+* Fri Apr 25 2003 02:40 GMT [colin]	0.3.0-pre25
+- src/gtk/about.c
+Fix too big window, add missing people
+
 * Thu Apr 24 2003 19:40 GMT [philip]	0.3.0-pre24
 - modules/yahoo2/libyahoo2/libyahoo2.c
 try to fix bug 727057

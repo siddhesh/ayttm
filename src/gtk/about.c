@@ -68,6 +68,16 @@ static tDevInfo sEverybuddyDevTeam[EVERYBUDDY_TEAM_SIZE] =
 	{"Philip Tellis", 	"<philip.tellis@iname.com>", 	"Yahoo Devel"}
 };
 
+#define	HELP_TEAM_SIZE	(4)
+
+static tDevInfo sHelpDevTeam[HELP_TEAM_SIZE] =
+{
+	{"Yann Marigo", 	"<yann@yannos.com>", 		"Art, Fr translation"},
+	{"Toby A. Inkster", 	"<tobyink@goddamn.co.uk>", 	"Patches"},
+	{"Ben Reser", 		"<ben@reser.org>", 		"Patches, MDK RPMs"},
+	{"Lee Leahu", 		"<penguin365@dyweni.com>", 	"Patches"}
+};
+
 /* the one and only about window */
 static GtkWidget *sAboutWindow = NULL;
 
@@ -120,10 +130,11 @@ void	ay_ui_show_about(void *useless, void *null)
 	GtkLabel	*label = NULL;
 	GtkTable	*table = NULL;
 	GtkWidget	*separator = NULL;
-	GtkBox		*vbox = NULL;
+	GtkBox		*vbox = NULL, *vbox2 = NULL;
 	GtkStyle	*style = NULL;
 	GdkPixmap	*pm = NULL;
 	GdkBitmap	*bm = NULL;
+	GtkWidget	*scroll = NULL;
 	const char	*versionStr = "Ayttm " VERSION "-" RELEASE "\n" __DATE__;
 
 
@@ -145,57 +156,88 @@ void	ay_ui_show_about(void *useless, void *null)
 	vbox = GTK_BOX(gtk_vbox_new(FALSE, 0));
 	gtk_widget_show(GTK_WIDGET(vbox));
 
+	vbox2 = GTK_BOX(gtk_vbox_new(FALSE, 0));
+	gtk_widget_show(GTK_WIDGET(vbox2));
+
 	/* logo */
 	style = gtk_widget_get_style(sAboutWindow);
 	pm = gdk_pixmap_create_from_xpm_d(sAboutWindow->window, &bm,
                  &style->bg[GTK_STATE_NORMAL], (gchar **)ayttmlogo_xpm);
 	logo = gtk_pixmap_new(pm, bm);
-	gtk_box_pack_start(vbox, logo, TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox, logo, FALSE, FALSE, 5);
 	gtk_widget_show(logo);
 
 	/* version */
 	label = GTK_LABEL(gtk_label_new( versionStr ));
 	gtk_widget_show( GTK_WIDGET(label) );
-	gtk_box_pack_start(vbox, GTK_WIDGET(label), TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox, GTK_WIDGET(label), FALSE, FALSE, 5);
 
 	/* separator */
 	separator = gtk_hseparator_new();
 	gtk_widget_show( separator );
-	gtk_box_pack_start(vbox, separator, TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox, separator, FALSE, FALSE, 5);
 
+	/* scroll */
+	scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_show(scroll);
+	
 	/* text */
 	label = GTK_LABEL(gtk_label_new( _("Ayttm is brought to you by:") ));
 	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
 	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
 	gtk_widget_show( GTK_WIDGET(label) );
-	gtk_box_pack_start(vbox, GTK_WIDGET(label), TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
 
 	/* list of Ayttm developers */
 	table = sMakeDeveloperTable( AYTTM_TEAM_SIZE, sAyttmDevTeam );
-	gtk_box_pack_start(vbox, GTK_WIDGET(table), TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox2, GTK_WIDGET(table), TRUE, TRUE, 5);
 
 	/* separator */
 	separator = gtk_hseparator_new();
 	gtk_widget_show( separator );
-	gtk_box_pack_start(vbox, separator, TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox2, separator, TRUE, TRUE, 5);
 
 	/* text */
 	label = GTK_LABEL(gtk_label_new( _("Ayttm is based on Everybuddy 0.4.3 which was brought to you by:") ));
 	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
 	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
 	gtk_widget_show( GTK_WIDGET(label) );
-	gtk_box_pack_start(vbox, GTK_WIDGET(label), TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
 
 	/* list of Everybuddy developers */
 	table = sMakeDeveloperTable( EVERYBUDDY_TEAM_SIZE, sEverybuddyDevTeam );
-	gtk_box_pack_start(vbox, GTK_WIDGET(table), TRUE, TRUE, 5);
+	gtk_box_pack_start(vbox2, GTK_WIDGET(table), TRUE, TRUE, 5);
 
+	/* separator */
+	separator = gtk_hseparator_new();
+	gtk_widget_show( separator );
+	gtk_box_pack_start(vbox2, separator, TRUE, TRUE, 5);
+
+	/* text */
+	label = GTK_LABEL(gtk_label_new( _("\"With a little help from\":") ));
+	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+	gtk_widget_show( GTK_WIDGET(label) );
+	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
+
+	/* list of Everybuddy developers */
+	table = sMakeDeveloperTable( HELP_TEAM_SIZE, sHelpDevTeam );
+	gtk_box_pack_start(vbox2, GTK_WIDGET(table), TRUE, TRUE, 5);
+
+	gtk_scrolled_window_add_with_viewport(
+			GTK_SCROLLED_WINDOW(scroll), GTK_WIDGET(vbox2));
+	
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
+			GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	
+	gtk_box_pack_start(vbox, GTK_WIDGET(scroll), TRUE, TRUE, 5);
+	
 	/* close button */
 	ok = gtk_button_new_with_label(_("Close"));
 	gtk_signal_connect_object(GTK_OBJECT(ok), "clicked",
 		                  GTK_SIGNAL_FUNC(destroy_about), GTK_OBJECT(sAboutWindow));
 
-	gtk_box_pack_start(vbox, ok, TRUE, FALSE, 0);
+	gtk_box_pack_start(vbox, ok, FALSE, FALSE, 0);
 	GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
 	gtk_widget_grab_default(ok);
 	gtk_widget_show(ok);
@@ -205,6 +247,8 @@ void	ay_ui_show_about(void *useless, void *null)
 
 	gtk_container_add(GTK_CONTAINER(sAboutWindow), GTK_WIDGET(vbox));
 
+	gtk_widget_set_usize(sAboutWindow, -1, 400);
+	
 	gtk_widget_show(sAboutWindow);
 	gtk_widget_grab_focus(ok);
 
