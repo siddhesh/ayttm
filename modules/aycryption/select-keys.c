@@ -116,12 +116,13 @@ gpgmegtk_recipient_selection (char *name, int crypt, int sign)
     sk.do_sign = sign;
     open_dialog (&sk);
 
+    gtk_main ();
     do {
         sk.pattern = recp_names? recp_names->data:NULL;
         gtk_clist_clear (sk.clist);
         fill_clist (&sk, sk.pattern);
         update_progress (&sk, 0, sk.pattern);
-        gtk_main ();
+        
         if (recp_names)
             recp_names = recp_names->next;
     } while (sk.okay && recp_names);

@@ -1,3 +1,7 @@
+* Mon May  5 2003 08:57 GMT [colin]	0.3.0-127
+- modules/aycryption/aycryption.c
+Fix signature check of signed-only (noncrypted) messages 
+
 * Mon May  5 2003 00:32 GMT [colin]	0.3.0-126
 - modules/aycryption/aycryption.c
 Be more verbose in error reporting

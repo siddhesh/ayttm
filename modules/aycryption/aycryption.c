@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.4 $",
-	"$Date: 2003/05/05 02:34:53 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/05/05 08:58:13 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -249,6 +249,7 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 			eb_debug(DBG_CRYPT,"error: %s\n",
 				gpgme_strerror(err));
 
+		memset(buf, 0, sizeof(buf));
 		while (!gpgme_data_read (cipher, buf, 1024, &nread)) {
 			char tmp[1024];
 			if (nread) {
@@ -256,6 +257,7 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 				if (p)
 					free(p);
 				p = strdup(tmp);
+				memset(buf, 0, sizeof(buf));
 			}
 		}
 		
@@ -305,47 +307,29 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 				"Maybe he does not have your correct key."), ct->nick);
 		ay_do_error(_("Aycryption"), buf);
 		return strdup(s);
-	} else if (err == GPGME_No_Data) {
-		p = strdup(s);
-	} else {
-		err = gpgme_data_rewind (plain);
-		if (err) {
-			if (err)
-				eb_debug(DBG_CRYPT,"error: %s\n",
-					gpgme_strerror(err));
-			return strdup(s);
-		}
-
-
-		while (!(err = gpgme_data_read (plain, buf, sizeof(buf), &nread))) {
-			char tmp[1024];
-			memset(tmp, 0, 1024);
-			if (nread) {
-				snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
-				if (p)
-					free(p);
-				p = strdup(tmp);
-			}            
-		}
+	} else if (err == GPGME_No_Data) { /*plaintext signed*/
+		gpgme_data_rewind(cipher);
+		gpgme_data_new(&plain);
+		err = gpgme_op_verify(ctx, cipher, plain, &sigstat);
+		if (err)
+			eb_debug(DBG_CRYPT, "plaintext err: %d\n", err);
 	}
 	
-	if (p) {
-		char *tmp=NULL;
-		if (!strncmp("-----BEGIN PGP SIGNED MESSAGE-----",
-			    p, strlen("-----BEGIN PGP SIGNED MESSAGE-----"))) {
-			tmp = strstr(p, "Hash: ");
-			if (tmp)
-				tmp = strstr(tmp, "\n");
-			if (tmp) {
-				char *here;
-				tmp+=3;
-				here = tmp;
-				*(strstr(tmp, "-----BEGIN PGP SIGNATURE-----")-2) = '\0';
-				tmp = strdup(here);
-				free (p);
-				p = tmp;
-			}
-		}
+	err = gpgme_data_rewind(plain);
+	if (err)
+		eb_debug(DBG_CRYPT, "rewind err %d\n", err);
+	
+	memset(buf, 0, sizeof(buf));
+	while (!(err = gpgme_data_read (plain, buf, sizeof(buf), &nread))) {
+		char tmp[1024];
+		memset(tmp, 0, 1024);
+		if (nread) {
+			snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
+			if (p)
+				free(p);
+			p = strdup(tmp);
+			memset(buf, 0, sizeof(buf));
+		}            
 	}
 		
 	gpgme_release(ctx);
@@ -357,8 +341,29 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 		case GPGME_SIG_STAT_GOOD:
 			s_sigstat=strdup(" <font color=#a8ffa8>[Good signature]</font>");
 			break;
-		default:
+		case GPGME_SIG_STAT_BAD:
 			s_sigstat=strdup(" <font color=#ffa8a8>[Bad signature]</font>");
+			break;
+		case GPGME_SIG_STAT_NOKEY:
+			s_sigstat=strdup(" <font color=#ffa8a8>[No key]</font>");
+			break;
+		case GPGME_SIG_STAT_NOSIG:
+			s_sigstat=strdup(" <font color=#ffa8a8>[No signature]</font>");
+			break;
+		case GPGME_SIG_STAT_ERROR:
+			s_sigstat=strdup(" <font color=#ffa8a8>[Error verifying signature]</font>");
+			break;
+		case GPGME_SIG_STAT_DIFF:
+			s_sigstat=strdup(" <font color=#ffa8a8>[Signature status: DIFF]</font>");
+			break;
+		case GPGME_SIG_STAT_GOOD_EXP:
+			s_sigstat=strdup(" <font color=#ffa8a8>[Expired good signature]</font>");
+			break;
+		case GPGME_SIG_STAT_GOOD_EXPKEY:
+			s_sigstat=strdup(" <font color=#ffa8a8>[Good signature with expired key]</font>");
+			break;
+		default:
+			s_sigstat=strdup(" <font color=#ffa8a8>[Unknown error]</font>");
 			break;
 	}
 	res = g_strdup_printf("%s%s", p, s_sigstat);
@@ -432,8 +437,10 @@ pgp_encrypt ( GpgmeData plain, GpgmeRecipients rset, int sign )
         	info.c = ctx;
         	gpgme_set_passphrase_cb (ctx, gpgmegtk_passphrase_cb, &info);
 	    }
-	    gpgme_set_textmode (ctx, 1);
-	    gpgme_set_armor (ctx, 1);
+	    if (rset != NULL) {
+		    gpgme_set_textmode (ctx, 1);
+		    gpgme_set_armor (ctx, 1);
+	    }
 	    gpgme_signers_clear (ctx);
 	    for (p = key_list; p != NULL; p = p->next) {
 		err = gpgme_signers_add (ctx, (GpgmeKey) p->data);
