@@ -59,12 +59,12 @@ defaults.h: Makefile
 	@echo "#define __DEFAULTS_H__" >> defaults.h;
 	@echo "#ifdef __MINGW32__" >> defaults.h;
 	@echo \#define BuddyArriveDefault \"\\\\BuddyArrive.au\" >> defaults.h;
-	@echo \#define BuddyLeaveDefault \"\\\\BuddyLeave.au\" >> defaults.h;
-	@echo \#define SendDefault \"\\\\Send.au\" >> defaults.h;
-	@echo \#define ReceiveDefault \"\\\\Receive.au\" >> defaults.h;
+	@echo \#define BuddyLeaveDefault \"\\Program\ Files\\ayttm\\BuddyLeave.au\" >> defaults.h;
+	@echo \#define SendDefault \"\\Program\ Files\\ayttm\\Send.au\" >> defaults.h;
+	@echo \#define ReceiveDefault \"\\Program\ Files\\ayttm\\Receive.au\" >> defaults.h;
 	@echo \#define SpeechProgramDefault \"\" >> defaults.h;
-	@echo \#define MODULE_DIR \"\\\\modules\" >> defaults.h;
-	@echo \#define AYTTMRC  \"\\\\@PACKAGE@rc\" >> defaults.h;
+	@echo \#define MODULE_DIR \"\\Program\ Files\\ayttm\\modules\" >> defaults.h;
+	@echo \#define AYTTMRC  \"\\@PACKAGE@rc\" >> defaults.h;
 	@echo "#else" >> defaults.h;
 	@echo \#define MODULE_DIR \"${libdir}/@PACKAGE@\" >> defaults.h;
 	@echo \#define AYTTMRC  \"${sysconfdir}/@PACKAGE@rc\" >> defaults.h;

@@ -1,3 +1,7 @@
+* Fri May 16 2003 13:15 GMT [edward]	0.3.0-196
+- src/Makefile.am
+Stuff in wrong locations for MINGW32 defs
+
 * Fri May 15 2003 07:20 GMT [philip]	0.3.0-195
 - modules/aim-toc/aim-toc.c
 disable profile adding stuff - it has no relevance now
