@@ -1,3 +1,10 @@
+* Fri May 16 2003 16:05 GMT [edward]	0.3.0-197
+- src/Makefile.am
+  mingw32/Makefile.am
+  mingw32/ay.iss <== Inno Installer file
+Fixed paths to work for WIN32. Too many backslashes 
+caused issue. Added installer file for Inno Setup 3... A free installer.
+
 * Fri May 16 2003 13:15 GMT [edward]	0.3.0-196
 - src/Makefile.am
 Stuff in wrong locations for MINGW32 defs

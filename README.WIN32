@@ -1,3 +1,21 @@
+Known Issues:
+	0) AIM support causes a pretty major GTK 'screen' flashing
+	to happen if you let AIM idle while a chat window is also
+	open. I recomment closing your chat windows if you are going to
+	idle.
+
+	1) There is no spell checker support.
+
+	2) File transfer support is iffy at best
+
+	3) Smiley Themes are untested
+
+	4) No Yahoo Webcam support
+
+	5) chat_room is untested.
+
+Compilation:
+
 In order to compile AYTTM on WIN32 platforms you must first install cygwin
 and its development environment as we will be using the MINGW32 portion 
 of it. In addition you will need to get the runtime and development
@@ -25,14 +43,3 @@ To Generate the program for WIN32 runtime once you have cygwin installed
 	./mingw
 
 
-Known Issues:
-
-	1) There is no spell checker support.
-
-	2) File transfer support is iffy at best
-
-	3) Smiley Themes are untested
-
-	4) No Yahoo Webcam support
-
-	5) chat_room is untested.
