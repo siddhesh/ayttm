@@ -106,7 +106,7 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:53 $",
 	&ref_count,
 	plugin_init,

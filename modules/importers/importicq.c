@@ -51,7 +51,7 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import ICQ99 Contact List", 
 	"Import the ICQ99 Contact List", 
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:32 $",
 	&ref_count,
 	plugin_init,

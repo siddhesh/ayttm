@@ -57,7 +57,7 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:46 $",
 	&ref_count,
 	middle_init,

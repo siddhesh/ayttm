@@ -3,7 +3,7 @@
  *
  * libyahoo2 is available at http://libyahoo2.sourceforge.net/
  *
- * $Revision: 1.1 $
+ * $Revision: 1.1.1.1 $
  * $Date: 2003/04/01 07:24:49 $
  * 
  * Copyright (C) 2002, Philip S Tellis <philip . tellis AT gmx . net>

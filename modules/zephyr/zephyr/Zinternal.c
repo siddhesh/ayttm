@@ -3,7 +3,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: Zinternal.c,v 1.1 2003/04/01 07:24:52 colinleroy Exp $
+ *	$Id: Zinternal.c,v 1.1.1.1 2003/04/01 07:24:52 colinleroy Exp $
  *
  *	Copyright (c) 1987,1988,1991 by the Massachusetts Institute of
  *	Technology.
@@ -18,7 +18,7 @@
 
 #ifndef lint
 static const char rcsid_Zinternal_c[] =
-  "$Id: Zinternal.c,v 1.1 2003/04/01 07:24:52 colinleroy Exp $";
+  "$Id: Zinternal.c,v 1.1.1.1 2003/04/01 07:24:52 colinleroy Exp $";
 static const char copyright[] =
   "Copyright (c) 1987,1988,1991 by the Massachusetts Institute of Technology.";
 #endif

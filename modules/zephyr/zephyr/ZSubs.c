@@ -4,7 +4,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: ZSubs.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZSubs.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1987,1988 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -14,7 +14,7 @@
 #include <internal.h>
 
 #ifndef lint
-static const char rcsid_ZSubscriptions_c[] = "$Id: ZSubs.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+static const char rcsid_ZSubscriptions_c[] = "$Id: ZSubs.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif
 
 static Code_t Z_Subscriptions __P((register ZSubscription_t *sublist,

@@ -3,7 +3,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: ZNewLocU.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZNewLocU.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1987,1988,1991 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -14,7 +14,7 @@
 
 #ifndef lint
 static const char rcsid_ZNewLocateUser_c[] =
-    "$Id: ZNewLocU.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+    "$Id: ZNewLocU.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif
 
 Code_t ZLocateUser(user, nlocs, auth)

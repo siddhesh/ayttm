@@ -78,7 +78,7 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Rainbow",
 	"Turns all outgoing messages rainbow colours",
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:46 $",
 	&ref_count,
 	rainbow_init,

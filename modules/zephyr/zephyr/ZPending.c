@@ -3,7 +3,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: ZPending.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZPending.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1987 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -11,7 +11,7 @@
  */
 
 #ifndef lint
-static char rcsid_ZPending_c[] = "$Id: ZPending.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+static char rcsid_ZPending_c[] = "$Id: ZPending.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif
 
 #include <internal.h>

@@ -3,7 +3,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: ZReadAscii.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZReadAscii.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1987, 1990 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -11,7 +11,7 @@
  */
 
 #ifndef lint
-static char rcsid_ZReadAscii_c[] = "$Id: ZReadAscii.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+static char rcsid_ZReadAscii_c[] = "$Id: ZReadAscii.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif /* lint */
 
 #include <internal.h>

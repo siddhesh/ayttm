@@ -3,7 +3,7 @@ by Philip S Tellis, philip dot tellis at gmx dot net
 v1.0, a very hot 18th May 2002
 v1.1, a sultry, and slightly rainy 3rd August 2002
 
-$Revision: 1.1 $
+$Revision: 1.1.1.1 $
 $Date: 2003/04/01 07:24:13 $
 
 I recently wrote the new Yahoo2 module for everybuddy, and well, to say the
@@ -141,7 +141,7 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Test Service",
 	"Test Service Module",
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:13 $",
 	&ref_count,
 	plugin_init,
@@ -1033,7 +1033,7 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Test Service",
 	"Test Service Module",
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:13 $",
 	&ref_count,
 	plugin_init,

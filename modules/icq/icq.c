@@ -95,7 +95,7 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ Service", 
 	"ICQ Protocol Support", 
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:28 $",
 	&ref_count,
 	plugin_init,

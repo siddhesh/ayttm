@@ -3,7 +3,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: ZMakeAscii.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZMakeAscii.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1987 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -14,7 +14,7 @@
 #include <assert.h>
 
 #ifndef lint
-static const char rcsid_ZMakeAscii_c[] = "$Id: ZMakeAscii.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+static const char rcsid_ZMakeAscii_c[] = "$Id: ZMakeAscii.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif
 
 static char *itox_chars = "0123456789ABCDEF";

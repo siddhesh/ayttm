@@ -3,7 +3,7 @@
  *
  *	Created by:	John T. Kohl
  *
- *	$Id: ZSendRLst.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZSendRLst.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1988 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -11,7 +11,7 @@
  */
 
 #ifndef lint
-static char rcsid_ZSendRawList_c[] = "$Id: ZSendRLst.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+static char rcsid_ZSendRawList_c[] = "$Id: ZSendRLst.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif
 
 #include <internal.h>

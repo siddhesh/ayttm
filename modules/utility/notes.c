@@ -72,7 +72,7 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Keep notes on contacts", 
 	"Keep notes about your contacts and buddies", 
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:46 $",
 	&ref_count,
 	plugin_init,

@@ -3,7 +3,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: ZMkAuth.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZMkAuth.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1987 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -13,7 +13,7 @@
 #include <internal.h>
 
 #ifndef lint
-static const char rcsid_ZMakeAuthentication_c[] = "$Id: ZMkAuth.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+static const char rcsid_ZMakeAuthentication_c[] = "$Id: ZMkAuth.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif
 
 #ifdef HAVE_KRB4

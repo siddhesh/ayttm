@@ -81,7 +81,7 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.1 $",
+	"$Revision: 1.1.1.1 $",
 	"$Date: 2003/04/01 07:24:20 $",
 	&ref_count,
 	plugin_init,

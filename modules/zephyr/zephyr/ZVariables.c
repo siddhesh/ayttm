@@ -4,7 +4,7 @@
  *
  *	Created by:	Robert French
  *
- *	$Id: ZVariables.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $
+ *	$Id: ZVariables.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $
  *
  *	Copyright (c) 1987 by the Massachusetts Institute of Technology.
  *	For copying and distribution information, see the file
@@ -12,7 +12,7 @@
  */
 
 #ifndef lint
-static char rcsid_ZVariables_c[] = "$Id: ZVariables.c,v 1.1 2003/04/01 07:24:51 colinleroy Exp $";
+static char rcsid_ZVariables_c[] = "$Id: ZVariables.c,v 1.1.1.1 2003/04/01 07:24:51 colinleroy Exp $";
 #endif
 
 #include <internal.h>
