@@ -1,4 +1,8 @@
-* Thu Jan 09 2004 09:49 GMT [chris]     0.4.6-pre5
+* Thu Jan 08 2004 15:51 GMT [chris]     0.4.6-pre6
+- configure.ac
+allow user to specify jasper path
+
+* Thu Jan 08 2004 09:49 GMT [chris]     0.4.6-pre5
 - src/crash.c
 include missing headers, needed for correct 64 bit
 compile (Debian bug#226665)

@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.4.6, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=pre5
+RELEASE=pre6
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -180,6 +180,8 @@ AM_PATH_GTK(1.2.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
 AC_ARG_ENABLE(webcam, AC_HELP_STRING([--disable-webcam],
 		[Do not build webcam support]))
 
+AC_ARG_WITH(jasper-prefix, AC_HELP_STRING([--with-jasper-prefix],
+		[Path where jasper include and lib directories can be found]))
 AC_ARG_ENABLE(jasper-filter, AC_HELP_STRING([--enable-jasper-filter],
 		[Build a jasper based jpeg2000 filter (not GPL)]))
 
@@ -189,7 +191,9 @@ if test "$enable_webcam" != "no"; then
 
     AC_MSG_CHECKING(for jasper)
     ac_check_lib_save_LIBS=$LIBS
-    LIBS="-ljasper -lm -ljpeg  $LIBS"
+    ac_check_lib_save_CFLAGS=$CFLAGS
+    LIBS="-ljasper -lm -ljpeg -L $with_jasper_prefix/lib $LIBS"
+    CFLAGS="$CFLAGS $with_jasper_prefix/include"
     AC_TRY_LINK([#include <jasper/jasper.h>],
 	[jas_init()],
 	[JASPER_LIBS="-ljasper -lm -ljpeg"
