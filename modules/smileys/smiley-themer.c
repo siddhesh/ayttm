@@ -31,6 +31,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <X11/xpm.h>
 
@@ -58,8 +59,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.1 $",
-	"$Date: 2003/05/08 16:17:05 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/05/08 19:02:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -139,10 +140,11 @@ static void unload_themes()
 		while(theme->smileys) {
 			struct smiley_struct *smiley = theme->smileys->data;
 			XpmFree(smiley->pixmap);
-			theme->smileys = l_list_remove(theme->smileys, theme->smileys);
+			free(smiley);
+			theme->smileys = l_list_remove_link(theme->smileys, theme->smileys);
 		}
 		free(theme->name);
-		themes = l_list_remove(themes, themes);
+		themes = l_list_remove_link(themes, themes);
 	}
 }
 
@@ -193,7 +195,7 @@ static LList * load_theme(const char *theme_name)
 		if(strchr(buff, '=') <= buff)
 			continue;
 
-		for(key = buff; *key && *key == ' '; key++)
+		for(key = buff; *key && isspace(*key); key++)
 			;
 
 		if(!*key)		/* empty key */
@@ -201,26 +203,28 @@ static LList * load_theme(const char *theme_name)
 
 		filename = strchr(key, '=');
 		*filename='\0';
-		tmp = strchr(key, ' ');
-		if(tmp)
+		for(tmp=key; *tmp && !isspace(*tmp); tmp++)
+			;
+		if(*tmp)
 			*tmp='\0';
-		for(++filename; *filename && *filename == ' '; filename++)
+		for(++filename; *filename && isspace(*filename); filename++)
 			;
 
 		if(!*filename)		/* empty filename */
 			continue;
 
-		tmp = strchr(filename, ' ');
-		if(tmp)
+		for(tmp=filename; *tmp && !isspace(*tmp); tmp++)
+			;
+		if(*tmp)
 			*tmp='\0';
 
 		
 		snprintf(filepath, sizeof(filepath), "%s/%s/%s",
 				smiley_directory, theme_name, filename);
 
-		printf("loading %s...", filepath);
+		printf("loading %s - ", filepath);
 		if(XpmReadFileToData(filepath, &smiley_data) != XpmSuccess) {
-			printf("Could not load %s\n", filepath);
+			printf("failed\n");
 			continue;
 		}
 
@@ -236,17 +240,7 @@ static LList * load_theme(const char *theme_name)
 
 static void reset_smileys(ebmCallbackData *data)
 {
-	struct smiley_theme *theme = NULL;
-	ebmImportData *eid;
-
-	if(IS_ebmImportData(data))
-		eid = (ebmImportData *)data;
-	else {	/* This should never happen, unless something is horribly wrong */
-		eb_debug(DBG_MOD, "*** Warning *** Unexpected ebmCallbackData type returned!\n");
-		return;
-	}
-
-	theme = eid->cd.user_data;
+	struct smiley_theme *theme = (struct smiley_theme *)data;
 
 	/* Set smileys back to default regardless of what they are now */
 	smileys = eb_smileys();
@@ -257,17 +251,7 @@ static void reset_smileys(ebmCallbackData *data)
 
 static void enable_smileys(ebmCallbackData *data)
 {
-	struct smiley_theme *theme = NULL;
-	ebmImportData *eid;
-
-	if(IS_ebmImportData(data))
-		eid = (ebmImportData *)data;
-	else {	/* This should never happen, unless something is horribly wrong */
-		eb_debug(DBG_MOD, "*** Warning *** Unexpected ebmCallbackData type returned!\n");
-		return;
-	}
-
-	theme = eid->cd.user_data;
+	struct smiley_theme *theme = (struct smiley_theme *)data;
 
 	if(!theme || !theme->smileys)
 		return;
@@ -304,6 +288,8 @@ static void load_themes()
 		}
 
 		ay_add_smiley_set( theme->name, theme->smileys );
+
+		themes = l_list_prepend(themes, theme);
 	}
 
 	closedir(theme_dir);
