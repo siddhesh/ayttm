@@ -28,10 +28,10 @@
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
+#include "util.h"
 #include "globals.h"
 #include "service.h"
 #include "prefs.h"
-#include "util.h"
 #include "plugin_api.h"
 #include "messages.h"
 
@@ -62,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Everybuddy Settings", 
 	"Import the Everybuddy Settings", 
-	"$Revision: 1.8 $",
-	"$Date: 2003/05/01 09:56:28 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/05/01 16:52:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
