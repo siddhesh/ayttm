@@ -28,6 +28,7 @@
 #include "dialog.h"
 #include "plugin_api.h"
 #include "libEBjabber.h"
+#include "intl.h"
 #ifdef __MINGW32__
 #include <glib.h>
 #define snprintf _snprintf
@@ -875,8 +876,9 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				JD=calloc(sizeof(JABBER_Dialog), 1);
 				name = xmlnode_get_tag_data(packet->iq, "username");
 				jabber_id = jab_getjid(conn);
-				JD->heading="Register? You're not authorized";
-				sprintf(buff, "Do you want to try to create the account \"%s\" on the jabber server %s?", jabber_id->user, jabber_id->server );
+				JD->heading=_("Register? You're not authorized");
+				sprintf(buff, _("Do you want to try to create the account \"%s\" on the jabber server %s?"), 
+						jabber_id->user, jabber_id->server );
 				JD->message=strdup(buff);
 				JD->callback=j_on_create_account;
 				JD->JConn=JConn;
@@ -899,7 +901,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			case 504: /* Remote Server Timeout */
 			default:
 				sprintf(buff, "%s@%s/%s - %s (%s)", conn->user->user, conn->user->server, conn->user->resource, desc, code);
-				do_error_dialog(buff, "Error");
+				do_error_dialog(buff, _("Error"));
 				fprintf(stderr, "Error: %s\n", code);
 			}
 		}
@@ -961,7 +963,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		if (type) {
 			JD=calloc(sizeof(JABBER_Dialog), 1);
 			if (strcmp (type, "subscribe") == 0) {
-				sprintf(buff, "%s wants to add you to his friends' list.\n\nDo you want to accept?", 
+				sprintf(buff, _("%s wants to add you to his friends' list.\n\nDo you want to accept?"), 
 						from);
 				JD->message=strdup(buff);
 				JD->heading="Subscribe Request";
@@ -977,7 +979,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				x = jutil_presnew (JPACKET__UNSUBSCRIBED, from, NULL);
 				jab_send (conn, x);
 				xmlnode_free(x);
-				sprintf(buff, "%s removed you from his list.\n\nDo you want to remove him?", from);
+				sprintf(buff, _("%s removed you from his list.\n\nDo you want to remove him?"), from);
 				JD->message=strdup(buff);
 				JD->heading="Remove User";
 				JD->callback=j_unsubscribe;
@@ -1013,7 +1015,7 @@ void j_on_state_handler(jconn conn, int state) {
 	case JCONN_STATE_OFF:
 		if(previous_state!=JCONN_STATE_OFF) {
 			eb_debug(DBG_JBR, "The Jabber server has disconnected you: %i\n", previous_state);
-			snprintf(buff, 4096, "The Jabber server: %s has disconnected you!",
+			snprintf(buff, 4096, _("The Jabber server %s has disconnected you."),
 				JCgetServerName(JConn));
 			JABBERError(buff, "Disconnect");
 			eb_input_remove(JConn->listenerID);
@@ -1023,8 +1025,8 @@ void j_on_state_handler(jconn conn, int state) {
 			JABBERLogout(NULL);
 		}
 		else if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
-			snprintf(buff, 4096, "Connection to the jabber server: %s failed!", conn->user->server);
-			JABBERError(buff, "Jabber server not responding");
+			snprintf(buff, 4096, _("Connection to the jabber server %s failed!"), conn->user->server);
+			JABBERError(buff, _("Jabber server not responding"));
 			jab_delete(JConn->conn);
 			JConn->conn=NULL;
 		}

@@ -28,6 +28,7 @@ modules/icq/icq.c
 modules/icq-toc/icq-toc.c
 modules/irc/irc.c
 modules/jabber/jabber.c
+modules/jabber/libEBjabber.c
 modules/smtp/smtp.c
 modules/msn2/msn.C
 modules/utility/autotrans.c
