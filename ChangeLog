@@ -1,3 +1,7 @@
+* Thu Oct  9 2003 09:10 GMT [colin]	0.4.2-18
+- modules/msn2/msn.C
+Invisible login pref
+
 * Thu Oct  9 2003 09:10 GMT [philip]	0.4.2-17
 - src/account_parser.y src/account_scanner.l src/account.c
 Comments allowed in accounts file.  Comment about passwords added

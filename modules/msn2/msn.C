@@ -116,6 +116,7 @@ typedef struct _eb_msn_local_account_data
 	int do_mail_notify_folders;
 	int do_mail_notify_run_script;
 	char do_mail_notify_script_name[MAX_PREF_LEN];
+	int login_invisible;
 } eb_msn_local_account_data;
 
 
@@ -169,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.63 $",
-	"$Date: 2003/08/29 12:46:20 $",
+	"$Revision: 1.64 $",
+	"$Date: 2003/10/09 10:35:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -485,6 +486,13 @@ static void msn_init_account_prefs(eb_local_account *ela)
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &mlad->login_invisible;
+	il->widget.checkbox.name = "LOGIN_INVISIBLE";
+	il->widget.checkbox.label= _("_Login invisible");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
 	il = il->next;	
 	il->widget.entry.value = mlad->fname_pref;
 	il->widget.entry.name = "fname_pref";
@@ -716,8 +724,13 @@ static void eb_msn_connected(eb_local_account * account)
 {
 	eb_msn_local_account_data * mlad;
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
-	if (mlad->status == MSN_OFFLINE)
+	
+	/* don't change if hidden */
+	if (mlad->status == MSN_OFFLINE && !mlad->login_invisible)
 		mlad->status=MSN_ONLINE;
+	else if (mlad->status == MSN_OFFLINE && mlad->login_invisible)
+		mlad->status = MSN_HIDDEN;
+	
 	if(account->status_menu)
 	{
 		/* Make sure set_current_state doesn't call us back */
@@ -1728,11 +1741,11 @@ static void eb_msn_incoming(void *data, int source, eb_input_condition condition
         {
           msn_handle_close(source);
         } else {
-	  int nargs;
+	  int nargs = 0;
 	  char ** args = NULL;
-	  llist * list;
+	  llist * list = NULL;
 	  list=msnconnections;
-	  msnconn *conn;
+	  msnconn *conn = NULL;
 	  
 	  if(list==NULL) { return; }
 
@@ -1763,9 +1776,9 @@ static void eb_msn_incoming(void *data, int source, eb_input_condition condition
 			 }
 			 delete [] args;
 		 }
-	 } else
+	   } else
 		  msn_handle_filetrans_incoming(conn, condition & EB_INPUT_READ, condition & EB_INPUT_WRITE);
-        }
+         }
 }
 
 
@@ -1992,8 +2005,10 @@ void ext_del_list_entry(msnconn * conn, char * list, char * username)
 
 void ext_show_error(msnconn * conn, char * msg)
 {
-	ay_do_warning( "MSN Error", msg );
-	eb_debug(DBG_MSN, "MSN: Error: %s\n", msg);
+	char *m = strdup(msg);
+	ay_do_warning( "MSN Error", m );
+	eb_debug(DBG_MSN, "MSN: Error: %s\n", m);
+	free(m);
 }
 
 static int get_status_num(char *status)
