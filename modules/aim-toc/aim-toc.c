@@ -50,7 +50,6 @@ typedef unsigned long ulong;
 #include "util.h"
 #include "status.h"
 #include "dialog.h"
-#include "progress_window.h"
 #include "activity_bar.h"
 #include "tcp_util.h"
 #include "message_parse.h"
@@ -90,8 +89,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.12 $",
-	"$Date: 2003/04/08 18:30:51 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/04/09 12:12:16 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1290,6 +1289,22 @@ static LList * eb_aim_write_prefs_config()
 	return config;
 }
 
+static int eb_aim_progress_window_new (const char *fname, unsigned long size)
+{
+	char label[1024];
+	snprintf(label,1024,"Transferring %s...", fname);
+	return ay_progress_bar_add(label, size, NULL, NULL);	
+}
+
+static void eb_aim_update_progress(int tag, unsigned long progress)
+{
+	ay_progress_bar_update_progress(tag, progress);
+}
+
+static void eb_aim_progress_window_close(int tag)
+{
+	ay_activity_bar_remove(tag);
+}
 
 struct service_callbacks * query_callbacks()
 {
@@ -1303,9 +1318,9 @@ struct service_callbacks * query_callbacks()
 	toc_chat_invite = eb_aim_chat_invite;
 	toc_join_ack = eb_aim_join_ack;
 	toc_chat_update_buddy = eb_aim_chat_update_buddy;
-	toc_begin_file_recieve = progress_window_new;
-	toc_update_file_status = update_progress;
-	toc_complete_file_recieve = progress_window_close;
+	toc_begin_file_recieve = eb_aim_progress_window_new;
+	toc_update_file_status = eb_aim_update_progress;
+	toc_complete_file_recieve = eb_aim_progress_window_close;
 	toc_file_offer = eb_aim_file_offer;
 	toc_user_info = eb_aim_user_info;
 	toc_new_user = eb_aim_new_user;

@@ -1,6 +1,10 @@
+* Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-72
+- modules/*toc
+Use new activity_bar for file transfers
+
 * Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-71
 - modules/msn2
-Use new activity_bar
+Use new activity_bar for file transfers
 
 * Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-70
 - src/activity_bar.[Ch]

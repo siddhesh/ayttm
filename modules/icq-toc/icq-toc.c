@@ -50,7 +50,6 @@ typedef unsigned long ulong;
 #include "util.h"
 #include "status.h"
 #include "dialog.h"
-#include "progress_window.h"
 #include "activity_bar.h"
 #include "message_parse.h"
 #include "value_pair.h"
@@ -91,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.10 $",
-	"$Date: 2003/04/08 18:23:19 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/04/09 12:12:17 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1230,6 +1229,22 @@ static LList * eb_icq_write_prefs_config()
 	return config;
 }
 
+static int eb_icq_progress_window_new (const char *fname, unsigned long size)
+{
+	char label[1024];
+	snprintf(label,1024,"Transferring %s...", fname);
+	return ay_progress_bar_add(label, size, NULL, NULL);	
+}
+
+static void eb_icq_update_progress(int tag, unsigned long progress)
+{
+	ay_progress_bar_update_progress(tag, progress);
+}
+
+static void eb_icq_progress_window_close(int tag)
+{
+	ay_activity_bar_remove(tag);
+}
 
 struct service_callbacks * query_callbacks()
 {
@@ -1243,9 +1258,9 @@ struct service_callbacks * query_callbacks()
 	icqtoc_chat_invite = eb_icq_chat_invite;
 	icqtoc_join_ack = eb_icq_join_ack;
 	icqtoc_chat_update_buddy = eb_icq_chat_update_buddy;
-	icqtoc_begin_file_recieve = progress_window_new;
-	icqtoc_update_file_status = update_progress;
-	icqtoc_complete_file_recieve = progress_window_close;
+	icqtoc_begin_file_recieve = eb_icq_progress_window_new;
+	icqtoc_update_file_status = eb_icq_update_progress;
+	icqtoc_complete_file_recieve = eb_icq_progress_window_close;
 	icqtoc_file_offer = eb_icq_file_offer;
 	icqtoc_user_info = eb_icq_user_info;
 	icqtoc_new_user = eb_icq_new_user;

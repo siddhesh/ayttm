@@ -53,7 +53,6 @@
 #include "info_window.h"
 #include "value_pair.h"
 #include "plugin_api.h"
-#include "progress_window.h"
 #include "activity_bar.h"
 #include "util.h"
 #include "status.h"
@@ -164,8 +163,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.16 $",
-	"$Date: 2003/04/09 12:02:49 $",
+	"$Revision: 1.17 $",
+	"$Date: 2003/04/09 12:12:17 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
