@@ -1,3 +1,7 @@
+* Wed Jan 07 2004 08:08 GMT [philip]	0.4.6-pre3
+- src/status.c
+trim CR and LF from end of status message if any
+
 * Wed Jan 07 2004 05:10 GMT [philip]	0.4.6-pre2
 - src/spellcheck.C
 pspell_manager_check and pspell_manager_suggest do not take

@@ -33,6 +33,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #ifndef __MINGW32__
 #include <X11/Xlib.h>
@@ -365,6 +366,9 @@ static void update_status_message(gchar * message )
 		time_t t;
 		struct tm * cur_time;
 		
+		for(i=strlen(message)-1; i>=0 && isspace(message[i]); i--)
+			message[i]=' ';
+
 		time(&t);
 		cur_time = localtime(&t);
 		tstamp_mess = g_strdup_printf("<font color=#888888><b>%d:%.2d:%.2d</b></font> %s<br>",
