@@ -28,6 +28,7 @@
  * AIM implementation
  */
 
+unsigned int module_version() {return CORE_VERSION;}
 #define DEBUG	1
 
 #include <gtk/gtk.h>
@@ -81,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/04 09:15:40 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/18 08:46:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

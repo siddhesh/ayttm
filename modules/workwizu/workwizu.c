@@ -19,6 +19,8 @@
  *
  */
 
+unsigned int module_version() {return CORE_VERSION;}
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -108,8 +110,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/17 10:23:36 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/04/18 08:46:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -26,6 +26,7 @@
  * icq.c
  * icq implementation
  */
+unsigned int module_version() {return CORE_VERSION;}
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
@@ -93,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.13 $",
-	"$Date: 2003/04/13 16:56:42 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/04/18 08:46:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

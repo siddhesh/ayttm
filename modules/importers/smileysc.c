@@ -19,6 +19,8 @@
  *
  */
 
+unsigned int module_version() {return CORE_VERSION;}
+
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
@@ -47,8 +49,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Console Smileys",
 	"Load Console smiley theme",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/03 19:51:37 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/18 08:46:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

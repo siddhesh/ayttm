@@ -27,6 +27,7 @@
  * ICQ implementation
  */
 
+unsigned int module_version() {return CORE_VERSION;}
 #ifdef __MINGW32__
 #define __IN_PLUGIN__
 #endif
@@ -95,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ Service", 
 	"ICQ Protocol Support", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/04 09:15:42 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/18 08:46:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

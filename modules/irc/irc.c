@@ -24,6 +24,7 @@
  * irc.c
  */
 
+unsigned int module_version() {return CORE_VERSION;}
 #include "intl.h"
 
 #include <string.h>
@@ -86,8 +87,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/17 11:28:37 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/04/18 08:46:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -1,3 +1,7 @@
+* Fri Apr 18 2003 00:54 GMT [colin]	0.2.3-133
+- configure.in src/plugin.c modules/*/*[cC]
+Add module versionning to avoid broken bugreports
+
 * Fri Apr 18 2003 00:54 GMT [colin]	0.2.3-132
 - src/prefs.c
 Use AYTTMRC file instead of #defines for the defaults

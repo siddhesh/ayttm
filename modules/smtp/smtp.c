@@ -23,6 +23,8 @@
  *
  */
 
+unsigned int module_version() {return CORE_VERSION;}
+
 #include "intl.h"
 #include <string.h>
 #include <errno.h>
@@ -70,8 +72,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/04 09:15:45 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/18 08:46:10 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

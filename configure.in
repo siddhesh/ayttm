@@ -1,7 +1,14 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([src/main.c])
 AM_INIT_AUTOMAKE(ayttm, 0.2.3)
-RELEASE=132
+RELEASE=133
+#This is to check modules/core binary compat
+#Bump it up when necessary only (query_callbacks change, struct change etc)
+CORE_VERSION=1
+
+CFLAGS="$CFLAGS -DCORE_VERSION=$CORE_VERSION"
+CXXFLAGS="$CXXFLAGS -DCORE_VERSION=$CORE_VERSION"
+
 AM_CONFIG_HEADER(config.h)
 
 if test "x$host_alias" = "xmingw32"; then

@@ -22,6 +22,7 @@
  *
  */
 
+unsigned int module_version() {return CORE_VERSION;}
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -55,8 +56,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Gaim Buddy List", 
 	"Import the Gaim Buddy List", 
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/03 19:51:35 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/18 08:46:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -132,6 +132,13 @@ static void SetPluginInfo(PLUGIN_INFO *pi, char *name, lt_dlhandle Module, PLUGI
 	if(service)
 		epi->service=strdup(service);
 	epi->Module=Module;
+	
+	if (status == PLUGIN_CANNOT_LOAD) {
+		char buff[512];
+		snprintf(buff, 512, _("Plugin %s has not been loaded because of an error:\n\n%s"),
+				name, status_desc);
+		do_error_dialog(buff, _("Plugin error"));
+	}
 }
 
 /* Find names which end in .la, the expected module extension */
@@ -221,7 +228,7 @@ int load_module(char *path, char *name)
 	if(!plugin_info) {
 		lt_dlclose(Module);
 		/* Only update status on a plugin that is not already loaded */
-		SetPluginInfo(NULL, full_path, NULL, PLUGIN_CANNOT_LOAD, _("Cannot resolve symbol plugin_info"), NULL, FALSE);
+		SetPluginInfo(NULL, full_path, NULL, PLUGIN_CANNOT_LOAD, _("Cannot resolve symbol \"plugin_info\"."), NULL, FALSE);
 		return(-1);
 	}
 	epi=FindPluginByName(full_path);
@@ -327,7 +334,9 @@ int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
 {
 	struct service *Service_Info=NULL;
 	struct service_callbacks *(*query_callbacks)();
+	int (*module_version)();
 	int service_id=-1;
+
 	eb_PLUGIN_INFO *epi=NULL;
 	LList *user_prefs=NULL;
 
@@ -342,14 +351,23 @@ int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
 	epi=FindLoadedPluginByService(Service_Info->name);
 	if(epi && epi->status==PLUGIN_LOADED) {
 		fprintf(stderr, _("Not loading module %s, a module for that service is already loaded!\n"), name);
-		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, _("Service provided by an already loaded plugin"), Service_Info->name, FALSE);
+		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, _("Same service is provided by an already loaded plugin."), Service_Info->name, FALSE);
 		lt_dlclose(Module);
 		return(-1);
 	}
+	
+	module_version = lt_dlsym(Module, "module_version");
+	if (!module_version || module_version() != CORE_VERSION) {
+		printf("service_version = %x\n",module_version);
+		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, "Plugin version differs from core version, which means it is probably not binary compatible.\nTry a clean install (or read README).", Service_Info->name, FALSE);
+		lt_dlclose(Module);
+		return(-1);	
+	}
+	
 	/* No more hard-coded service_id numbers */
 	query_callbacks = lt_dlsym(Module, "query_callbacks");
 	if(!query_callbacks) {
-		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, "Unable to resolve symbol query_callbacks", Service_Info->name, FALSE);
+		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, "Unable to resolve symbol \"query_callbacks\".", Service_Info->name, FALSE);
 		lt_dlclose(Module);
 		return(-1);
 	}

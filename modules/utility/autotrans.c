@@ -21,6 +21,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+unsigned int module_version() {return CORE_VERSION;}
+
 #ifdef __MINGW32__
 #define __IN_PLUGIN__
 #endif
@@ -78,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Auto-translator",
 	"Automatic translation",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/06 12:14:48 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/18 08:46:10 $",
 	&ref_count,
 	trans_init,
 	trans_finish,

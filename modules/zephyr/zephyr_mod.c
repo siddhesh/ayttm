@@ -96,6 +96,8 @@ Implementation of Zephyr functionality
 /*** Include files ***********************************************************/
 /*****************************************************************************/
 
+unsigned int module_version() {return CORE_VERSION;}
+
 #include "intl.h"
 #include <stdlib.h>
 #include <string.h>

@@ -19,6 +19,7 @@
  *
  */
 
+unsigned int module_version() {return CORE_VERSION;}
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
@@ -48,8 +49,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Yahoo Smileys",
 	"Load Yahoo smiley theme",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:32 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/18 08:46:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

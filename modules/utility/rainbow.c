@@ -22,6 +22,8 @@
  *
  */
 
+unsigned int module_version() {return CORE_VERSION;}
+
 #include "intl.h"
 
 #include <stdio.h>
@@ -78,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Rainbow",
 	"Turns all outgoing messages rainbow colours",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/06 12:14:52 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/18 08:46:11 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,

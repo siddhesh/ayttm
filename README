@@ -1,3 +1,12 @@
+* Important notes
+=================
+As of CVS version 0.2.3-107, modules are installed in $prefix/lib/ayttm
+instead of $prefix/share/ayttm/modules. It means that the old modules in
+$prefix/share/ayttm/modules shouldn't be used anymore because they are not
+binary compatible anymore. You _have_ to fix your prefs file to change 
+modules paths.
+If you get a popup saying 
+
 * Project homepage (where to bugreport and so):
 ===============================================
 	http://www.sf.net/projects/ayttm

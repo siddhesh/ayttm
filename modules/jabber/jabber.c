@@ -23,6 +23,8 @@
  * jabber.c
  */
 
+unsigned int module_version() {return CORE_VERSION;}
+
 #define DEBUG
 
 #ifdef __MINGW32__
@@ -80,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.17 $",
-	"$Date: 2003/04/10 09:29:41 $",
+	"$Revision: 1.18 $",
+	"$Date: 2003/04/18 08:46:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

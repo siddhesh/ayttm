@@ -111,6 +111,7 @@ static LList * psmileys=NULL;
 /* Function Prototypes */
 extern "C"
 {
+unsigned int module_version() {return CORE_VERSION;}
 static int plugin_init();
 static int plugin_finish();
 struct service_callbacks * query_callbacks();
@@ -164,8 +165,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.21 $",
-	"$Date: 2003/04/17 15:28:23 $",
+	"$Revision: 1.22 $",
+	"$Date: 2003/04/18 08:46:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
