@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.19 $",
-	"$Date: 2003/05/06 17:04:49 $",
+	"$Revision: 1.20 $",
+	"$Date: 2003/05/07 18:48:25 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -173,8 +173,8 @@ enum {
 static char *irc_states[] =
 {
 	"",
-	"(Away)",
-	"(Offline)"
+	"Away",
+	"Offline"
 };
 
 static int is_setting_state = 0;
@@ -1471,10 +1471,23 @@ static void irc_del_user( eb_account * account )
 
 static int irc_is_suitable (eb_local_account *local, eb_account *remote)
 {
-	irc_account *ia = (irc_account *)remote->protocol_account_data;
-	irc_local_account *ila = (irc_local_account *)local->protocol_local_account_data;
+	irc_account *ia = NULL;
+	irc_local_account *ila = NULL;
 	
-	if (!strcmp(ia->server, ila->server)) { return TRUE; }
+	if (!local || !remote)
+		return FALSE;
+	
+	if (remote->ela == local)
+		return TRUE;
+		
+	ia = (irc_account *)remote->protocol_account_data; 
+	ila = (irc_local_account *)local->protocol_local_account_data;
+	
+	if (!ia || !ila)
+		return FALSE;
+		
+	if (!strcmp(ia->server, ila->server)) 
+		return TRUE;
 	
 	return FALSE;
 }
