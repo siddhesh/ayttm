@@ -109,16 +109,14 @@ static int do_prompt_save_file = 1;
 static int do_guess_away = 0;
 static int do_show_away_time = 0;
 
-/* Exported to libyahoo2 */
-char pager_host[MAX_PREF_LEN]="scs.yahoo.com";
-char pager_port[MAX_PREF_LEN]="5050";
-char filetransfer_host[MAX_PREF_LEN]="filetransfer.msg.yahoo.com";
-char filetransfer_port[MAX_PREF_LEN]="80";
-char webcam_host[MAX_PREF_LEN]="webcam.yahoo.com";
-char webcam_description[MAX_PREF_LEN]="";
-char webcam_port[MAX_PREF_LEN]="5100";
-char local_host[MAX_PREF_LEN]="";
-int conn_type=0;
+static char pager_host[MAX_PREF_LEN]="scs.yahoo.com";
+static char pager_port[MAX_PREF_LEN]="5050";
+static char filetransfer_host[MAX_PREF_LEN]="filetransfer.msg.yahoo.com";
+static char filetransfer_port[MAX_PREF_LEN]="80";
+static char webcam_host[MAX_PREF_LEN]="webcam.yahoo.com";
+static char webcam_description[MAX_PREF_LEN]="";
+static char webcam_port[MAX_PREF_LEN]="5100";
+static int conn_type=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info =
@@ -126,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.62 $",
-	"$Date: 2003/07/30 15:54:54 $",
+	"$Revision: 1.63 $",
+	"$Date: 2003/09/20 08:55:15 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1960,13 +1958,22 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
 	ela->connecting = 1;
 	ref_count++;
-	ylad->id = yahoo_init(ela->handle, ylad->password);
+	ylad->id = yahoo_init(ela->handle, ylad->password,
+			"pager_host", pager_host,
+			"pager_port", atoi(pager_port),
+			"filetransfer_host", filetransfer_host,
+			"filetransfer_port", atoi(filetransfer_port),
+			"webcam_host", webcam_host,
+			"webcam_port", atoi(webcam_port),
+			"webcam_description", webcam_description,
+			"local_host", get_local_addresses(),
+			"conn_type", conn_type,
+			NULL);
 
 	ylad->connect_progress_tag = ay_activity_bar_add(buff, ay_yahoo_cancel_connect, ela);
 
 	LOG(("eb_yahoo_login_with_state"));
 	yahoo_set_log_level(do_yahoo_debug?YAHOO_LOG_DEBUG:YAHOO_LOG_NONE);
-	strncpy(local_host, get_local_addresses(), sizeof(local_host));
 
 	ela->connected = 0;
 	ylad->status = YAHOO_STATUS_OFFLINE;

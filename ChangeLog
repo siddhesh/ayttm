@@ -1,3 +1,9 @@
+* Sat Sep 20 2003 08:50 GMT [philip]	0.4.1-2
+- Makefile.am
+include ayttm.spec in DIST
+- modules/yahoo2/yahoo2.c modules/yahoo2/libyahoo2
+No more extern vars.  merge in from libyahoo2
+
 * Wed Sep 17 2003 16:30 GMT [colin]	0.4.1
 Release
 
