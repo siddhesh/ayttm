@@ -89,10 +89,10 @@ class ay_prefs_window
 			PANEL_CHAT_GENERAL,
 			PANEL_CHAT_TABS,
 			PANEL_ADVANCED,
-			PANEL_PROXY,
 #ifdef HAVE_ICONV
 			PANEL_ENCODING,
 #endif
+			PANEL_PROXY,
 			PANEL_SERVICES,
 			PANEL_UTILITIES,
 			
@@ -101,6 +101,7 @@ class ay_prefs_window
 
 	private:	// Gtk callbacks
 		static void		s_tree_item_selected( GtkWidget *widget, gpointer data );
+		static void		s_destroy_callback( GtkWidget* widget, gpointer data );
 		static void		s_ok_callback( GtkWidget *widget, gpointer data );
 		static void		s_cancel_callback( GtkWidget *widget, gpointer data );
 	
@@ -468,10 +469,10 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 	_( "Chat" ),
 	_( "Chat:Tabs" ),
 	_( "Advanced" ),
-	_( "Advanced:Proxy" ),
 #ifdef HAVE_ICONV
 	_( "Advanced:Encoding" ),
 #endif
+	_( "Advanced:Proxy" ),
 	_( "Services" ),
 	_( "Utilities" )
 };
@@ -492,6 +493,8 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtk_window_set_title( GTK_WINDOW(m_prefs_window_widget), _("Ayttm Preferences") );
 	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
+	
+	gtk_signal_connect( GTK_OBJECT(m_prefs_window_widget), "destroy", GTK_SIGNAL_FUNC(s_destroy_callback), this );
 	
 	GtkWidget	*main_hbox = gtk_hbox_new( FALSE, 5 );
 
@@ -596,6 +599,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 
 ay_prefs_window::~ay_prefs_window( void )
 {
+printf( "ay_prefs_window::~ay_prefs_window\n" );
 	GList	*iter = m_panels;
 	
 	while ( iter != NULL )
@@ -606,8 +610,6 @@ ay_prefs_window::~ay_prefs_window( void )
 		iter = g_list_next( iter );
 	}
 	g_list_free( m_panels );
-
-	gtk_widget_destroy( m_prefs_window_widget );
 		
 	s_only_prefs_window = NULL;
 }
@@ -648,6 +650,7 @@ void	ay_prefs_window::AddToTree( const char *inName, ay_prefs_window_panel *inPa
 	
 	char		*child_name = strchr( name, ':' );
 	GtkWidget	*section_tree = GTK_WIDGET(m_tree);
+	int			position = -1;	// inserting at position -1 puts it at the end
 	
 	if ( child_name != NULL )
 	{
@@ -676,7 +679,7 @@ void	ay_prefs_window::AddToTree( const char *inName, ay_prefs_window_panel *inPa
 		// not found, so add it
 		if ( child == NULL )
 		{
-			the_tree_item = gtk_tree_item_new_with_label( name );
+			the_tree_item = gtk_tree_item_new_with_label( child_name );
 			gtk_widget_show( the_tree_item );
 			
 			gtk_tree_append( GTK_TREE(section_tree), the_tree_item );
@@ -692,6 +695,25 @@ void	ay_prefs_window::AddToTree( const char *inName, ay_prefs_window_panel *inPa
 			gtk_tree_item_set_subtree( GTK_TREE_ITEM(the_tree_item), section_tree );
 			gtk_tree_set_view_lines( GTK_TREE(section_tree), TRUE );
 		}
+		
+		// find the position to put it in alphabetically
+		child = GTK_TREE(section_tree)->children;
+		position = 0;
+		
+		while ( child != NULL )
+		{
+			GtkWidget	*the_tree_item = GTK_WIDGET(child->data);
+			GtkLabel	*label = GTK_LABEL(GTK_BIN(the_tree_item)->child);
+			gchar		*text = NULL;
+
+			gtk_label_get( label, &text );
+
+			if ( strncmp( text, child_name, name_len ) > 0 )
+				break;
+			
+			child = child->next;
+			position++;	
+		}
 	}
 	else
 	{
@@ -701,7 +723,7 @@ void	ay_prefs_window::AddToTree( const char *inName, ay_prefs_window_panel *inPa
 	GtkWidget	*item = gtk_tree_item_new_with_label( child_name );
 	gtk_widget_show( item );
 
-	gtk_tree_append( GTK_TREE(section_tree), item );
+	gtk_tree_insert( GTK_TREE(section_tree), item, position );
 
 	gtk_signal_connect( GTK_OBJECT(item), "select", GTK_SIGNAL_FUNC(s_tree_item_selected), inPanel );
 }
@@ -722,12 +744,18 @@ void	ay_prefs_window::OK( void )
 	}
 
 	ayttm_prefs_apply( &m_prefs );
+	
+	gtk_widget_destroy( m_prefs_window_widget );
+	m_prefs_window_widget = NULL;
 }
 
 // Cancel
 void	ay_prefs_window::Cancel( void )
 {
 	ayttm_prefs_cancel( &m_prefs );
+	
+	gtk_widget_destroy( m_prefs_window_widget );
+	m_prefs_window_widget = NULL;
 }
 
 ////
@@ -741,6 +769,15 @@ void	ay_prefs_window::s_tree_item_selected( GtkWidget *widget, gpointer data )
 	the_panel->Show();
 }
 
+// s_destroy_callback
+void	ay_prefs_window::s_destroy_callback( GtkWidget* widget, gpointer data )
+{
+	ay_prefs_window	*the_window = reinterpret_cast<ay_prefs_window *>( data );
+	assert( the_window != NULL );
+
+	delete the_window;
+}
+
 // s_ok_callback
 void	ay_prefs_window::s_ok_callback( GtkWidget *widget, gpointer data )
 {
@@ -748,7 +785,6 @@ void	ay_prefs_window::s_ok_callback( GtkWidget *widget, gpointer data )
 	assert( the_window != NULL );
 	
 	the_window->OK();
-	delete the_window;
 }
 
 // s_cancel_callback
@@ -758,7 +794,6 @@ void	ay_prefs_window::s_cancel_callback( GtkWidget *widget, gpointer data )
 	assert( the_window != NULL );
 	
 	the_window->Cancel();
-	delete the_window;
 }
 
 ////////////////

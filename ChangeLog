@@ -1,4 +1,9 @@
-* Sat May  3 2003 18:20 GMT [andy]	0.3.0-123
+* Sun May  4 2003 16:35 GMT [andy]	0.3.0-124
+- src/gtk/prefs_window.C
+Keep services and utilities sorted
+Fix memory leak when user closes window without using OK or Cancel
+
+* Sat May  3 2003 18:20 GMT [colin]	0.3.0-123
 - modules/msn2/msn.C
 Add mail notify script based on a patch by Ivor Cave
 (ivor@users.sf.net)
