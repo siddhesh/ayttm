@@ -1626,7 +1626,7 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 	const unsigned char *magic_ptr;
 
 	unsigned int  magic[64];
-	unsigned int  magic_work;
+	unsigned int  magic_work=0;
 	unsigned int  value = 0;
 
 	int x;

@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.67 $",
-	"$Date: 2003/10/08 06:09:00 $",
+	"$Revision: 1.68 $",
+	"$Date: 2003/10/08 06:13:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1505,7 +1505,7 @@ static void ext_yahoo_chat_cat_xml(int id, char *xml)
 {
 }
 
-static void ext_yahoo_chat_join(int id, char *room, char * topic, YList *members)
+static void ext_yahoo_chat_join(int id, char *room, char * topic, YList *members, int fd)
 {
 }
 
@@ -1552,7 +1552,7 @@ static void _image_window_closed(int tag, void *data)
 }
 
 static void ext_yahoo_got_webcam_image(int id, const char *who,
-		const unsigned char *image, unsigned int image_size, unsigned int real_size,
+		unsigned char *image, unsigned int image_size, unsigned int real_size,
 		unsigned int timestamp)
 {
 	struct webcam_feed *wf = NULL;
@@ -2195,7 +2195,6 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 {
 	eb_local_account *ela;
 	eb_yahoo_local_account_data *ylad;
-	char	*str = NULL;
 
 	if(!pairs) {
 		WARNING(("eb_yahoo_read_local_account_config: pairs == NULL"));
