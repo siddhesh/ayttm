@@ -1,4 +1,4 @@
-THEME_NAME="Console\ Smileys"
+THEME_NAME="Console Smileys"
 smileydir = ${pkgdatadir}/smileys/${THEME_NAME}
 smiley_DATA = aysmile.rc \
 	blank.xpm blush.xpm confused.xpm cooldude.xpm \

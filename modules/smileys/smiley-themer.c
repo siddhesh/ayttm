@@ -30,6 +30,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <ctype.h>
 #ifndef __MINGW32__
@@ -56,6 +58,7 @@ static int is_setting_state=1;
 static int ref_count=0;
 static char smiley_directory[MAX_PREF_LEN]=AYTTM_SMILEY_DIR;
 static char last_selected[MAX_PREF_LEN]="";
+static int do_smiley_debug = 0;
 
 static char rcfilename[]="aysmile.rc";
 
@@ -69,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.9 $",
-	"$Date: 2003/05/10 19:16:45 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/05/31 19:40:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -108,6 +111,13 @@ static int plugin_init()
 	il->widget.entry.label= _("Last Selected:");
 	il->type = EB_INPUT_ENTRY;
 
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &do_smiley_debug;
+	il->widget.checkbox.name = "do_smiley_debug";
+	il->widget.checkbox.label= _("Enable debugging:");
+	il->type = EB_INPUT_CHECKBOX;
+
 	load_themes();
 
 	return 0;
@@ -136,6 +146,24 @@ static int reload_prefs()
 /*******************************************************************************
  *                             End Module Code
  ******************************************************************************/
+
+static int log(char *fmt,...)
+{
+	if(do_smiley_debug) {
+		va_list ap;
+
+		va_start(ap, fmt);
+
+		vfprintf(stderr, fmt, ap);
+		fflush(stderr);
+		va_end(ap);
+	}
+	return 0;
+}
+
+#define LOG(x) if(do_smiley_debug) { log("%s:%d: ", __FILE__, __LINE__); \
+	log x; \
+	log("\n"); }
 
 struct smiley_theme {
 	char *name;
@@ -276,8 +304,10 @@ static struct smiley_theme * load_theme(const char *theme_name)
 	snprintf(buff, sizeof(buff), "%s/%s/%s",
 			smiley_directory, theme_name, rcfilename);
 
-	if(!(themerc = fopen(buff, "rt")))
+	if(!(themerc = fopen(buff, "rt"))) {
+		LOG(("Could not find/open %s error %d: %s", rcfilename, errno, strerror(errno)));
 		return NULL;
+	}
 
 	theme = calloc(1, sizeof(struct smiley_theme));
 
@@ -306,6 +336,7 @@ static struct smiley_theme * load_theme(const char *theme_name)
 					smiley_directory, theme_name, value);
 
 			if(XpmReadFileToData(filepath, &smiley_data) != XpmSuccess) {
+				LOG(("Could not read xpm file %s", filepath));
 				continue;
 			}
 
@@ -347,8 +378,10 @@ static void load_themes()
 	struct smiley_theme *theme;
 	struct dirent *entry;
 	DIR *theme_dir = opendir(smiley_directory);
-	if(!theme_dir)
+	if(!theme_dir) {
+		LOG(("Unable to open smiley directory %s", smiley_directory));
 		return;
+	}
 
 	theme = calloc(1, sizeof(struct smiley_theme));
 	theme->name = _("Default");
@@ -366,8 +399,10 @@ static void load_themes()
 		if(entry->d_name[0]=='.')
 			continue;
 
-		if(!(theme = load_theme(entry->d_name)))
+		if(!(theme = load_theme(entry->d_name))) {
+			LOG(("Could not load theme %s", entry->d_name));
 			continue;
+		}
 
 		theme->menu_tag=eb_add_menu_item(theme->name, EB_SMILEY_MENU, enable_smileys, ebmSMILEYDATA, theme);
 		if(!theme->menu_tag) {
