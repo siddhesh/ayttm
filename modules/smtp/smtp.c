@@ -23,8 +23,6 @@
  *
  */
 
-unsigned int module_version() {return CORE_VERSION;}
-
 #include "intl.h"
 #include <string.h>
 #include <errno.h>
@@ -73,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.10 $",
-	"$Date: 2003/04/29 08:32:02 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/04/30 06:22:35 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -89,6 +87,8 @@ struct service SERVICE_INFO = {
 	NULL
 };
 /* End Module Exports */
+
+unsigned int module_version() {return CORE_VERSION;}
 
 static int plugin_init()
 {
