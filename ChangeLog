@@ -1,3 +1,8 @@
+* Mon Dec 22 2003 20:35 GMT [philip]	0.4.5-22
+- modules/image_filter/img2jpc.c
+don't store output format in a static, because it changes. this should
+take care of all those black screens on windows.
+
 * Mon Dec 22 2003 20:09 GMT [philip]	0.4.5-21
 - modules/image_filter/ayttm-streamer-wrapper.sh
 fix for Subash's webcamrc file

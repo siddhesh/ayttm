@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.87 $",
-	"$Date: 2003/12/21 18:29:43 $",
+	"$Revision: 1.88 $",
+	"$Date: 2003/12/22 20:40:13 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1931,8 +1931,10 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 	if(ylad->viewers && image) {
 		if(image_2_jpc)
 			image2000 = image_2_jpc(image, &length);
-		else
+		else {
+			WARNING(("jpc encoder not available, using jpeg"));
 			image2000 = ay_memdup(image, length);
+		}
 	} else {
 		length=0;
 	}

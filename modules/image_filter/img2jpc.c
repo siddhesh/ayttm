@@ -31,8 +31,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.2 $",
-	"$Date: 2003/12/22 09:45:00 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/12/22 20:40:12 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -73,13 +73,12 @@ static int plugin_finish()
  *                             End Module Code
  ******************************************************************************/
 
-static unsigned char * img_2_img(const unsigned char *in_img, long *size, const char *soutfmt)
+static unsigned char * img_2_img(const unsigned char *in_img, long *size, int outfmt, const char *soutfmt)
 {
 	char * out_img = NULL;
 	jas_stream_t *in, *out;
 	jas_image_t *image;
 	int infmt;
-	static int outfmt;
 
 	/*
 	static int ctr;
@@ -96,8 +95,6 @@ static unsigned char * img_2_img(const unsigned char *in_img, long *size, const 
 		eb_debug(DBG_MOD, "Could not init jasper\n");
 		return ay_memdup(in_img, *size);
 	}
-	if(!outfmt)
-		outfmt = jas_image_strtofmt(soutfmt);
 
 	if(!(in = jas_stream_memopen((unsigned char *)in_img, *size))) {
 		eb_debug(DBG_MOD, "Could not open jasper input stream\n");
@@ -143,10 +140,16 @@ static unsigned char * img_2_img(const unsigned char *in_img, long *size, const 
 
 static unsigned char * img_2_jpg(const unsigned char *in_img, long *size)
 {
-	return img_2_img(in_img, size, "jpg");
+	static int outfmt;
+	if(!outfmt)
+		outfmt = jas_image_strtofmt("jpg");
+	return img_2_img(in_img, size, outfmt, "jpg");
 }
 
 static unsigned char * img_2_jpc(const unsigned char *in_img, long *size)
 {
-	return img_2_img(in_img, size, "jpc");
+	static int outfmt;
+	if(!outfmt)
+		outfmt = jas_image_strtofmt("jpc");
+	return img_2_img(in_img, size, outfmt, "jpc");
 }
