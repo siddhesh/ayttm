@@ -111,10 +111,6 @@ void eb_new_user();
 extern "C" {
 #endif
 
-int progress_window_new( char * filename, unsigned long size );
-void update_progress(int tag, unsigned long progress);
-void progress_window_close(int tag);
-
 /* defined in util.c */
 gint gtk_notebook_get_number_pages(GtkNotebook *notebook);
 
