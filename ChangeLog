@@ -1,3 +1,8 @@
+* Wed Jun  6 2003 10:25 GMT [edward]	0.3.1-22
+- src/Makefile.am
+  src/flash_window_title.c
+Makde the flashing compile.
+
 * Wed Jun  4 2003 10:25 GMT [colin]	0.3.1-21
 - modules/aycryption/aycryption.c
 Better error management
