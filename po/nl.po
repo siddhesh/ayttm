@@ -475,11 +475,11 @@ msgid ""
 "icq user %s would like to\n"
 "send you the file\n"
 "%s\n"
-"do you want to accept?\n"
+"do you want to accept?"
 msgstr ""
 "ICQ-gebruiker %s wilt u het bestand\n"
 "%s\n"
-"toezenden. Accepteert u dit?\n"
+"toezenden. Accepteert u dit?"
 
 #: modules/icq-toc/icq-toc.c:399
 msgid "Incoming icq File Request"
