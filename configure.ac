@@ -5,11 +5,11 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=124
+RELEASE=125
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
-CORE_VERSION=9
+CORE_VERSION=11
 
 AM_CONFIG_HEADER(config.h)
 
@@ -258,8 +258,10 @@ AC_ARG_ENABLE(workwizu, AC_HELP_STRING([--enable-workwizu],
 		[include workwizu service]))
 AC_ARG_ENABLE(broken_icq, AC_HELP_STRING([--enable-broken-icq],
 		[include broken icq service instead of working one]))
-AC_ARG_ENABLE(yahoo, AC_HELP_STRING([--enable-smtp],
+AC_ARG_ENABLE(smtp, AC_HELP_STRING([--enable-smtp],
 		[include smtp service]))
+AC_ARG_ENABLE(aycryption, AC_HELP_STRING([--enable-aycryption],
+		[include encryption utility]))
 AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
 		[exclude aim-toc service]))
 AC_ARG_ENABLE(icq_toc, AC_HELP_STRING([--disable-icq-toc],
@@ -298,7 +300,7 @@ if test "$enable_workwizu" = yes; then
 	 exit
 	fi;
 fi
-if test "$enable_libmsn2_debug" = yes; then
+if test "$enable_libmsn2_debug" == yes; then
 	DEBUG_LIBMSN="-DDEBUG=1"
 fi
 if test "$enable_yahoo" != no; then
@@ -321,6 +323,19 @@ if test "$enable_aim_toc" != no; then
 fi
 if test "$enable_icq_toc" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq-toc"
+fi
+if test "$enable_aycryption" == yes; then
+	GPGME_CFLAGS=`gpgme-config --cflags`
+	if [ $? != 0 ]; then
+	 enable_aycryption=no;
+	 echo "you have to install gpgme 0.3 to use encryption"
+	else
+	 echo "aycryption enabled"
+	 GPGME_LDFLAGS=`gpgme-config --libs`
+	 EB_CFLAGS="$EB_CFLAGS $GPGME_CFLAGS"
+	 EB_LIBS="$EB_LIBS $GPGME_LDFLAGS"
+	 OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aycryption"
+	fi;
 fi
 
 ### End Optional Service  options ######################################
@@ -407,6 +422,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  modules/icq/Makefile
                  modules/icq/libicq/Makefile
                  modules/importers/Makefile
+		 modules/aycryption/Makefile
                  modules/irc/Makefile
 		 modules/smtp/Makefile
                  modules/jabber/Makefile

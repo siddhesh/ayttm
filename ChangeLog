@@ -1,3 +1,10 @@
+* Mon May  5 2003 00:32 GMT [colin]	0.3.0-125
+- configure.ac modules/Makefile.am
+- src/contact.h src/account.c src/contact_parser.y
+- modules/aycription/aycription.c 	** ADDED **
+- modules/aycription/select-keys.[ch]	** ADDED **
+Add aycription plugin (needs gpgme)
+
 * Sun May  4 2003 16:35 GMT [andy]	0.3.0-124
 - src/gtk/prefs_window.C
 Keep services and utilities sorted

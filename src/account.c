@@ -114,6 +114,11 @@ void write_contact_list()
 					strbuf);
 			g_free (strbuf);
 			
+			fprintf(fp, "\t\tGPG_KEY=\"%s\"\n",
+					(c->gpg_key!=NULL)?c->gpg_key:"");
+			fprintf(fp, "\t\tGPG_CRYPT=\"%d\"\n",c->gpg_do_encryption);
+			fprintf(fp, "\t\tGPG_SIGN=\"%d\"\n",c->gpg_do_signature);
+			
 			for(l3 = ((struct contact*)l2->data)->accounts; l3; l3=l3->next) {
 				eb_account * account = (eb_account*)l3->data;
 				fprintf( fp, "\t\t<ACCOUNT %s>\n"

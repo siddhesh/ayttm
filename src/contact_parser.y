@@ -119,6 +119,21 @@ contact:
 			cur_contact->language[0] = '\0';
 		}
 
+		c = value_pair_get_value( $2, "GPG_KEY" );
+		if(c) {
+			strncpy( cur_contact->gpg_key ,c, sizeof(cur_contact->gpg_key) );
+			free(c);
+		} else {
+			cur_contact->gpg_key[0] = '\0';
+		}
+
+		c = value_pair_get_value( $2, "GPG_CRYPT" );
+		cur_contact->gpg_do_encryption = (c && !strcmp(c,"1"));
+		free(c);
+		c = value_pair_get_value( $2, "GPG_SIGN" );
+		cur_contact->gpg_do_signature = (c && !strcmp(c,"1"));
+		free(c);
+		
 		c = value_pair_get_value( $2, "DEFAULT_PROTOCOL" );
 		cur_contact->default_filetransb = cur_contact->default_chatb = get_service_id(c);
 		free(c);

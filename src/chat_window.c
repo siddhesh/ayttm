@@ -431,7 +431,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	chat_window * data = (chat_window*)d;
 	gchar buff[BUF_SIZE];
 	gchar buff2[BUF_SIZE];
-	gchar * text, *o_text;
+	gchar * text, *o_text = NULL;
 	gchar * link_message;
 	gchar * temp_message;
 	struct tm * cur_time;
@@ -508,7 +508,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	for(filter_walk = outgoing_message_filters; filter_walk; filter_walk=filter_walk->next) {
 		char * (*ifilter)(const eb_local_account *, const eb_account *, const struct contact *, const char *);
 
-		eb_debug(DBG_CORE, "Running an outgoing filter\n");
+		eb_debug(DBG_CORE, "Running an outgoing filter:\n");
 
 		ifilter=filter_walk->data;
 
@@ -1244,9 +1244,9 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 
 	for(filter_walk=incoming_message_filters; filter_walk; filter_walk=filter_walk->next) {
 		char * (*ofilter)(const eb_local_account *, const eb_account *, const struct contact *, const char *);
-		char *otext;
+		char *otext = NULL;
 
-		eb_debug(DBG_CORE, "Running an incoming filter\n");
+		eb_debug(DBG_CORE, "Running an incoming filter:\n");
 		ofilter=filter_walk->data;
 
 		otext=ofilter(account, remote, remote_contact, message);

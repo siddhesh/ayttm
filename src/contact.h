@@ -38,6 +38,9 @@
 struct contact {
 	char nick[255];
 	char language[3];
+	char gpg_key[48];
+	int gpg_do_encryption;
+	int gpg_do_signature;
 	trigger_struct trigger;
 	LList *accounts;
 	int expanded;
