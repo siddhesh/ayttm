@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 11:30 GMT [colin]	0.3.0-37
+- modules/yahoo.c
+use find_account_with_ela(char *, eb_local_account *)
+
 * Tue Apr 29 2003 11:30 GMT [colin]	0.3.0-36
 - src/util.[ch]
 add find_account_with_ela(char *, eb_local_account *)

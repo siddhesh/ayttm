@@ -122,8 +122,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.36 $",
-	"$Date: 2003/04/29 08:32:03 $",
+	"$Revision: 1.37 $",
+	"$Date: 2003/04/29 11:44:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -608,8 +608,9 @@ static void ext_yahoo_status_changed(int id, char *who, int stat, char *msg, int
 {
 	eb_account *ea;
 	eb_yahoo_account_data *yad;
-
-	ea = find_account_by_handle(who, SERVICE_INFO.protocol_id);
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	
+	ea = find_account_with_ela(who, ela);
 	if(!ea) {
 		WARNING(("Server set status for unknown: %s\n", who));
 		return;
@@ -687,7 +688,7 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 			continue;
 		*/
 
-		ea = find_account_by_handle(bud->id, SERVICE_INFO.protocol_id);
+		ea = find_account_with_ela(bud->id, ela);
 
 		contact_name = (bud->real_name?bud->real_name:bud->id);
 
@@ -740,7 +741,7 @@ static void ext_yahoo_got_ignore(int id, YList * ign)
 			continue;
 		*/
 
-		ea = find_account_by_handle(bud->id, SERVICE_INFO.protocol_id);
+		ea = find_account_with_ela(bud->id, ela);
 
 		if(ea) {
 			if(!strcasecmp(ea->account_contact->group->name, bud->group))
@@ -795,8 +796,8 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 		if(utf8)
 			umsg = y_utf8_to_str(msg);
 
-		sender = find_account_by_handle(who, SERVICE_INFO.protocol_id);
 		receiver = yahoo_find_local_account_by_id(id);
+		sender = find_account_with_ela(who, receiver);
 		if (sender == NULL) {
 			sender = eb_yahoo_new_account(receiver, who);
 			add_dummy_contact(who, sender);
@@ -1062,7 +1063,7 @@ static void ext_yahoo_conf_userjoin(int id, char *who, char *room)
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data * ylad = ela->protocol_local_account_data;
 	eb_yahoo_chat_room_data *ycrd;
-	eb_account *ea = find_account_by_handle(who, SERVICE_INFO.protocol_id);
+	eb_account *ea = find_account_with_ela(who, ela);
 /*	char buff[1024];*/
 	YList * l;
 
@@ -1142,8 +1143,7 @@ static void eb_yahoo_accept_conference(gpointer data, int result)
 
 	if(result) {
 		eb_chat_room *chat_room = g_new0(eb_chat_room, 1);
-		eb_account *ea = find_account_by_handle(ycrd->host, 
-				SERVICE_INFO.protocol_id);
+		eb_account *ea = find_account_with_ela(ycrd->host, ela);
 
 		strcpy(chat_room->id, ycrd->room);
 		strcpy(chat_room->room_name, ycrd->room);
@@ -1197,8 +1197,7 @@ static void eb_yahoo_accept_invite(eb_local_account *ela, void * data)
 	eb_yahoo_chat_room_data *ycrd = data;
 	
 	eb_chat_room *chat_room = g_new0(eb_chat_room, 1);
-	eb_account *ea;/* = find_account_by_handle(ycrd->host, 
-			SERVICE_INFO.protocol_id);*/
+	eb_account *ea;
 	YList * l;
 	eb_yahoo_local_account_data * ylad = ela->protocol_local_account_data;
 	int done_myself=0;
@@ -1223,8 +1222,7 @@ static void eb_yahoo_accept_invite(eb_local_account *ela, void * data)
 			eb_chat_room_buddy_arrive(chat_room, ela->alias, ylad->act_id);
 			done_myself=1;
 		} else {
-			ea = find_account_by_handle(handle, 
-					SERVICE_INFO.protocol_id);
+			ea = find_account_with_ela(handle, ela);
 			eb_chat_room_buddy_arrive(chat_room, 
 					(ea?ea->account_contact->nick:handle), 
 					handle);
@@ -1437,7 +1435,7 @@ static void eb_yahoo_authorize_callback(gpointer data, int result)
 	eb_local_account *ela = yahoo_find_local_account_by_id(ay->id);
 
 	if(result) {
-		if(!find_account_by_handle(ay->who, SERVICE_INFO.protocol_id)) {
+		if(!find_account_with_ela(ay->who, ela)) {
 			eb_account *ea = eb_yahoo_new_account(ela, ay->who);
 			add_unknown_account_window_new(ea);
 		}
@@ -1525,7 +1523,9 @@ static int eb_yahoo_send_typing(eb_local_account *from, eb_account *to)
 
 static void ext_yahoo_typing_notify(int id, char *who, int stat)
 {
-	eb_account *ea = find_account_by_handle(who, SERVICE_INFO.protocol_id);
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	
+	eb_account *ea = find_account_with_ela(who, ela);
 
 	if(ea) {
 		if(stat && iGetLocalPref("do_typing_notify"))
@@ -1764,7 +1764,7 @@ static void eb_yahoo_logout(eb_local_account * ela)
 		
 		for (; l; l=l->next) {
 			struct yahoo_buddy *bud = l->data;
-			eb_account *ea = find_account_by_handle(bud->id, SERVICE_INFO.protocol_id);
+			eb_account *ea = find_account_with_ela(bud->id, ela);
 			eb_yahoo_account_data *yad;
 			if(!ea)
 				continue;
