@@ -575,7 +575,8 @@ int JABBER_IsChatRoom(char *from)
 		ptr=buffer;
 	eb_debug(DBG_JBR, "Looking for %s\n", ptr);
 	agent = j_find_agent_by_alias(ptr);
-	if(agent && !strcmp(agent->type, "groupchat")) {
+	if(agent && (!strcmp(agent->type, "groupchat") 
+			|| !strncmp(agent->alias, "conference.",strlen("conference.")))) {
 		eb_debug(DBG_JBR, "Returning True\n");
 		return(1);
 	}

@@ -1,3 +1,11 @@
+* Sat Oct 18 2003 10:00 GMT [colin]	0.4.3-1
+Release
+
+* Sat Oct 18 2003 10:00 GMT [colin]	0.4.3-pre19
+- modules/jabber/libEBjabber.c
+Workaround for bug "[ 783598 ] Jabber chat doesn't update users list"
+by Wes Hardaker <hardaker@users.sf.net>
+
 * Thu Oct 16 2003 04:24 GMT [philip]	0.4.3-pre18
 - src/util.c src/crash.c src/status.c
 more correct version number comparison - still doesn't work
