@@ -1,3 +1,8 @@
+* Sat Jul 10 2004 22:38 GMT [colin]	0.4.6-20
+- Added NL translation by Sander Devrieze <s.devrieze@pandora.be>
+  po/nl.po
+  configure.ac
+
 * Fri Jul 09 2004 18:52 GMT [edward] 0.4.6-19
 - code for AIX port but #949977. Added READMEs for AIX and LINUX build issues.
   This bug is closed, yet the final port is not complete as it requires libXShm

@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.4.6], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=19
+RELEASE=20
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -86,7 +86,7 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([atexit bzero dcgettext dup2 getcwd gethostbyname gethostname gettimeofday getwd hstrerror inet_ntoa isascii memchr memmove mempcpy memset mkdir modf munmap nl_langinfo pow select setlocale socket stpcpy strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname snprintf])
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify getopt_long getopt])
 
-ALL_LINGUAS="fr en_GB pt_BR de es"
+ALL_LINGUAS="fr en_GB pt_BR de es nl"
 AM_GNU_GETTEXT([external])
 
 ###############################################################################
