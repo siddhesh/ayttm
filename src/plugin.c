@@ -44,10 +44,22 @@ typedef long __off32_t;
 
 
 
-char *PLUGIN_TYPE_TXT[]={"SERVICE", "UTILITY", "SOUND", "LOG", "GUI", "UNKNOWN"};
-char *PLUGIN_STATUS_TXT[]={"Not Loaded", 
-			   "Loaded", 
-			   "Cannot Load"};
+const char *PLUGIN_TYPE_TXT[] =
+{
+	"SERVICE",
+	"FILTER",
+	"IMPORTER",
+	"SMILEY",
+	"UTILITY",
+	"UNKNOWN"
+};
+
+const char *PLUGIN_STATUS_TXT[] =
+{
+	"Not Loaded", 
+	"Loaded", 
+	"Cannot Load"
+};
 
 static PLUGIN_INFO Plugin_Cannot_Load = {PLUGIN_UNKNOWN, 
 				  "Unknown",
@@ -56,10 +68,7 @@ static PLUGIN_INFO Plugin_Cannot_Load = {PLUGIN_UNKNOWN,
 				  "Unknown", NULL, NULL, NULL, NULL};
 
 static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
-static int	load_utility_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
-static int	load_log_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
-static int	load_sound_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
-static int	load_gui_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
+static int	load_plugin_default( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
 
 
 static int compare_plugin_loaded_service(gconstpointer a, gconstpointer b)
@@ -116,8 +125,8 @@ static void	SetPluginInfo( PLUGIN_INFO *pi, const char *name, lt_dlhandle Module
 		if(epi->service)
 			free(epi->service);
 		free(epi->name);
-		free(epi->pi.brief_desc);
-		free(epi->pi.full_desc);
+		free(epi->pi.module_name);
+		free(epi->pi.description);
 		free(epi->pi.version);
 		free(epi->pi.date);
 	}
@@ -128,8 +137,8 @@ static void	SetPluginInfo( PLUGIN_INFO *pi, const char *name, lt_dlhandle Module
 	if(!pi)
 		pi=&Plugin_Cannot_Load;
 	epi->pi.type=pi->type;
-	epi->pi.brief_desc=strdup(pi->brief_desc);
-	epi->pi.full_desc=strdup(pi->full_desc);
+	epi->pi.module_name=strdup(pi->module_name);
+	epi->pi.description=strdup(pi->description);
 	epi->pi.version=strdup(pi->version);
 	epi->pi.date=strdup(pi->date);
 	epi->pi.init=pi->init;
@@ -209,20 +218,11 @@ int load_module_full_path( const char *inFullPath )
 			load_service_plugin( Module, plugin_info, inFullPath );
 			break;
 			
+		case PLUGIN_FILTER:
+		case PLUGIN_IMPORTER:
+		case PLUGIN_SMILEY:
 		case PLUGIN_UTILITY:
-			load_utility_plugin( Module, plugin_info, inFullPath );
-			break;
-			
-		case PLUGIN_SOUND:
-			load_sound_plugin( Module, plugin_info, inFullPath );
-			break;
-			
-		case PLUGIN_LOG:
-			load_log_plugin( Module, plugin_info, inFullPath );
-			break;
-			
-		case PLUGIN_GUI:
-			load_gui_plugin( Module, plugin_info, inFullPath );
+			load_plugin_default( Module, plugin_info, inFullPath );
 			break;
 			
 		default:
@@ -343,13 +343,25 @@ static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 	}
 	
 	module_version = lt_dlsym(Module, "module_version");
-	if (!module_version || module_version() != CORE_VERSION) {
-		char error[1024];
-		snprintf(error, 1024, _("Plugin version (%d) differs from core version (%d), "
+	if (!module_version || module_version() != CORE_VERSION)
+	{
+		const int	error_len = 1024;
+		char 		error[error_len];
+		
+		if ( !module_version )
+		{
+			strncpy( error, _("This plugin is not binary compatible.\n"
+					"Try a clean install (or read README)."), error_len );
+		}
+		else
+		{
+			snprintf( error, error_len, _("Plugin version (%d) differs from core version (%d), "
 					"which means it is probably not binary compatible.\n"
 					"Try a clean install (or read README)."), 
-					module_version?module_version():"undefined",
-					CORE_VERSION);
+					module_version(),
+					CORE_VERSION );
+		}
+					
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, error, Service_Info->name, FALSE);
 		lt_dlclose(Module);
 		return(-1);	
@@ -363,7 +375,7 @@ static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 		return(-1);
 	}
 	if(info->init) {
-		eb_debug(DBG_CORE, "Executing init for %s\n", info->brief_desc);
+		eb_debug(DBG_CORE, "Executing init for %s\n", info->module_name);
 		info->init();
 	}
 	if(info->prefs) {
@@ -382,46 +394,45 @@ static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 	return(0);
 }
 
-static int	load_utility_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
+static int	load_plugin_default( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
 {
-	char buf[1024];
-	LList *user_prefs=NULL;
+	const int	buf_len = 1024;
+	char		buf[buf_len];
+	LList		*user_prefs = NULL;
 
-	eb_debug(DBG_CORE, ">\n");
-	if(!info->init) {
-		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, _("No init function defined"), NULL, FALSE);
-		lt_dlclose(Module);
-		snprintf(buf, sizeof(buf), _("Utility module %s doesn't define an init function; skipping it."), name);
+	
+	eb_debug( DBG_CORE, ">\n" );
+	
+	if ( !info->init )
+	{
+		SetPluginInfo( info, name, NULL, PLUGIN_CANNOT_LOAD, _("No init function defined"), NULL, FALSE );
+		
+		lt_dlclose( Module );
+		
+		snprintf( buf, buf_len, _("Utility module %s doesn't define an init function; skipping it."), name );
 		ay_do_warning( _("Plugin Warning"), buf );
-		return(-1);
+		
+		return( -1 );
 	}
-	eb_debug(DBG_CORE, "Executing init for %s\n", info->brief_desc);
+	
+	eb_debug( DBG_CORE, "Executing init for %s\n", info->module_name );
 	info->init();
-	if(info->prefs) {
-		user_prefs=GetPref(name);
-		if(user_prefs) {
-			eb_update_from_value_pair(info->prefs, user_prefs);
-		}
-		eb_debug(DBG_MOD, "prefs name: %s\n", info->prefs->widget.entry.name);
+	
+	if ( info->prefs )
+	{
+		user_prefs = GetPref( name );
+		
+		if ( user_prefs != NULL )
+			eb_update_from_value_pair( info->prefs, user_prefs );
+
+		eb_debug( DBG_MOD, "prefs name: %s\n", info->prefs->widget.entry.name );
 	}
-	SetPluginInfo(info, name, Module, PLUGIN_LOADED, "", NULL, TRUE);
-	eb_debug(DBG_CORE, "<\n");
-	return(0);
-}
-
-static int	load_log_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
-{
-	return(1);
-}
-
-static int	load_sound_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
-{
-	return(1);
-}
-
-static int	load_gui_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
-{
-	return(1);
+	
+	SetPluginInfo( info, name, Module, PLUGIN_LOADED, "", NULL, TRUE );
+	
+	eb_debug( DBG_CORE, "<\n" );
+	
+	return( 0 );
 }
 
 int	unload_module_full_path( const char *inFullPath )

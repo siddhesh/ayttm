@@ -56,39 +56,68 @@ GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage )
 	return( button );
 }
 
+GtkWidget *gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent )
+{
+	GtkWidget	*iconwid = NULL;
+	GdkPixmap	*icon = NULL;
+	GdkBitmap	*mask = NULL;
+	GtkStyle	*style = NULL;
+
+		
+	style = gtk_widget_get_style( inParent );
+	
+	icon = gdk_pixmap_create_from_xpm_d( inParent->window, &mask, &style->bg[GTK_STATE_NORMAL], inXPM );
+	iconwid = gtk_pixmap_new( icon, mask );
+	gtk_widget_show( iconwid );
+		
+	return( iconwid );
+}
+
 GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent )
 {
 	GtkWidget	*button = NULL;
 	GtkWidget	*label = NULL;
 	GtkWidget	*hbox = NULL;
 	GtkWidget	*iconwid = NULL;
-	GdkPixmap	*icon = NULL;
-	GdkBitmap	*mask = NULL;
 	GtkStyle	*style = NULL;
 	const int	min_width = 80;
 	int			width = min_width;
+	int			using_label = (inLabel != NULL);
 
 	
-	hbox = gtk_hbox_new( FALSE, 0 );
-	gtk_widget_show( hbox );
-
+	if ( using_label )
+	{
+		hbox = gtk_hbox_new( FALSE, 0 );
+		gtk_widget_show( hbox );
+	}
+	
 	style = gtk_widget_get_style( inParent );
 	
-	icon = gdk_pixmap_create_from_xpm_d( inParent->window, &mask, &style->bg[GTK_STATE_NORMAL], inXPM );
-	iconwid = gtk_pixmap_new( icon, mask );
-	gtk_widget_show( iconwid );
+	iconwid = gtkut_create_icon_widget( inXPM, inParent );
 	
-	label = gtk_label_new( inLabel );
-	gtk_widget_show( label );
-
-	gtk_box_pack_start( GTK_BOX(hbox), iconwid, FALSE, FALSE, 0 );
-	gtk_box_pack_start( GTK_BOX(hbox), label, TRUE, TRUE, 0 );
+	if ( using_label )
+	{
+		gtk_box_pack_start( GTK_BOX(hbox), iconwid, FALSE, FALSE, 0 );
+		
+		label = gtk_label_new( inLabel );
+		gtk_widget_show( label );
+		gtk_box_pack_start( GTK_BOX(hbox), label, TRUE, TRUE, 0 );
+	}
 	
 	button = gtk_button_new();
-	gtk_container_add( GTK_CONTAINER(button), hbox );
-	if ( button->requisition.width > width )
-		width = button->requisition.width;
-	gtk_widget_set_usize( button, width, -1 );
+	if ( using_label )
+	{
+		gtk_container_add( GTK_CONTAINER(button), hbox );
+		
+		if ( button->requisition.width > width )
+			width = button->requisition.width;
+		gtk_widget_set_usize( button, width, -1 );
+	}
+	else
+	{
+		gtk_container_add( GTK_CONTAINER(button), iconwid );
+	}
+	
 	gtk_widget_show( button );
 	
 	return( button );

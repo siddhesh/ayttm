@@ -53,19 +53,24 @@ extern LList *smileys;
 extern "C" {
 #endif
 
-void init_smileys(void);
-gchar * eb_smilify(gchar * text, LList * protocol_smileys);
+void	ay_add_smiley_set( const char *inName, LList * inSet );
+LList	*ay_lookup_smiley_set( const char *inName );
+void	ay_remove_smiley_set( const char *inName );
 
-LList * eb_default_smileys(void);
+void init_smileys( void );
 
-LList * add_smiley(LList * list, char * name, gchar ** data);
+gchar * eb_smilify( const char *text, LList *protocol_smileys );
 
-LList * add_protocol_smiley(LList * list, char * text, char * name);
+LList * eb_default_smileys( void );
+
+LList * add_smiley( LList *list, const char *name, gchar **data );
+
+LList * add_protocol_smiley( LList *list, const char *text, const char *name );
 
 /* someone figure out how to do this with LList * const */
-LList * eb_smileys(void);
+LList * eb_smileys( void );
 
-smiley * get_smiley_by_name(char * name);
+smiley * get_smiley_by_name( const char *name );
 
 typedef struct _smiley_callback_data smiley_callback_data;
 
@@ -75,10 +80,10 @@ struct _smiley_callback_data
 	chat_window    *c_window;
 };
 
-void show_smileys_cb (smiley_callback_data *data);
+void show_smileys_cb( smiley_callback_data *data );
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif // ifndef _SMILEYS_
+#endif

@@ -24,6 +24,7 @@
 #include "service.h"
 #include "smileys.h"
 #include "prefs.h"
+#include "value_pair.h"
 
 #include "pixmaps/smile.xpm"
 #include "pixmaps/sad.xpm"
@@ -93,6 +94,30 @@ LList *smileys=NULL;
 static LList *default_smileys = NULL;
 
 static LList *_eb_smileys=NULL;
+
+static LList	*s_smiley_sets = NULL;
+
+
+
+void	ay_add_smiley_set( const char *inName, LList *inSet )
+{
+	ay_remove_smiley_set( inName );
+	
+	s_smiley_sets = value_pair_add( s_smiley_sets, inName, (const char *)inSet );
+}
+
+LList *ay_lookup_smiley_set( const char *inName )
+{
+	void	*current = value_pair_get_value( s_smiley_sets, inName );
+	
+	return( (LList *)current );
+}
+
+void	ay_remove_smiley_set( const char *inName )
+{
+	if ( ay_lookup_smiley_set( inName ) )
+		s_smiley_sets = value_pair_remove( s_smiley_sets, inName );
+}
 
 /* someone figure out how to do this with LList * const */
 LList * eb_smileys(void)
@@ -195,7 +220,7 @@ void init_smileys(void)
   default_smileys=add_protocol_smiley(default_smileys, ":'(", "cry");
 }
 
-gchar * eb_smilify(gchar * text, LList * protocol_smileys)
+gchar * eb_smilify( const char *text, LList *protocol_smileys )
 {
   int ipos=0;
   int found;
@@ -293,7 +318,7 @@ LList * eb_default_smileys(void)
   return default_smileys;
 }
 
-LList * add_protocol_smiley(LList * list, char * text, char * name)
+LList * add_protocol_smiley(LList * list, const char * text, const char * name)
 {
   protocol_smiley * psmile;
 
@@ -303,7 +328,7 @@ LList * add_protocol_smiley(LList * list, char * text, char * name)
   return l_list_append(list, psmile);
 }
 
-LList * add_smiley(LList * list, char * name, gchar ** data)
+LList * add_smiley( LList * list, const char *name, gchar **data )
 {
   smiley * psmile;
 
@@ -313,7 +338,8 @@ LList * add_smiley(LList * list, char * name, gchar ** data)
   return l_list_append(list, psmile);
 }
 
-smiley * get_smiley_by_name(char * name) {
+smiley * get_smiley_by_name( const char *name )
+{
   smiley * psmile;
   LList * l = smileys;
   while(l != NULL) {

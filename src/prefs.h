@@ -39,13 +39,13 @@ extern "C" {
 typedef struct
 {
 	const char		*module_type;
-	const char		*brief_desc;
+	const char		*module_name;
+	const char		*description;
 	const char		*loaded_status;
 	const char		*version;
 	const char		*date;
 	const char		*file_name;
 	const char		*status_desc;
-	const char		*service_name;
 	
 	int				is_loaded;
 	
@@ -54,34 +54,27 @@ typedef struct
 
 struct prefs
 {
-	struct general
-	{
-		int		do_ayttm_debug;
-		int		use_alternate_browser;
-		char	alternate_browser[MAX_PREF_LEN];
-
-		#ifdef HAVE_LIBPSPELL
-			int		do_spell_checking;
-			char	spell_dictionary[MAX_PREF_LEN];
-		#endif
-	} general;
-	
-	struct logging
-	{
-		int		do_logging;
-		int		do_restore_last_conv;
-	} logging;
-	
 	struct chat
 	{
 		int		do_ignore_unknown;
-		char		font_face[MAX_PREF_LEN];
 		int		do_raise_window;
 		int		do_send_idle_time;
 		int		do_ignore_fore;
 		int		do_ignore_back;
 		int		do_ignore_font;
+		char	font_face[MAX_PREF_LEN];
+		
+		#ifdef HAVE_LIBPSPELL
+			int		do_spell_checking;
+			char	spell_dictionary[MAX_PREF_LEN];
+		#endif
 	} chat;
+		
+	struct logging
+	{
+		int		do_logging;
+		int		do_restore_last_conv;
+	} logging;
 	
 	struct tabs
 	{
@@ -109,6 +102,13 @@ struct prefs
 		
 		double	SoundVolume;
 	} sound;
+	
+	struct misc
+	{
+		int		do_ayttm_debug;
+		int		use_alternate_browser;
+		char	alternate_browser[MAX_PREF_LEN];
+	} general;
 	
 	struct advanced
 	{

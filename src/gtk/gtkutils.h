@@ -33,6 +33,24 @@ extern "C" {
 #endif
 
 GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage );
+
+/** Create a widget with an xpm.
+	
+	@param	inXPM		the pixmap
+	@param	inParent	the parent whose window we'll use to create the pixmap
+	
+	@returns the new widget
+*/
+GtkWidget	*gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent );
+
+/** Create a button with an xpm and optional label.
+
+	@param	inLabel		optional label for the button
+	@param	inXPM		the pixmap
+	@param	inParent	the parent whose window we'll use to create the pixmap
+	
+	@returns the new button
+*/
 GtkWidget	*gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent );
 
 void gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap *outPixmap );

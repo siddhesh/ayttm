@@ -30,8 +30,8 @@
 
 #define EB_PLUGIN_LIST "PLUGIN::LIST"
 
-extern char *PLUGIN_TYPE_TXT[];
-extern char *PLUGIN_STATUS_TXT[];
+extern const char *PLUGIN_TYPE_TXT[];
+extern const char *PLUGIN_STATUS_TXT[];
 
 typedef enum {
 	PLUGIN_NOT_LOADED,

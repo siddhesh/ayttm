@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef _PLUGIN_API_H
-#define _PLUGIN_API_H
+#ifndef __PLUGIN_API_H__
+#define __PLUGIN_API_H__
 
 #include "input_list.h"
 #include "account.h"
@@ -33,14 +33,13 @@ extern "C" {
 #endif
 
 /* Plugin */
-#define API_MAJOR_VERSION 0
-#define API_MINOR_VERSION 1
+
 typedef enum {
-	PLUGIN_SERVICE=1,
+	PLUGIN_SERVICE = 1,
+	PLUGIN_FILTER,
+	PLUGIN_IMPORTER,
+	PLUGIN_SMILEY,
 	PLUGIN_UTILITY,
-	PLUGIN_SOUND,
-	PLUGIN_LOG,
-	PLUGIN_GUI,
 	PLUGIN_UNKNOWN
 } PLUGIN_TYPE;
 
@@ -48,8 +47,8 @@ typedef int (*eb_plugin_func)();
 
 typedef struct {
 	PLUGIN_TYPE type;
-	char *brief_desc;
-	char *full_desc;
+	char *module_name;
+	char *description;
 	char *version;
 	char *date;
 	int *ref_count;
@@ -58,7 +57,6 @@ typedef struct {
 	input_list *prefs;
 } PLUGIN_INFO;
 
-/* GUI */
 
 #define IS_ebmCallbackData(x) (x->CDType>=ebmCALLBACKDATA)
 /* Names of menus and the data structure passed to callbacks for them */

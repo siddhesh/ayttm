@@ -293,9 +293,12 @@ static void	s_destroy_input_list( input_list *inList )
 static void	s_reset_module_info( t_module_pref *outModulePref )
 {
 	assert( outModulePref != NULL );
+		
+	if ( outModulePref->module_name != NULL )
+		free( (void *)outModulePref->module_name );
 	
-	if ( outModulePref->brief_desc != NULL )
-		free( (void *)outModulePref->brief_desc );
+	if ( outModulePref->description != NULL )
+		free( (void *)outModulePref->description );
 		
 	if ( outModulePref->version != NULL )
 		free( (void *)outModulePref->version );
@@ -308,9 +311,6 @@ static void	s_reset_module_info( t_module_pref *outModulePref )
 		
 	if ( outModulePref->status_desc != NULL )
 		free( (void *)outModulePref->status_desc );
-		
-	if ( outModulePref->service_name != NULL )
-		free( (void *)outModulePref->service_name );
 	
 	s_destroy_input_list( outModulePref->pref_list );
 	outModulePref->pref_list = NULL;
@@ -325,7 +325,8 @@ static void	s_fill_in_module_pref_info( t_module_pref *outModulePref, const eb_P
 	s_reset_module_info( outModulePref );
 	
 	outModulePref->module_type = PLUGIN_TYPE_TXT[inPluginInfo->pi.type-1];
-	outModulePref->brief_desc = s_strdup_allow_null( inPluginInfo->pi.brief_desc );
+	outModulePref->module_name = s_strdup_allow_null( inPluginInfo->pi.module_name );
+	outModulePref->description = s_strdup_allow_null( inPluginInfo->pi.description );
 	outModulePref->loaded_status = PLUGIN_STATUS_TXT[inPluginInfo->status];
 	/* In the following lines, the space between "$" and "Revision: " and
 		"$" and "Date: " is intentional.  We cannot simply put them together
@@ -335,7 +336,6 @@ static void	s_fill_in_module_pref_info( t_module_pref *outModulePref, const eb_P
 	outModulePref->date = s_strdup_strip( "$" "Date: ", " $", inPluginInfo->pi.date );
 	outModulePref->file_name = s_strdup_allow_null( inPluginInfo->name );
 	outModulePref->status_desc = s_strdup_allow_null( inPluginInfo->status_desc );
-	outModulePref->service_name = s_strdup_allow_null( inPluginInfo->service );
 	
 	outModulePref->is_loaded = (inPluginInfo->status == PLUGIN_LOADED);
 	
@@ -496,22 +496,6 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "length_contact_window", 256 );
 	iSetLocalPref( "width_contact_window", 150 );
 	iSetLocalPref( "status_show_level", 2 );
-
-	/* general */
-	iSetLocalPref( "do_ayttm_debug", 0 );
-	iSetLocalPref( "do_ayttm_debug_html", 0 );
-	iSetLocalPref( "do_plugin_debug", 0 );
-	iSetLocalPref( "do_noautoresize", 0 );
-	iSetLocalPref( "use_alternate_browser", 0 );
-	cSetLocalPref( "alternate_browser", "" );
-	
-	iSetLocalPref( "do_spell_checking", 0 );
-	cSetLocalPref( "spell_dictionary", "" );
-	
-	/* logging */
-	iSetLocalPref( "do_logging", 1 );
-	iSetLocalPref( "do_strip_html", 0 );
-	iSetLocalPref( "do_restore_last_conv", 0 );
 	
 	/* chat */
 	iSetLocalPref( "do_typing_notify", 1 );
@@ -520,7 +504,6 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_convo_timestamp", 1 );
 	iSetLocalPref( "do_enter_send", 1 );
 	iSetLocalPref( "do_ignore_unknown", 0 );
-	cSetLocalPref( "FontFace", "helvetica" );
 	iSetLocalPref( "do_multi_line", 1 );
 	iSetLocalPref( "do_raise_window", 0 );
 	iSetLocalPref( "do_send_idle_time", 0 );
@@ -529,6 +512,14 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_ignore_back", 1 );
 	iSetLocalPref( "do_ignore_font", 1 );
 	iSetLocalPref( "do_smiley", 1 );
+	iSetLocalPref( "do_spell_checking", 0 );
+	cSetLocalPref( "spell_dictionary", "" );
+	cSetLocalPref( "FontFace", "helvetica" );
+
+	/* logging */
+	iSetLocalPref( "do_logging", 1 );
+	iSetLocalPref( "do_strip_html", 0 );
+	iSetLocalPref( "do_restore_last_conv", 0 );
 	
 	/* tabs */
 	iSetLocalPref( "do_tabbed_chat", 0 );
@@ -556,6 +547,14 @@ void	ayttm_prefs_init( void )
 	cSetLocalPref( "FirstMsgFilename", cGetLocalPref("default_recv_snd"));
 
 	fSetLocalPref( "SoundVolume", 0.0 );
+
+	/* misc */
+	iSetLocalPref( "do_ayttm_debug", 0 );
+	iSetLocalPref( "do_ayttm_debug_html", 0 );
+	iSetLocalPref( "do_plugin_debug", 0 );
+	iSetLocalPref( "do_noautoresize", 0 );
+	iSetLocalPref( "use_alternate_browser", 0 );
+	cSetLocalPref( "alternate_browser", "" );
 
 	/* advanced */
 	iSetLocalPref( "proxy_type", PROXY_NONE );
@@ -756,25 +755,6 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "x_contact_window=%d\n", iGetLocalPref("x_contact_window") );
 	fprintf( fp, "y_contact_window=%d\n", iGetLocalPref("y_contact_window") );
 	fprintf( fp, "status_show_level=%d\n", iGetLocalPref("status_show_level") );
-	
-	/* general */
-    fprintf( fp, "do_ayttm_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
-    fprintf( fp, "do_ayttm_debug_html=%d\n", iGetLocalPref("do_ayttm_debug_html") );
-    fprintf( fp, "do_plugin_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
-    fprintf( fp, "length_contact_window=%d\n", iGetLocalPref("length_contact_window") );
-    fprintf( fp, "width_contact_window=%d\n", iGetLocalPref("width_contact_window") );
-#ifdef HAVE_LIBPSPELL
-    fprintf( fp, "do_spell_checking=%d\n", iGetLocalPref("do_spell_checking") );
-	fprintf( fp, "spell_dictionary=%s\n", cGetLocalPref("spell_dictionary") );
-#endif
-    fprintf( fp, "do_noautoresize=%d\n", iGetLocalPref("do_noautoresize") ) ;
-    fprintf( fp, "use_alternate_browser=%d\n", iGetLocalPref("use_alternate_browser") );
-	fprintf( fp, "alternate_browser=%s\n", cGetLocalPref("alternate_browser") );
-
-	/* logging */
-	fprintf( fp, "do_logging=%d\n", iGetLocalPref("do_logging") );
-	fprintf( fp, "do_strip_html=%d\n", iGetLocalPref("do_strip_html") );
-	fprintf( fp, "do_restore_last_conv=%d\n", iGetLocalPref("do_restore_last_conv") );
 
 	/* chat */
 	fprintf( fp, "do_typing_notify=%d\n", iGetLocalPref("do_typing_notify") );
@@ -783,7 +763,6 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_convo_timestamp=%d\n", iGetLocalPref("do_convo_timestamp") );
 	fprintf( fp, "do_enter_send=%d\n", iGetLocalPref("do_enter_send") );
 	fprintf( fp, "do_ignore_unknown=%d\n", iGetLocalPref("do_ignore_unknown") );
-	fprintf( fp, "FontFace=%s\n", cGetLocalPref("FontFace") );
 	fprintf( fp, "do_multi_line=%d\n", iGetLocalPref("do_multi_line") );
 	fprintf( fp, "do_raise_window=%d\n", iGetLocalPref("do_raise_window") );
 	fprintf( fp, "do_send_idle_time=%d\n", iGetLocalPref("do_send_idle_time") );
@@ -792,6 +771,16 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_ignore_back=%d\n", iGetLocalPref("do_ignore_back") );
 	fprintf( fp, "do_ignore_font=%d\n", iGetLocalPref("do_ignore_font") );
 	fprintf( fp, "do_smiley=%d\n", iGetLocalPref("do_smiley" ) );
+	fprintf( fp, "FontFace=%s\n", cGetLocalPref("FontFace") );
+#ifdef HAVE_LIBPSPELL
+    fprintf( fp, "do_spell_checking=%d\n", iGetLocalPref("do_spell_checking") );
+	fprintf( fp, "spell_dictionary=%s\n", cGetLocalPref("spell_dictionary") );
+#endif
+
+	/* logging */
+	fprintf( fp, "do_logging=%d\n", iGetLocalPref("do_logging") );
+	fprintf( fp, "do_strip_html=%d\n", iGetLocalPref("do_strip_html") );
+	fprintf( fp, "do_restore_last_conv=%d\n", iGetLocalPref("do_restore_last_conv") );
 
 	/* tabs */
 	fprintf( fp, "do_tabbed_chat=%d\n", iGetLocalPref("do_tabbed_chat") );
@@ -813,6 +802,16 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "ReceiveFilename=%s\n", cGetLocalPref("ReceiveFilename") );
 	fprintf( fp, "FirstMsgFilename=%s\n", cGetLocalPref("FirstMsgFilename") );
 	fprintf( fp, "SoundVolume=%f\n", fGetLocalPref("SoundVolume") );
+	
+	/* misc */
+    fprintf( fp, "do_ayttm_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
+    fprintf( fp, "do_ayttm_debug_html=%d\n", iGetLocalPref("do_ayttm_debug_html") );
+    fprintf( fp, "do_plugin_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
+    fprintf( fp, "length_contact_window=%d\n", iGetLocalPref("length_contact_window") );
+    fprintf( fp, "width_contact_window=%d\n", iGetLocalPref("width_contact_window") );
+    fprintf( fp, "do_noautoresize=%d\n", iGetLocalPref("do_noautoresize") ) ;
+    fprintf( fp, "use_alternate_browser=%d\n", iGetLocalPref("use_alternate_browser") );
+	fprintf( fp, "alternate_browser=%s\n", cGetLocalPref("alternate_browser") );
 
 	/* advanced */
 	fprintf( fp, "proxy_type=%d\n", iGetLocalPref("proxy_type") );
@@ -849,29 +848,24 @@ void	ayttm_prefs_show_window( void )
 {
 	struct prefs	*prefs = calloc( 1, sizeof( struct prefs ) );
 
-	
-	/* general prefs */
-	prefs->general.do_ayttm_debug        = iGetLocalPref("do_ayttm_debug");
-	prefs->general.use_alternate_browser = iGetLocalPref("use_alternate_browser");
-	strncpy( prefs->general.alternate_browser, cGetLocalPref("alternate_browser"), MAX_PREF_LEN );
-
-#ifdef HAVE_LIBPSPELL
-	prefs->general.do_spell_checking     = iGetLocalPref("do_spell_checking");
-	strncpy( prefs->general.spell_dictionary, cGetLocalPref("spell_dictionary"), MAX_PREF_LEN );
-#endif
-
-	/* logging prefs */
-	prefs->logging.do_logging            = iGetLocalPref("do_logging");
-	prefs->logging.do_restore_last_conv  = iGetLocalPref("do_restore_last_conv");
 
 	/* chat prefs */
 	prefs->chat.do_ignore_unknown     = iGetLocalPref("do_ignore_unknown");
-	strncpy( prefs->chat.font_face, cGetLocalPref("FontFace"), MAX_PREF_LEN );
 	prefs->chat.do_raise_window       = iGetLocalPref("do_raise_window");	
 	prefs->chat.do_send_idle_time     = iGetLocalPref("do_send_idle_time");
 	prefs->chat.do_ignore_fore        = iGetLocalPref("do_ignore_fore");
 	prefs->chat.do_ignore_back        = iGetLocalPref("do_ignore_back");
 	prefs->chat.do_ignore_font        = iGetLocalPref("do_ignore_font");
+	strncpy( prefs->chat.font_face, cGetLocalPref("FontFace"), MAX_PREF_LEN );
+
+#ifdef HAVE_LIBPSPELL
+	prefs->chat.do_spell_checking     = iGetLocalPref("do_spell_checking");
+	strncpy( prefs->chat.spell_dictionary, cGetLocalPref("spell_dictionary"), MAX_PREF_LEN );
+#endif
+
+	/* logging prefs */
+	prefs->logging.do_logging            = iGetLocalPref("do_logging");
+	prefs->logging.do_restore_last_conv  = iGetLocalPref("do_restore_last_conv");
 
 	/* tabs prefs */
 	prefs->tabs.do_tabbed_chat        = iGetLocalPref("do_tabbed_chat");
@@ -896,6 +890,11 @@ void	ayttm_prefs_show_window( void )
 	strncpy( prefs->sound.FirstMsgFilename, cGetLocalPref("FirstMsgFilename"), MAX_PREF_LEN );
 
 	prefs->sound.SoundVolume        = fGetLocalPref("SoundVolume");
+	
+	/* misc prefs */
+	prefs->general.do_ayttm_debug        = iGetLocalPref("do_ayttm_debug");
+	prefs->general.use_alternate_browser = iGetLocalPref("use_alternate_browser");
+	strncpy( prefs->general.alternate_browser, cGetLocalPref("alternate_browser"), MAX_PREF_LEN );
 	
 	/* advanced */
 	prefs->advanced.proxy_type      = iGetLocalPref("proxy_type");
@@ -980,30 +979,24 @@ int		ayttm_prefs_load_module( t_module_pref *ioPrefs )
 void	ayttm_prefs_apply( struct prefs *inPrefs )
 {
 	assert( inPrefs != NULL );
-	
-	/* general */
-	iSetLocalPref( "do_ayttm_debug", inPrefs->general.do_ayttm_debug );
-	iSetLocalPref( "do_plugin_debug", inPrefs->general.do_ayttm_debug );
-	iSetLocalPref( "use_alternate_browser", inPrefs->general.use_alternate_browser );
-	cSetLocalPref( "alternate_browser", inPrefs->general.alternate_browser );
-	
-#ifdef HAVE_LIBPSPELL
-	iSetLocalPref( "do_spell_checking", inPrefs->general.do_spell_checking );
-	cSetLocalPref( "spell_dictionary", inPrefs->general.spell_dictionary );
-#endif
-	
-	/* logging */
-	iSetLocalPref( "do_logging", inPrefs->logging.do_logging );
-	iSetLocalPref( "do_restore_last_conv", inPrefs->logging.do_restore_last_conv );
 
 	/* chat */
 	iSetLocalPref( "do_ignore_unknown", inPrefs->chat.do_ignore_unknown );
-	cSetLocalPref( "FontFace", inPrefs->chat.font_face );
 	iSetLocalPref( "do_raise_window", inPrefs->chat.do_raise_window );
 	iSetLocalPref( "do_send_idle_time", inPrefs->chat.do_send_idle_time );
 	iSetLocalPref( "do_ignore_fore", inPrefs->chat.do_ignore_fore );
 	iSetLocalPref( "do_ignore_back", inPrefs->chat.do_ignore_back );
 	iSetLocalPref( "do_ignore_font", inPrefs->chat.do_ignore_font );
+	cSetLocalPref( "FontFace", inPrefs->chat.font_face );
+	
+#ifdef HAVE_LIBPSPELL
+	iSetLocalPref( "do_spell_checking", inPrefs->chat.do_spell_checking );
+	cSetLocalPref( "spell_dictionary", inPrefs->chat.spell_dictionary );
+#endif
+	
+	/* logging */
+	iSetLocalPref( "do_logging", inPrefs->logging.do_logging );
+	iSetLocalPref( "do_restore_last_conv", inPrefs->logging.do_restore_last_conv );
 	
 	/* tabs */
 	iSetLocalPref( "do_tabbed_chat", inPrefs->tabs.do_tabbed_chat );
@@ -1028,6 +1021,12 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	cSetLocalPref( "FirstMsgFilename", inPrefs->sound.FirstMsgFilename );
 	
 	fSetLocalPref( "SoundVolume", inPrefs->sound.SoundVolume );
+	
+	/* misc */
+	iSetLocalPref( "do_ayttm_debug", inPrefs->general.do_ayttm_debug );
+	iSetLocalPref( "do_plugin_debug", inPrefs->general.do_ayttm_debug );
+	iSetLocalPref( "use_alternate_browser", inPrefs->general.use_alternate_browser );
+	cSetLocalPref( "alternate_browser", inPrefs->general.alternate_browser );
 
 	/* advanced */
 	iSetLocalPref( "proxy_type", inPrefs->advanced.proxy_type );
