@@ -1,3 +1,7 @@
+* Tue May  6 2003 13:39 GMT [colin]	0.3.0-141
+- modules/aycryption/aycryption.c
+More info (will be moved to a window later or sooner)
+
 * Tue May  6 2003 13:39 GMT [philip]	0.3.0-140
 - modules/msn2/msn.C
 infinite loop

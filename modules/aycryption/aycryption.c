@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/05 10:27:58 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/05/06 14:08:42 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -143,8 +143,6 @@ static int aycryption_init()
 
 static int aycryption_finish()
 {
-	int result = 0;
-
 	outgoing_message_filters = l_list_remove(outgoing_message_filters, &translate_out);
 	incoming_message_filters = l_list_remove(incoming_message_filters, &translate_in);
 	
@@ -222,7 +220,6 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 		return strdup(s);
 	} else {
 		GpgmeData plain = NULL;
-		GpgmeData sign = NULL;
 		GpgmeData cipher = NULL;
 		int err;
 		gpgme_data_new(&plain);
@@ -273,14 +270,15 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 {
 	char *p = NULL, *res = NULL;
 	GpgmeData plain = NULL, cipher = NULL;
+	GpgmeKey key = NULL;
         struct passphrase_cb_info_s info;
 	int err;
 	char buf[1024];
 	int nread;
-	int pass=0;
 	GpgmeCtx ctx = NULL;
 	GpgmeSigStat sigstat = 0;
-	char *s_sigstat;
+	char s_sigstat[1024];
+	int was_crypted = 1;
 	memset(buf, 0, 1024);
 	if (strncmp (s, "-----BEGIN PGP ", strlen("-----BEGIN PGP "))) {
 		eb_debug(DBG_CRYPT, "Incoming message isn't PGP formatted\n");
@@ -303,7 +301,7 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
             gpgme_set_passphrase_cb (ctx, gpgmegtk_passphrase_cb, &info);
 	} 
 	err = gpgme_op_decrypt_verify (ctx, cipher, plain, &sigstat);
-	
+
 	if (err && err != GPGME_No_Data) {
 		char buf[1024];
 		snprintf(buf, 1024, _("Can not decrypt message from %s.\n"
@@ -311,6 +309,7 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 		ay_do_error(_("Aycryption"), buf);
 		return strdup(s);
 	} else if (err == GPGME_No_Data) { /*plaintext signed*/
+		was_crypted = 0;
 		gpgme_data_rewind(cipher);
 		gpgme_data_new(&plain);
 		err = gpgme_op_verify(ctx, cipher, plain, &sigstat);
@@ -318,6 +317,11 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 			eb_debug(DBG_CRYPT, "plaintext err: %d\n", err);
 	}
 	
+	err = gpgme_get_sig_key(ctx, 0, &key);
+	if (err) {
+		eb_debug(DBG_CRYPT, "getkey err %d\n", err);
+		key = NULL;
+	}
 	err = gpgme_data_rewind(plain);
 	if (err)
 		eb_debug(DBG_CRYPT, "rewind err %d\n", err);
@@ -344,39 +348,54 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 	
 	switch(sigstat) {
 		case GPGME_SIG_STAT_NONE:
-			s_sigstat=strdup(" <font color=#a8a8a8>[Unsigned]</font>");
+			strcpy(s_sigstat, " <font color=#a8a8a8>[");
 			break;
 		case GPGME_SIG_STAT_GOOD:
-			s_sigstat=strdup(" <font color=#a8ffa8>[Good signature]</font>");
-			break;
-		case GPGME_SIG_STAT_BAD:
-			s_sigstat=strdup(" <font color=#ffa8a8>[Bad signature]</font>");
-			break;
-		case GPGME_SIG_STAT_NOKEY:
-			s_sigstat=strdup(" <font color=#ffa8a8>[No key]</font>");
-			break;
-		case GPGME_SIG_STAT_NOSIG:
-			s_sigstat=strdup(" <font color=#ffa8a8>[No signature]</font>");
-			break;
-		case GPGME_SIG_STAT_ERROR:
-			s_sigstat=strdup(" <font color=#ffa8a8>[Error verifying signature]</font>");
-			break;
-		case GPGME_SIG_STAT_DIFF:
-			s_sigstat=strdup(" <font color=#ffa8a8>[Signature status: DIFF]</font>");
-			break;
-		case GPGME_SIG_STAT_GOOD_EXP:
-			s_sigstat=strdup(" <font color=#ffa8a8>[Expired good signature]</font>");
-			break;
-		case GPGME_SIG_STAT_GOOD_EXPKEY:
-			s_sigstat=strdup(" <font color=#ffa8a8>[Good signature with expired key]</font>");
+			strcpy(s_sigstat, " <font color=#a8ffa8>[");
 			break;
 		default:
-			s_sigstat=strdup(" <font color=#ffa8a8>[Unknown error]</font>");
+			strcpy(s_sigstat, " <font color=#ffa8a8>[");
+	}
+	strcat(s_sigstat, was_crypted?_("Crypted"):_("Uncrypted"));
+	strcat(s_sigstat, ", ");
+	switch(sigstat) {
+		case GPGME_SIG_STAT_NONE:
+			strcat(s_sigstat, _("Unsigned"));
+			break;
+		case GPGME_SIG_STAT_GOOD:
+			strcat(s_sigstat, _("Good signature from "));
+			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			break;
+		case GPGME_SIG_STAT_BAD:
+			strcat(s_sigstat, _("Bad signature from "));
+			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			break;
+		case GPGME_SIG_STAT_NOKEY:
+			strcat(s_sigstat, _("No key"));
+			break;
+		case GPGME_SIG_STAT_NOSIG:
+			strcat(s_sigstat, _("No signature"));
+			break;
+		case GPGME_SIG_STAT_ERROR:
+			strcat(s_sigstat, _("Error verifying signature"));
+			break;
+		case GPGME_SIG_STAT_DIFF:
+			strcat(s_sigstat, _("More than one signature, differing"));
+			break;
+		case GPGME_SIG_STAT_GOOD_EXP:
+			strcat(s_sigstat, _("Expired good signature from "));
+			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			break;
+		case GPGME_SIG_STAT_GOOD_EXPKEY:
+			strcat(s_sigstat, _("Good signature with expired key from "));
+			break;
+		default:
+			strcat(s_sigstat, _("Unknown error"));
 			break;
 	}
+	strcat(s_sigstat, "]</font>");
 	res = g_strdup_printf("%s%s", p, s_sigstat);
 	free(p);
-	free(s_sigstat);
 	return res;
 }
 
