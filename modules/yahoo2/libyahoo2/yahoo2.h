@@ -37,7 +37,7 @@ int  yahoo_set_log_level(enum yahoo_log_level level);
 
 /* these functions should be self explanatory */
 /* who always means the buddy you're acting on */
-/* id is the successful value returned by yahoo_login */
+/* id is the successful value returned by yahoo_init */
 
 
 /* init returns a connection id used to identify the connection hereon */
