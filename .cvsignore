@@ -25,3 +25,5 @@ ayttmrc
 ayttm-*.tar.gz
 missing
 depcomp
+install-sh
+mkinstalldirs
