@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.51 $",
-	"$Date: 2003/08/03 18:10:11 $",
+	"$Revision: 1.52 $",
+	"$Date: 2003/08/12 10:37:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -580,7 +580,7 @@ static void eb_aim_user_info(toc_conn * conn, char * user, char * message )
 		ea->service_id = ela->service_id;
 		aad->status = AIM_OFFLINE;
 		ea->protocol_account_data = aad;
-
+		ea->ela = ela;
 		add_unknown(ea);
 		sender = ea;
 
@@ -688,9 +688,8 @@ static void eb_aim_parse_incoming_im(toc_conn * conn, char * user, char * messag
 			ea->service_id = ela->service_id;
 			aad->status = AIM_OFFLINE;
 			ea->protocol_account_data = aad;
-			
+			ea->ela = ela;
 			add_unknown(ea);
-			//aim_add_buddy(command->conn,screenname);
 			sender = ea;
 
 			eb_debug(DBG_TOC, "Sender == NULL");

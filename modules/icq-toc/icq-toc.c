@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.39 $",
-	"$Date: 2003/07/30 15:54:54 $",
+	"$Revision: 1.40 $",
+	"$Date: 2003/08/12 10:37:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -611,7 +611,6 @@ static void eb_icq_parse_incoming_im(toc_conn * conn, char * user, char * messag
 			ea->protocol_account_data = aad;
 			ea->ela = ela;
 			add_unknown(ea);
-			//icq_add_buddy(command->conn,screenname);
 			sender = ea;
 
 			eb_debug(DBG_TOC, "Sender == NULL");

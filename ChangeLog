@@ -1,3 +1,7 @@
+* Thu Aug  7 2003 06:12 GMT [colin]	0.3.3-26
+- modules/aim-toc/aim-toc.c
+Fix bug #786905 (NULL ela)
+
 * Thu Aug  7 2003 06:12 GMT [colin]	0.3.3-25
 - modules/irc/irc.c
 Fix bug #782017
