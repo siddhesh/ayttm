@@ -1,3 +1,7 @@
+* Fri Dec 12 2003 07:07 GMT [philip]	0.4.5-6
+- modules/yahoo2/yahoo.c
+fix possible crash (which may have caused bug 821649
+
 * Fri Dec 12 2003 06:56 GMT [philip]	0.4.5-5
 - modules/yahoo2/libyahoo2/yahoo_httplib.c
 fix file receiving - sometimes the sender would not be

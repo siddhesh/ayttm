@@ -134,8 +134,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.78 $",
-	"$Date: 2003/12/12 07:00:38 $",
+	"$Revision: 1.79 $",
+	"$Date: 2003/12/12 07:10:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -3031,6 +3031,10 @@ static int ext_yahoo_connect_async(int id, char *host, int port, yahoo_connect_c
 	eb_yahoo_local_account_data *ylad;
 
 	ccd->ela = yahoo_find_local_account_by_id(id);
+	if(!ccd->ela) {
+		free(ccd);
+		return 0;
+	}
 	ccd->callback = callback;
 	ccd->data = data;
 
