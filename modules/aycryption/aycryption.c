@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.16 $",
-	"$Date: 2003/06/04 10:27:25 $",
+	"$Revision: 1.17 $",
+	"$Date: 2003/06/04 10:28:46 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -409,7 +409,7 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	if (!s_nohtml)
 	{
 		eb_debug(DBG_CRYPT,"Couldn't copy message to strip html");
-		log_action(ct, LOG_ERR, "Memory eror while stripping html.");
+		log_action(ct, LOG_ERR, "Memory error while stripping html.");
 		return strdup(s);
 	}
 	br_to_nl(s_nohtml);
