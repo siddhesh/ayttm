@@ -64,6 +64,7 @@ static int ref_count = 0;
 static char smtp_host[MAX_PREF_LEN] = "127.0.0.1";
 static char smtp_port[MAX_PREF_LEN] = "25";
 static int do_smtp_debug = 0;
+static int default_online = 0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info =
@@ -71,8 +72,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.15 $",
-	"$Date: 2003/05/03 14:53:22 $",
+	"$Revision: 1.16 $",
+	"$Date: 2003/05/06 07:06:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -113,6 +114,13 @@ static int plugin_init()
 	il->widget.checkbox.value = &do_smtp_debug;
 	il->widget.checkbox.name = "do_smtp_debug";
 	il->widget.checkbox.label = _("Enable debugging");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = calloc(1, sizeof(input_list));
+	il = il->next;
+	il->widget.checkbox.value = &default_online;
+	il->widget.checkbox.name = "default_online";
+	il->widget.checkbox.label = _("Contacts online by default");
 	il->type = EB_INPUT_CHECKBOX;
 
 	return (0);
@@ -275,6 +283,7 @@ static void eb_smtp_login(eb_local_account *account)
 {
 	/* we should always be logged in */
 	eb_smtp_local_account_data *sla = account->protocol_local_account_data;
+	enum smtp_status_code status = SMTP_STATUS_OFFLINE;
 
 	if(account->status_menu) {
 		sla->status = SMTP_STATUS_ONLINE;
@@ -285,8 +294,11 @@ static void eb_smtp_login(eb_local_account *account)
 	account->connected = 1;
 	ref_count++;
 
+	if(default_online)
+		status = SMTP_STATUS_ONLINE;
+
 	l_list_foreach(eb_smtp_buddies, _buddy_change_state, 
-			(void *)SMTP_STATUS_OFFLINE);
+			(void *)status);
 }
 
 static void eb_smtp_logout(eb_local_account *account)
