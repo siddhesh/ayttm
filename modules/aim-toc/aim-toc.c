@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.53 $",
-	"$Date: 2003/08/30 12:02:03 $",
+	"$Revision: 1.54 $",
+	"$Date: 2003/09/04 16:10:29 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -507,13 +507,13 @@ static void eb_aim_oncoming_buddy(toc_conn *conn, char * user, int online, time_
 	eb_account * ea = NULL;
 	struct eb_aim_account_data * aad ;
 	struct eb_aim_local_account_data *alad;
-       
-	ea = find_account_with_ela( user, aim_find_local_account_by_conn(conn));
+        eb_local_account *ela = aim_find_local_account_by_conn(conn);
+	ea = find_account_with_ela( user, ela);
 	if(!ea)
 		return;
 	
 	
-	alad = ea->ela?(struct eb_aim_local_account_data *)ea->ela->protocol_local_account_data:NULL;
+	alad = ela?(struct eb_aim_local_account_data *)ela->protocol_local_account_data:NULL;
 	aad = ea->protocol_account_data;
 	if (alad && !l_list_find(alad->aim_buddies, ea->handle))
 		alad->aim_buddies = l_list_append(alad->aim_buddies, ea->handle);
@@ -973,8 +973,7 @@ static void eb_aim_logout( eb_local_account * account )
 	{
 		eb_debug(DBG_TOC, "eb_aim_logout %d %d\n", alad->conn->fd, alad->conn->seq_num );
 		toc_signoff(alad->conn);
-		g_free(alad->conn);
-		alad->conn = NULL;
+		
 		if (ref_count>0)
 			ref_count--;
 	}
@@ -995,7 +994,10 @@ static void eb_aim_logout( eb_local_account * account )
 		eb_aim_oncoming_buddy(alad->conn, l->data, FALSE, 0, 0, FALSE);
 	}
 
-
+	if (alad->conn) {
+		g_free(alad->conn);
+		alad->conn = NULL;
+	}
 }
 
 static void eb_aim_send_im( eb_local_account * account_from,

@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.41 $",
-	"$Date: 2003/08/30 12:09:21 $",
+	"$Revision: 1.42 $",
+	"$Date: 2003/09/04 16:10:29 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -864,8 +864,6 @@ static void eb_icq_logout( eb_local_account * account )
 	{
 		eb_debug(DBG_TOC, "eb_icq_logout %d %d\n", alad->conn->fd, alad->conn->seq_num );
 		icqtoc_signoff(alad->conn);
-		g_free(alad->conn);
-		alad->conn = NULL;
 		if (ref_count >0)
 			ref_count--;
 	}
@@ -889,6 +887,11 @@ static void eb_icq_logout( eb_local_account * account )
 	{
 		eb_icq_oncoming_buddy(alad->conn, l->data, FALSE, 0, 0, FALSE);
 	}
+	
+	if (alad->conn) {
+		g_free(alad->conn);
+		alad->conn = NULL;
+	}		
 }
 
 static void ay_toc_connect_status(const char *msg, void *data)

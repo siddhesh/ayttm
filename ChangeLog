@@ -1,3 +1,7 @@
+* Thu Sep  4 2003 16:58 GMT [colin]     0.4.0-19
+modules/*toc/*toc.c
+Fix bug introduced in 0.4.0-1[12]
+
 * Thu Sep  4 2003 06:58 GMT [colin]	0.4.0-18
 - modules/aycryption/aycryption.c
 Fire compatibility patch by Gary E. Miller <garyemiller@users.sf.net>
