@@ -51,7 +51,7 @@
 #include "pixmaps/smiley_button.xpm"
 #include "pixmaps/action.xpm"
 #include "pixmaps/invite_btn.xpm"
-
+#include "pixmaps/reconnect.xpm"
 
 #define GET_CHAT_ROOM(cur_cw) {\
 	if( iGetLocalPref("do_tabbed_chat") ) { \
@@ -391,6 +391,153 @@ static void set_sound_on_toggle(GtkWidget * sound_button, gpointer userdata)
     cr->sound_enabled = FALSE;
 }
 
+void start_auto_chatrooms(eb_local_account *ela) 
+{
+	FILE *fp;
+	char buff [4096];
+	snprintf(buff, 4095, "%s%cchatroom_autoconnect", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	if (!ela) 
+		return;
+	
+	eb_debug(DBG_CORE, "buff %s\n",buff);
+	fp = fopen(buff, "r");
+		
+	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		if (!strcmp(tokens[0], get_service_name(ela->service_id))
+		&& !strcmp(tokens[1], ela->handle)) {
+			eb_start_chat_room(ela, tokens[2], atoi(tokens[3]));
+		}
+		ay_strfreev(tokens);
+	}
+	if (fp)
+		fclose(fp);
+	
+}
+
+static int eb_is_chatroom_auto(eb_chat_room *cr) 
+{
+	FILE *fp;
+	char buff [4096];
+	snprintf(buff, 4095, "%s%cchatroom_autoconnect", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	if (!cr->local_user || !cr->room_name) 
+		return FALSE;
+	
+	eb_debug(DBG_CORE, "buff %s\n",buff);
+	fp = fopen(buff, "r");
+		
+	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		if (!strcmp(tokens[0], get_service_name(cr->local_user->service_id))
+		&&  !strcmp(tokens[1], cr->local_user->handle)
+		&&  !strcmp(tokens[2], cr->room_name)
+		&&  atoi(tokens[3]) == cr->is_public) {
+			fclose(fp);
+			ay_strfreev(tokens);
+			return TRUE; /* already in */
+		}
+		ay_strfreev(tokens);
+	}
+	if (fp)
+		fclose(fp);
+	return FALSE;	
+}
+
+static void eb_add_auto_chatroom(eb_local_account *ela, const char *name, int public) 
+{
+	FILE *fp;
+	char buff [4096];
+	snprintf(buff, 4095, "%s%cchatroom_autoconnect", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	if (!ela || !name) 
+		return;
+	
+	eb_debug(DBG_CORE, "buff %s\n",buff);
+	fp = fopen(buff, "r");
+		
+	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		if (!strcmp(tokens[0], get_service_name(ela->service_id))
+		&&  !strcmp(tokens[1], ela->handle)
+		&&  !strcmp(tokens[2], name)
+		&&  atoi(tokens[3]) == public) {
+			fclose(fp);
+			ay_strfreev(tokens);
+			return; /* already in */
+		}
+		ay_strfreev(tokens);
+	}
+	if (fp)
+		fclose(fp);
+	
+	snprintf(buff, 4095, "%s%cchatroom_autoconnect", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	fp = fopen(buff, "a");
+	if (!fp) 
+		return;
+	fprintf(fp, "%s\t%s\t%s\t%d\t--\n", get_service_name(ela->service_id), ela->handle, name, public);
+	fclose(fp);
+}
+
+static void eb_remove_auto_chatroom(eb_local_account *ela, const char *name, int public) 
+{
+	FILE *fp ,*tmp;
+	char buffin [4095], bufftmp[4095], buff[4095];
+	snprintf(bufftmp, 4095, "%s%cchatroom_autoconnect.tmp", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	snprintf(buffin, 4095, "%s%cchatroom_autoconnect", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	if (!ela || !name) 
+		return;
+	
+	eb_debug(DBG_CORE, "buff %s\n",buff);
+	fp = fopen(buffin, "r");
+	tmp = fopen(bufftmp, "w");
+	
+	if (!tmp) {
+		if (fp) fclose(fp);
+		return;
+	}
+	
+	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		if (strcmp(tokens[0], get_service_name(ela->service_id))
+		||  strcmp(tokens[1], ela->handle)
+		||  strcmp(tokens[2], name)
+		||  atoi(tokens[3]) != public) {
+			fprintf(tmp, "%s", buff);
+		}
+	}
+		
+	fclose(tmp);
+
+	if (fp) {
+		fclose(fp);
+		unlink(buffin);
+	}
+	rename(bufftmp, buffin);
+}
+
+static void set_reconnect_on_toggle(GtkWidget * sound_button, gpointer userdata)
+{
+  eb_chat_room * cr = (eb_chat_room *)userdata;
+   
+  /*Set the sound_enable variable depending on the toggle button*/
+   
+  if (GTK_TOGGLE_BUTTON (sound_button)->active)
+    eb_add_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
+  else
+    eb_remove_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
+}
+
 static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
 {
 	return strcasecmp((const char *)a, (const char *)b);
@@ -558,6 +705,7 @@ static GtkWidget * chat_room_type;
 static GtkWidget * join_chat_window;
 static GtkWidget * public_chkbtn;
 static GtkWidget * public_list_btn;
+static GtkWidget * reconnect_chkbtn;
 
 static int total_rooms;
 
@@ -599,7 +747,11 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 	if (!name || strlen(name) == 0)
 		name = next_chatroom_name();
 	
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(reconnect_chkbtn)))
+		eb_add_auto_chatroom(ela, name, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(public_chkbtn)));
+
 	eb_start_chat_room(ela, name, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(public_chkbtn)));
+	
 	g_free(name);
 	gtk_widget_destroy(join_chat_window);
 }
@@ -719,7 +871,7 @@ void open_join_chat_window()
 
 	gtk_container_add(GTK_CONTAINER(join_chat_window), vbox);
 
-	table = gtk_table_new(2, 4, FALSE);
+	table = gtk_table_new(2, 5, FALSE);
 
 	label = gtk_label_new(_("Chat Room Name: "));
 	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 0, 1);
@@ -741,13 +893,17 @@ void open_join_chat_window()
 	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_type, 1, 2, 1, 2);
 	gtk_widget_show(chat_room_type);
 
+	reconnect_chkbtn = gtk_check_button_new_with_label(_("Reconnect at login"));
+	gtk_table_attach_defaults (GTK_TABLE(table), reconnect_chkbtn, 1, 2, 2, 3);
+	gtk_widget_show(reconnect_chkbtn);
+
 	public_chkbtn = gtk_check_button_new_with_label(_("Chatroom is public"));
-	gtk_table_attach_defaults (GTK_TABLE(table), public_chkbtn, 1, 2, 2, 3);
+	gtk_table_attach_defaults (GTK_TABLE(table), public_chkbtn, 1, 2, 3, 4);
 	gtk_widget_set_sensitive(public_chkbtn, FALSE);
 	gtk_widget_show(public_chkbtn);
 
 	public_list_btn = gtk_button_new_with_label(_("List public chatrooms..."));
-	gtk_table_attach_defaults (GTK_TABLE(table), public_list_btn, 1, 2, 3, 4);
+	gtk_table_attach_defaults (GTK_TABLE(table), public_list_btn, 1, 2, 4, 5);
 	gtk_widget_set_sensitive(public_list_btn, FALSE);
 	gtk_widget_show(public_list_btn);
 
@@ -1079,12 +1235,30 @@ static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_mes
 	g_free(room_title);
 }
 
+static eb_chat_room * find_chatroom_by_ela_and_name(eb_local_account *ela, const char *name, int is_public)
+{
+	LList * node = NULL;
+	
+	for (node = chat_rooms; node && node->data; node = node->next) {
+		eb_chat_room *ecr = node->data;
+		if (ecr->local_user == ela && !strcmp(ecr->room_name, name)
+		&&  ecr->is_public == is_public) {
+			return ecr;
+		}
+	}
+	return NULL;
+}
+
+
 eb_chat_room* eb_start_chat_room( eb_local_account *ela, gchar * name, int is_public )
 {
-	eb_chat_room * ecb = NULL;
-
-	/* if we don't have a working account just bail right now */
-
+	eb_chat_room * ecb = NULL;	
+	
+	if ((ecb = find_chatroom_by_ela_and_name(ela, name, is_public)) != NULL) {
+		/* we have to destroy and recreate it in case we have been disconnected */
+		eb_destroy_chat_room(ecb);
+		ecb = NULL;
+	}
 	if( !ela )
 		return NULL;
 
@@ -1092,6 +1266,7 @@ eb_chat_room* eb_start_chat_room( eb_local_account *ela, gchar * name, int is_pu
 
 	if( ecb )
 	{
+		ecb->is_public = is_public;
 		if (!l_list_find(chat_rooms,ecb)) {
 			chat_rooms = l_list_append(chat_rooms, ecb);
 		}
@@ -1423,6 +1598,20 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		TOOLBAR_SEPARATOR();
 	}
 
+	ICON_CREATE(icon, iconwid, reconnect_xpm);
+	
+  	chat_room->reconnect_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
+						GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
+						NULL,
+						_("Reconnect at login"),
+						_("Reconnect at login"),
+						_("Reconnect at login"),
+						iconwid,
+						GTK_SIGNAL_FUNC(set_reconnect_on_toggle),
+						chat_room);
+	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON( chat_room->reconnect_button ), 
+				     eb_is_chatroom_auto(chat_room) );
+	
 	ICON_CREATE(icon, iconwid, tb_volume_xpm);
 	
   	chat_room->sound_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),

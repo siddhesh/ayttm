@@ -1,6 +1,8 @@
-* Sun Oct  5 2003 22:05 GMT [colin]   0.4.2-9
-- modules/jabber
-more MULTI_ACCOUNT fixes
+* Mon Oct  6 2003 00:05 GMT [colin]   0.4.2-10
+- src/chatroom.[ch] src/offline_queue_mgmt.c
+auto reconnect to chatrooms
+- pixmaps/reconnect.xpm pixmaps/Makefile.am
+new pixmap
 
 * Sat Oct  4 2003 11:05 GMT [colin]   0.4.2-8
 - modules/jabber

@@ -738,8 +738,9 @@ static void eb_sign_on_predef(int all)
 	LList *node = accounts ;
 	while(node) {
 		eb_local_account *ac = (eb_local_account*)(node->data);
-		if (!ac->connected && (all || ac->connect_at_startup))
+		if (!ac->connected && (all || ac->connect_at_startup)) {
 			RUN_SERVICE(ac)->login(ac) ;
+		}
 		node = node->next ;
 	}
 	set_menu_sensitivity();

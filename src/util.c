@@ -630,7 +630,6 @@ LList * find_chatrooms_with_remote_account(eb_account *remote)
 				if(!strcmp(remote->handle, ecrb->handle)) {
 					result = l_list_prepend(result, ecr);
 					eb_debug(DBG_CORE, "Found %s in %s\n",remote->handle, ecr->room_name);
-					break;
 				}
 			}
 		}

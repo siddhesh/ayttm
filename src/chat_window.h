@@ -48,6 +48,7 @@ typedef struct _chat_window
 	GtkWidget *sound_button;
 	GtkWidget *offline_button;
 	GtkWidget *status_label;
+	GtkWidget *reconnect_button;
 
 	int sound_enabled;
 	int send_enabled;
@@ -89,6 +90,7 @@ typedef struct _chat_window
 	GtkWidget *fellows_widget;  /* CList of online folks */
 	LList * typing_fellows;
 	int total_arrivals;
+	int is_public;
 	
 	void *protocol_local_chat_room_data; /* For protocol-specific storage */
 

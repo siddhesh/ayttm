@@ -138,6 +138,8 @@ void ay_restore_account_information(LList *saved);
 
 char * ay_http_get(const char *uri);
 char *ay_get_last_version(void);
+void ay_dump_cts(void);
+void ay_dump_elas(void);
 
 #ifdef __cplusplus
 } /* extern "C" */
@@ -148,6 +150,3 @@ char *ay_get_last_version(void);
 #endif
 
 #endif
-
-void ay_dump_cts(void);
-void ay_dump_elas(void);

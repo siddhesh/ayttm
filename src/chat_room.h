@@ -68,6 +68,8 @@ eb_chat_room * find_chat_room_by_name( char * name, int service_id );
 LList * find_chatrooms_with_remote_account(eb_account *remote);
 void invite_dialog( eb_local_account * ela, char * user, char * chat_room,
 		    void * id );
+void start_auto_chatrooms(eb_local_account *ela);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
