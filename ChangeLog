@@ -1,3 +1,7 @@
+* Fri May  2 2003 09:51 GMT [philip]	0.3.0-99
+- modules/msn2
+Fix connection failing silently
+
 * Fri May  2 2003 09:51 GMT [philip]	0.3.0-98
 - src/chat_window.c
 let text entry grab focus even if not raising window

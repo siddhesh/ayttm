@@ -628,7 +628,11 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
   if(!readable) { return; }
 
   if(args==NULL)
-  { msn_clean_up(conn); return; }
+  { 
+	  ext_show_error(conn,"MSN connection has been reset.");
+	  msn_clean_up(conn); 
+	  return; 
+  }
 
   if(numargs >=3 && !strcmp(args[0], "XFR") && !strcmp(args[2], "NS"))
   {
@@ -1027,7 +1031,7 @@ if(DEBUG)
     }
     if(inv->app==APP_FTP)
     {
-      ext_filetrans_failed((invitation_ftp *)inv, 0, "Cancelled by remote user");
+      ext_filetrans_failed((invitation_ftp *)inv, 0, "Cancelled by remote user.");
       if(inv_is_out)
       {
         msn_del_from_llist(conn->invitations_out, inv);
@@ -1141,7 +1145,7 @@ void msn_recv_file(invitation_ftp * inv, char * msg_body)
 
   if(cookie==NULL || remote==NULL || port_c==NULL)
   {
-    ext_filetrans_failed(inv, 0, "Missing parameters");
+    ext_filetrans_failed(inv, 0, "Missing parameters.");
     msn_del_from_llist(inv->conn->invitations_in, inv);
     if(cookie!=NULL) { delete cookie; }
     if(remote!=NULL) { delete remote; }
@@ -1237,7 +1241,11 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 
       args=msn_read_line(conn, &numargs);
 
-      if(args==NULL) { msn_clean_up(conn); return; }
+      if(args==NULL) { 
+	      ext_show_error(conn,"MSN connection has been reset.");
+	      msn_clean_up(conn); 
+	      return; 
+      }
 
       if(!strcmp(args[0], "VER"))
       {
@@ -1268,7 +1276,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
     if (auth->inv->cancelled) {
 	    write(conn->sock,"CCL\r\n",5);
 	    if(DEBUG) printf("Cancelling reception\n");
-	    ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Connection dropped");
+	    ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "You cancelled the transfer.");
 	    msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
             msn_clean_up(conn);
 	    return;
@@ -1296,7 +1304,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
     {
       if(read(conn->sock, &c, 1)<1)
       {
-	ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Connection dropped");
+	ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Connection dropped.");
 	msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
         msn_clean_up(conn);
         return;
@@ -1304,7 +1312,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
       if(auth->num_ignore>0)
       {
 	if(auth->num_ignore == 3 && c == 1) {
-		ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Cancelled by remote user");
+		ext_filetrans_failed((invitation_ftp *)auth->inv, 0, "Cancelled by remote user.");
 		msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);
 		msn_clean_up(conn);      
 		return;
@@ -1405,7 +1413,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
           auth->fd=open(auth->inv->filename, O_RDONLY);
           if(auth->fd<0)
           {
-            ext_filetrans_failed(auth->inv, errno, "Could not open file for reading");
+            ext_filetrans_failed(auth->inv, 0, "Could not open file for reading.");
             msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
             msn_clean_up(conn);
           } else {
@@ -1451,7 +1459,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 		/* TODO Check if args is NULL */
 		if (!strcmp(args[0],"CCL")) {
 			/* remote cancelled reception */
-        		ext_filetrans_failed(auth->inv, 0, "Remote user cancelled");
+        		ext_filetrans_failed(auth->inv, 0, "Remote user cancelled transfer.");
         		msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
 			msn_clean_up(conn);
 		}

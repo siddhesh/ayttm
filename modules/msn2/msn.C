@@ -154,8 +154,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.43 $",
-	"$Date: 2003/05/01 11:46:20 $",
+	"$Revision: 1.44 $",
+	"$Date: 2003/05/02 13:46:16 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1069,7 +1069,7 @@ void ext_filetrans_success(invitation_ftp * inv) {
 void ext_filetrans_failed(invitation_ftp * inv, int err, char * msg)
 {
 	char buf[1024];
-        snprintf(buf, sizeof(buf), "File transfer failed: %s\n\n(The file sender must have a public IP, and his firewall must allow TCP connections to port 6891.)", msg);
+        snprintf(buf, sizeof(buf), "File transfer failed: %s%s", msg, err?"\n\n(The file sender must have a public IP, and his firewall must allow TCP connections to port 6891.)":"");
 		ay_do_error( "MSN File Transfer", buf );
 	transfer_window * t_win = eb_find_window_by_inv(inv);
 	if (t_win) {
