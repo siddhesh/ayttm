@@ -1,12 +1,12 @@
 * Project homepage (where to bugreport and so):
 ===============================================
-	http://savannah.nongnu.org/projects/ayttm/
+	http://www.sf.net/projects/ayttm
 	
 * How to help & be helped
 =========================
   - bugreports:
     If you experience a fatal bug (segfault), you can file a bugreport
-    on savannah's bugtracker. The more precise it is, the easier we'll 
+    on SF.net's bugtracker. The more precise it is, the easier we'll 
     find out how to fix it. In particular, a backtrace is really 
     useful. After a crash you should have a `core' file in your 
     working directory ($HOME if run via a window manager). run gdb with 
@@ -25,7 +25,7 @@
     make install" instead of simply "make && sudo make install".
   - If you are a developer and fix a bug or add a feature, we certainly
     want to hear from you :) Please send a patch (ideally, against CVS)
-    to savannah's patchtracker. use `cvs diff -u`.
+    to SF.net's patchtracker. use `cvs diff -u`.
   - Translations: The existing translations are quite out of date after
     the fork. I plan to update the french one, but that'll be when i'll
     have more time, could be quite long. If you want to submit a 
