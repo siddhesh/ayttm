@@ -1,3 +1,11 @@
+* Wed Apr 23 2003 18:17 GMT [colin]	0.3.0-pre19
+- src/action.c src/util.c
+Formatting fixes
+
+* Wed Apr 23 2003 18:17 GMT [colin]	0.3.0-pre18
+- src/action.c
+Everyone has color printer nowadays :)
+
 * Tue Apr 22 2003 19:48 UTC [edward]	0.3.0-pre17
 - libproxy/proxy.c
 Fixes to get MINGW32 to compile.

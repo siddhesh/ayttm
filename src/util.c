@@ -771,6 +771,8 @@ void strip_html(char * text)
 
 				case 'i':
 				case 'I':
+					if(!strncasecmp(text+i+1, "img ",4))
+						visible = 0; /* don't break */
 				case 'u':
 				case 'U':
 				case 'p':
@@ -781,6 +783,7 @@ void strip_html(char * text)
 				case 'b':
 				case 'B':
 					if(text[i+2] == '>' 
+					|| !strncasecmp(text+i+1, "br>", 3)
 					|| !strncasecmp(text+i+1, "body ", 5)
 					|| !strncasecmp(text+i+1, "body>", 5))
 						visible = 0;
@@ -788,10 +791,11 @@ void strip_html(char * text)
 				case 'h':
 				case 'H':
 					if(!strncasecmp(text+i+1, "html ", 5)
+					|| !strncasecmp(text+i+1, "hr>", 3)
+					|| !strncasecmp(text+i+1, "hr width", 8)
 					|| !strncasecmp(text+i+1, "html>", 5))
 						visible = 0;
-					break;
-								
+					break;		
 				case 'F':
 				case 'f':
 					if(!strncasecmp(text+i+1, "font ", 5)
@@ -803,6 +807,10 @@ void strip_html(char * text)
 						visible = 0;
 						text[j++]=' '; /*hack*/
 					}
+				case '!':
+					if(!strncasecmp(text+i+1, "!--", 3))
+						visible = 0;
+					break;
 				case '/':
 					visible = 0;
 					break;

@@ -178,6 +178,12 @@ void conversation_action(log_info *li, int to_end)
 	fprintf(output_fhtml, "<html><head><title>Ayttm conversation</title></head><body>\n");
 	
 	while (fgets(buf, sizeof(buf), loginfo->fp)) {
+		char *smil = NULL;
+		/* smiley tags won't be so long */
+		char *bhide = "<!--", *ehide = "-->";
+		char *txt = NULL;
+		int addbr = FALSE;
+		
 		if (!to_end && strstr(buf, _("Conversation ended on ")) != NULL)
 			break;
 		if (strstr(buf, _("Conversation started on ")) != NULL) {
@@ -187,11 +193,45 @@ void conversation_action(log_info *li, int to_end)
 				break;
 			}
 		}
+		while ( (smil = strstr(buf, "<smiley name=")) != NULL) {
+			char *alt = strstr(smil, "\" alt=\"");
+			
+			if (alt) {
+				alt+=4;
+			} else {
+				break; /* not normal ... */
+			}
+			strncpy(smil, bhide, strlen(bhide));
+			strncpy(alt, ehide, strlen(ehide));
+
+			smil = alt + strlen(ehide);
+			alt = strstr(smil, "\">");
+			if (alt)
+				strncpy(alt, "  ", 2);
+		}
+		if (!strncmp(buf,"<P>",3)) {
+			char *alt = strstr(buf, "</P>");
+			if ((alt+5-buf) == strlen(buf)) {
+				/* replace <P>...</P> by ...<BR> */
+				strncpy(buf, "   ", 3);
+				strncpy(alt, "<BR>", 4);
+			}
+		} else if (!strncmp(buf,"<HR WIDTH", 9)) {
+			/* add <BR> */
+			addbr = TRUE;
+		}
+		
 		eb_debug(DBG_CORE,"=>%s\n",buf);
 		fprintf(output_fhtml, "%s",buf);
+		if (addbr)
+			fprintf(output_fhtml, "<br>");
 		
 		strip_html(buf);
-		fprintf(output_fplain, "%s",buf);
+		
+		txt = buf;
+		while (txt && *txt==' ')
+			*txt++;
+		fprintf(output_fplain, "%s",txt);
 		
 		firstline = 0;
 	}
