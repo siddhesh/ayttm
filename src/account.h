@@ -76,6 +76,7 @@ typedef struct account {
 	int online;
 	int status_handler;
 	struct _info_window * infowindow;
+	int priority;
 } eb_account;
 
 int load_accounts();

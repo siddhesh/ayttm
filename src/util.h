@@ -135,6 +135,7 @@ GList * llist_to_glist(LList * l, int free_old);
 /* free_old will free the old list after converting */
 LList * glist_to_llist(GList * g, int free_old);
 
+int account_cmp(const void * a, const void * b);
 int contact_cmp(const void * a, const void * b);
 
 int send_url(const char *url);

@@ -17,13 +17,6 @@
 	static grouplist * cur_group = NULL;
 	extern int contactlex();
 
-
-	static int account_cmp(const void * a, const void * b)
-	{
-		eb_account *ca=(eb_account *)a, *cb=(eb_account *)b;
-		return strcasecmp(ca->handle, cb->handle);
-	}
-	
 %}
 
 %union {
@@ -161,6 +154,11 @@ account:
 					free(c);
 				} else {
 					$$->ela = find_local_account_for_remote($$, 0);
+				}
+				c = value_pair_get_value( $5, "PRIORITY" );
+				if(c) {
+					$$->priority=atoi(c);
+					free(c);
 				}
 				$$->icon_handler = $$->status_handler = -1;
 				$$ = eb_services[id].sc->read_account_config($$, $5);

@@ -982,6 +982,16 @@ void rename_group( grouplist *current_group, char * new_name )
 }
 
 
+
+int account_cmp(const void * a, const void * b)
+{
+	eb_account *ca=(eb_account *)a, *cb=(eb_account *)b;
+	if(ca->priority == cb->priority)
+		return strcasecmp(ca->handle, cb->handle);
+	else
+		return ca->priority - cb->priority;
+}
+	
 /* compares two contact names */
 int contact_cmp(const void * a, const void * b)
 {
@@ -1048,7 +1058,7 @@ static void add_account_verbose( char * contact, eb_account * ea, int verbosity 
 		contact_mgmt_queue_add(ea, MGMT_ADD, c?c->group->name:_("Unknown"));
 	}
 	if (c) {
-		c->accounts = l_list_prepend( c->accounts, ea );
+		c->accounts = l_list_insert_sorted( c->accounts, ea, account_cmp );
 		ea->account_contact = c;
 		RUN_SERVICE(ea)->add_user(ea);
 
@@ -1217,7 +1227,7 @@ struct contact * move_account (struct contact * new_con, eb_account *ea)
 		old_con->accounts = l_list_remove(old_con->accounts, ea);
 		remove_account_line(ea);
 
-		new_con->accounts = l_list_prepend(new_con->accounts, ea);
+		new_con->accounts = l_list_insert_sorted(new_con->accounts, ea, account_cmp);
 		ea->account_contact = new_con;
 
 		if(l_list_empty(old_con->accounts)) {
