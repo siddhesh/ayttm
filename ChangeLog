@@ -1,3 +1,8 @@
+* Wed Apr 23 2003 20:40 GMT [colin]	0.3.0-pre20
+- src/prefs.c
+Preference loss if no /etc/ayttmrc fix - thanks to
+Ben Reser for the patch.
+
 * Wed Apr 23 2003 18:17 GMT [colin]	0.3.0-pre19
 - src/action.c src/util.c
 Formatting fixes

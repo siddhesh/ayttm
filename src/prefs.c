@@ -578,8 +578,11 @@ static void ayttm_prefs_read_file(char *file)
 	
 	if ( fp == NULL )
 	{
-		printf( "Creating prefs file [%s]\n", buff );
-		ayttm_prefs_write();
+		if (strcmp(file,AYTTMRC)) 
+		{
+			printf( "Creating prefs file [%s]\n", buff );
+			ayttm_prefs_write();
+		}
 		return;
 	}
 	
