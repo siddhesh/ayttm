@@ -1,3 +1,7 @@
+* Wed Oct 22 2003 08:25 GMT [nicolas]	0.4.3-11
+- modules/aim-toc/aim-toc.c
+Remove old useless code that leaks in eb_aim_chat_invite().
+
 * Wed Oct 22 2003 08:23 GMT [philip]	0.4.3-10
 - modules/yahoo2/yahoo.c modules/yahoo2/libyahoo2/yahoo2_types.h
 Detect failed login because of incorrect username
