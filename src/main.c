@@ -70,10 +70,10 @@ int WinVer;
 char geometry[256];
 
 #ifdef CRASH_DIALOG
-gchar *startup_dir;
-gchar *argv0;
+gchar *startup_dir = NULL;
+gchar *argv0 = NULL;
 static int crash;
-static gchar *crash_param;
+static gchar *crash_param = NULL;
 #endif
 
 static void eb_cli_ver ()
@@ -85,10 +85,9 @@ static void eb_cli_ver ()
 	printf("You may redistribute copies of Ayttm under the terms of the\n");
 	printf("GNU General Public License.  For more information about these\n");
 	printf("matters, see the file named COPYING.\n");
-	printf("\nAyttm is brought to you by (in no order): Torrey Searle, \n");
-	printf("Jared Peterson, Ben Rigas, Alex Wheeler, Robert Lazzurs, Meredydd Luff,\n");
-	printf("Vance Lankhaar, Erik Inge Bolso, Colin Leroy, Philip Tellis, Jeff Miller,\n");
-	printf("and Troy Morrison.\n");
+	printf("\nAyttm is brought to you by (in no order): \n");
+	printf(" Colin Leroy, Andy Maloney, Philip Tellis, Edward Haletky,\n");
+	printf(" and Tahir Hashmi.\n");
 	printf("\nFor more information on Ayttm, visit the website at\n");
 	printf("         http://ayttm.sf.net/\n");
 	return;
@@ -101,7 +100,7 @@ struct option_help
 	const char * help;
 };
 
-static struct option_help options [] =
+static const struct option_help options [] =
 {
 	{'h', "help",       "Display this help and exit"},
 	{'v', "version",    "Output version information and exit"},
@@ -149,8 +148,6 @@ static void eb_cli_help (const char * cmd)
 	}
 
 #endif /* defined (HAVE_GETOPT) || defined (HAVE_GETOPT_LONG) */
-
-	return;
 }
 
 
@@ -518,7 +515,8 @@ int main(int argc, char *argv[])
 
 	start_login(!accounts_success);
 
-        init_smileys();
+	init_smileys();
+	
 	gtk_main();
 
 	clean_up_dummies();
@@ -535,5 +533,4 @@ int main(int argc, char *argv[])
 	eb_debug(DBG_CORE, "Removed lock file\n");
 #endif
 	return 0;
-
 }
