@@ -278,11 +278,10 @@ msnconn *find_nsconn_by_name(char *name)
     llist * list;
 
     list=msnconnections;
-    while(1)
+    for(; list; list = list->next)
     {
       msnconn * c;
       
-      if(list==NULL) { break ; }
       c=(msnconn *)list->data;
       if(c->type==CONN_NS &&
          !strcmp (name,((authdata_SB *)c->auth)->username)) {

@@ -1,3 +1,7 @@
+* Tue May  6 2003 13:39 GMT [philip]	0.3.0-140
+- modules/msn2/msn.C
+infinite loop
+
 * Tue May  6 2003 13:30 GMT [philip]	0.3.0-139
 - configure.ac acinclude.m4
 Use gpgme macro and don't include GPGME stuff in EB_CFLAGS,LIBS
