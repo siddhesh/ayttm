@@ -18,6 +18,24 @@
 	static grouplist * cur_group = NULL;
 	extern int contactlex();
 
+	static int group_cmp(const void * a, const void * b)
+	{
+		const grouplist *ga=(grouplist *)a, *gb=(grouplist *)b;
+		return strcasecmp(ga->name, gb->name);
+	}
+
+	static int contact_cmp(const void * a, const void * b)
+	{
+		const struct contact *ca=(struct contact *)a, *cb=(struct contact *)b;
+		return strcasecmp(ca->nick, cb->nick);
+	}
+
+	static int account_cmp(const void * a, const void * b)
+	{
+		eb_account *ca=(eb_account *)a, *cb=(eb_account *)b;
+		return strcasecmp(ca->handle, cb->handle);
+	}
+	
 %}
 
 %union {
@@ -46,7 +64,7 @@ start:
 ;
 
 group_list:
-		group group_list { $$ = l_list_prepend( $2, $1 ); }
+		group group_list { $$ = l_list_insert_sorted( $2, $1 , group_cmp); }
 	|	EPSILON { $$ = 0; }
 ;
 
@@ -66,7 +84,7 @@ group:
 ;
 
 contact_list:
-		contact contact_list { $$ = l_list_prepend( $2, $1 ); }
+		contact contact_list { $$ = l_list_insert_sorted( $2, $1, contact_cmp ); }
 	|	EPSILON { $$ = 0; }
 ;
 
@@ -122,7 +140,7 @@ contact:
 ;	
 
 account_list:
-	 	account account_list{ $$ = l_list_prepend( $2, $1 ); }
+	 	account account_list{ $$ = l_list_insert_sorted( $2, $1 , account_cmp); }
 	 |	EPSILON { $$ = 0; }
 
 ;
