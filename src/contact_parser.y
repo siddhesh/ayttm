@@ -64,7 +64,7 @@ start:
 ;
 
 group_list:
-		group group_list { $$ = l_list_insert_sorted( $2, $1 , group_cmp); }
+		group group_list { $$ = l_list_prepend( $2, $1 ); }
 	|	EPSILON { $$ = 0; }
 ;
 
