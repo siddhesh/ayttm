@@ -1,3 +1,7 @@
+* Fri Dec 12 2003 19:56 GMT [philip]	0.4.5-8
+- modules/yahoo2/yahoo.c
+fix get_time to work on windows - plasmoida (bug 859107)
+
 * Fri Dec 12 2003 10:30 GMT [philip]	0.4.5-7
 - src/status.c
 finally fix that statusbar

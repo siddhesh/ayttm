@@ -29,6 +29,7 @@
 
 #ifdef __MINGW32__
 # include <winsock2.h>
+# include <sys/timeb.h>  /* <--  added to allow compilation on Win32 ( see get_time() ) : plasmoidia */
 # define EINPROGRESS WSAEINPROGRESS
 #else
 # include <netdb.h>
@@ -134,8 +135,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.79 $",
-	"$Date: 2003/12/12 07:10:19 $",
+	"$Revision: 1.80 $",
+	"$Date: 2003/12/12 20:03:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1820,6 +1821,18 @@ static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
 	}
 }
 
+/* added to allow compilation on Win32 : plasmoidia */
+#ifdef __MINGW32__
+static double get_time()
+{
+	struct _timeb ct;
+	_ftime(&ct);
+
+	/* return time in milliseconds */
+	return (ct.time * 1E3 + ct.millitm);
+}
+
+#else
 static double get_time()
 {
 	struct timeval ct;
@@ -1828,6 +1841,7 @@ static double get_time()
 	/* return time in milliseconds */
 	return (ct.tv_sec * 1E3 + ct.tv_usec / 1E3);
 }
+#endif
 
 static int ay_yahoo_webcam_timeout_callback(gpointer data)
 {
@@ -2333,7 +2347,6 @@ static void eb_yahoo_logout(eb_local_account * ela)
 	ela->connected = 0;
 
 	is_setting_state = 1;
-
 	if (ela->status_menu) {
 		eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_OFFLINE);
 	}
