@@ -1,3 +1,7 @@
+* Tue Apr 08 2003 11:58 GMT [colin]	0.2.3-60
+- src/edit_local_accounts.c
+Fix my mistakes - thanks Michael Ivey !
+
 * Tue Apr 08 2003 11:58 GMT [colin]	0.2.3-59
 - src/status.c src/edit_local_accounts.c
   modules/*toc/*toc.c

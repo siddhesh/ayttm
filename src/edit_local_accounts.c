@@ -52,7 +52,7 @@ enum
 	SERVICE_TYPE
 };
 
-typedef char * account_row[3];
+typedef char * account_row[4];
 
 static GtkWidget * account_list;
 static GtkWidget * account_window = NULL;
@@ -222,10 +222,11 @@ static char * check_login_validity(char * text[])
 
 static void add_callback(GtkWidget * widget, gpointer data)
 {
-	char * text[3];
+	char * text[4];
 	char * error_message = NULL;
 	int i, row;
 	
+	text[CONNECT] = "";
 	text[USER_NAME] = gtk_entry_get_text(GTK_ENTRY(username));
 	text[PASSWORD] = gtk_entry_get_text(GTK_ENTRY(password));
 	text[SERVICE_TYPE] = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(service_type)->entry));
@@ -270,10 +271,11 @@ static void add_callback(GtkWidget * widget, gpointer data)
 
 static void modify_callback(GtkWidget * widget, gpointer data)
 {
-	char * text[3];
+	char * text[4];
 	char * error_message = NULL;
 	int i;
 	
+	text[CONNECT]="";
 	text[USER_NAME] = gtk_entry_get_text(GTK_ENTRY(username));
 	text[PASSWORD] = gtk_entry_get_text(GTK_ENTRY(password));
 	text[SERVICE_TYPE] = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(service_type)->entry));
