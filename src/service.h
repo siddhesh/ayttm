@@ -139,7 +139,7 @@ struct service_callbacks {
 
 	/* set an away message */
 
-	void (*set_away)(eb_local_account * account, char * message );
+	void (*set_away)(eb_local_account * account, char * message, int away );
 
 	/*send a message to a chat room*/
 

@@ -25,7 +25,7 @@
 #ifndef __AWAY_WINDOW_H__
 #define __AWAY_WINDOW_H__
 
-gchar * get_away_message();
+char * get_away_message();
 void show_away_choicewindow(void *widget, void *data);
 void away_window_set_back(void);
 #endif

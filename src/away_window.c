@@ -83,7 +83,7 @@ static void destroy_away()
     		ela = list->data;
 		/* Only change state for those accounts which are connected */
 		if(ela->connected)
-			eb_services[ela->service_id].sc->set_away(ela, NULL);
+			eb_services[ela->service_id].sc->set_away(ela, NULL,0);
 	}
 }
 
@@ -148,11 +148,11 @@ static void show_away(gchar *a_message, void *unused)
     		ela = list->data;
 		/* Only change state for those accounts which are connected */
 		if(ela->connected)
-			eb_services[ela->service_id].sc->set_away(ela, a_message);
+			eb_services[ela->service_id].sc->set_away(ela, a_message,1);
 	}
 }
 
-gchar * get_away_message()
+char * get_away_message()
 {
 	return gtk_editable_get_chars(GTK_EDITABLE(away_message_text_entry),0,-1);
 }

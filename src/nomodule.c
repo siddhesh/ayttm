@@ -202,7 +202,7 @@ static void eb_nomodule_set_idle( eb_local_account * ela, int idle )
 	return;
 }
 
-static void eb_nomodule_set_away(eb_local_account * account, char * message)
+static void eb_nomodule_set_away(eb_local_account * account, char * message, int away)
 {
 	return;
 }
