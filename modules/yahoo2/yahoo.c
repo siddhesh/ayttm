@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.27 $",
-	"$Date: 2003/04/28 10:43:19 $",
+	"$Revision: 1.28 $",
+	"$Date: 2003/04/28 11:48:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -406,7 +406,7 @@ static int ext_yahoo_log(char *fmt,...)
 static void eb_yahoo_add_user(eb_account * ea);
 static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode);
 static void eb_yahoo_logout(eb_local_account * ela);
-static eb_account *eb_yahoo_new_account(const char * account);
+static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * account);
 
 
 static int eb_yahoo_ping_timeout_callback(gpointer data)
@@ -698,7 +698,7 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 			changed = 1;
 			con=add_new_contact(bud->group, contact_name, SERVICE_INFO.protocol_id);
 		}
-		ea = eb_yahoo_new_account(bud->id);
+		ea = eb_yahoo_new_account(NULL, bud->id);
 		add_account(con->nick, ea);
 	}
 
@@ -755,7 +755,7 @@ static void ext_yahoo_got_ignore(int id, YList * ign)
 			}
 			con=add_new_contact(bud->group, contact_name, SERVICE_INFO.protocol_id);
 		}
-		ea = eb_yahoo_new_account(bud->id);
+		ea = eb_yahoo_new_account(NULL, bud->id);
 		add_account(con->nick, ea);
 	}
 
@@ -788,7 +788,7 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 
 		sender = find_account_by_handle(who, SERVICE_INFO.protocol_id);
 		if (sender == NULL) {
-			sender = eb_yahoo_new_account(who);
+			sender = eb_yahoo_new_account(NULL, who);
 			add_dummy_contact(who, sender);
 		}
 		receiver = yahoo_find_local_account_by_id(id);
@@ -1427,7 +1427,7 @@ static void eb_yahoo_authorize_callback(gpointer data, int result)
 
 	if(result) {
 		if(!find_account_by_handle(ay->who, SERVICE_INFO.protocol_id)) {
-			eb_account *ea = eb_yahoo_new_account(ay->who);
+			eb_account *ea = eb_yahoo_new_account(NULL, ay->who);
 			add_unknown_account_window_new(ea);
 		}
 	} else {
@@ -2267,7 +2267,7 @@ static void eb_yahoo_rename_group(const char *old_group, const char *new_group)
 	}
 }
 
-static eb_account *eb_yahoo_new_account(const char * account)
+static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * account)
 {
 	eb_account *acct = g_new0(eb_account, 1);
 	eb_yahoo_account_data *yad = g_new0(eb_yahoo_account_data, 1);
@@ -2281,6 +2281,7 @@ static eb_account *eb_yahoo_new_account(const char * account)
 	yad->away = 1;
 	yad->status_message = NULL;
 	yad->typing_timeout_tag = 0;
+	acct->ela = ela;
 	return acct;
 }
 

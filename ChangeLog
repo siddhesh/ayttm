@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 11:00 GMT [colin]	0.3.0-12
+- src modules
+Change new_account service callback to take an ela
+
 * Mon Apr 28 2003 11:00 GMT [colin]	0.3.0-11
 - src/offline_queue_mgmt.c src/account.[ch]
 Offline stuff uses ea->ela

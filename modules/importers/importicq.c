@@ -52,8 +52,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import ICQ99 Contact List", 
 	"Import the ICQ99 Contact List", 
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/18 08:46:07 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/28 11:48:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -391,7 +391,7 @@ void import_icq99_ok( GtkWidget  *w,GtkFileSelection *fs )
 				add_new_contact(contact.group, contact.user_name, ICQ_ID );
 			}
 		}
-		ea = eb_services[ICQ_ID].sc->new_account(uin);
+		ea = eb_services[ICQ_ID].sc->new_account(NULL,uin);
 
 		if(find_contact_by_nick(contact.user_name))
                add_account( contact.user_name, ea );

@@ -120,7 +120,7 @@ struct service_callbacks {
 	int (*is_suitable)(eb_local_account *local, eb_account *remote);
 
 	/*Creates a new account*/
-	eb_account*(*new_account)( const char * account );
+	eb_account*(*new_account)(eb_local_account *ela, const char * account );
 
 	/*This returns the string representing the status,
 	  this will get used on the Contact List, if statuses

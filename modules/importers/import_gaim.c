@@ -57,8 +57,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Gaim Buddy List", 
 	"Import the Gaim Buddy List", 
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/27 12:30:38 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/28 11:48:46 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -129,7 +129,7 @@ void import_gaim_accounts(ebmCallbackData *data)
 		
             if(!find_account_by_handle(handle, AIM_ID))
             {
-                eb_account * ea = eb_services[AIM_ID].sc->new_account(handle);
+                eb_account * ea = eb_services[AIM_ID].sc->new_account(NULL,handle);
                 add_account( fname, ea );
 		move_contact (group, find_contact_by_nick(fname));
             }

@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.12 $",
-	"$Date: 2003/04/28 10:43:18 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/04/28 11:48:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -200,7 +200,7 @@ static eb_local_account * irc_read_local_config(LList * pairs);
           static void irc_add_user( eb_account * account );
           static void irc_del_user( eb_account * account );
       static int irc_is_suitable (eb_local_account *local, eb_account *remote);
-	static eb_account * irc_new_account( const char * account );
+	static eb_account * irc_new_account(eb_local_account *ela, const char * account );
        static char * irc_get_status_string( eb_account * account );
           static char ** irc_get_status_pixmap( eb_account * account);
           static void irc_set_idle(eb_local_account * account, int idle );
@@ -1536,14 +1536,14 @@ static eb_local_account * irc_search_for_local_account (char *server)
 /* This func expects account names of the form Nick@server,
    for example Knan@irc.midgardsormen.net, and will return
    NULL otherwise, very probably causing a crash. */
-static eb_account * irc_new_account( const char * account )
+static eb_account * irc_new_account(eb_local_account *ela, const char * account )
 {
 	eb_account * ea = g_new0(eb_account, 1);
 	irc_account * ia = g_new0(irc_account, 1);
 	LList * node;
 	
 	strncpy(ea->handle, account, 254);
-	
+	ea->ela = ela;
 	ea->protocol_account_data = ia;
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->list_item = NULL;

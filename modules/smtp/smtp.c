@@ -71,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/28 10:43:19 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/28 11:48:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -349,13 +349,13 @@ static void eb_smtp_set_away(eb_local_account * account, char * message)
 {
 }
 
-static eb_account *eb_smtp_new_account(const char * account)
+static eb_account *eb_smtp_new_account(eb_local_account *ela, const char * account)
 {
 	eb_account *ea = calloc(1, sizeof(eb_account));
 	eb_smtp_account_data *sad = calloc(1, sizeof(eb_smtp_account_data));
 
 	ea->protocol_account_data = sad;
-
+	ea->ela = ela;
 	strncpy(ea->handle, account, 255);
 	ea->service_id = SERVICE_INFO.protocol_id;
 	sad->status = SMTP_STATUS_OFFLINE;

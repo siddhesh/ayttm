@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.22 $",
-	"$Date: 2003/04/28 10:43:18 $",
+	"$Revision: 1.23 $",
+	"$Date: 2003/04/28 11:48:46 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -201,7 +201,7 @@ static LList * icq_buddies;
 static input_list * icq_prefs = NULL;
 */
 
-static eb_account * eb_icq_new_account( const char * account );
+static eb_account * eb_icq_new_account(eb_local_account *ela, const char * account );
 static void eb_icq_add_user( eb_account * account );
 static void eb_icq_login( eb_local_account * account );
 static void eb_icq_logout( eb_local_account * account );
@@ -502,7 +502,7 @@ static void eb_icq_user_info(toc_conn * conn, char * user, char * message )
 		ea->service_id = ela->service_id;
 		aad->status = ICQ_OFFLINE;
 		ea->protocol_account_data = aad;
-
+		ea->ela = ela;
 		add_unknown(ea);
 		sender = ea;
 
@@ -547,7 +547,7 @@ static void eb_icq_new_user(char * group, char * f_handle)
 	{
 		grouplist * gl = find_grouplist_by_name(group);
 		struct contact * c = find_contact_by_nick(fname);
-		ea = eb_icq_new_account(handle);
+		ea = eb_icq_new_account(NULL, handle);
 	
 
 		if(!gl && !c)
@@ -601,7 +601,7 @@ static void eb_icq_parse_incoming_im(toc_conn * conn, char * user, char * messag
 			ea->service_id = ela->service_id;
 			aad->status = ICQ_OFFLINE;
 			ea->protocol_account_data = aad;
-			
+			ea->ela = ela;
 			add_unknown(ea);
 			//icq_add_buddy(command->conn,screenname);
 			sender = ea;
@@ -700,7 +700,7 @@ static eb_chat_room * eb_icq_make_chat_room(char * name, eb_local_account * acco
 	return ecr;
 }
 
-static eb_account * eb_icq_new_account( const char * account )
+static eb_account * eb_icq_new_account(eb_local_account *ela, const char * account )
 {
 	eb_account * a = g_new0(eb_account, 1);
 	struct eb_icq_account_data * aad = g_new0(struct eb_icq_account_data, 1);
@@ -708,6 +708,7 @@ static eb_account * eb_icq_new_account( const char * account )
 	a->protocol_account_data = aad;
 	strncpy(a->handle, account, 255);
 	a->service_id = SERVICE_INFO.protocol_id;
+	a->ela = ela;
 	aad->status = ICQ_OFFLINE;
 
 	return a;

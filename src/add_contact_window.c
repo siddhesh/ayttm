@@ -194,8 +194,8 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
 	
 	gint service_id = get_service_id( service );
-				
-	eb_account *ea = eb_services[service_id].sc->new_account(account);
+			
+	eb_account *ea = eb_services[service_id].sc->new_account(find_suitable_local_account(NULL, service_id), account);
 	ea->service_id = service_id;
 
 	if (eb_services[service_id].sc->check_login) {

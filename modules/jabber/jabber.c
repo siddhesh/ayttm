@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.21 $",
-	"$Date: 2003/04/28 10:43:19 $",
+	"$Revision: 1.22 $",
+	"$Date: 2003/04/28 11:48:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -545,11 +545,11 @@ static void eb_jabber_del_user(eb_account * account )
     account->protocol_account_data=NULL;
 }
 
-static eb_account * eb_jabber_new_account( const char * account )
+static eb_account * eb_jabber_new_account(eb_local_account *ela, const char * account )
 {
 	eb_account * ea = g_new0(eb_account, 1);
 	eb_jabber_account_data * jad = g_new0( eb_jabber_account_data, 1 );
-	
+	ea->ela = ela;
 	ea->protocol_account_data = jad;
 	strncpy(ea->handle, account, 255 );
 	ea->service_id = SERVICE_INFO.protocol_id;
@@ -899,7 +899,7 @@ void JABBERAddBuddy(void *data)
 
     ea = find_account_by_handle(jb->jid, SERVICE_INFO.protocol_id);
     if (!ea) {	/* Add an unknown account */
-	ea = eb_jabber_new_account(jb->jid);
+	ea = eb_jabber_new_account(NULL, jb->jid);
         if ( !find_grouplist_by_name("Unknown" )) {
           add_group("Unknown");
         }
@@ -929,7 +929,7 @@ void JABBERInstantMessage(void *data)
     im = (JABBER_InstantMessage_PTR)data;
     sender = find_account_by_handle(im->sender, SERVICE_INFO.protocol_id);
     if (sender == NULL) {
-	ea = eb_jabber_new_account(im->sender);
+	ea = eb_jabber_new_account(NULL, im->sender);
 
         add_unknown(ea);
         sender = ea;
@@ -960,7 +960,7 @@ void JABBERStatusChange(void *data)
 
     ea = find_account_by_handle(jb->jid, SERVICE_INFO.protocol_id);
     if (!ea) {	/* Add an unknown account */
-	ea = eb_jabber_new_account(jb->jid);
+	ea = eb_jabber_new_account(NULL, jb->jid);
         if ( !find_grouplist_by_name("Unknown" )) {
           add_group("Unknown");
         }

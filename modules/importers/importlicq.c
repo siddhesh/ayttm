@@ -59,8 +59,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Licq Contact List", 
 	"Import the Licq Contact List", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/27 12:30:38 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/28 11:48:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -227,7 +227,7 @@ void import_licq_accounts(ebmCallbackData *data)
         }
         if(!find_account_by_handle(uin, ICQ_ID))
         {
-            eb_account * ea = eb_services[ICQ_ID].sc->new_account(uin);
+            eb_account * ea = eb_services[ICQ_ID].sc->new_account(NULL,uin);
             add_account( nick, ea );
 //            RUN_SERVICE(ea)->add_user(ea);
         }

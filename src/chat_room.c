@@ -122,7 +122,7 @@ static void handle_fellow_click (char *name, eb_chat_room *cr)
 		eb_chat_window_display_contact(find_contact_by_nick(name));
 		return;
 	} else {
-		ea = RUN_SERVICE(cr->local_user)->new_account(name);
+		ea = RUN_SERVICE(cr->local_user)->new_account(cr->local_user, name);
 		add_unknown_account_window_new(ea);
 		return; /* as add_unknown_account_window_new isn't modal 
 			we'll open the chat_window next time */

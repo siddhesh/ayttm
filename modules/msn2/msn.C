@@ -100,7 +100,7 @@ static llist * waiting_auth_callbacks = NULL;
 
 static eb_chat_room * eb_msn_get_chat_room(msnconn * conn);
 static void eb_msn_clean_up_chat_room(msnconn * conn);
-static eb_account * eb_msn_new_account( const char * account );
+static eb_account * eb_msn_new_account(eb_local_account *ela, const char * account );
 
 static LList * psmileys=NULL;
 
@@ -150,8 +150,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.30 $",
-	"$Date: 2003/04/28 10:43:19 $",
+	"$Revision: 1.31 $",
+	"$Date: 2003/04/28 11:48:51 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -985,7 +985,7 @@ static void eb_msn_authorize_callback( gpointer data, int response )
   eb_debug(DBG_MSN,"entering authorize_callback\n");
   if(response) {
     if (ac == NULL) {
-      ac = eb_msn_new_account(username);
+      ac = eb_msn_new_account(ela, username);
       add_account_silent(username, ac);
       eb_msn_add_user(ac);
       edit_account_window_new(ac);
@@ -1136,12 +1136,13 @@ static void eb_msn_del_user(eb_account * account )
         }
 }
 
-static eb_account * eb_msn_new_account( const char * account )
+static eb_account * eb_msn_new_account(eb_local_account *ela, const char * account )
 {
 	eb_account * ea = (eb_account *)g_new0(eb_account, 1);
 	eb_msn_account_data * mad = (eb_msn_account_data *)g_new0( eb_msn_account_data, 1 );
 
 	ea->protocol_account_data = mad;
+	ea->ela = ela;
 	strncpy(ea->handle, account, 255 );
 	ea->service_id = SERVICE_INFO.protocol_id;
 	mad->status = MSN_OFFLINE;
@@ -1390,7 +1391,7 @@ void ext_got_friend(msnconn *conn, char *name, char *groups)
 		group[ strstr(group,",")-group ] = 0;
 	eb_debug(DBG_MSN,"got a friend %s, %s (all=%s)\n",name,group,groups);
 	
-	ea = eb_msn_new_account(name);
+	ea = eb_msn_new_account(ela, name);
 	
 	LList *walk = mlad->msn_grouplist;
 	for (walk = mlad->msn_grouplist; walk && walk->data; walk=walk->next) {
@@ -1962,6 +1963,7 @@ static int get_status_num(char *status)
 void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * status)
 {
     eb_account *ea;
+    eb_local_account *ela = (eb_local_account *)conn->ext_data;
     eb_msn_account_data *mad;
     /* UNUSED char *newHandle = NULL; */
     int state=0;
@@ -1975,7 +1977,7 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
 	}
     } else {
 	    eb_debug(DBG_MSN, "ea not found, creating new account\n");
-	    ea = eb_msn_new_account(buddy);
+	    ea = eb_msn_new_account(ela, buddy);
             mad = (eb_msn_account_data *)ea->protocol_account_data;
 	    if(!find_grouplist_by_name(_("Buddies")))
 		    add_group(_("Buddies"));

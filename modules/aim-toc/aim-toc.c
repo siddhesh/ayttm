@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.24 $",
-	"$Date: 2003/04/28 10:43:18 $",
+	"$Revision: 1.25 $",
+	"$Date: 2003/04/28 11:48:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -201,7 +201,7 @@ static LList * aim_buddies;
 static input_list * aim_prefs = NULL;
 */
 
-static eb_account * eb_aim_new_account( const char * account );
+static eb_account * eb_aim_new_account(eb_local_account * ela, const char * account );
 static void eb_aim_add_user( eb_account * account );
 static void eb_aim_login( eb_local_account * account );
 static void eb_aim_logout( eb_local_account * account );
@@ -545,7 +545,7 @@ static void eb_aim_new_user(char * group, char * f_handle)
 	{
 		grouplist * gl = find_grouplist_by_name(group);
 		struct contact * c = find_contact_by_nick(handle);
-		ea = eb_aim_new_account(handle);
+		ea = eb_aim_new_account(NULL,handle);
 	
 
 		if(!gl && !c)
@@ -700,7 +700,7 @@ static eb_chat_room * eb_aim_make_chat_room(char * name, eb_local_account * acco
 	return ecr;
 }
 
-static eb_account * eb_aim_new_account( const char * account )
+static eb_account * eb_aim_new_account(eb_local_account *ela, const char * account )
 {
 	eb_account * a = g_new0(eb_account, 1);
 	struct eb_aim_account_data * aad = g_new0(struct eb_aim_account_data, 1);
@@ -709,7 +709,7 @@ static eb_account * eb_aim_new_account( const char * account )
 	strncpy(a->handle, account, 255);
 	a->service_id = SERVICE_INFO.protocol_id;
 	aad->status = AIM_OFFLINE;
-
+	a->ela = ela;
 	return a;
 }
 
