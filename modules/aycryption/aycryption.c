@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.17 $",
-	"$Date: 2003/06/04 10:28:46 $",
+	"$Revision: 1.18 $",
+	"$Date: 2003/09/04 07:05:35 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -222,8 +222,12 @@ static void br_to_nl(char * text)
 	{
 		if(text[i] == '<')
 		{
-			if (!strncasecmp(text+i+1, "br/", 3))
-			{
+			if (!strncasecmp(text+i+1, "br/", 3)) {
+				/* Kopete compat */
+				visible = 0;
+				text[j++] = '\n';
+			} else if (!strncasecmp(text+i+1, "br", 2)) {
+				/* Fire compat */
 				visible = 0;
 				text[j++] = '\n';
 			}

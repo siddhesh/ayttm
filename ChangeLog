@@ -1,3 +1,7 @@
+* Thu Sep  4 2003 06:58 GMT [colin]	0.4.0-18
+- modules/aycryption/aycryption.c
+Fire compatibility patch by Gary E. Miller <garyemiller@users.sf.net>
+
 * Wed Sep  3 2003 15:55 GMT [colin]	0.4.0-17
 - src/gtk/pref_windows.C src/prefs.[ch] src/status.c
 "Edit accounts" now point to the correct page in prefs
