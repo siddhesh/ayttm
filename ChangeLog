@@ -1,3 +1,7 @@
+* Wed Nov 19 2003 21:05 GMT [colin]	0.4.4-23
+- configure.ac po/es.po
+New Spanish translation by Ricardo Mones
+
 * Mon Nov 17 2003 08:05 GMT [breser]	0.4.4-22
 - gen
 Switch to #!/bin/sh and use which instead of type -p,
