@@ -81,7 +81,7 @@ int load_accounts();
 int load_contacts();
 void write_contact_list();
 void write_account_list();
-eb_account *dummy_account(char *handle, char *group, int serviceid);
+eb_account *dummy_account(char *handle, char *group, eb_local_account *ela);
 
 #ifdef __cplusplus
 }

@@ -52,7 +52,7 @@ void contact_mgmt_queue_add(const eb_account *ea, int action, const char *new_gr
 	}
 	
 	fprintf(fp, "%s\t%d\t%s\t%s\t%s\n",
-		get_service_name(ea->service_id),
+		ea->ela? ea->ela->handle:"____NULL____",
 		action,
 		ea->handle,
 		(action!=MGMT_ADD ? ea->account_contact->group->name:"NULL"),
@@ -76,7 +76,7 @@ void group_mgmt_queue_add(const eb_local_account *ela, const char *old_group, in
 	}
 	
 	fprintf(fp, "%s\t%d\t%s\t%s\n",
-		get_service_name(ela->service_id),
+		ela->handle,
 		action,
 		(old_group!=NULL ? old_group:"NULL"),
 		(new_group!=NULL ? new_group:"NULL"));
@@ -91,18 +91,18 @@ int contact_mgmt_flush(eb_local_account *ela)
 	char **tokens = NULL;
 
 	if (ela->connecting) {
-		eb_debug(DBG_CORE,"connecting on %s (trying again later)\n",get_service_name(ela->service_id));
+		eb_debug(DBG_CORE,"connecting on %s (trying again later)\n",ela->handle);
 		return 1;
 	}
 	
 	ela->mgmt_flush_tag = 0; /* we can now consider it won't be called a second time */
 	
 	if (!ela->connected) {
-		eb_debug(DBG_CORE,"disconnected on %s (cancelling flush)\n",get_service_name(ela->service_id));
+		eb_debug(DBG_CORE,"disconnected on %s (cancelling flush)\n",ela->handle);
 		return 0;
 	}
 			
-	eb_debug(DBG_CORE,"connected on %s (flushing)\n",get_service_name(ela->service_id));
+	eb_debug(DBG_CORE,"connected on %s (flushing)\n",ela->handle);
 
 	/* flush groups, too */
 	group_mgmt_flush(ela);
@@ -130,7 +130,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 		char buff_backup[NAME_MAX];
 		strncpy(buff_backup, buff, NAME_MAX);
 		tokens = ay_strsplit( buff, "\t", -1 );
-		if(!strcmp(tokens[0],get_service_name(ela->service_id))) {
+		if(!strcmp(tokens[0], ela->handle)) {
 			int action     = atoi(tokens[1]);
 			char *handle   = tokens[2];
 			char *oldgroup = tokens[3];
@@ -171,8 +171,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 
 			if (!ea) {
 				ea_recreated = FALSE;
-				ea = dummy_account(handle, oldgroup, 
-						   ela->service_id);
+				ea = dummy_account(handle, oldgroup, ela);
 			}
 
 			if (action == MGMT_DEL && CAN(ea, del_user)) {
@@ -260,7 +259,7 @@ int group_mgmt_flush(const eb_local_account *ela)
 		char buff_backup[NAME_MAX];
 		strncpy(buff_backup, buff, NAME_MAX);
 		tokens = ay_strsplit( buff, "\t", -1 );
-		if(!strcmp(tokens[0], get_service_name(ela->service_id))) {
+		if(!strcmp(tokens[0], ela->handle)) {
 			int action     = atoi(tokens[1]);
 			char *oldgroup = tokens[2];
 			char *newgroup = tokens[3];

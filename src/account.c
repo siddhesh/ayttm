@@ -197,7 +197,7 @@ int load_contacts()
 	return 1;
 }
 
-eb_account *dummy_account(char *handle, char *group, int serviceid)
+eb_account *dummy_account(char *handle, char *group, eb_local_account *ela)
 {
 	eb_account *dum = g_new0(eb_account, 1);
 	dum->account_contact = g_new0(struct contact, 1);
@@ -206,7 +206,8 @@ eb_account *dummy_account(char *handle, char *group, int serviceid)
 	strncpy(dum->handle, handle, sizeof(dum->handle));
 	strncpy(dum->account_contact->group->name, group,
 		sizeof(dum->account_contact->group->name));
-	dum->service_id = serviceid;
+	dum->service_id = ela->service_id;
+	dum->ela = ela;
 	
 	return dum;
 }

@@ -1,3 +1,8 @@
+* Mon Apr 28 2003 11:00 GMT [colin]	0.3.0-11
+- src/offline_queue_mgmt.c src/account.[ch]
+Offline stuff uses ea->ela
+
+- src/contact_parser.y src/account.c
 * Mon Apr 28 2003 11:50 GMT [andy]	0.3.0-10
 - src/input_list.[ch]
   src/gtk/prefs_window.C
