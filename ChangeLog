@@ -1,3 +1,7 @@
+* Sun Apr 06 2003 14:40 GMT [philip]	0.2.3-44
+- modules/msn2/msn.C
+don't call ay_activity_bar_remove if it has been cancelled
+
 * Sun Apr 06 2003 14:35 GMT [philip]	0.2.3-43
 - modules/yahoo2/yahoo.c
 avoid segfault when cancelling after connect complete (but before login
