@@ -1,3 +1,7 @@
+* Mon Jul 07 2003 10:36 GMT [colin]	0.3.2-10
+- pixmaps/invite_btn.xpm
+Cleaner button
+
 * Mon Jul 07 2003 10:36 GMT [colin]	0.3.2-9
 - modules/irc.c src/chat_room.[ch]
 Don't show "xx has joined the chat" at channel arrival
