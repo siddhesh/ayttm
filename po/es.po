@@ -6,8 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
-"POT-Creation-Date: 2003-11-19 21:58+0100\n"
-"PO-Revision-Date: 2003/11/18 11:25\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2003-12-02 16:34+0100\n"
+"PO-Revision-Date: 2003-12-02 17:22+0100\n"
 "Last-Translator: Ricardo Mones <mones@aic.uniovi.es>\n"
 "Language-Team: Ricardo Mones <mones@aic.uniovi.es>\n"
 "MIME-Version: 1.0\n"
@@ -109,7 +110,7 @@ msgstr "Entrando en la cuenta AIM: %s"
 #: modules/aim-toc/aim-toc.c:904
 #, c-format
 msgid "AIM password for: %s"
-msgstr ""
+msgstr "Contraseña AIM para: %s"
 
 #: modules/aim-toc/aim-toc.c:936
 msgid "Cannot connect to AIM due to network problem."
@@ -134,7 +135,7 @@ msgstr "_Contraseña:"
 #: modules/jabber/jabber.c:474 modules/msn2/msn.C:494
 #: modules/yahoo2/yahoo.c:2216
 msgid "_Ask for password at Login time"
-msgstr ""
+msgstr "Pedir contr_aseña al conectar"
 
 #: modules/aim-toc/aim-toc.c:1063 modules/icq-toc/icq-toc.c:992
 #: modules/irc/irc.c:1365 modules/jabber/jabber.c:481 modules/msn2/msn.C:501
@@ -504,7 +505,7 @@ msgstr "Entrando en la cuenta ICQ: %s"
 #: modules/icq-toc/icq-toc.c:806
 #, c-format
 msgid "ICQ password for: %s"
-msgstr ""
+msgstr "Contraseña ICQ para: %s"
 
 #: modules/icq-toc/icq-toc.c:837
 msgid "Cannot connect to ICQ due to network problem."
@@ -712,25 +713,23 @@ msgstr "Entrando en la cuenta Jabber: %s"
 #: modules/jabber/jabber.c:338
 #, c-format
 msgid "Jabber password for: %s"
-msgstr ""
+msgstr "Contraseña Jabber para: %s"
 
 #: modules/jabber/jabber.c:460
-#, fuzzy
 msgid "_Username:"
-msgstr "Usuario: "
+msgstr "_Usuario: "
 
 #: modules/jabber/jabber.c:489
 msgid "Use _SSL"
-msgstr ""
+msgstr "Usar _SSL"
 
 #: modules/jabber/jabber.c:496 modules/smtp/smtp.c:202
 msgid "P_ort:"
 msgstr "Puert_o:"
 
 #: modules/jabber/jabber.c:504
-#, fuzzy
 msgid "SSL Po_rt:"
-msgstr "Puerto:"
+msgstr "Pue_rto SSL:"
 
 #: modules/jabber/jabber.c:1252 modules/msn2/msn.C:2494
 #: modules/workwizu/workwizu.c:326 modules/yahoo2/yahoo.c:1869
@@ -804,7 +803,7 @@ msgstr "Reconectar si la conexión se rompe inesperadamente"
 
 #: modules/msn2/msn.C:234
 msgid "Rename my MSN-only contacts whenever they change their alias"
-msgstr ""
+msgstr "Renombrar mis contactos MSN cuando ellos cambien su apodo"
 
 #: modules/msn2/msn.C:436 modules/msn2/msn.C:441
 msgid "Invite to Gnomemeeting"
@@ -815,9 +814,8 @@ msgid "_MSN Login:"
 msgstr "Usuario _MSN:"
 
 #: modules/msn2/msn.C:508
-#, fuzzy
 msgid "_Login invisible"
-msgstr "Conexión _invisible"
+msgstr "Conexión invisib_le"
 
 #: modules/msn2/msn.C:515
 msgid "Friendly Name:"
@@ -848,7 +846,7 @@ msgstr "Entrando en la cuenta MSN: %s"
 #: modules/msn2/msn.C:745
 #, c-format
 msgid "MSN password for: %s"
-msgstr ""
+msgstr "Contraseña MSN para: %s"
 
 #: modules/msn2/msn.C:1062
 msgid "MSN logins must have @domain.tld part."
@@ -1250,9 +1248,8 @@ msgid "%s's webcam"
 msgstr "Webcam de %s"
 
 #: modules/yahoo2/yahoo.c:1661
-#, fuzzy
 msgid "Cannot find a valid local account to view user's webcam."
-msgstr "No puedo encontrar una cuenta local válida para invitar a su contacto."
+msgstr "No puedo encontrar una cuenta local válida para ver la webcam del usuario."
 
 #: modules/yahoo2/yahoo.c:1676
 #, c-format
@@ -1341,7 +1338,7 @@ msgstr "Tiene %d mensaje%s\n"
 
 #: modules/yahoo2/yahoo.c:1899
 msgid "s"
-msgstr ""
+msgstr "s"
 
 #: modules/yahoo2/yahoo.c:1904
 msgid "Yahoo Mail"
@@ -1357,31 +1354,29 @@ msgid "Logging in to Yahoo account: %s"
 msgstr "Entrando en la cuenta Yahoo: %s"
 
 #: modules/yahoo2/yahoo.c:2032
-#, fuzzy, c-format
+#, c-format
 msgid "Yahoo! password for: %s"
-msgstr "Error de lectura Yahoo (%d): %s"
+msgstr "Contraseña Yahoo! para: %s"
 
 #: modules/yahoo2/yahoo.c:2055
 msgid "Fetching buddies..."
 msgstr "Obteniendo colegas..."
 
 #: modules/yahoo2/yahoo.c:2068
-#, fuzzy
 msgid ""
 "Could not log into Yahoo service - username not recognised.  Please verify "
 "that your username is correctly typed."
 msgstr ""
-"No se pudo entrar en el servicio Yahoo.  Por favor, verifique que el nombre "
-"de usuario y contraseña estan correctamente escritos."
+"No se pudo entrar en el servicio Yahoo - usuario no reconocido.  Por favor "
+"verifique que el nombre de usuario esté correctamente escrito."
 
 #: modules/yahoo2/yahoo.c:2071
-#, fuzzy
 msgid ""
 "Could not log into Yahoo service - incorrect password.  Please verify that "
 "your password is correctly typed."
 msgstr ""
-"No se pudo entrar en el servicio Yahoo.  Por favor, verifique que el nombre "
-"de usuario y contraseña estan correctamente escritos."
+"No se pudo entrar en el servicio Yahoo - contraseña incorrecta.  Por favor "
+"verifique que la contraseña esté correctamente escrita."
 
 #: modules/yahoo2/yahoo.c:2075
 #, c-format
@@ -1433,7 +1428,7 @@ msgstr "Ignorar mensajes del _sistema"
 #: modules/yahoo2/yahoo.c:2321
 #, c-format
 msgid "Yahoo logins do NOT have the %s part."
-msgstr ""
+msgstr "Los nombres de Yahoo NO tienen parte %s."
 
 #: modules/yahoo2/yahoo.c:2697
 #, c-format
@@ -1460,7 +1455,7 @@ msgstr "Error de escritura Yahoo: el servidor cerró el socket"
 
 #: modules/yahoo2/yahoo.c:3208 modules/yahoo2/yahoo.c:3209
 msgid "View Webcam"
-msgstr ""
+msgstr "Ver cámara web"
 
 #: src/action.c:82 src/action.c:95 src/action.c:128 src/action.c:141
 #: src/action.c:173 src/action.c:246 src/action.c:262
@@ -1711,7 +1706,7 @@ msgstr "Cuenta local: "
 #: src/chat_room.c:911 src/chat_room.c:1627 src/chat_room.c:1628
 #: src/chat_room.c:1629
 msgid "Reconnect at login"
-msgstr ""
+msgstr "Reconectar al entrar"
 
 #: src/chat_room.c:915
 msgid "Chatroom is public"
@@ -1986,6 +1981,9 @@ msgid ""
 "A newer version (%s) is available; please do not file a bugreport before "
 "upgrading."
 msgstr ""
+"%s.\n"
+"Esta disponible una nueva versión (%s). Por favor pruebe a actualizarse "
+"antes de enviar un informe de error."
 
 #: src/crash.c:212
 #, c-format
@@ -1994,7 +1992,7 @@ msgid ""
 "Please file a bug report and include the information below."
 msgstr ""
 "%s.\n"
-"Por favor, rellene un informe de error e incluya la información de abajo."
+"Por favor, rellene un informe de error e incluya la información siguiente."
 
 #: src/crash.c:217
 msgid "Debug log"
@@ -2129,9 +2127,8 @@ msgstr "Tiene que introducir alguna cuenta."
 
 #: src/edit_local_accounts.c:240 src/edit_local_accounts.c:670
 #: src/edit_local_accounts.c:671 src/edit_local_accounts.c:672
-#, fuzzy
 msgid "Help"
-msgstr "/_Ayuda"
+msgstr "Ayuda"
 
 #: src/edit_local_accounts.c:241
 msgid ""
@@ -2149,6 +2146,18 @@ msgid ""
 "- for SMTP: Use the email address you want as From address. Set the server "
 "to use in prefs. Password isn't supported yet."
 msgstr ""
+"Como crear y registrar cuentas:\n"
+"- para AIM, ICQ y Yahoo: Utilice su identificador. Ha de registrar la cuenta "
+"a través de la página web.\n"
+"- para MSN: Utilice el nombre completo (usuario@dominio.com). Ha de registrar "
+"la cuenta a través de la página web.\n"
+"- para IRC. Utilice \"alias@servidor.com\" para conectar como alias a "
+"servidor.com. Deberá teclear la contraseña si la cuenta esta reservada en el "
+"servidor.\n"
+"- para Jabber: Utilice \"alias@servidor.com\" para conectar como alias a "
+"servidor.com. Si la cuenta no existe se le preguntará si desea registrarse.\n"
+"- para SMTP: Utilice la dirección de correo que desee como remitente. Indique "
+"el servidor a usar en las preferencias. Aún no hay soporte para contraseñas."
 
 #: src/edit_local_accounts.c:285 src/edit_local_accounts.c:338
 #, c-format
@@ -2414,7 +2423,7 @@ msgstr "Ignorar a gente desconocida"
 
 #: src/gtk/prefs_window.C:1187
 msgid "On the fly chat completion"
-msgstr ""
+msgstr "Autocompletado en las charlas"
 
 #: src/gtk/prefs_window.C:1199
 msgid "Use spell checking"
@@ -2875,9 +2884,8 @@ msgid "Do you really want to delete account \"%s\"?"
 msgstr "¿Realmente quiere borrar la cuenta \"%s\"?"
 
 #: src/status.c:331
-#, fuzzy
 msgid "Ayttm - history"
-msgstr "Editor de cuentas Ayttm"
+msgstr "Ayttm - historia"
 
 #: src/status.c:468
 msgid "Add contact to group..."
@@ -2937,7 +2945,7 @@ msgid "Info..."
 msgstr "Info..."
 
 #: src/status.c:749
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "A new release of ayttm is available.\n"
 "Latest version is %s, while you have %s.\n"
@@ -2960,12 +2968,12 @@ msgstr "Tiene instalada la última versión de aytmm."
 #: src/status.c:810
 #, c-format
 msgid "Setting %s (on %s) to %s"
-msgstr ""
+msgstr "Estableciendo %s (en %s) a %s"
 
 #: src/status.c:840
 #, c-format
 msgid "Setting %s (on %s) to Online"
-msgstr ""
+msgstr "Estableciendo %s (en %s) a Conectado"
 
 #: src/status.c:960
 msgid "Account vanished after add_account_line.\n"
@@ -2976,9 +2984,9 @@ msgid "Account missing while online?\n"
 msgstr "¿Perdió la cuenta mientras estaba conectado?\n"
 
 #: src/status.c:1115
-#, fuzzy, c-format
+#, c-format
 msgid "%s is now %s"
-msgstr "%s ha conectado"
+msgstr "%s es ahora %s"
 
 #: src/status.c:1173
 #, c-format
@@ -2990,14 +2998,14 @@ msgid "-"
 msgstr "-"
 
 #: src/status.c:1614
-#, fuzzy, c-format
+#, c-format
 msgid "%s is now Online"
-msgstr "%s ha conectado"
+msgstr "%s está conectado"
 
 #: src/status.c:1648
-#, fuzzy, c-format
+#, c-format
 msgid "%s is now Offline"
-msgstr "%s ha desconectado"
+msgstr "%s desconectado"
 
 #: src/status.c:1863
 msgid "eb_smiley_function: calling callback\n"
@@ -3301,11 +3309,3 @@ msgstr "No puedo conectar"
 msgid "Connection to the server failed."
 msgstr "Conexión con el servidor fallida."
 
-#~ msgid ""
-#~ "%s removed you from his list.\n"
-#~ "\n"
-#~ "Do you want to remove him?"
-#~ msgstr ""
-#~ "%s le ha eliminado de su lista.\n"
-#~ "\n"
-#~ "¿Desea eliminarle a él de la suya?"
