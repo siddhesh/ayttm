@@ -411,11 +411,9 @@ AC_CONFIG_FILES([Makefile ayttm.spec
 		 mingw32/Makefile])
 
 if test "x$host_alias" = "xmingw32" ; then
-	AC_CONFIG_COMMANDS(src/Makefile, 
-	[echo "editing src/Makefile final time"
+	echo "editing src/Makefile final time"
         cat src/Makefile | sed 's/^LIBS = .*/LIBS = \$(EB_LIBS)/' > .ACE
 	cp -f .ACE src/Makefile
-	])
 fi
 
 AC_OUTPUT
