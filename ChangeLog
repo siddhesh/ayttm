@@ -1,3 +1,7 @@
+* Sun Aug  3 2003 08:04 GMT [philip]	0.3.3-19
+- modules/aim-toc/aim-toc.c
+fix problem with handle not showing in chat windows
+
 * Sat Aug  2 2003 10:48 GMT [philip]	0.3.3-18
 - src/smileys.c
 Fix bug 781677 thanks to code from Anonymous Poster
