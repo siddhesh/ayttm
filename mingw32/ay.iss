@@ -40,6 +40,7 @@ Source: "C:\Program Files\ayttm\libjasper-1-700-2.dll"; DestDir: "{app}"; Flags:
 Source: "C:\Program Files\ayttm\libjpeg-62.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libltdl-3.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libssl-0.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\exchndl.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libXpm-noX4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\etc\ayttmrc"; DestDir: "{app}\etc"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\sounds\Send.au"; DestDir: "{app}\sounds"; Flags: ignoreversion

@@ -11,6 +11,7 @@ install: ayttmrc
 	cp ayttmrc /c/Program\ Files/ayttm/etc
 	cp setup.bat /c/Program\ Files/ayttm
 	cp ../src/ayttm.exe /c/Program\ Files/ayttm
+	cp /mingw/bin/exchndl.dll /c/Program\ Files/ayttm
 	cp /usr/local/bin/lib*.dll /c/Program\ Files/ayttm
 	cp /usr/local/lib/libXpm-noX4.dll /c/Program\ Files/ayttm
 	mkdir -p /c/Program\ Files/ayttm/lib/gdk-pixbuf/loaders
