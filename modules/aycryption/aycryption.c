@@ -1,11 +1,8 @@
 /*
- * Autotrans module for Ayttm 
+ * Aycryption (GPG support) module for Ayttm 
  *
  * Copyright (C) 2003, the Ayttm team
  * 
- * Ayttm is derivative of Everybuddy
- * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -84,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.1 $",
-	"$Date: 2003/05/05 00:35:07 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/05/05 00:41:54 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
