@@ -444,6 +444,17 @@ static void insert_smiley_cb (GtkWidget * widget, smiley_callback_data *data)
 		eb_debug(DBG_CORE, "smiley_window is null * !\n");
 }
 
+static gint delete_event_cb(GtkWidget *widget,
+			    GdkEvent  *event,
+			    gpointer  data) {
+	
+	smiley_callback_data *scd = (smiley_callback_data *)data;
+	scd->c_window->smiley_window = NULL;
+
+	/* This will result in a destroy event on the window */
+	return FALSE;
+}
+
 void show_smileys_cb (smiley_callback_data *data) {
 	eb_local_account *account;
 	LList *smileys = NULL;
@@ -549,6 +560,9 @@ void show_smileys_cb (smiley_callback_data *data) {
 	gtk_window_set_title(GTK_WINDOW(smiley_window), "Smileys");
 	gtk_window_set_policy(GTK_WINDOW(smiley_window), FALSE, FALSE, FALSE);
 	gtk_widget_realize(smiley_window);
+
+	gtk_signal_connect(GTK_OBJECT(smiley_window), "delete_event",
+			   GTK_SIGNAL_FUNC(delete_event_cb), (gpointer)data);
 
 	gtk_container_add(GTK_CONTAINER(smiley_window), smileys_table);
 	gtk_widget_show(smileys_table);
