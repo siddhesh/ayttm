@@ -56,6 +56,7 @@
 #include "service.h"
 #include "action.h"
 #include "mem_util.h"
+#include "chat_room.h"
 
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
@@ -74,7 +75,7 @@
 #include "pixmaps/cancel.xpm"
 #include "pixmaps/smiley_button.xpm"
 #include "pixmaps/action.xpm"
-
+#include "pixmaps/invite_btn.xpm"
 
 #define BUF_SIZE 1024  /* Maximum message length */
 #ifndef NAME_MAX
@@ -466,6 +467,7 @@ void send_message(GtkWidget *widget, gpointer d)
 		return;		
 	}
 
+	
 	if(data->local_user && data->local_user != data->preferred->ela)
 		data->local_user = NULL;
 	
@@ -886,6 +888,14 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		button = gtk_menu_item_new_with_label(_("Send File"));
 		gtk_signal_connect(GTK_OBJECT(button), "activate",
 				 GTK_SIGNAL_FUNC(send_file), cw);
+		gtk_menu_append(GTK_MENU(menu), button);
+		gtk_widget_show(button);
+
+		/*Invite Selection*/
+
+		button = gtk_menu_item_new_with_label(_("Invite"));
+		gtk_signal_connect(GTK_OBJECT(button), "activate",
+				 GTK_SIGNAL_FUNC(do_invite_window), cw);
 		gtk_menu_append(GTK_MENU(menu), button);
 		gtk_widget_show(button);
 
@@ -2179,6 +2189,17 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 				   GTK_ACCEL_VISIBLE);
 	gtk_menu_append(GTK_MENU(menu), button);
 
+	/*Invite Selection*/ 
+
+	button = gtk_menu_item_new_with_label(_("Invite"));
+	gtk_signal_connect(GTK_OBJECT(button), "activate",
+			   GTK_SIGNAL_FUNC(do_invite_window),
+			   cw);
+	gtk_widget_add_accelerator(button, "activate", accel_group, 
+				   GDK_i, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
+	gtk_menu_append(GTK_MENU(menu), button);
+
 	/*Send Selection*/
 
 	button = gtk_menu_item_new_with_label(_("Send Message"));
@@ -2321,6 +2342,12 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	sendf_button = TOOLBAR_APPEND(_("Send File CTRL+T"), iconwid, send_file, cw);
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
 
+	/*This is the invite button*/
+
+	ICON_CREATE(icon, iconwid, invite_btn_xpm);
+	sendf_button = TOOLBAR_APPEND(_("Invite CTRL+I"), iconwid, do_invite_window, cw);
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
+
 	/*This is the ignore button*/
 
 	ICON_CREATE(icon, iconwid, tb_no_xpm);
@@ -2370,4 +2397,46 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 			   GTK_SIGNAL_FUNC(destroy_event), cw);	
 
 	return cw;
+}
+
+typedef struct _cr_wait
+{
+	eb_chat_room *cr;
+	eb_account *second;
+	eb_account *third;
+	char *msg;
+} cr_wait;
+
+int wait_chatroom_connected(cr_wait *crw)
+{
+	if (crw->cr->connected == 0) {
+		eb_debug(DBG_CORE, "chatroom still not ready\n");
+		return 1;
+	} else {
+		RUN_SERVICE(crw->cr->local_user)->send_invite(crw->cr->local_user, crw->cr,crw->second->handle, crw->msg);
+		RUN_SERVICE(crw->cr->local_user)->send_invite(crw->cr->local_user, crw->cr,crw->third->handle, crw->msg);
+		free(crw->msg);
+		free(crw);
+		crw = NULL;
+		return 0;
+	}		
+}
+
+void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, char *msg)
+{
+	eb_account *second_party = cw->preferred;
+	eb_local_account *ela = cw->local_user;
+	eb_chat_room *cr = NULL;
+	cr_wait *crw = g_new0(cr_wait, 1);
+	
+	if (second_party == NULL) {
+		return;
+	}
+	
+	cr = eb_start_chat_room(ela, next_chatroom_name(), 0);
+	crw->cr = cr;
+	crw->second = second_party;
+	crw->third = third_party;
+	crw->msg = strdup(msg);
+	eb_timeout_add(1000, (GtkFunction)wait_chatroom_connected, (gpointer)crw);
 }

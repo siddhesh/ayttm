@@ -127,4 +127,5 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name);
 chat_window *find_tabbed_chat_window_index (int current_page);
 void set_tab_red(chat_window *cw);
 void set_tab_normal(chat_window *cw);
+void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, char *msg);
 #endif

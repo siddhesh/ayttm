@@ -380,12 +380,24 @@ static void invite_callback( GtkWidget * widget, gpointer data )
 	char * invited = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(ecr->invite_buddy)->entry),0,-1);
 	if (!strstr(invited, "(") || !strstr(invited, ")"))
 		return;
-	acc = strstr(invited, "(")+1;
-	*strstr(acc, ")") = '\0';
-	RUN_SERVICE(ecr->local_user)->send_invite(
-				ecr->local_user, ecr,
-				acc,
-				gtk_entry_get_text(GTK_ENTRY(ecr->invite_message)));
+	if (ecr->preferred) {
+		/* this is a chat window */
+		eb_account *third = NULL;
+		acc = strstr(invited, "(")+1;
+		*strstr(acc, ")") = '\0';
+		third = find_account_by_handle(acc, ecr->local_user->service_id);
+		if (third) {
+			chat_window_to_chat_room(ecr, third, gtk_entry_get_text(GTK_ENTRY(ecr->invite_message)));	
+			ecr->preferred = NULL;
+		}
+	} else {
+		acc = strstr(invited, "(")+1;
+		*strstr(acc, ")") = '\0';
+		RUN_SERVICE(ecr->local_user)->send_invite(
+					ecr->local_user, ecr,
+					acc,
+					gtk_entry_get_text(GTK_ENTRY(ecr->invite_message)));
+	}
 	g_free(invited);
 	gtk_widget_destroy(ecr->invite_window);
 }
@@ -396,16 +408,24 @@ static void destroy_invite( GtkWidget * widget, gpointer data )
 	ecr->invite_window_is_open = 0;
 }
 
-static void do_invite_window(eb_chat_room * room )
+void do_invite_window(void *widget, eb_chat_room * room )
 {
 	GtkWidget * box;
 	GtkWidget * box2;
 	GtkWidget * label;
 	GList * list;
-	
-	if( !room || room->invite_window_is_open )
+		
+	if( !room || room->invite_window_is_open)
 		return;
 
+	if (!room->local_user && room->preferred) {
+		room->local_user = room->preferred->ela;
+	}
+	if (!room->local_user) {
+		ay_do_error(_("Chatroom error"), _("Cannot invite a third party until a protocol has been chosen."));
+		return;
+	}
+	
 	room->invite_window = gtk_window_new(GTK_WINDOW_DIALOG);
 	gtk_window_set_position(GTK_WINDOW(room->invite_window), GTK_WIN_POS_MOUSE);
 	box = gtk_vbox_new(FALSE, 3);
@@ -924,6 +944,11 @@ void eb_chat_room_buddy_leave( eb_chat_room * room, gchar * handle )
 static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata)
 {
 	eb_chat_room * cr = (eb_chat_room *)userdata;
+	if (iGetLocalPref("do_tabbed_chat")) {
+		int tab_number = gtk_notebook_page_num (GTK_NOTEBOOK(cr->notebook), cr->notebook_child);
+		if (tab_number != gtk_notebook_get_current_page(GTK_NOTEBOOK(cr->notebook)))
+			return;
+	}	
 	eb_chat_room_update_window_title(cr, FALSE);
 	set_tab_normal (cr);
 
@@ -942,14 +967,14 @@ static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_mes
 	g_free(room_title);
 }
 
-void eb_start_chat_room( eb_local_account *ela, gchar * name, int is_public )
+eb_chat_room* eb_start_chat_room( eb_local_account *ela, gchar * name, int is_public )
 {
 	eb_chat_room * ecb = NULL;
 
 	/* if we don't have a working account just bail right now */
 
 	if( !ela )
-		return;
+		return NULL;
 
 	ecb = RUN_SERVICE(ela)->make_chat_room(name, ela, is_public);
 
@@ -961,6 +986,7 @@ void eb_start_chat_room( eb_local_account *ela, gchar * name, int is_public )
 		eb_chat_room_update_window_title(ecb, FALSE);
 		set_tab_normal (ecb);
 	}
+	return ecb;
 }
 
 void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, gchar * message)
@@ -1081,7 +1107,7 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 
 static void invite_button_callback( GtkWidget * widget, gpointer data )
 {
-	do_invite_window(data);
+	do_invite_window((void *)widget, data);
 }
 
 static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
