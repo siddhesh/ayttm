@@ -1,3 +1,9 @@
+* Thu Sep 25 2003 07:53 GMT [philip]	0.4.1-7
+- configure.ac
+Applied Brian Ford's patch to make it more consistent
+- src/Makefile.am
+_LDFLAGS is reserved by automake.  use WIN32_LD instead of WIN32_LDFLAGS
+
 * Wed Sep 24 2003 15:17 GMT [philip]	0.4.1-6
 - modules/yahoo2
 change host name to scs.msg.yahoo.com

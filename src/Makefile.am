@@ -5,7 +5,7 @@ bin_PROGRAMS = ayttm
 if MINGW32
 localedir = locale
 WIN32_SOURCES = ayttm.rc
-WIN32_LDFLAGS = -mwindows -Wl,--export-all-symbols -Wl,--out-implib,libayttm.a
+WIN32_LD = -mwindows -Wl,--export-all-symbols -Wl,--out-implib,libayttm.a
 WIN32_LIBS = -lws2_32 -lwinmm
 else
 localedir = $(datadir)/locale
@@ -22,7 +22,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
 	offline_queue_mgmt.c tcp_util.c image_window.c action.c about.c \
-	messages.c edit_list_window.c flash_window_title.c ssl.c $(WIN32_SOURCES)
+	messages.c edit_list_window.c flash_window_title.c ssl.c $(WIN32_SOURCE)
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
@@ -44,7 +44,7 @@ AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)
 AM_CXXFLAGS = $(AM_CFLAGS)
 LIBS = @LIBS@ $(EB_LIBS) -lproxy $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS) $(WIN32_LIBS)
-ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy -export-dynamic $(WIN32_LDFLAGS)
+ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy -export-dynamic $(WIN32_LD)
 CLEANFILES = @CLEANFILES@ defaults.h
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\" -D_REENTRANT
 

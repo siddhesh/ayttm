@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.4.1, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=6
+RELEASE=7
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -186,20 +186,20 @@ if test "$enable_webcam" != "no"; then
 
 fi
 
-AC_ARG_WITH(openssl, AC_HELP_STRING([--with-openssl-prefix=PFX],
+AC_ARG_WITH(openssl-prefix, AC_HELP_STRING([--with-openssl-prefix=PFX],
 		[Prefix where openssl is installed (optional)]))
 SSL_INCLUDES=
 SSL_LIBDIR=
-if test "$with_ssl" != ""; then
-	SSL_INCLUDES="-I $with_ssl/include"
-	SSL_LIBDIR="-L $with_ssl/lib"
+if test "$with_openssl_prefix" != ""; then
+	SSL_INCLUDES="-I${with_openss_prefixl}/include"
+	SSL_LIBDIR="-L${with_openss_prefixl}/lib"
 fi
 
 AC_MSG_CHECKING(for openssl)
 ac_check_lib_save_LIBS=$LIBS
 LIBS="$SSL_LIBDIR -lssl -lcrypto $LIBS"
 ac_check_lib_save_CFLAGS=$CFLAGS
-CFLAGS="$SSL_INCLUDEDIR $CFLAGS"
+CFLAGS="$SSL_INCLUDES $CFLAGS"
 AC_TRY_LINK([#include <openssl/opensslv.h>],
     [ return OPENSSL_VERSION_NUMBER; ],
     [EB_LIBS="$EB_LIBS $SSL_LIBDIR -lssl -lcrypto"
@@ -391,7 +391,7 @@ AC_SUBST(OPTIONAL_PLUG_DIR)
 AC_SUBST(DEBUG_LIBMSN)
 
 HOST=`echo $host | sed -e 's/^[[^-]]*-[[^-]]*-\([[^-]]*\).*/\1/'`
-HOST=`echo -n ${HOST%${HOST#?}} | tr a-z A-Z; echo ${HOST#?} | tr A-Z a-z`
+HOST=`echo $ECHO_N "${HOST%${HOST#?}} $ECHO_C" | tr a-z A-Z; echo ${HOST#?} | tr A-Z a-z`
 AC_DEFINE_UNQUOTED(HOST, "$HOST", [OS that this system was built for])
 AC_SUBST(HOST)
 AC_SUBST(RC)
