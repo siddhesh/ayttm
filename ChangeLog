@@ -1,3 +1,7 @@
+* Fri Dec 26 2003 08:14 GMT [philip]	0.4.5-25
+- modules/yahoo2/libyahoo2
+fix potential segfaults.
+
 * Tue Dec 22 2003 21:02 GMT [philip]	0.4.5-24
 - modules/yahoo2/libayhoo2/libayhoo2.c
 implement full async writes

@@ -713,7 +713,7 @@ static void to_y64(unsigned char *out, const unsigned char *in, int inlen)
 	*out = '\0';
 }
 
-static void yahoo_add_to_send_queue(struct yahoo_input_data *yid, unsigned char *data, int length)
+static void yahoo_add_to_send_queue(struct yahoo_input_data *yid, void *data, int length)
 {
 	struct data_queue *tx = y_new0(struct data_queue, 1);
 	tx->queue = y_new0(unsigned char, length);
@@ -2926,7 +2926,7 @@ int yahoo_write_ready(int id, int fd, void *data)
 	struct data_queue *tx;
 	LOG(("write callback: id=%d fd=%d data=%p", id, fd, data));
 
-	if(!yid)
+	if(!yid || !yid->txqueues)
 		return -2;
 	
 	tx = yid->txqueues->data;
@@ -3455,7 +3455,7 @@ void yahoo_login(int id, int initial)
 	 */
 	if(tag > 0)
 		ccd->tag = tag;
-	else
+	else if(tag < 0)
 		YAHOO_CALLBACK(ext_yahoo_login_response)(yd->client_id, YAHOO_LOGIN_SOCK, NULL);
 }
 
