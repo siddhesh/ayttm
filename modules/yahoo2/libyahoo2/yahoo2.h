@@ -50,8 +50,7 @@ int  yahoo_set_log_level(enum yahoo_log_level level);
 /* or 0 on failure */
 /* you must call init before calling any other function */
 int  yahoo_init(const char *username, const char *password);
-/* should be called in case of asynchronous connect after connect completes */
-void  yahoo_connected(int id, int fd, int error);
+void yahoo_close(int id);
 /* login logs in to the server */
 /* initial is of type enum yahoo_status.  see yahoo2_types.h */
 void  yahoo_login(int id, int initial);

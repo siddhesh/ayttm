@@ -51,7 +51,8 @@ enum yahoo_login_status {
 	YAHOO_LOGIN_OK = 0,
 	YAHOO_LOGIN_PASSWD = 13,
 	YAHOO_LOGIN_LOCK = 14,
-	YAHOO_LOGIN_DUPL = 99
+	YAHOO_LOGIN_DUPL = 99,
+	YAHOO_LOGIN_SOCK = -1
 };
 
 enum yahoo_error {
@@ -118,21 +119,16 @@ struct yahoo_data {
 	YList *identities;
 	char  *login_id;
 
-	int   fd;
-	int   type;
-
 	int   current_status;
 	int   initial_status;
 	int   logged_in;
 
-	int id;
+	int   session_id;
 
-	int client_id;
+	int   client_id;
 
-	unsigned char	*rxqueue;
-	int   rxlen;
-	char *rawbuddylist;
-	char *ignorelist;
+	char  *rawbuddylist;
+	char  *ignorelist;
 };
 
 struct yab {

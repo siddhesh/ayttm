@@ -52,6 +52,8 @@ typedef enum {
 	YAHOO_INPUT_EXCEPTION = 1 << 2
 } yahoo_input_condition;
 
+typedef void (*yahoo_connect_callback)(int fd, int error, void *callback_data);
+
 /*
  * The following functions need to be implemented in the client
  * interface.  They will be called by the library when each
@@ -397,14 +399,28 @@ void YAHOO_CALLBACK_TYPE(ext_yahoo_remove_handler)(int id, int fd);
  * Name: ext_yahoo_connect
  * 	Connect to a host:port
  * Params:
- * 	id   - the id that identifies this connection
  * 	host - the host to connect to
  * 	port - the port to connect on
  * Returns:
  * 	a unix file descriptor to the socket
  */
-int YAHOO_CALLBACK_TYPE(ext_yahoo_connect)(int id, char *host, int port);
-int YAHOO_CALLBACK_TYPE(ext_yahoo_connect_sync)(char *host, int port);
+int YAHOO_CALLBACK_TYPE(ext_yahoo_connect)(char *host, int port);
+
+
+/*
+ * Name: ext_yahoo_connect_async
+ * 	Connect to a host:port asynchronously
+ * Params:
+ * 	id   - the id that identifies this connection
+ * 	host - the host to connect to
+ * 	port - the port to connect on
+ * 	callback - function to callback when connect completes
+ * 	callback_data - data to pass to the callback function
+ * Returns:
+ * 	a unix file descriptor to the socket
+ */
+int YAHOO_CALLBACK_TYPE(ext_yahoo_connect_async)(int id, char *host, int port, 
+		yahoo_connect_callback callback, void *callback_data);
 
 #ifdef USE_STRUCT_CALLBACKS
 };

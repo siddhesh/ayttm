@@ -122,8 +122,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/04 19:38:23 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/05 15:02:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -215,6 +215,11 @@ static int plugin_init()
 
 static int plugin_finish()
 {
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		g_free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
 	return (ref_count);
 }
@@ -256,6 +261,8 @@ typedef struct {
 	int id;
 	int input;
 	int timeout_tag;
+	int connect_progress_tag;
+	int connect_tag;
 	int status;
 	char *status_message;
 	int away;
@@ -656,6 +663,8 @@ static void ext_yahoo_got_identities(int id, YList * ids)
 static void ext_yahoo_got_buddies(int id, YList * buds)
 {
 	YList * buddy;
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *yla;
 	eb_account *ea = NULL;
 	int changed = 0;
 
@@ -695,6 +704,14 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 	if(changed) {
 		update_contact_list();
 		write_contact_list();
+	}
+
+	if(ela) {
+		yla = ela->protocol_local_account_data;
+		if(yla->connect_progress_tag) {
+			ay_activity_bar_remove(yla->connect_progress_tag);
+			yla->connect_progress_tag=0;
+		}
 	}
 }
 
@@ -1545,6 +1562,38 @@ static void eb_yahoo_login(eb_local_account * ela)
 		eb_yahoo_login_with_state(ela, YAHOO_STATUS_AVAILABLE);
 }
 
+struct connect_callback_data {
+	eb_local_account *ela;
+	yahoo_connect_callback callback;
+	void *data;
+	int tag;
+};
+static LList *conn = NULL;
+
+static void ay_yahoo_cancel_connect(void *data)
+{
+	eb_local_account *ela = data;
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	if(ylad->connect_tag) {
+		LList *l;
+		ay_socket_cancel_async(ylad->connect_tag);
+		for(l=conn; ela->connecting && l; l=l_list_next(l)) {
+			struct connect_callback_data *ccd = l->data;
+			if(ccd->tag == ylad->connect_tag) {
+				conn = l_list_remove_link(conn, l);
+				ccd->callback(-1, 0, ccd->data);
+				FREE(ccd);
+				break;
+			}
+		}
+	}
+		
+	ref_count--;
+	ela->connecting = 0;
+	ylad->connect_tag = 0;
+	ylad->connect_progress_tag = 0;
+}
+
 static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 {
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
@@ -1555,9 +1604,10 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 		return;
 
 	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
-	ylad->timeout_tag = ay_activity_bar_add(buff, NULL, NULL);
-
 	ela->connecting = 1;
+	ref_count++;
+	ylad->connect_progress_tag = ay_activity_bar_add(buff, ay_yahoo_cancel_connect, ela);
+
 	ylad->id = yahoo_init(ela->handle, ylad->password);
 
 	LOG(("eb_yahoo_login_with_state"));
@@ -1572,7 +1622,6 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 		return;
 	}
 */
-	ref_count++;
 }
 
 static void ext_yahoo_login_response(int id, int succ, char *url)
@@ -1583,11 +1632,11 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 
 	ela->connecting = 0;
 
-	ay_activity_bar_remove(ylad->timeout_tag);
 	if(succ == YAHOO_LOGIN_OK) {
 		ela->connected = 1;
 		ylad->status = yahoo_current_status(id);
 
+		ay_activity_bar_update_label(ylad->connect_progress_tag, _("Fetching buddies..."));
 		is_setting_state = 1;
 		if(ela->status_menu)
 			eb_set_active_menu_status(ela->status_menu, yahoo_to_eb_state_translation(ylad->status));
@@ -1608,10 +1657,15 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 
 	} else if(succ == YAHOO_LOGIN_DUPL) {
 		snprintf(buff, sizeof(buff), _("You have been logged out of the yahoo service, possibly due to a duplicate login."));
+	} else if(succ == YAHOO_LOGIN_SOCK) {
+		snprintf(buff, sizeof(buff), _("Could not connect to Yahoo server.  Please verify that you are connected to the net and the pager host and port are correctly entered."));
 	} else {		
 		snprintf(buff, sizeof(buff), _("Could not log into Yahoo service due to unknown state: %d\n"), succ);
 	}	
 	
+	ay_activity_bar_remove(ylad->connect_progress_tag);
+	ylad->connect_progress_tag = 0;
+
 	ela->connected = 0;
 	ylad->status = YAHOO_STATUS_OFFLINE;
 	do_error_dialog(buff, _("Yahoo Login Error"));
@@ -2326,25 +2380,55 @@ static int eb_yahoo_is_suitable(eb_local_account *ela, eb_account *ea)
 
 static void _yahoo_connected(int fd, int error, void * data)
 {
-	eb_local_account * ela = data;
+	struct connect_callback_data *ccd = data;
+	eb_local_account * ela = ccd->ela;
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 
-	yahoo_connected(ylad->id, fd, error);
+	conn = l_list_remove(conn, ccd);
+
+	ccd->callback(fd, error, ccd->data);
+	FREE(ccd);
+	ylad->connect_tag = 0;
 }
 
-static int ext_yahoo_connect(int id, char *host, int port)
+static void ay_yahoo_connect_status(const char *msg, void *data)
+{
+	struct connect_callback_data *ccd = data;
+	eb_local_account *ela = ccd->ela;
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	ay_activity_bar_update_label(ylad->connect_progress_tag, msg);
+}
+
+static int ext_yahoo_connect_async(int id, char *host, int port, yahoo_connect_callback callback, void *data)
 {
 #ifdef __MINGW32__
-	return ay_socket_new(host,port);
+	int fd = ay_socket_new(host,port);
+	if(fd == -1)
+		callback(fd, WSAGetLastError(), data);
+	else
+		callback(fd, 0, data);
 #else
-	eb_local_account * ela = yahoo_find_local_account_by_id(id);
-	ay_socket_new_async(host, port, _yahoo_connected, ela, NULL);
-	errno = EINPROGRESS;
-	return -1;
+	struct connect_callback_data *ccd = y_new0(struct connect_callback_data, 1);
+	eb_yahoo_local_account_data *ylad;
+
+	ccd->ela = yahoo_find_local_account_by_id(id);
+	ccd->callback = callback;
+	ccd->data = data;
+
+	ylad = ccd->ela->protocol_local_account_data;
+	ccd->tag = ylad->connect_tag = 
+		ay_socket_new_async(host, port, _yahoo_connected, ccd, ay_yahoo_connect_status);
+
+	conn = l_list_prepend(conn, ccd);
+
+	if(ylad->connect_tag < 0)
+		_yahoo_connected(-1, errno, ccd);
+
+	return ylad->connect_tag;
 #endif
 }
 
-static int ext_yahoo_connect_sync(char *host, int port)
+static int ext_yahoo_connect(char *host, int port)
 {
 	return ay_socket_new(host, port);
 }
@@ -2685,8 +2769,8 @@ static void register_callbacks()
 	yc.ext_yahoo_log = ext_yahoo_log;
 	yc.ext_yahoo_add_handler = ext_yahoo_add_handler;
 	yc.ext_yahoo_remove_handler = ext_yahoo_remove_handler;
+	yc.ext_yahoo_connect_async = ext_yahoo_connect_async;
 	yc.ext_yahoo_connect = ext_yahoo_connect;
-	yc.ext_yahoo_connect_sync = ext_yahoo_connect_sync;
 
 	yahoo_register_callbacks(&yc);
 	

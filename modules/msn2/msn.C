@@ -174,8 +174,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.11 $",
-	"$Date: 2003/04/04 20:42:06 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/04/05 15:02:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -433,6 +433,11 @@ int plugin_init()
 
 int plugin_finish()
 {
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		g_free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 	eb_debug(DBG_MSN, "Returning the ref_count: %i\n", ref_count);
 	return(ref_count);
 }

@@ -1,3 +1,10 @@
+* Sat Apr 05 2003 14:48 GMT [philip]	0.2.3-34
+- modules/yahoo2
+Clean up callback handling and implement cancel pending connect
+Free plugin_info.prefs before unloading
+- modules/msn2
+Free plugin_info.prefs before unloading
+
 * Sat Apr 05 2003 13:38 GMT [philip]	0.2.3-33
 - src/activity_window.C
 remove packs as well when closing window
