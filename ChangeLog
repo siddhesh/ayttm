@@ -1,3 +1,7 @@
+* Tue Apr 08 2003 23:10 GMT [colin]	0.2.3-63
+- src/add_contact_window.c
+Stop emptying contact name when changing group
+
 * Tue Apr 08 2003 18:20 GMT [philip]	0.2.3-62
 - modules/aim-toc/aim-toc.c, modules/icq-toc/icq-toc.c
 include tcp_util.h

@@ -148,10 +148,13 @@ LList * get_all_accounts(int serviceid)
 static void  dif_group(GtkEditable *editable, gpointer user_data)
 {
 		GList * list = llist_to_glist(get_contacts(COMBO_TEXT(group_name)), 1);
+		
+		char *tmp = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(contact_name)->entry));
+		
 		gtk_signal_handler_block(GTK_OBJECT(GTK_COMBO(contact_name)->entry),
 				contact_input_handler);
 		
-		list = g_list_prepend(list, "");
+		list = g_list_prepend(list, tmp?tmp:"");
 		
 		gtk_combo_set_popdown_strings(GTK_COMBO(contact_name), list);
 		g_list_free(list);
