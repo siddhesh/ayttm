@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ Service", 
 	"ICQ Protocol Support", 
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:28 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1015,11 +1015,16 @@ static eb_account * icq_read_config(LList *config, struct contact *contact)
 {
 	eb_account * ea = g_new0(eb_account, 1 );
 	struct icq_account_data * iad =  g_new0(struct icq_account_data,1);
+	char	*str = NULL;
+	
+	
 	iad->status = STATUS_OFFLINE;
 	
 
 	/*you know, eventually error handling should be put in here*/
-	strcpy(ea->handle, value_pair_get_value(config, "NAME"));
+	str = value_pair_get_value(config, "NAME");
+	strncpy(ea->handle, str, 255);
+	free( str );
 	
 
 	ea->service_id = SERVICE_INFO.protocol_id;
@@ -1043,12 +1048,15 @@ static eb_local_account * icq_read_local_config(LList * pairs)
 	
 	eb_local_account * ela = g_new0(eb_local_account, 1);
 	icq_local_account * ila = g_new0(icq_local_account, 1);
+	char	*str = NULL;
 	
 
 	/*you know, eventually error handling should be put in here*/
-	ela->handle=strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
-	strcpy(ela->alias, ela->handle);
-	strcpy(ila->password, value_pair_get_value(pairs, "PASSWORD"));
+	ela->handle=value_pair_get_value(pairs, "SCREEN_NAME");
+	strncpy(ela->alias, ela->handle, 255);
+	str = value_pair_get_value(pairs, "PASSWORD");
+	strncpy(ila->password, str, 255);
+	free( str );
 	
 	set_status = STATUS_OFFLINE;
 	
@@ -1513,16 +1521,19 @@ static void eb_icq_read_prefs_config(LList * values)
 	if(c)
 	{
 		strcpy(icq_server, c);
+		free( c );
 	}
 	c = value_pair_get_value(values, "port");
 	if(c)
 	{
 		strcpy(icq_port, c);
+		free( c );
 	}
 	c = value_pair_get_value(values, "do_icq_debug");
 	if(c)
 	{
 		do_icq_debug=atoi(c);
+		free( c );
 	}
 }
 

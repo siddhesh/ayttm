@@ -85,8 +85,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:33 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1274,39 +1274,39 @@ static eb_local_account * irc_read_local_config(LList * pairs)
 	temp = value_pair_get_value(pairs, "SCREEN_NAME");
 	if (temp)
 	{
-		ela->handle = strdup(temp);
-		if (ela->handle != NULL)
+		ela->handle = temp;
+			
+		strncpy(ela->alias, ela->handle, 254);
+		ela->service_id = SERVICE_INFO.protocol_id;
+
+		/* string magic - point to the first char after '@' */
+		if (strrchr(temp, '@') != NULL)
 		{
-			strncpy(ela->alias, ela->handle, 254);
-			ela->service_id = SERVICE_INFO.protocol_id;
-		
-			/* string magic - point to the first char after '@' */
-			if (strrchr(temp, '@') != NULL)
+			temp = strrchr(temp, '@') + 1;
+			strncpy(ila->server, temp, 254);
+
+			/* Remove the port from ila->server */
+			temp2 = strrchr(ila->server, ':');
+			if (temp2) temp2[0] = '\0';
+
+			/* string magic - point to the first char after ':' */
+			if (strrchr(temp, ':') != NULL)
 			{
-				temp = strrchr(temp, '@') + 1;
-				strncpy(ila->server, temp, 254);
-
-				/* Remove the port from ila->server */
-				temp2 = strrchr(ila->server, ':');
-				if (temp2) temp2[0] = '\0';
-
-				/* string magic - point to the first char after ':' */
-				if (strrchr(temp, ':') != NULL)
-				{
-					temp = strrchr(temp, ':') + 1;
-					strncpy(ila->port, temp, 9);
-				}
-
-				temp = value_pair_get_value(pairs, "PASSWORD");
-				if (temp)
-				{
-					strncpy(ila->password, temp, sizeof(ila->password));
-				}
-
-				return (ela);
+				temp = strrchr(temp, ':') + 1;
+				strncpy(ila->port, temp, 9);
 			}
-			eb_debug(DBG_MOD, "no @ found in login name\n");
+
+			temp = value_pair_get_value(pairs, "PASSWORD");
+			if (temp)
+			{
+				strncpy(ila->password, temp, sizeof(ila->password));
+				free( temp );
+				temp = NULL;
+			}
+
+			return (ela);
 		}
+		eb_debug(DBG_MOD, "no @ found in login name\n");
 	}
 	else
 		eb_debug(DBG_MOD, "SCREEN_NAME not defined\n");
@@ -1363,6 +1363,8 @@ static eb_account * irc_read_config(LList *config, struct contact *contact)
 	if (temp)
 	{
 		 strncpy(ea->handle, temp, 254);
+		 free( temp );
+		 temp = NULL;
 	}
 
 	ia->idle = 0;

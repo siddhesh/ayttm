@@ -115,19 +115,20 @@ static eb_local_account * eb_nomodule_read_local_config(LList * pairs)
 	
 	eb_debug(DBG_CORE, "eb_nomodule_read_local_config: entering\n");	
 	/*you know, eventually error handling should be put in here*/
-	ptr = value_pair_get_value(pairs, "SCREEN_NAME");
-	if(!ptr) {
+	ela->handle = value_pair_get_value(pairs, "SCREEN_NAME");
+	if(!ela->handle) {
 		fprintf(stderr, "Error!  Invalid account config no SCREEN_NAME defined!\n");
 		exit(1);
 	}
-	ela->handle=strdup(ptr);
+
 	strncpy(ela->alias, ela->handle, 255);
 	ptr = value_pair_get_value(pairs, "PASSWORD");
 	if(!ptr) {
 		fprintf(stderr, "Warning!  No password specified for handle %s\n", ela->handle);
 	}
 	else {
-		strncpy(ala->password, value_pair_get_value(pairs, "PASSWORD"), 255);
+		strncpy(ala->password, ptr, 255);
+		free( ptr );
 	}
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = ala;
@@ -152,11 +153,14 @@ static eb_account * eb_nomodule_read_config( LList * config, struct contact *con
 {
 	eb_account * ea = g_new0(eb_account, 1 );
 	struct eb_nomodule_account_data * aad =  g_new0(struct eb_nomodule_account_data,1);
+	char		*str = NULL;
 	
 	aad->status = 0;
 
 	/*you know, eventually error handling should be put in here*/
-	strncpy(ea->handle, value_pair_get_value( config, "NAME"), 255);
+	str = value_pair_get_value( config, "NAME");
+	strncpy(ea->handle, str, 255);
+	free( str );
 
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = aad;

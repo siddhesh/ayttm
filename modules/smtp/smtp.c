@@ -70,8 +70,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:52 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -189,6 +189,7 @@ static eb_local_account *eb_smtp_read_local_account_config(LList * pairs)
 {
 	eb_local_account *ela;
 	eb_smtp_local_account_data *sla;
+	char	*str = NULL;
 
 	if(!pairs) {
 		WARNING(("eb_smtp_read_local_account_config: pairs == NULL"));
@@ -198,10 +199,11 @@ static eb_local_account *eb_smtp_read_local_account_config(LList * pairs)
 	ela = calloc(1, sizeof(eb_local_account));
 	sla = calloc(1, sizeof(eb_smtp_local_account_data));
 
-	ela->handle = strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
+	ela->handle = value_pair_get_value(pairs, "SCREEN_NAME");
 	strncpy(ela->alias, ela->handle, sizeof(ela->alias));
-	strncpy(sla->password, value_pair_get_value(pairs, "PASSWORD"), 
-			sizeof(sla->password));
+	str = value_pair_get_value(pairs, "PASSWORD");
+	strncpy(sla->password, str, sizeof(sla->password));
+	free( str );
 
 	sla->status = SMTP_STATUS_OFFLINE;
 
@@ -377,11 +379,13 @@ static eb_account *eb_smtp_read_account_config(LList * config, struct contact * 
 {
 	eb_account *ea = calloc(1, sizeof(eb_account));
 	eb_smtp_account_data *sad = calloc(1, sizeof(eb_smtp_account_data));
+	char	*str = NULL;
 
 	sad->status = SMTP_STATUS_OFFLINE;
 
-	strncpy(ea->handle, value_pair_get_value(config, "NAME"), 
-			sizeof(ea->handle));
+	str = value_pair_get_value(config, "NAME");
+	strncpy(ea->handle, str, sizeof(ea->handle));
+	free( str );
 
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = sad;

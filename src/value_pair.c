@@ -63,16 +63,24 @@ void value_pair_print_values( LList * pairs, FILE * file, int indent )
 
 LList * value_pair_add(LList * list, const char * key, const char * value)
 {
-	char * tmp = escape_string(value);
-	value_pair * vp;
+	char		*tmp = escape_string(value);
+	value_pair	*vp = NULL;
+	char		*value = NULL;
 	
-	if (value_pair_get_value(list, key) != NULL)
+	
+	value = value_pair_get_value( list, key );
+	
+	if ( value != NULL )
+	{
 		list = value_pair_remove(list, key);
+		free( value );
+	}
 
 	vp = calloc(1, sizeof(value_pair));
 	strncpy(vp->key, key, MAX_PREF_NAME_LEN);
 	strncpy(vp->value,tmp, MAX_PREF_LEN);
 	free(tmp);
+	
 	return l_list_append(list, vp);
 }
 

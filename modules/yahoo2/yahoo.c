@@ -121,8 +121,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:47 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1700,6 +1700,7 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 {
 	eb_local_account *ela;
 	eb_yahoo_local_account_data *ylad;
+	char	*str = NULL;
 
 	if(!pairs) {
 		WARNING(("eb_yahoo_read_local_account_config: pairs == NULL"));
@@ -1709,9 +1710,11 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 	ela = g_new0(eb_local_account, 1);
 	ylad = g_new0(eb_yahoo_local_account_data, 1);
 
-	ela->handle = strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
+	ela->handle = value_pair_get_value(pairs, "SCREEN_NAME");
 	strncpy(ela->alias, ela->handle, 255);
-	strncpy(ylad->password, value_pair_get_value(pairs, "PASSWORD"), 255);
+	str = value_pair_get_value(pairs, "PASSWORD");
+	strncpy(ylad->password, str, 255);
+	free( str );
 
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = ylad;
@@ -1745,13 +1748,16 @@ static eb_account *eb_yahoo_read_account_config(LList * config, struct contact *
 {
 	eb_account *ea = g_new0(eb_account, 1);
 	eb_yahoo_account_data *yad = g_new0(eb_yahoo_account_data, 1);
+	char	*str = NULL;
 
 	yad->status = YAHOO_STATUS_OFFLINE;
 	yad->away = 1;
 	yad->status_message = NULL;
 	yad->typing_timeout_tag = 0;
 
-	strncpy(ea->handle, value_pair_get_value(config, "NAME"), 255);
+	str = value_pair_get_value(config, "NAME");
+	strncpy(ea->handle, str, 255);
+	free( str );
 
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = yad;

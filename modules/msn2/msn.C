@@ -173,8 +173,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:41 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1361,16 +1361,22 @@ void ext_got_group(char *id, char *name)
 {
 	char *eb_name = NULL;
 	char *t = NULL;
+	
 	if (!strcmp(name,"~")) {
 		eb_name = _("Buddies");
-		if (!value_pair_get_value(msn_grouplist, eb_name)) {
+		t = value_pair_get_value(msn_grouplist, eb_name);
+		if (!t) {
 			msn_grouplist = value_pair_add (msn_grouplist, eb_name, strdup(id));
 			eb_debug(DBG_MSN,"got group id %s, %s\n",id,eb_name);
+		}
+		else {
+			free( t );
+			t = NULL;
 		}
 	} 
 	eb_name = Utf8ToStr(name);
 	t = value_pair_get_value(msn_grouplist, eb_name);
-	if (!t || !strcmp("-1", value_pair_get_value(msn_grouplist, eb_name))) {
+	if (!t || !strcmp("-1", t)) {
 		msn_grouplist = value_pair_add (msn_grouplist, eb_name, strdup(id));
 		eb_debug(DBG_MSN,"got group id %s, %s\n",id,eb_name);
 	}
@@ -1408,7 +1414,6 @@ void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char
 	if (!mainconn || listsyncing) /* not now */
 		return;
 	eb_debug(DBG_MSN,"moving %s from %s to %s\n", ea->handle, int_old_group, int_new_group);
-	oldid = value_pair_get_value(msn_grouplist, int_old_group);
 	newid = value_pair_get_value(msn_grouplist, int_new_group);
 	if (newid == NULL || !strcmp("-1",newid)) {
 		movecb_data *tomove = g_new0(movecb_data, 1);
@@ -1418,13 +1423,24 @@ void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char
 			ext_got_group("-1",enc);
 			free(enc);
 		}
+		else
+		{
+			free( newid );
+		}
+		
 		strncpy(tomove->handle, ea->handle, sizeof(tomove->handle));
 		strncpy(tomove->newgr, int_new_group, sizeof(tomove->newgr));
 		strncpy(tomove->oldgr, int_old_group, sizeof(tomove->oldgr));
 		eb_timeout_add(1000, (eb_timeout_function)finish_group_move, (gpointer)tomove);
 		return;
 	} 
+	oldid = value_pair_get_value(msn_grouplist, int_old_group);
 	msn_change_group(mainconn, ea->handle, oldid, newid);
+	
+	if ( oldid != NULL )
+		free( oldid );
+		
+	free( newid );
 }
 
 void eb_msn_change_group(eb_account * ea, const char *new_group)
@@ -1442,10 +1458,13 @@ static int finish_group_move(movecb_data *tomove)
 		char *id = value_pair_get_value(msn_grouplist, ngroup);
 		if (id == NULL || !strcmp(id,"-1")) {
 			eb_debug(DBG_MSN,"ID still %s\n",id);
+			if ( id != NULL )
+				free( id );
 			return TRUE;
 		}
 		eb_debug(DBG_MSN,"Got ID %s\n",id);
 		eb_msn_real_change_group(ea,ogroup,ngroup);
+		free( id );
 		return FALSE;
 	}
 	return TRUE;
@@ -1462,6 +1481,8 @@ void eb_msn_del_group(const char *group)
 	
 	if (!id || !strcmp(id, "-1") || !strcmp(id, "0")) {
 		eb_debug(DBG_MSN,"ID for group %s is %s,not deleting\n",group,id);
+		if ( id != NULL )
+			free ( id );
 		return;
 	}
 	if (mainconn) {
@@ -1471,6 +1492,8 @@ void eb_msn_del_group(const char *group)
 	} else {
 		eb_debug(DBG_MSN,"ID for group %s is %s,not deleting because mainconn is null\n",group,id);
 	}
+	
+	free( id );
 }
 
 void eb_msn_add_group(const char *group) 
@@ -1488,6 +1511,9 @@ void eb_msn_add_group(const char *group)
 		ext_got_group("-1", enc);
 		free(enc);
 	}
+	
+	if ( id != NULL )
+		free( id );
 }
 
 void eb_msn_rename_group(const char *ogroup, const char *ngroup) 
@@ -1506,6 +1532,9 @@ void eb_msn_rename_group(const char *ogroup, const char *ngroup)
 		msn_grouplist = value_pair_add (msn_grouplist, ngroup, id);
 		free(enc);
 	}
+	
+	if ( id != NULL )
+		free( id );
 }
 
 input_list * eb_msn_get_prefs()

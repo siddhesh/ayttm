@@ -88,8 +88,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:26 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -850,9 +850,11 @@ static eb_local_account * eb_aim_read_local_config(LList * pairs)
 {
 
 	eb_local_account * ela = g_new0(eb_local_account, 1);
-	char * c = NULL;
 	char buff[1024];
 	struct eb_aim_local_account_data * ala = g_new0(struct eb_aim_local_account_data, 1);
+	char	*str = NULL;
+	
+	
 	strncpy(ala->aim_info,  "Visit the Ayttm website at <a href=\"http://www.nongnu.org/ayttm/\">www.nongnu.org/ayttm</a>",
 			sizeof(ala->aim_info));
 
@@ -861,12 +863,16 @@ static eb_local_account * eb_aim_read_local_config(LList * pairs)
 	/*you know, eventually error handling should be put in here*/
 	ela->handle=strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
 	strncpy(ela->alias, ela->handle, 255);
-	strncpy(ala->password, value_pair_get_value(pairs, "PASSWORD"), 255);
+	str = value_pair_get_value(pairs, "PASSWORD");
+	strncpy(ala->password, str, 255);
+	free( str );
 
 
-	c = value_pair_get_value(pairs, "PROFILE");
-	if(c) {	
-		strncpy(ala->aim_info, c, MAX_PREF_LEN);
+	str = value_pair_get_value(pairs, "PROFILE");
+	if(str) {	
+		strncpy(ala->aim_info, str, MAX_PREF_LEN);
+		free( str );
+		str = NULL;
 	}
 
 	snprintf(buff, sizeof(buff), "%s [AIM]", ela->alias);
@@ -899,11 +905,14 @@ static eb_account * eb_aim_read_config( LList * config, struct contact *contact 
 {
     eb_account * ea = g_new0(eb_account, 1 );
     struct eb_aim_account_data * aad =  g_new0(struct eb_aim_account_data,1);
+	char	*str = NULL;
 	
 	aad->status = AIM_OFFLINE;
 
     /*you know, eventually error handling should be put in here*/
-    strncpy(ea->handle, value_pair_get_value( config, "NAME"), 255);
+	str = value_pair_get_value( config, "NAME");
+    strncpy(ea->handle, str, 255);
+	free( str );
 
     ea->service_id = SERVICE_INFO.protocol_id;
     ea->protocol_account_data = aad;
@@ -1170,16 +1179,19 @@ static void eb_aim_read_prefs_config(LList * values)
 	if(c)
 	{
 		strncpy(aim_server, c, sizeof(aim_server));
+		free( c );
 	}
 	c = value_pair_get_value(values, "port");
 	if(c)
 	{
 		strncpy(aim_port, c, sizeof(aim_port));
+		free( c );
 	}
 	c = value_pair_get_value(values, "do_aim_debug");
 	if(c)
 	{
 		do_aim_debug = atoi(c);
+		free( c );
 	}
 }
 

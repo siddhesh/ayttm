@@ -87,9 +87,7 @@ contact:
 		c = value_pair_get_value( $2, "TRIGGER_PARAM" );
 		if(c)
 		{
-			char *tmp = unescape_string(c);
-			strncpy( cur_contact->trigger.param ,tmp, sizeof(cur_contact->trigger.param) );
-			g_free(tmp);
+			strncpy( cur_contact->trigger.param ,c, sizeof(cur_contact->trigger.param) );
 			g_free(c);
 		}
 		else

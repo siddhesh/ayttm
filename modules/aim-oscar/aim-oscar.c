@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:20 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:51 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1232,11 +1232,14 @@ eb_local_account * eb_aim_read_local_config(LList * pairs)
 
 	eb_local_account * ela = g_new0(eb_local_account, 1);
 	struct eb_aim_local_account_data * ala = g_new0(struct eb_aim_local_account_data, 1);
+	char	*str = NULL;
 	
     /*you know, eventually error handling should be put in here*/
-    ela->handle=strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
+    ela->handle=value_pair_get_value(pairs, "SCREEN_NAME");
 	strncpy(ela->alias, ela->handle, 255);
-    strncpy(ala->password, value_pair_get_value(pairs, "PASSWORD"), 255);
+	str = value_pair_get_value(pairs, "PASSWORD");
+    strncpy(ala->password, str, 255);
+	free( str );
 
     ela->service_id = SERVICE_INFO.protocol_id;
     ela->protocol_local_account_data = ala;
@@ -1250,11 +1253,13 @@ eb_account * eb_aim_read_config( LList * config, struct contact *contact )
 {
     eb_account * ea = g_new0(eb_account, 1 );
     struct eb_aim_account_data * aad =  g_new0(struct eb_aim_account_data,1);
+	char	*str = NULL;
 	
 	aad->status = AIM_OFFLINE;
 
     /*you know, eventually error handling should be put in here*/
-    strncpy(ea->handle, value_pair_get_value( config, "NAME"), 255);
+	str = value_pair_get_value( config, "NAME");
+    strncpy(ea->handle, str, 255);
 
     ea->service_id = SERVICE_INFO.protocol_id;
     ea->protocol_account_data = aad;

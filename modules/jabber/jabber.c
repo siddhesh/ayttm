@@ -78,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:33 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/01 18:54:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -322,9 +322,10 @@ static eb_local_account * eb_jabber_read_local_account_config( LList * values )
 			jlad = g_new0(eb_jabber_local_account_data,1);
 			jlad->status = JABBER_OFFLINE;
 			strcpy( jlad->password, pass);
+			free( pass );
 
 			ela = g_new0( eb_local_account, 1);
-			ela->handle = strdup(name);
+			ela->handle = name;
 
 			/*the alias will be the persons login minus the @servername */
 			strcpy( buff, ela->handle );
@@ -360,10 +361,13 @@ static eb_account * eb_jabber_read_account_config( LList * config, struct contac
 {
 	eb_account * ea = g_new0(eb_account, 1);
 	eb_jabber_account_data * jad = g_new0( eb_jabber_account_data, 1 );
+	char	*str = NULL;
 
 	jad->status = JABBER_OFFLINE;
 	jad->JConn = NULL;
-	strncpy(ea->handle, value_pair_get_value( config, "NAME"), 255 );
+	str = value_pair_get_value( config, "NAME");
+	strncpy(ea->handle, str, 255 );
+	free( str );
 	
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = jad;
@@ -654,16 +658,19 @@ static void eb_jabber_read_prefs_config(LList * values)
 	if(c)
 	{
 		strcpy(jabber_server, c);
+		free( c );
 	}
 	c = value_pair_get_value(values, "port");
 	if(c)
 	{
 		strcpy(jabber_port, c);
+		free( c );
 	}
 	c = value_pair_get_value(values, "do_jabber_debug");
 	if(c)
 	{
 		do_jabber_debug=atoi(c);
+		free( c );
 	}
 }
 
