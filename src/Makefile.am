@@ -10,6 +10,8 @@ WIN32_LIBS = -lws2_32 -lwinmm
 else
 localedir = $(datadir)/locale
 endif
+# for building on windows
+EXTRA_DIST = ayttm.rc exchndl2.cxx
 
 ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	account.c info_window.c chat_window.c util.c add_contact_window.c \
@@ -38,8 +40,6 @@ noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	edit_local_accounts.h  platform_defs.h edit_list_window.h \
 	ui_about_window.h ui_file_selection_dlg.h ui_log_window.h \
 	ui_message_windows.h ui_prefs_window.h ssl.h ssl_certificate.h
-
-EXTRA_DIST = 
 
 AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)
