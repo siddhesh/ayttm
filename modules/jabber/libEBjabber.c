@@ -255,7 +255,7 @@ JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	}
 	jab_packet_handler(JConn->conn, j_on_packet_handler);
 	jab_state_handler(JConn->conn, j_on_state_handler);
-	jab_start(JConn->conn);
+	jab_start(JConn->conn, port);
 
 	return NULL;
 }

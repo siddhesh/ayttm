@@ -78,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/05 11:17:50 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/05 11:45:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -105,7 +105,7 @@ static int plugin_init()
 		il = il->next;
 		il->widget.entry.value = jabber_port;
 		il->widget.entry.name = "jabber_port";
-		il->widget.entry.label = _("Default Port:");
+		il->widget.entry.label = _("Port:");
 		il->type = EB_INPUT_ENTRY;
 
 		il->next = g_new0(input_list, 1);
@@ -255,6 +255,8 @@ void JABBERNotConnected(void *data)
 {
     eb_jabber_local_account_data * jlad;
     jlad = (eb_jabber_local_account_data *)jabber_local_account->protocol_local_account_data;
+    jabber_local_account->connected=0;
+    jabber_local_account->connecting=0;
 
     ay_activity_bar_remove(jlad->activity);	
 }

@@ -1,3 +1,8 @@
+* Sat Apr 05 2003 11:44 GMT [colin]	0.2.3-31
+- modules/jabber
+Obey Port preference
+reset connecting & connected flags on error
+
 * Sat Apr 05 2003 11:17 GMT [colin]	0.2.3-30
 - modules/jabber/libEBjabber.c
 s/everybuddy/ayttm/

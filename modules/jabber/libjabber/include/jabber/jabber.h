@@ -318,7 +318,7 @@ jconn jab_new(char *user, char *pass);
 void jab_delete(jconn j);
 void jab_state_handler(jconn j, jconn_state_h h);
 void jab_packet_handler(jconn j, jconn_packet_h h);
-void jab_start(jconn j);
+void jab_start(jconn j, int port);
 void jab_stop(jconn j);
 
 int jab_getfd(jconn j);

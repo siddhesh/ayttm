@@ -114,7 +114,7 @@ void jab_packet_handler(jconn j, jconn_packet_h h)
  *      j -- connection
  *
  */
-void jab_start(jconn j)
+void jab_start(jconn j, int port)
 {
     if(!j || j->state != JCONN_STATE_OFF) return;
 
@@ -123,8 +123,7 @@ void jab_start(jconn j)
     XML_SetElementHandler(j->parser, startElement, endElement);
     XML_SetCharacterDataHandler(j->parser, charData);
 
-    //j->fd = make_netsocket(5222, j->user->server, NETSOCKET_CLIENT);
-    if (ay_socket_new_async(j->user->server, 5222, 
+    if (ay_socket_new_async(j->user->server, port, 
 		    	    (ay_socket_callback)jab_continue, j, NULL) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
 	    return;
