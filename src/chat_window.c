@@ -55,6 +55,7 @@
 #include "smileys.h"
 #include "service.h"
 #include "action.h"
+#include "mem_util.h"
 
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
@@ -534,6 +535,12 @@ void send_message(GtkWidget *widget, gpointer d)
 	o_text = convert_eol(text);
 	g_free(text);
 	text=o_text;
+
+#ifdef __MINGW32__
+	char *recoded = ay_utf8_to_str(text);
+	g_free(text);
+	text = recoded;
+#endif
 
 #ifdef HAVE_ICONV_H
 	if(!can_iconvert(eb_services[data->preferred->service_id])) {
@@ -1357,6 +1364,12 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 	}
 	else
 		g_snprintf(buff2, BUF_SIZE, "%s", remote_contact->nick);
+
+#ifdef __MINGW32__
+	char *recoded = ay_str_to_utf8(message);
+	g_free(message);
+	message = recoded;
+#endif
 
 #ifdef HAVE_ICONV_H
 	{

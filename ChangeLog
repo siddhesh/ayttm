@@ -1,4 +1,9 @@
-* Wed Jun  6 2003 22:03 GMT [colin]	0.3.1-24
+* Thu Jun  5 2003 22:03 GMT [colin]	0.3.1-25
+- src/chat_window.c src/chat_room.c
+Fix UTF8 chars appearing on windows - patch by Benoit Laniel 
+(nels @ users.sf.net)
+
+* Wed Jun  4 2003 22:03 GMT [colin]	0.3.1-24
 - modules/aim-oscar/aim-oscar.c
   modules/aim-toc/aim-toc.c
   modules/icq/icq.c
@@ -14,11 +19,11 @@
   src/service.h
 Add public chatroom selection interface (implemented in irc)
 
-* Wed Jun  6 2003 16:20 GMT [philip]	0.3.1-23
+* Wed Jun  4 2003 16:20 GMT [philip]	0.3.1-23
 - src/flash_window_title.c
 make it compile on non-windows too
 
-* Wed Jun  6 2003 10:25 GMT [edward]	0.3.1-22
+* Wed Jun  4 2003 10:25 GMT [edward]	0.3.1-22
 - src/Makefile.am
   src/flash_window_title.c
 Makde the flashing compile.

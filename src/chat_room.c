@@ -35,6 +35,7 @@
 #include "add_contact_window.h"
 #include "action.h"
 #include "messages.h"
+#include "mem_util.h"
 
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
@@ -167,6 +168,13 @@ static void send_cr_message( GtkWidget * widget, gpointer data )
 	
 	if (!text || strlen(text) == 0)
 		return;
+
+#ifdef __MINGW32__
+	char *recoded = ay_utf8_to_str(text);
+	g_free(text);
+	text = recoded;
+#endif
+
 	RUN_SERVICE(ecr->local_user)->send_chat_room_message(ecr,text);
 
 	if(ecr->this_msg_in_history)
@@ -970,6 +978,12 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 	link_message = linkify(temp_message);
 
 	g_free(temp_message);
+
+#ifdef __MINGW32__
+	char *recoded = ay_str_to_utf8(link_message);
+	g_free(link_message);
+	link_message = recoded;
+#endif
 	
 	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), buff,0,0,0 );
 	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), link_message,
