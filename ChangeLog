@@ -1,3 +1,7 @@
+* Tue Apr 15 2003 13:54 GMT [colin]	0.2.3-104
+- libproxy/proxy.c
+Backward compat
+
 * Tue Apr 15 2003 13:13 GMT [colin]	0.2.3-103
 - src/action.c
 Background execution of actions

@@ -709,40 +709,48 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
    if (!proxy_inited)
 	   proxy_autoinit();
 
-   if (callback == NULL) {
-	   fprintf(stderr, "proxy_connect callback is null\n");
-	   return -1;
-   }
    switch (proxy_type) {
       case PROXY_NONE:    /* No proxy */
 		{
 		struct sockaddr_in *sin = (struct sockaddr_in *)serv_addr;
-		return ay_socket_new_async(
+		if (callback)
+			return ay_socket_new_async(
 			      inet_ntoa(sin->sin_addr), 
 			      ntohs(sin->sin_port), 
 			      callback, data, NULL);     
+		else
+			return connect(sockfd, serv_addr, addrlen);
 		break;
 		}
       case PROXY_HTTP:    /* Http proxy */
 		if ( (tmp=http_connect(sockfd, serv_addr, addrlen)) > 0 ) {
-			callback(tmp, 0, data);
-			return 0;
+			if (callback) {
+				callback(tmp, 0, data);
+				return 0;
+			} else 
+				return tmp;
 		} else {
 			return -1;
 		}
 		break;
       case PROXY_SOCKS4:  /* SOCKS4 proxy */
 		if ( (tmp=socks4_connect(sockfd, serv_addr, addrlen)) > 0 ) {
-			callback(tmp, 0, data);
-			return 0;
+			if (callback) {
+				callback(tmp, 0, data);
+				return 0;
+			} else 
+				return tmp;
 		} else {
 			return -1;
 		}
 		break;
       case PROXY_SOCKS5:  /* SOCKS5 proxy */
 		if ( (tmp=socks5_connect(sockfd, serv_addr, addrlen)) > 0 ) {
-			callback(tmp, 0, data);
-			return 0;
+			if (callback) {
+				callback(tmp, 0, data);
+				return 0;
+			} else 
+				return tmp;
 		} else {
 			return -1;
 		}
