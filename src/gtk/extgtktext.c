@@ -5464,7 +5464,9 @@ draw_line (ExtGtkText* text,
 	   gint pixel_start_height,
 	   LineParams* lp)
 {
+#ifndef HAVE_LIBXFT
   GdkGCValues gc_values;
+#endif
   gint i;
   gint len = 0;
   guint running_offset = lp->tab_cont.pixel_offset;

@@ -387,7 +387,6 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 	char *service, *user, *pass;
 	int i;
 	int id;
-	gboolean had_accounts = (accounts != NULL);
 	LList *pairs = NULL;
 	LList *existing_accounts = NULL, *new_accounts = NULL,
 	    *acc_walk = NULL, *to_remove = NULL;

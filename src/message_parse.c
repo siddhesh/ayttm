@@ -55,7 +55,7 @@
 #undef func_data
 #undef HAVE_PTHREAD
 #endif
-#ifdef __NetBSD__
+#if defined(__NetBSD__) || defined(__FreeBSD__) 
 #undef HAVE_PTHREAD
 #endif
 

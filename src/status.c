@@ -773,8 +773,6 @@ static void ay_compare_version (const char *version, int warn_again)
 static void ay_check_release ( GtkWidget * widget, gpointer userdata )
 {
 	int is_auto = GPOINTER_TO_INT(userdata);
-	char *rss = NULL;
-	int found = 0;
 	char *version = ay_get_last_version();
 	if (version) {
 		eb_debug(DBG_CORE, "Last version: %s\n", version);
