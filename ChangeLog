@@ -1,3 +1,7 @@
+* Thu Apr 17 2003 10:22 GMT [colin]	0.2.3-124
+- modules/irc modules/workwizu
+Proxy support
+
 * Thu Apr 17 2003 10:04 GMT [colin]	0.2.3-123
 - modules/yahoo2/yahoo.c
 Proxy support

@@ -65,6 +65,7 @@ typedef unsigned long ulong;
 #include "globals.h"
 #include "tcp_util.h"
 #include "activity_bar.h"
+#include "libproxy/libproxy.h"
 
 #include "pixmaps/workwizu_online.xpm"
 #include "pixmaps/workwizu_away.xpm"
@@ -107,8 +108,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/08 08:40:07 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/17 10:23:36 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -679,7 +680,7 @@ void eb_workwizu_login (eb_local_account *account)
 	my_user->typing_handler = -1;
 	
 	eb_debug(DBG_WWZ, "Logging in\n");
-	if ((res = ay_socket_new_async(server, atoi(port), 
+	if ((res = proxy_connect_host(server, atoi(port), 
 			(ay_socket_callback)eb_workwizu_connected, account, NULL)) < 0) {
 		eb_debug(DBG_WWZ, "cant connect socket");
 		do_error_dialog(_("Server doesn't answer."), 

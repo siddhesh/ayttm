@@ -55,6 +55,7 @@
 #include "gtk/gtk_eb_html.h"
 #include "plugin_api.h"
 #include "smileys.h"
+#include "libproxy/libproxy.h"
 
 #include "pixmaps/irc_online.xpm"
 #include "pixmaps/irc_away.xpm"
@@ -85,8 +86,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/04 11:54:00 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/17 10:23:36 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1136,7 +1137,7 @@ static void irc_login( eb_local_account * account)
 	i = socket(AF_INET, SOCK_STREAM, 0);
 	if (i < 0) { fprintf(stderr, "IRC: socket() failed for %s\n", ila->server); return; }
 	
-	if (connect(i, (struct sockaddr *)&site, sizeof(site)) < 0)
+	if (proxy_connect(i, (struct sockaddr *)&site, sizeof(site),NULL,NULL,NULL) < 0)
 	{
 		char buff[1024]; 
 		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
