@@ -74,6 +74,7 @@ void update_contact_window_length ();
 void focus_statuswindow (void);
 int add_menu_items(void *menu, int cur_service, int should_sep,
 			struct contact *conn, eb_account *acc, eb_local_account *ela);
+void set_menu_sensitivity(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

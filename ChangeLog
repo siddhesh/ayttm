@@ -1,3 +1,9 @@
+* Tue Apr 08 2003 07:40 GMT [colin]	0.2.3-56
+- src/status.[ch] src/plugin_api.c
+Call set_menu_sensitivity after a module changed its status
+- modules/jabber/jabber.c
+set flags before setting status at disconnect
+
 * Tue Apr 08 2003 07:40 GMT [colin]	0.2.3-55
 - modules/*toc
 Implement connect cancel

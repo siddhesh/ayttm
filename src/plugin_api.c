@@ -31,6 +31,7 @@
 #include "dialog.h"
 #include "prefs.h"
 
+extern void set_menu_sensitivity(void);
 
 static void eb_gtk_dialog_callback(GtkWidget *widget, gpointer data)
 {
@@ -151,11 +152,10 @@ void eb_do_dialog(char *message, char *title, eb_callback_action action, void *d
 void eb_set_active_menu_status(LList *status_menu, int status)
 {
 	gtk_check_menu_item_set_active
-		(GTK_CHECK_MENU_ITEM
-		 	(
-			 l_list_nth(status_menu, status)->data
-			 ), TRUE
-		);
+		(GTK_CHECK_MENU_ITEM(
+			 l_list_nth(status_menu, status)->data), TRUE);
+	
+	set_menu_sensitivity();
 }
 
 /* File */

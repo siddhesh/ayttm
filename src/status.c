@@ -64,7 +64,6 @@
 #endif
 
 void update_contact_list();
-static void set_menu_sensitivity(void);
 
 enum {
 	TARGET_STRING,
@@ -1786,7 +1785,7 @@ static void menu_set_sensitive(GtkItemFactory *ifactory, const gchar *path,
 }
 
 
-static void set_menu_sensitivity(void)
+void set_menu_sensitivity(void)
 {
 	int online = connected_local_accounts();
 	
