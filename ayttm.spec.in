@@ -43,11 +43,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gnome/apps/Internet/@PACKAGE@.desktop
 %{_datadir}/applnk/Internet/@PACKAGE@.desktop
 # Install the modules
-%{_datadir}/@PACKAGE@/modules/*.a   
-%{_datadir}/@PACKAGE@/modules/*.la  
-%{_datadir}/@PACKAGE@/modules/*.so 
+%{_libdir}/@PACKAGE@/*.a   
+%{_libdir}/@PACKAGE@/*.la  
+%{_libdir}/@PACKAGE@/*.so 
 # Install translations
 %{_datadir}/locale/*/LC_MESSAGES/@PACKAGE@.mo
+# the config file
+%config(noreplace) /etc/ayttmrc
 # Lastly, the binary itself
 %{_bindir}/@PACKAGE@
 
