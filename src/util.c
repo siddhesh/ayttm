@@ -1584,8 +1584,8 @@ int send_url(const char * url)
 int eb_send_message (const char *to, const char *msg, int service)
 {
   gint pos = 0;
-  struct contact *con;
-  eb_account *ac;
+  struct contact *con=NULL;
+  eb_account *ac=NULL;
   
   if (service != -1)
 	ac = find_account_by_handle(to, service);

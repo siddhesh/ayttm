@@ -1,3 +1,7 @@
+* Thu Apr 17 2003 18:00 GMT [philip]	0.2.3-130
+- src/util.c
+initialise variables
+
 * Thu Apr 17 2003 14:56 GMT [colin]	0.2.3-129
 - modules/msn2/msn.C
 fix cast
