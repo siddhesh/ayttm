@@ -11,7 +11,7 @@ TODO 0.3.1
     - *TOC	Half-fixed (some unknown problems like segs)
     - Jabber	Not checked
     - IRC	Not checked
-* Yahoo webcam support - half done
+* Yahoo webcam support - Done - needs testing
 * Standardise on autoconf/automake versions (2.53/1.6) - Done
 * Right click on contact list to sort contacts
 
