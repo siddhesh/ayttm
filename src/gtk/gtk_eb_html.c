@@ -972,29 +972,29 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					||(parm = strstr(copy, "NAME=")) != NULL)
 				{
 					char tmp_sname[64];
+					char tmp_sserv[64];
 					GdkPixmap *icon;
 					GdkBitmap *mask;
                                         LList * slist=smileys;
-                                        smiley * smile;
+                                        smiley * smile = NULL;
 
 					parm += strlen("name=");
                                         // here
                                         _extract_parameter(parm, tmp_sname, 64);
 
-                                        while(slist!=NULL)
-                                        {
-                                                smile=(smiley *)slist->data;
-                                                if(!strcmp(smile->name, tmp_sname))
-                                                {
+					parm = strstr(copy, "protocol=");
+					if (parm) {
+						parm +=strlen("protocol=");
+						_extract_parameter(parm, tmp_sserv, 64);
+						smile = get_smiley_by_name_and_service(tmp_sname, tmp_sserv);
+					} else
+						smile = get_smiley_by_name(tmp_sname);
+					
+					if (smile) {
 						  icon = gdk_pixmap_create_from_xpm_d(GTK_WIDGET(widget)->window, &mask, NULL, smile->pixmap);
 						  ext_gtk_text_insert_pixmap(widget, font, fs->fore, fs->back,
 						  icon, mask, "smiley", strlen("smiley"));
-                                                  break;
-                                                }
-                                                slist=slist->next;
-                                        }
-                                        if(slist==NULL)
-                                        {
+                                        } else {
 						if((parm = strstr(copy, "alt=")) != NULL
 								|| (parm = strstr(copy, "ALT=")) != NULL) 
 						{

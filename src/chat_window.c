@@ -507,7 +507,8 @@ void send_message(GtkWidget *widget, gpointer d)
 
 	/* TODO make these two filters */
 	if(RUN_SERVICE(data->local_user)->get_smileys)
-		temp_message = eb_smilify(text, RUN_SERVICE(data->local_user)->get_smileys());
+		temp_message = eb_smilify(text, RUN_SERVICE(data->local_user)->get_smileys(), 
+				get_service_name(data->local_user->service_id));
 	else
 		temp_message = g_strdup(text);
 	link_message = linkify(temp_message);
@@ -1321,7 +1322,8 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 
 	/* TODO make these filters */
 	if(RUN_SERVICE(account)->get_smileys)
-		temp_message = eb_smilify(message, RUN_SERVICE(account)->get_smileys());
+		temp_message = eb_smilify(message, RUN_SERVICE(account)->get_smileys(), 
+				get_service_name(account->service_id));
 	else
 		temp_message = g_strdup(message);
 	link_message = linkify(temp_message);

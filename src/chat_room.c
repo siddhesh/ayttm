@@ -1170,7 +1170,8 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 		 
 	}
 	if(RUN_SERVICE(chat_room->local_user)->get_smileys)
-	 	temp_message = eb_smilify(message, RUN_SERVICE(chat_room->local_user)->get_smileys());
+	 	temp_message = eb_smilify(message, RUN_SERVICE(chat_room->local_user)->get_smileys(), 
+				get_service_name(chat_room->local_user->service_id));
 	else
 		temp_message = g_strdup(message);
 	

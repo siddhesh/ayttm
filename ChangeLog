@@ -1,3 +1,9 @@
+* Wed Jul 09 2003 21:30 GMT [colin]	0.3.2-22
+- src/smileys.[ch]
+- src/chat_room.c src/chat_window.c src/gtk/gtk_eb_html.[ch]
+Pass protocol to <smiley> tag
+Fix infinite loop in fast_sqrt
+
 * Wed Jul 09 2003 18:30 GMT [philip]	0.3.2-21
 - src/smileys.[ch] modules/smileys/smiley-themer.c
 Support multiprotocol themes so that if a theme supports

@@ -69,7 +69,7 @@ void				ay_remove_smiley_set( const char *inName );
 
 void init_smileys( void );
 
-gchar * eb_smilify( const char *text, LList *protocol_smileys );
+gchar * eb_smilify( const char *text, LList *protocol_smileys, const char *service );
 
 LList * eb_default_smileys( void );
 
@@ -79,6 +79,9 @@ LList * add_protocol_smiley( LList *list, const char *text, const char *name );
 
 /* someone figure out how to do this with LList * const */
 LList * eb_smileys( void );
+
+smiley * get_smiley_by_name( const char *name );
+smiley * get_smiley_by_name_and_service( const char *name, const char *service );
 
 typedef struct _smiley_callback_data smiley_callback_data;
 

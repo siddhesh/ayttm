@@ -261,7 +261,7 @@ void init_smileys(void)
   default_smileys=add_protocol_smiley(default_smileys, ":'(", "cry");
 }
 
-gchar * eb_smilify( const char *text, LList *protocol_smileys )
+gchar * eb_smilify( const char *text, LList *protocol_smileys, const char *service )
 {
   int ipos=0;
   int found;
@@ -317,6 +317,8 @@ gchar * eb_smilify( const char *text, LList *protocol_smileys )
 	int i = 0, j = 0;
         g_string_append(newstr, "<smiley name=\"");
         g_string_append(newstr, ps->name);
+	g_string_append(newstr, "\" protocol=\"");
+	g_string_append(newstr, service);
 	g_string_append(newstr, "\" alt=\"");
 	while (ps->text[i] && j<123) {
 		if(ps->text[i]=='>') {
@@ -381,7 +383,7 @@ LList * add_smiley( LList * list, const char *name, char **data, const char *ser
   return l_list_append(list, psmile);
 }
 
-static smiley * get_smiley_by_name( const char *name )
+smiley * get_smiley_by_name( const char *name )
 {
 	smiley * psmile;
 	LList * l;
@@ -393,7 +395,7 @@ static smiley * get_smiley_by_name( const char *name )
 	return NULL;
 }
 
-static smiley * get_smiley_by_name_and_service( const char *name, const char *service )
+smiley * get_smiley_by_name_and_service( const char *name, const char *service )
 {
 	smiley * psmile, *possibility=NULL;
 	LList * l;
@@ -401,6 +403,7 @@ static smiley * get_smiley_by_name_and_service( const char *name, const char *se
 		psmile = (smiley *)(l->data);
 		if(strcmp(psmile->name,name) != 0) 
 			continue;
+		printf("service:%s, p->service:%s\n",service, psmile->service);
 		if(!service || (psmile->service && !strcmp(psmile->service, service)))
 			return psmile;
 		if(!possibility)
@@ -481,13 +484,14 @@ void show_smileys_cb (smiley_callback_data *data) {
 	for(;smileys;smileys=smileys->next) {
 		gboolean already_done = FALSE;
 		msmiley = smileys->data;
-		
+		printf("a\n");
 		for(l=done; l; l=l->next) {
 			protocol_smiley * done_smiley = l->data;
 			if(!strcmp(msmiley->name, done_smiley->name)) {
 				already_done = TRUE;
 				break;
 			}
+			printf("b\n");
 		}
 
 		if(already_done || !get_smiley_by_name(msmiley->name))
@@ -504,6 +508,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 
 	for(l = done; l; l=l_list_next(l)) {
 		msmiley = l->data;
+		printf("c\n");
 		dsmile = get_smiley_by_name_and_service(msmiley->name, GET_SERVICE(account).name);
 		if(dsmile != NULL) {
 			GtkWidget *parent = NULL;
@@ -572,12 +577,15 @@ void show_smileys_cb (smiley_callback_data *data) {
 static int fast_sqrt(int n)
 {
 	int guess=n/4;
-	int result;
-
+	int result=-1;
+	int oldguess=-1, oldresult=-1;
 	do {
+		oldguess=guess;
+		oldresult=result;
+		
 		result = n/guess;
 		guess = (guess+result)/2;
-	} while(guess!=result);
+	} while(guess!=result && (oldguess!=guess && oldresult!=result));
 
 	return result;
 }
