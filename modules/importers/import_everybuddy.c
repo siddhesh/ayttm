@@ -60,8 +60,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Everybuddy Settings", 
 	"Import the Everybuddy Settings", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/29 07:15:06 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/29 07:30:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -73,7 +73,8 @@ static void *buddy_list_tag=NULL;
 int plugin_init()
 {
 	eb_debug(DBG_MOD,"EB Buddy List init\n");
-	buddy_list_tag=eb_add_menu_item("Everybuddy Settings", EB_IMPORT_MENU, import_eb_accounts, ebmIMPORTDATA, NULL);
+	buddy_list_tag=eb_add_menu_item("Everybuddy Settings", EB_IMPORT_MENU, 
+				import_eb_accounts, ebmIMPORTDATA, NULL);
 	if(!buddy_list_tag)
 		return(-1);
 	return(0);
@@ -85,13 +86,13 @@ int plugin_finish()
 
 	result=eb_remove_menu_item(EB_IMPORT_MENU, buddy_list_tag);
 	if(result) {
-		g_warning("Unable to remove eb Buddy List menu item from import menu!");
+		g_warning("Unable to remove eb Buddy List menu item from  menu!");
 		return(-1);
 	}
 	return(0);
 }
 
-/*************************************************************************************
+/************************************************************************************
  *                             End Module Code
  ************************************************************************************/
 
@@ -114,41 +115,57 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(accountsbutton))) {
 		snprintf(buff, 1024, "%s/.everybuddy/accounts", getenv("HOME"));
 		if (!load_accounts_from_file(buff)) {
-			ay_do_error(_("Import error"), _("Cannot import accounts.\nCheck that ~/.everybuddy/accounts exists and is readable."));
+			ay_do_error(_("Import error"), _("Cannot import accounts.\n"
+					"Check that ~/.everybuddy/accounts exists "
+					"and is readable."));
 		} else
 			a=1;
 	}
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(contactsbutton))) {
 		snprintf(buff, 1024, "%s/.everybuddy/contacts", getenv("HOME"));
 		if (!load_contacts_from_file(buff)) {
-			ay_do_error(_("Import error"), _("Cannot import contacts.\nCheck that ~/.everybuddy/contacts exists and is readable."));
+			ay_do_error(_("Import error"), _("Cannot import contacts.\n"
+					"Check that ~/.everybuddy/contacts exists "
+					"and is readable."));
 		} else
 			c=1;	
 	}
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(prefsbutton))) {
 		/* prefs we want to save */
 		char saved[7][MAX_PREF_LEN];
-		p=1;
-		strncpy( saved[0], cGetLocalPref("BuddyArriveFilename"), MAX_PREF_LEN );
-		strncpy( saved[1], cGetLocalPref("BuddyAwayFilename"), MAX_PREF_LEN );
-		strncpy( saved[2], cGetLocalPref("BuddyLeaveFilename"), MAX_PREF_LEN );
-		strncpy( saved[3], cGetLocalPref("SendFilename"), MAX_PREF_LEN );
-		strncpy( saved[4], cGetLocalPref("ReceiveFilename"), MAX_PREF_LEN );
-		strncpy( saved[5], cGetLocalPref("FirstMsgFilename"), MAX_PREF_LEN );
-		strncpy( saved[6], cGetLocalPref("modules_path"), MAX_PREF_LEN );
+		FILE *in;
+		
+		strncpy(saved[0], cGetLocalPref("BuddyArriveFilename"), MAX_PREF_LEN);
+		strncpy(saved[1], cGetLocalPref("BuddyAwayFilename"), MAX_PREF_LEN);
+		strncpy(saved[2], cGetLocalPref("BuddyLeaveFilename"), MAX_PREF_LEN);
+		strncpy(saved[3], cGetLocalPref("SendFilename"), MAX_PREF_LEN);
+		strncpy(saved[4], cGetLocalPref("ReceiveFilename"), MAX_PREF_LEN);
+		strncpy(saved[5], cGetLocalPref("FirstMsgFilename"), MAX_PREF_LEN);
+		strncpy(saved[6], cGetLocalPref("modules_path"), MAX_PREF_LEN);
 
 		snprintf(buff, 1024, "%s/.everybuddy/prefs", getenv("HOME"));
-		ayttm_prefs_read_file(buff);
-		
-		cSetLocalPref("BuddyArriveFilename", saved[0]);
-		cSetLocalPref("BuddyAwayFilename", saved[1]);
-		cSetLocalPref("BuddyLeaveFilename", saved[2]);
-		cSetLocalPref("SendFilename", saved[3]);
-		cSetLocalPref("ReceiveFilename", saved[4]);
-		cSetLocalPref("FirstMsgFilename", saved[5]);
-		cSetLocalPref("modules_path", saved[6]);
-		
-		ayttm_prefs_write();
+		in = fopen(buff, "r");
+		if (in) {
+			fclose (in);
+			ayttm_prefs_read_file(buff);
+
+			cSetLocalPref("BuddyArriveFilename", saved[0]);
+			cSetLocalPref("BuddyAwayFilename", saved[1]);
+			cSetLocalPref("BuddyLeaveFilename", saved[2]);
+			cSetLocalPref("SendFilename", saved[3]);
+			cSetLocalPref("ReceiveFilename", saved[4]);
+			cSetLocalPref("FirstMsgFilename", saved[5]);
+			cSetLocalPref("modules_path", saved[6]);
+
+			ayttm_prefs_write();
+			p=1;
+		} else {
+			ay_do_error(_("Import error"), 
+					_("Cannot import preferences.\n"
+					"Check that ~/.everybuddy/preferences "
+					"exists and is readable."));			
+		}
+			
 	}
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(awaybutton))) {
 		FILE *in = NULL, *out = NULL;
@@ -158,7 +175,10 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 			snprintf(buff, 1024, "%saway_messages", config_dir);
 			out = fopen(buff, "a");
 			if (!out) {
-				ay_do_error(_("Import error"), _("Cannot save away messages.\nCheck that ~/.ayttm/away_messages is writable."));
+				ay_do_error(_("Import error"),
+						 _("Cannot save away messages.\n"
+						"Check that ~/.ayttm/away_messages "
+						"is writable."));
 			} else {
 				while (fgets(buff, 1024, in) != NULL)
 					fputs(buff, out);
@@ -167,7 +187,10 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 			}
 			fclose(in);
 		} else {
-			ay_do_error(_("Import error"), _("Cannot import away messages.\nCheck that ~/.everybuddy/away_messages exists and is readable."));			
+			ay_do_error(_("Import error"), 
+					_("Cannot import away messages.\n"
+					"Check that ~/.everybuddy/away_messages "
+					"exists and is readable."));			
 		}
 	}
 	
@@ -175,7 +198,8 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 		return;
 	} else {
 		char message[1024];
-		snprintf(message, 1024, "Successfully imported %s%s%s%s%s%s%s from Everybuddy.",
+		snprintf(message, 1024, "Successfully imported %s%s%s%s%s%s%s "
+				"from Everybuddy.",
 				a?"accounts":"",
 				(a && (c||p||m))?", ":"",
 				c?"contacts":"",
@@ -210,12 +234,17 @@ void import_eb_accounts(ebmCallbackData *data)
 		
 		vbox = gtk_vbox_new(FALSE, 5);
 		
-		label = gtk_label_new(_("Select which parts of your everybuddy configuration to import.\n"));
+		label = gtk_label_new(_("Select which parts of your everybuddy "
+				"configuration to import.\n"));
 		
-		accountsbutton  = gtk_check_button_new_with_label(_("Import local accounts"));
-		contactsbutton  = gtk_check_button_new_with_label(_("Import contacts"));
-		prefsbutton     = gtk_check_button_new_with_label(_("Import preferences"));
-		awaybutton      = gtk_check_button_new_with_label(_("Import away messages"));
+		accountsbutton  = gtk_check_button_new_with_label(
+					_("Import local accounts"));
+		contactsbutton  = gtk_check_button_new_with_label(
+					_("Import contacts"));
+		prefsbutton     = gtk_check_button_new_with_label(
+					_("Import preferences"));
+		awaybutton      = gtk_check_button_new_with_label(
+					_("Import away messages"));
 		
 		okbutton = do_icon_button(_("OK"), ok_xpm, window);
 		cancelbutton = do_icon_button(_("Cancel"), cancel_xpm, window);

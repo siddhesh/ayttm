@@ -547,14 +547,15 @@ void ayttm_prefs_read_file(char *file)
 	char * const	param = buff;		/* just another name for buff... */
 	FILE			*fp = NULL;
 	
-	
 	snprintf( buff, buffer_size, "%s",file );
 	
 	fp = fopen( buff, "r" );
 	
 	if ( fp == NULL )
-	{
-		if (strcmp(file,AYTTMRC)) 
+	{	
+		char tmp[1024];
+		snprintf(tmp, 1024, "%sprefs", config_dir);
+		if (!strcmp(file, tmp)) 
 		{
 			printf( "Creating prefs file [%s]\n", buff );
 			ayttm_prefs_write();

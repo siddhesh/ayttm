@@ -1,3 +1,9 @@
+* Tue Apr 29 2003 07:14 GMT [colin]	0.3.0-34
+- modules/importers/import_everybuddy.c 
+even more feedback ;-)
+- src/prefs.c
+Write prefs only if it's our prefs file
+
 * Tue Apr 29 2003 07:14 GMT [colin]	0.3.0-33
 - modules/importers/import_everybuddy.c 
 more feedback
