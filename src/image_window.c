@@ -23,10 +23,11 @@
 #   include <config.h>
 #endif
 #include "globals.h"
+#include "image_window.h"
 
 #ifndef HAVE_GDK_PIXBUF
 #include "debug.h"
-int ay_image_window_new(int width, int height, const char *title) { 
+int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data) { 
 	eb_debug(DBG_CORE, "Image window support not included\n");
 	return 0; 
 }
@@ -43,6 +44,10 @@ struct ay_image_wnd {
 	GtkWidget *window;
 	GtkWidget *pixmap;
 	GdkPixbufLoader *loader;
+
+	ay_image_window_cancel_callback callback;
+	void *callback_data;
+
 	int tag;
 };
 
@@ -61,6 +66,26 @@ static struct ay_image_wnd * get_image_wnd_by_tag(int tag)
 	return NULL;
 }
 
+
+static void ay_image_window_destroy(GtkWidget *widget, gpointer data)
+{
+	struct ay_image_wnd *aiw = data;
+
+	if(!aiw)
+		return;
+
+	images = l_list_remove(images, aiw);
+
+	gdk_pixbuf_loader_close(aiw->loader);
+
+	if(aiw->callback)
+		aiw->callback(aiw->tag, aiw->callback_data);
+
+	if(aiw->tag == last_tag)
+		last_tag--;
+
+	g_free(aiw);
+}
 
 static char *dummy_pixmap_xpm[] = {
 	"1 1 1 1",
@@ -84,7 +109,7 @@ static GtkWidget *create_dummy_pixmap(GtkWidget * widget)
 	return pixmap;
 }
 
-int ay_image_window_new(int width, int height, const char *title)
+int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data)
 {
 	struct ay_image_wnd * aiw;
 	GtkWidget *wndImage;
@@ -122,6 +147,9 @@ int ay_image_window_new(int width, int height, const char *title)
 	gtk_object_set_data_full(GTK_OBJECT(wndImage), "btnClose",
 				 btnClose,
 				 (GtkDestroyNotify) gtk_widget_unref);
+	gtk_signal_connect_object(GTK_OBJECT(btnClose), "clicked",
+				GTK_SIGNAL_FUNC(gtk_widget_destroy),
+				GTK_OBJECT(wndImage));
 	gtk_widget_show(btnClose);
 	gtk_box_pack_start(GTK_BOX(vbox1), btnClose, FALSE, FALSE, 0);
 
@@ -130,8 +158,13 @@ int ay_image_window_new(int width, int height, const char *title)
 	aiw->window = wndImage;
 	aiw->pixmap = pixImage;
 	aiw->tag = ++last_tag;
+	aiw->callback = callback;
+	aiw->callback_data = callback_data;
 
 	images = l_list_prepend(images, aiw);
+
+	gtk_signal_connect(GTK_OBJECT(wndImage), "destroy",
+				GTK_SIGNAL_FUNC(ay_image_window_destroy), aiw);
 
 	gtk_widget_show(wndImage);
 
@@ -191,14 +224,8 @@ void ay_image_window_close(int tag)
 	if(!aiw)
 		return;
 
-	images = l_list_remove(images, aiw);
-
-	gdk_pixbuf_loader_close(aiw->loader);
+	aiw->callback = aiw->callback_data = NULL;
+	
 	gtk_widget_destroy(aiw->window);
-
-	if(aiw->tag == last_tag)
-		last_tag--;
-
-	g_free(aiw);
 }
 #endif

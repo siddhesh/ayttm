@@ -22,11 +22,13 @@
 #ifndef __IMAGE_WINDOW_H__
 #define __IMAGE_WINDOW_H__
 
+typedef void (*ay_image_window_cancel_callback)(int tag, void *data);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int ay_image_window_new(int width, int height, const char *title);
+int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback cancel_callback, void *callback_data);
 int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int new_image);
 void ay_image_window_close(int tag);
 
