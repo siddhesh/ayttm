@@ -1,3 +1,10 @@
+* Tue Jul 22 2003 04:23 GMT [philip]	0.3.3-6
+- src/edit_local_accounts.c
+add access keys for Screen _Name, _Password, Service _Type and
+_Connect at startup.
+- ayttm.spec.in
+merge in IRC
+
 * Sun Jul 20 2003 12:14 GMT [colin]	0.3.3-5
 - modules/aim-toc/
 - modules/icq-toc/

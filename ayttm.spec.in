@@ -19,8 +19,7 @@ Requires:	@REQUIRES@
 Ayttm is designed to become a Universal Instant Messaging client, seamlessly
 integrating all existing Instant Messaging clients and providing a single
 consistant user interface. Currently, Ayttm supports sending and receiving
-messages through AOL, ICQ, Yahoo, MSN and Jabber. IRC support is possibly
-planned to be incorporated in future releases.
+messages through AOL, ICQ, Yahoo, MSN, IRC and Jabber.
 
 %if "%{nodebug}" == "0"
 %define optflags -g

@@ -498,6 +498,7 @@ void	ay_edit_local_accounts( void )
 	GtkWidget *hbox;
 	GtkWidget *button_box;
 	GtkWidget *label;
+	guint label_key;
 	GtkWidget *iconwid;
 	GtkWidget *toolbar;
 	GtkWidget *toolitem;
@@ -505,11 +506,14 @@ void	ay_edit_local_accounts( void )
 	GList *list;
 	GdkPixmap *icon;
 	GdkBitmap *mask;
+	GtkAccelGroup *accel_group;
 
 	if (is_open)
 		return;
 
 	is_open = 1;
+
+	accel_group = gtk_accel_group_new();
 
 	account_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_position(GTK_WINDOW(account_window),
@@ -531,17 +535,21 @@ void	ay_edit_local_accounts( void )
 
 	/*Screen Name Section */
 
-	label = gtk_label_new(_("Screen Name:"));
+	label = gtk_label_new("");
+	label_key = gtk_label_parse_uline(GTK_LABEL(label), _("Screen _Name:"));
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
 	username = gtk_entry_new();
 	gtk_box_pack_start(GTK_BOX(box), username, FALSE, FALSE, 2);
 	gtk_widget_show(username);
+	gtk_widget_add_accelerator(username, "grab_focus", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 
 	/*Password Section */
 
-	label = gtk_label_new(_("Password:"));
+	label = gtk_label_new("");
+	label_key = gtk_label_parse_uline(GTK_LABEL(label), _("_Password:"));
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
@@ -549,10 +557,13 @@ void	ay_edit_local_accounts( void )
 	gtk_entry_set_visibility(GTK_ENTRY(password), FALSE);
 	gtk_box_pack_start(GTK_BOX(box), password, FALSE, FALSE, 2);
 	gtk_widget_show(password);
+	gtk_widget_add_accelerator(password, "grab_focus", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 
 	/*Service Type Section */
 
-	label = gtk_label_new(_("Service Type:"));
+	label = gtk_label_new("");
+	label_key = gtk_label_parse_uline(GTK_LABEL(label), _("Service _Type:"));
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
@@ -564,13 +575,17 @@ void	ay_edit_local_accounts( void )
 	g_list_free(list);
 	gtk_widget_show(service_type);
 	gtk_box_pack_start(GTK_BOX(box), service_type, FALSE, FALSE, 2);
+	gtk_widget_add_accelerator(GTK_COMBO(service_type)->entry, "grab_focus", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 
 	/*Connect at startup Section */
 
-	connect_at_startup = gtk_check_button_new_with_label(_("Connect at startup"));
+	connect_at_startup = gtk_check_button_new_with_label("");
+	label_key = gtk_label_parse_uline(GTK_LABEL(GTK_BIN(connect_at_startup)->child), _("_Connect at startup"));
 	gtk_widget_show(connect_at_startup);
-	gtk_box_pack_start(GTK_BOX(box), connect_at_startup, FALSE, FALSE,
-			   5);
+	gtk_widget_add_accelerator(connect_at_startup, "clicked", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+	gtk_box_pack_start(GTK_BOX(box), connect_at_startup, FALSE, FALSE, 5);
 
 	gtk_box_pack_start(GTK_BOX(hbox), box, FALSE, FALSE, 2);
 	gtk_widget_show(box);
@@ -703,6 +718,9 @@ void	ay_edit_local_accounts( void )
 
 	gtk_signal_connect(GTK_OBJECT(account_window), "destroy",
 			   GTK_SIGNAL_FUNC(destroy), NULL);
+
+	gtk_window_add_accel_group(GTK_WINDOW(account_window), accel_group);
+
 	gtk_widget_show(account_window);
 	gtk_widget_grab_focus(username);
 }
