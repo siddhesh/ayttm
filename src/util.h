@@ -41,7 +41,6 @@
 
 #include <glib.h>	/* for llist_to_glist and glist_to_llist */
 #include "contact.h"
-#include "chat_room.h"
 
 #if !defined(FALSE) && !defined(TRUE)
 enum {FALSE, TRUE};
@@ -90,9 +89,6 @@ eb_account * find_suitable_remote_account( eb_account * first,
 					   struct contact * rest );
 eb_account * find_suitable_file_transfer_account( eb_account * first,
 						  struct contact * rest );
-eb_chat_room * find_chat_room_by_id( char * id );
-eb_chat_room * find_chat_room_by_name( char * name, int service_id );
-LList * find_chatrooms_with_remote_account(eb_account *remote);
 grouplist * find_grouplist_by_nick(char * nick);
 grouplist * find_grouplist_by_name(char * name);
 struct contact * find_contact_by_handle( char * handle );
@@ -117,8 +113,6 @@ void add_account( char * contact, eb_account * account );
 void add_account_silent( char * contact, eb_account * account );
 struct contact * move_account( struct contact * c, eb_account *account );
 void move_contact( char * group, struct contact * c);
-void invite_dialog( eb_local_account * ela, char * user, char * chat_room,
-		    void * id );
 void make_safe_filename(char *buff, char *name, char *group);
 int connected_local_accounts(void);
 

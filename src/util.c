@@ -50,6 +50,7 @@
 #include "util.h"
 #include "status.h"
 #include "globals.h"
+#include "chat_room.h"
 #include "chat_window.h"
 #include "value_pair.h"
 #include "plugin.h"

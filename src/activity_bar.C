@@ -23,6 +23,7 @@
 
 #include <stddef.h>
 #include <gtk/gtk.h>
+#include "gtk_globals.h"
 
 #include "plugin_api.h"
 #include "activity_bar.h"
@@ -204,6 +205,7 @@ ay_activity_bar_pack::~ay_activity_bar_pack()
 void ay_activity_window::create_window( void )
 {
 	s_window = gtk_window_new(GTK_WINDOW_DIALOG);
+	gtk_window_set_transient_for(GTK_WINDOW(s_window), GTK_WINDOW(statuswindow));
 	gtk_signal_connect(GTK_OBJECT(s_window), "delete_event", 
 			GTK_SIGNAL_FUNC(s_delete_event), NULL);
 	gtk_window_set_policy(GTK_WINDOW(s_window), FALSE, TRUE, TRUE);
