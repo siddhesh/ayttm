@@ -330,6 +330,19 @@ static void end_conversation(chat_window* cw)
 	g_free(cw);
 }
 
+static void remove_smiley_window(struct contact *ct)
+{
+	chat_window *cw = ct->chatwindow;
+
+	GET_CHAT_WINDOW(cw);
+	if(cw->smiley_window != NULL) {
+		/* close smileys popup */
+		gtk_widget_destroy(cw->smiley_window);
+		cw->smiley_window = NULL;
+	}
+	
+}
+
 /*
  * They guy closed the chat window, so we need to clean up
  */
@@ -357,19 +370,6 @@ static void remove_tab(struct contact *ct)
 	if (gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0) == NULL) {
 		gtk_widget_destroy(window);
 	}
-}
-
-static void remove_smiley_window(struct contact *ct)
-{
-	chat_window *cw = ct->chatwindow;
-
-	GET_CHAT_WINDOW(cw);
-	if(cw->smiley_window != NULL) {
-		/* close smileys popup */
-		gtk_widget_destroy(cw->smiley_window);
-		cw->smiley_window = NULL;
-	}
-	
 }
 
 static void close_tab_callback(GtkWidget *button, gpointer userdata)
@@ -1322,7 +1322,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 
 	} else {
 		if(iGetLocalPref("do_raise_window"))
-			gdk_window_raise(remote_contact->chatwindow->window->window);	  
+			gdk_window_show(remote_contact->chatwindow->window->window);	  
 	}
 
 	eb_update_window_title(remote_contact->chatwindow, TRUE);
@@ -1339,10 +1339,10 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 			play_sound( SOUND_RECEIVE );
 	}
 
-	/*for grab the focus*/
+	/*for raising the window*/
 
 	if ( iGetLocalPref("do_raise_window") )
-		gdk_window_raise(remote_contact->chatwindow->window->window);
+		gdk_window_show(remote_contact->chatwindow->window->window);
 
 	if ( iGetLocalPref("do_convo_timestamp") ) {
 		gchar * color;
@@ -1437,12 +1437,12 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 				eb_restore_last_conv (buff, remote_contact->chatwindow);
 			}
 			gdk_window_raise(remote_contact->chatwindow->window->window);
-			ENTRY_FOCUS(remote_contact->chatwindow);
+			/*ENTRY_FOCUS(remote_contact->chatwindow);*/
 		}
 
 	} else {
 		gdk_window_raise(remote_contact->chatwindow->window->window);
-		ENTRY_FOCUS(remote_contact->chatwindow);
+		/*ENTRY_FOCUS(remote_contact->chatwindow);*/
 	}
 
 	if (remote_contact->chatwindow->notebook != NULL) {
@@ -1504,12 +1504,12 @@ void eb_chat_window_display_account(eb_account * remote_account)
 				eb_restore_last_conv(buff,remote_contact->chatwindow);	
 			}
 			gdk_window_raise(remote_contact->chatwindow->window->window);
-			ENTRY_FOCUS(remote_contact->chatwindow);
+			/*ENTRY_FOCUS(remote_contact->chatwindow);*/
 		} else /* Did they get denied because they're in the Unknown group? */
 			return;
 	} else if (remote_contact->chatwindow && remote_contact->chatwindow->window) {
 		gdk_window_raise(remote_contact->chatwindow->window->window);
-		ENTRY_FOCUS(remote_contact->chatwindow);
+		/*ENTRY_FOCUS(remote_contact->chatwindow);*/
 	}       
     
 	eb_update_window_title(remote_contact->chatwindow, FALSE);

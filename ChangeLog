@@ -1,3 +1,7 @@
+* Tue Jun  3 2003 07:00 GMT [philip]	0.3.1-19
+- src/chat_window.c
+try to fix the do_raise_window problem
+
 * Tue Jun  3 2003 06:05 GMT [philip]	0.3.1-18
 - src/gtk/prefs_window.C
 raise prefs window if already visible and reselected from menu
