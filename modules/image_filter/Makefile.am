@@ -5,8 +5,14 @@ WIN32_LDFLAGS = -no-undefined
 WIN32_LIBADD = -L../../src -layttm -lintl -lglib-2.0
 endif
 
-pkglib_LTLIBRARIES = img2jpc.la video_capture.la
+if BUILD_JASPER_FILTER
+JASPER_BUILD = img2jpc.la
+else
+JASPER_BUILD =
+endif
+
 bin_SCRIPTS = ayttm_streamer_wrapper.sh
+pkglib_LTLIBRARIES = video_capture.la $(JASPER_BUILD)
 
 img2jpc_la_SOURCES = img2jpc.c 
 img2jpc_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)

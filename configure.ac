@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.4.5, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=19
+RELEASE=20
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -179,6 +179,10 @@ AM_PATH_GTK(1.2.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
 
 AC_ARG_ENABLE(webcam, AC_HELP_STRING([--disable-webcam],
 		[Do not build webcam support]))
+
+AC_ARG_ENABLE(jasper-filter, AC_HELP_STRING([--enable-jasper-filter],
+		[Build a jasper based jpeg2000 filter (not GPL)]))
+
 if test "$enable_webcam" != "no"; then
     AM_PATH_GDK_PIXBUF(, [AC_DEFINE(HAVE_GDK_PIXBUF, 1, [Define if you have gdk-pixbuf])],
         [AC_MSG_WARN([Unable to find gdk-pixbuf-devel, you won't be able to view webcams])])
@@ -408,6 +412,7 @@ AC_SUBST(HOST)
 AC_SUBST(RC)
 
 AM_CONDITIONAL(MINGW32, test $use_mingw = yes)
+AM_CONDITIONAL(BUILD_JASPER_FILTER, test "$enable_jasper_filter" = "yes")
 
 AC_CONFIG_FILES([Makefile ayttm.spec
                  doc/Makefile
@@ -445,6 +450,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
 		 modules/smileys/Makefile
 		 modules/smileys/console_smileys/Makefile
 		 modules/smileys/giles_smiles/Makefile
+		 modules/image_filter/Makefile
                  pixmaps/Makefile
                  sounds/Makefile
                  src/Makefile

@@ -1,3 +1,9 @@
+* Mon Dec 22 2003 09:41 GMT [philip]	0.4.5-20
+- modules/image_filter/img2jpc.c
+uncomment the jpc encoder ... duh
+add image_filter to the build path
+img2jpc will be built only if --enable-jasper-filter is passed to configure
+
 * Sun Dec 21 2003 17:33 GMT [philip]	0.4.5-19
 - modules/yahoo2/yahoo.c
 - src/status.c src/plugin_api.h

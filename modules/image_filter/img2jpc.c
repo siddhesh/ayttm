@@ -31,8 +31,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.1 $",
-	"$Date: 2003/12/17 11:58:05 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/12/22 09:45:00 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -54,8 +54,8 @@ static int plugin_init()
 	old_img_2_jpg = image_2_jpg;
 	image_2_jpg = img_2_jpg;
 
-/*	old_img_2_jpc = image_2_jpc;
-	image_2_jpc = img_2_jpc;*/
+	old_img_2_jpc = image_2_jpc;
+	image_2_jpc = img_2_jpc;
 
 	return 0;
 }
@@ -64,7 +64,7 @@ static int plugin_finish()
 {
 	image_2_jpg = old_img_2_jpg;
 
-/*	image_2_jpc = old_img_2_jpc;*/
+	image_2_jpc = old_img_2_jpc;
 
 	return 0;
 }
