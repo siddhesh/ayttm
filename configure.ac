@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.4.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=3
+RELEASE=4
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -203,22 +203,31 @@ if test "$enable_webcam" != "no"; then
 
 fi
 
-AC_ARG_ENABLE(openssl, AC_HELP_STRING([--disable-openssl],
-		[Do not include SSL support - nor MSN]))
-if test "$enable_ssl" != "no"; then
-  AC_MSG_CHECKING(for openssl)
-  ac_check_lib_save_LIBS=$LIBS
-  LIBS="-lssl -lcrypto $LIBS"
-  AC_TRY_LINK([#include <openssl/opensslv.h>],
-      [ return OPENSSL_VERSION_NUMBER; ],
-      [EB_LIBS="$EB_LIBS -lssl -lcrypto"
-      AC_DEFINE(HAVE_OPENSSL, 1, [Define if you have openssl])
-      AC_MSG_RESULT(yes)],
-      [enable_msn="no"
-      AC_MSG_RESULT(no)
-      AC_MSG_WARN([Unable to find openssl, you won't have MSN plugin])])
-  LIBS=$ac_check_lib_save_LIBS 
+AC_ARG_WITH(openssl, AC_HELP_STRING([--with-openssl-prefix=PFX],
+		[Prefix where openssl is installed (optional)]))
+SSL_INCLUDES=
+SSL_LIBDIR=
+if test "$with_ssl" != ""; then
+	SSL_INCLUDES="-I $with_ssl/include"
+	SSL_LIBDIR="-L $with_ssl/lib"
 fi
+
+AC_MSG_CHECKING(for openssl)
+ac_check_lib_save_LIBS=$LIBS
+LIBS="$SSL_LIBDIR -lssl -lcrypto $LIBS"
+ac_check_lib_save_CFLAGS=$CFLAGS
+CFLAGS="$SSL_INCLUDEDIR $CFLAGS"
+AC_TRY_LINK([#include <openssl/opensslv.h>],
+    [ return OPENSSL_VERSION_NUMBER; ],
+    [EB_LIBS="$EB_LIBS $SSL_LIBDIR -lssl -lcrypto"
+     EB_CFLAGS="$EB_CFLAGS $SSL_INCLUDES"
+    AC_DEFINE(HAVE_OPENSSL, 1, [Define if you have openssl])
+    AC_MSG_RESULT(yes)],
+    [enable_msn="no"
+    AC_MSG_RESULT(no)
+    AC_MSG_WARN([Unable to find openssl, you won't have MSN plugin])])
+LIBS=$ac_check_lib_save_LIBS 
+CFLAGS=$ac_check_lib_save_CFLAGS
 
 else
  	GTK_CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -D_REENTRANT -Wall -g -I../mingw32"

@@ -1,4 +1,10 @@
-* Mon Aug 25 18:52:24 UTC 2003 [elh]    0.4.0-3
+* Tue Aug 26 2003 04:48 GMT [philip	0.4.0-4
+- configure.ac
+Allow user to specify openssl prefix
+- ChangeLog
+fix date format so rpm doesn't complain
+
+* Mon Aug 25 2003 18:52 GMT [elh]	0.4.0-3
 - src/ssl.h
 OPENSSL_NO_KRB5 undefined to fix issue with includes
 
