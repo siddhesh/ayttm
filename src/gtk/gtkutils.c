@@ -143,20 +143,25 @@ void    gtkut_set_pixmap( eb_local_account *ela, char **inXPM, GtkPixmap *outPix
 	while(x != NULL) {
 		d = (struct dd *)x->data;
 		if(d->inXPM == inXPM) {
-			gtk_pixmap_set( outPixmap, d->tpx, d->tbx );
+			if (outPixmap->pixmap != d->tpx)
+				gtk_pixmap_set( outPixmap, d->tpx, d->tbx );
 			return;
 		}
 		x = x->next;
 	}
 	if (!x) {
+		GdkPixmap *tpx;
+		GdkBitmap *tbx;
 		d = (struct dd *) g_new0 (struct dd, 1);
 		if (!d)
 			return;
 
-		d->tpx = gdk_pixmap_create_from_xpm_d( statuswindow->window, 
-			&d->tbx, NULL, inXPM );
+		tpx = gdk_pixmap_create_from_xpm_d( statuswindow->window, 
+			&tbx, NULL, inXPM );
 
 		d->inXPM=inXPM;
+		d->tpx=tpx;
+		d->tbx=tbx;
 		gtk_pixmap_set( outPixmap, d->tpx, d->tbx );
 		x = l_list_append(ela->status_pix, d);
 		ela->status_pix = x;

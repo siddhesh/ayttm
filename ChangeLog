@@ -1,3 +1,10 @@
+* Sat May 28 2003 13:02 GMT [edward]	0.3.1-2
+- src/gtk/gtkutils.c
+Fix for WIN32 memory issues. After reading through code I think I came
+up with a better way to set the pixmap. This way, we only change when 
+the pixmap changes. AIM should be looked at as it changes the pixmap
+very often when it should not. I.e. it goes to off to on to on to off, etc.
+
 * Sat May 24 2003 09:15 GMT [philip]	0.3.1-1
 - Ready to release 0.3.1
 
