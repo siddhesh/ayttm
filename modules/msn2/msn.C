@@ -172,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.73 $",
-	"$Date: 2003/12/02 17:25:38 $",
+	"$Revision: 1.74 $",
+	"$Date: 2003/12/05 11:56:27 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2418,6 +2418,8 @@ void ext_start_netmeeting(char *ip)
 	while ((fgets(buf, sizeof(buf), test)) != NULL) {
 		if(strstr(buf, "--callto") != NULL)
 			callto_supported = 1;
+		else if (strstr(buf, "--call") != NULL)
+			callto_supported = 2;
 	}
 	pclose(test);	
 	
