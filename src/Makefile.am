@@ -13,8 +13,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
 	offline_queue_mgmt.c tcp_util.c image_window.c action.c about.c \
-	messages.c edit_list_window.c \
-	account_parser.y contact_parser.y account_scanner.l contact_scanner.l
+	messages.c edit_list_window.c
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
@@ -74,4 +73,22 @@ defaults.h: Makefile
 
 prefs.$(OBJEXT) plugin.$(OBJEXT): defaults.h
 
+account_parser.h: account_parser.y
 
+account_parser.c: account_parser.y
+	$(YACC) $(AM_LFLAGS) $(LFLAGS) -d -p account $< && \
+		mv y.tab.c $*.c && \
+		mv y.tab.h $*.h
+
+contact_parser.h: contact_parser.y
+
+contact_parser.c: contact_parser.y
+	$(YACC) $(AM_LFLAGS) $(LFLAGS) -d -p contact $< && \
+		mv y.tab.c $*.c && \
+		mv y.tab.h $*.h
+
+account_scanner.c: account_scanner.l
+	$(LEX) $(AM_LFLAGS) $(LFLAGS) -it -Paccount $< > $@
+
+contact_scanner.c: contact_scanner.l
+	$(LEX) $(AM_LFLAGS) $(LFLAGS) -it -Pcontact $< > $@
