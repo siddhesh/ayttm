@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.3, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=20
+RELEASE=21
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -96,7 +96,7 @@ if test "x$host_alias" != "xmingw32"; then
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify getopt_long getopt])
 fi
 
-ALL_LINGUAS="fr en_GB pt_BR"
+ALL_LINGUAS="fr en_GB pt_BR es"
 AM_GNU_GETTEXT
 
 ###############################################################################

@@ -540,7 +540,7 @@ eb_account * find_suitable_remote_account( eb_account * first, struct contact * 
 	for(node = rest->accounts; node; node=node->next) {
 		eb_account * ea = node->data;
 		
-		if( RUN_SERVICE(ea)->query_connected(ea) && ea->ela->connected) {
+		if( RUN_SERVICE(ea)->query_connected(ea) && ea->ela && ea->ela->connected) {
 			if(ea->service_id == rest->default_chatb ) 
 				return ea;
 			else
@@ -1234,22 +1234,25 @@ struct contact * move_account (struct contact * new_con, eb_account *ea)
 {
 	struct contact *old_con = ea->account_contact;
 	char *new_group = new_con->group->name;
-	char *old_group = old_con->group->name;
+	char *old_group = NULL;
 
-	if (old_con != new_con) {
-
-		handle_group_change(ea, old_group, new_group);
-
-		old_con->accounts = l_list_remove(old_con->accounts, ea);
+	if (old_con != new_con && old_con && old_con->group) {
+		old_group = old_con->group->name;
+		
+		if (old_group)
+			handle_group_change(ea, old_group, new_group);
+		
+		if (old_con)
+			old_con->accounts = l_list_remove(old_con->accounts, ea);
 		remove_account_line(ea);
 
 		new_con->accounts = l_list_insert_sorted(new_con->accounts, ea, account_cmp);
 		ea->account_contact = new_con;
 
-		if(l_list_empty(old_con->accounts)) {
+		if(old_con && l_list_empty(old_con->accounts)) {
 			remove_contact(old_con);
 			old_con=NULL;
-		} else {
+		} else if (old_con) {
 			LList *l;
 			old_con->online = 0;
 			for(l=old_con->accounts; l; l=l->next)
