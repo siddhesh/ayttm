@@ -200,7 +200,6 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	
 	service = strstr(service,"[")+1;
 	service_id = get_service_id( service );
-	printf("for %s (%s %d)\n", local_acc, service, service_id);
 	
 	ea = eb_services[service_id].sc->new_account(find_local_account_by_handle(local_acc, service_id), account);
 	ea->service_id = service_id;

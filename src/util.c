@@ -1010,7 +1010,7 @@ static void add_contact( char * group, struct contact * user )
 		grp = find_grouplist_by_name(group);
 	}
 	if(!grp) {
-	    printf("Error adding group :(\n");
+	    eb_debug(DBG_CORE,"Error adding group :(\n");
 	    return;
 	}    
 	grp->members = l_list_insert_sorted(grp->members, user, contact_cmp);
@@ -1362,7 +1362,6 @@ pid_t create_lock_file(char* fname)
 				fd = fopen(data2, "r");
 				if(fd==NULL) {
 					perror("fopen");
-					printf("can't open %s\n",data2);
 				}
 				else {
 					char cmd[1024];

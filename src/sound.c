@@ -552,7 +552,7 @@ static gboolean file_ok(gchar *soundfile)
 		default:
 			g_snprintf(message, 1024, "Error in opening sound file \'%s\', error code = %d", soundfile, errno);
 		}
-		printf(message);
+		eb_debug(DBG_CORE, "%s", message);
 		return FALSE;
 	}
 	return TRUE;

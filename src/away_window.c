@@ -150,7 +150,6 @@ void delete_msg_cb(GtkWidget * menuitem, gpointer data)
 	int i=0;
 	away *ldata = NULL;
 	
-	printf("delete %s\n",my_away->title);
 	away_messages = l_list_remove(away_messages, my_away);
 	write_away_messages();
 	while(NULL != (ldata = (away*)gtk_clist_get_row_data(
@@ -166,7 +165,6 @@ void delete_msg_cb(GtkWidget * menuitem, gpointer data)
 void deselect_msg_cb(GtkCList *clist, gint row, gint column,
                    GdkEventButton *event, gpointer user_data) 
 {
-	printf("deselecting row %d\n",row);
 	if (event && event->button == 3) {
 		gtk_signal_emit_stop_by_name(GTK_OBJECT(clist),
 				   "unselect-row");
@@ -182,7 +180,6 @@ void select_msg_cb(GtkCList *clist, gint row, gint column,
 	
 	my_away = (away *)gtk_clist_get_row_data(GTK_CLIST(away_clist),
 				row);
-	printf("selecting row %d\n",row);
 	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
 			select_msg_cb, NULL);
 	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
