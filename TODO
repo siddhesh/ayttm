@@ -1,9 +1,9 @@
 TODO 0.3.1
 * Use pspell for spell-checker
 * Phase in multiple accounts per service
-  * add service flag for multi account if service supports it
+  * add service flag for multi account if service supports it - Done
 * Yahoo webcam support
-* Standardise on autoconf/automake versions (2.53/1.6)
+* Standardise on autoconf/automake versions (2.53/1.6) - Done
 
 
 TODO later
