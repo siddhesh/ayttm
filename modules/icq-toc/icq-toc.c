@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.36 $",
-	"$Date: 2003/06/28 11:02:41 $",
+	"$Revision: 1.37 $",
+	"$Date: 2003/06/28 11:31:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -105,6 +105,7 @@ struct service SERVICE_INFO = { "ICQ", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_I
 /* End Module Exports */
 
 static char *eb_toc_get_color(void) { static char color[]="#000088"; return color; }
+static eb_chat_room * eb_icq_make_chat_room(char * name, eb_local_account * account, int is_public );
 
 unsigned int module_version() {return CORE_VERSION;}
 static int plugin_init()
