@@ -41,6 +41,7 @@
 #include "plugin_api.h"
 #include "value_pair.h"
 #include "messages.h"
+#include "status.h"
 
 #ifdef HAVE_MIT_SAVER_EXTENSION
 #include <X11/extensions/scrnsaver.h>

@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.33 $",
-	"$Date: 2003/04/30 06:03:54 $",
+	"$Revision: 1.34 $",
+	"$Date: 2003/05/01 08:54:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1152,9 +1152,9 @@ static void eb_aim_set_idle( eb_local_account * ela, int idle )
 static void eb_aim_real_change_group(eb_account * ea, const char *old_group, const char *new_group)
 {
 	char str[2048];
-	struct eb_aim_local_account_data * alad;
-	LList * node;
-	
+	struct eb_aim_local_account_data * alad = NULL;
+
+		
 	g_snprintf(str, 2048, "g %s\nb %s", new_group, ea->handle);
 
 	if( eb_services[ea->service_id].protocol_id != SERVICE_INFO.protocol_id )

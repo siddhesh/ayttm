@@ -154,8 +154,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.41 $",
-	"$Date: 2003/04/30 21:56:44 $",
+	"$Revision: 1.42 $",
+	"$Date: 2003/05/01 08:54:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -519,7 +519,7 @@ static void eb_msn_logout( eb_local_account * account );
 static void eb_msn_authorize_callback( gpointer data, int response );
 static void eb_msn_filetrans_callback( gpointer data, int response );
 static void eb_msn_netmeeting_callback( gpointer data, int response );
-static int eb_msn_authorize_user ( char * username, char * friendlyname );
+static int eb_msn_authorize_user( eb_local_account *ela, char * username, char * friendlyname );
 static void eb_msn_filetrans_accept(const char * filename, void * invitation);
 
 
@@ -1315,7 +1315,7 @@ static int is_waiting_auth(char *name)
   return 0;	
 }
 
-static int eb_msn_authorize_user (eb_local_account *ela, char * username, char * friendlyname)
+static int eb_msn_authorize_user( eb_local_account *ela, char * username, char * friendlyname )
 {
   char dialog_message[1025];
   char *uname;

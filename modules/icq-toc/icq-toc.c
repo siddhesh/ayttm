@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.31 $",
-	"$Date: 2003/04/30 06:03:55 $",
+	"$Revision: 1.32 $",
+	"$Date: 2003/05/01 08:54:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1150,8 +1150,8 @@ static void eb_icq_set_idle( eb_local_account * ela, int idle )
 static void eb_icq_real_change_group(eb_account * ea, const char *old_group, const char *new_group)
 {
 	char str[2048];
-	struct eb_icq_local_account_data * alad;
-	LList * node;
+	struct eb_icq_local_account_data * alad = NULL;
+
 	
 	g_snprintf(str, 2048, "g %s\nb %s", new_group, ea->handle);
 

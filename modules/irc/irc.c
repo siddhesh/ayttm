@@ -1,5 +1,5 @@
 /*
- * IRC protocol support for Everybuddy
+ * IRC protocol support for Ayttm
  *
  * Copyright (C) 2001, Erik Inge Bolso <knan@mo.himolde.no>
  *                     and others
@@ -28,7 +28,11 @@
 
 #include <string.h>
 #include <strings.h>
-#include <sys/types.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #include <winsock2.h>
@@ -37,11 +41,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #endif
-#include <unistd.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
 
 #include "gtk_globals.h"
 #include "service.h"
@@ -83,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.16 $",
-	"$Date: 2003/04/30 06:03:57 $",
+	"$Revision: 1.17 $",
+	"$Date: 2003/05/01 08:54:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1354,8 +1353,8 @@ static eb_account * irc_read_config(LList *config, struct contact *contact)
 	eb_account * ea = g_new0(eb_account, 1 );
 	irc_account * ia = g_new0(irc_account, 1);
 	char *temp = NULL;
-	LList * node;
-	
+
+		
 	ea->protocol_account_data = ia;
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->account_contact = contact;

@@ -61,8 +61,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Gaim Buddy List", 
 	"Import the Gaim Buddy List", 
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/30 06:03:56 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/05/01 08:54:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -72,6 +72,7 @@ PLUGIN_INFO plugin_info = {
 static void *buddy_list_tag=NULL;
 
 unsigned int module_version() {return CORE_VERSION;}
+
 int plugin_init()
 {
 	eb_debug(DBG_MOD,"Gaim Buddy List init\n");
@@ -102,9 +103,10 @@ void import_gaim_accounts(ebmCallbackData *data)
     gchar buff[1024];
     gchar c[1024];
     gchar group[1024];
-    gchar *fname, *handle;
-    struct contact *cnt;
+    gchar *fname = NULL;
+	gchar *handle = NULL;
     FILE * fp;
+	
     gint AIM_ID=-1;
     g_snprintf(buff, 1024, "%s/gaim.buddy", getenv("HOME"));
     if( !(fp = fopen(buff, "r")) ) {

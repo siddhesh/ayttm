@@ -2,9 +2,6 @@
  * Ayttm 
  *
  * Copyright (C) 2003, the Ayttm team
- * 
- * Ayttm is derivative of Everybuddy
- * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+ 
+#include "intl.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -30,15 +29,16 @@
 #define __IN_PLUGIN__ 1
 #endif
 #include "globals.h"
-#include "account.h"
 #include "service.h"
 #include "dialog.h"
 #include "prefs.h"
 #include "util.h"
 #include "plugin_api.h"
+#include "messages.h"
+
 #include "pixmaps/ok.xpm"
 #include "pixmaps/cancel.xpm"
-#include "intl.h"
+
 /*************************************************************************************
  *                             Begin Module Code
  ************************************************************************************/
@@ -61,8 +61,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Everybuddy Settings", 
 	"Import the Everybuddy Settings", 
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/30 06:03:56 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/01 08:54:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -72,6 +72,7 @@ PLUGIN_INFO plugin_info = {
 static void *buddy_list_tag=NULL;
 
 unsigned int module_version() {return CORE_VERSION;}
+
 int plugin_init()
 {
 	eb_debug(DBG_MOD,"EB Buddy List init\n");

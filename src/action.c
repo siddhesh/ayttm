@@ -35,11 +35,10 @@
 #include "util.h"
 #include "messages.h"
 #include "dialog.h"
+#include "edit_list_window.h"
 
 #include "gtk/gtkutils.h"
 
-
-static void create_action_menu(char *html_file, char *plain_file, int sens);
 
 static void action_do_action(char * value, void * data)
 {

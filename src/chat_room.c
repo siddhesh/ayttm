@@ -33,6 +33,7 @@
 #include "service.h"
 #include "add_contact_window.h"
 #include "action.h"
+#include "messages.h"
 
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
@@ -324,7 +325,7 @@ static GList * chat_service_list()
 {
 	GList * list = NULL;
 	LList * walk = NULL;
-	int i;
+
 	for (walk = accounts; walk; walk = walk->next) {
 		eb_local_account *ela = (eb_local_account *)walk->data;
 		if (ela && ela->connected && can_group_chat(eb_services[ela->service_id])) {

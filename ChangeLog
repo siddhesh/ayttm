@@ -1,3 +1,17 @@
+* Thu May  1 2003 09:50 GMT [andy]	0.3.0-74
+- modules/*-toc.c
+  modules/importers/import_everybuddy.c
+  modules/importers/import_gaim.c
+  modules/irc/irc.c
+  modules/msn2/msn.C
+  src/action.c
+  src/chat_room.c
+  src/contact_parser.y
+  src/edit_account_window.c
+  src/service.c
+Workers of the world... oh, wait...
+Fix compiler warnings
+
 * Wed Apr 30 2003 22:55 GMT [andy]	0.3.0-73
 - src/ui_file_selection_dlg.h	 		** ADDED **
   src/gtk/file_selection_dlg.C	 		** ADDED **

@@ -24,12 +24,15 @@
 
 #include "intl.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "status.h"
 #include "util.h"
 #include "dialog.h"
 #include "globals.h"
+#include "messages.h"
+#include "service.h"
 #include "gtk/gtkutils.h"
 
 #include "pixmaps/tb_preferences.xpm"
