@@ -10,3 +10,4 @@ noinst_HEADERS = \
 	gtk_eb_html.h gtkspell.h gtkutils.h
 
 INCLUDES = -I.. $(GTK_CFLAGS)
+AM_CXXFLAGS = $(CFLAGS)
