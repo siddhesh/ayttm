@@ -154,7 +154,7 @@ account:
 				strncpy($$->handle, c, sizeof($$->handle)-1);
 				free(c);
 				c = value_pair_get_value( $5, "LOCAL_ACCOUNT");
-				if(c) {
+				if(c && strcmp(c, "")) {
 					$$->ela = find_local_account_by_handle(c, id);
 					free(c);
 				} else {
