@@ -23,14 +23,18 @@
 #include <openssl/ssl.h>
 #include <glib.h>
 #include "ssl_certificate.h"
+#ifndef __MINGW32__
 #include <netdb.h>
+#else
+#include <winsock2.h>
+#endif
 #include <glib.h>
 #include "intl.h"
-#include "globals.h"
 #include "debug.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "globals.h"
 
 static SSLCertificate *ssl_certificate_new_lookup(X509 *x509_cert, char *host, int port, int lookup);
 

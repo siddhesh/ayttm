@@ -1,3 +1,8 @@
+* Mon Oct 20 2003 14:51 GMT [elh]	0.4.4-7
+- src/ssl_certificate.c
+  A few MinGW compile fixes. globals.h should be after unistd.h always.
+  netdb.h is a part of winsock2.h for Win32 so added ifdef 
+
 * Mon Oct 20 2003 13:19 GMT [elh]	0.4.4-6
 - ChangeLog
   configure.ac
