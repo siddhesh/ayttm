@@ -536,8 +536,8 @@ void icqtoc_get_file( char * ip, short port, char * cookie, char * filename )
 			long res_fork_size;
 			long creation_time;
 			long res_fork_checksum2;
-			long num_recieved;
-			long recieved_checksum;
+			long num_received;
+			long received_checksum;
 			char id_string[32];
 			char flags;
 			char list_name_offset;
@@ -596,8 +596,8 @@ if(DEBUG) {
 		fh->total_num_parts_left = htons(1);
 
 if(DEBUG) {
-		fprintf(stderr, "total_num_parts = %04x total_num_parts_left = %04x file_size = %lu\n",
-		fh->total_num_parts, fh->total_num_parts_left, ntohl(*((long*)(buff+22))));
+		fprintf(stderr, "total_num_parts = %04x total_num_parts_left = %04x file_size = %u\n",
+		fh->total_num_parts, fh->total_num_parts_left, (unsigned int)ntohl(*((long*)(buff+22))));
 
 }
 
@@ -762,7 +762,7 @@ if(DEBUG) {
 		return;
 
 if(DEBUG)
-	fprintf(stderr,"Recieved flap: %s\n", buff);
+	fprintf(stderr,"Received flap: %s\n", buff);
 
 
 
