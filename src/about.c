@@ -51,7 +51,8 @@ static tDeveloperInfo sKudosPeople[KUDOS_SIZE] =
 	{"Yann Marigo", 	"<yann@yannos.com>", 		"Art, Fr translation"},
 	{"Ben Reser", 		"<ben@reser.org>", 			"Patches, MDK RPMs"},
 	{"Lee Leahu", 		"<penguin365@dyweni.com>", 	"Patches"},
-	{"Richard Ellis",	"<rellis9@yahoo.com>",		"Patches"}
+	{"Richard Ellis",	"<rellis9@yahoo.com>",		"Patches"},
+	{"Paul Rhodes",		"<withnail@users.sf.net>",	"Patches"}
 };
 
 /* Everybuddy developers */

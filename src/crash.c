@@ -547,7 +547,7 @@ static void crash_handler(int sig)
 		 * line typed in (argv0)
 		 */
 		args[0] = argv0; 
-		args[1] = "--crash";
+		args[1] = "-C";
 		snprintf(buf, sizeof(buf), "%d,%d,%s", getppid(), sig, argv0);
 		args[2] = buf;
 		args[3] = NULL;

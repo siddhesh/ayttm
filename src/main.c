@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
 		c = getopt_long(argc, argv, "vhg:a:d:Dc:m:u:", long_options, &option_index);
 #else /* HAVE_GETOPT_LONG */
 /* Either had getopt_long or getopt or both so getopt should be here */
-		c = getopt (argc, argv, "vhg:a:d:Dc:m:u:");
+		c = getopt (argc, argv, "vhg:a:d:Dc:m:u:C:");
 #endif
 		/* Detect the end of the options. */
 
