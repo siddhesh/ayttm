@@ -1,3 +1,7 @@
+* Thu Aug  7 2003 06:12 GMT [colin]	0.3.3-25
+- modules/irc/irc.c
+Fix bug #782017
+
 * Wed Aug  6 2003 21:23 GMT [colin]	0.3.3-24
 - src/gtk/prefs_window.C
 Tell when a local account has no prefs
