@@ -40,7 +40,7 @@ extern void JABBERAddBuddy(void *data);
 extern void JABBERInstantMessage(void *data);
 extern void JABBERDialog(void *data);
 extern void JABBERListDialog(char **list, void *data);
-extern void JABBERError(char* title, char *message);
+extern void	JABBERError( char *message, char *title );
 extern void JABBERLogout(void *data);
 extern void JABBERChatRoomMessage(char *id, char *user, char *message);
 extern void JABBERChatRoomBuddyStatus(char *id, char *user, int offline);
@@ -225,16 +225,16 @@ int JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	if(!strchr(handle, '@')) {
 		/* A host must be specified in the config file */
 		if(!host) {
-			JABBERError("No jabber server specified!", "Cannot login");
+			JABBERError( _("No jabber server specified."), _("Cannot login") );
 			return(0);
 		}
 		snprintf(jid, 256, "%s@%s/ayttm", handle, host);
 	}
 	else if(!strchr(handle, '/'))
 		snprintf(jid, 256, "%s/ayttm", handle);
-
 	else
 		strncpy(jid, handle, 256);
+
 	/* Extract the server name */
 	strcpy(server, jid);
 	ptr=strchr(server, '@');
@@ -248,12 +248,21 @@ int JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	JConn->reg_flag = 0;
 	JConn->conn=jab_new(jid, passwd);
 	if(!JConn->conn) {
-		snprintf(buff, 4096, "Connection to the jabber server: %s failed!", host);
-		JABBERError(buff, "Jabber server not responding");
+		snprintf(buff, 4096, "Connection to server '%s' failed.", host);
+		JABBERError(buff, _("Jabber Error"));
 		JABBERNotConnected(NULL);
 		free(JConn);
 		return(0);
 	}
+	else if ( JConn->conn->user == NULL )
+	{
+		snprintf( buff, 4096, "Error connecting to server '%s':\n   Invalid user name.", host );
+		JABBERError( buff, _("Jabber Error") );
+		JABBERNotConnected( NULL );
+		free( JConn );
+		return( 0 );
+	}
+	
 	jab_packet_handler(JConn->conn, j_on_packet_handler);
 	jab_state_handler(JConn->conn, j_on_state_handler);
 	tag = jab_start(JConn->conn, port);
@@ -1021,7 +1030,7 @@ void j_on_state_handler(jconn conn, int state) {
 			eb_debug(DBG_JBR, "The Jabber server has disconnected you: %i\n", previous_state);
 			snprintf(buff, 4096, _("The Jabber server %s has disconnected you."),
 				JCgetServerName(JConn));
-			JABBERError(buff, "Disconnect");
+			JABBERError(buff, _("Disconnect"));
 			eb_input_remove(JConn->listenerID);
 			/* FIXME: Do we need to free anything? */
 			j_remove_agents_from_host(JCgetServerName(JConn));

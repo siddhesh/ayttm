@@ -1,3 +1,9 @@
+* Wed Apr 09 2003 13:20 GMT [andy]	0.2.3-75
+- modules/jabber/jabber.c
+  modules/jabber/libEBjabber.c
+Fix declaration of JABBERError to reflect usage
+Error on invalid user name [i.e. name with spaces] instead of crashing
+
 * Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-74
 - modules/yahoo2/yahoo.c
 Use new activity_bar for file transfers

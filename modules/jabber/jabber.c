@@ -80,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.12 $",
-	"$Date: 2003/04/08 08:40:04 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/04/09 12:24:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -192,7 +192,7 @@ void JABBERStatusChange(void *data);
 void JABBERDialog(void *data);
 void JABBERListDialog(char **list, void *data);
 void JABBERLogout(void *data);
-void JABBERError(char* title, char *message);
+void JABBERError( char *message, char *title );
 
 static void jabber_dialog_callback( gpointer data, int response )
 {
@@ -1027,7 +1027,7 @@ void JABBERLogout(void *data)
     eb_debug(DBG_JBR, "<\n");
 }
 
-void JABBERError(char* title, char *message)
+void	JABBERError( char *message, char *title )
 {
-	do_error_dialog(title, message);
+	do_error_dialog( message, title );
 }
