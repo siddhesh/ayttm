@@ -27,7 +27,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "util.h"
-#include "globals.h"
+#include "gtk_globals.h"
 #include "sound.h"
 #include "prefs.h"
 #include "smileys.h"
@@ -440,6 +440,7 @@ void do_invite_window(void *widget, eb_chat_room * room )
 	}
 	
 	room->invite_window = gtk_window_new(GTK_WINDOW_DIALOG);
+	gtk_window_set_transient_for(GTK_WINDOW(room->invite_window), GTK_WINDOW(room->window));
 	gtk_window_set_position(GTK_WINDOW(room->invite_window), GTK_WIN_POS_MOUSE);
 	box = gtk_vbox_new(FALSE, 3);
 	box2 = gtk_hbox_new(FALSE, 3);
@@ -650,6 +651,7 @@ void open_join_chat_window()
 	join_service_is_open = 1;
 
 	join_chat_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_transient_for(GTK_WINDOW(join_chat_window), GTK_WINDOW(statuswindow));
 
 	gtk_widget_realize(join_chat_window);
 

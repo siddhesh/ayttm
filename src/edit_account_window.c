@@ -29,7 +29,7 @@
 
 #include "status.h"
 #include "util.h"
-#include "globals.h"
+#include "gtk_globals.h"
 #include "messages.h"
 #include "service.h"
 #include "gtk/gtkutils.h"
@@ -168,6 +168,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 		LList *walk = NULL;
 		
 		edit_account_window = gtk_window_new(GTK_WINDOW_DIALOG);
+		gtk_window_set_transient_for(GTK_WINDOW(edit_account_window), GTK_WINDOW(statuswindow));
 		gtk_window_set_position(GTK_WINDOW(edit_account_window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(edit_account_window);
 		gtk_container_set_border_width(GTK_CONTAINER(edit_account_window), 5);

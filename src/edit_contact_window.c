@@ -35,6 +35,7 @@
 #include "pixmaps/tb_edit.xpm"
 #include "pixmaps/cancel.xpm"
 
+extern GtkWidget * statuswindow;
 
 static gint window_open = 0;
 static struct contact * my_contact = NULL;
@@ -82,6 +83,7 @@ void edit_contact_window_new( struct contact * c )
 		GtkWidget * separator;
 		GList * list;
 		edit_contact_window = gtk_window_new(GTK_WINDOW_DIALOG);
+		gtk_window_set_transient_for(GTK_WINDOW(edit_contact_window), GTK_WINDOW(statuswindow));
 		gtk_window_set_position(GTK_WINDOW(edit_contact_window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(edit_contact_window);
 		gtk_container_set_border_width(GTK_CONTAINER(edit_contact_window), 5);

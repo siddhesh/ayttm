@@ -26,7 +26,7 @@
 
 #include "service.h"
 #include "util.h"
-#include "globals.h"
+#include "gtk_globals.h"
 #include "status.h"
 #include "add_contact_window.h"
 #include "messages.h"
@@ -280,6 +280,7 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 		LList *walk;
 
 		add_contact_window = gtk_window_new(GTK_WINDOW_DIALOG);
+		gtk_window_set_transient_for(GTK_WINDOW(add_contact_window), GTK_WINDOW(statuswindow));
 		gtk_window_set_position(GTK_WINDOW(add_contact_window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(add_contact_window);
 		gtk_container_set_border_width(GTK_CONTAINER(add_contact_window), 5);      

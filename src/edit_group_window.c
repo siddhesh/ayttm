@@ -33,6 +33,7 @@
 #include "pixmaps/tb_edit.xpm"
 #include "pixmaps/cancel.xpm"
 
+extern GtkWidget * statuswindow;
 
 static gint window_open = 0;
 static GtkWidget * edit_group_window;
@@ -81,6 +82,7 @@ void edit_group_window_new( grouplist * g)
 		GtkWidget * separator;
 		
 		edit_group_window = gtk_window_new(GTK_WINDOW_DIALOG);
+		gtk_window_set_transient_for(GTK_WINDOW(edit_group_window), GTK_WINDOW(statuswindow));
 		gtk_window_set_position(GTK_WINDOW(edit_group_window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(edit_group_window);
 		gtk_container_set_border_width(GTK_CONTAINER(edit_group_window), 5);

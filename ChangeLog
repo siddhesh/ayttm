@@ -1,3 +1,7 @@
+* Tue Jul 08 2003 04:51 GMT [philip]	0.3.2-14
+- src/many files
+make some dialog windows transients for their parent windows
+
 * Tue Jul 08 2003 04:07 GMT [philip]	0.3.2-13
 - check for pspell in pspell and aspell - thanks to Ben Reser
 
