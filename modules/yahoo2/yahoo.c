@@ -55,7 +55,6 @@
 #include "account.h"
 #include "service.h"
 #include "dialog.h"
-#include "progress_window.h"
 #include "activity_bar.h"
 #include "status.h"
 #include "util.h"
@@ -125,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.13 $",
-	"$Date: 2003/04/08 08:40:09 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/04/09 12:22:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -839,7 +838,7 @@ static void eb_yahoo_save_file_callback(gpointer data, int fd,
 		close(file);
 		close(fd);
 
-		progress_window_close(yftd->progress);
+		ay_activity_bar_remove(yftd->progress);
 
 		FREE(yftd->from);
 		FREE(yftd->url);
@@ -850,7 +849,7 @@ static void eb_yahoo_save_file_callback(gpointer data, int fd,
 	}
 
 	yftd->transferred += count;
-	update_progress(yftd->progress, yftd->transferred);
+	ay_progress_bar_update_progress(yftd->progress, yftd->transferred);
 	while(count > 0 && (c=write(file, buffer, count)) < count) 
 		count -= c;
 }
@@ -858,6 +857,7 @@ static void eb_yahoo_save_file_callback(gpointer data, int fd,
 static void eb_yahoo_save_file(char *filename, gpointer data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
+	char label[1024];
 	int fd;
 
 	if(!filename) {
@@ -894,7 +894,8 @@ static void eb_yahoo_save_file(char *filename, gpointer data)
 		return;
 	}
 
-	yftd->progress = progress_window_new(filename, yftd->fsize);
+	snprintf(label,1024,"Receiving %s...", filename);
+	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);	
 	yftd->input = eb_input_add(fd, EB_INPUT_READ, eb_yahoo_save_file_callback, yftd);
 
 	FREE(filename);
@@ -961,7 +962,7 @@ static void eb_yahoo_send_file_callback(gpointer data, int fd,
 	}
 
 	yftd->transferred += count;
-	update_progress(yftd->progress, yftd->transferred);
+	ay_progress_bar_update_progress(yftd->progress, yftd->transferred);
 	while(count > 0 && (c=write(fd, buffer, count)) < count) 
 		count -= c;
 
@@ -972,7 +973,7 @@ done_sending:
 		close(file);
 		close(fd);
 
-		progress_window_close(yftd->progress);
+		ay_activity_bar_remove(yftd->progress);
 
 		FREE(yftd->from);
 		FREE(yftd->url);
@@ -985,6 +986,8 @@ static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *fil
 {
 	struct stat stats;
 	int in, out;
+	char label[1024];
+	
 	eb_yahoo_local_account_data *ylad = from->protocol_local_account_data;
 	eb_yahoo_file_transfer_data *yftd;
 
@@ -1010,7 +1013,8 @@ static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *fil
 
 	out = yahoo_send_file(ylad->id, to->handle, "", file, yftd->fsize);
 
-	yftd->progress = progress_window_new(file, yftd->fsize);
+	snprintf(label,1024,"Sending %s...", file);
+	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);	
 
 	yftd->input = eb_input_add(out, EB_INPUT_WRITE, eb_yahoo_send_file_callback, yftd);
 }
