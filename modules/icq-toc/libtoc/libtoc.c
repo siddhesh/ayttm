@@ -682,14 +682,22 @@ char * get_flap(toc_conn * conn )
 	int stat = 0;
 	fd_set fs;
 	int sb,ind;
+	struct timeval tv;
 
 if(DEBUG)
 	printf( "get_flap BEFORE %d %d\n", conn->fd, conn->seq_num );
 
 	FD_ZERO(&fs);
 	FD_SET(conn->fd, &fs);
+	
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
 
-	select(conn->fd+1, &fs, NULL, NULL, NULL );
+	if (select(conn->fd+1, &fs, NULL, NULL, &tv ) < 0) {
+		if (DEBUG) printf("nothing to read!\n");
+		return NULL;
+	}
+
 	stat = read(conn->fd, &fh, sizeof(flap_header));
 	
 	if(stat <= 0 )
