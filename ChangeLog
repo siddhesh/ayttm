@@ -1,3 +1,7 @@
+* Sun Jun  8 2003 15:54 GMT [colin]	0.3.1-27
+- po/pt_BR.po
+new translation from Fabricio@linuxcult.com
+
 * Sun Jun  8 2003 15:11 GMT [philip]	0.3.1-26
 - src/gtk/gtkutils.c
 gtkut_set_pixmap was modifying a local copy of the outPixmap
