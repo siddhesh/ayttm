@@ -51,28 +51,11 @@ static GtkWidget *action_name;
 static GList *triggers = NULL;
 static GList *actions = NULL;
 
-static void quick_message(gchar *message) {
+static void quick_message(const char *contact, int online, const char *message) {
 
-  GtkWidget *dialog, *label, *okay_button;
-   
-  /* Create the widgets */
-   
-  dialog = gtk_dialog_new();
-  label = gtk_label_new (message);
-  okay_button = gtk_button_new_with_label(_("Okay"));
-   
-  /* Ensure that the dialog box is destroyed when the user clicks ok. */
-   
-  gtk_signal_connect_object (GTK_OBJECT (okay_button), "clicked",
-			     GTK_SIGNAL_FUNC (gtk_widget_destroy), GTK_OBJECT(dialog));
-  gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-		     okay_button);
-
-  /* Add the label, and show everything we've added to the dialog. */
-
-  gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
-		     label);
-  gtk_widget_show_all (dialog);
+  char buf[1024];
+  snprintf(buf, 1024, _("%s just came %s.\n\n%s"), contact, online?_("online"):_("offline"), message);
+  ay_ui_info_window_create (_("Online trigger"), buf);
 }
 
 static void pounce_contact(struct contact *con, char *str) 
@@ -138,7 +121,7 @@ void do_trigger_action(struct contact *con, int trigger_type)
 	    system(param_string);
 	} else if(con->trigger.action == DIALOG)
 	{
-		quick_message(param_string);
+		quick_message(con->nick, con->trigger.type != USER_OFFLINE, param_string);
 	} else if(con->trigger.action == POUNCE && con->trigger.type == USER_ONLINE)
 	{
 		pounce_contact(con, param_string);

@@ -1,3 +1,7 @@
+* Sat May 31 2003 09:16 GMT [colin]	0.3.1-8
+- src/trigger.c
+Make alert window look like a real window
+
 * Sat May 31 2003 09:16 GMT [colin]	0.3.1-7
 - modules/aycryption/aycrpytion.c
 Bigger buffers
