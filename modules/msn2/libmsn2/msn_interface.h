@@ -21,7 +21,7 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
 void ext_buddy_offline(msnconn * conn, char * buddy);
 
 void ext_got_friendlyname(msnconn * conn, char * friendlyname);
-
+void ext_got_pong(msnconn *conn);
 void ext_got_info(msnconn * conn, syncinfo * data);
 
 void ext_latest_serial(msnconn * conn, int serial);

@@ -165,8 +165,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.22 $",
-	"$Date: 2003/04/18 08:46:09 $",
+	"$Revision: 1.23 $",
+	"$Date: 2003/04/20 11:15:34 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -573,7 +573,7 @@ static int checkconn(msnconn *conn) {
 	ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
 	eb_debug(DBG_MSN, "msn: checking conn\n");
 	if(waiting_ans > 2) {
-		eb_debug(DBG_MSN, "msn conn closed !(no answer to fname set)\n");
+		eb_debug(DBG_MSN, "msn conn closed !\n");
 		close_conn(conn);
 		waiting_ans = 0; 
 		if (do_reconnect) {
@@ -581,12 +581,9 @@ static int checkconn(msnconn *conn) {
 		}
 		return 1;
 	}
-	if(fname_pref[0]!='\0') {
-		char *tmp = StrToUtf8(fname_pref);
- 	 	status = msn_set_friendlyname(conn, tmp); 
-		free(tmp);
-		waiting_ans++;
-	}
+	msn_send_ping(conn);
+	waiting_ans++;
+
 	if (status == 0) {
 		eb_debug(DBG_MSN, "conn closed... :(\n");
 		close_conn(conn);
@@ -1718,6 +1715,11 @@ void ext_unregister_sock(int s)
 	return;
     }
   }
+}
+
+void ext_got_pong(msnconn *conn)
+{
+	waiting_ans = 0;	
 }
 
 void ext_got_friendlyname(msnconn * conn, char * friendlyname)

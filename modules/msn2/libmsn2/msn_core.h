@@ -284,6 +284,7 @@ class syncinfo : public callback_data
 };
 
 int msn_set_friendlyname(msnconn * conn, char * friendlyname);
+void msn_send_ping(msnconn * conn);
 
 void msn_sync_lists(msnconn * conn, int version);
 void msn_add_to_list(msnconn * conn, char * list, char * user);

@@ -251,6 +251,12 @@ void msn_set_BLP(msnconn * conn, char c)
   write(conn->sock, buf, strlen(buf));
 }
 
+void msn_send_ping(msnconn * conn)
+{
+  snprintf(buf, sizeof(buf), "PNG\r\n");
+  write(conn->sock, buf, strlen(buf));
+}
+
 int msn_set_friendlyname(msnconn * conn, char * friendlyname)
 {
   char	*username = NULL;
@@ -750,6 +756,12 @@ void msn_handle_default(msnconn * conn, char ** args, int numargs)
   if(!strcmp(args[0], "REA"))
   {
     msn_handle_REA(conn, args, numargs);
+    return;
+  }
+
+  if(!strcmp(args[0], "QNG"))
+  {
+    ext_got_pong(conn);
     return;
   }
 
