@@ -4,7 +4,7 @@ Version: 	@VERSION@
 Release:	@RELEASE@
 Group: 		Applications/Internet
 License: 	GPL
-URL: 		http://www.nongnu.org/ayttm/
+URL: 		http://ayttm.sourceforge.net
 Source: 	%{name}-%{version}.tar.gz
 Buildroot: 	%{_tmppath}/%{name}-%{version}-%{release}-root
 Requires:	@REQUIRES@
