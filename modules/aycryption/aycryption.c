@@ -73,16 +73,16 @@ static int gpgme_inited = 0;
 static void *tag1=NULL;
 static void *tag2=NULL;
 
-static int do_debug = 0;
-#define DBG_CRYPT do_debug
+static int do_aycryption_debug = 0;
+#define DBG_CRYPT do_aycryption_debug
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.2 $",
-	"$Date: 2003/05/05 00:41:54 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/05/05 01:43:27 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -111,8 +111,8 @@ static int aycryption_init()
 
 	il->next = g_new0(input_list, 1);
        	il = il->next;
-	il->widget.checkbox.value = &do_debug;
-	il->widget.checkbox.name = "do_debug";
+	il->widget.checkbox.value = &do_aycryption_debug;
+	il->widget.checkbox.name = "do_aycryption_debug";
 	il->widget.checkbox.label = strdup(_("Enable debugging"));
 	il->type = EB_INPUT_CHECKBOX;
 
@@ -209,12 +209,14 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 	if ((ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
 	&& gpgme_recipients_add_name_with_validity( rset, ct->gpg_key, 
 		GPGME_VALIDITY_FULL) ) {
+		eb_debug(DBG_CRYPT,"can't init outgoing crypt: %d %p %c\n",
+				ct->gpg_do_encryption, ct->gpg_key, ct->gpg_key[0]);
 		return strdup(s);
 	} else {
 		GpgmeData plain = NULL;
 		GpgmeData sign = NULL;
 		GpgmeData cipher = NULL;
-		
+		int err;
 		gpgme_data_new(&plain);
 		gpgme_data_write(plain, s, strlen(s));
 		
@@ -237,8 +239,11 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
   			gpgme_recipients_release (rset); rset = NULL;
 		
 		}
-		gpgme_data_rewind (cipher);
-		
+		err = gpgme_data_rewind (cipher);
+		if (err)
+			eb_debug(DBG_CRYPT,"error: %s\n",
+				gpgme_strerror(err));
+
 		while (!gpgme_data_read (cipher, buf, 1024, &nread)) {
 			char tmp[1024];
 			if (nread) {
@@ -268,6 +273,7 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 	char *s_sigstat;
 	memset(buf, 0, 1024);
 	if (strncmp (s, "-----BEGIN PGP ", strlen("-----BEGIN PGP "))) {
+		eb_debug(DBG_CRYPT, "Incoming message isn't PGP formatted\n");
 		return strdup(s);
 	}
 
@@ -289,12 +295,18 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 	err = gpgme_op_decrypt_verify (ctx, cipher, plain, &sigstat);
 	
 	if (err && err != GPGME_No_Data) {
+		if (err)
+			eb_debug(DBG_CRYPT,"error: %s\n",
+				gpgme_strerror(err));
 		return strdup(s);
 	} else if (err == GPGME_No_Data) {
 		p = strdup(s);
 	} else {
 		err = gpgme_data_rewind (plain);
 		if (err) {
+			if (err)
+				eb_debug(DBG_CRYPT,"error: %s\n",
+					gpgme_strerror(err));
 			return strdup(s);
 		}
 
