@@ -26,6 +26,7 @@ void show_data_choicewindow(
 		char *file,
 		char *dtype,
 		char *ok_button_label,
+		char *help,
 		char *entityname,
 		char *valuename,
 		void (*cb)(char *msg, void *data),

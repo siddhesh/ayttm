@@ -417,6 +417,7 @@ void show_data_choicewindow(
 		char *file,
 		char *dtype,
 		char *ok_button_label,
+		char *help,
 		char *entityname,
 		char *valuename,
 		void (*cb)(char *msg, void *data),
@@ -425,6 +426,7 @@ void show_data_choicewindow(
 {
 	if ( !data_open ) {
 		GtkWidget * vbox;
+		GtkWidget * vbox2;
 		GtkWidget * hbox;
 		GtkWidget * hbox2;
 		GtkWidget * label;
@@ -470,16 +472,29 @@ void show_data_choicewindow(
 		
 		hbox = gtk_hbox_new(FALSE, 5);
 		label = gtk_label_new(_("Value:"));
+		gtk_misc_set_alignment(GTK_MISC(label), 0.5, 0);
 		gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
 				 GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(label);
 		gtk_widget_show(hbox);
 		
+		vbox2 = gtk_vbox_new(FALSE, 0);
+		gtk_widget_show(vbox2);
+		
+		if (help) {
+			label = gtk_label_new(help);
+			gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+			gtk_widget_set_usize(text_entry, 300, -1);
+			gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
+			gtk_widget_show(label);
+			gtk_box_pack_start(GTK_BOX(vbox2), label, TRUE, TRUE, 0);
+		}
 		text_entry = gtk_text_new(NULL,NULL);
 		gtk_text_set_editable(GTK_TEXT(text_entry), TRUE);
 		gtk_widget_set_usize(text_entry, 300, 60);
-		gtk_table_attach_defaults(GTK_TABLE(table), text_entry, 1, 2, 1, 2);
+		gtk_box_pack_start(GTK_BOX(vbox2), text_entry, TRUE, TRUE, 0);
+		gtk_table_attach_defaults(GTK_TABLE(table), vbox2, 1, 2, 1, 2);
 		gtk_widget_show(text_entry);
 
 		save = gtk_check_button_new_with_label(_("Save"));

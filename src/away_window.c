@@ -69,7 +69,7 @@ void show_away_choicewindow(void *w, void *data)
 		return;
 	}
 	snprintf(file, 1024, "%saway_messages", config_dir);
-	show_data_choicewindow(file, _("Away message"), _("Set away"),
+	show_data_choicewindow(file, _("Away message"), _("Set away"), NULL,
 				"AWAY_MESSAGE", "MESSAGE", show_away, NULL);
 }
 
