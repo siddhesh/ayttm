@@ -1,3 +1,8 @@
+* Tue Dec 22 2003 21:02 GMT [philip]	0.4.5-24
+- modules/yahoo2/libayhoo2/libayhoo2.c
+implement full async writes
+might cause problem with file sending.
+
 * Tue Dec 22 2003 08:51 GMT [philip]	0.4.5-23
 - modules/image_filter/img2jpc.c
 Make jpeg2000 encoding a pref, off by default
