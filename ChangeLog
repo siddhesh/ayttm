@@ -1,3 +1,8 @@
+* Fri Apr 18 2003 22:03 GMT [colin]	0.3.0-pre7
+- src/util.c
+Fix move_contact() forgetting to move accounts from
+old to new contact
+
 * Fri Apr 18 2003 21:15 GMT [philip]	0.3.0-pre6
 - modules/yahoo2/yahoo.c
 remove int return in void context

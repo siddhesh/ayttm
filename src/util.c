@@ -1234,24 +1234,13 @@ void move_contact (char * group, struct contact * c)
 
 	con = find_contact_in_group_by_nick(c->nick, g);
 	if(con) {
-		return; /* group same and contact same.  what move? */
-		
-/*		rename_nick_log(group, c->nick, group, con->nick);
-		for(l=c->accounts; l; l=l->next) {
+		/* contact already exists in new group : 
+		   move accounts for old contact to new one */
+		while(c && (l=c->accounts)) {
 			eb_account *ea = l->data;
-
-        		ea->account_contact = con;
-			con->accounts = l_list_append(con->accounts, ea);
-			if(RUN_SERVICE(ea)->change_user_name) {
-				if (!find_suitable_local_account(NULL, ea->service_id))
-					contact_mgmt_queue_add(ea, MGMT_REN, con->nick);
-				else
-					RUN_SERVICE(ea)->change_user_name(ea, con->nick);
-			}
+			c=move_account(con,ea);
 		}
-		l_list_free(c->accounts);
-		add_contact_and_accounts(con);
-		add_contact_line(con);*/
+		return; 
 	} else {
 		g->members = l_list_insert_sorted(g->members, c, contact_cmp);
 		c->group = g;
