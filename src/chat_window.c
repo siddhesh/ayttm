@@ -1194,7 +1194,7 @@ void eb_chat_window_do_timestamp(struct contact * c, gboolean online)
 	if( !iGetLocalPref("do_timestamp") )
 		return;
 	
-	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#e0c96d width=*><b> %s is logged %s %s.\n</b></body>\n"),
+	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#e0c96d width=*><b> %s is logged %s %s.\n</b></body>"),
 	     c->nick, (online?_("in"):_("out")), g_strchomp(asctime(localtime(&my_time))));
 	gtk_eb_html_add(EXT_GTK_TEXT(c->chatwindow->chat), buff, 0,0,0);
 }

@@ -484,7 +484,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	m_tree( NULL ),
 	m_panels( NULL )
 {
-	m_prefs_window_widget = gtk_window_new( GTK_WINDOW_DIALOG );
+	m_prefs_window_widget = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
 	gtk_window_set_position( GTK_WINDOW(m_prefs_window_widget), GTK_WIN_POS_MOUSE );
 	gtk_window_set_policy( GTK_WINDOW(m_prefs_window_widget), FALSE, FALSE, TRUE );
