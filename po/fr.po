@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
-"POT-Creation-Date: 2003-05-16 20:30+0200\n"
-"PO-Revision-Date: 2003-05-16 20:42--100\n"
+"POT-Creation-Date: 2003-05-18 15:39+0200\n"
+"PO-Revision-Date: 2003-05-18 15:40--100\n"
 "Last-Translator: Colin Leroy <colin@colino.net>\n"
 "Language-Team: Colin Leroy <colin@colino.net>\n"
 "MIME-Version: 1.0\n"
@@ -132,18 +132,15 @@ msgstr "Message tronqué"
 msgid "User is currently away"
 msgstr "L'utilisateur est absent"
 
-#. This is the same as handle_clicks, without showing the menu for
-#. accelerators to hopefully work better now.
-#.
 #. Add Contact Selection
 #: modules/aim-toc/aim-toc.c:1220
-#: src/chat_window.c:818
-#: src/chat_window.c:1236
-#: src/chat_window.c:1240
+#: src/chat_window.c:824
 #: src/chat_window.c:1242
-#: src/chat_window.c:1832
-#: src/chat_window.c:2028
-#: src/chat_window.c:2149
+#: src/chat_window.c:1246
+#: src/chat_window.c:1248
+#: src/chat_window.c:1871
+#: src/chat_window.c:2067
+#: src/chat_window.c:2188
 #: src/contact_util.C:363
 #: src/crash.c:460
 #: src/crash.c:479
@@ -152,9 +149,9 @@ msgstr "L'utilisateur est absent"
 #: src/status.c:1103
 #: src/status.c:1511
 #: src/status.c:1552
-#: src/util.c:1019
-#: src/util.c:1047
-#: src/util.c:1155
+#: src/util.c:1020
+#: src/util.c:1048
+#: src/util.c:1156
 msgid "Unknown"
 msgstr "Unknown"
 
@@ -276,6 +273,14 @@ msgstr "un message avec plus d'une signature ; leur statut diffère."
 #: modules/aycryption/aycryption.c:475
 msgid " correctly signed (by "
 msgstr "un message correctement signé (par "
+
+#: modules/aycryption/aycryption.c:472
+msgid ") message, but signature has expired."
+msgstr "), mais la signature a expiré."
+
+#: modules/aycryption/aycryption.c:477
+msgid ") message, but key has expired."
+msgstr "), mais la clé a expiré."
 
 #: modules/aycryption/aycryption.c:480
 msgid " message - Unknown signature status (file a bugreport)!"
@@ -822,8 +827,8 @@ msgstr "Le fichier %s a bien été transféré."
 #: modules/msn2/msn.C:1884
 #: modules/yahoo2/yahoo.c:2368
 #: modules/yahoo2/yahoo.c:2409
-#: src/chat_window.c:632
-#: src/chat_window.c:1243
+#: src/chat_window.c:639
+#: src/chat_window.c:1249
 #: src/contact_util.C:508
 #: src/contact_util.C:512
 #: src/offline_queue_mgmt.c:158
@@ -831,9 +836,9 @@ msgstr "Le fichier %s a bien été transféré."
 #: src/status.c:1104
 #: src/status.c:1432
 #: src/status.c:1464
-#: src/util.c:1054
-#: src/util.c:1185
-#: src/util.c:1189
+#: src/util.c:1055
+#: src/util.c:1186
+#: src/util.c:1190
 msgid "Ignore"
 msgstr "Ignorer"
 
@@ -1460,9 +1465,9 @@ msgid "Group: "
 msgstr "Groupe :"
 
 #: src/add_contact_window.c:398
-#: src/chat_window.c:820
-#: src/chat_window.c:2030
-#: src/chat_window.c:2152
+#: src/chat_window.c:826
+#: src/chat_window.c:2069
+#: src/chat_window.c:2191
 msgid "Add Contact"
 msgstr "Ajouter un contact"
 
@@ -1507,7 +1512,7 @@ msgid "I'm Back"
 msgstr "Je suis de retour"
 
 #: src/away_window.c:141
-#: src/chat_window.c:1012
+#: src/chat_window.c:1018
 msgid "Away"
 msgstr "Absent"
 
@@ -1577,43 +1582,43 @@ msgid "Invite User"
 msgstr "Inviter un utilisateur"
 
 #: src/chat_room.c:1095
-#: src/chat_window.c:2177
+#: src/chat_window.c:2216
 msgid "Insert Smiley"
 msgstr "Insérer un smiley"
 
 #: src/chat_room.c:1109
 #: src/chat_room.c:1111
-#: src/chat_window.c:2188
-#: src/chat_window.c:2190
+#: src/chat_window.c:2227
+#: src/chat_window.c:2229
 #: src/gtk/prefs_window.C:465
 msgid "Sound"
 msgstr "Son"
 
 #: src/chat_room.c:1110
-#: src/chat_window.c:847
-#: src/chat_window.c:2055
+#: src/chat_window.c:853
+#: src/chat_window.c:2094
 msgid "Enable Sounds"
 msgstr "Activer les sons"
 
 #: src/chat_room.c:1142
-#: src/chat_window.c:863
-#: src/chat_window.c:2108
-#: src/chat_window.c:2212
+#: src/chat_window.c:869
+#: src/chat_window.c:2147
+#: src/chat_window.c:2251
 #: src/gtk/log_window.C:239
 msgid "Actions..."
 msgstr "Actions..."
 
 #. Send message Section
 #: src/chat_room.c:1147
-#: src/chat_window.c:890
-#: src/chat_window.c:2088
+#: src/chat_window.c:896
+#: src/chat_window.c:2127
 msgid "Send Message"
 msgstr "Envoyer le message"
 
 #. Close Selection
 #: src/chat_room.c:1153
-#: src/chat_window.c:910
-#: src/chat_window.c:2121
+#: src/chat_window.c:916
+#: src/chat_window.c:2160
 #: src/crash.c:253
 #: src/gtk/about_window.c:196
 #: src/image_window.c:225
@@ -1621,55 +1626,55 @@ msgstr "Envoyer le message"
 msgid "Close"
 msgstr "Fermer"
 
-#: src/chat_window.c:455
-#: src/chat_window.c:459
-#: src/chat_window.c:659
+#: src/chat_window.c:462
+#: src/chat_window.c:466
+#: src/chat_window.c:666
 msgid "<body bgcolor=#F9E589 width=*><b> Cannot send message - user is offline.</b></body>\n"
 msgstr "<body bgcolor=#F9E589 width=*><b> Impossible d'envoyer - le contact est hors-ligne.</b></body>\n"
 
-#: src/chat_window.c:475
+#: src/chat_window.c:482
 msgid "<body bgcolor=#F9E589 width=*><b> Cannot send message - no local account found.</b></body>\n"
 msgstr "<body bgcolor=#F9E589 width=*><b> Impossible d'envoyer - pas de compte local adapté.</b></body>\n"
 
-#: src/chat_window.c:645
+#: src/chat_window.c:652
 #, c-format
 msgid "Do you really want to ignore %s?"
 msgstr "Voulez-vous réellement ignorer %s?"
 
 #. Ignore Section
-#: src/chat_window.c:647
-#: src/chat_window.c:882
-#: src/chat_window.c:2067
+#: src/chat_window.c:654
+#: src/chat_window.c:888
+#: src/chat_window.c:2106
 msgid "Ignore Contact"
 msgstr "Ignorer ce contact"
 
 #. Start building the menu
-#: src/chat_window.c:766
+#: src/chat_window.c:773
 msgid "Change Local Account"
 msgstr "Changer le compte local"
 
-#: src/chat_window.c:830
-#: src/chat_window.c:2040
+#: src/chat_window.c:836
+#: src/chat_window.c:2079
 msgid "Offline Messaging"
 msgstr "Messagerie hors-ligne"
 
-#: src/chat_window.c:845
-#: src/chat_window.c:2053
+#: src/chat_window.c:851
+#: src/chat_window.c:2092
 msgid "Disable Sounds"
 msgstr "Désactiver les sons"
 
 #. View log selection
-#: src/chat_window.c:856
+#: src/chat_window.c:862
 msgid "View Log"
 msgstr "Voir l'historique"
 
 #. Send File Selection
-#: src/chat_window.c:874
-#: src/chat_window.c:2077
+#: src/chat_window.c:880
+#: src/chat_window.c:2116
 msgid "Send File"
 msgstr "Envoyer un fichier"
 
-#: src/chat_window.c:1011
+#: src/chat_window.c:1017
 msgid ""
 "You are currently away. \n"
 "\n"
@@ -1679,133 +1684,133 @@ msgstr ""
 "\n"
 "Voulez-vous revenir \"en ligne\" ?"
 
-#: src/chat_window.c:1186
+#: src/chat_window.c:1192
 msgid "<b>Error: </b>"
 msgstr "<b>Erreur : </b>"
 
-#: src/chat_window.c:1205
+#: src/chat_window.c:1211
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s is logged %s @ %s.\n"
 "</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s s'est %s à %s.\n"
 "</b></body>"
 
-#: src/chat_window.c:1206
+#: src/chat_window.c:1212
 msgid "in"
 msgstr "connecté(e)"
 
-#: src/chat_window.c:1206
+#: src/chat_window.c:1212
 msgid "out"
 msgstr "déconnecté(e)"
 
-#: src/chat_window.c:1520
+#: src/chat_window.c:1559
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s changed status to %s @ %s.</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s est maintenant %s à %s.</b></body>"
 
-#: src/chat_window.c:1521
+#: src/chat_window.c:1560
 msgid "(Online)"
 msgstr "(En ligne)"
 
-#: src/chat_window.c:1551
-#: src/chat_window.c:1635
+#: src/chat_window.c:1590
+#: src/chat_window.c:1674
 msgid "Conversation started"
 msgstr "Conversation commencée"
 
-#: src/chat_window.c:1552
+#: src/chat_window.c:1591
 #, c-format
 msgid "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation commencée"
 
-#: src/chat_window.c:1553
+#: src/chat_window.c:1592
 msgid "<HR WIDTH=\"100%\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%\"><B>Conversation commencée"
 
-#: src/chat_window.c:1589
-#: src/chat_window.c:1594
-#: src/chat_window.c:1599
-#: src/chat_window.c:1626
-#: src/chat_window.c:1637
-#: src/chat_window.c:1642
+#: src/chat_window.c:1628
+#: src/chat_window.c:1633
+#: src/chat_window.c:1638
+#: src/chat_window.c:1665
+#: src/chat_window.c:1676
+#: src/chat_window.c:1681
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s</b></body>"
 
-#: src/chat_window.c:1602
-#: src/chat_window.c:1603
+#: src/chat_window.c:1641
+#: src/chat_window.c:1642
 msgid "<B>Conversation "
 msgstr "<B>Conversation "
 
-#: src/chat_window.c:1603
-#: src/chat_window.c:1611
+#: src/chat_window.c:1642
+#: src/chat_window.c:1650
 msgid "ended on"
 msgstr "terminée à"
 
-#: src/chat_window.c:1605
-#: src/chat_window.c:1613
+#: src/chat_window.c:1644
+#: src/chat_window.c:1652
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"
 
-#: src/chat_window.c:1610
-#: src/chat_window.c:1611
+#: src/chat_window.c:1649
+#: src/chat_window.c:1650
 msgid "<P ALIGN=\"CENTER\"><B>Conversation "
 msgstr "<P ALIGN=\"CENTER\"><B>Conversation "
 
-#: src/chat_window.c:1618
-#: src/chat_window.c:1619
-#: src/chat_window.c:1624
+#: src/chat_window.c:1657
+#: src/chat_window.c:1658
+#: src/chat_window.c:1663
 msgid "<P><hr><b>"
 msgstr "<P><hr><b>"
 
-#: src/chat_window.c:1620
+#: src/chat_window.c:1659
 msgid "changed status to"
 msgstr "est maintenant"
 
-#: src/chat_window.c:1640
+#: src/chat_window.c:1679
 msgid "Conversation ended"
 msgstr "Conversation terminée"
 
-#: src/chat_window.c:1707
+#: src/chat_window.c:1746
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*>%sConversation ended%s</body>\n"
 msgstr "<body bgcolor=#F9E589 width=*>%sConversation terminée%s</body>\n"
 
-#: src/chat_window.c:2097
+#: src/chat_window.c:2136
 msgid "View log"
 msgstr "Voir l'historique"
 
-#: src/chat_window.c:2163
-#: src/chat_window.c:2165
+#: src/chat_window.c:2202
+#: src/chat_window.c:2204
 msgid "Allow"
 msgstr "Permettre"
 
-#: src/chat_window.c:2164
+#: src/chat_window.c:2203
 msgid "Allow Offline Messaging CTRL+O"
 msgstr "Permettre la messagerie hors-ligne CTRL+O"
 
-#: src/chat_window.c:2189
+#: src/chat_window.c:2228
 msgid "Enable Sounds CTRL+S"
 msgstr "Activer les sons CTRL+S"
 
-#: src/chat_window.c:2207
+#: src/chat_window.c:2246
 msgid "View Log CTRL+L"
 msgstr "Voir l'historique CTRL+L"
 
-#: src/chat_window.c:2221
+#: src/chat_window.c:2260
 msgid "Send File CTRL+T"
 msgstr "Envoyer un fichier CTRL+T"
 
-#: src/chat_window.c:2227
+#: src/chat_window.c:2266
 msgid "Ignore CTRL+G"
 msgstr "Ignorer CTRL+G"
 
-#: src/chat_window.c:2233
+#: src/chat_window.c:2272
 msgid "Send Message CTRL+R"
 msgstr "Envoyer le message CTRL+R"
 
-#: src/chat_window.c:2242
-#: src/chat_window.c:2244
+#: src/chat_window.c:2281
+#: src/chat_window.c:2283
 msgid "Close CTRL+Q"
 msgstr "Fermer CTRL+Q"
 
@@ -2224,7 +2229,7 @@ msgstr "Les utilitaires ajoutent diverses fonctionnalités\n"
 msgid ""
 "Filters change messages when sending and/or receiving them.\n"
 "This may be used to add functionality such as translation and\n"
-"encryption"
+"encryption."
 msgstr ""
 "Les filtres changent les messages à l'envoi/réception.\n"
 "Ceci peut être utilisé pour ajouter des fonctionnalités comme\n"
@@ -3016,7 +3021,7 @@ msgstr "Actualiser"
 msgid "Ayttm - Edit Trigger"
 msgstr "Ayttm - Editeur de déclencheur"
 
-#: src/util.c:1026
+#: src/util.c:1027
 #, c-format
 msgid ""
 "The account \"%s\" already exists on your\n"
@@ -3033,11 +3038,11 @@ msgstr ""
 "\n"
 "Faut-il le déplacer ?"
 
-#: src/util.c:1040
+#: src/util.c:1041
 msgid "Error: account exists"
 msgstr "Erreur : le compte existe"
 
-#: src/util.c:1368
+#: src/util.c:1369
 #, c-format
 msgid ""
 "User %s wants to invite you to\n"
@@ -3048,20 +3053,20 @@ msgstr ""
 "%s\n"
 "Voulez-vous accepter ?"
 
-#: src/util.c:1374
+#: src/util.c:1375
 msgid "Chat Invite"
 msgstr "Inviter"
 
-#: src/util.c:1436
-#: src/util.c:1452
+#: src/util.c:1437
+#: src/util.c:1453
 msgid "deleting stale lock file\n"
 msgstr "deleting stale lock file\n"
 
-#: src/util.c:1483
+#: src/util.c:1484
 msgid "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
 msgstr "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
 
-#: src/util.c:1487
+#: src/util.c:1488
 msgid "No callback defined in call to eb_generic_menu_function, ignoring call!"
 msgstr "No callback defined in call to eb_generic_menu_function, ignoring call!"
 
