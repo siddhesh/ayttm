@@ -21,3 +21,5 @@ img2jpc_la_LIBADD = $(JASPER_LIBS) $(WIN32_LIBADD)
 video_capture_la_SOURCES = video_capture.c
 video_capture_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 video_capture_la_LIBADD = $(WIN32_LIBADD)
+
+EXTRA_DIST = $(bin_SCRIPTS)

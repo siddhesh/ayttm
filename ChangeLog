@@ -1,4 +1,7 @@
-* Thu Jan 08 2004 15:51 GMT [chris]     0.4.6-pre6
+* Fri Jan 09 2004 05:07 GMT [philip]     0.4.6-pre7
+- include ayttm_streamer_wrapper.sh in dist
+
+* Thu Jan 08 2004 15:51 GMT [philip]     0.4.6-pre6
 - configure.ac
 allow user to specify jasper path
 
