@@ -461,7 +461,7 @@ void send_message(GtkWidget *widget, gpointer d)
 		return;		
 	}
 
-	if(data->local_user && data->local_user->service_id != data->preferred->service_id)
+	if(data->local_user && data->local_user != data->preferred->ela)
 		data->local_user = NULL;
 	
 	if(data->local_user && !data->local_user->connected)
@@ -470,7 +470,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	/*determine what is the best local account to use*/
 
 	if(!data->local_user)
-		data->local_user = find_suitable_local_account(data->local_user, data->preferred->service_id); 
+		data->local_user = find_suitable_local_account(data->preferred->ela, data->preferred->service_id); 
 
 	if(!data->local_user) {
 		cw_put_message(data, "<hr>",0,0,0);
