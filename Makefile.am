@@ -13,7 +13,7 @@ sysconf_DATA = @PACKAGE@rc
 # distdir = $(PACKAGE)-$(VERSION)-$(RELEASE)
 
 # most of these are for building on windows
-EXTRA_DIST = ayttm.spec.in gen README.WIN32 makedll makeebdll mingw
+EXTRA_DIST = ayttm.spec.in gen README.WIN32 mingw
 CLEANFILES = $(Utilities_DATA) $(gnome_DATA)
 
 @PACKAGE@.desktop: Makefile

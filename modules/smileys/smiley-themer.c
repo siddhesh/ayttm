@@ -32,8 +32,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#ifndef __MINGW32__
 #include <X11/xpm.h>
+#else
+#define XPM_NO_X
+#include <noX/xpm.h>
+#endif
 
 
 /*******************************************************************************
@@ -65,8 +69,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/09 21:06:55 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/05/10 14:48:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

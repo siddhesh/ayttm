@@ -1,3 +1,25 @@
+* Fri May 10 2003 23:35 GMT [edward]	0.3.0-175
+- mingw
+fix to CC usage
+
+* Fri May  9 2003 23:35 GMT [edward]	0.3.0-174
+- added mingw32/smiley-themer.la
+- modules/smileys/smiley-themer.c
+- README.WIN32
+MINGW32 Build for smiley-themer first pass
+
+* Fri May  9 2003 23:26 GMT [edward]	0.3.0-173
+- README.WIN32
+- configure.ac
+- remove makedll
+- remove makeebdll
+- mingw
+- mingw32/Makefile.am
+- add mingw32/makedll
+- add mingw32/makeebdll
+Build updates for latest CYGWIN pass 1. Andy should merge these into his
+changes.
+
 * Sat May 10 2003 10:30 GMT [philip]	0.3.0-172
 - src/util.[ch] src/chat_window.c src/contact_actions.c
 possibly better matching of local account to remote
