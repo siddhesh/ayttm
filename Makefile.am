@@ -24,3 +24,6 @@ CLEANFILES = $(Utilities_DATA) $(gnome_DATA)
 	@echo Type=Application >> @PACKAGE@.desktop;
 
 ayttm.spec: ChangeLog
+
+dist: ayttm.spec
+
