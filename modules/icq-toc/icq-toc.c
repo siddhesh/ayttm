@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.40 $",
-	"$Date: 2003/08/12 10:37:06 $",
+	"$Revision: 1.41 $",
+	"$Date: 2003/08/30 12:09:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -321,7 +321,7 @@ static void eb_icq_chat_update_buddy(toc_conn * conn, char * id,
 	}
 	if(online)
 	{
-		eb_account * ea = find_account_by_handle(user, SERVICE_INFO.protocol_id);
+		eb_account * ea = find_account_with_ela(user, icq_find_local_account_by_conn(conn));
 		if( ea)
 		{
 			eb_chat_room_buddy_arrive(ecr, ea->account_contact->nick, user );
@@ -424,9 +424,9 @@ static void eb_icq_error_message( char * message )
 	ay_do_error( _("ICQ Error"), message );
 }
 	
-static void eb_icq_oncoming_buddy(char * user, int online, time_t idle, int evil, int unavailable )
+static void eb_icq_oncoming_buddy(toc_conn *conn, char * user, int online, time_t idle, int evil, int unavailable )
 {
-	eb_account * ea = find_account_by_handle( user, SERVICE_INFO.protocol_id);
+	eb_account * ea = find_account_with_ela( user, icq_find_local_account_by_conn(conn));
 	struct eb_icq_account_data * aad ;
 	struct eb_icq_local_account_data *alad;
 	
@@ -465,7 +465,7 @@ static void eb_icq_oncoming_buddy(char * user, int online, time_t idle, int evil
 static void eb_icq_toc_chat_im_in( toc_conn * conn, char * id, char * user, char * message )
 {
 	eb_chat_room * ecr = find_chat_room_by_id( id );
-	eb_account * ea = find_account_by_handle(user, SERVICE_INFO.protocol_id);
+	eb_account * ea = find_account_with_ela(user, icq_find_local_account_by_conn(conn));
 	char * message2 = linkify(message);
 
 	if(!ecr)
@@ -493,7 +493,7 @@ static void eb_icq_user_info(toc_conn * conn, char * user, char * message )
 	eb_local_account * reciever = NULL;
 
 
-	sender = find_account_by_handle(user, ela->service_id);
+	sender = find_account_with_ela(user, ela);
 	if(sender==NULL)
 	{
 		eb_account * ea = g_new0(eb_account, 1);
@@ -548,7 +548,7 @@ static void eb_icq_new_user(toc_conn *conn, char * group, char * f_handle)
 	else
 		fname = handle;
 		
-	ea = find_account_by_handle( handle, SERVICE_INFO.protocol_id );
+	ea = find_account_with_ela( handle, ela );
 	
 	if(!ea)
 	{
@@ -600,7 +600,7 @@ static void eb_icq_parse_incoming_im(toc_conn * conn, char * user, char * messag
 
 		eb_debug(DBG_TOC, "eb_icq_parse_incomming_im %d %d, %d %d\n", conn->fd, conn->seq_num, alad->conn->fd, alad->conn->seq_num );
 
-		sender = find_account_by_handle(user, ela->service_id);
+		sender = find_account_with_ela(user, ela);
 		if(sender==NULL)
 		{
 			eb_account * ea = g_new0(eb_account, 1);
@@ -885,9 +885,9 @@ static void eb_icq_logout( eb_local_account * account )
 	alad->is_setting_state = 0;
 	
 	/* Make sure each icq buddy gets logged off from the status window */
-	for(l = alad->icq_buddies; l; l=l->next)
+	for(l = alad->icq_buddies; l && alad->conn; l=l->next)
 	{
-		eb_icq_oncoming_buddy(l->data, FALSE, 0, 0, FALSE);
+		eb_icq_oncoming_buddy(alad->conn, l->data, FALSE, 0, 0, FALSE);
 	}
 }
 
@@ -1200,7 +1200,7 @@ static void eb_icq_rename_group(eb_local_account *ela, const char *old_group, co
 	struct eb_icq_local_account_data *alad = (struct eb_icq_local_account_data *)ela->protocol_local_account_data;	
 	for(l = alad->icq_buddies; l; l=l->next)
 	{
-		eb_account *ea = find_account_by_handle(l->data, SERVICE_INFO.protocol_id);
+		eb_account *ea = find_account_with_ela(l->data, ela);
 		if (ea) 
 			eb_debug(DBG_TOC, "checking if we should move %s from %s\n",ea->handle, ea->account_contact->group->name);
 		if (ea && !strcmp(ea->account_contact->group->name, new_group)) {

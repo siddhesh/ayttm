@@ -54,7 +54,7 @@ void (*icqtoc_update_file_status)( int tag, unsigned long progress );
 void (*icqtoc_complete_file_recieve)( int tag );
 void (*icqtoc_im_in)(toc_conn  * conn, char * user, char * message );
 void (*icqtoc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
-void (*icqupdate_user_status)(char * user, int online, time_t idle, int evil, int unavailable );
+void (*icqupdate_user_status)(toc_conn *conn, char * user, int online, time_t idle, int evil, int unavailable );
 void (*icqtoc_error_message)(char * message);
 void (*icqtoc_disconnect)(toc_conn * conn);
 void (*icqtoc_chat_invite)(toc_conn * conn, char * id, char * name, 

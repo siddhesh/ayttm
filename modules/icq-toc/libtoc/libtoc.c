@@ -960,7 +960,7 @@ if(DEBUG)
 			idle_time -= atoi(idle)*60;
 		}
 
-		icqupdate_user_status(user, online, idle_time, atoi(evil), unavailable);
+		icqupdate_user_status(conn, user, online, idle_time, atoi(evil), unavailable);
 		
 	}
 	else if(!strcmp(c, "CHAT_UPDATE_BUDDY"))
