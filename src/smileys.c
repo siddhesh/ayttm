@@ -403,7 +403,6 @@ smiley * get_smiley_by_name_and_service( const char *name, const char *service )
 		psmile = (smiley *)(l->data);
 		if(strcmp(psmile->name,name) != 0) 
 			continue;
-		printf("service:%s, p->service:%s\n",service, psmile->service);
 		if(!service || (psmile->service && !strcmp(psmile->service, service)))
 			return psmile;
 		if(!possibility)
@@ -484,14 +483,12 @@ void show_smileys_cb (smiley_callback_data *data) {
 	for(;smileys;smileys=smileys->next) {
 		gboolean already_done = FALSE;
 		msmiley = smileys->data;
-		printf("a\n");
 		for(l=done; l; l=l->next) {
 			protocol_smiley * done_smiley = l->data;
 			if(!strcmp(msmiley->name, done_smiley->name)) {
 				already_done = TRUE;
 				break;
 			}
-			printf("b\n");
 		}
 
 		if(already_done || !get_smiley_by_name(msmiley->name))
@@ -508,7 +505,6 @@ void show_smileys_cb (smiley_callback_data *data) {
 
 	for(l = done; l; l=l_list_next(l)) {
 		msmiley = l->data;
-		printf("c\n");
 		dsmile = get_smiley_by_name_and_service(msmiley->name, GET_SERVICE(account).name);
 		if(dsmile != NULL) {
 			GtkWidget *parent = NULL;
