@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([src/main.c])
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=pre13
+RELEASE=pre14
 #This is to check modules/core binary compat
 #Bump it up when necessary only (query_callbacks change, struct change etc)
 CORE_VERSION=1

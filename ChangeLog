@@ -1,3 +1,7 @@
+* Tue Apr 22 2003 00:27 GMT [colin]	0.3.0-pre14
+- modules/icq-toc/icq-toc.c
+Try to fix bug 725040 (12345678:name imported from icq)
+
 * Sun Apr 20 2003 19:28 GMT [colin]	0.3.0-pre13
 - libproxy/proxy.c
 Fix missing return

@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.14 $",
-	"$Date: 2003/04/18 08:46:06 $",
+	"$Revision: 1.15 $",
+	"$Date: 2003/04/22 00:29:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -526,9 +526,16 @@ static void eb_icq_new_group(char * group)
 	}
 }
 
-static void eb_icq_new_user(char * group, char * handle)
+static void eb_icq_new_user(char * group, char * f_handle)
 {
-	eb_account * ea = find_account_by_handle( handle, SERVICE_INFO.protocol_id );
+	eb_account * ea = NULL;
+	char *handle = strdup(f_handle);
+	
+	if (strrchr(handle,':')) {
+		*(strrchr(handle,':')) = '\0';
+	}
+		
+	ea = find_account_by_handle( handle, SERVICE_INFO.protocol_id );
 	
 	if(!ea)
 	{
@@ -556,13 +563,12 @@ static void eb_icq_new_user(char * group, char * handle)
 		icq_buddies = l_list_append(icq_buddies, handle);
 		c->accounts = l_list_append(c->accounts, ea);
 		ea->account_contact = c;
-#if 0
-		add_account(handle, ea);
-#endif
 
 		update_contact_list ();
 		write_contact_list();
 	}
+	
+	free(handle);
 }
 		
 
