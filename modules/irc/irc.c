@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.31 $",
-	"$Date: 2003/07/08 13:44:08 $",
+	"$Revision: 1.32 $",
+	"$Date: 2003/07/15 14:01:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1179,6 +1179,7 @@ static void irc_login( eb_local_account * account)
 		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
 		ay_do_error( _("IRC Error"), buff );
 		fprintf(stderr, buff);
+		ay_irc_cancel_connect(account);
 		return;
 	}
 	ila->connect_tag = tag;
@@ -1198,6 +1199,7 @@ static void irc_connect_cb(int fd, int error, void *data)
 		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
 		ay_do_error( _("IRC Error"), buff );
 		fprintf(stderr, buff);
+		ay_irc_cancel_connect(ela);
 		return;
 	}
 
