@@ -1102,6 +1102,30 @@ static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer 
 		if ( cw->hist_pos != NULL )
 			cw_set_message( cw, cw->hist_pos->data );
 	}
+	else if (event->keyval == GDK_Page_Up)
+	{
+		GtkWidget *scwin = cw->chat->parent;
+		GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
+		if (ga && ga->value > ga->page_size) {
+			gtk_adjustment_set_value(ga, ga->value - ga->page_size);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		} else if (ga) {
+			gtk_adjustment_set_value(ga, 0);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		}
+	}
+	else if (event->keyval == GDK_Page_Down)
+	{
+		GtkWidget *scwin = cw->chat->parent;
+		GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
+		if (ga && ga->value < ga->upper - ga->page_size) {
+			gtk_adjustment_set_value(ga, ga->value + ga->page_size);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		} else if (ga) {
+			gtk_adjustment_set_value(ga, ga->upper);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		}		
+	}
 	else if (cw->notebook != NULL)
 	{
 		// check tab changes if this is a tabbed chat window

@@ -304,6 +304,30 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
         gtk_editable_insert_text(GTK_EDITABLE (cr->entry), cr->hist_pos->data, strlen(cr->hist_pos->data), &p);
       }
     }
+  else if (event->keyval == GDK_Page_Up)
+  {
+	  GtkWidget *scwin = cr->chat->parent;
+	  GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
+	  if (ga && ga->value > ga->page_size) {
+		  gtk_adjustment_set_value(ga, ga->value - ga->page_size);
+		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+	  } else if (ga) {
+		  gtk_adjustment_set_value(ga, 0);
+		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+	  }
+  }
+  else if (event->keyval == GDK_Page_Down)
+  {
+	  GtkWidget *scwin = cr->chat->parent;
+	  GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
+	  if (ga && ga->value < ga->upper - ga->page_size) {
+		  gtk_adjustment_set_value(ga, ga->value + ga->page_size);
+		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+	  } else if (ga) {
+		  gtk_adjustment_set_value(ga, ga->upper);
+		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+	  }		
+  }
 
   if(modifiers)
   { return gtk_false(); }
