@@ -382,7 +382,7 @@ int add_menu_items(void *vmenu, int cur_service, int should_sep,
 	eb_local_account *l_ela = ela;
 	
 	if (!l_ela) 
-		l_ela = ea->ela;
+		l_ela = acc->ela;
 
 	md = GetPref(EB_CONTACT_MENU);
 	for(list = md->menu_items; list; list  = list->next ) {
