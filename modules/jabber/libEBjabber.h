@@ -117,7 +117,6 @@ int JABBER_AuthorizeContact(JABBER_Conn *conn, char *handle);
 */
 
 int JABBER_Login(char *handle, char *passwd, char *host, int port);
-
 /*
 ** Name:    JABBER_SendMessage
 ** Purpose: This function encapuslates the sending of an instant message
