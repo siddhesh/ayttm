@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.5 $",
-	"$Date: 2003/05/05 08:58:13 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/05/05 09:03:11 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -332,6 +332,11 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 		}            
 	}
 		
+	if (p) {
+		while (p[strlen(p)-1] == '\n' || p[strlen(p)-1] == '\r')
+			p[strlen(p)-1] = '\0';	
+	}
+	
 	gpgme_release(ctx);
 	
 	switch(sigstat) {
