@@ -98,6 +98,27 @@ class transfer_window : public llist_data
   int window_tag;
 };
 
+typedef struct _eb_msn_local_account_data
+{
+	char login[255];
+	char password[255]; // account password
+	int fd;				// the file descriptor
+	int status;			// the current status of the user
+	msnconn * mc;
+	int connect_tag;
+	int activity_tag;
+	LList *msn_contacts;
+	int waiting_ans;
+	LList *msn_grouplist;
+	int listsyncing;
+	char fname_pref[MAX_PREF_LEN];
+	int do_mail_notify;
+	int do_mail_notify_folders;
+	int do_mail_notify_run_script;
+	char do_mail_notify_script_name[MAX_PREF_LEN];
+} eb_msn_local_account_data;
+
+
 static llist * chatrooms=NULL;
 static llist * transfer_windows = NULL;
 static llist * waiting_auth_callbacks = NULL;
@@ -117,7 +138,7 @@ static int plugin_finish();
 struct service_callbacks * query_callbacks();
 //char * msn_create_mail_initial_notify (int unread_ibc, int unread_fold);
 //char * msn_create_new_mail_notify (char * from, char * subject);
-static void msn_new_mail_run_script(void);
+static void msn_new_mail_run_script(eb_local_account *ela);
 static char *Utf8ToStr(const char *in);
 static char *StrToUtf8(const char *in);
 static void eb_msn_format_message (message * msg);
@@ -131,32 +152,25 @@ static LList *eb_msn_get_smileys(void) { return psmileys; }
 }
 
 static int ref_count = 0;
-static char fname_pref[MAX_PREF_LEN] = "";
-static char msn_server[MAX_PREF_LEN] = "messenger.hotmail.com";
-static char msn_port[MAX_PREF_LEN] = "1863";
 
 /* hack to check conn */
-static int do_check_connection = 0;
-static int do_reconnect = 0;
 
 int do_msn_debug = 0;
 #define DBG_MSN do_msn_debug
 
-static int do_mail_notify = 0;
-static int do_mail_notify_folders = 0;
-static int do_mail_notify_run_script = 0;
-static int do_guess_away = 1;
-static char do_mail_notify_script_name[MAX_PREF_LEN];
-
-/* #include "gtk_globals.h"*/
+static char msn_server[MAX_PREF_LEN] = "messenger.hotmail.com";
+static char msn_port[MAX_PREF_LEN] = "1863";
+static int do_guess_away = 0;
+static int do_check_connection;
+static int do_reconnect;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.58 $",
-	"$Date: 2003/07/23 18:04:10 $",
+	"$Revision: 1.59 $",
+	"$Date: 2003/07/30 10:20:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -176,13 +190,6 @@ static int plugin_init()
 	ref_count=0;
 	input_list * il = g_new0(input_list, 1);
 	plugin_info.prefs = il;
-	il->widget.entry.value = fname_pref;
-	il->widget.entry.name = "fname_pref";
-	il->widget.entry.label = _("Friendly Name:");
-	il->type = EB_INPUT_ENTRY;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
 	il->widget.entry.value = msn_server;
 	il->widget.entry.name = "msn_server";
 	il->widget.entry.label = _("Server:");
@@ -195,33 +202,6 @@ static int plugin_init()
 	il->widget.entry.label = _("Port:");
 	il->type = EB_INPUT_ENTRY;
 
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &do_mail_notify;
-	il->widget.checkbox.name = "do_mail_notify";
-	il->widget.checkbox.label = _("Tell me about new Hotmail/MSN mail");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &do_mail_notify_folders;
-	il->widget.checkbox.name = "do_mail_notify_folders";
-	il->widget.checkbox.label = _("Notify me about new mail even if it isn't in my Inbox");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &do_mail_notify_run_script;
-	il->widget.checkbox.name = "do_mail_notify_run_script";
-	il->widget.checkbox.label = _("Run Script on Mail Notification");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.entry.value = do_mail_notify_script_name;
-	il->widget.entry.name = "do_mail_notify_script_name";
-	il->widget.entry.label = _("Script Name:");
-	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
@@ -479,6 +459,67 @@ static int plugin_finish()
 	return(ref_count);
 }
 
+static void msn_init_account_prefs(eb_local_account *ela)
+{
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	input_list *il = g_new0(input_list, 1);
+	ela->prefs = il;
+	
+	il->widget.entry.value = mlad->login;
+	il->widget.entry.name = "SCREEN_NAME";
+	il->widget.entry.label= _("_MSN Login:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = mlad->password;
+	il->widget.entry.name = "PASSWORD";
+	il->widget.entry.label= _("_Password:");
+	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ela->connect_at_startup;
+	il->widget.checkbox.name = "CONNECT";
+	il->widget.checkbox.label= _("_Connect at startup");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;	
+	il->widget.entry.value = mlad->fname_pref;
+	il->widget.entry.name = "fname_pref";
+	il->widget.entry.label = _("Friendly Name:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &mlad->do_mail_notify;
+	il->widget.checkbox.name = "do_mail_notify";
+	il->widget.checkbox.label = _("Tell me about new Hotmail/MSN mail");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &mlad->do_mail_notify_folders;
+	il->widget.checkbox.name = "do_mail_notify_folders";
+	il->widget.checkbox.label = _("Notify me about new mail even if it isn't in my Inbox");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &mlad->do_mail_notify_run_script;
+	il->widget.checkbox.name = "do_mail_notify_run_script";
+	il->widget.checkbox.label = _("Run Script on Mail Notification");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = mlad->do_mail_notify_script_name;
+	il->widget.entry.name = "do_mail_notify_script_name";
+	il->widget.entry.label = _("Script Name:");
+	il->type = EB_INPUT_ENTRY;
+}
+
 /*******************************************************************************
  *                             End Module Code
  ******************************************************************************/
@@ -542,20 +583,6 @@ typedef struct _msn_info_data
  * local accounts
  * below are just some suggested values
  */
-
-typedef struct _eb_msn_local_account_data
-{
-	char password[255]; // account password
-	int fd;				// the file descriptor
-	int status;			// the current status of the user
-	msnconn * mc;
-	int connect_tag;
-	int activity_tag;
-	LList *msn_contacts;
-	int waiting_ans;
-	LList *msn_grouplist;
-	int listsyncing;
-} eb_msn_local_account_data;
 
 class pending_invitation : public llist_data
 {
@@ -880,53 +907,25 @@ static eb_local_account * eb_msn_read_local_account_config( LList * values )
 	mlad = g_new0( eb_msn_local_account_data, 1);
 
 	ela->handle = value_pair_get_value( values, "SCREEN_NAME" );
-	c = value_pair_get_value( values, "PASSWORD");
-	strncpy( mlad->password, c, sizeof(mlad->password));
-	g_free (c); c = NULL;
 	
 	/*the alias will be the persons login minus the @hotmail.com */
 	strncpy( buff, ela->handle , sizeof(buff));
 	c = strtok( buff, "@" );
 	strncpy(ela->alias, buff , sizeof(ela->alias));
 
-	str = value_pair_get_value(values,"CONNECT");
-	ela->connect_at_startup=(str && !strcmp(str,"1"));
-	free(str);
-
 	mlad->status = MSN_OFFLINE;
 	ela->protocol_local_account_data = mlad;
 
 	ela->service_id = SERVICE_INFO.protocol_id;
 
+	msn_init_account_prefs(ela);
+	eb_update_from_value_pair(ela->prefs, values);
 	return ela;
 }
 
-static LList * eb_msn_write_local_config( eb_local_account * account )
+static LList * eb_msn_write_local_config( eb_local_account * ela )
 {
-	value_pair * val;
-	LList * vals = NULL;
-	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
-
-	val = g_new0( value_pair, 1 );
-	strcpy(val->key, "SCREEN_NAME" );
-	strncpy(val->value, account->handle, sizeof(val->value));
-	vals = l_list_append( vals, val );
-
-	val = g_new0( value_pair, 1 );
-	strcpy(val->key, "PASSWORD");
-	strncpy(val->value, mlad->password, sizeof(val->value));
-	vals = l_list_append( vals, val );
-
-	val = g_new0( value_pair, 1 );
-	strcpy( val->key, "CONNECT" );
-	if (account->connect_at_startup)
-		strcpy( val->value, "1");
-	else 
-		strcpy( val->value, "0");
-	
-	vals = l_list_append( vals, val );
-
-	return vals;
+	return eb_input_to_value_pair(ela->prefs);
 }
 
 
@@ -1901,8 +1900,8 @@ void ext_got_friendlyname(msnconn * conn, char * friendlyname)
   ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
   eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
   strncpy(ela->alias, tmp, 255);
-  if(fname_pref[0]=='\0')
-  { strncpy(fname_pref, tmp, MAX_PREF_LEN); }
+  if(mlad->fname_pref[0]=='\0')
+  { strncpy(mlad->fname_pref, tmp, MAX_PREF_LEN); }
   free(tmp);
 
   if(!ela->connected && !ela->connecting) {
@@ -1928,8 +1927,8 @@ void ext_got_info(msnconn * conn, syncinfo * info)
 	  eb_msn_connected(ela);
   }
   
-  if(fname_pref[0]!='\0') { 
-	  char * tmp = StrToUtf8(fname_pref);
+  if(mlad->fname_pref[0]!='\0') { 
+	  char * tmp = StrToUtf8(mlad->fname_pref);
 	  msn_set_friendlyname(conn, tmp); 
 	  free(tmp);
   }
@@ -2094,7 +2093,8 @@ void ext_got_SB(msnconn * conn, void * tag)
 
   eb_join_chat_room(ecr);
 
-  eb_chat_room_buddy_arrive(ecr, fname_pref[0]!=0 ? fname_pref:((authdata_SB *)conn->auth)->username,  
+  eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)(ecr->local_user->protocol_local_account_data);
+  eb_chat_room_buddy_arrive(ecr, mlad->fname_pref[0]!=0 ? mlad->fname_pref:((authdata_SB *)conn->auth)->username,  
 		  		 ((authdata_SB *)conn->auth)->username);
 
 
@@ -2142,7 +2142,8 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
         l=l->next;
       }
 
-      eb_chat_room_buddy_arrive(ecr, 	fname_pref[0]!=0?fname_pref:((authdata_SB *)conn->auth)->username,  
+     eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)(ecr->local_user->protocol_local_account_data);
+     eb_chat_room_buddy_arrive(ecr, 	mlad->fname_pref[0]!=0?mlad->fname_pref:((authdata_SB *)conn->auth)->username,  
 		      			((authdata_SB *)conn->auth)->username);
     } else {
       llist * l=pending_invitations;
@@ -2368,16 +2369,17 @@ void ext_netmeeting_invite(msnconn * conn, char * from, char * friendlyname, inv
 void ext_initial_email(msnconn * conn, int unread_ibc, int unread_fold)
 {
   char buf[1024];
-
-  if(do_mail_notify == 0)
+  eb_local_account *ela = (eb_local_account *)conn->ext_data;
+  eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+  if(mlad->do_mail_notify == 0)
     return;
 
-  if(unread_ibc==0 && (!do_mail_notify_folders || unread_fold==0)) { return; }
+  if(unread_ibc==0 && (!mlad->do_mail_notify_folders || unread_fold==0)) { return; }
 
   snprintf(buf, 1024, "You have %d new %s in your Inbox",
     unread_ibc, (unread_ibc==1)?("message"):("messages"));
 
-  if(do_mail_notify_folders)
+  if(mlad->do_mail_notify_folders)
   {
     int sl=strlen(buf);
     snprintf(buf+sl, 1024-sl, ", and %d in other folders", unread_fold);
@@ -2388,15 +2390,17 @@ void ext_initial_email(msnconn * conn, int unread_ibc, int unread_fold)
 
 void ext_new_mail_arrived(msnconn * conn, char * from, char * subject) {
   char buf[1024];
+  eb_local_account *ela = (eb_local_account *)conn->ext_data;
+  eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 
-  if(!do_mail_notify) { return; }
+  if(!mlad->do_mail_notify) { return; }
 
-  if (!do_mail_notify_run_script) {
+  if (!mlad->do_mail_notify_run_script) {
   	snprintf(buf, 1024, "New mail from %s: \"%s\"", from, subject);
 
 	  ay_do_info( _("MSN Mail"), buf );
   } else {
-	msn_new_mail_run_script();
+	msn_new_mail_run_script(ela);
   }
 }
 void ext_typing_user(msnconn * conn, char * username, char * friendlyname)
@@ -2831,13 +2835,14 @@ static void invite_gnomemeeting(ebmCallbackData * data)
 	msn_new_SB(mlad->mc,NULL);
 }
 
-void msn_new_mail_run_script(void)
+void msn_new_mail_run_script(eb_local_account *ela)
 {
 	char buf[1024];
-	if (!strstr(do_mail_notify_script_name," &")) {
-		snprintf(buf, 1024, "(%s) &", do_mail_notify_script_name);
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	if (!strstr(mlad->do_mail_notify_script_name," &")) {
+		snprintf(buf, 1024, "(%s) &", mlad->do_mail_notify_script_name);
 	} else {
-		strncpy(buf, do_mail_notify_script_name, 1024);
+		strncpy(buf, mlad->do_mail_notify_script_name, 1024);
 	}
 	system(buf);	
 }
