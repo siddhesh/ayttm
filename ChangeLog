@@ -1,3 +1,9 @@
+* mer Oct  8 2003 16:10 GMT [nicolas]	0.4.2-15
+- modules/aim-oscar/aim-oscar.c
+Add prefs for debug messages, better connection error report, use an
+activity bar instead of a progress bar.
+Use snprintf everywhere to avoid bo. (patch by colin)
+	
 * Wed Oct  8 2003 11:07 GMT [colin]	0.4.2-14
 - src/add_contact_window.c
 Fix extraneous free()
