@@ -1787,10 +1787,11 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Tools/Add a _group..."),
   				NULL, add_group_callback, 0, NULL },
 	{ N_("/Tools/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Tools/_Preferences..."),
-  				NULL, build_prefs_callback, 0, NULL },
 	{ N_("/Tools/_Edit accounts..."),
   				NULL, eb_edit_accounts, 0, NULL },
+	{ N_("/Tools/---"),		NULL, NULL, 0, "<Separator>" },
+	{ N_("/Tools/_Preferences..."),
+  				NULL, build_prefs_callback, 0, NULL },
 	{ N_("/_Help"),		NULL, NULL, 0, "<Branch>" },
 #ifndef __MINGW32__
 	{ N_("/Help/_Web site..."),	NULL, show_website, 0, NULL },

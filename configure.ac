@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=157
+RELEASE=158
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -39,6 +39,7 @@ case "$host" in
         ;;
 esac
 
+LIBS="$LIBS -L/usr/local/lib"
 # Checks for libraries.
 AC_CHECK_LIB([audiofile], [_af_ulaw2linear])
 AC_CHECK_LIB([ltdl], [lt_dlopen])
@@ -186,6 +187,16 @@ AC_CHECK_HEADER(X11/extensions/scrnsaver.h, [have_xss=yes], [have_xss=no],
 	 #include <X11/Xlib.h>
 	 #endif
 	])
+
+AC_MSG_CHECKING(for jasper)
+ac_check_lib_save_LIBS=$LIBS
+LIBS="-ljasper -lm -ljpeg  $LIBS"
+AC_TRY_LINK([#include <jasper/jasper.h>],
+	[jas_init()],
+	[EB_LIBS="$EB_LIBS -ljasper -lm -ljpeg"
+	AC_DEFINE(HAVE_LIBJASPER, 1, [Define if you have jasper])
+	AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])
+LIBS=$ac_check_lib_save_LIBS
 
 if test "$have_xss" = yes; then
 	# Let's figure out what library it's in...

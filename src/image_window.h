@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback cancel_callback, void *callback_data);
-int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int new_image);
+int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new_image);
 void ay_image_window_close(int tag);
 
 #ifdef __cplusplus

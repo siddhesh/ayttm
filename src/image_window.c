@@ -31,7 +31,7 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 	eb_debug(DBG_CORE, "Image window support not included\n");
 	return 0; 
 }
-int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int new) { return 0; }
+int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new) { return 0; }
 void ay_image_window_close(int tag) { }
 #else
 
@@ -39,6 +39,11 @@ void ay_image_window_close(int tag) { }
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf-loader.h>
 #include "llist.h"
+#include "mem_util.h"
+
+#ifdef HAVE_LIBJASPER
+# include <jasper/jasper.h>
+#endif
 
 struct ay_image_wnd {
 	GtkWidget *window;
@@ -54,6 +59,46 @@ struct ay_image_wnd {
 static int last_tag = 0;
 static LList *images = NULL;
 
+
+static unsigned char * image_2_jpg(const unsigned char * in_img, long *size)
+{
+#ifdef HAVE_LIBJASPER
+	char * out_img = NULL;
+	jas_stream_t *in, *out;
+	jas_image_t *image;
+	int infmt;
+	static int init;
+
+	/* TODO log an error */
+	if(!init && !(init = jas_init()))
+		return ay_memdup(in_img, *size);
+
+	in = jas_stream_memopen((unsigned char *)in_img, *size);
+	infmt = jas_image_getfmt(in);
+	if(!strcmp(jas_image_fmttostr(infmt), "jpg")) {
+	/* TODO log an error */
+		jas_stream_close(in);
+		return ay_memdup(in_img, *size);
+	}
+
+	image = jas_image_decode(in, infmt, NULL);
+
+	out = jas_stream_memopen(out_img, 0);
+
+	jas_image_encode(image, out, jas_image_strtofmt("jpg"), "quality=100");
+	jas_stream_flush(out);
+
+	*size = out->bufsize_;
+	jas_stream_close(in);
+	jas_stream_close(out);
+	jas_image_destroy(image);
+
+	return out_img;
+#else
+	return ay_memdup(in_img, *size);
+#endif
+	
+}
 
 static struct ay_image_wnd * get_image_wnd_by_tag(int tag)
 {
@@ -173,14 +218,14 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 
 
 /*
- * tag - identifies the window
- * buf - image data to be shown.  NULL == no more data
+ * tag   - identifies the window
+ * buf   - image data to be shown.  NULL == no more data
  * count - nbytes in buf
- * new - true if we need to create a new image
+ * new   - true if we need to create a new image
  *
  * returns: 1 on success, 0 on failure (window already closed?)
  */
-int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int new)
+int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new)
 {
 	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);
 	GdkPixbuf *pixbuf;
@@ -199,9 +244,11 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, int count, int n
 	if(!aiw->loader)
 		aiw->loader = gdk_pixbuf_loader_new();
 
-	if(buf)
-		gdk_pixbuf_loader_write(aiw->loader, buf, count);
-	else
+	if(buf) {
+		unsigned char *jpg_buf = image_2_jpg(buf, &count);
+		gdk_pixbuf_loader_write(aiw->loader, jpg_buf, count);
+		free(jpg_buf);
+	} else
 		gdk_pixbuf_loader_close(aiw->loader);
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(aiw->loader);
