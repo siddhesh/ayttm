@@ -152,7 +152,7 @@ struct service_callbacks {
 
 	/*this it to create a new chat room*/
 
-	eb_chat_room * (*make_chat_room)(char * name, eb_local_account * account);
+	eb_chat_room * (*make_chat_room)(char * name, eb_local_account * account, int is_public);
 
 	/*this is to invite somebody into the chat room*/
 
@@ -215,6 +215,8 @@ struct service_callbacks {
 	void (*free_account_data)(eb_account *account);
 	
 	int (*handle_url)(const char *url);
+	
+	LList * (*get_public_chatrooms)(eb_local_account *ela);
 };
 
 /*for every server you have the following: the name of the service,

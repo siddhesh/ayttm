@@ -98,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ", 
 	"Provides support for the ICQ protocol", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/06 17:04:41 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/06/04 22:07:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -344,7 +344,7 @@ static CONTACT_PTR getContact( glong uin )
 static int icq_get_current_state(eb_local_account * account );
 static void icq_logout( eb_local_account * account );
 static void icq_login( eb_local_account * account );
-static eb_chat_room * icq_make_chat_room( char * name, eb_local_account * account );
+static eb_chat_room * icq_make_chat_room( char * name, eb_local_account * account , int is_public);
 static void icq_info_update(eb_account *sender); 
 static void icq_info_data_cleanup(info_window *iw);
 static void icq_get_info( eb_local_account * account_from, eb_account * account_to);
@@ -1346,7 +1346,7 @@ static void icq_send_invite( eb_local_account * account, eb_chat_room * room,
 	ICQ_Request_Chat(uin, message);
 }
 
-static eb_chat_room * icq_make_chat_room( char * name, eb_local_account * account )
+static eb_chat_room * icq_make_chat_room( char * name, eb_local_account * account, int is_public )
 {
 	eb_chat_room * ecr = find_chat_room_by_id("ICQ");
 	

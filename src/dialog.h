@@ -26,7 +26,7 @@
 #define __DIALOG__
 
 #include <gtk/gtk.h>
-
+#include <llist.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,6 +35,7 @@ extern "C" {
 
 void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widget, gpointer data), gpointer data );
 void do_list_dialog( char * message, char * title, const char **list, void (*action)(char * text, gpointer data), gpointer data );
+void do_llist_dialog( char * message, char * title, LList *list, void (*action)(char * text, gpointer data), gpointer data );
 void do_text_input_window( gchar * title, gchar * value, void (*action)(char * text, gpointer data), gpointer data );
 void do_text_input_window_multiline( gchar * title, gchar * value, int ismulti, void (*action)(char * text, gpointer data), gpointer data );
 

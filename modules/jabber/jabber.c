@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.30 $",
-	"$Date: 2003/05/21 15:59:35 $",
+	"$Revision: 1.31 $",
+	"$Date: 2003/06/04 22:07:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -627,7 +627,7 @@ static void eb_jabber_leave_chat_room( eb_chat_room * room )
 	JABBER_LeaveChatRoom(jlad->JConn, room->room_name, room->local_user->alias);
 }
 
-static eb_chat_room * eb_jabber_make_chat_room( char * name, eb_local_account * account )
+static eb_chat_room * eb_jabber_make_chat_room( char * name, eb_local_account * account, int is_public )
 {
 	eb_chat_room *ecr = g_new0(eb_chat_room, 1);
 	char *ptr=NULL;

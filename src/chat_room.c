@@ -426,6 +426,9 @@ static gboolean join_service_is_open = 0;
 static GtkWidget * chat_room_name;
 static GtkWidget * chat_room_type;
 static GtkWidget * join_chat_window;
+static GtkWidget * public_chkbtn;
+static GtkWidget * public_list_btn;
+
 static int total_rooms;
 
 char * next_chatroom_name(void)
@@ -465,9 +468,84 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 	if (!name || strlen(name) == 0)
 		name = next_chatroom_name();
 	
-	eb_start_chat_room(ela, name);
+	eb_start_chat_room(ela, name, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(public_chkbtn)));
 	g_free(name);
 	gtk_widget_destroy(join_chat_window);
+}
+
+static void update_public_sensitivity(GtkWidget * widget, gpointer data ) {
+	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
+	char *mservice = NULL;
+	char *local_acc = NULL;
+	int service_id = -1;
+	int has_public = 0;
+	
+	if (!strstr(service, "]") || !strstr(service," ")) {
+		g_free(service);
+		return;
+	}
+	
+	local_acc = strstr(service, " ") +1;
+	*(strstr(service, "]")) = '\0';
+	mservice = strstr(service,"[")+1;
+	
+	service_id = get_service_id( mservice );
+	g_free(service);
+	
+	has_public = (eb_services[service_id].sc->get_public_chatrooms != NULL);
+	gtk_widget_set_sensitive(public_chkbtn, has_public);
+	gtk_widget_set_sensitive(public_list_btn, has_public);
+	if (has_public) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(public_chkbtn), FALSE);
+	}
+}
+
+static void choose_list_cb(char *text, gpointer data) {
+	int pos;
+	
+	gtk_editable_delete_text(GTK_EDITABLE(chat_room_name), 0, -1);
+	gtk_editable_insert_text(GTK_EDITABLE(chat_room_name), text, strlen(text), &pos);
+	
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(public_chkbtn), TRUE);
+}
+
+static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
+	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
+	char *mservice = NULL;
+	char *local_acc = NULL;
+	int service_id = -1;
+	int has_public = 0;
+	LList *list = NULL;
+	eb_local_account *ela = NULL;
+	if (!strstr(service, "]") || !strstr(service," ")) {
+		g_free(service);
+		return;
+	}
+	
+	local_acc = strstr(service, " ") +1;
+	*(strstr(service, "]")) = '\0';
+	mservice = strstr(service,"[")+1;
+	
+	service_id = get_service_id( mservice );
+	ela = find_local_account_by_handle(local_acc, service_id);
+	
+	g_free(service);
+	
+	if (!ela) {
+		ay_do_error(_("Cannot list chatrooms"), _("The local account doesn't exist."));
+		return;			
+	}
+
+	list = RUN_SERVICE(ela)->get_public_chatrooms(ela);
+	
+	if (!list) {
+		ay_do_error(_("Cannot list chatrooms"), _("The local account doesn't exist."));
+		return;			
+	}
+
+	do_llist_dialog(_("Select a chatroom."), _("Public chatrooms list"), list, choose_list_cb, NULL);
+	
+	l_list_free(list);
 }
 
 static void join_chat_destroy(GtkWidget * widget, gpointer data )
@@ -490,6 +568,7 @@ void open_join_chat_window()
 	GtkWidget * hbox2;
 	GtkWidget * button;
 	GtkWidget * separator;
+	
 	GList * list;
 
 	if(join_service_is_open)
@@ -506,7 +585,7 @@ void open_join_chat_window()
 
 	gtk_container_add(GTK_CONTAINER(join_chat_window), vbox);
 
-	table = gtk_table_new(2, 2, FALSE);
+	table = gtk_table_new(2, 4, FALSE);
 
 	label = gtk_label_new(_("Chat Room Name: "));
 	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 0, 1);
@@ -516,15 +595,26 @@ void open_join_chat_window()
 	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_name, 1, 2, 0, 1);
 	gtk_widget_show(chat_room_name);
 
+	public_chkbtn = gtk_check_button_new_with_label(_("Chatroom is public"));
+	gtk_table_attach_defaults (GTK_TABLE(table), public_chkbtn, 1, 2, 1, 2);
+	gtk_widget_set_sensitive(public_chkbtn, FALSE);
+	gtk_widget_show(public_chkbtn);
+
+	public_list_btn = gtk_button_new_with_label(_("List public chatrooms..."));
+	gtk_table_attach_defaults (GTK_TABLE(table), public_list_btn, 1, 2, 2, 3);
+	gtk_widget_set_sensitive(public_list_btn, FALSE);
+	gtk_widget_show(public_list_btn);
+
 	label = gtk_label_new(_("Local account: "));
-	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 1, 2);
+	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 3, 4);
 	gtk_widget_show(label);
 
 	chat_room_type = gtk_combo_new();
 	list = chat_service_list();
+	list = g_list_prepend(list, strdup(""));
 	gtk_combo_set_popdown_strings(GTK_COMBO(chat_room_type), list);
 	g_list_free(list);
-	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_type, 1, 2, 1, 2);
+	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_type, 1, 2, 3, 4);
 	gtk_widget_show(chat_room_type);
 
 	/* set up a frame (hopefully) */
@@ -572,6 +662,14 @@ void open_join_chat_window()
 
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
 					GTK_SIGNAL_FUNC(join_chat_callback),
+					NULL);
+
+	gtk_signal_connect(GTK_OBJECT(public_list_btn), "clicked",
+					GTK_SIGNAL_FUNC(list_public_chatrooms),
+					NULL);
+
+	gtk_signal_connect(GTK_OBJECT(GTK_COMBO(chat_room_type)->list), "selection-changed",
+					GTK_SIGNAL_FUNC(update_public_sensitivity),
 					NULL);
 
 	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
@@ -770,7 +868,7 @@ static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_mes
 	g_free(room_title);
 }
 
-void eb_start_chat_room( eb_local_account *ela, gchar * name )
+void eb_start_chat_room( eb_local_account *ela, gchar * name, int is_public )
 {
 	eb_chat_room * ecb = NULL;
 
@@ -779,7 +877,7 @@ void eb_start_chat_room( eb_local_account *ela, gchar * name )
 	if( !ela )
 		return;
 
-	ecb = RUN_SERVICE(ela)->make_chat_room(name, ela);
+	ecb = RUN_SERVICE(ela)->make_chat_room(name, ela, is_public);
 
 	if( ecb )
 	{

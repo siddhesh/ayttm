@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.51 $",
-	"$Date: 2003/06/02 15:40:12 $",
+	"$Revision: 1.52 $",
+	"$Date: 2003/06/04 22:07:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1325,7 +1325,7 @@ static int eb_msn_authorize_user( eb_local_account *ela, char * username, char *
   } else return 0;	 
 }
 
-static eb_chat_room * eb_msn_make_chat_room( gchar * name, eb_local_account * account )
+static eb_chat_room * eb_msn_make_chat_room( gchar * name, eb_local_account * account, int is_public )
 {
 	eb_chat_room * ecr = g_new0(eb_chat_room, 1);
 

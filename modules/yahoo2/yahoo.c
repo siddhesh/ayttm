@@ -129,8 +129,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.57 $",
-	"$Date: 2003/05/18 16:14:04 $",
+	"$Revision: 1.58 $",
+	"$Date: 2003/06/04 22:07:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1476,7 +1476,7 @@ static void eb_yahoo_send_invite(eb_local_account * ela, eb_chat_room * ecr, cha
 	}
 }
 
-static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela)
+static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela, int is_public)
 {
 	eb_chat_room *ecr = g_new0(eb_chat_room, 1);
 	eb_yahoo_chat_room_data *ycrd = g_new0(eb_yahoo_chat_room_data, 1);

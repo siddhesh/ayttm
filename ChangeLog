@@ -1,3 +1,19 @@
+* Wed Jun  6 2003 22:03 GMT [colin]	0.3.1-24
+- modules/aim-oscar/aim-oscar.c
+  modules/aim-toc/aim-toc.c
+  modules/icq/icq.c
+  modules/icq-toc/icq-toc.c
+  modules/irc/irc.c
+  modules/jabber/jabber.c
+  modules/msn2/msn.C
+  modules/workwizu/workwizu.c
+  modules/yahoo2/yahoo.c
+  src/chat_room.[ch]
+  src/dialog.[ch]
+  src/dialog.h
+  src/service.h
+Add public chatroom selection interface (implemented in irc)
+
 * Wed Jun  6 2003 16:20 GMT [philip]	0.3.1-23
 - src/flash_window_title.c
 make it compile on non-windows too

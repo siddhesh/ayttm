@@ -70,16 +70,30 @@ static void list_dialog_callback(GtkWidget *widget,
 
 void do_list_dialog( char * message, char * title, const char **list, void (*action)(char * text, gpointer data), gpointer data )
 {
+	const char **ptr=list;
+	LList *tmp = NULL;
+	while(*ptr) {
+		char *t=strdup(*ptr);
+		ptr++;
+		tmp = l_list_append(tmp, t);
+	}
+	do_llist_dialog(message, title, tmp, action, data);
+}
+
+void do_llist_dialog( char * message, char * title, LList *list, void (*action)(char * text, gpointer data), gpointer data )
+{
 	GtkWidget * dialog_window;
 	GtkWidget * label;
 	GtkWidget * clist;
+	GtkWidget * scwin;
+	
 	/*  UNUSED GtkWidget * button_box; */
 	char *Row[2]={NULL, NULL};
 	list_dialog_data *ldata;
-	const char **ptr=list;
+	LList *t_list = list;
 
 	eb_debug(DBG_CORE, ">Entering\n");
-	if(list[0]==NULL) {
+	if(list==NULL) {
 		eb_debug(DBG_CORE, ">Leaving as list[0]==NULL\n");
 		return;
 	}
@@ -98,11 +112,11 @@ void do_list_dialog( char * message, char * title, const char **list, void (*act
 	gtk_clist_set_selection_mode(GTK_CLIST(clist), GTK_SELECTION_SINGLE);
 	gtk_clist_set_column_width (GTK_CLIST(clist), 0, 200);
 	/* Array of pointers to elements, one per column */
-	while(*ptr) {
-		Row[0]=strdup(*ptr);
-		ptr++;
+	while(t_list) {
+		Row[0]=strdup(t_list->data);
 		gtk_clist_append(GTK_CLIST(clist), Row);
 		free(Row[0]);
+		t_list = t_list->next;
 	}
 
 	ldata=calloc(1, sizeof(list_dialog_data));
@@ -119,8 +133,14 @@ void do_list_dialog( char * message, char * title, const char **list, void (*act
 	gtk_widget_show(clist);
 	/* End list construction */
 
+	scwin = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_add_with_viewport
+		(GTK_SCROLLED_WINDOW(scwin),clist);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),
+                GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_widget_set_usize(scwin, 250, 350);
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->action_area), 
-						clist, FALSE, FALSE, 5 );
+						scwin, FALSE, FALSE, 5 );
 
 	gtk_widget_show_all(dialog_window);
 	eb_debug(DBG_CORE, ">Leaving, all done\n");

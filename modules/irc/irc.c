@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.20 $",
-	"$Date: 2003/05/07 18:48:25 $",
+	"$Revision: 1.21 $",
+	"$Date: 2003/06/04 22:07:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -140,6 +140,7 @@ typedef struct irc_local_account_type
 	GString *	buff;
 	int		status;
 	LList *		friends;
+	LList *		channel_list;
 } irc_local_account;
 
 typedef struct irc_account_type
@@ -214,7 +215,7 @@ static eb_local_account * irc_read_local_config(LList * pairs);
           static void irc_leave_chat_room(eb_chat_room *room);
           static void irc_send_chat_room_message(eb_chat_room *room, char *message);
           static void irc_send_invite( eb_local_account * account, eb_chat_room * room, char * user, char * message);
-static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account);
+static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account, int is_public);
           static void irc_accept_invite( eb_local_account * account, void * invitation );
           static void irc_decline_invite( eb_local_account * account, void * invitation );
           static void eb_irc_read_prefs_config(LList * values);
@@ -679,6 +680,21 @@ static void irc_parse (eb_local_account * ela, char *buff)
 			printf("IRC: RPL_NAMEREPLY without joining channel %s on %s!\n", tempstring, ila->server);
 		}
 		g_strfreev (buff2);
+	}
+	else if (!strncmp(split_buff[1], "321", 3)) /* RPL_LISTSTART */
+	{
+		if (ila->channel_list)
+			l_list_free(ila->channel_list);
+		ila->channel_list = NULL;
+	}
+	else if (!strncmp(split_buff[1], "322", 3)) /* RPL_LIST */
+	{
+		buff2 = g_strsplit(buff, " ", -1);
+		ila->channel_list = l_list_append(ila->channel_list, strdup(buff2[3]));
+		g_strfreev (buff2);
+	}
+	else if (!strncmp(split_buff[1], "322", 3)) /* RPL_LISTEND */
+	{
 	}
 	else if (!strncmp(split_buff[1], "JOIN", 4))
 	{
@@ -1170,6 +1186,9 @@ static void irc_login( eb_local_account * account)
 	
 	/* No use adding this one before we're in anyway */
 	ila->keepalive_tag = eb_timeout_add((guint32)60000, irc_keep_alive, (gpointer)account );
+
+	/* get list of channels */
+	ret = sendall(ila->fd, "LIST\n", strlen("LIST\n"));
 
 	/* Claim us to be online */
 	account->connected = TRUE;
@@ -1836,7 +1855,7 @@ static void irc_send_invite( eb_local_account * account, eb_chat_room * room,
 	return;
 }
 
-static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account)
+static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account, int is_public)
 {
 	LList * node;
 	eb_chat_room * ecr;
@@ -1905,7 +1924,7 @@ static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account
 
 static void irc_accept_invite( eb_local_account * account, void * invitation )
 {
-	eb_chat_room * ecr = irc_make_chat_room((char *) invitation, account);
+	eb_chat_room * ecr = irc_make_chat_room((char *) invitation, account, FALSE);
 	free(invitation);
 	if ( ecr )
 	{
@@ -1928,6 +1947,13 @@ static void eb_irc_read_prefs_config(LList * values)
 static LList * eb_irc_write_prefs_config()
 {
 	return (NULL);
+}
+
+static LList * eb_irc_get_public_chatrooms(eb_local_account *ela)
+{
+	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
+	
+	return l_list_copy(ila->channel_list);
 }
 
 struct service_callbacks * query_callbacks()
@@ -1971,7 +1997,8 @@ struct service_callbacks * query_callbacks()
 
 	sc->get_color=eb_irc_get_color;
 	sc->get_smileys=eb_default_smileys;
-
+	sc->get_public_chatrooms = eb_irc_get_public_chatrooms;
+	
 	return sc;
 }
 

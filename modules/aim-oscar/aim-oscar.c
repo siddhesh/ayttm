@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.9 $",
-	"$Date: 2003/05/06 17:04:40 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/06/04 22:07:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1820,7 +1820,7 @@ void eb_aim_leave_chat_room( eb_chat_room * room )
   alad->chat_room = NULL;
 }
 
-eb_chat_room *eb_aim_make_chat_room(gchar *name, eb_local_account *ela)
+eb_chat_room *eb_aim_make_chat_room(gchar *name, eb_local_account *ela, int is_public)
 {
   struct eb_aim_local_account_data *alad = ela->protocol_local_account_data;
   eb_chat_room *ecr = g_new0(eb_chat_room, 1);

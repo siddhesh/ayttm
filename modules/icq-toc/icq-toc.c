@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.34 $",
-	"$Date: 2003/05/06 17:04:41 $",
+	"$Revision: 1.35 $",
+	"$Date: 2003/06/04 22:07:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -692,7 +692,7 @@ static void eb_icq_leave_chat_room( eb_chat_room * room )
 	icqtoc_chat_leave(conn, room->id);
 }
 
-static eb_chat_room * eb_icq_make_chat_room(char * name, eb_local_account * account )
+static eb_chat_room * eb_icq_make_chat_room(char * name, eb_local_account * account, int is_public )
 {
 	eb_chat_room * ecr = g_new0(eb_chat_room, 1);
 

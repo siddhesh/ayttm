@@ -113,8 +113,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu",
 	"Provides Workwizu Chat support",
-	"$Revision: 1.13 $",
-	"$Date: 2003/05/06 17:04:50 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/06/04 22:07:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1013,7 +1013,7 @@ void eb_workwizu_leave_chat_room (eb_chat_room *room)
 	wad->chat_room = NULL;
 }
 
-eb_chat_room *eb_workwizu_make_chat_room(char *name, eb_local_account *account)
+eb_chat_room *eb_workwizu_make_chat_room(char *name, eb_local_account *account, int is_public)
 {
 	eb_chat_room * ecr = NULL;
 	wwz_account_data *wad = (wwz_account_data *)account->protocol_local_account_data;
