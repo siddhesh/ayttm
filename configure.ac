@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.4.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=19
+RELEASE=20
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -436,7 +436,8 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  pixmaps/Makefile
                  sounds/Makefile
                  src/Makefile
-		 src/gtk/Makefile])
+		 src/gtk/Makefile
+		 mingw32/Makefile])
 
 
 AC_OUTPUT
