@@ -27,20 +27,20 @@
 #else
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 #endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
-#ifndef __MINGW32__
-#include <sys/socket.h>
-#endif
 #include <fcntl.h>
 #include <gtk/gtk.h>
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+
 #include "libproxy/libproxy.h"
 #include "libtoc.h"
 #include "plugin_api.h"
@@ -1235,12 +1235,6 @@ static void icqtoc_signon_cb(int fd, int error, void *data)
 {
 	fd_set fs;
 	toc_conn *conn = (toc_conn *)data;
-	char *flap_result=NULL;
-	char *norm_username = icq_normalize(conn->username);
-	unsigned short username_length = htons(strlen(norm_username));
-	char sflap_header[] = {0,0,0,1,0,1};
-	char buff[2048];
-	flap_header fh;
 
 	conn->fd=fd;
 	

@@ -163,8 +163,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.18 $",
-	"$Date: 2003/04/09 12:40:53 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/04/11 16:02:29 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -447,6 +447,7 @@ static transfer_window * eb_find_window_by_inv(invitation_ftp * inv) {
   return NULL;
 }
 
+/*
 static transfer_window * eb_find_window_by_tag(int tag) {
   llist * l = transfer_windows;
   while(l!=NULL) {
@@ -455,6 +456,7 @@ static transfer_window * eb_find_window_by_tag(int tag) {
   }  
   return NULL;
 }
+*/
 
 enum
 {

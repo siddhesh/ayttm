@@ -55,6 +55,8 @@
 #include "globals.h"
 #include "service.h"
 #include "plugin_api.h"
+#include "activity_bar.h"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif

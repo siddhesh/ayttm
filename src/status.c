@@ -59,6 +59,7 @@
 #include "pixmaps/login_icon.xpm"
 #include "pixmaps/blank_icon.xpm"
 #include "pixmaps/logoff_icon.xpm"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
@@ -110,7 +111,6 @@ static void delete_event( GtkWidget *widget,
 				   GdkEvent *event,
 				   gpointer data )
 {
-	LList * node = accounts;
 	gchar *userrc = NULL;
 	
 	eb_debug(DBG_CORE, "Signing out...\n");

@@ -234,6 +234,7 @@ static void del_from_list(struct yahoo_data *yd)
 }
 
 /* call repeatedly to get the next one */
+/*
 static struct yahoo_input_data * find_input_by_id(int id)
 {
 	YList *l;
@@ -244,6 +245,7 @@ static struct yahoo_input_data * find_input_by_id(int id)
 	}
 	return NULL;
 }
+*/
 
 static struct yahoo_input_data * find_input_by_id_and_type(int id, enum yahoo_connection_type type)
 {
