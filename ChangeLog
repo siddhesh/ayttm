@@ -1,3 +1,7 @@
+* Sun May 11 2003 14:27 GMT [philip]	0.3.0-184
+- configure.ac
+make webcam support optional
+
 * Sun May 11 2003 13:40 GMT [philip]	0.3.0-183
 - src/util.c
 Add contact from __Dummy__ treated same as add contact from Unknown
