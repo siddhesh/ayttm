@@ -1,3 +1,11 @@
+* Fri Apr 18 2003 11:40 GMT [andy]	0.2.3-135
+- libproxy/proxy.c
+  src/action.c
+  src/plugin.c
+Fix warnings
+- src/main.c
+Fix version string to show Ayttm team
+
 * Fri Apr 18 2003 10:45 GMT [andy]	0.2.3-134
 - src/gtk/prefs_window.C
 Disallow 'Return' as a hotkey for tab switching

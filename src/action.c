@@ -24,16 +24,17 @@
 
 #include "intl.h"
  
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
-#include <unistd.h>
 
 #include "globals.h"
 #include "action.h"
 #include "dialog.h"
 #include "prefs.h"
 #include "mem_util.h"
+#include "util.h"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
@@ -104,7 +105,7 @@ static void action_do_action(char * value, void * data)
 static void action_prepare(GtkWidget *w, void *data)
 {
 	char *val = gtk_widget_get_name(w);
-	char **c = data;
+
 	action_do_action(val, data);
 }
 

@@ -39,7 +39,6 @@ typedef long __off32_t;
 #include "nomodule.h"
 #include "value_pair.h"
 #include "dialog.h"
-#include "prefs.h"
 #include "status.h"
 
 #ifdef __MINGW32__
@@ -358,7 +357,7 @@ int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
 	
 	module_version = lt_dlsym(Module, "module_version");
 	if (!module_version || module_version() != CORE_VERSION) {
-		printf("service_version = %x\n",module_version);
+		printf("service_version = %x\n", (unsigned int)module_version);
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, "Plugin version differs from core version, which means it is probably not binary compatible.\nTry a clean install (or read README).", Service_Info->name, FALSE);
 		lt_dlclose(Module);
 		return(-1);	

@@ -24,12 +24,15 @@
 /* it is intended to : 1st handle http proxy, using the CONNECT command
  , 2nd provide an easy way to add socks support */
 
+#include "intl.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <glib.h>
+#include <unistd.h>
 
 #ifdef __MINGW32__
 #define sleep(a)	Sleep(a)
@@ -37,19 +40,12 @@
 #define bzero(a,b)    memset(a,0,b)
 #include <winsock2.h>
 #else
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
 
-#include <glib.h>
-#include <unistd.h>
-
-#include "config.h"
-#include "intl.h"
 #include "libproxy.h"
 #include "tcp_util.h"
+
 
 static int proxy_inited=0;
 int proxy_type = PROXY_NONE;
@@ -714,8 +710,7 @@ int http_tunnel_init(int sockfd, struct sockaddr *serv_addr, int addrlen )
 {
 	/* step two : do  proxy tunneling init */
 	char cmd[200];
-	char *inputline;
-	int auth_tried = 0;
+	char *inputline = NULL;
 	unsigned short realport=ntohs(((struct sockaddr_in *)serv_addr)->sin_port);
    
 	sprintf(cmd,"CONNECT %s:%d HTTP/1.1\r\n",proxy_realhost,realport);
