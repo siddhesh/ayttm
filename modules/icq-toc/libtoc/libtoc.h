@@ -60,6 +60,7 @@ void (*icqtoc_disconnect)(toc_conn * conn);
 void (*icqtoc_chat_invite)(toc_conn * conn, char * id, char * name, 
 		      char * sender, char * message );
 void (*icqtoc_join_ack)(toc_conn * conn, char * id, char * name);
+void (*icqtoc_join_error)(toc_conn * conn, char * name);
 void (*icqtoc_chat_update_buddy)(toc_conn * conn, char * id, 
 		                             char * user, int online );
 void (*icqtoc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,

@@ -103,6 +103,7 @@ int eb_chat_room_buddy_connected( eb_chat_room * room, char * user );
 void open_join_chat_window();
 char* next_chatroom_name();
 void eb_chat_room_display_status (eb_account *remote, char *message);
+void eb_destroy_chat_room (eb_chat_room *ecr);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -60,6 +60,7 @@ void (*toc_disconnect)(toc_conn * conn);
 void (*toc_chat_invite)(toc_conn * conn, char * id, char * name, 
 		      char * sender, char * message );
 void (*toc_join_ack)(toc_conn * conn, char * id, char * name);
+void (*toc_join_error)(toc_conn * conn, char * name);
 void (*toc_chat_update_buddy)(toc_conn * conn, char * id, 
 		                             char * user, int online );
 void (*toc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,

@@ -92,8 +92,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.15 $",
-	"$Date: 2003/04/09 15:02:12 $",
+	"$Revision: 1.16 $",
+	"$Date: 2003/04/13 16:56:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -293,6 +293,18 @@ static void eb_aim_join_ack(toc_conn * conn, char * id, char * name)
 	strncpy( ecr->id, id , sizeof(ecr->id));
 
 	eb_join_chat_room(ecr);
+}
+
+static void eb_aim_join_error(toc_conn * conn, char * name)
+{
+	eb_chat_room * ecr = find_chat_room_by_name(name , SERVICE_INFO.protocol_id);
+
+	eb_debug(DBG_TOC, "eb_aim_join_err %s\n", name );
+
+	if(!ecr)
+		return;
+	
+	eb_destroy_chat_room(ecr);
 }
 
 static void eb_aim_chat_update_buddy(toc_conn * conn, char * id, 
@@ -1334,6 +1346,7 @@ struct service_callbacks * query_callbacks()
 	toc_chat_im_in = eb_aim_toc_chat_im_in;
 	toc_chat_invite = eb_aim_chat_invite;
 	toc_join_ack = eb_aim_join_ack;
+	toc_join_error = eb_aim_join_error;
 	toc_chat_update_buddy = eb_aim_chat_update_buddy;
 	toc_begin_file_recieve = eb_aim_progress_window_new;
 	toc_update_file_status = eb_aim_update_progress;

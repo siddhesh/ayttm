@@ -231,6 +231,9 @@ static char * parse_error(char * data)
 		case 950:
 			g_snprintf(message, 1024, "Chat in %s is unavailable.", data+4);
 			break;
+		case 951:
+			g_snprintf(message, 1024, "Chatroom name error (name too long or forbidden word probably).");
+			break;
 		case 960:
 			g_snprintf(message, 1024, "You are sending message too fast to %s", data+4);
 			break;
@@ -1185,6 +1188,16 @@ if(DEBUG)
 	else if(!strcmp(c, "ERROR"))
 	{
 		icqtoc_error_message(parse_error(buff+6));
+		if (atoi(buff+6) == 951) {
+			/* chatroom error */
+			char cr[200];
+			for(j=0; buff[j+10] != ':' && j < 200; j++ )
+			{
+				cr[j] = buff[j+10];
+			}
+			cr[j] = '\0';
+			icqtoc_join_error(conn, cr);
+		}
 		if (atoi(buff+6) > 979) {
 			icqtoc_disconnect(conn);
 		}

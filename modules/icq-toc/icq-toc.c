@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.12 $",
-	"$Date: 2003/04/09 15:02:13 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/04/13 16:56:42 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -294,6 +294,18 @@ static void eb_icq_join_ack(toc_conn * conn, char * id, char * name)
 	strncpy( ecr->id, id , sizeof(ecr->id));
 
 	eb_join_chat_room(ecr);
+}
+
+static void eb_icq_join_error(toc_conn * conn, char * name)
+{
+	eb_chat_room * ecr = find_chat_room_by_name(name , SERVICE_INFO.protocol_id);
+
+	eb_debug(DBG_TOC, "eb_icq_join_err %s\n", name );
+
+	if(!ecr)
+		return;
+	
+	eb_destroy_chat_room(ecr);
 }
 
 static void eb_icq_chat_update_buddy(toc_conn * conn, char * id, 
@@ -1273,6 +1285,7 @@ struct service_callbacks * query_callbacks()
 	icqtoc_chat_im_in = eb_icq_toc_chat_im_in;
 	icqtoc_chat_invite = eb_icq_chat_invite;
 	icqtoc_join_ack = eb_icq_join_ack;
+	icqtoc_join_error = eb_icq_join_error;
 	icqtoc_chat_update_buddy = eb_icq_chat_update_buddy;
 	icqtoc_begin_file_recieve = eb_icq_progress_window_new;
 	icqtoc_update_file_status = eb_icq_update_progress;

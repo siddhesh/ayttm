@@ -569,13 +569,29 @@ void open_join_chat_window()
 				GTK_SIGNAL_FUNC(join_chat_destroy), NULL );
 }
 
+void eb_destroy_chat_room (eb_chat_room *room) 
+{
+	gtk_widget_destroy(room->window);
+}
+
 static void destroy(GtkWidget * widget, gpointer data)
 {
 	eb_chat_room * ecr = data;
+
+	if ( ecr == NULL )
+		return;
+
 	while (l_list_find(chat_rooms, data)) {
 		chat_rooms = l_list_remove(chat_rooms, data);
 	}
 	RUN_SERVICE(ecr->local_user)->leave_chat_room(ecr);
+		
+	if ( ecr->smiley_window != NULL && ecr->smiley_window->window != NULL )
+	{
+		/* destroy smiley window */
+		gtk_widget_destroy(ecr->smiley_window);
+		ecr->smiley_window = NULL;
+	}
 	
 	free_chat_room( ecr );
 }
@@ -839,18 +855,7 @@ static void invite_button_callback( GtkWidget * widget, gpointer data )
 
 static void destroy_chat_window(GtkWidget * widget, gpointer data)
 {
-	eb_chat_room	*ecr = data;
-	
-	if ( ecr == NULL )
-		return;
-		
-	if ( ecr->smiley_window != NULL && ecr->smiley_window->window != NULL )
-	{
-		/* destroy smiley window */
-		gtk_widget_destroy(ecr->smiley_window);
-		ecr->smiley_window = NULL;
-	}
-	
+	eb_chat_room *ecr = (eb_chat_room *)data;
 	gtk_widget_destroy(ecr->window);
 }
 
