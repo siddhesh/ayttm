@@ -807,7 +807,7 @@ static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
 	char *mservice = NULL;
 	char *local_acc = NULL;
 	int service_id = -1;
-	int has_public = 0;
+	/*int has_public = 0;*/
 	LList *list = NULL;
 	eb_local_account *ela = NULL;
 	
@@ -1093,8 +1093,8 @@ eb_chat_room *find_tabbed_chat_room(void)
 eb_chat_room *find_tabbed_chat_room_index (int current_page)
 {
 	LList *l1;
-	LList *l2;
-	struct contact *c;
+	/*LList *l2;*/
+	/*struct contact *c;*/
 
 	eb_chat_room *notebook_window = find_tabbed_chat_room ();
 	if (notebook_window == NULL || notebook_window->notebook == NULL)

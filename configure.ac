@@ -5,13 +5,15 @@ AC_INIT(Ayttm, 0.4.4, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=14
+RELEASE=15
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
 CORE_VERSION=18
 
 AM_CONFIG_HEADER(config.h)
+
+AM_MAINTAINER_MODE
 
 # Checks for programs.
 AC_PROG_CC
@@ -78,7 +80,7 @@ AC_CHECK_FUNCS([atexit bzero dcgettext dup2 getcwd gethostbyname gethostname get
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify getopt_long getopt])
 
 ALL_LINGUAS="fr en_GB pt_BR de"
-AM_GNU_GETTEXT
+AM_GNU_GETTEXT([external])
 
 ###############################################################################
 #  Check for pthreads
@@ -400,7 +402,6 @@ AM_CONDITIONAL(MINGW32, test $use_mingw = yes)
 
 AC_CONFIG_FILES([Makefile ayttm.spec
                  doc/Makefile
-                 intl/Makefile
                  libproxy/Makefile
                  po/Makefile.in
                  m4/Makefile 

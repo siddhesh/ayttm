@@ -1,5 +1,5 @@
-DIST_SUBDIRS = pixmaps po m4 intl libproxy sounds doc src modules
-SUBDIRS = pixmaps po m4 intl libproxy sounds doc src modules
+DIST_SUBDIRS = pixmaps po m4 libproxy sounds doc src modules
+SUBDIRS = pixmaps po m4 libproxy sounds doc src modules
 ACLOCAL_AMFLAGS = -I m4
 
 Utilitiesdir = $(datadir)/applnk/Internet
@@ -13,7 +13,7 @@ sysconf_DATA = @PACKAGE@rc
 # distdir = $(PACKAGE)-$(VERSION)-$(RELEASE)
 
 # most of these are for building on windows
-EXTRA_DIST = ayttm.spec.in ayttm.spec gen README.WIN32 mingw mingw32
+EXTRA_DIST = config.rpath  ayttm.spec.in ayttm.spec gen README.WIN32 mingw mingw32
 CLEANFILES = $(Utilities_DATA) $(gnome_DATA)
 
 @PACKAGE@.desktop: Makefile

@@ -2255,8 +2255,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	gchar buff[NAME_MAX];
 	chat_window *cw;
 	chat_window *tab_cw=NULL;
-	GtkPositionType pos;
-	GtkWidget *contact_label;
+	/*GtkPositionType pos;*/
+	/*GtkWidget *contact_label;*/
 	gboolean	enableSoundButton = FALSE;
 	const int	tabbedChat = iGetLocalPref("do_tabbed_chat");
 

@@ -1,3 +1,18 @@
+* Fri Nov 7 2003 18:09 GMT [philip]	0.4.4-15
+Added Chris Halls' changes
+Ran gettextize
+- Makefile.am
+Remove intl from SUBDIRS and DIST_SUBDIRS, add config.rpath to EXTRA_DIST
+- m4/Makefile.am
+added m4 files to EXTRA_DIFF
+- po/
+updated to gettext 0.11.1
+intl/ no longer exists
+
+- configure.ac
+Added AM_MAINTAINER_MODE
+Removed intl/Makefile
+
 * Fri Nov 7 2003 17:22 GMT [breser]	0.4.4-14
 - configure.ac
 fix aspell detection

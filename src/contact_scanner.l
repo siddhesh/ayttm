@@ -1,5 +1,7 @@
 A [^\n\t"<>/= ]
 
+%option noyywrap
+
 %{
 	#include <string.h>
 
@@ -8,7 +10,6 @@ A [^\n\t"<>/= ]
 	#include "contact_parser.h"
 
 	
-	#define contactwrap() 1
     int Line_contact = 1;
 %}
 %%

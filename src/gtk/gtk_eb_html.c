@@ -326,10 +326,10 @@ static XftFont * _getfont(char * font, int bold, int italic, int size, int ptsiz
 			char **tokens = ay_strsplit(tmp,"-",-1);
 			char **etokens = ay_strsplit(tmp,":",-1);
 			char mfont[1024];
-			char *endsize = NULL;
+			/*char *endsize = NULL;*/
 			int attributespos = 1;
 			int mysize = 0;
-			int i = 0;
+			/*int i = 0;*/
 			
 			if (strcmp(tmp, font)) {
 				/* font specified */
@@ -975,7 +975,7 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					char tmp_sserv[64];
 					GdkPixmap *icon;
 					GdkBitmap *mask;
-                                        LList * slist=smileys;
+                                        /*LList * slist=smileys;*/
                                         smiley * smile = NULL;
 
 					parm += strlen("name=");

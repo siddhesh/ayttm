@@ -1,5 +1,7 @@
 A [^\n\t"<>/= ]
 
+%option noyywrap
+
 %{
 	#include <string.h>
 
@@ -7,7 +9,6 @@ A [^\n\t"<>/= ]
 	#include "account.h"
 	#include "account_parser.h"
 
-	#define accountwrap() 1
 	int Line = 1;
 %}
 %%
