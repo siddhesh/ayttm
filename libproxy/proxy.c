@@ -187,9 +187,11 @@ int proxy_set_proxy(int type,char *host,int port) {
     proxy_type=type;
     if (type != PROXY_NONE) {
     proxy_port=0;
-    proxy_host=(char *)strdup(host);
-    if (proxy_host != NULL) 
+    
+    if (host != NULL)  {
+	proxy_host=(char *)strdup(host);
 	proxy_port=port;
+    }
     if (proxy_port == 0)
 	proxy_port=3128;
 #ifdef HAVE_ATEXIT

@@ -1,3 +1,9 @@
+* Thu Apr 17 2003 10:04 GMT [colin]	0.2.3-122
+- modules/jabber
+Proxy support
+- libproxy/proxy.c
+Fix segfault waiting to happen
+
 * Thu Apr 17 2003 09:30 GMT [colin]	0.2.3-121
 - src/edit_local_accounts.c
 Empty account are not ok

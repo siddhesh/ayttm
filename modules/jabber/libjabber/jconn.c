@@ -19,6 +19,7 @@
 
 #include "jabber/jabber.h"
 #include "tcp_util.h"
+#include "libproxy/libproxy.h"
 
 /* local macros for launching event handlers */
 #define STATE_EVT(arg) if(j->on_state) { (j->on_state)(j, (arg) ); }
@@ -124,7 +125,7 @@ int jab_start(jconn j, int port)
     XML_SetElementHandler(j->parser, startElement, endElement);
     XML_SetCharacterDataHandler(j->parser, charData);
 
-    if ((tag = ay_socket_new_async(j->user->server, port, 
+    if ((tag = proxy_connect_host(j->user->server, port, 
 		    	    (ay_socket_callback)jab_continue, j, NULL)) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
 	    return 0;
