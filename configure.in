@@ -6,9 +6,6 @@ RELEASE=pre3
 #Bump it up when necessary only (query_callbacks change, struct change etc)
 CORE_VERSION=1
 
-CFLAGS="$CFLAGS -DCORE_VERSION=$CORE_VERSION"
-CXXFLAGS="$CXXFLAGS -DCORE_VERSION=$CORE_VERSION"
-
 AM_CONFIG_HEADER(config.h)
 
 if test "x$host_alias" = "xmingw32"; then
@@ -362,7 +359,9 @@ if test "$enable_all_warnings" = yes; then
 	CXXFLAGS="$CXXFLAGS -Wall"
 fi
 
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src"
+CFLAGS="$CFLAGS -I\$(top_srcdir)/src -DCORE_VERSION=$CORE_VERSION"
+CXXFLAGS="$CXXFLAGS -DCORE_VERSION=$CORE_VERSION"
+
 
 AC_SUBST_FILE(CHANGELOG)
 CHANGELOG="ChangeLog"
