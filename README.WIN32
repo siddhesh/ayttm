@@ -1,4 +1,7 @@
 Known Issues:
+
+	0) Can not connect to any servers!
+
 	1) There is a problem when you click into the chat (non-entry)
 	window where occasionally the text will appear somewhere else besides
 	the end.
@@ -15,33 +18,106 @@ Known Issues:
 
 	7) No Icons
 
-Compilation:
+Get MinGW
+At the time of this writing, the "stable" packages needed are:
+	Binutils 2.13.90 (20030111-1) 
+	GCC 3.2.3 (20030504-1) 
+	MinGW Runtime 3.0 
+	Windows API 2.3 
+	MSYS 1.0.8 
 
-In order to compile AYTTM on WIN32 platforms you must first install cygwin
-and its development environment as we will be using the MINGW32 portion 
-of it. In addition you will need to get the runtime and development
-GTK and GLIB archives from http://www.gimp.org/win32. You want the version
-1.2 of GTK not the 2.0. Unzip these into the /target directory when using
-a cygwin shell.
+It is also a good idea to download:
 
-The following files are required:
-	dirent.zip
-	gettext-dev-0.10.40-20020904.zip
-	glib-2.0.6-20020802.zip
-	glib-dev-2.0.6-20020802.zip
-	gtk+-1.3.0-20030216.zip
-	gtk+-dev-1.3.0-20030115.zip
-	libintl-0.10.40-20020310.zip
-	pkgconfig-0.14.zip
-	libiconv-1.7-w32.bin.zip
-	xpm-nox-4.0.3-20020617.zip
-	xpm-nox-4.0.3-20020112.zip
+	MSYS Developer Tool Kit 1.0.1 (which includes autoconf, 
+		automake, libtool...) 
+	MinGW Developer Tool Kit 1.0.0 alpha 1 (which includes wget, 
+		bison and flex) 
 
-Note: glib-2.2.1 will NOT work with this.
+All Necessary files are under 'mingw32' that are special to AYTTM, including
+all patches and config files.
 
-To Generate the program for WIN32 runtime once you have cygwin installed
+To install MinGW, you will need a program that can uncompress Gzip'ed
+TAR files, 7-zip seems to work well.
 
-	./mingw
+Next thing is to uncompress all these files into one location ("C:\MinGW"
+for example). Then, install MSYS by double-clicking on MSYS-1.0.8.exe,
+I'll assume that you install it in "C:\msys\1.0". When asked for
+post-install configuration, answer yes to all questions and tell it
+mingw is in "c:/MinGW".
+
+After that, copy (and replace) the file config.site to
+"C:\msys\1.0\etc". This file is largely inspired by the recommended
+compilation flags of GnuWin32.
+
+Installation is now done and you can start your development environment
+by clicking on "Start/Programs/MinGW/MSYS/msys" or by launching
+"C:\msys\1.0\msys.bat".
+
+Compilation of Prerequisites
+I always use "./configure --prefix=/usr/local --disable-static".
+After that, a "make; make install" will do everything you want.
+
+libiconv
+	Official sources: http://ftp.gnu.org/gnu/libiconv/libiconv-1.9.1.tar.gz
+	Patch file: libiconv-1.9.1-mingw.patch
+	Notes: The only limitation is that libiconv doesn't read Win32
+	symlinks (see "srclib\xreadlink.c")
+
+gettext
+	Official sources: http://ftp.gnu.org/gnu/gettext/gettext-0.12.1.tar.gz
+	Patch file: gettext-0.12.1-mingw.patch
+	Notes: The lines 
+		- getopt.lo getopt1.lo hash.lo javacomp.lo javaexec.lo \
+		+ hash.lo javacomp.lo javaexec.lo \
+
+		and
+		
+		-hostname_LDADD = $(LDADD)
+		+hostname_LDADD = $(LDADD) -lwsock32
+
+	are not platform independent; they are only quick hacks to limit
+	the size of the patch.
+
+	Like libiconv, gettext doesn't read Win32 symlinks (see
+	"gettext-tools\lib\xreadlink.c").  Warning: To enable gettext
+	support on libiconv, you should recompile it after gettext.  
+
+glib
+	Official sources: ftp://ftp.gtk.org/pub/gtk/v2.2/glib-2.2.2.tar.gz
+	Patch file: glib-2.2.2-mingw.patch
+	Notes: You will need to copy pkg-config.exe and libglib-2.0.dll
+	(available in pkg-config-0.15.tar.gz) to "C:\msys\1.0\local\bin"
+	before compiling glib. After that, you can put "glib.m4"
+	(taken from glib 1.2.10) in "C:\msys\1.0\local\share\aclocal"
+	and "glib-config" in "C:\msys\1.0\local\bin" to enable GLib 1.2
+	style detection.
+
+gtk+ 
+	Official sources: http://www.gimp.org/~tml/gimp/win32/gtk+-1.3.0-20030115-src.zip
+	Patch file: gtk+-1.3.0-mingw.patch (libtool updated to version
+	1.5). There is also an experimental patch adding support for
+	set_props: gtk+-1.3.0-set_props.patch (based on gtk+-1.2.9).
+	Notes: After installing, you need to copy
+	"gdk\win32\gdkwin32.h" to "C:\msys\1.0\local\include\gdk"
+	and "gdk\win32\gdkprivate-win32.h" to
+	"C:\msys\1.0\local\include\gdk\win32". You can also put
+	"gtk-config" in "C:\msys\1.0\local\bin" to enable GTK+ 1.2
+	style detection.
+
+To BUILD AYTTM:
+
+sh mingw
+
+or (its contents)
+
+ACLOCAL_FLAGS='-I /usr/local/share/aclocal'
+sh gen
+./configure
+make
 
 
-To build a package we use the Inno Setup 3 tool.
+To INSTALL AYTTM:
+cd mingw32
+make install
+
+Viola, it now runs.

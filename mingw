@@ -1,50 +1,6 @@
-#!/bin/bash
-if [ X"$CC" = X ]
-then
-	CC=gcc-2
-	export CC
-fi
-if [ X"$CXX" = X ]
-then
-	CXX=g++-2
-	export CXX
-fi
-case `$CC --version | sed -e 's,\..*,.,' -e q` in
-      2.)
-        if $CC -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
-          msnative_struct='-fnative-struct'
-        fi
-        ;;
-      *)
-        if $CC -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
-          msnative_struct='-mms-bitfields'
-        fi
-        ;;
-esac
+#!/bin/sh
 
-export msnative_struct
-if [ X"$1" != X"noconfig" ]
-then
-	ACLOCAL_FLAGS='-I mingw32'
-	CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/target/include/glib-2.0 -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include"
-	CXXFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/target/include/glib-2.0 -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include"
-	export CFLAGS ACLOCAL_FLAGS CXXFLAGS
-	./gen
-	./configure -build="mingw32" -host="mingw32"
-	echo "editing src/Makefile final time"
-        cat src/Makefile | sed 's/) -lproxy/)/' > .ACE
-        cat .ACE | sed 's/^LIBS = .*/LIBS = \$(EB_LIBS)/' > src/Makefile
-	#cp -f .ACE src/Makefile
-fi
-cd libltdl
-${CC} -I. -I../mingw32 -mno-cygwin $msnative_struct -D__WINDOWS__ -DHAVE_CONFIG_H -UCYGWIN -UCYGWIN32 -c ltdl.c
-ar r libltdl.a ltdl.o
-cd ..
-
+ACLOCAL_FLAGS='-I /usr/local/share/aclocal'
+sh gen
+./configure
 make
-
-if [ $? != 0 ]; then exit; fi
-
-cd mingw32
-make all
-

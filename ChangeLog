@@ -1,3 +1,7 @@
+* Thu Sep  5 2003 12:23 GMT [elh]       0.4.0-21
+README.WIN32
+Add new readme
+
 * Thu Sep  5 2003 12:06 GMT [elh]       0.4.0-20
 mingw32/Makefile.am
 Fixed installation aspect for MSYS
