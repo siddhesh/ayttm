@@ -1,3 +1,7 @@
+* Tue Apr 15 2003 18:05 GMT [philip]	0.2.3-105
+- modules/yahoo2/yahoo.c
+Fix bug #718464 (sourceforge) and in the process, a memory leak too
+
 * Tue Apr 15 2003 13:54 GMT [colin]	0.2.3-104
 - libproxy/proxy.c
 Backward compat

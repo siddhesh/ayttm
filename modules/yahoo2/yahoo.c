@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.19 $",
-	"$Date: 2003/04/15 09:39:15 $",
+	"$Revision: 1.20 $",
+	"$Date: 2003/04/15 18:09:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -907,16 +907,22 @@ static void eb_yahoo_accept_file(gpointer data, int result)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	if(result) {
-		char *filepath = g_new0(char, 1024);
+		char *filepath;
 
-		snprintf(filepath, 1024, "%s", 
-				yftd->fname ? yftd->fname : ( yahoo_urldecode( strrchr(yftd->url,'/')+1 ))
-		);
+		if(yftd->fname)
+			filepath = strdup(yftd->fname);
+		else
+			filepath = yahoo_urldecode(strchr(yftd->url, '/')+1);
+
+		if(strchr(filepath, '?'))
+			*(strchr(filepath, '?')) = '\0';
 
 		if(do_prompt_save_file)
 			eb_do_file_selector(filepath, _("Save file as"), eb_yahoo_save_file, yftd);
 		else
 			eb_yahoo_save_file(filepath, yftd);
+
+		FREE(filepath);
 	} else {
 
 		FREE(yftd->from);
