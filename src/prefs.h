@@ -131,7 +131,13 @@ struct prefs
 
 
 void	ayttm_prefs_init( void );
+#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
+__declspec(dllimport)
+#endif
 void	ayttm_prefs_read( void );
+#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
+__declspec(dllimport)
+#endif
 void	ayttm_prefs_write( void );
 
 void		ayttm_prefs_show_window( void );
