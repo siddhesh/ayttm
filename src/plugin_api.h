@@ -94,6 +94,7 @@ typedef struct {
 
 typedef struct {
 	ebmCallbackData cd;
+	char *group;		/* Can have two contacts with same name in diff groups */
 	char *contact;		/* Name of the contact we're chatting with */
 	char *remote_account;	/* The actual account name the contact is using */
 	char *local_account;    /* The actual account we're using */

@@ -505,9 +505,10 @@ int add_menu_items(void *vmenu, int cur_service, int should_sep,
 	md = GetPref(EB_CONTACT_MENU);
 	for(list = md->menu_items; list; list  = list->next ) {
 		ecd=ebmContactData_new();
-		if (conn)
+		if (conn) {
 			ecd->contact=conn->nick;
-		else if (acc) {
+			ecd->group=conn->group->name;
+		} else if (acc) {
 			ecd->contact=acc->account_contact->nick;
 			ecd->remote_account=acc->handle;
 		}

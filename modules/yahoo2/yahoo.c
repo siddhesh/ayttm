@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.86 $",
-	"$Date: 2003/12/21 17:06:44 $",
+	"$Revision: 1.87 $",
+	"$Date: 2003/12/21 18:29:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -317,7 +317,6 @@ typedef struct {
 
 	int webcam_timeout;
 	unsigned int webcam_start;
-	int send_images;
 	int viewers;
 
 	int status;
@@ -1690,8 +1689,16 @@ static void ay_yahoo_view_users_webcam(ebmCallbackData *data)
 	ebmContactData *ecd = (ebmContactData *)data;
 	eb_local_account *ela;
 	eb_yahoo_local_account_data *ylad;
+	char *who=ecd->remote_account;
 
-	if(!ecd->remote_account) {
+	if(!who && ecd->contact && ecd->group) {
+		grouplist *g = find_grouplist_by_name(ecd->group);
+		struct contact *c = find_contact_in_group_by_nick(ecd->contact, g);
+		eb_account *ea = find_account_for_protocol(c, SERVICE_INFO.protocol_id);
+		who = ea->handle;
+	}
+
+	if(!who) {
 		return;
 	}
 
@@ -1703,7 +1710,7 @@ static void ay_yahoo_view_users_webcam(ebmCallbackData *data)
 
 	ylad = ela->protocol_local_account_data;
 
-	yahoo_webcam_get_feed(ylad->id, ecd->remote_account);
+	yahoo_webcam_get_feed(ylad->id, who);
 }
 
 static void ext_yahoo_webcam_invite(int id, char *who)
@@ -1825,7 +1832,7 @@ static void ay_yahoo_stop_webcam(eb_local_account *ela)
 {
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	eb_timeout_remove(ylad->webcam_timeout);
-	ylad->send_images=ylad->viewers=ylad->webcam_timeout = ylad->webcam_start = 0;
+	ylad->viewers=ylad->webcam_timeout = ylad->webcam_start = 0;
 	yahoo_webcam_close_feed(ylad->id, NULL);
 }
 
@@ -1875,7 +1882,7 @@ static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
 			break;
 
 	}
-	if(yla->viewers < 0)
+	if(yla->viewers <= 0)
 		yla->viewers = 0;
 
 	if(connect != 2) {
@@ -1921,7 +1928,7 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 		ay_image_window_add_data(wf->image_window_tag, NULL, 0, 0);
 	}
 
-	if(ylad->send_images && image) {
+	if(ylad->viewers && image) {
 		if(image_2_jpc)
 			image2000 = image_2_jpc(image, &length);
 		else
@@ -1943,14 +1950,10 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 
 static void ext_yahoo_webcam_data_request(int id, int send)
 {
-	eb_local_account *ela = yahoo_find_local_account_by_id(id);
-	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	if (send) {
 		LOG(("Got request to start sending images"));
-		ylad->send_images=1;
 	} else {
 		LOG(("Got request to stop sending images"));
-		ylad->send_images=0;
 	}
 }
 
@@ -1971,10 +1974,17 @@ static void ay_yahoo_invite_to_view_my_webcam(ebmCallbackData *data)
 	ebmContactData *ecd = (ebmContactData *)data;
 	eb_local_account *ela;
 	eb_yahoo_local_account_data *ylad;
+	char *who=ecd->remote_account;
 
-	if(!ecd->remote_account) {
-		return;
+	if(!who && ecd->contact && ecd->group) {
+		grouplist *g = find_grouplist_by_name(ecd->group);
+		struct contact *c = find_contact_in_group_by_nick(ecd->contact, g);
+		eb_account *ea = find_account_for_protocol(c, SERVICE_INFO.protocol_id);
+		who = ea->handle;
 	}
+
+	if (!who)
+		return;
 
 	ela = find_local_account_by_handle(ecd->local_account, SERVICE_INFO.protocol_id);
 	if(!ela) {
@@ -1986,7 +1996,7 @@ static void ay_yahoo_invite_to_view_my_webcam(ebmCallbackData *data)
 
 	if(!ylad->webcam_start)
 		ay_yahoo_start_webcam(ela);
-	yahoo_webcam_invite(ylad->id, ecd->remote_account);
+	yahoo_webcam_invite(ylad->id, who);
 }
 
 /*
@@ -3456,14 +3466,30 @@ struct service_callbacks *query_callbacks()
 
 static void register_menuentries()
 {
-	mywebcam_chat_menu_tag = eb_add_menu_item(_("Invite to view Webcam"), EB_CHAT_WINDOW_MENU, ay_yahoo_invite_to_view_my_webcam, ebmCONTACTDATA, NULL);
-	mywebcam_contact_menu_tag = eb_add_menu_item(_("Invite to view Webcam"), EB_CONTACT_MENU, ay_yahoo_invite_to_view_my_webcam, ebmCONTACTDATA, NULL);
+	mywebcam_chat_menu_tag = eb_add_menu_item(_("Invite to view Webcam"), 
+			EB_CHAT_WINDOW_MENU, 
+			ay_yahoo_invite_to_view_my_webcam, 
+			ebmCONTACTDATA, 
+			NULL);
+	mywebcam_contact_menu_tag = eb_add_menu_item(_("Invite to view Webcam"), 
+			EB_CONTACT_MENU, 
+			ay_yahoo_invite_to_view_my_webcam, 
+			ebmCONTACTDATA, 
+			NULL);
 
 	eb_menu_item_set_protocol(mywebcam_chat_menu_tag, "Yahoo");
 	eb_menu_item_set_protocol(mywebcam_contact_menu_tag, "Yahoo");
 
-	webcam_chat_menu_tag = eb_add_menu_item(_("View Webcam"), EB_CHAT_WINDOW_MENU, ay_yahoo_view_users_webcam, ebmCONTACTDATA, NULL);
-	webcam_contact_menu_tag = eb_add_menu_item(_("View Webcam"), EB_CONTACT_MENU, ay_yahoo_view_users_webcam, ebmCONTACTDATA, NULL);
+	webcam_chat_menu_tag = eb_add_menu_item(_("View Webcam"), 
+			EB_CHAT_WINDOW_MENU, 
+			ay_yahoo_view_users_webcam, 
+			ebmCONTACTDATA, 
+			NULL);
+	webcam_contact_menu_tag = eb_add_menu_item(_("View Webcam"), 
+			EB_CONTACT_MENU, 
+			ay_yahoo_view_users_webcam, 
+			ebmCONTACTDATA, 
+			NULL);
 
 	eb_menu_item_set_protocol(webcam_chat_menu_tag, "Yahoo");
 	eb_menu_item_set_protocol(webcam_contact_menu_tag, "Yahoo");

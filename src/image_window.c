@@ -225,6 +225,16 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 	return 1;
 }
 
+void ay_image_window_update_title(int tag, const char *title)
+{
+	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);
+
+	if(!aiw)
+		return;
+
+	gtk_window_set_title(GTK_WINDOW(aiw->window), title);
+}
+
 void ay_image_window_close(int tag)
 {
 	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);

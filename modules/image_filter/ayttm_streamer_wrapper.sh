@@ -1,5 +1,21 @@
 #!/bin/bash
 
+if ! ps -u $UID | grep -q webcam >/dev/null; then
+	/usr/bin/webcam &>/dev/null &
+fi
+
+IMGDIR=$( sed -ne "/^dir *= */{s///;p
+}" ~/.webcamrc )
+if ! echo $IMGDIR | grep -q "^/" >/dev/null; then
+	IMGDIR=$HOME/$IMGDIR
+fi
+IMGFILE=$( sed -ne "/^file *= */{s///;p
+}" ~/.webcamrc )
+
+cat $IMGDIR/$IMGFILE
+
+exit 0
+
 [ $1 = "-d" ] && DIR=$2 || DIR=~/.ayttm
 
 LOCK=$DIR/webcam_grab.lock

@@ -1,3 +1,9 @@
+* Sun Dec 21 2003 17:33 GMT [philip]	0.4.5-19
+- modules/yahoo2/yahoo.c
+- src/status.c src/plugin_api.h
+add group to contact menu callback data so we can identify an account
+when the user right clicks on a contact
+
 * Sun Dec 21 2003 16:55 GMT [philip]	0.4.5-18
 - modules/yahoo2/
 loads of fixes, segfaults, mem leaks, some api changes in libyahoo2,
