@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "config.h"
+#include "intl.h"
 #include "status.h"
 #include "service.h"
 #include "globals.h"
@@ -83,9 +85,10 @@ void write_account_list()
 	LList * l1;
 
 	snprintf(buff2, 1024, "%saccounts", config_dir);
-	if(! (fp = fdopen( creat(buff2, S_IRWXU), "w") ) )
+	if(! (fp = fdopen( creat(buff2, S_IRWXU), "w") ) ) {
+		ay_do_error(_("Account creation problem"),_("Cannot open account file !"));
 		return;
-
+	}
 	fprintf(fp, 	"# Ayttm's Local Account file\n"
 			"# Edit only if you know what you're doing\n"
 			"# Passwords are obfuscated, not encrypted\n"
@@ -109,10 +112,8 @@ void write_account_list()
 		config = value_pair_add(config, "password_encoded", decode_password(pwd, enc_type));
 		config = value_pair_remove(config, "PASSWORD");
 		free(pwd);
-/*		LList * prefs = eb_input_to_value_pair(ela->prefs);*/
 		fprintf(fp, "<ACCOUNT %s>\n", eb_services[ela->service_id].name);
 		value_pair_print_values(config, fp, 1);
-/*		value_pair_print_values(prefs, fp, 1);*/
 		fprintf( fp, "</ACCOUNT>\n" );
 		value_pair_free(config);
 	}

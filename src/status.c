@@ -109,6 +109,9 @@ static void eb_save_size( GtkWidget * widget, gpointer data );
 
 void set_tooltips_active(int active)
 {
+	if(!status_tips)
+		status_tips = gtk_tooltips_new();
+	
 	if(active)
 		gtk_tooltips_enable(status_tips);
 	else

@@ -849,7 +849,10 @@ void	ay_prefs_window::s_tree_item_selected( GtkWidget *widget, gpointer data )
 		if(old_panel->GetNotebookID() == gtk_notebook_get_current_page(
 					GTK_NOTEBOOK(s_only_prefs_window->m_notebook_widget)))
 		{
-			gtk_window_remove_accel_group(GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget),
+			if (the_panel->m_accel_group
+			&&  g_slist_find (the_panel->m_accel_group->attach_objects, 
+					  GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget)))
+				gtk_window_remove_accel_group(GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget),
 					the_panel->m_accel_group);
 			break;
 		}
