@@ -12,13 +12,7 @@ To Generate the program for WIN32 runtime once you have cygwin installed
 
 Known Issues:
 
-	1) Browser Support always opens a new window.
+	1) There is no spell checker support.
 
-	2) Occasionally a line will overwrite a previous line as the 
-	   response window scrolls.
+	2) File transfer support is iffy at best
 
-	3) There is no spell checker support.
-
-	4) File transfer support is iffy at best
-
-	5) Yahoo is busted

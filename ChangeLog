@@ -1,3 +1,9 @@
+* Tue Apr 29 2003 12:42 GMT [edward]	0.3.0-39
+- mingw32/Makefile.am 
+  mingw32/gdk/Makefile.am
+  mingw32/gdk/win32/Makefile.am 
+EXTRA_DISTS for mingw32
+
 * Tue Apr 29 2003 12:09 GMT [colin]	0.3.0-38
 - modules/msn2/msn.C
 use find_account_with_ela(char *, eb_local_account *)
