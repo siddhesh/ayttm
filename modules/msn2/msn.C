@@ -49,7 +49,6 @@
 #include <netdb.h>
 #endif
 
-#include "dialog.h"
 #include "info_window.h"
 #include "value_pair.h"
 #include "plugin_api.h"
@@ -68,6 +67,9 @@
 #include "add_contact_window.h"
 #include "offline_queue_mgmt.h"
 #include "tcp_util.h"
+#include "messages.h"
+#include "dialog.h"
+
 #include "libproxy/libproxy.h"
 
 #ifdef __MINGW32__
@@ -164,8 +166,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.26 $",
-	"$Date: 2003/04/27 11:29:02 $",
+	"$Revision: 1.27 $",
+	"$Date: 2003/04/27 12:30:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -744,7 +746,7 @@ static void eb_msn_send_im( eb_local_account * from, eb_account * account_to,
         {
           char buf[1024];
           snprintf(buf, 1024, "Warning - your last message was too long for the MSN service. The last %d characters were not sent.", strlen(mess)-1100);
-          do_error_dialog(buf, "MSN: Message truncated");
+          ay_do_warning( "MSN Warning", buf );
         }
 	msg->body = g_strndup(tmp, 1098);
 	free(tmp);
@@ -763,7 +765,7 @@ static void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
 		(eb_msn_local_account_data *)from->protocol_local_account_data;
 
 	if(stat(file, &stats) < 0) {
-		do_error_dialog("File is not readable.", "Error");
+		ay_do_error( "MSN Error", "File is not readable." );
 		return;
 	}
 	eb_debug(DBG_MSN, "file==%s\n",file);
@@ -1066,7 +1068,7 @@ static void eb_msn_filetrans_accept(char * filename, void * inv_vd)
 void ext_filetrans_success(invitation_ftp * inv) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), _("The file %s has been successfully transfered."), inv->filename);
-	do_error_dialog(buf, _("File transfered"));
+	ay_do_info( "MSN File Transfer", buf );
 	transfer_window * t_win = eb_find_window_by_inv(inv);
 	if (t_win) {
           ay_activity_bar_remove(t_win->window_tag);
@@ -1078,7 +1080,7 @@ void ext_filetrans_failed(invitation_ftp * inv, int err, char * msg)
 {
 	char buf[1024];
         snprintf(buf, sizeof(buf), "File transfer failed: %s\n\n(The file sender must have a public IP, and his firewall must allow TCP connections to port 6891.)", msg);
-        do_error_dialog(buf, "Transfer failed");
+		ay_do_error( "MSN File Transfer", buf );
 	transfer_window * t_win = eb_find_window_by_inv(inv);
 	if (t_win) {
           ay_activity_bar_remove(t_win->window_tag);
@@ -1235,7 +1237,7 @@ static void eb_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
         {
           char buf[1024];
           snprintf(buf, 1024, "Warning - your last message was too long for the MSN service. The last %d characters were not sent.", strlen(mess)-1100);
-          do_error_dialog(buf, "MSN: Message truncated");
+ 		  ay_do_warning( "MSN Warning", buf );
         }
 	
 	msg->body = g_strndup(tmp, 1098);
@@ -1824,8 +1826,8 @@ void ext_del_list_entry(msnconn * conn, char * list, char * username)
 
 void ext_show_error(msnconn * conn, char * msg)
 {
-  do_error_dialog(msg, "MSN Error");
-  eb_debug(DBG_MSN, "MSN: Error: %s\n", msg);
+	ay_do_error( "MSN Error", msg );
+	eb_debug(DBG_MSN, "MSN: Error: %s\n", msg);
 }
 
 static int get_status_num(char *status)
@@ -2159,19 +2161,19 @@ void ext_start_netmeeting(char *ip)
 	
 	test=popen("gnomemeeting --version 2>&1","r");
 	if (test==NULL) {
-		do_error_dialog(_("Cannot run gnomemeeting: presence test failed."),_("Cannot run gnomemeeting"));
+		ay_do_error( _("GnomeMeeting Error"), _("Cannot run gnomemeeting: presence test failed.") );
 		return;
 	}
 	fgets(buf, sizeof(buf), test);
 	pclose(test);
 	if(!strstr(buf,"GnomeMeeting")) {
-		do_error_dialog(_("You have no gnomemeeting installed or it isn't in your PATH."),("Cannot run gnomemeeting"));		
+		ay_do_error( _("GnomeMeeting Error"), _("You do not have gnomemeeting installed or it isn't in your PATH.") );
 		return;
 	}	
 	test=NULL;
 	test=popen("gnomemeeting --help 2>&1","r");
 	if (test==NULL) {
-		do_error_dialog(_("Cannot run gnomemeeting: presence test failed."),("Cannot run gnomemeeting"));
+		ay_do_error( _("GnomeMeeting Error"), _("Cannot run gnomemeeting: presence test failed.") );
 		return;
 	}
 	while ((fgets(buf, sizeof(buf), test)) != NULL) {
@@ -2181,7 +2183,7 @@ void ext_start_netmeeting(char *ip)
 	pclose(test);	
 	
 	if (!callto_supported) {
-		do_error_dialog(_("Your gnomemeeting version doesn't support --callto argument; You should update it."),("Cannot run gnomemeeting"));		
+		ay_do_error( _("GnomeMeeting Error"), _("Your gnomemeeting version doesn't support --callto argument; You should update it.") );
 		return;		
 	}
 	
@@ -2226,8 +2228,7 @@ void ext_initial_email(msnconn * conn, int unread_ibc, int unread_fold)
     snprintf(buf+sl, 1024-sl, ", and %d in other folders", unread_fold);
   }
 
-  do_error_dialog(buf, "New MSN mail");
-
+  ay_do_info( _("MSN Mail"), buf );
 }
 
 void ext_new_mail_arrived(msnconn * conn, char * from, char * subject) {
@@ -2237,7 +2238,7 @@ void ext_new_mail_arrived(msnconn * conn, char * from, char * subject) {
 
   snprintf(buf, 1024, "New mail from %s: \"%s\"", from, subject);
 
-  do_error_dialog(buf, "New MSN mail");
+  ay_do_info( _("MSN Mail"), buf );
 }
 void ext_typing_user(msnconn * conn, char * username, char * friendlyname)
 {
@@ -2614,7 +2615,7 @@ static void invite_gnomemeeting(ebmCallbackData * data)
 
 	from = find_local_account_by_handle(ecd->local_account,SERVICE_INFO.protocol_id);
 	if (!from) {
-		do_error_dialog(_("Cannot find a valid local account to invite your contact."), _("MSN Error"));
+		  ay_do_error( _("MSN Error"), _("Cannot find a valid local account to invite your contact.") );
 		return;
 	}
 		
@@ -2629,7 +2630,7 @@ static void invite_gnomemeeting(ebmCallbackData * data)
 		acc = find_account_for_protocol(cont, SERVICE_INFO.protocol_id);
 	}
 	if(!acc) {
-		do_error_dialog(_("Cannot find a valid remote account to invite your contact."), _("MSN Error"));
+		  ay_do_error( _("MSN Error"), _("Cannot find a valid remote account to invite your contact.") );
 		return;
 	}
 	eb_debug(DBG_MSN,"inviting %s to GnomeMeeting via %s\n", acc->handle, ecd->local_account);

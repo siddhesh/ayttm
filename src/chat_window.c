@@ -50,12 +50,14 @@
 #include "status.h"
 #include "away_window.h"
 #include "message_parse.h"
-#include "gtk/gtk_eb_html.h"
 #include "plugin.h"
 #include "contact_actions.h"
 #include "smileys.h"
 #include "service.h"
 #include "action.h"
+
+#include "gtk/gtk_eb_html.h"
+#include "gtk/gtkutils.h"
 
 #ifdef HAVE_ISPELL
 #include "gtk/gtkspell.h"
@@ -349,7 +351,7 @@ static void remove_tab(struct contact *ct)
 	tab_number = gtk_notebook_page_num (GTK_NOTEBOOK(notebook), ct->chatwindow->notebook_child);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), tab_number);
 
-	if (gtk_notebook_get_number_pages(GTK_NOTEBOOK(notebook)) == 0) {
+	if (gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0) == NULL) {
 		gtk_widget_destroy(window);
 	}
 }
@@ -868,7 +870,7 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		gtk_menu_append(GTK_MENU(menu), button);
 		gtk_widget_show(button);
 
-		eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
+		gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 
 		/*Send File Selection*/
 
@@ -898,12 +900,12 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		md = GetPref(EB_CHAT_WINDOW_MENU);
 		if(md) {
 			int should_sep=0;
-			eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
+			gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 			should_sep=(add_menu_items(menu,-1, should_sep, NULL, cw->preferred, cw->local_user)>0);
 			if (cw->local_user)
 				add_menu_items(menu,cw->local_user->service_id, should_sep, NULL, 
 						cw->preferred, cw->local_user);
-			eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
+			gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 		}
 
 		/*Close Selection*/
@@ -1876,7 +1878,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	gtk_window_set_title(GTK_WINDOW(cw->window), remote->nick);    
 
-	eb_icon(cw->window->window);	
+	gtkut_set_window_icon(cw->window->window, NULL);	
 
 	if (tab_cw)
 		gtk_widget_set_usize(cw->chat, 

@@ -31,6 +31,8 @@
 #include "dialog.h"
 #include "util.h"
 
+#include "gtk/gtkutils.h"
+
 #include "pixmaps/tb_edit.xpm"
 #include "pixmaps/cancel.xpm"
 
@@ -216,7 +218,7 @@ void edit_contact_window_new( struct contact * c )
 	
 	g_snprintf(buff,1024,_("Edit Properties for %s"), c->nick);
 	gtk_window_set_title(GTK_WINDOW(edit_contact_window), buff ); 
-	eb_icon(edit_contact_window->window);
+	gtkut_set_window_icon(edit_contact_window->window, NULL);
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(service_list)->entry),
 					   eb_services[c->default_chatb].name );
 

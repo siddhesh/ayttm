@@ -30,13 +30,11 @@
 
 #ifndef __CHAT_WINDOW_H__
 #define __CHAT_WINDOW_H__
-#include <gtk/gtk.h>
-#include <stdio.h>
+
 #include <time.h>
+
 #include "contact.h"
-#include "account.h"
 #include "log_window.h"
-#include "llist.h"
 
 typedef struct _chat_window
 {

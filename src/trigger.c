@@ -36,6 +36,8 @@
 #include "file_select.h"
 #include "util.h"
 
+#include "gtk/gtkutils.h"
+
 #include "pixmaps/tb_preferences.xpm"
 #include "pixmaps/cancel.xpm"
 
@@ -496,7 +498,7 @@ void show_trigger_window(struct contact * con)
       
 
   gtk_window_set_title(GTK_WINDOW(edit_trigger_window), _("Ayttm - Edit Trigger"));
-  eb_icon(edit_trigger_window->window); 
+  gtkut_set_window_icon(edit_trigger_window->window, NULL); 
   gtk_widget_show(edit_trigger_window);
      
   gtk_signal_connect(GTK_OBJECT(edit_trigger_window), "destroy",

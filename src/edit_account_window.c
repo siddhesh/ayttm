@@ -30,6 +30,8 @@
 #include "util.h"
 #include "dialog.h"
 
+#include "gtk/gtkutils.h"
+
 #include "pixmaps/tb_preferences.xpm"
 #include "pixmaps/cancel.xpm"
 
@@ -262,7 +264,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 	g_snprintf(buff, 1024, window_title, account->handle);
 	gtk_window_set_title(GTK_WINDOW(edit_account_window), buff);
-	eb_icon(edit_account_window->window);
+	gtkut_set_window_icon(edit_account_window->window, NULL);
 
 	window_open = 1;
 }

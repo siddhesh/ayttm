@@ -56,7 +56,6 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "contact.h"
 #include "account.h"
 #include "service.h"
-#include "dialog.h"
 #include "activity_bar.h"
 #include "status.h"
 #include "util.h"
@@ -69,6 +68,7 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "smileys.h"
 #include "add_contact_window.h"
 #include "tcp_util.h"
+#include "messages.h"
 
 #include "yahoo2.h"
 #include "yahoo2_callbacks.h"
@@ -126,8 +126,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.24 $",
-	"$Date: 2003/04/27 11:57:43 $",
+	"$Revision: 1.25 $",
+	"$Date: 2003/04/27 12:30:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1127,7 +1127,7 @@ static void ext_yahoo_conf_userdecline(int id, char *who, char *room, char *msg)
 	snprintf(buff, sizeof(buff), _("The yahoo user %s declined your invitation to join conference %s, with the message: %s"),
 			who, room, msg);
 
-	do_error_dialog(buff, _("Yahoo conference decline"));
+	ay_do_error( _("Yahoo Error"), buff );
 }
 
 #if LOCAL_CHAT_CALLBACKS
@@ -1449,7 +1449,7 @@ static void ext_yahoo_rejected(int id, char *who, char *msg)
 	char buff[1024];
 	snprintf(buff, sizeof(buff), _("%s has rejected your request to be added as a buddy%s%s"),
 			who, (msg?_(" with the message:\n"):"."), (msg?msg:""));
-	do_error_dialog(buff, _("Yahoo Buddy"));
+	ay_do_error( _("Yahoo Error"), buff );
 }
 
 static void ext_yahoo_contact_added(int id, char *myid, char *who, char *msg)
@@ -1554,7 +1554,7 @@ static void ext_yahoo_mail_notify(int id, char *from, char *subj, int cnt)
 	}
 
 	if(buff[0])
-		do_message_dialog(buff, _("Yahoo Mail"), 0);
+		ay_do_info( _("Yahoo Mail"), buff );
 }
 
 static void ext_yahoo_system_message(int id, char *msg)
@@ -1562,14 +1562,14 @@ static void ext_yahoo_system_message(int id, char *msg)
 	if(ignore_system)
 		return;
 
-	do_message_dialog(msg, _("Yahoo System Message"), 0);
+	ay_do_info( _("Yahoo System Message"), msg );
 }
 
 static void ext_yahoo_error(int id, char *err, int fatal)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 
-	do_error_dialog(err, _("Yahoo Error"));
+	ay_do_error( _("Yahoo Error"), err );
 	if(fatal) {
 		eb_yahoo_logout(ela);
 	}
@@ -1713,7 +1713,7 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 
 	ela->connected = 0;
 	ylad->status = YAHOO_STATUS_OFFLINE;
-	do_error_dialog(buff, _("Yahoo Login Error"));
+	ay_do_error( _("Yahoo Error"), buff );
 	eb_yahoo_logout(ela);
 	is_setting_state = 1;
 	if (ela->status_menu) {
@@ -2551,7 +2551,7 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 		LOG(("Unknown: %d", condition));
 
 	if(buff[0])
-		do_error_dialog(buff, _("Yahoo Error"));
+		ay_do_error( _("Yahoo Error"), buff );
 }
 
 static YList * handlers = NULL;

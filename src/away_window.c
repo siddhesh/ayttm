@@ -32,9 +32,12 @@
 #include <sys/types.h>
 
 #include "away_window.h"
-#include "dialog.h"
 #include "gtk_globals.h"
 #include "service.h"
+#include "messages.h"
+#include "dialog.h"
+
+#include "gtk/gtkutils.h"
 
 #include "pixmaps/ok.xpm"
 #include "pixmaps/cancel.xpm"
@@ -204,7 +207,7 @@ void select_msg_cb(GtkCList *clist, gint row, gint column,
 		break;
 	case 3: {
 		GtkWidget *menu = gtk_menu_new();
-		eb_menu_button (GTK_MENU(menu), _("Delete"),
+		gtkut_create_menu_button (GTK_MENU(menu), _("Delete"),
 			GTK_SIGNAL_FUNC(delete_msg_cb), my_away);
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
 				event->button, event->time );
@@ -334,7 +337,6 @@ static void check_title( GtkWidget * widget, gpointer data)
 	LList *w = away_messages;
 	char *txt = gtk_entry_get_text(GTK_ENTRY(title));
 	int replace = FALSE;
-	char *cur = NULL;
 	GList *ch = gtk_container_children(GTK_CONTAINER(save_later));
 	while (w) {
 		away * omsg = (away *)w->data;
@@ -385,7 +387,7 @@ static void imaway (void)
 		}
 	}
 	if (!buff || strlen(buff) == 0) {
-		do_error_dialog (_("You have to enter a message."),_("Error"));
+		ay_do_error( _("Away Message"), _("You have to enter a message.") );
 		return;
 	}
 	g_string_append(a_title, buff); 
@@ -559,7 +561,7 @@ void show_away_choicewindow(void *w, void *data)
 	}
 
 	gtk_window_set_title(GTK_WINDOW(away_window), _("Set as away"));
-	eb_icon(away_window->window);
+	gtkut_set_window_icon(away_window->window, NULL);
 	gtk_signal_connect(GTK_OBJECT(away_window), "destroy",
 			GTK_SIGNAL_FUNC(destroy), NULL);
 	away_open = 1; 
@@ -617,7 +619,7 @@ static void show_away(GtkWidget *w, gchar *a_message)
 	}
 
 	gtk_window_set_title(GTK_WINDOW(awaybox), _("Away"));
-	eb_icon(awaybox->window);
+	gtkut_set_window_icon(awaybox->window, NULL);
 	gtk_container_border_width(GTK_CONTAINER(awaybox), 2);
 	gtk_widget_show(awaybox);
 	is_away = 1;

@@ -30,11 +30,12 @@ unsigned int module_version() {return CORE_VERSION;}
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
-#include "dialog.h"
 #include "prefs.h"
 #include "service.h"
 #include "util.h"
 #include "plugin_api.h"
+#include "messages.h"
+
 
 /*************************************************************************************
  *                             Begin Module Code
@@ -56,8 +57,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import GnomeICU Contact List", 
 	"Import the GnomeICU Contact List", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/18 08:46:07 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/27 12:30:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -103,7 +104,7 @@ void import_gnomeicu_accounts(ebmCallbackData *data)
     g_snprintf(buff, 1024, "%s/.gnome/GnomeICU", getenv("HOME"));
     if( !(fp = fopen(buff, "r")) ) {
 		g_snprintf(c, 1024, "Unable to import GnomeICU accounts from %s: %s", buff, strerror(errno));
-	    do_message_dialog( c, "Error", 0);
+		ay_do_error( "Import Error", c );
         return;
     }
 	ICQ_ID=get_service_id("ICQ");
@@ -117,7 +118,7 @@ void import_gnomeicu_accounts(ebmCallbackData *data)
 	if(feof(fp))
 	{
 		fclose(fp);
-		do_message_dialog("No GnomeICU contacts added", "Warning", 0);
+		ay_do_warning( "Import Warning", "No GnomeICU contacts added" );
 		return;
 	}
 	if(!find_grouplist_by_name("GnomeICU Users"))
@@ -151,5 +152,5 @@ void import_gnomeicu_accounts(ebmCallbackData *data)
 	g_strfreev (tokens);
     }
 	fclose(fp);
-	do_message_dialog("Successfully imported GnomeICU contacts list", "Success", 0);
+    ay_do_info( "Import", "Successfully GnomeICU contacts list" );
 }

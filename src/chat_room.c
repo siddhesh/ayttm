@@ -25,7 +25,6 @@
 #include <time.h>
 
 #include "globals.h"
-#include "gtk/gtk_eb_html.h"
 #include "util.h"
 #include "sound.h"
 #include "dialog.h"
@@ -34,6 +33,9 @@
 #include "service.h"
 #include "add_contact_window.h"
 #include "action.h"
+
+#include "gtk/gtk_eb_html.h"
+#include "gtk/gtkutils.h"
 
 #ifdef HAVE_ISPELL
 #include "gtk/gtkspell.h"
@@ -1018,7 +1020,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	
 	gtk_window_set_title(GTK_WINDOW(chat_room->window), room_title);
 	g_free(room_title);
-	eb_icon(chat_room->window->window);
+	gtkut_set_window_icon(chat_room->window->window, NULL);
 	gtk_signal_connect(GTK_OBJECT(chat_room->window), "destroy",
 					   GTK_SIGNAL_FUNC(destroy), chat_room );
 	gtk_signal_connect(GTK_OBJECT(chat_room->window), "focus_in_event",

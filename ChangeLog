@@ -1,3 +1,53 @@
+* Sun Apr 27 2003 13:20 GMT [andy]	0.3.0-5
+- configure.in
+Added extra C flag for darwin
+
+- pixmaps/error.xpm				** ADDED **
+  pixmaps/info.xpm				** ADDED **
+  src/about.[ch]				** ADDED **
+  src/edit_local_accounts.h		** ADDED **
+  src/messages.[ch]				** ADDED **
+  src/ui_about_window.h			** ADDED **
+  src/ui_message_windows.h		** ADDED **
+  src/ui_prefs_window.h			** ADDED **
+  src/gtk/about_window.c		** ADDED **
+  src/gtk/message_windows.c		** ADDED **
+  src/gtk/about.[ch]			** REMOVED **
+  src/gtk/prefs_window.h		** REMOVED **
+  libproxy/proxy.c
+  modules/[* almost all services *]
+  modules/importers/import_gaim.c
+  modules/importers/import_gnomeicu.c
+  modules/importers/importlicq.c
+  modules/utility/autotrans.c
+  src/Makefile.am
+  src/action.[ch]
+  src/add_contact_window.c
+  src/away_window.c
+  src/chat_room.[ch]
+  src/chat_window.[ch]
+  src/crash.c
+  src/dialog.[ch]
+  src/edit_*_window.c
+  src/edit_local_accounts.c
+  src/info_window.[ch]
+  src/input_list.c
+  src/main.c
+  src/message_parse.c
+  src/plugin.c
+  src/prefs.c
+  src/service.c
+  src/smileys.h
+  src/status.c
+  src/trigger.c
+  src/util.c
+  src/gtk/Makefile.am
+  src/gtk/gtkspell.c
+  src/gtk/gtkutils.[ch]
+  src/gtk/prefs_window.C
+Moved a bunch of functionality from dialog.[ch] to gtk/gtkutils.[ch],
+most noteably the error/message stuff, and cleaned it up.
+
 * Sun Apr 27 2003 11:55 GMT [philip]	0.3.0-4
 - src/edit_local_accounts.c
 allow multiple accounts for services that support it

@@ -52,9 +52,10 @@
 #include "plugin.h"
 #include "prefs.h"
 #include "offline_queue_mgmt.h"
+#include "about.h"
+#include "edit_local_accounts.h"
 
 #include "gtk/gtkutils.h"
-#include "gtk/about.h"
 
 #include "pixmaps/login_icon.xpm"
 #include "pixmaps/blank_icon.xpm"
@@ -354,15 +355,15 @@ static void group_menu(GdkEventButton * event, gpointer d )
 	if (contact_list && grp->list_item)
 		gtk_tree_select_child(GTK_TREE(contact_list), grp->list_item);
  
-	eb_menu_button (GTK_MENU(menu), _("Add contact to group..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Add contact to group..."),
 			GTK_SIGNAL_FUNC(add_to_group_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
+	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 
-	eb_menu_button (GTK_MENU(menu), _("Edit Group..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Group..."),
 			GTK_SIGNAL_FUNC(edit_group_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), _("Delete Group..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Group..."),
 			GTK_SIGNAL_FUNC(offer_remove_group_callback), d);
 	
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
@@ -407,11 +408,11 @@ int add_menu_items(void *vmenu, int cur_service, int should_sep,
 		) {
 			if(last != cur_service) {
 				if(should_sep)
-					eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
+					gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 				if (!acc && mid->protocol) {
 					char *title=g_strdup_printf(_("%s options"),mid->protocol);
 					submenu = gtk_menu_new();
-					eb_menu_submenu (GTK_MENU(menu), title, submenu,
+					gtkut_attach_submenu(GTK_MENU(menu), title, submenu,
 							 ecd->local_account!=NULL);
 					gtk_widget_show(submenu);
 					g_free(title);
@@ -449,36 +450,36 @@ static void contact_menu(GdkEventButton * event, gpointer d )
 	if (contact_list && conn->list_item)
 		gtk_tree_select_child(GTK_TREE(contact_list), conn->list_item);
 	
-	eb_menu_button (GTK_MENU(menu), _("Add Account to Contact..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Add Account to Contact..."),
 			GTK_SIGNAL_FUNC(add_account_to_contact_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), _("Edit Contact..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Contact..."),
 			GTK_SIGNAL_FUNC(edit_contact_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), _("Delete Contact..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Contact..."),
 			GTK_SIGNAL_FUNC(offer_remove_contact_callback), d);
 	
-	eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
+	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 	
-	eb_menu_button (GTK_MENU(menu), _("Send File..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Send File..."),
 			GTK_SIGNAL_FUNC(send_file_with_contact_callback), d);
 	
-	eb_menu_button (GTK_MENU(menu), _("Edit Trigger..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Trigger..."),
 			GTK_SIGNAL_FUNC(edit_trigger_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
+	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 
-	eb_menu_button (GTK_MENU(menu), _("View Log..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("View Log..."),
 			GTK_SIGNAL_FUNC(view_log_callback), d);
 
 	submenu = make_info_menu((struct contact *)d, &nbitems);
-	eb_menu_submenu (GTK_MENU(menu), _("Info"), submenu, nbitems);
+	gtkut_attach_submenu (GTK_MENU(menu), _("Info"), submenu, nbitems);
 
 	/*** MIZHI
 	 * code for viewing the logs
 	 */
 	
-	eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
+	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 
 	md = GetPref(EB_CONTACT_MENU);
 	if(md) {
@@ -504,22 +505,22 @@ static void account_menu(GdkEventButton * event, gpointer d )
 	if (contact_list && acc->list_item)
 		gtk_tree_select_child(GTK_TREE(contact_list), acc->list_item);
 
-	eb_menu_button (GTK_MENU(menu), _("Edit Account..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Account..."),
 			GTK_SIGNAL_FUNC(edit_account_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), _("Delete Account..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Account..."),
 			GTK_SIGNAL_FUNC(offer_remove_account_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
+	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 
 	if (CAN(acc, send_file))
-		 eb_menu_button (GTK_MENU(menu), _("Send File..."),
+		 gtkut_create_menu_button (GTK_MENU(menu), _("Send File..."),
 			GTK_SIGNAL_FUNC(send_file_callback), d);
 
-	eb_menu_button (GTK_MENU(menu), _("Info..."),
+	gtkut_create_menu_button (GTK_MENU(menu), _("Info..."),
 			GTK_SIGNAL_FUNC(get_info),d);
 
-	eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
+	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 
 	md = GetPref(EB_CONTACT_MENU);
 	if(md) {
@@ -595,7 +596,7 @@ static void add_group_callback(GtkWidget *widget, GtkTree *tree)
 
 static void eb_edit_accounts( GtkWidget * widget, gpointer stats )
 {
-	eb_new_user();
+	ay_edit_local_accounts();
 }
 
 static void build_prefs_callback( GtkWidget * widget, gpointer stats )
@@ -1773,7 +1774,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Help/_Web site..."),	NULL, show_website, 0, NULL },
 	{ N_("/Help/_Manual..."),	NULL, show_manual, 0, NULL },
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Help/_About Ayttm..."),NULL, ay_ui_show_about, 0, NULL }
+	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL }
 };
 
 static GtkItemFactory *main_menu_factory = NULL;
@@ -1968,7 +1969,7 @@ void eb_status_window()
 
 	gtk_widget_realize(statuswindow);
 	
-	eb_icon(statuswindow->window);
+	gtkut_set_window_icon(statuswindow->window, NULL);
 	iconlogin_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconlogin_bm,
 		NULL, (gchar **) login_icon_xpm);
 	iconblank_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconblank_bm,

@@ -50,7 +50,6 @@ typedef unsigned long ulong;
 #include "away_window.h"
 #include "util.h"
 #include "status.h"
-#include "dialog.h"
 #include "activity_bar.h"
 #include "message_parse.h"
 #include "value_pair.h"
@@ -59,7 +58,10 @@ typedef unsigned long ulong;
 #include "plugin_api.h"
 #include "smileys.h"
 #include "globals.h"
+#include "messages.h"
+#include "dialog.h"
 #include "offline_queue_mgmt.h"
+
 #include "pixmaps/icq_online.xpm"
 #include "pixmaps/icq_away.xpm"
 
@@ -95,8 +97,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.19 $",
-	"$Date: 2003/04/27 11:29:01 $",
+	"$Revision: 1.20 $",
+	"$Date: 2003/04/27 12:30:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -420,7 +422,7 @@ static void eb_icq_chat_invite(toc_conn * conn, char * id, char * name,
 
 static void eb_icq_error_message( char * message )
 {
-	do_message_dialog(message, _("icq Error"), 0);
+	ay_do_error( _("ICQ Error"), message );
 }
 	
 static void eb_icq_oncoming_buddy(char * user, int online, time_t idle, int evil, int unavailable )
@@ -805,7 +807,7 @@ static void eb_icq_logged_in (toc_conn *conn)
 			should_fallback=1;
 			eb_icq_login(ela);
 		} else {
-			do_error_dialog(_("Cannot connect to ICQ due to network problem."), _("ICQ Error"));
+			ay_do_error( _("ICQ Error"), _("Cannot connect to ICQ due to network problem.") );
 			should_fallback=0;
 			icq_last_fallback=0;
 		}
@@ -892,7 +894,7 @@ static void eb_icq_send_im( eb_local_account * account_from,
 	char * message2 = linkify(message);
 	if(strlen(message2) > 2000)
 	{
-		do_message_dialog(_("Message Truncated"), _("icq Error"), 0);
+		ay_do_warning( _("ICQ Warning"), _("Message Truncated") );
 		message2[2000] = '\0';
 	}
 	icqtoc_send_im(plad->conn,account_to->handle, message2);

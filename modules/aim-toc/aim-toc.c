@@ -50,7 +50,6 @@ typedef unsigned long ulong;
 #include "away_window.h"
 #include "util.h"
 #include "status.h"
-#include "dialog.h"
 #include "activity_bar.h"
 #include "tcp_util.h"
 #include "message_parse.h"
@@ -59,9 +58,14 @@ typedef unsigned long ulong;
 #include "plugin_api.h"
 #include "smileys.h"
 #include "globals.h"
+#include "messages.h"
+#include "dialog.h"
 #include "offline_queue_mgmt.h"
+
 #include "pixmaps/aim_online.xpm"
 #include "pixmaps/aim_away.xpm"
+
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
@@ -94,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.21 $",
-	"$Date: 2003/04/27 11:29:01 $",
+	"$Revision: 1.22 $",
+	"$Date: 2003/04/27 12:30:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -419,7 +423,7 @@ static void eb_aim_chat_invite(toc_conn * conn, char * id, char * name,
 
 static void eb_aim_error_message( char * message )
 {
-	do_message_dialog(message, _("AIM Error"), 0);
+	ay_do_error( _("AIM Error"), message );
 }
 	
 static void eb_aim_oncoming_buddy(char * user, int online, time_t idle, int evil, int unavailable )
@@ -807,7 +811,7 @@ static void eb_aim_logged_in (toc_conn *conn)
 			should_fallback=1;
 			eb_aim_login(ela);
 		} else {
-			do_error_dialog(_("Cannot connect to AIM due to network problem."), _("AIM Error"));
+			ay_do_error( _("AIM Error"), _("Cannot connect to AIM due to network problem.") );
 			should_fallback=0;
 			aim_last_fallback=0;
 		}
@@ -892,7 +896,7 @@ static void eb_aim_send_im( eb_local_account * account_from,
 	char * message2 = linkify(message);
 	if(strlen(message2) > 2000)
 	{
-		do_message_dialog(_("Message Truncated"), _("AIM Error"), 0);
+		ay_do_warning( _("AIM Error"), _("Message Truncated") );
 		message2[2000] = '\0';
 	}
 	toc_send_im(plad->conn,account_to->handle, message2);
@@ -1277,7 +1281,7 @@ static int eb_aim_handle_url(const char *url)
 		goto silent_err;
 	}
 err:
-	do_error_dialog(_("This URL isn't supported by AIM module."),_("AIM error"));
+	ay_do_error( _("AIM Error"), _("This URL isn't supported by AIM module.") );
 silent_err:
 	res = 0;
 ok:

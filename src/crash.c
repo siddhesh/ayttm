@@ -53,7 +53,8 @@
 #include "crash.h"
 #include "globals.h"
 #include "browser.h"
-#include "dialog.h"
+#include "messages.h"
+
 
 /*
  * NOTE: the crash dialog is called when ayttm is not 
@@ -512,7 +513,7 @@ static void crash_handler(int sig)
 		char *buf = g_strdup_printf(
 				_("Caught strange signal (%d). This is probably\n"
 				  "due to a broken compilation; Exiting."), sig);
-		do_error_dialog(buf, _("Error!"));
+		ay_do_error( _("Error"), buf );
 		g_free(buf);
 		_exit(0);
 	}

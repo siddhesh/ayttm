@@ -53,11 +53,11 @@ typedef unsigned long ulong;
 #include "util.h"
 #include "status.h"
 #include "globals.h"
-#include "dialog.h"
 #include "message_parse.h"
 #include "value_pair.h"
 #include "plugin_api.h"
 #include "smileys.h"
+#include "messages.h"
 
 #include "pixmaps/aim_online.xpm"
 #include "pixmaps/aim_away.xpm"
@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/18 08:46:05 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/27 12:30:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -710,7 +710,7 @@ int eb_aim_msg_missed(struct aim_session_t * sess,struct command_rx_struct *comm
 
 int eb_aim_msg_error(struct aim_session_t * sess,struct command_rx_struct *command, ...)
 {
-  do_error_dialog("Last message could not be sent", "AIM: Error");
+  ay_do_error( "AIM Error", "Last message could not be sent" );
 
   return 1;
 }

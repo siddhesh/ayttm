@@ -43,8 +43,7 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "status.h"		/* buddy_login,  */
 				/* buddy_logoff,  */
 				/* buddy_update_status */
-
-void do_message_dialog(char *message, char *title, int modal);
+#include "messages.h"
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -72,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/18 08:46:10 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/27 12:30:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -450,8 +449,7 @@ static char ** eb_smtp_get_status_pixmap(eb_account * account)
 
 static void eb_smtp_send_file(eb_local_account *from, eb_account *to, char *file)
 {
-	do_message_dialog(_("You cannot send files through SMTP... yet"), 
-			_("SMTP send file"), 0);
+	ay_do_info( _("SMTP Warning"), _("You cannot send files through SMTP... yet") );
 }
 
 static int validate_or_die_gracefully(const char *buff, const char *valid, int fd)

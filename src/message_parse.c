@@ -51,11 +51,12 @@
 #include "chat_window.h"
 #include "message_parse.h"
 #include "util.h"
-#include "dialog.h"
+#include "messages.h"
 #include "globals.h"
 #include "service.h"
 #include "plugin_api.h"
 #include "activity_bar.h"
+#include "dialog.h"
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -182,21 +183,21 @@ static int update_send_progress(void * data )
 	}
 	else if( xfer_in_progress == -1 )
 	{
-		do_error_dialog(_("Remote Side Disconnected"), _("Ayttm file x-fer"));
+		ay_do_error( _("Ayttm File Transfer"), _("Remote Side Disconnected") );
 		ay_activity_bar_remove(pcd->tag);
 		eb_timeout_remove(pcd->timer);
 		free(pcd);
 	}
 	else if( xfer_in_progress == -2 )
 	{
-		do_error_dialog(_("Unable to open file!"), _("Ayttm file x-fer"));
+		ay_do_error( _("Ayttm File Transfer"), _("Unable to open file") );
 		ay_activity_bar_remove(pcd->tag);
 		eb_timeout_remove(pcd->timer);
 		free(pcd);
 	}
 	else
 	{
-		do_error_dialog(_("File Sent Successfully"), _("Ayttm file x-fer"));
+		ay_do_info( _("Ayttm File Transfer"), _("File Sent Successfully") );
 		ay_activity_bar_remove(pcd->tag);
 		eb_timeout_remove(pcd->timer);
 		free(pcd);
@@ -278,8 +279,7 @@ static void send_file( char * filename, int s )
 	}
 	else
 	{
-		do_error_dialog(_("Remote Side has aborted the file transfer"),
-						_("Ayttm file x-fer"));
+		ay_do_error( _("Ayttm File Transfer"), _("Remote Side has aborted the file transfer") );
 	}
 
 }
@@ -296,7 +296,7 @@ static void get_file2( void *data, int source, eb_input_condition condition )
 	{
 		fclose(fp);
 		close(source);
-		do_error_dialog(_("File Receive Complete"), _("Ayttm File x-fer"));
+		ay_do_info( _("Ayttm File Transfer"), _("File Receive Complete") );
 		ay_activity_bar_remove(pcd->tag);
 
 		xfer_in_progress = 0;

@@ -32,9 +32,12 @@
 #include "gtk_globals.h"
 #include "status.h"
 #include "util.h"
-#include "dialog.h"
 #include "value_pair.h"
 #include "prefs.h"
+#include "messages.h"
+#include "dialog.h"
+
+#include "gtk/gtkutils.h"
 
 #include "pixmaps/ok.xpm"
 #include "pixmaps/cancel.xpm"
@@ -241,7 +244,7 @@ static void add_callback(GtkWidget * widget, gpointer data)
 		char *buf = g_strdup_printf(_("This account is not a valid %s account: \n\n %s"), 
 				    text[SERVICE_TYPE], error_message);
 		g_free(error_message);
-		do_error_dialog(buf, _("Invalid account"));
+		ay_do_error( _("Invalid Account"), buf );
 		g_free(buf);
 		return;
 	}
@@ -251,10 +254,10 @@ static void add_callback(GtkWidget * widget, gpointer data)
 			char *service;
 			gtk_clist_get_text(GTK_CLIST(account_list), i, SERVICE_TYPE, &service);
 			if (!strcmp(service, text[SERVICE_TYPE])) {
-				char *buf=g_strdup_printf(_("You already have an account for %s service.\n\n"
+				char *buf = g_strdup_printf(_("You already have an account for %s service.\n\n"
 						    "Multiple accounts per service aren't supported yet."),
 					 	   text[SERVICE_TYPE]);
-				do_error_dialog(buf, _("Invalid account"));
+				ay_do_error( _("Invalid Account"), buf );
 				g_free(buf);
 				return;
 			}
@@ -294,21 +297,19 @@ static void modify_callback(GtkWidget * widget, gpointer data)
 		char *buf = g_strdup_printf(_("This account is not a valid %s account: \n\n %s"), 
 				    text[SERVICE_TYPE], error_message);
 		g_free(error_message);
-		do_error_dialog(buf, _("Invalid account"));
+		ay_do_error( _("Invalid Account"), buf );
 		g_free(buf);
 		return;
 	}
 
 	for (i = 0; i < num_accounts; i++) {
 		char *service;
-		gtk_clist_get_text(GTK_CLIST(account_list), i,
-				   SERVICE_TYPE, &service);
-		if (i != selected_row
-		    && !strcmp(service, text[SERVICE_TYPE])) {
+		gtk_clist_get_text(GTK_CLIST(account_list), i, SERVICE_TYPE, &service);
+		if (i != selected_row && !strcmp(service, text[SERVICE_TYPE])) {
 			char *buf = g_strdup_printf(_("You already have an account for %s service. \n\n"
 						    "Multiple accounts per service aren't supported yet."), 
 					    text[SERVICE_TYPE]);
-			do_error_dialog(buf, _("Invalid account"));
+			ay_do_error( _("Invalid Account"), buf );
 			g_free(buf);
 			return;
 		}
@@ -374,8 +375,7 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 	fp = fdopen(creat(buff, 0700), "w");
 
 	if (num_accounts == 0) {
-		do_error_dialog(_("You didn't define any account."),
-				_("Error"));
+		ay_do_error( _("Invalid Account"), _("You didn't define an account.") );
 		return;
 	}
 
@@ -442,8 +442,7 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 				value_pair_print_values(config, fp, 1);
 				fprintf(fp, "</ACCOUNT>\n");
 			} else
-				do_error_dialog(_("Can't add account : unknown service"),
-						_("Error"));
+				ay_do_error( _("Invalid Service"), _("Can't add account : unknown service") );
 		}
 	}
 
@@ -491,8 +490,8 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 		rebuild_set_status_menu();
 	}
 }
-
-void eb_new_user()
+		
+void	ay_edit_local_accounts( void )
 {
 	char *text[] = { _("C"),
 		_("Screen Name"),
@@ -703,10 +702,9 @@ void eb_new_user()
 	gtk_widget_show(window_box);
 
 	gtk_container_add(GTK_CONTAINER(account_window), window_box);
-
-	gtk_window_set_title(GTK_WINDOW(account_window),
-			     _("Ayttm Account Editor"));
-	eb_icon(account_window->window);
+   
+	gtk_window_set_title(GTK_WINDOW(account_window), _("Ayttm Account Editor"));
+	gtkut_set_window_icon(account_window->window, NULL);
 
 	gtk_signal_connect(GTK_OBJECT(account_window), "destroy",
 			   GTK_SIGNAL_FUNC(destroy), NULL);

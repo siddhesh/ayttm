@@ -1327,15 +1327,6 @@ void make_safe_filename(char *buff, char *name, char *group)  {
 				holder);
 	eb_debug(DBG_CORE,"logfile: %s\n",buff);
 }
-					
-
-int gtk_notebook_get_number_pages(GtkNotebook *notebook)
-{
-	int i;  
-	for (i=0; gtk_notebook_get_nth_page(notebook, i); i++)
-		;
-	return i;
-}
 
 /* looks for lockfile, if found, returns the pid in the file */
 /* If not, creates the file, writes our pid, and returns -1 */

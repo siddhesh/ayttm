@@ -2,21 +2,19 @@
 AC_INIT([src/main.c])
 AC_PREREQ(2.53)
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=4
-#This is to check modules/core binary compat
-#Bump it up when necessary only (query_callbacks change, struct change etc)
-CORE_VERSION=2
+RELEASE=5
+
+# This is to check modules/core binary compat
+# Bump it up when necessary only (query_callbacks change, struct change etc)
+CORE_VERSION=3
 
 AM_CONFIG_HEADER(config.h)
 
 if test "x$host_alias" = "xmingw32"; then
 	# EB_CFLAGS="-mno-cygwin -fnative-struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -I../mingw32 -D_REENTRANT -Wall -g"
-        EB_LDADD="$LDADD"
-        EB_LIBS="-Wl,-subsystem,windows -Wl,--export-dynamic /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib -L/target/lib -lgdk -lgtk -lglib-2.0 -L../libproxy -lproxy -lwinmm -lws2_32 -lwst -lmsvcrt40"
-
+	EB_LDADD="$LDADD"
+	EB_LIBS="-Wl,-subsystem,windows -Wl,--export-dynamic /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib -L/target/lib -lgdk -lgtk -lglib-2.0 -L../libproxy -lproxy -lwinmm -lws2_32 -lwst -lmsvcrt40"
 fi
-
-dnl AC_DEFINE(UNIX)
 
 # Checks for programs.
 AC_PROG_CC
@@ -30,6 +28,13 @@ AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 
+# add some platform-specific flags
+case "$host" in
+*-darwin*)
+        CFLAGS="$CFLAGS -no-cpp-precomp"
+        ;;
+esac
+
 # Checks for libraries.
 AC_CHECK_LIB([audiofile], [_af_ulaw2linear])
 AC_CHECK_LIB([ltdl], [lt_dlopen])
@@ -39,6 +44,7 @@ AC_PATH_XTRA
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
+AC_HEADER_TIME
 AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h])
 if test "x$host_alias" != "xmingw32"; then
 AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
@@ -47,22 +53,20 @@ AC_CHECK_HEADERS([sys/utsname.h])
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_PID_T
+AC_TYPE_SIGNAL
+AC_TYPE_SIZE_T
+AC_TYPE_UID_T
+AC_STRUCT_TM
 AC_C_CONST
 AC_C_INLINE
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-AC_HEADER_TIME
-AC_STRUCT_TM
-AC_TYPE_UID_T
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
 AC_FUNC_ALLOCA
-AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_FUNC_MMAP
-AC_TYPE_SIGNAL
 AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF

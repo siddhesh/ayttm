@@ -31,10 +31,11 @@ unsigned int module_version() {return CORE_VERSION;}
 #define __IN_PLUGIN__ 1
 #endif
 #include "service.h"
-#include "dialog.h"
 #include "prefs.h"
 #include "util.h"
 #include "plugin_api.h"
+#include "messages.h"
+
 
 /*************************************************************************************
  *                             Begin Module Code
@@ -56,8 +57,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Gaim Buddy List", 
 	"Import the Gaim Buddy List", 
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/22 08:47:39 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/27 12:30:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -103,7 +104,7 @@ void import_gaim_accounts(ebmCallbackData *data)
     g_snprintf(buff, 1024, "%s/gaim.buddy", getenv("HOME"));
     if( !(fp = fopen(buff, "r")) ) {
 	g_snprintf(c, 1024, "Unable to import gaim accounts from %s: %s", buff, strerror(errno));
-	do_message_dialog(c, "Error", 0);
+	ay_do_error( "Import Error", c );
         return;
     }
     AIM_ID=get_service_id("AIM");
@@ -141,5 +142,5 @@ void import_gaim_accounts(ebmCallbackData *data)
         }
     }
     fclose(fp);
-    do_message_dialog("Successfully imported gaim BuddyList", "Success", 0);
+    ay_do_info( "Import", "Successfully imported gaim BuddyList" );
 }

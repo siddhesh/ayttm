@@ -27,8 +27,11 @@
 #include "service.h"
 #include "status.h"
 #include "util.h"
-#include "dialog.h"
 #include "add_contact_window.h"
+#include "messages.h"
+#include "dialog.h"
+
+#include "gtk/gtkutils.h"
 
 #include "pixmaps/tb_preferences.xpm"
 #include "pixmaps/cancel.xpm"
@@ -202,7 +205,7 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 			buf = g_strdup_printf(_("This account is not a valid %s account: \n\n %s"), 
 					get_service_name(service_id), err);
 			g_free(err);
-			do_error_dialog(buf, _("Invalid account"));
+			ay_do_error( _("Invalid Account"), buf );
 			g_free(buf);
 			return;
 		}
@@ -418,7 +421,7 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 
 		gtk_window_set_title(GTK_WINDOW(add_contact_window), _("Ayttm - Add Contact"));
 		gtk_widget_grab_focus(account_name);
-		eb_icon(add_contact_window->window);
+		gtkut_set_window_icon( add_contact_window->window, NULL );
 		gtk_widget_show(add_contact_window);
 
 		gtk_signal_connect(GTK_OBJECT(add_contact_window), "destroy",

@@ -38,8 +38,9 @@ typedef long __off32_t;
 #include "plugin.h"
 #include "nomodule.h"
 #include "value_pair.h"
-#include "dialog.h"
 #include "status.h"
+#include "messages.h"
+
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -136,7 +137,7 @@ static void SetPluginInfo(PLUGIN_INFO *pi, char *name, lt_dlhandle Module, PLUGI
 		char buff[512];
 		snprintf(buff, 512, _("Plugin %s has not been loaded because of an error:\n\n%s"),
 				name, status_desc);
-		do_error_dialog(buff, _("Plugin error"));
+		ay_do_error( _("Plugin error"), buff );
 	}
 }
 
@@ -174,7 +175,7 @@ int unload_module(eb_PLUGIN_INFO *epi)
 		error=epi->pi.finish();
 		if(error > 0) {
 			snprintf(buf, sizeof(buf), _("Unable to unload plugin %s; maybe it is still in use?"), epi->name);
-			do_error_dialog(buf, _("Error"));
+			ay_do_error( _("Plugin error"), buf );
 			eb_debug(DBG_CORE, "<Plugin failed to unload\n");
 			return(-1);
 		}
@@ -288,7 +289,7 @@ void load_modules()
 		if((dirp = opendir(cur_path)) == NULL)
 		{
 			snprintf(buf, sizeof(buf), _("Cannot open module directory \"%s\"."), cur_path);
-			do_error_dialog(buf, _("Warning"));
+			ay_do_warning( _("Plugin Warning"), buf );
 			buf[0] = '\0';
 			break;
 		}
@@ -357,7 +358,6 @@ int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
 	
 	module_version = lt_dlsym(Module, "module_version");
 	if (!module_version || module_version() != CORE_VERSION) {
-		printf("service_version = %x\n", (unsigned int)module_version);
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, "Plugin version differs from core version, which means it is probably not binary compatible.\nTry a clean install (or read README).", Service_Info->name, FALSE);
 		lt_dlclose(Module);
 		return(-1);	
@@ -400,7 +400,7 @@ int load_utility_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, _("No init function defined"), NULL, FALSE);
 		lt_dlclose(Module);
 		snprintf(buf, sizeof(buf), _("Utility module %s doesn't define an init function; skipping it."), name);
-		do_error_dialog(buf, _("Warning"));
+		ay_do_warning( _("Plugin Warning"), buf );
 		return(-1);
 	}
 	eb_debug(DBG_CORE, "Executing init for %s\n", info->brief_desc);

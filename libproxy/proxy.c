@@ -48,6 +48,7 @@
 
 #include "libproxy.h"
 #include "tcp_util.h"
+#include "messages.h"
 
 
 static int proxy_inited=0;
@@ -460,13 +461,13 @@ int socks4_connect(int  sock, struct sockaddr *serv_addr, int addrlen )
 	    if (packet[1] == 90)		 
 	            return 0;
 	    else if(packet[1] == 91)
-		    do_error_dialog(_("Socks 4 proxy rejected request for an unknown reason."),_ ("Proxy error"));
+		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request for an unknown reason.") );
 	    else if(packet[1] == 92)
-		    do_error_dialog(_("Socks 4 proxy rejected request because it could not connect to our identd."),_ ("Proxy error"));	    
+		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request because it could not connect to our identd.") );
 	    else if(packet[1] == 93)
-		    do_error_dialog(_("Socks 4 proxy rejected request because identd returned a different userid."),_ ("Proxy error"));	    
+		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request because identd returned a different userid.") );
 	    else {
-		    do_error_dialog(_("Socks 4 proxy rejected request with an RFC-uncompliant error code."),_ ("Proxy error"));	    
+		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request with an RFC-uncompliant error cod.") );   
 		    printf("=>>%d\n",packet[1]);
 	    }		    
          } else {
@@ -614,7 +615,7 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
 		fprintf(stderr, "We got a response back from the SOCKS server\n");
 	}
 	if (buff[1] != 0) {
-		do_error_dialog(_("Socks5 proxy refused our authentication."),_("Proxy error"));
+		ay_do_error( _("Proxy Error"), _("Socks5 proxy refused our authentication.") );
 		return -1;
 	}
    }
@@ -741,14 +742,14 @@ int http_tunnel_init(int sockfd, struct sockaddr *serv_addr, int addrlen )
 		       while(proxy_recv_line(sockfd,&inputline) > 0) {
 			       free(inputline);
 		       }
-		       do_error_dialog(_("HTTP proxy error: Authentication required."), _("Proxy error"));
+				ay_do_error( _("Proxy Error"), _("HTTP proxy error: Authentication required.") );
 		       return( -2 );
 		   }
 		   if ( strstr( inputline, "403" ) ) {
 		       while(proxy_recv_line(sockfd,&inputline) > 0) {
 			       free(inputline);
 		       }
-		       do_error_dialog(_("HTTP proxy error: permission denied."), _("Proxy error"));
+				ay_do_error( _("Proxy Error"), _("HTTP proxy error: permission denied.") );
 		       return( -2 );
 		   }
 		   free(inputline);
@@ -804,7 +805,7 @@ int proxy_connect_host (char *host, int port, void *cb, void *data, void *scb)
 	struct sockaddr_in sin;
 	if ((hp = proxy_gethostbyname((char *)host)) == NULL) 
 	{
-		do_error_dialog("Could not resolve host.", "Proxy error");
+		ay_do_error( _("Proxy Error"), _("Could not resolve host.") );
 		perror("ghbn");
 		return -1;
 	}

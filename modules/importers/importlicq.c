@@ -35,7 +35,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "prefs.h"
 #include "plugin_api.h"
 #include "service.h"
-#include "dialog.h"
+#include "messages.h"
+
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -58,8 +59,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Licq Contact List", 
 	"Import the Licq Contact List", 
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/18 08:46:07 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/27 12:30:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -156,7 +157,7 @@ void import_licq_accounts(ebmCallbackData *data)
         g_snprintf(c, 1024, "%s/.licq/conf/users.conf", getenv("HOME"));
         if (!(fp = fopen(c, "r"))) {
 			g_snprintf(msg, 1024, "Unable to import licq accounts from neither %s/.licq/users.conf, nor %s\n", getenv("HOME"), c);
-			do_message_dialog(msg, "Error", 0);
+			ay_do_error( "Import Error", msg );
             return;
 		}
         licq_version = 6;
@@ -172,7 +173,7 @@ void import_licq_accounts(ebmCallbackData *data)
     if(feof(fp))
     {
         fclose(fp);
-		do_message_dialog("No users found in licq file to import", "Warning", 0);
+		ay_do_warning( "Import Warning", "No users found in licq file to import" );
         return;
     }
 
@@ -186,7 +187,7 @@ void import_licq_accounts(ebmCallbackData *data)
     if (feof(fp)) 
     {
         fclose(fp);
-		do_message_dialog("No users found in licq file to import", "Warning", 0);
+		ay_do_warning( "Import Warning", "No users found in licq file to import" );
         return;
     }
 
@@ -195,7 +196,7 @@ void import_licq_accounts(ebmCallbackData *data)
     if (num_users < 1)
     {
         fclose(fp);
-		do_message_dialog("No users found in licq file to import", "Warning", 0);
+		ay_do_warning( "Import Warning", "No users found in licq file to import" );
         return;
     }
     
@@ -232,5 +233,6 @@ void import_licq_accounts(ebmCallbackData *data)
         }
     }
     fclose(fp);
-	do_message_dialog("Successfully imported licq contact list", "Success", 0);
+	
+	ay_do_info( "Import", "Successfully imported licq contact list" );
 }

@@ -32,8 +32,19 @@
 extern "C" {
 #endif
 
-void gtkut_set_pixmap_from_xpm(char **xpm, GtkPixmap *pixmap);
-void gtkut_widget_get_uposition(GtkWidget *widget, gint *px, gint *py);
+GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage );
+GtkWidget	*gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent );
+
+void gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap *outPixmap );
+
+
+/** Get a widget's position.
+
+	@param	inWidget	which eidget?
+	@param	outXpos		if not NULL returns the x position
+	@param	outYpos		if not NULL returns the y position
+*/
+void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos );
 
 /** Create a radio button and add it to a group.
 
@@ -62,6 +73,37 @@ GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox
 */
 GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText, int inIsSelected,
 	GtkSignalFunc inSignalFunc, void *inCallbackData );
+
+/** Create a menu button and append it to a menu.
+
+	@param	inMenu			the menu into which the button is to be appended
+	@param	inLabel			the text of the button
+	@param	inSignalFunc	the callback function to call when it is activated
+	@param	inCallbackData	the callback data
+	
+	@returns	the new button
+*/
+GtkWidget	*gtkut_create_menu_button( GtkMenu *inMenu, const char *inLabel,
+	GtkSignalFunc inSignalFunc, void *inCallbackData );
+
+/** Create a menu button, append it to a menu, and attach a submenu to it.
+
+	@param	inMenu			the menu into which the button & submenu is to be appended
+	@param	inLabel			the text of the button
+	@param	inSubmenu		the submenu to attach
+	@param	inActive		is the new button active?
+	
+	@returns	the new button
+*/
+GtkWidget	*gtkut_attach_submenu( GtkMenu *inMenu, const char *inLabel,
+			     GtkWidget *inSubmenu, int inActive );
+
+/** Set a window's icon.
+
+	@param	inWindow		the window whose icon we are setting
+	@param	inXPM			the xpm we are setting it to [if NULL then use standard ayttm icon]
+*/
+void	gtkut_set_window_icon( GdkWindow *inWindow, gchar **inXPM );
 
 #ifdef __cplusplus
 } /* extern "C" */

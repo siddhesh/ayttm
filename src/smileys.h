@@ -1,9 +1,9 @@
 #ifndef __SMILEYS_H_
 #define __SMILEYS_H_
 
-#include "llist.h"
 #include "chat_window.h"
 #include "chat_room.h"
+
 
 struct protocol_smiley_struct
 {

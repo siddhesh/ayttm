@@ -39,17 +39,17 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "prefs.h"
 #include "util.h"
 #include "tcp_util.h"
+#include "messages.h"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
 
-
 /* already declared in dialog.h - but that uses gtk */
-void do_message_dialog(char *message, char *title, int modal);
 void do_list_dialog(char * message, char * title, char **list,
 		    void (*action) (char *text, gpointer data),
 		    gpointer data);
-
+			
 /*******************************************************************************
  *                             Begin Module Code
  ******************************************************************************/
@@ -80,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Auto-translator",
 	"Automatic translation",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/18 08:46:10 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/27 12:30:39 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
@@ -173,14 +173,13 @@ static void language_selected(char *text, gpointer data)
 	write_contact_list();
 
 	if (!doTrans) {
-		do_message_dialog(_("Warning - you have just selected a language "
+		ay_do_warning( _("Auto-Translation Warning"), _("You have just selected a language "
 					"with which to talk to a buddy. This will "
 					"only affect you if you have the auto-translator"
 					"plugin turned on. If you do, beware that it will"
 					"hang each time you send or receive a message, for"
 					"the time it takes to contact BabelFish. This can"
-					"take several seconds."),
-				  _("Warning"), 0);
+					"take several seconds.") );
 	}
 }
 

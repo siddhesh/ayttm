@@ -32,9 +32,11 @@
 
 #include <stdlib.h>
 
-#include "gtk/gtk_eb_html.h"
 #include "info_window.h"
 #include "dialog.h"
+
+#include "gtk/gtk_eb_html.h"
+#include "gtk/gtkutils.h"
 
 #include "pixmaps/cancel.xpm"
 
@@ -96,7 +98,7 @@ info_window * eb_info_window_new(eb_local_account * local, struct account * remo
 
         gtk_widget_realize(iw->window);	
 	gtk_window_set_title(GTK_WINDOW(iw->window), remote->handle);
-	eb_icon(iw->window->window);
+	gtkut_set_window_icon(iw->window->window, NULL);
 
         gtk_widget_set_usize(iw->scrollwindow, 375, 150);
 	gtk_container_add(GTK_CONTAINER(iw->scrollwindow),iw->info);

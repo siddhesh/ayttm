@@ -59,7 +59,6 @@ typedef unsigned long ulong;
 #include "chat_room.h"
 #include "util.h"
 #include "status.h"
-#include "dialog.h"
 #include "message_parse.h"
 #include "value_pair.h"
 #include "plugin_api.h"
@@ -67,6 +66,8 @@ typedef unsigned long ulong;
 #include "globals.h"
 #include "tcp_util.h"
 #include "activity_bar.h"
+#include "messages.h"
+
 #include "libproxy/libproxy.h"
 
 #include "pixmaps/workwizu_online.xpm"
@@ -110,8 +111,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/18 08:46:11 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/27 12:30:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -198,8 +199,7 @@ void sock_write (int sock, char *buf)
 	if (write(sock, buf, strlen(buf)) == -1) {
 		perror("write");
 		account = find_local_account_by_handle(my_user->username, SERVICE_INFO.protocol_id);
-		do_error_dialog(_("Connection closed (can't write)"), 
-				_("Workwizu Error"));
+		ay_do_error( _("Workwizu Error"), _("Connection closed (can't write)") );
 		eb_workwizu_logout(account);
 	}	
 }
@@ -447,8 +447,7 @@ void workwizu_handle_incoming(int sock, int readable, int writable)
 		case CONN_WAITING_CHALLENGE:
 			line = sock_read(sock);
 			if (line == NULL) {
-				do_error_dialog(_("Server doesn't answer."), 
-						_("Workwizu Error"));
+				ay_do_error( _("Workwizu Error"), _("Server doesn't answer.") );
 				eb_workwizu_logout(account);
 				return;
 			}
@@ -460,8 +459,7 @@ void workwizu_handle_incoming(int sock, int readable, int writable)
 		case CONN_WAITING_USERINFO:
 			line = sock_read(sock);
 			if (line == NULL) {
-				do_error_dialog(_("Bad authentication."), 
-						_("Workwizu Error"));
+				ay_do_error( _("Workwizu Error"), _("Bad authentication.") );
 				eb_workwizu_logout(account);
 				return;
 			}
@@ -487,7 +485,7 @@ void workwizu_handle_incoming(int sock, int readable, int writable)
 			line = sock_read(sock);
 			if (line == NULL) {
 				char *buf = g_strdup_printf(_("Connection to %s lost."),server); 
-				do_error_dialog(buf, _("Workwizu Error"));
+				ay_do_error( _("Workwizu Error"), buf );
 				g_free(buf);
 				eb_workwizu_logout(account);
 				return;
@@ -631,8 +629,7 @@ void eb_workwizu_connected (int fd, int error, void *data)
 	if (wad->sock == -1) {
 		eb_debug(DBG_WWZ, "wad->sock=-1 !\n");
 		if (error) {
-		do_error_dialog(_("Server doesn't answer."), 
-						_("Workwizu Error"));
+		ay_do_error( _("Workwizu Error"), _("Server doesn't answer.") );
 		}
 		account->connected=0;
 		eb_workwizu_logout(account);
@@ -685,8 +682,7 @@ void eb_workwizu_login (eb_local_account *account)
 	if ((res = proxy_connect_host(server, atoi(port), 
 			(ay_socket_callback)eb_workwizu_connected, account, NULL)) < 0) {
 		eb_debug(DBG_WWZ, "cant connect socket");
-		do_error_dialog(_("Server doesn't answer."), 
-						_("Workwizu Error"));
+		ay_do_error( _("Workwizu Error"), _("Server doesn't answer.") );
 		ay_activity_bar_remove(wad->activity_tag);
 		wad->activity_tag = 0;
 		eb_workwizu_logout(account);
@@ -774,8 +770,7 @@ void eb_workwizu_send_im (eb_local_account *account_from,
 	
 	send_my_packet(wad->sock, CHAT, user->uid, send);
 	if (!my_user->has_speak)
-		do_error_dialog(_("You aren't allowed to speak.\nThis message has probably not arrived."),	
-				_("Workwizu Error"));
+		ay_do_error( _("Workwizu Error"), _("You aren't allowed to speak.\nThis message has probably not arrived.") );
 	g_free(send);
 }
 
@@ -996,8 +991,7 @@ void eb_workwizu_send_chat_room_message(eb_chat_room *room, char *message)
 	char *send = translate_to_br(message);
 	
 	if (!my_user->has_speak)
-		do_error_dialog(_("You aren't allowed to speak.\nThis message has probably not arrived."), 
-				_("Workwizu Error"));
+		ay_do_error( _("Workwizu Error"), _("You aren't allowed to speak.\nThis message has probably not arrived.") );
 	else {
 		reset_typing(GINT_TO_POINTER(wad->sock));
 		send_my_packet(wad->sock, CHAT, EXCEPTME, send); /*CHANNEL or EXCEPTME*/

@@ -36,9 +36,11 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "dialog.h"
+#include "messages.h"
+
+
 #ifdef __MINGW32__
-#define snprintf g_snprintf
+#define snprintf _snprintf
 #endif
 /* TODO:
  * asynchronous lookups
@@ -208,8 +210,7 @@ int gtkspell_start(char *path, char * args[]) {
 		 * if it doesn't, it's an error. */
 		if (buf[0] != '@') {
 			gtkspell_stop();
-			do_error_dialog(_("Ispell exited abnormally.\n You probably specified a invalid dictionary."),
-					_("Ispell error"));
+			ay_do_error( _("Ispell Error"), _("Ispell exited abnormally.\n You probably specified a invalid dictionary.") );
 
 			return -1;
 		}

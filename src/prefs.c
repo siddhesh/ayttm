@@ -36,7 +36,7 @@
 #include "libproxy/libproxy.h"
 #include "plugin.h"
 
-#include "gtk/prefs_window.h"
+#include "ui_prefs_window.h"
 
 #ifdef __MINGW32__
 #include <sys/stat.h>

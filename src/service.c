@@ -36,11 +36,11 @@
 #include "service.h"
 #include "globals.h"
 #include "chat_window.h"
-#include "dialog.h"
 #include "util.h"
 #include "nomodule.h"
 #include "plugin_api.h"
 #include "value_pair.h"
+#include "messages.h"
 
 #ifdef HAVE_MIT_SAVER_EXTENSION
 #include <X11/extensions/scrnsaver.h>
@@ -126,7 +126,7 @@ static void reload_service_accounts(int service_id)
 		nela = eb_services[oela->service_id].sc->read_local_account_config(account_pairs);
 		if(!nela) {
 			snprintf(buff2, buffer_size, _("Unable to create account for %s.\nCheck your config file."), buff);
-			do_error_dialog(buff2, _("Invalid account"));
+			ay_do_error( _("Invalid Account"), buff2 );
 			oela->service_id=get_service_id("NO SERVICE");
 		}
 		else {

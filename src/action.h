@@ -22,8 +22,8 @@
  *
  */
  
-#ifndef __PRINT_H__
-#define __PRINT_H__
+#ifndef __ACTION_H__
+#define __ACTION_H__
 
 #include "log_window.h"
 

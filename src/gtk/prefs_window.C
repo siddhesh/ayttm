@@ -29,8 +29,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "prefs_window.h"
-#include "dialog.h"
+#include "ui_prefs_window.h"
+
 #include "service.h"
 #include "util.h"
 #include "libproxy/libproxy.h"
@@ -48,6 +48,7 @@
 
 #include "pixmaps/ok.xpm"
 #include "pixmaps/cancel.xpm"
+#include "pixmaps/error.xpm"
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -143,13 +144,14 @@ class ay_prefs_window_panel
 		
 		void		Show( void );
 		
-		static ay_prefs_window_panel	*Create( GtkWidget *inParent, struct prefs &inPrefs,
+		static ay_prefs_window_panel	*Create( GtkWidget *inParentWindow, GtkWidget *inParent, struct prefs &inPrefs,
 			ay_prefs_window::ePanelID inPanelID, const char *inName );
 
-		static ay_prefs_window_panel	*CreateModulePanel( GtkWidget *inParent, t_module_pref &inPrefs );
+		static ay_prefs_window_panel	*CreateModulePanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_module_pref &inPrefs );
 
 	protected:
 		GtkWidget	*m_top_vbox;
+		GtkWidget	*m_parent_window;
 	
 	private:
 		void	AddTopFrame( const char *in_text );
@@ -477,32 +479,28 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtk_window_set_policy( GTK_WINDOW(m_prefs_window_widget), FALSE, FALSE, TRUE );
 	gtk_widget_realize( m_prefs_window_widget );
 	gtk_window_set_title( GTK_WINDOW(m_prefs_window_widget), _("Ayttm Preferences") );
-	eb_icon( m_prefs_window_widget->window );
+	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
 	
 	GtkWidget	*main_hbox = gtk_hbox_new( FALSE, 5 );
-	gtk_widget_show( main_hbox );
 
 	// a scrolled window for the tree
 	GtkWidget	*scrolled_win = gtk_scrolled_window_new( NULL, NULL );
-	gtk_widget_show( scrolled_win );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scrolled_win), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_usize( scrolled_win, 210, 430 );
 	gtk_box_pack_start( GTK_BOX(main_hbox), GTK_WIDGET(scrolled_win), FALSE, FALSE, 0 );
 
 	m_tree = GTK_TREE(gtk_tree_new());
-	gtk_widget_show( GTK_WIDGET(m_tree) );
 	gtk_tree_set_view_lines( m_tree, FALSE );
 	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(scrolled_win), GTK_WIDGET(m_tree) );
 	
 	GtkWidget	*notebook = gtk_notebook_new();
-	gtk_widget_show( notebook );
 	gtk_widget_set_usize( notebook, 410, -1 );
 	gtk_notebook_set_show_tabs( GTK_NOTEBOOK(notebook), FALSE );
 	
 	for ( int i = PANEL_GENERAL; i < PANEL_MAX; i++ )
 	{
-		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::Create( notebook, m_prefs,
+		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::Create( m_prefs_window_widget, notebook, m_prefs,
 				static_cast<ePanelID>(i), s_titles[i] );
 		
 		if ( the_panel == NULL )
@@ -529,7 +527,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	{
 		t_module_pref		*pref_info = reinterpret_cast<t_module_pref *>(module_pref->data);
 		
-		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::CreateModulePanel( notebook, *pref_info );
+		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::CreateModulePanel( m_prefs_window_widget, notebook, *pref_info );
 		
 		if ( the_panel != NULL )
 		{
@@ -549,6 +547,11 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 		
 		module_pref = module_pref->next;
 	}
+	
+	gtk_widget_show( notebook );
+	gtk_widget_show( GTK_WIDGET(m_tree) );
+	gtk_widget_show( scrolled_win );
+	gtk_widget_show( main_hbox );
 
 	GtkWidget	*prefs_vbox = gtk_vbox_new( FALSE, 5 );
 	gtk_widget_show( prefs_vbox );
@@ -559,13 +562,13 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtk_widget_show( hbox2 );
 	gtk_widget_set_usize( hbox2, 200, 25 );
 
-	GtkWidget	*button = do_icon_button( _("OK"), ok_xpm, m_prefs_window_widget );
+	GtkWidget	*button = gtkut_create_icon_button( _("OK"), ok_xpm, m_prefs_window_widget );
 	gtk_widget_show( button );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC( s_ok_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
 
 	// Cancel Button
-	button = do_icon_button( _("Cancel"), cancel_xpm, m_prefs_window_widget );
+	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, m_prefs_window_widget );
 	gtk_widget_show( button );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC( s_cancel_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
@@ -756,7 +759,9 @@ void	ay_prefs_window::s_cancel_callback( GtkWidget *widget, gpointer data )
 //// ay_prefs_window_panel implementation
 
 ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
-:	m_prefs( NULL ),
+:	m_parent_window( NULL ),
+	m_parent( NULL ),
+	m_prefs( NULL ),
 	m_panel_id( ay_prefs_window::PANEL_MAX )
 {
 	m_name = strdup( inTopFrameText );
@@ -769,7 +774,7 @@ ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
 }
 
 // Create
-ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParent, struct prefs &inPrefs,
+ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParentWindow, GtkWidget *inParent, struct prefs &inPrefs,
 	ay_prefs_window::ePanelID inPanelID, const char *inName )
 {
 	ay_prefs_window_panel	*new_panel = NULL;
@@ -829,6 +834,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParent, struc
 			
 	assert( new_panel != NULL );
 	
+	new_panel->m_parent_window = inParentWindow;
 	new_panel->m_parent = inParent;
 	new_panel->Build( inParent );
 	
@@ -836,7 +842,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParent, struc
 }
 
 // CreateModulePanel
-ay_prefs_window_panel	*ay_prefs_window_panel::CreateModulePanel( GtkWidget *inParent, t_module_pref &inPrefs )
+ay_prefs_window_panel	*ay_prefs_window_panel::CreateModulePanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_module_pref &inPrefs )
 {
 	const int	name_len = 64;
 	char		name[name_len];
@@ -853,6 +859,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::CreateModulePanel( GtkWidget *inPa
 			
 	assert( new_panel != NULL );
 	
+	new_panel->m_parent_window = inParentWindow;
 	new_panel->m_parent = inParent;
 	new_panel->Build( inParent );
 	
@@ -939,7 +946,7 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
-	brbutton = eb_button( _("Use spell checking"), &m_prefs.do_spell_checking, hbox );
+	brbutton = gtkut_button( _("Use spell checking"), &m_prefs.do_spell_checking, hbox );
 	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
@@ -964,7 +971,7 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 #endif
 
-	brbutton = eb_button( _("Use alternate browser"), &m_prefs.use_alternate_browser, m_top_vbox );
+	brbutton = gtkut_button( _("Use alternate browser"), &m_prefs.use_alternate_browser, m_top_vbox );
 	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
 
 	hbox = gtk_hbox_new( FALSE, 0 );
@@ -991,7 +998,7 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 
-	eb_button( _("Enable debug messages"), &m_prefs.do_ayttm_debug, m_top_vbox );
+	gtkut_button( _("Enable debug messages"), &m_prefs.do_ayttm_debug, m_top_vbox );
 	
 	SetActiveWidgets();
 }
@@ -1082,8 +1089,8 @@ ay_logging_panel::ay_logging_panel( const char *inTopFrameText, struct prefs::lo
 // Build
 void	ay_logging_panel::Build( GtkWidget *inParent )
 {
-	eb_button( _("Save all conversations to logfiles"), &m_prefs.do_logging, m_top_vbox );
-	eb_button( _("Restore last conversation when opening a chat window"), &m_prefs.do_restore_last_conv, m_top_vbox );
+	gtkut_button( _("Save all conversations to logfiles"), &m_prefs.do_logging, m_top_vbox );
+	gtkut_button( _("Restore last conversation when opening a chat window"), &m_prefs.do_restore_last_conv, m_top_vbox );
 }
 
 
@@ -1099,12 +1106,12 @@ ay_sound_general_panel::ay_sound_general_panel( const char *inTopFrameText, stru
 // Build
 void	ay_sound_general_panel::Build( GtkWidget *inParent )
 {
-	eb_button( _("Disable sounds when I am away"), &m_prefs.do_no_sound_when_away, m_top_vbox );
-	eb_button( _("Disable sounds for Ignored people"), &m_prefs.do_no_sound_for_ignore, m_top_vbox );
-	eb_button( _("Play sounds when people sign on or off"), &m_prefs.do_online_sound, m_top_vbox );
-	eb_button( _("Play a sound when sending a message"), &m_prefs.do_play_send, m_top_vbox );
-	eb_button( _("Play a sound when receiving a message"), &m_prefs.do_play_receive, m_top_vbox );
-	eb_button( _("Play a special sound when receiving first message"), &m_prefs.do_play_first, m_top_vbox );
+	gtkut_button( _("Disable sounds when I am away"), &m_prefs.do_no_sound_when_away, m_top_vbox );
+	gtkut_button( _("Disable sounds for Ignored people"), &m_prefs.do_no_sound_for_ignore, m_top_vbox );
+	gtkut_button( _("Play sounds when people sign on or off"), &m_prefs.do_online_sound, m_top_vbox );
+	gtkut_button( _("Play a sound when sending a message"), &m_prefs.do_play_send, m_top_vbox );
+	gtkut_button( _("Play a sound when receiving a message"), &m_prefs.do_play_receive, m_top_vbox );
+	gtkut_button( _("Play a special sound when receiving first message"), &m_prefs.do_play_first, m_top_vbox );
 }
 
 
@@ -1364,12 +1371,12 @@ ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &in
 // Build
 void	ay_chat_panel::Build( GtkWidget *inParent )
 {
-	eb_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
-	eb_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
-	eb_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
-	eb_button( _("Ignore foreground Colors"), &m_prefs.do_ignore_fore, m_top_vbox );
-	eb_button( _("Ignore background Colors"), &m_prefs.do_ignore_back, m_top_vbox );
-	eb_button( _("Ignore fonts"), &m_prefs.do_ignore_font, m_top_vbox );
+	gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
+	gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
+	gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
+	gtkut_button( _("Ignore foreground Colors"), &m_prefs.do_ignore_fore, m_top_vbox );
+	gtkut_button( _("Ignore background Colors"), &m_prefs.do_ignore_back, m_top_vbox );
+	gtkut_button( _("Ignore fonts"), &m_prefs.do_ignore_font, m_top_vbox );
 
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
 
@@ -1966,7 +1973,7 @@ void	ay_encoding_panel::Build( GtkWidget *inParent )
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label);
 
-	GtkWidget	*button = eb_button( _("Use recoding in conversations"), &m_prefs.use_recoding, m_top_vbox );
+	GtkWidget	*button = gtkut_button( _("Use recoding in conversations"), &m_prefs.use_recoding, m_top_vbox );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_set_use_of_recoding), this );
 
 	const int	label_len = 120;
@@ -2132,13 +2139,26 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		GtkWidget	*frame = gtk_frame_new( _("Plugin Error") );
 		gtk_widget_show( frame );
 
+		GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
+		gtk_widget_show( hbox );
+		
+		GtkStyle	*style = gtk_widget_get_style( m_parent_window );
+		GdkBitmap	*mask = NULL;
+	
+		GdkPixmap	*icon = gdk_pixmap_create_from_xpm_d( m_parent_window->window, &mask, &style->bg[GTK_STATE_NORMAL], error_xpm );
+		GtkWidget	*icon_widget = gtk_pixmap_new( icon, mask );
+		gtk_widget_show( icon_widget );
+		gtk_box_pack_start( GTK_BOX(hbox), icon_widget, FALSE, FALSE, 0 );
+
 		GtkWidget	*label = gtk_label_new( m_prefs.status_desc );
 		gtk_widget_show( label );
 		gtk_misc_set_alignment( GTK_MISC(label), 0.0, 0.5 );
 		gtk_label_set_line_wrap( GTK_LABEL(label), TRUE );
 		gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
 		gtk_misc_set_padding( GTK_MISC(label), 5, 5 );
-		gtk_container_add( GTK_CONTAINER(frame), label );
+		gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+		
+		gtk_container_add( GTK_CONTAINER(frame), hbox );
 
 		gtk_box_pack_start( GTK_BOX(m_top_vbox), frame, FALSE, FALSE, 0 );
 	}

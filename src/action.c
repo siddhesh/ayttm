@@ -30,10 +30,13 @@
 
 #include "globals.h"
 #include "action.h"
-#include "dialog.h"
 #include "prefs.h"
 #include "mem_util.h"
 #include "util.h"
+#include "messages.h"
+#include "dialog.h"
+
+#include "gtk/gtkutils.h"
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -82,7 +85,7 @@ static void action_do_action(char * value, void * data)
 	free(filename_plain);
 	
 	if (!found) {
-		do_error_dialog(_("Command line is invalid (missing %s and %p)."), _("Action error"));
+		ay_do_error( _("Action Error"), _("Command line is invalid (missing %s and %p).") );
 		return;
 	}
 
@@ -96,7 +99,7 @@ static void action_do_action(char * value, void * data)
 		save_action(value);
 		g_free(begin);
 	} else {
-		do_error_dialog(_("Cannot run command : fork() failed."), _("Action error"));
+		ay_do_error( _("Action Error"), _("Cannot run command : fork() failed.") );
 		perror("fork");
 	}		
 #endif
@@ -135,11 +138,11 @@ void conversation_action(log_info *li, int to_end)
 	free (loginfo->filename);
 	
 	if (!loginfo->fp) {
-		do_error_dialog(_("Cannot use log: no logfile available."),_("Action error"));
+		ay_do_error( _("Action Error"), _("Cannot use log: no logfile available.") );
 		return;
 	}
 	if (fseek(loginfo->fp, loginfo->filepos, SEEK_SET) < 0) {
-		do_error_dialog(_("Cannot use log: logfile too short (!?)."),_("Action error"));
+		ay_do_error( _("Action Error"), _("Cannot use log: logfile too short (!?).") );
 		return;
 	}
 	
@@ -170,7 +173,7 @@ void conversation_action(log_info *li, int to_end)
 	if (output_fhtml == NULL || output_fplain == NULL) {
 		perror("fopen");
 		printf(" %s %s\n", output_html, output_plain);
-		do_error_dialog(_("Cannot use log: Impossible to create temporary file."),_("Action error"));
+		ay_do_error( _("Action Error"), _("Cannot use log: Impossible to create temporary file.") );
 		fclose(loginfo->fp);
 		return;
 	}
@@ -237,7 +240,7 @@ void conversation_action(log_info *li, int to_end)
 	}
 	
 	if (errno) {
-		do_error_dialog(strerror(errno), _("Action error"));
+		ay_do_error( _("Action Error"), strerror(errno) );
 		fclose(loginfo->fp);
 		fclose(output_fhtml);
 		fclose(output_fplain);
@@ -325,7 +328,7 @@ static void create_action_menu(char *html_file, char *plain_file, int sens)
 	files[1] = strdup(plain_file);
 	
 	menu = gtk_menu_new();
-	item = eb_menu_button (GTK_MENU(menu), _("New command..."),
+	item = gtkut_create_menu_button (GTK_MENU(menu), _("New command..."),
 			GTK_SIGNAL_FUNC(add_command_cb), files);
 	gtk_widget_set_sensitive(item, sens); /* don't set the whole menu unsensitive */
 
@@ -339,10 +342,10 @@ static void create_action_menu(char *html_file, char *plain_file, int sens)
 	}
 	
 	if (!l_list_empty(commands)) {
-		eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
+		gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 		walk = commands;
 		while (walk) {
-			item = eb_menu_button(GTK_MENU(menu), walk->data, 
+			item = gtkut_create_menu_button(GTK_MENU(menu), walk->data, 
 					GTK_SIGNAL_FUNC(action_prepare), files);
 			gtk_widget_set_name(item, walk->data);
 			gtk_widget_set_sensitive(item, sens);

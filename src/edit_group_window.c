@@ -28,6 +28,9 @@
 #include "status.h"
 #include "dialog.h"
 #include "util.h"
+
+#include "gtk/gtkutils.h"
+
 #include "pixmaps/tb_edit.xpm"
 #include "pixmaps/cancel.xpm"
 
@@ -155,7 +158,7 @@ void edit_group_window_new( grouplist * g)
 	else
 		g_snprintf(buff, 1024, _("Add group"));
 	gtk_window_set_title(GTK_WINDOW(edit_group_window), buff);
-	eb_icon(edit_group_window->window);
+	gtkut_set_window_icon(edit_group_window->window, NULL);
 	gtk_signal_connect(GTK_OBJECT(edit_group_window), "destroy",
 				GTK_SIGNAL_FUNC(destroy), NULL);
 

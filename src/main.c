@@ -54,15 +54,15 @@ int WinVer;
 
 #include "status.h"
 #include "plugin.h"
-#include "gtk_globals.h"
-#include "dialog.h"
+#include "globals.h"
 #include "util.h"
 #include "sound.h"
 #include "smileys.h"
 #include "console_session.h"
 #include "crash.h"
 #include "prefs.h"
-
+#include "messages.h"
+#include "edit_local_accounts.h"
 
 #define PACKAGE "ayttm"
 
@@ -158,7 +158,7 @@ char config_dir[1024] = "";
 static void start_login(gboolean new)
 {
    	if (new)
-		eb_new_user();
+		ay_edit_local_accounts();
 	else {
 		eb_status_window();
 		eb_sign_on_startup() ;
@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
 			perror("connect");
 			g_snprintf(buff, 1024, _("Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot be connected."), pid);
 			/* TODO make sure this one is modal */
-			do_error_dialog(buff, _("Already logged on"));
+			ay_do_error( _("Already Logged On"), buff );
 			exit(1);
 		}
 		length = strlen("focus-ayttm")+1;

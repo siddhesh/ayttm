@@ -31,6 +31,8 @@
 #ifndef __INFO_WINDOW_H__
 #define __INFO_WINDOW_H__
 
+#include <gtk/gtk.h>
+
 #include "account.h"
 
 

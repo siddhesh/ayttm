@@ -44,8 +44,6 @@ unsigned int module_version() {return CORE_VERSION;}
 #include <errno.h>
 #include <fcntl.h>
 
-#include "dialog.h"
-
 #include "gtk_globals.h"
 #include "service.h"
 #include "util.h"
@@ -56,6 +54,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "gtk/gtk_eb_html.h"
 #include "plugin_api.h"
 #include "smileys.h"
+#include "messages.h"
+
 #include "libproxy/libproxy.h"
 
 #include "pixmaps/irc_online.xpm"
@@ -87,8 +87,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/27 11:29:01 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/27 12:30:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -990,7 +990,7 @@ static void irc_callback (void *data, int source, eb_input_condition condition)
 				/* Connection closed by other side - log off */
 				char buff[1024]; 
 				snprintf(buff, sizeof(buff), _("Connection closed by %s."), ila->server);
-				do_error_dialog(buff, "IRC Error");
+				ay_do_error( _("IRC Error"), buff );
 				fprintf(stderr, buff);
 				
 				ela->connected = 0;
@@ -1123,7 +1123,7 @@ static void irc_login( eb_local_account * account)
 	if (!host) { 
 		char buff[1024]; 
 		snprintf(buff, sizeof(buff), _("%s: Unknown host."), ila->server);
-		do_error_dialog(buff, "IRC Error");
+		ay_do_error( _("IRC Error"), buff );
 		fprintf(stderr, buff);
 
 		return; 
@@ -1142,7 +1142,7 @@ static void irc_login( eb_local_account * account)
 	{
 		char buff[1024]; 
 		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
-		do_error_dialog(buff, "IRC Error");
+		ay_do_error( _("IRC Error"), buff );
 		fprintf(stderr, buff);
 
 		return;

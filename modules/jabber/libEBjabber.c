@@ -21,14 +21,17 @@
  *	(http://jewel.sourceforge.net/)
  */
 
+#include "intl.h"
 
 #define DEBUG
 #include <stdio.h>
 #include <jabber/jabber.h>
-#include "dialog.h"
+
 #include "plugin_api.h"
 #include "libEBjabber.h"
-#include "intl.h"
+#include "messages.h"
+
+
 #ifdef __MINGW32__
 #include <glib.h>
 #define snprintf _snprintf
@@ -660,7 +663,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 	if(!JConn) {
 		sprintf(buff, "%s@%s/%s - connection error, can't find connection, packets are being dropped!",
 			conn->user->user, conn->user->server, conn->user->resource);
-		do_error_dialog(buff, "Error");
+		ay_do_error( _("Jabber Error"), buff );
 		eb_debug(DBG_JBR, "<Returning error - can't find connection\n");
 		return;
 	}
@@ -914,7 +917,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			case 504: /* Remote Server Timeout */
 			default:
 				sprintf(buff, "%s@%s/%s - %s (%s)", conn->user->user, conn->user->server, conn->user->resource, desc, code);
-				do_error_dialog(buff, _("Error"));
+				ay_do_error( _("Jabber Error"), buff );
 				fprintf(stderr, "Error: %s\n", code);
 			}
 		}

@@ -47,7 +47,6 @@ typedef unsigned long ulong;
 #include "info_window.h"
 #include "util.h"
 #include "status.h"
-#include "dialog.h"
 #include "message_parse.h"
 #include "value_pair.h"
 #include "plugin_api.h"
@@ -55,6 +54,8 @@ typedef unsigned long ulong;
 #include "gtk_globals.h"
 #include "activity_bar.h"
 #include "tcp_util.h"
+#include "messages.h"
+#include "dialog.h"
 
 #include "pixmaps/jabber_online.xpm"
 #include "pixmaps/jabber_away.xpm"
@@ -82,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.19 $",
-	"$Date: 2003/04/27 11:29:01 $",
+	"$Revision: 1.20 $",
+	"$Date: 2003/04/27 12:30:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1038,5 +1039,5 @@ void JABBERLogout(void *data)
 
 void	JABBERError( char *message, char *title )
 {
-	do_error_dialog( message, title );
+	ay_do_error( title, message );
 }

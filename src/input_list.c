@@ -29,7 +29,8 @@
 #include "globals.h"
 #include "input_list.h"
 #include "value_pair.h"
-#include "dialog.h"
+
+#include "gtk/gtkutils.h"
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -71,7 +72,7 @@ void	eb_input_render( input_list * il, void * box )
 	{
 		case EB_INPUT_CHECKBOX:
 			{
-				eb_button( item_label, il->widget.checkbox.value, box );
+				gtkut_button( item_label, il->widget.checkbox.value, box );
 				il->widget.checkbox.saved_value = *(il->widget.checkbox.value);
 			}
 			break;

@@ -25,8 +25,6 @@
 #ifndef __CHAT_ROOM_H__
 #define __CHAT_ROOM_H__
 
-#include <gtk/gtk.h>
-#include <stdio.h>
 #include <time.h>
 
 #include "account.h"
