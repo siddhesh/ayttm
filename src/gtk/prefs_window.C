@@ -90,10 +90,14 @@ class ay_prefs_window
 			PANEL_SOUND_FILES,
 			PANEL_CHAT_GENERAL,
 			PANEL_CHAT_TABS,
+			PANEL_ADVANCED,
 			PANEL_PROXY,
 #ifdef HAVE_ICONV
 			PANEL_ENCODING,
 #endif
+			PANEL_SERVICES,
+			PANEL_UTILITIES,
+			
 			PANEL_MAX
 		};
 
@@ -309,6 +313,15 @@ class ay_tabs_panel : public ay_prefs_window_panel
 		guint 			m_accel_change_handler_id;
 };
 
+/// Advanced prefs panel
+class ay_advanced_panel : public ay_prefs_window_panel
+{
+	public:
+		ay_advanced_panel( const char *inTopFrameText );
+		
+		virtual void	Build( GtkWidget *inParent );
+};
+
 /// Proxy prefs panel
 class ay_proxy_panel : public ay_prefs_window_panel
 {
@@ -383,6 +396,24 @@ class ay_encoding_panel : public ay_prefs_window_panel
 };
 #endif	// HAVE_ICONV
 
+/// Services prefs panel
+class ay_services_panel : public ay_prefs_window_panel
+{
+	public:
+		ay_services_panel( const char *inTopFrameText );
+		
+		virtual void	Build( GtkWidget *inParent );
+};
+
+/// Utilities prefs panel
+class ay_utilities_panel : public ay_prefs_window_panel
+{
+	public:
+		ay_utilities_panel( const char *inTopFrameText );
+		
+		virtual void	Build( GtkWidget *inParent );
+};
+
 /// A module prefs panel
 class ay_module_panel : public ay_prefs_window_panel
 {
@@ -423,11 +454,13 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 	_( "Sound:Files" ),
 	_( "Chat" ),
 	_( "Chat:Tabs" ),
-	_( "Advanced:Proxy" )
+	_( "Advanced" ),
+	_( "Advanced:Proxy" ),
 #ifdef HAVE_ICONV
-	,
-	_( "Advanced:Encoding" )
+	_( "Advanced:Encoding" ),
 #endif
+	_( "Services" ),
+	_( "Utilities" )
 };
 
 ay_prefs_window	*ay_prefs_window::s_only_prefs_window = NULL;
@@ -752,6 +785,10 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParent, struc
 			new_panel = new ay_chat_panel( inName, inPrefs.chat );
 			break;
 
+		case ay_prefs_window::PANEL_ADVANCED:
+			new_panel = new ay_advanced_panel( inName );
+			break;
+
 		case ay_prefs_window::PANEL_PROXY:
 			new_panel = new ay_proxy_panel( inName, inPrefs.advanced );
 			break;
@@ -761,6 +798,14 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParent, struc
 			new_panel = new ay_encoding_panel( inName, inPrefs.advanced );
 			break;
 #endif
+
+		case ay_prefs_window::PANEL_SERVICES:
+			new_panel = new ay_services_panel( inName );
+			break;
+
+		case ay_prefs_window::PANEL_UTILITIES:
+			new_panel = new ay_utilities_panel( inName );
+			break;
 		
 		default:
 			assert( false );
@@ -838,7 +883,7 @@ void	ay_prefs_window_panel::AddTopFrame( const char *in_text )
 	gtk_widget_show( frame );
 	gtk_frame_set_shadow_type( GTK_FRAME(frame), GTK_SHADOW_IN );
 	gtk_widget_modify_style( frame, rc_style );
-	gtk_container_set_border_width( GTK_CONTAINER(frame), 5 );
+	gtk_container_set_border_width( GTK_CONTAINER(frame), 1 );
 
 	GtkWidget	*useless_event_box_because_of_stupid_gtk_colour_handling = gtk_event_box_new();
 	gtk_widget_show( useless_event_box_because_of_stupid_gtk_colour_handling );
@@ -956,7 +1001,7 @@ void	ay_general_panel::Apply( void )
 	strncpy( alt_browser_command, gtk_entry_get_text(GTK_ENTRY(m_alternate_browser_entry)), MAX_PREF_LEN );
 	
 	// add "%s" for the URL if the user didn't
-	if ( !strstr( alt_browser_command, "%s" ) )
+	if ( (alt_browser_command[0] != '\0') && !strstr( alt_browser_command, "%s" ) )
 		strncat( alt_browser_command, " %s", MAX_PREF_LEN );
 	
 	strncpy( m_prefs.alternate_browser, alt_browser_command, MAX_PREF_LEN );
@@ -1612,6 +1657,26 @@ void	ay_tabs_panel::s_getnewkey( GtkWidget *keybutton, void *data )
 	}
 }
 
+////////////////
+//// ay_advanced_panel implementation
+ay_advanced_panel::ay_advanced_panel( const char *inTopFrameText )
+:	ay_prefs_window_panel( inTopFrameText )
+{
+}
+
+// Build
+void	ay_advanced_panel::Build( GtkWidget *inParent )
+{	
+	GtkWidget	*label = gtk_label_new( _("This section is for configuration of advanced options such as proxy\nservers and encoding conversion [if your system supports them].") );
+	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 10 );
+	
+	label = gtk_label_new( _("[There are no general preferences for the Advanced section]") );
+	gtk_widget_show( label );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 5 );
+}
 
 ////////////////
 //// ay_proxy_panel implementation
@@ -1965,6 +2030,51 @@ void	ay_encoding_panel::s_set_use_of_recoding( GtkWidget *widget, void *data )
 
 #endif	// HAVE_ICONV
 
+
+////////////////
+//// ay_services_panel implementation
+ay_services_panel::ay_services_panel( const char *inTopFrameText )
+:	ay_prefs_window_panel( inTopFrameText )
+{
+}
+
+// Build
+void	ay_services_panel::Build( GtkWidget *inParent )
+{
+	GtkWidget	*label = gtk_label_new( _("Services allow you to connect to and chat with people using a\nvariety of messenger protocols.") );
+	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 10 );
+	
+	label = gtk_label_new( _("[There are no general preferences for the Services section]") );
+	gtk_widget_show( label );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 5 );
+}
+
+
+////////////////
+//// ay_utilities_panel implementation
+ay_utilities_panel::ay_utilities_panel( const char *inTopFrameText )
+:	ay_prefs_window_panel( inTopFrameText )
+{
+}
+
+// Build
+void	ay_utilities_panel::Build( GtkWidget *inParent )
+{
+	GtkWidget	*label = gtk_label_new( _("Utilities add additional capabilities such as importing contacts or\nchanging your smiley sets.") );
+	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 10 );
+	
+	label = gtk_label_new( _("[There are no general preferences for the Utilities section]") );
+	gtk_widget_show( label );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 5 );
+}
+
+
 ////////////////
 //// ay_module_panel implementation
 
@@ -1979,7 +2089,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 {
 	GtkWidget	*info_frame = gtk_frame_new( _( "Info" ) );
 	gtk_widget_show( info_frame );
-	gtk_container_set_border_width( GTK_CONTAINER(info_frame), 5 );
+	gtk_container_set_border_width( GTK_CONTAINER(info_frame), 0 );
 	
 	GtkWidget	*info_table = gtk_table_new( 4, 4, FALSE );
 	gtk_widget_show( info_table );
@@ -1997,7 +2107,13 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		AddInfoRow( info_table, row++, _( "Error:" ), m_prefs.status_desc );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), info_frame, FALSE, FALSE, 5 );
-		
+	
+	GtkWidget	*spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, -1, 5 );
+	
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), spacer, FALSE, FALSE, 0 );
+	
 	if ( m_prefs.pref_list != NULL )
 	{
 		eb_input_render( m_prefs.pref_list, m_top_vbox );
@@ -2007,7 +2123,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		GtkWidget	*label = gtk_label_new( NULL );
 		gtk_widget_show( label );
 		
-		GString		*labelText = g_string_new( _("No preferences for ") );
+		GString		*labelText = g_string_new( _("[There are no preferences for ") );
 		
 		if ( m_prefs.service_name != NULL )
 		{
@@ -2019,6 +2135,8 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 			labelText = g_string_append( labelText, m_prefs.brief_desc );
 			labelText = g_string_append( labelText, "'" );
 		}
+		
+		labelText = g_string_append( labelText, "]" );
 		
 		gtk_label_set_text( GTK_LABEL(label), labelText->str );
 		gtk_box_pack_start( GTK_BOX(m_top_vbox), GTK_WIDGET(label), FALSE, FALSE, 2 );

@@ -1,4 +1,8 @@
-* Fri Apr 18 2003 11:56 GMT [andy]	0.3.0-pre2
+* Fri Apr 18 2003 15:10 GMT [andy]	0.3.0-pre3
+- src/gtk/prefs_window.C
+Add description panels for Advanced, Services, and Utilities
+
+* Fri Apr 18 2003 13:09 GMT [andy]	0.3.0-pre2
 - src/gtk/prefs_window.C
 Clean up layout of proxy and encoding panels
 
