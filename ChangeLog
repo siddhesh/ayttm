@@ -1,4 +1,11 @@
-* Wed May 01 2003 16:40 GMT [edward]	0.3.0-86
+* Thu May  1 2003 19:10 GMT [philip]	0.3.0-87
+- src/util.c
+fix segfault when node was null because ela was returned first (730895)
+
+- src/Makefile.am
+fix building of nameless .c and .h files
+
+* Thu May  1 2003 16:40 GMT [edward]	0.3.0-86
 - src/account_parser.y
   src/action.c
   src/add_contact_window.c
@@ -13,27 +20,27 @@
   moved util.h before globals.h as there was a mkdir dependency issue
   with MINGW32
 
-* Wed Apr 30 2003 14:00 GMT [colin]	0.3.0-85
+* Thu May  1 2003 14:00 GMT [colin]	0.3.0-85
 - src/contact_parser.y
 Fix account staying orphaned
 
-* Wed Apr 30 2003 14:00 GMT [colin]	0.3.0-84
+* Thu May  1 2003 14:00 GMT [colin]	0.3.0-84
 - src/util.c
 Fix segfault
 
-* Wed Apr 30 2003 14:00 GMT [philip]	0.3.0-83
+* Thu May  1 2003 14:00 GMT [philip]	0.3.0-83
 - src/util.c
 compile before commit, not the other way around
 
-* Wed Apr 30 2003 13:39 GMT [colin]	0.3.0-82
+* Thu May  1 2003 13:39 GMT [colin]	0.3.0-82
 - src/main.c
 fix getopt patch
 
-* Wed Apr 30 2003 13:30 GMT [philip]	0.3.0-81
+* Thu May  1 2003 13:30 GMT [philip]	0.3.0-81
 - src/util.c
 find_local_account_for_remote looks at remote->ela first
 
-* Wed Apr 30 2003 12:59 GMT [yann]	0.3.0-80
+* Thu May  1 2003 12:59 GMT [yann]	0.3.0-80
 - modules/workwizu/workwizu.c
 Patch deprecated workwizu module
 
