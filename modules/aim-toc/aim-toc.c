@@ -59,6 +59,7 @@ typedef unsigned long ulong;
 #include "plugin_api.h"
 #include "smileys.h"
 #include "globals.h"
+#include "offline_queue_mgmt.h"
 #include "pixmaps/aim_online.xpm"
 #include "pixmaps/aim_away.xpm"
 #ifdef __MINGW32__
@@ -93,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.18 $",
-	"$Date: 2003/04/18 08:46:06 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/04/22 01:04:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -520,7 +521,7 @@ static void eb_aim_user_info(toc_conn * conn, char * user, char * message )
 
 static void eb_aim_new_group(char * group)
 {
-	if(!find_grouplist_by_name(group)) {
+	if(!find_grouplist_by_name(group) && !group_mgmt_check_moved(group)) {
 		add_group(group);
 	}
 }

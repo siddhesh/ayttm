@@ -1,3 +1,9 @@
+* Tue Apr 22 2003 01:02 GMT [colin]	0.3.0-pre15
+- modules/icq-toc/icq-toc.c
+- modules/icq-toc/aim-toc.c
+- src/offline_queue_mgmt.c
+Try to fix bug 725267 (Group comes back after login)
+
 * Tue Apr 22 2003 00:27 GMT [colin]	0.3.0-pre14
 - modules/icq-toc/icq-toc.c
 Try to fix bug 725040 (12345678:name imported from icq)

@@ -219,9 +219,9 @@ int group_mgmt_check_moved(const char *groupname)
 	while( fgets(buff, sizeof(buff), queue)  != NULL )
 	{		
 		char **tokens  = ay_strsplit( buff, "\t", -1 );
-	/*	int action     = atoi(tokens[0]); */
-		char *oldgroup = tokens[1];
-	/*	char *newgroup = tokens[2]; */
+	/*	int action     = atoi(tokens[1]); */
+		char *oldgroup = tokens[2];
+	/*	char *newgroup = tokens[3]; */
 				
 		if (oldgroup && !strcmp(oldgroup, groupname)) {
 			fclose(queue);
