@@ -1,7 +1,0 @@
-#!/bin/sh
-o=$1
-shift
-d=$1
-shift
-make $o.o
-dllwrap -g -mno-cygwin --export-all-symbols --output-def $o.def --implib $o.dll.a --target i386-mingw32 --driver-name $d -I/target/include/glib-2.0 -Wl,--subsystem,windows -o $o.dll $o.o $* ../libayttm.a /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib /target/lib/libgtk.dll.a /target/lib/libgdk.dll.a /target/lib/libglib-2.0.dll.a -lws2_32 -lwst -lmsvcrt
