@@ -1,3 +1,8 @@
+* Sat May  3 2003 14:25 GMT [colin]	0.3.0-119
+- modules/smtp/smtp.c
+Reword a few labels, check login validity,
+comply to RFC
+
 * Sat May  3 2003 13:01 GMT [colin]	0.3.0-118
 - configure.ac modules/Makefile.am
 Allow optional building of smtp module

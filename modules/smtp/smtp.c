@@ -71,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.12 $",
-	"$Date: 2003/05/01 11:46:20 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/05/03 14:26:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -486,9 +486,9 @@ static void smtp_message_sent(struct smtp_callback_data *d, int success)
 {
 	char reply[1024] = "<FONT COLOR=\"#a0a0a0\"><I>";
 	if(success)
-		strcat(reply, _("Message Sent"));
+		strcat(reply, _("Message sent via SMTP."));
 	else
-		strcat(reply, _("Error Sending Message"));
+		strcat(reply, _("Error sending message via SMTP."));
 	strcat(reply, "</I></FONT>");
 
 	eb_parse_incoming_message(d->from, d->to, reply);
@@ -516,11 +516,11 @@ static void send_message_async(void * data, int fd, eb_input_condition cond)
 		d->state = SMTP_HELO;
 		break;
 	case SMTP_HELO:
-		snprintf(buff, sizeof(buff)-1, "MAIL FROM: %s", d->from->handle);
+		snprintf(buff, sizeof(buff)-1, "MAIL FROM: <%s>", d->from->handle);
 		d->state = SMTP_FROM;
 		break;
 	case SMTP_FROM:
-		snprintf(buff, sizeof(buff)-1, "RCPT TO: %s", d->to->handle);
+		snprintf(buff, sizeof(buff)-1, "RCPT TO: <%s>", d->to->handle);
 		d->state = SMTP_TO;
 		break;
 	case SMTP_TO:
@@ -593,7 +593,10 @@ static void eb_smtp_send_im(eb_local_account * account_from,
 
 static char * eb_smtp_check_login(char * user, char * pass)
 {
-	return NULL;
+   if(strchr(user,'@') == NULL) {
+      return strdup(_("SMTP logins must have @domain.tld part."));
+   }
+   return NULL;
 }
 
 struct service_callbacks *query_callbacks()
