@@ -19,6 +19,7 @@ ayttm.exe: ayttmrc
 	cp /target/lib/iconv.dll /cygdrive/c/Program\ Files/ayttm
 	cp /target/lib/libXpm-noX4.dll /cygdrive/c/Program\ Files/ayttm
 	cp /target/lib/libintl-1.dll /cygdrive/c/Program\ Files/ayttm
+	cp ../COPYING /cygdrive/c/Program\ Files/ayttm
 
 plugins: modules sound importers utilities aim-toc icq-toc irc yahoo2 jabber smtp smileys
 
