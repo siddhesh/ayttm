@@ -101,7 +101,11 @@ LList *outgoing_message_filters=NULL;
 LList *incoming_message_filters=NULL;
 
 
-#define ENTRY_FOCUS(x) { if (!x->notebook) gtk_widget_grab_focus(x->entry); }
+#define ENTRY_FOCUS(x) { chat_window *x2 = x; \
+			 GET_CHAT_WINDOW(x2); \
+			 gtk_widget_grab_focus(x2->entry); \
+}
+
 #ifdef HAVE_ICONV_H
 
 /*
@@ -816,7 +820,6 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		menu = gtk_menu_new();
 
 		/*Add Contact Selection*/
-		printf("====>%s\n",cw->contact->group->name);
 		if(!strcmp(cw->contact->group->name, _("Unknown"))
 		|| !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
 			button = gtk_menu_item_new_with_label(_("Add Contact"));
@@ -1284,7 +1287,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		if(remote_contact->chatwindow)
 			g_free(remote_contact->chatwindow);
 
-		remote_contact->chatwindow = eb_chat_window_new(account, remote_contact);
+		eb_chat_window_display_contact(remote_contact);
 
 		if (!remote_contact->chatwindow)
 		{
@@ -1448,11 +1451,24 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 		int page_num = gtk_notebook_page_num (GTK_NOTEBOOK
 				     (remote_contact->chatwindow->notebook),
 				     remote_contact->chatwindow->notebook_child);
-
+		chat_window *current = NULL;
 		set_tab_normal (remote_contact);
 
-		gtk_notebook_set_page (GTK_NOTEBOOK
+		current = find_tabbed_chat_window();
+		GET_CHAT_WINDOW(current);
+		if (current && current!=remote_contact->chatwindow) {
+			char *text = gtk_editable_get_chars(GTK_EDITABLE(current->entry),0,-1);
+			if (strlen(text) == 0) {
+				gtk_notebook_set_page (GTK_NOTEBOOK
+					   (remote_contact->chatwindow->notebook), page_num);
+				ENTRY_FOCUS(remote_contact->chatwindow);
+			}
+			g_free(text);
+		} else {
+			gtk_notebook_set_page (GTK_NOTEBOOK
 				   (remote_contact->chatwindow->notebook), page_num);
+			ENTRY_FOCUS(remote_contact->chatwindow);
+		}
 	}
 }
 
@@ -1499,12 +1515,24 @@ void eb_chat_window_display_account(eb_account * remote_account)
 		int page_num = gtk_notebook_page_num(GTK_NOTEBOOK(remote_contact->chatwindow->notebook),
 			                		 remote_contact->chatwindow->notebook_child);
 
-		set_tab_normal(remote_contact);
-		gtk_notebook_set_page(GTK_NOTEBOOK(remote_contact->chatwindow->notebook), 
-				  page_num);
-	} else {
-		gdk_window_raise(remote_contact->chatwindow->window->window);	  
-		ENTRY_FOCUS(remote_contact->chatwindow);
+		chat_window *current = NULL;
+		set_tab_normal (remote_contact);
+
+		current = find_tabbed_chat_window();
+		GET_CHAT_WINDOW(current);
+		if (current && current!=remote_contact->chatwindow) {
+			char *text = gtk_editable_get_chars(GTK_EDITABLE(current->entry),0,-1);
+			if (strlen(text) == 0) {
+				gtk_notebook_set_page (GTK_NOTEBOOK
+					   (remote_contact->chatwindow->notebook), page_num);
+				ENTRY_FOCUS(remote_contact->chatwindow);
+			}
+			g_free(text);
+		} else {
+			gtk_notebook_set_page (GTK_NOTEBOOK
+				   (remote_contact->chatwindow->notebook), page_num);
+			ENTRY_FOCUS(remote_contact->chatwindow);
+		}
 	}
 	remote_contact->chatwindow->preferred = remote_account;
 }
