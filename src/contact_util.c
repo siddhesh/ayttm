@@ -104,6 +104,12 @@ static int contact_cmp(const void * a, const void * b)
 	return strcasecmp(ca->nick, cb->nick);
 }
 
+/**
+ * Return a group given its name
+ * @param	name	the group's name
+ *
+ * @return	the group or NULL if not found
+ */
 grouplist * find_grouplist_by_name(const char *name)
 {
 	LList *l;
@@ -118,6 +124,13 @@ grouplist * find_grouplist_by_name(const char *name)
 	return NULL;
 }
 
+/**
+ * Return a contact from a group given its nickname
+ * @param	nick	the contact's nick name
+ * @param	group	the group in which to search
+ *
+ * @return	the contact or NULL if not found
+ */
 struct contact * find_contact_in_group_by_nick(const char *nick, grouplist *group)
 {
 	LList *l;
@@ -132,6 +145,12 @@ struct contact * find_contact_in_group_by_nick(const char *nick, grouplist *grou
 	return NULL;
 }
 
+/**
+ * Return a contact from any group given its nickname
+ * @param	nick	the contact's nick name
+ *
+ * @return	the contact or NULL if not found
+ */
 struct contact * find_contact_by_nick(const char *nick)
 {
 	LList *l;
@@ -147,6 +166,12 @@ struct contact * find_contact_by_nick(const char *nick)
 	return NULL;
 }
 
+/**
+ * Return a contact given the handle of one of its accounts
+ * @param	handle	the handle of an account of this contact
+ *
+ * @return	the contact or NULL if not found
+ */
 struct contact * find_contact_by_handle( char * handle )
 {
 	eb_account * account = find_in_hash(handle, NULL);
@@ -173,6 +198,12 @@ struct contact * find_contact_by_handle( char * handle )
 	*/
 }
 
+/**
+ * Return an account given its handle
+ * @param	handle	the handle of the account
+ *
+ * @return	the account or NULL if not found
+ */
 eb_account * find_account_by_handle(const char *handle, const eb_local_account * ela)
 {
 
@@ -191,6 +222,12 @@ eb_account * find_account_by_handle(const char *handle, const eb_local_account *
 	*/
 }
 		
+/**
+ * Add a new group with the given name and return it
+ * @param	group_name	the name of the new group
+ *
+ * @return	the group or NULL if group_name is NULL or empty
+ */
 grouplist * add_group(const char *group_name)
 {
 	LList *node = NULL;
@@ -217,7 +254,15 @@ grouplist * add_group(const char *group_name)
 	return gl;
 }
 
-struct contact * add_contact_with_group(const char *contact_name, grouplist *group)
+/**
+ * Add a new contact with the given name to a group and return it
+ * @param	contact_name	the name of the new contact
+ * @param	group		the group to add the contact to
+ * @param	default_service	the default service to use when communicating with this contact
+ *
+ * @return	the contact or NULL if group or contact_name is NULL
+ */
+struct contact * add_contact_with_group(const char *contact_name, grouplist *group, int default_service)
 {
 	struct contact *contact;
 
@@ -226,6 +271,7 @@ struct contact * add_contact_with_group(const char *contact_name, grouplist *gro
 
 	contact = calloc(1, sizeof(struct contact));
 	strncpy(contact->nick, contact_name, sizeof(contact->nick)-1);
+	contact->default_chatb = contact->default_filetransb = default_service;
 	
 	group->members = l_list_insert_sorted(group->members, contact, contact_cmp );
 
@@ -234,7 +280,15 @@ struct contact * add_contact_with_group(const char *contact_name, grouplist *gro
 	return contact;
 }
 
-struct contact * add_contact(const char *contact_name, const char *group_name)
+/**
+ * Add a new contact with the given name to a group, given its name, and return it
+ * @param	contact_name	the name of the new contact
+ * @param	group_name	the name of the group to add the contact to
+ * @param	default_service	the default service to use when communicating with this contact
+ *
+ * @return	the contact or NULL if group_name or contact_name is NULL or empty
+ */
+struct contact * add_contact(const char *contact_name, const char *group_name, int default_service)
 {
 	grouplist *group;
 	
@@ -249,9 +303,17 @@ struct contact * add_contact(const char *contact_name, const char *group_name)
 	if(group == NULL)
 		group = add_group(group_name);
 
-	return add_contact_with_group(contact_name, group);
+	return add_contact_with_group(contact_name, group, default_service);
 }
 
+/**
+ * Add a new account to a contact attached to a local account
+ * @param	handle		the handle of the new account
+ * @param	contact		the contact to add the account to
+ * @param	ela		the local account that this account is associated with
+ *
+ * @return	the account or NULL if handle or contact is NULL or empty
+ */
 eb_account * add_account(const char *handle, struct contact *contact, eb_local_account *ela)
 {
 	eb_account *account;
@@ -277,12 +339,21 @@ eb_account * add_account(const char *handle, struct contact *contact, eb_local_a
 	return account;
 }
 
+/**
+ * Destroy all data associated with an account.  Call this to free an account's memory
+ * @param	account		the account to destroy
+ */
 void destroy_account(eb_account * account)
 {
 	RUN_SERVICE(account)->free_account_data(account);
 	free(account);
 }
 
+/**
+ * Destroy all data associated with a contact, including all accounts under it.
+ * Call this to free a contact's memory
+ * @param	contact		the contact to destroy
+ */
 void destroy_contact(struct contact * contact)
 {
 	while(contact->accounts) {
@@ -293,6 +364,11 @@ void destroy_contact(struct contact * contact)
 	free(contact);
 }
 
+/**
+ * Destroy all data associated with a group, including all contacts and accounts under it.
+ * Call this to free a group's memory
+ * @param	group		the group to destroy
+ */
 void destroy_group(grouplist * group)
 {
 	while(group->members) {
@@ -303,6 +379,10 @@ void destroy_group(grouplist * group)
 	free(group);
 }
 
+/**
+ * Remove an account from your account list.  This will destroy the account after removing it.
+ * @param	account		The account to remove
+ */
 void remove_account(eb_account * account)
 {
 	RUN_SERVICE(account)->del_user(account);
@@ -311,6 +391,10 @@ void remove_account(eb_account * account)
 	destroy_account(account);
 }
 
+/**
+ * Remove a contact from your contact list.  This will destroy the contact after removing it.
+ * @param	contact		The contact to remove
+ */
 void remove_contact(struct contact * contact)
 {
 	contact->group->members = l_list_remove(contact->group->members, contact);
@@ -321,6 +405,10 @@ void remove_contact(struct contact * contact)
 	destroy_contact(contact);
 }
 
+/**
+ * Remove a group from your group list.  This will destroy the group after removing it.
+ * @param	group		The group to remove
+ */
 void remove_group(grouplist * group)
 {
 	LList *l;
@@ -369,6 +457,11 @@ static void handle_group_change(eb_account *ea, const char *og, const char *ng)
 
 }
 
+/**
+ * Rename a group
+ * @param	group		The group that we need to rename
+ * @param	new_name	The new name of the group
+ */
 void rename_group(grouplist * group, const char * new_name)
 {
 	LList *l;
@@ -389,11 +482,19 @@ void rename_group(grouplist * group, const char * new_name)
 	strncpy(group->name, new_name, sizeof(group->name)-1);
 }
 
+/**
+ * Rename a contact
+ * @param	contact		The contact that we need to rename
+ * @param	new_name	The new name of the contact
+ */
 void rename_contact(struct contact * contact, const char * new_name)
 {
 	LList *l;
 
 	if(new_name == NULL)
+		return;
+
+	if(!strcmp(contact->nick, new_name))
 		return;
 
 	for(l=contact->accounts; l; l=l_list_next(l)) {
@@ -405,8 +506,16 @@ void rename_contact(struct contact * contact, const char * new_name)
 				contact_mgmt_queue_add(ea, MGMT_REN, new_name);
 		}
 	}
+
+	strncpy(contact->nick, new_name, sizeof(contact->nick)-1);
 }
 
+/**
+ * Move a contact to a new group.  This takes care of calling ignore/unignore user
+ * depending on group names
+ * @param	contact		The contact that we need to move
+ * @param	new_group	The group to move the contact to
+ */
 void move_contact(struct contact * contact, grouplist * new_group)
 {
 	LList *l;
@@ -419,6 +528,12 @@ void move_contact(struct contact * contact, grouplist * new_group)
 	new_group->members = l_list_insert_sorted(new_group->members, contact, contact_cmp);
 }
 
+/**
+ * Move an account to a new contact.  This takes care of calling ignore/unignore user
+ * depending on group names
+ * @param	account		The account that we need to move
+ * @param	new_contact	The contact to move the account to
+ */
 void move_account(eb_account * account, struct contact * new_contact)
 {
 	struct contact * old_contact = account->account_contact;
@@ -430,6 +545,11 @@ void move_account(eb_account * account, struct contact * new_contact)
 	new_contact->accounts = l_list_append(new_contact->accounts, account);
 }
 
+/**
+ * Returns a LList of all group names in case insensitive sorted order
+ *
+ * @return	a sorted list of group names
+ */
 LList * get_group_names( void )
 {
 	LList *g=NULL, *g2;
@@ -440,6 +560,12 @@ LList * get_group_names( void )
 	return g;
 }
 
+/**
+ * Returns a LList of all contact names in a group in case insensitive sorted order
+ * @param	group		The group whose contacts are to be returned
+ *
+ * @return	a sorted list of contact names
+ */
 LList * get_group_contact_names( grouplist * group )
 {
 	LList *g=NULL, *g2;
