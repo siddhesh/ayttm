@@ -3,7 +3,7 @@
 # version 0.10.35 of gettext required a different kind of Makefile
 # in intl/  it won't build with our distributed intl/ and must be
 # overwritten
-function check_gettext
+check_gettext()
 {
 	VERSION=`gettext --version | head -1 | cut -d' ' -f4` 
 	MAJOR=`echo $VERSION | cut -d'.' -f1` 

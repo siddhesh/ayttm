@@ -2,7 +2,7 @@
 # Based on sample debian/rules 
 # GNU copyright 1997 to 1999 by Joey Hess.
 
-CFLAGS = -Wall -g
+export CFLAGS = -Wall -g
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
@@ -13,6 +13,28 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
 endif
 
+export DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+export DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+  confflags += --build $(DEB_HOST_GNU_TYPE)
+else
+  confflags += --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
+endif
+  
+# Parallel build support - based on debian-policy bug#209008
+ifneq (,$(findstring parallel,$(DEB_BUILD_OPTIONS)))
+    PARALLEL_JOBS := $(shell echo $(DEB_BUILD_OPTIONS) | \
+        sed -e 's/.*parallel=\([0-9]\+\).*/\1/')
+    ifeq ($(DEB_BUILD_OPTIONS),$(PARALLEL_JOBS))
+	PARALLEL_JOBS := $(shell if [ -f /proc/cpuinfo ]; \
+            then echo `cat /proc/cpuinfo | grep 'processor' | wc -l`; \
+            else echo 1; fi)
+    endif
+    NJOBS := -j$(PARALLEL_JOBS)
+endif
+MAKEFLAGS += $(NJOBS)
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -22,11 +44,11 @@ configure-stamp:
 	  exit 1 ;\
 	fi
 	#./gen
-	./configure \
+	./configure $(confflags) CFLAGS="$(CFLAGS)" CXXFLAGS="$(CFLAGS)" \
 	  --prefix=/usr \
 	  --sysconfdir=/etc \
 	  --mandir=/usr/share/man \
-	  --disable-arts
+	  --disable-arts 
 
 	touch configure-stamp
 
@@ -43,10 +65,15 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	-$(MAKE) distclean
-	rm -f po/*.gmo 
+	-$(MAKE) -i distclean
+	rm -f po/*.gmo mingw32/Makefile
 
 	dh_clean
+
+	-test -r /usr/share/misc/config.sub && \
+	  cp -f /usr/share/misc/config.sub config.sub
+	-test -r /usr/share/misc/config.guess && \
+	  cp -f /usr/share/misc/config.guess config.guess
 
 install: build
 	dh_testdir

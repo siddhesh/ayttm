@@ -1,3 +1,10 @@
+* Wed Jan 02 2004 08:22 GMX [chris]     0.4.6-pre4
+- gen
+replace 'function check_gettext' with 
+POSIX sh compatible 'check_gettext()'
+- debian/rules, debian/changelog
+Debian packaging update for 0.4.6
+
 * Wed Jan 07 2004 08:08 GMT [philip]	0.4.6-pre3
 - src/status.c
 trim CR and LF from end of status message if any
