@@ -1,3 +1,11 @@
+* Sun Nov 9 2003 06:30 GMT [philip]	0.4.4-17
+- modules/yahoo2/yahoo.c
+make "s" a translatable string
+- po/de.po
+translate "s"
+- add config.rpath - should have been added with gettext upgrade
+Needed in EXTRA_DIST
+
 * Sat Nov 8 2003 10:20 GMT [colin]	0.4.4-16
 - src/edit_local_account.c pixmaps/Makefile.am pixmaps/help.xpm
 Add help about adding accounts

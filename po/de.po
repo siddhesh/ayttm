@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "POT-Creation-Date: 2003-10-25 18:44+0200\n"
-"PO-Revision-Date: $Date: 2003/10/26 19:12:59 $\n"
+"PO-Revision-Date: $Date: 2003/11/09 06:36:23 $\n"
 "Last-Translator: Philip S Tellis <philip.tellis@gmx.net>\n"
 "Language-Team: Philip S Tellis <philip.tellis@gmx.net>\n"
 "MIME-Version: 1.0\n"
@@ -1357,7 +1357,12 @@ msgstr "Sie haben eine neue Mail von %s betreffend %s\n"
 #: modules/yahoo2/yahoo.c:1867
 #, c-format
 msgid "You have %d message%s\n"
-msgstr "Sie haben %d Nachricht(en)\n"
+msgstr "Sie haben %d Nachricht%s\n"
+
+#: modules/yahoo2/yahoo.c:1867
+#, c-format
+msgid "s"
+msgstr "en"
 
 #: modules/yahoo2/yahoo.c:1873
 msgid "Yahoo Mail"

@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.74 $",
-	"$Date: 2003/10/22 08:30:19 $",
+	"$Revision: 1.75 $",
+	"$Date: 2003/11/09 06:36:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1865,7 +1865,7 @@ static void ext_yahoo_mail_notify(int id, char *from, char *subj, int cnt)
 	if(cnt) {
 		snprintf(buff2, sizeof(buff2), 
 				_("You have %d message%s\n"), 
-				cnt, cnt==1?"":"s");
+				cnt, cnt==1?"":_("s"));
 		strncat(buff, buff2, sizeof(buff)-strlen(buff));
 	}
 
