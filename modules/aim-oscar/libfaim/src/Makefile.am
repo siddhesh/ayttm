@@ -4,7 +4,6 @@ noinst_LTLIBRARIES = libfaim.la
 libfaim_la_SOURCES = \
 	admin.c        \
 	adverts.c      \
-	aim.h          \
 	aim_cbtypes.h  \
 	aim_internal.h \
 	auth.c         \
