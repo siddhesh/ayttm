@@ -150,8 +150,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.34 $",
-	"$Date: 2003/04/28 13:22:54 $",
+	"$Revision: 1.35 $",
+	"$Date: 2003/04/28 15:04:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -884,7 +884,8 @@ static eb_account * eb_msn_read_account_config( LList * config, struct contact *
 	if (tmp) {
 		ea->ela = find_local_account_by_handle(tmp, SERVICE_INFO.protocol_id);
 		free(tmp);
-	}
+	} else 
+		ea->ela = find_local_account_for_remote(ea, 0);
 	
 	ea->list_item = NULL;
 	ea->online = 0;

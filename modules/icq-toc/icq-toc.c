@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.25 $",
-	"$Date: 2003/04/28 14:05:45 $",
+	"$Revision: 1.26 $",
+	"$Date: 2003/04/28 15:04:51 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -742,6 +742,7 @@ static void eb_icq_add_user( eb_account * account )
 	LList * node;
 
 	struct eb_icq_local_account_data *alad = (struct eb_icq_local_account_data *)account->ela->protocol_local_account_data;
+	if (!alad) return;
 	
  	assert( eb_services[account->service_id].protocol_id == SERVICE_INFO.protocol_id );
 	alad->icq_buddies = l_list_append(alad->icq_buddies, account->handle);
@@ -992,7 +993,11 @@ static eb_account * eb_icq_read_config( LList * config, struct contact *contact 
 	if (str) {
 		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
 		free(str);
-	}
+	} else 
+		ea->ela = find_local_account_for_remote(ea, 0);
+
+	if (!ea->ela)
+		return NULL;
 	
     ea->account_contact = contact;
 	ea->list_item = NULL;

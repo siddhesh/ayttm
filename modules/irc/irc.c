@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.13 $",
-	"$Date: 2003/04/28 11:48:50 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/04/28 15:04:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1380,7 +1380,8 @@ static eb_account * irc_read_config(LList *config, struct contact *contact)
 	if (temp) {
 		ea->ela = find_local_account_by_handle(temp, SERVICE_INFO.protocol_id);
 		g_free(temp);
-	}
+	} else 
+		ea->ela = find_local_account_for_remote(ea, 0);
 
 	ia->idle = 0;
 	ia->status = IRC_OFFLINE;
@@ -1392,21 +1393,15 @@ static eb_account * irc_read_config(LList *config, struct contact *contact)
 		strncpy(ia->server, temp, 254);
 	}
 
-	for( node = accounts; node; node = node->next )
+	if (ea->ela && ea->ela->service_id == SERVICE_INFO.protocol_id)
 	{
-		eb_local_account * ela = (eb_local_account *)(node->data);
-		
-		if (ela->service_id == SERVICE_INFO.protocol_id)
-		{
-			irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
+		irc_local_account * ila = (irc_local_account *)ea->ela->protocol_local_account_data;
 
-			if (!strcmp(ila->server, ia->server))
-			{
-				ila->friends = l_list_append( ila->friends, ea );
-			}
+		if (!strcmp(ila->server, ia->server))
+		{
+			ila->friends = l_list_append( ila->friends, ea );
 		}
 	}
-
 	return ea;
 }
 

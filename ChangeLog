@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 13:58 GMT [colin]	0.3.0-22
+- modules/*toc src/contact_parser.y
+Segfaults fixes
+
 * Mon Apr 28 2003 13:58 GMT [colin]	0.3.0-21
 - modules/*toc
 begin fixes for multiaccount
