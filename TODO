@@ -25,9 +25,9 @@ TODO later
 * Non-blocking connection in IRC
 * use our own linked list routines - partially done
 * Yahoo voice support ? 
-* GPG encryption utility
+* GPG encryption utility - Done
 * 1-to-1 conversation -> group chat by inviting a user
-* Remember last selected smiley pack
+* Remember last selected smiley pack - Done gloablly, should be per chat
 
 eyecandy
 * emoticons in contact names and status
