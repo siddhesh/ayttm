@@ -28,6 +28,7 @@
 
 #include "gtkutils.h"
 #include "gtk_globals.h"
+#include "account.h"
 
 #include "pixmaps/ayttm.xpm"
 
@@ -121,6 +122,45 @@ GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidge
 	gtk_widget_show( button );
 	
 	return( button );
+}
+
+void    gtkut_set_pixmap( eb_local_account *ela, char **inXPM, GtkPixmap *outPixmap ) 
+{
+	LList *x;
+	struct dd {
+		char **inXPM;
+		GdkPixmap *tpx;
+		GdkBitmap *tbx;
+	} *d;
+
+	if (ela == NULL)
+		return;
+
+	if ( (inXPM == NULL) || (outPixmap == NULL) )
+		return;
+	
+	x = ela->status_pix;
+	while(x != NULL) {
+		d = (struct dd *)x->data;
+		if(d->inXPM == inXPM) {
+			gtk_pixmap_set( outPixmap, d->tpx, d->tbx );
+			return;
+		}
+		x = x->next;
+	}
+	if (!x) {
+		d = (struct dd *) g_new0 (struct dd, 1);
+		if (!d)
+			return;
+
+		d->tpx = gdk_pixmap_create_from_xpm_d( statuswindow->window, 
+			&d->tbx, NULL, inXPM );
+
+		d->inXPM=inXPM;
+		gtk_pixmap_set( outPixmap, d->tpx, d->tbx );
+		x = l_list_append(ela->status_pix, d);
+		ela->status_pix = x;
+	}
 }
 
 void	gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap *outPixmap )

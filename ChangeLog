@@ -1,3 +1,15 @@
+* Wed May 22 2003 19:36 GMT [edward]	0.3.1-pre13
+- README.WIN32
+  modules/aim-toc/aim-toc.c
+  src/account.h
+  src/status.c
+  src/gtk/gtkutils.c
+Fix to the WIN32 flashing issue. This fix creates the pixmaps 
+to be used for status for each local account and stores them
+after creation. Therefore for each local account there is only
+ONE creations and therefore the memory leak is lessened to just
+those instances.
+
 * Wed May 21 2003 15:20 GMT [colin]	0.3.1-pre12
 - modules/jabber/jabber.c
 Try to fix bug 740891 (sig 11)

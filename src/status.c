@@ -1284,8 +1284,9 @@ void contact_update_status(struct contact * ec)
 
 	/* set the icon if there isn't another timeout about to alter the icon */
 	if (ec->icon_handler == -1) {
-		gtkut_set_pixmap_from_xpm(RUN_SERVICE(ea)->get_status_pixmap(ea), 
-					  GTK_PIXMAP(ec->pix));
+		gtkut_set_pixmap(ea->ela, 
+			RUN_SERVICE(ea)->get_status_pixmap(ea), 
+			GTK_PIXMAP(ec->pix));
 	}
 
 	width = contact_list->allocation.width;
@@ -1346,7 +1347,9 @@ void buddy_update_status(eb_account * ea)
 	/* update the icon if another timeout isn't about to change it */
 	if (ea->icon_handler == -1) {
 		if (RUN_SERVICE(ea) && RUN_SERVICE(ea)->get_status_pixmap && ea->pix)
-			gtkut_set_pixmap_from_xpm(RUN_SERVICE(ea)->get_status_pixmap(ea), GTK_PIXMAP(ea->pix));
+			gtkut_set_pixmap(ea->ela, 
+				RUN_SERVICE(ea)->get_status_pixmap(ea), 
+				GTK_PIXMAP(ea->pix));
 	}
 
 	/* since the contact's status info  might be a copy of this

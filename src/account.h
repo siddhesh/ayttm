@@ -57,6 +57,7 @@ typedef struct local_account {
         int connecting;
 	void * status_button; /* GtkWidget */
 	LList * status_menu;
+	LList * status_pix; /* GtkWidget */
         void *protocol_local_account_data;
 	int mgmt_flush_tag;
 	int connect_at_startup;

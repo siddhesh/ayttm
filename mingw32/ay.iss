@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=AYTTM
-AppVerName=AYTTM 0.3.0-195
+AppVerName=AYTTM 0.3.1-pre13
 AppPublisherURL=http://ayttm.sourceforge.net
 AppSupportURL=http://ayttm.sourceforge.net
 AppUpdatesURL=http://ayttm.sourceforge.net

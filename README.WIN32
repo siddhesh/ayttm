@@ -1,8 +1,4 @@
 Known Issues:
-	0) There is no update to the status window icons to determine
-	if the user is idle or not. They will remain an open door.
-	We are looking into a solution. 
-
 	1) There is a problem when you click into the chat (non-entry)
 	window where occasionally the text will appear somewhere else besides
 	the end.
