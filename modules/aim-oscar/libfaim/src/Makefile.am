@@ -17,15 +17,12 @@ libfaim_la_SOURCES = \
 	ft.c \
 	icq.c \
 	im.c \
-	info.c \
 	invite.c \
 	locate.c \
-	login.c \
 	Makefile \
 	Makefile.am \
 	Makefile.in \
 	md5.c \
-	meta.c \
 	misc.c \
 	msgcookie.c \
 	odir.c \
