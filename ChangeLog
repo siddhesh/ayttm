@@ -1,3 +1,7 @@
+* Tue May  6 2003 08:37 GMT [philip]	0.3.0-138
+- modules/msn2/msn.C
+Print local handle in authorise user dialog
+
 * Tue May  6 2003 08:30 GMT [philip]	0.3.0-137
 - modules/yahoo2/yahoo.c
 Print local handle on all dialog boxes

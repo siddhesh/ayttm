@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.45 $",
-	"$Date: 2003/05/04 01:49:06 $",
+	"$Revision: 1.46 $",
+	"$Date: 2003/05/06 08:43:46 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1311,8 +1311,8 @@ static int eb_msn_authorize_user( eb_local_account *ela, char * username, char *
 	  char *tmp = Utf8ToStr(friendlyname);
 	  authorize_cb_data *cbd = g_new0(authorize_cb_data, 1);
 	  eb_debug(DBG_MSN, "** %s (%s) has added you to their list.\n", friendlyname, username);
-	  snprintf(dialog_message, sizeof(dialog_message), _("The MSN user %s (%s) would like to add you to their contact list.\n\nDo you want to allow them to see when you are online?"), 
-			  tmp, username);
+	  snprintf(dialog_message, sizeof(dialog_message), _("%s, the MSN user %s (%s) would like to add you to their contact list.\n\nDo you want to allow them to see when you are online?"), 
+			  ela->handle, tmp, username);
 	  free(tmp);
   	  uname = msn_permstring(username);
 	  msn_add_to_llist(waiting_auth_callbacks, (llist_data *)uname);
