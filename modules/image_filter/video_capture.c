@@ -48,13 +48,13 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Video Capture",
 	"Capture video images from some source",
-	"$Revision: 1.2 $",
-	"$Date: 2003/12/21 07:37:25 $",
-	NULL,
+	"$Revision: 1.3 $",
+	"$Date: 2004/12/29 21:13:46 $",
+	0,
 	plugin_init,
 	plugin_finish,
-	NULL,
-	NULL
+	0,
+	0
 };
 /* End Module Exports */
 
@@ -95,16 +95,16 @@ static long int grab_frame(unsigned char **image)
 {
 	FILE *grabber_fp;
 	unsigned char buff[1024];
-	unsigned char *outbuf=NULL;
+	unsigned char *outbuf=0;
 	long int nsize=0, n;
 
 	char *cmd = strdup(frame_grabber);
 	while(strstr(cmd, "%d")) {
 		char *tmp = strstr(cmd, "%d");
-		char *rest=NULL;
+		char *rest=0;
 		if(*(tmp+2))
 			rest = strdup(tmp+2);
-		*tmp = NULL;
+		*tmp = 0;
 		cmd = ay_string_append(cmd, eb_config_dir());
 		if(rest)
 			cmd = ay_string_append(cmd, rest);
