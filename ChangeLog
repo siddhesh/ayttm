@@ -1,3 +1,9 @@
+* Fri Apr 18 2003 10:45 GMT [andy]	0.2.3-134
+- src/gtk/prefs_window.C
+Disallow 'Return' as a hotkey for tab switching
+- src/chat_window.c
+Fix tab switching so <Control>Up and <Control>Down work
+
 * Fri Apr 18 2003 00:54 GMT [colin]	0.2.3-133
 - configure.in src/plugin.c modules/*/*[cC]
 Add module versionning to avoid broken bugreports

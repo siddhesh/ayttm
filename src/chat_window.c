@@ -996,81 +996,91 @@ static gboolean chat_singleline_key_press(GtkWidget *widget, GdkEventKey *event,
 	return gtk_true();
 }
 
-static gboolean chat_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
 {
 	chat_window				*cw = (chat_window *)data;
 	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
-	eb_update_window_title(cw, FALSE);
+	
+	eb_update_window_title( cw, FALSE );
 
-	if (event->keyval == GDK_Return) {
+	if ( event->keyval == GDK_Return )
+	{
 		/* Just print a newline on Shift-Return */
-		if (event->state & GDK_SHIFT_MASK)
+		if ( event->state & GDK_SHIFT_MASK )
+		{
 			event->state = 0;
-		else if ( iGetLocalPref("do_enter_send") ) {
+		}
+		else if ( iGetLocalPref("do_enter_send") )
+		{
 			/*Prevents a newline from being printed*/
-			gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+			gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "key_press_event" );
 
-			send_message(NULL, cw);
-			return gtk_true();
-		}
-	} else if (event->keyval == GDK_Up) {
-		
-		if(cw->history==NULL) 
-			return gtk_true();
-
-		if(cw->hist_pos==NULL) {
-			char * s;
-			LList * node;
-
-			s= cw_get_message(cw);
-
-			for(node=cw->history; node!=NULL ; node=node->next)
-				cw->hist_pos=node;
-
-			if(strlen(s)>0) {
-				cw->history=l_list_append(cw->history, strdup(s));
-				g_free(s); 
-				cw->this_msg_in_history=1;
-			}
-		} else {
-			cw->hist_pos=cw->hist_pos->prev;
-			if(cw->hist_pos==NULL) {
-				LList * node;
-				eb_debug(DBG_CORE,"history Wrapped!\n");
-				for(node=cw->history; node!=NULL ; node=node->next)
-				cw->hist_pos=node;
-			}
-		}
-
-		cw_reset_message(cw);
-		cw_set_message(cw, cw->hist_pos->data);
-		
-	} else if (event->keyval == GDK_Down) {
-		if(cw->history==NULL || cw->hist_pos==NULL) 
-			return gtk_true();
-		cw->hist_pos=cw->hist_pos->next;
-		
-		if(cw->hist_pos==NULL)
-			cw_reset_message(cw);
-		else {
-			cw_reset_message(cw);
-			cw_set_message(cw, cw->hist_pos->data);
+			send_message( NULL, cw );
+			
+			return( gtk_true() );
 		}
 	}
-	else if (cw->notebook != NULL)  /* only change tabs if this window is tabbed */
+	else if ( (event->keyval == GDK_Up) && (modifiers == 0) )
 	{
+		if ( cw->history == NULL ) 
+			return( gtk_true() );
+
+		if ( cw->hist_pos == NULL )
+		{
+			LList	*node = NULL;
+			char	*s = cw_get_message(cw);
+
+			for ( node = cw->history; node != NULL ; node = node->next )
+				cw->hist_pos = node;
+
+			if ( strlen( s ) > 0 )
+			{
+				cw->history=l_list_append( cw->history, strdup( s ) );
+				g_free( s ); 
+				cw->this_msg_in_history = 1;
+			}
+		}
+		else
+		{
+			cw->hist_pos=cw->hist_pos->prev;
+			
+			if ( cw->hist_pos==NULL )
+			{
+				LList	*node = NULL;
+				
+				eb_debug(DBG_CORE,"history Wrapped!\n");
+				for ( node = cw->history; node != NULL ; node = node->next )
+					cw->hist_pos = node;
+			}
+		}
+
+		cw_reset_message( cw );
+		cw_set_message( cw, cw->hist_pos->data );
+	}
+	else if ( (event->keyval == GDK_Down) && (modifiers == 0) )
+	{
+		if ( cw->history == NULL || cw->hist_pos == NULL ) 
+			return( gtk_true() );
+		
+		cw->hist_pos = cw->hist_pos->next;
+		
+		cw_reset_message( cw );
+		
+		if ( cw->hist_pos != NULL )
+			cw_set_message( cw, cw->hist_pos->data );
+	}
+	else if (cw->notebook != NULL)
+	{
+		// check tab changes if this is a tabbed chat window
 		if ( check_tab_accelerators( widget, cw, modifiers, event ) )
 			return( gtk_true() );
 	}
 
-	if(cw->preferred==NULL || modifiers)
-		return gtk_false();
-
-	if(!modifiers)
+	if ( (cw->preferred != NULL) && (modifiers == 0) )
 		send_typing_status(cw);
 
-	return gtk_false();
+	return( gtk_false() );
 }
 
 static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data)
