@@ -1,3 +1,7 @@
+* Sat Jun 28 2003 11:00 GMT [colin]	0.3.1-48
+- modules/*toc/*toc.c
+Fix chatroom invitation accepting
+
 * Sat Jun 28 2003 08:05 GMT [philip]	0.3.1-47
 - src/smileys.c
 fix parsing issue with smileys that start with <
