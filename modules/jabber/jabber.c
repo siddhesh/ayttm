@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.38 $",
-	"$Date: 2003/10/10 04:57:19 $",
+	"$Revision: 1.39 $",
+	"$Date: 2003/10/10 07:14:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -167,6 +167,7 @@ typedef struct _eb_jabber_local_account_data
 	char password[MAX_PREF_LEN];	// account password
 	int fd;				// the file descriptor
 	int status;			// the current status of the user
+	int prompt_password;
 	JABBER_Conn	*JConn;
 	int activity_tag;
 	int connect_tag;
@@ -291,40 +292,55 @@ static void ay_jabber_cancel_connect (void *data)
 	eb_jabber_logout(ela);
 }
 
+static void eb_jabber_finish_login( const char *password, gpointer data)
+{
+	eb_local_account *account = data;
+	eb_jabber_local_account_data * jlad;
+	char buff[1024];
+	int port = 5222;
+    
+	eb_debug(DBG_JBR, ">\n");
+
+	jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
+   
+	account->connected = 0;
+	account->connecting = 1;
+	snprintf(buff, sizeof(buff), _("Logging in to Jabber account: %s"), account->handle);
+	jlad->activity_tag = ay_activity_bar_add(buff, ay_jabber_cancel_connect, account);
+	if (!jlad->server_port || !strlen(jlad->server_port)) {
+#ifdef HAVE_OPENSSL
+	strcpy(jlad->ssl_server_port,"5223");
+#endif
+	strcpy(jlad->server_port,"5222");
+	}
+    
+#ifdef HAVE_OPENSSL
+	if (jlad->use_ssl)
+		port = atoi(jlad->ssl_server_port);    
+	else
+#endif
+		port = atoi(jlad->server_port);
+   
+	jlad->connect_tag = JABBER_Login(account->handle, password, 
+			jabber_server, jlad->use_ssl, port);
+}
+
 static void eb_jabber_login( eb_local_account * account )
 {
-    eb_jabber_local_account_data * jlad;
-    char buff[1024];
-    int port = 5222;
-    
-    eb_debug(DBG_JBR, ">\n");
+	eb_jabber_local_account_data * jlad;
+	char buff[1024];
 
-    jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
-   
+	if (account->connected || account->connecting) 
+		return;
     
-    if (account->connected || account->connecting) 
-	    return;
-    
-    account->connected = 0;
-    account->connecting = 1;
-    snprintf(buff, sizeof(buff), _("Logging in to Jabber account: %s"), account->handle);
-    jlad->activity_tag = ay_activity_bar_add(buff, ay_jabber_cancel_connect, account);
-    if (!jlad->server_port || !strlen(jlad->server_port)) {
-#ifdef HAVE_OPENSSL
-	  strcpy(jlad->ssl_server_port,"5223");
-#endif
-	  strcpy(jlad->server_port,"5222");
-    }
-    
-#ifdef HAVE_OPENSSL
-    if (jlad->use_ssl)
-	port = atoi(jlad->ssl_server_port);    
-    else
-#endif
-	port = atoi(jlad->server_port);
-    	    	    
-    jlad->connect_tag = JABBER_Login(account->handle, jlad->password, 
-			    jabber_server, jlad->use_ssl, port);
+	jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
+	if(jlad->prompt_password) {
+		snprintf(buff, sizeof(buff), _("Jabber! Password for: %s"), account->handle);
+		do_password_input_window(buff, "", eb_jabber_finish_login, account);
+	} else {
+		eb_jabber_finish_login(jlad->password, account);
+	}
+
 }
 
 void JABBERNotConnected(void *data)
@@ -450,6 +466,13 @@ static void jabber_account_prefs_init(eb_local_account *ela)
 	il->widget.entry.name = "PASSWORD";
 	il->widget.entry.label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &jlad->prompt_password;
+	il->widget.checkbox.name = "prompt_password";
+	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;

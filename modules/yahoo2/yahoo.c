@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.69 $",
-	"$Date: 2003/10/10 04:57:19 $",
+	"$Revision: 1.70 $",
+	"$Date: 2003/10/10 07:14:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1948,7 +1948,12 @@ static void eb_yahoo_finish_login(const char *password, eb_local_account *ela)
 {
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	char buff[1024];
-	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
+
+	/* don't allow double connects */
+	if(ela->connecting || ela->connected)
+		return;
+
+	ela->connecting = 1;
 
 	ref_count++;
 	ylad->id = yahoo_init_with_attributes(ela->handle, password,
@@ -1963,6 +1968,7 @@ static void eb_yahoo_finish_login(const char *password, eb_local_account *ela)
 			"conn_type", conn_type,
 			NULL);
 
+	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
 	ylad->connect_progress_tag = ay_activity_bar_add(buff, ay_yahoo_cancel_connect, ela);
 
 	LOG(("eb_yahoo_finish_login"));
@@ -1987,10 +1993,8 @@ static void eb_yahoo_login(eb_local_account * ela)
 	char buff[1024];
 
 	/* don't allow double connects */
-	if(ela->connecting)
+	if(ela->connecting || ela->connected)
 		return;
-
-	ela->connecting = 1;
 
 	if(ylad->prompt_password) {
 		snprintf(buff, sizeof(buff), _("Yahoo! Password for: %s"), ela->handle);
