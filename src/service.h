@@ -214,6 +214,8 @@ struct service_callbacks {
 	
 	/* free an account */
 	void (*free_account_data)(eb_account *account);
+	
+	int (*handle_url)(const char *url);
 };
 
 /*for every server you have the following: the name of the service,

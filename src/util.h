@@ -97,9 +97,9 @@ LList * find_chatrooms_with_remote_account(eb_account *remote);
 grouplist * find_grouplist_by_nick(char * nick);
 grouplist * find_grouplist_by_name(char * name);
 struct contact * find_contact_by_handle( char * handle );
-struct contact * find_contact_by_nick( char * nick);
+struct contact * find_contact_by_nick( const char * nick);
 struct contact * find_contact_in_group_by_nick( char * nick, grouplist *gl );
-eb_account * find_account_by_handle( char * handle, int type );
+eb_account * find_account_by_handle( const char * handle, int type );
 eb_local_account * find_local_account_by_handle( char * handle, int type );
 void strip_html(char * text);
 int remove_account( eb_account * a );
@@ -132,6 +132,9 @@ eb_account *find_account_for_protocol(struct contact *c, int service);
 GList * llist_to_glist(LList * l, int free_old);
 /* free_old will free the old list after converting */
 LList * glist_to_llist(GList * g, int free_old);
+
+int send_url(const char *url);
+int eb_send_message (const char *to, const char *msg, int service);
 
 #ifdef __cplusplus
 } /* extern "C" */

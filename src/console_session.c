@@ -66,7 +66,23 @@ static void console_session_get_command(void *data, int source, eb_input_conditi
 		console_session_close((int*)data);
 		return;
 	}
-	if(strcmp(contact_name, "focus-ayttm")) {
+	if(!strcmp(contact_name,"URL-ayttm")) {
+		if(read(source, &len, sizeof(short))<=0)
+		{
+			console_session_close((int*)data);
+			return;
+		}
+		message = alloca(len);
+		if(read(source, message, len)<=0)
+		{
+			console_session_close((int*)data);
+			return;
+		}
+		
+		ret = send_url(message);
+		write(source, &ret, sizeof(int));
+		return;		
+	} else if(strcmp(contact_name, "focus-ayttm")) {
 		if(read(source, &len, sizeof(short))<=0)
 		{
 			console_session_close((int*)data);
@@ -99,7 +115,6 @@ static void console_session_get_command(void *data, int source, eb_input_conditi
 
 		gtk_editable_insert_text(GTK_EDITABLE(remote_contact->chatwindow->entry),
 								 message, strlen(message), &pos);
-		send_message(NULL, remote_contact->chatwindow);
 	} else {
 		focus_statuswindow();
 	}

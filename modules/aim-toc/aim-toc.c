@@ -89,8 +89,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/08 07:39:31 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/08 12:02:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1170,6 +1170,45 @@ static void eb_aim_get_info( eb_local_account * from, eb_account * account_to )
 	toc_get_info( alad->conn, account_to->handle );
 }
 
+static int eb_aim_handle_url(const char *url)
+{
+	char *str = strdup(url); /*avoid gcc warnings */
+	int res=1;
+	if(!strncmp("aim:",url, 4)) {
+		char *action = str+4;
+		if(!strncmp(action,"goim?",5)) {
+			char *screenname = strstr(action,"screenname=");
+			char *message = strstr(action,"message=");
+			char *end = NULL;
+			
+			if (!screenname)
+				goto err;
+			
+			screenname += strlen("screenname=");
+			
+			end = strstr(screenname,"&");
+			
+			if (end)
+				*end='\0';
+			
+			if (message)
+				message += strlen("message=");
+			
+			if(eb_send_message(screenname, message, SERVICE_INFO.protocol_id))
+				goto ok;
+			else
+				goto err;
+		}
+		goto err;
+	}
+err:
+	res = 0;
+ok:
+	if (str)
+		free(str);
+	return res;	
+}
+
 static void aim_info_update(eb_account *sender)
 {
 	info_window *iw = sender->infowindow;
@@ -1181,14 +1220,6 @@ static void aim_info_update(eb_account *sender)
 static void aim_info_data_cleanup(info_window * iw)
 {
 }
-
-/*	There are no prefs for AIM-TOC at the moment.
-
-static input_list * eb_aim_get_prefs()
-{
-	return aim_prefs;
-}
-*/
 
 static void eb_aim_read_prefs_config(LList * values)
 {
@@ -1287,5 +1318,6 @@ struct service_callbacks * query_callbacks()
 	sc->add_group = eb_aim_add_group;
 	sc->del_group = eb_aim_del_group;
 	sc->rename_group = eb_aim_rename_group;
+	sc->handle_url = eb_aim_handle_url;
 	return sc;
 }

@@ -111,6 +111,7 @@ static struct option_help options [] =
 	{'c', "contact",    "Specify contact to send a message to via console server"},
 	{'m', "message",    "Specify the message to send via console server"},
 	{' ', NULL,        "-c and -m must be used toegether"},
+	{'u', "url",        "pass an url to a module"},
 	{'\0', NULL,         NULL}
 };
 
@@ -182,6 +183,7 @@ int main(int argc, char *argv[])
 #endif
 	char message[4096] = "";
 	char contact[256] = "";
+	char url[4096] = "";
 	gchar buff[1024];
 	struct stat stat_buf;
 	gboolean accounts_success = FALSE;
@@ -279,6 +281,7 @@ int main(int argc, char *argv[])
 	    	{"contact", required_argument, NULL, 'c'},
 	    	{"message", required_argument, NULL, 'm'},
 	    	{"config-dir", required_argument, NULL, 'd'},
+	    	{"url", required_argument, NULL, 'u'},
 #ifdef CRASH_DIALOG
 	    	{"crash", required_argument, NULL, 'C'},
 #endif
@@ -287,10 +290,10 @@ int main(int argc, char *argv[])
     
 		int option_index = 0;
 
-		c = getopt_long(argc, argv, "vhg:a:d:Dc:m:", long_options, &option_index);
+		c = getopt_long(argc, argv, "vhg:a:d:Dc:m:u:", long_options, &option_index);
 #else /* HAVE_GETOPT_LONG */
 /* Either had getopt_long or getopt or both so getopt should be here */
-		c = getopt (argc, argv, "vhg:a:d:Dc:m:");
+		c = getopt (argc, argv, "vhg:a:d:Dc:m:u:");
 #endif
 		/* Detect the end of the options. */
 
@@ -332,6 +335,10 @@ int main(int argc, char *argv[])
 
 		    case 'm':
 			strncpy(message, optarg, sizeof(message));
+			break;
+
+		    case 'u':
+			strncpy(url, optarg, sizeof(url));
 			break;
 
 #ifdef CRASH_DIALOG
@@ -379,7 +386,8 @@ int main(int argc, char *argv[])
 
 #endif
 
-	if (strlen(message) > 0 && strlen(contact) > 0) {
+	if ( (strlen(message) > 0 && strlen(contact) > 0)
+		|| strlen(url) > 0) {
 #ifndef __MINGW32__
 		struct sockaddr_un remote;
 #else
@@ -402,12 +410,21 @@ int main(int argc, char *argv[])
 			perror("connect");
 			exit(1);
 		}
-		length = strlen(contact)+1;
-		write(sock, &length, sizeof(short));
-		write(sock, contact, length);
-		length = strlen(message)+1;
-		write(sock, &length, sizeof(short));
-		write(sock, message, length);
+		if (strlen(url) > 0) {
+			length = strlen("URL-ayttm")+1;
+			write(sock, &length, sizeof(short));
+			write(sock, "URL-ayttm", length);
+			length = strlen(url)+1;
+			write(sock, &length, sizeof(short));
+			write(sock, url, length);
+		} else {
+			length = strlen(contact)+1;
+			write(sock, &length, sizeof(short));
+			write(sock, contact, length);
+			length = strlen(message)+1;
+			write(sock, &length, sizeof(short));
+			write(sock, message, length);
+		}
 		read(sock, &ret, sizeof(int));
 		close(sock);
 		exit(ret);

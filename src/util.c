@@ -687,7 +687,7 @@ struct contact * find_contact_by_handle( char * handle )
 	return NULL;
 }
 
-struct contact * find_contact_by_nick( char * nick )
+struct contact * find_contact_by_nick( const char * nick )
 {
 	LList *l1, *l2;
 
@@ -718,7 +718,7 @@ struct contact * find_contact_in_group_by_nick( char * nick , grouplist *gl )
 	return NULL;
 }
 
-eb_account * find_account_by_handle( char * handle, int type )
+eb_account * find_account_by_handle( const char * handle, int type )
 {
 	LList *l1, *l2, *l3;
 
@@ -1563,4 +1563,44 @@ LList * glist_to_llist(GList * gl, int free_old)
 	return l;
 }
 
+int send_url(const char * url)
+{
+	LList *node;
+	int ret = 0;
+	for( node = accounts; node && !ret; node = node->next ) {
+		eb_local_account * ela = node->data;
+		if (CAN(ela, handle_url)) {
+			ret = RUN_SERVICE(ela)->handle_url(url);
+			eb_debug(DBG_CORE,"%s: %s handle this url\n",ela->handle,
+					ret?"did":"didn't");
+		} else {
+			eb_debug(DBG_CORE,"%s: no handle of this url\n",ela->handle);
+		}
+		
+	}
+	return ret;
+}
 
+int eb_send_message (const char *to, const char *msg, int service)
+{
+  gint pos = 0;
+  struct contact *con;
+  eb_account *ac;
+  
+  if (service != -1)
+	ac = find_account_by_handle(to, service);
+  else
+	con = find_contact_by_nick(to);
+	  
+  if (ac) {
+	  con = ac->account_contact;
+	  eb_chat_window_display_account(ac);
+  } else if (con) {
+	  eb_chat_window_display_contact(con);
+  } else {
+	  return 0;
+  }
+  gtk_editable_insert_text(GTK_EDITABLE(con->chatwindow->entry), msg?msg:"", msg?strlen(msg):0, &pos);
+  /* send_message(NULL, con->chatwindow);*/
+  return 1;
+}
