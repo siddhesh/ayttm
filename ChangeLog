@@ -1,3 +1,14 @@
+* Thu May  1 2003 10:50 GMT [andy]	0.3.0-75
+- modules/importers/import_everybuddy.c
+  src/add_contact_window.c
+  src/chat_room.c
+  src/dialog.[ch]
+  src/edit_account_window.c
+  src/edit_contact_window.c
+  src/edit_group_window.c
+  src/edit_list_window.c
+Replace do_icon_button() with gtkut_create_icon_button()
+
 * Thu May  1 2003 09:50 GMT [andy]	0.3.0-74
 - modules/*-toc.c
   modules/importers/import_everybuddy.c

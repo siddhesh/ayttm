@@ -26,14 +26,12 @@
 #include <string.h>
 
 #include "status.h"
-#include "dialog.h"
 #include "util.h"
 
 #include "gtk/gtkutils.h"
 
 #include "pixmaps/tb_edit.xpm"
 #include "pixmaps/cancel.xpm"
-
 
 
 static gint window_open = 0;
@@ -119,7 +117,7 @@ void edit_group_window_new( grouplist * g)
 
 		/*Ok Button*/
 		hbox2=gtk_hbox_new(FALSE,5);
-		button = do_icon_button(g?_("Save"):_("Add"), tb_edit_xpm, edit_group_window);
+		button = gtkut_create_icon_button( g?_("Save"):_("Add"), tb_edit_xpm, edit_group_window );
 
 		gtk_signal_connect(GTK_OBJECT(button), "clicked", 
 						   GTK_SIGNAL_FUNC(ok_callback), NULL );
@@ -129,7 +127,7 @@ void edit_group_window_new( grouplist * g)
 		
 		/*Cancel Button*/
       
-		button = do_icon_button(_("Cancel"), cancel_xpm, edit_group_window);
+		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_group_window );
 
 		gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
 						GTK_SIGNAL_FUNC(cancel_callback), NULL);

@@ -29,7 +29,6 @@
 
 #include "status.h"
 #include "util.h"
-#include "dialog.h"
 #include "globals.h"
 #include "messages.h"
 #include "service.h"
@@ -265,7 +264,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 		/*Add Button*/
 
-		button = do_icon_button(add_label,tb_preferences_xpm, edit_account_window);
+		button = gtkut_create_icon_button( add_label, tb_preferences_xpm, edit_account_window );
 		
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
 				GTK_SIGNAL_FUNC(ok_callback), NULL);
@@ -275,7 +274,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 		/*Cancel Button*/
 
-		button = do_icon_button(_("Cancel"),cancel_xpm, edit_account_window);
+		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_account_window );
 		
 		gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
 				GTK_SIGNAL_FUNC(gtk_widget_destroy),

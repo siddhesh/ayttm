@@ -30,7 +30,6 @@
 #include "util.h"
 #include "add_contact_window.h"
 #include "messages.h"
-#include "dialog.h"
 
 #include "gtk/gtkutils.h"
 
@@ -276,7 +275,6 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 		GtkWidget *button;
 		GtkWidget *table;
 		GtkWidget *frame;
-		GtkWidget *separator;
 		GList *list;
 		LList *walk;
 
@@ -404,20 +402,13 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 		gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
 		gtk_widget_show(frame);
 
-		/*Lets try adding a seperator*/
-
-		separator = gtk_hseparator_new();
-		gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
-		gtk_widget_show(separator);
-		
 		hbox = gtk_hbox_new(FALSE, 5);
 		hbox2 = gtk_hbox_new(TRUE, 5);
 
-		/*Add Button*/
-
 		gtk_widget_set_usize(hbox2, 200,25);
 
-		button = do_icon_button(_("Add"), tb_preferences_xpm, add_contact_window);
+		/*Add Button*/
+		button = gtkut_create_icon_button( _("Add"), tb_preferences_xpm, add_contact_window );
 
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
 							GTK_SIGNAL_FUNC(add_button_callback),
@@ -427,8 +418,7 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 		gtk_widget_show(button);
 
 		/*Cancel Button*/
-
-		button = do_icon_button(_("Cancel"), cancel_xpm, add_contact_window);
+		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, add_contact_window );
 
 		gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
 						GTK_SIGNAL_FUNC(gtk_widget_destroy),

@@ -28,7 +28,6 @@
 
 #include "service.h"
 #include "status.h"
-#include "dialog.h"
 #include "util.h"
 
 #include "gtk/gtkutils.h"
@@ -174,7 +173,7 @@ void edit_contact_window_new( struct contact * c )
 		
 		/*Ok Button*/
    
-		button = do_icon_button(_("Save"), tb_edit_xpm, edit_contact_window);
+		button = gtkut_create_icon_button( _("Save"), tb_edit_xpm, edit_contact_window );
 
 		gtk_signal_connect(GTK_OBJECT(button), "clicked", 
 						   GTK_SIGNAL_FUNC(ok_callback), NULL );
@@ -184,7 +183,7 @@ void edit_contact_window_new( struct contact * c )
 		
 		/*Cancel Button*/
       
-		button = do_icon_button(_("Cancel"), cancel_xpm, edit_contact_window);
+		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_contact_window );
 
 		gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
 									  GTK_SIGNAL_FUNC(gtk_widget_destroy),

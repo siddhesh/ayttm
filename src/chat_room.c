@@ -27,7 +27,6 @@
 #include "globals.h"
 #include "util.h"
 #include "sound.h"
-#include "dialog.h"
 #include "prefs.h"
 #include "smileys.h"
 #include "service.h"
@@ -560,7 +559,7 @@ void open_join_chat_window()
 	
 	/* stuff for the join button */
 	
-	button = do_icon_button(_("Join"),ok_xpm, join_chat_window);
+	button = gtkut_create_icon_button( _("Join"), ok_xpm, join_chat_window );
 
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
 					GTK_SIGNAL_FUNC(join_chat_callback),
@@ -571,7 +570,7 @@ void open_join_chat_window()
 	
 	/* stuff for the cancel button */
 
-	button = do_icon_button(_("Cancel"), cancel_xpm, join_chat_window);
+	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, join_chat_window );
 
 	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
 						GTK_SIGNAL_FUNC(gtk_widget_destroy),

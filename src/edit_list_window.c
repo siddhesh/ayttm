@@ -35,7 +35,6 @@
 #include "gtk_globals.h"
 #include "service.h"
 #include "messages.h"
-#include "dialog.h"
 
 #include "gtk/gtkutils.h"
 
@@ -547,7 +546,7 @@ void show_data_choicewindow(
 
 		/* put in the pixmap and label for the 'OK' button */
 
-		button = do_icon_button(ok_button_label, ok_xpm, window); 
+		button = gtkut_create_icon_button( ok_button_label, ok_xpm, window ); 
 
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
 				GTK_SIGNAL_FUNC(ok_callback), NULL);
@@ -557,7 +556,7 @@ void show_data_choicewindow(
 
 		/* now start on the cancel button */
 
-		button = do_icon_button(_("Cancel"), cancel_xpm, window);
+		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, window );
 
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
 				GTK_SIGNAL_FUNC(cancel_callback), NULL);

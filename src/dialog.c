@@ -127,43 +127,6 @@ void do_list_dialog( gchar * message, gchar * title, char **list, void (*action)
 	eb_debug(DBG_CORE, ">Leaving, all done\n");
 }
 
-GtkWidget * do_icon_button (char *label, char **xpm, GtkWidget *w) {
-	GtkWidget *button;
-	GtkWidget *blabel;
-	GtkWidget *hbox;
-	GtkWidget *iconwid;
-	GdkPixmap *icon;
-	GdkBitmap *mask;
-
-	hbox = gtk_hbox_new(FALSE, 0);
-
-	/* w may not be realised, prefer to use statuswindow if it is */
-	if (!w->window && statuswindow)
-		icon = gdk_pixmap_create_from_xpm_d(statuswindow->window, &mask, NULL, xpm);
-	else
-		icon = gdk_pixmap_create_from_xpm_d(w->window, &mask, NULL, xpm);
-	
-	iconwid = gtk_pixmap_new(icon, mask);
-	blabel = gtk_label_new(label);
-
-	gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox), blabel, FALSE, FALSE, 2);
-
-	gtk_widget_show(iconwid);
-	gtk_widget_show(blabel);
-	gtk_widget_show(hbox);
-	
-	button = gtk_button_new();
-
-	gtk_widget_show(hbox);
-
-	gtk_container_add (GTK_CONTAINER (button), hbox);
-	gtk_widget_set_usize(button, button->requisition.width<100?100:button->requisition.width, 25);
-
-	gtk_widget_show(button);
-	return button;
-}
-
 typedef struct _dialog_buttons {
 	GtkWidget *yes;
 	GtkWidget *no;
@@ -196,6 +159,8 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 	dialog_buttons *buttons = g_new0(dialog_buttons, 1);
 	
 	dialog_window = gtk_dialog_new();
+	gtk_widget_realize(dialog_window);
+	
 	label = gtk_label_new(message);
 	gtk_widget_set_usize(label, 240, -1);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
@@ -216,7 +181,7 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->vbox), hbox_xpm, TRUE, TRUE, 5);
 	gtk_widget_show(hbox_xpm);
 		
-	button = do_icon_button(_("No"), tb_no_xpm, dialog_window);
+	button = gtkut_create_icon_button( _("No"), tb_no_xpm, dialog_window );
 	
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 		   GTK_SIGNAL_FUNC(action), data );
@@ -231,7 +196,7 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 	hbox2 = gtk_hbox_new(FALSE,0);
 	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 0);
 
-	button = do_icon_button(_("Yes"), tb_yes_xpm, dialog_window);
+	button = gtkut_create_icon_button( _("Yes"), tb_yes_xpm, dialog_window );
 	
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 		   GTK_SIGNAL_FUNC(action), data );
@@ -313,7 +278,7 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 
 	input_window->window = gtk_window_new(GTK_WINDOW_DIALOG);
 	gtk_window_set_position(GTK_WINDOW(input_window->window), GTK_WIN_POS_MOUSE);
-    	gtk_widget_realize(input_window->window);
+	gtk_widget_realize(input_window->window);
 
 	gtk_container_set_border_width(GTK_CONTAINER(input_window->window), 5);
 	label = gtk_label_new(title);
@@ -346,7 +311,7 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 
   	gtk_widget_set_usize(hbox2, 200,25);
 
-	button = do_icon_button(_("OK"), ok_xpm, input_window->window);
+	button = gtkut_create_icon_button( _("OK"), ok_xpm, input_window->window );
 	     
 	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_ok,
 			input_window);
@@ -358,7 +323,7 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 	gtk_widget_show(button);
 
-	button = do_icon_button(_("Cancel"), cancel_xpm, input_window->window);
+	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, input_window->window );
 	     
 	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_cancel,
 			input_window);

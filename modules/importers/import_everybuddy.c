@@ -30,11 +30,12 @@
 #endif
 #include "globals.h"
 #include "service.h"
-#include "dialog.h"
 #include "prefs.h"
 #include "util.h"
 #include "plugin_api.h"
 #include "messages.h"
+
+#include "gtk/gtkutils.h"
 
 #include "pixmaps/ok.xpm"
 #include "pixmaps/cancel.xpm"
@@ -61,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Everybuddy Settings", 
 	"Import the Everybuddy Settings", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/01 08:54:09 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/05/01 09:56:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -249,8 +250,8 @@ void import_eb_accounts(ebmCallbackData *data)
 		awaybutton      = gtk_check_button_new_with_label(
 					_("Import away messages"));
 		
-		okbutton = do_icon_button(_("OK"), ok_xpm, window);
-		cancelbutton = do_icon_button(_("Cancel"), cancel_xpm, window);
+		okbutton = gtkut_create_icon_button(_("OK"), ok_xpm, window);
+		cancelbutton = gtkut_create_icon_button(_("Cancel"), cancel_xpm, window);
 
 		hbox = gtk_hbox_new(FALSE, 5);
 		gtk_box_pack_start(GTK_BOX(hbox), okbutton, FALSE, FALSE, 2);
