@@ -1,2 +1,4 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS=win32
+
+all:
