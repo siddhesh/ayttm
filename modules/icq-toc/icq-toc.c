@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.42 $",
-	"$Date: 2003/09/04 16:10:29 $",
+	"$Revision: 1.43 $",
+	"$Date: 2003/10/11 09:22:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -178,7 +178,7 @@ struct eb_icq_local_account_data {
 	int connect_tag;
 	LList * icq_buddies;
 	int is_setting_state;
-	
+	int prompt_password;	
 };
 
 enum
@@ -770,15 +770,14 @@ static void ay_icq_cancel_connect(void *data)
 	eb_icq_logout(ela);
 }
 
-static void eb_icq_login( eb_local_account * account )
+static void eb_icq_finish_login(const char *password, void *data)
 {
 	struct eb_icq_local_account_data * alad;
 	char buff[1024];
 	int port = atoi(icq_port);
-	
-	account->connecting = 1;
+	eb_local_account *account = (eb_local_account *)data;
 	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
-
+	
 	snprintf(buff, sizeof(buff), _("Logging in to ICQ account: %s"), account->handle);
  	alad->activity_tag = ay_activity_bar_add(buff, ay_icq_cancel_connect, account);
 
@@ -788,8 +787,29 @@ static void eb_icq_login( eb_local_account * account )
 		should_fallback = 0;
 	}
 
-	alad->connect_tag = icqtoc_signon( account->handle, alad->password,
+	alad->connect_tag = icqtoc_signon( account->handle, password,
 			      icq_server, atoi(icq_port), alad->icq_info);
+}
+
+static void eb_icq_login( eb_local_account * account )
+{
+	struct eb_icq_local_account_data * alad;
+	char buff[1024];
+	
+	if (account->connecting || account->connected)
+		return;
+	
+	account->connecting = 1;
+	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
+
+	if (alad->prompt_password || !alad->password || !strlen(alad->password)) {
+		snprintf(buff, sizeof(buff), _("ICQ password for: %s"), account->handle);
+		do_password_input_window(buff, "", 
+				eb_icq_finish_login, account);
+	} else {
+		eb_icq_finish_login(alad->password, account);
+	}
+
 }
 
 static void eb_icq_logged_in (toc_conn *conn) 
@@ -957,6 +977,13 @@ static void icq_init_account_prefs(eb_local_account * ela)
 	il->widget.entry.name = "PASSWORD";
 	il->widget.entry.label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &alad->prompt_password;
+	il->widget.checkbox.name = "prompt_password";
+	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;

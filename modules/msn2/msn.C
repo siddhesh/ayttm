@@ -11,7 +11,7 @@
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope thact it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -171,8 +171,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.66 $",
-	"$Date: 2003/10/10 19:34:41 $",
+	"$Revision: 1.67 $",
+	"$Date: 2003/10/11 09:22:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -734,7 +734,7 @@ static void eb_msn_login( eb_local_account * account )
 	
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
 
-	if (mlad->prompt_password) {
+	if (mlad->prompt_password || !mlad->password || !strlen(mlad->password)) {
 		snprintf(buff, sizeof(buff), _("MSN password for: %s"), account->handle);
 		do_password_input_window(buff, "", 
 				eb_msn_finish_login, account);

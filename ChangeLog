@@ -1,3 +1,9 @@
+* Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre11
+- modules/*toc/*toc.c
+ask pass stuff
+- modules/*/*
+ask pass if empty too
+
 * Fri Oct 10 2003 19:30 GMT [philip]	0.4.3-pre10
 - modules/yahoo2/yahoo.c modules/msn2/msn.C
 no need to typecast callback anymore

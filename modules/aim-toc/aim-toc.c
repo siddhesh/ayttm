@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.54 $",
-	"$Date: 2003/09/04 16:10:29 $",
+	"$Revision: 1.55 $",
+	"$Date: 2003/10/11 09:22:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -178,7 +178,7 @@ struct eb_aim_local_account_data {
 	int connect_tag;
 	LList * aim_buddies;
 	int is_setting_state;
-
+	int prompt_password;	
 };
 
 enum
@@ -875,27 +875,47 @@ static int eb_aim_async_socket(char *host, int port, void *cb, void *data)
   return tag;
 }
 
-static void eb_aim_login( eb_local_account * account )
+static void eb_aim_finish_login(const char *password, void *data)
 {
 	struct eb_aim_local_account_data * alad;
 	char buff[1024];
 	int port = atoi(aim_port);
+	eb_local_account *account = (eb_local_account *)data;
+	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
+	
 	snprintf(buff, sizeof(buff), _("Logging in to AIM account: %s"), account->handle);
 
-	account->connecting = 1;
-	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
-
 	alad->activity_tag = ay_activity_bar_add(buff, ay_aim_cancel_connect, account);
-	
+
 	if (should_fallback) {
 		port = aim_fallback_ports[aim_last_fallback];
 		aim_last_fallback++;
 		should_fallback = 0;
 	}
 
-	alad->connect_tag = toc_signon( account->handle, alad->password,
+	alad->connect_tag = toc_signon( account->handle, password,
 			      aim_server, port, alad->aim_info);
 	
+}
+
+static void eb_aim_login( eb_local_account * account )
+{
+	struct eb_aim_local_account_data * alad;
+	char buff[1024];
+	
+	if (account->connecting || account->connected)
+		return;
+	
+	account->connecting = 1;
+	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	if (alad->prompt_password || !alad->password || !strlen(alad->password)) {
+		snprintf(buff, sizeof(buff), _("AIM password for: %s"), account->handle);
+		do_password_input_window(buff, "", 
+				eb_aim_finish_login, account);
+	} else {
+		eb_aim_finish_login(alad->password, account);
+	}
 }
 
 static void eb_aim_logged_in (toc_conn *conn)
@@ -911,6 +931,7 @@ static void eb_aim_logged_in (toc_conn *conn)
 	alad->conn = conn;
 	
 	ay_activity_bar_remove(alad->activity_tag);
+
 	alad->activity_tag=0;
 	
 	if(alad->conn->fd == -1 )
@@ -1036,6 +1057,13 @@ static void aim_init_account_prefs(eb_local_account * ela)
 	il->widget.entry.name = "PASSWORD";
 	il->widget.entry.label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &alad->prompt_password;
+	il->widget.checkbox.name = "prompt_password";
+	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;

@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.72 $",
-	"$Date: 2003/10/10 19:34:41 $",
+	"$Revision: 1.73 $",
+	"$Date: 2003/10/11 09:22:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1997,7 +1997,7 @@ static void eb_yahoo_login(eb_local_account * ela)
 	if(ela->connecting || ela->connected)
 		return;
 
-	if(ylad->prompt_password) {
+	if(ylad->prompt_password || !ylad->password || !strlen(ylad->password)) {
 		snprintf(buff, sizeof(buff), _("Yahoo! password for: %s"), ela->handle);
 		do_password_input_window(buff, "", eb_yahoo_finish_login, ela);
 	} else {
