@@ -262,6 +262,7 @@ void ay_activity_window::close_window( void )
 	while(packs) {
 		ay_activity_bar_pack *abp = (ay_activity_bar_pack *)packs->data;
 		abp->cancel();
+		packs = l_list_remove(packs, abp);
 		delete abp;
 	}
 }
