@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#   include <config.h>
+#endif
+
 #ifndef HAVE_GDK_PIXBUF
 #include "debug.h"
 int ay_image_window_new(int width, int height, const char *title) { 
