@@ -1,3 +1,7 @@
+* Thu Jan 29 2004 05:10 GMT [philip]	0.4.6-5
+- modules/yahoo2/libyahoo2/yahoo_fn.c
+Braces around initialiser for anonymous union
+
 * Wed Jan 28 2004 21:12 GMT [breser]	0.4.6-4
 - modules/yahoo2/libyahoo2/yahoo_fn.[ch]
 Fix new yahoo authentication table code to work on 64-bit archs where sizeof(int) != sizeof(long).
