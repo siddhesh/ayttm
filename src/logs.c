@@ -141,7 +141,7 @@ void	ay_log_file_close( log_file *ioLogFile )
 	}
 }
 
-void	ay_log_file_destroy( log_file **ioLogFile )
+static void	ay_log_file_destroy_ext ( log_file **ioLogFile, int close )
 {
 	log_file	*the_log_file = NULL;
 	
@@ -150,7 +150,8 @@ void	ay_log_file_destroy( log_file **ioLogFile )
 	
 	the_log_file = *ioLogFile;
 	
-	ay_log_file_close( the_log_file );
+	if (close)
+		ay_log_file_close( the_log_file );
 	
 	if ( the_log_file->filename != NULL )
 	{
@@ -161,4 +162,14 @@ void	ay_log_file_destroy( log_file **ioLogFile )
 	memset( the_log_file, 0, sizeof( log_file ) );
 	
 	*ioLogFile = NULL;
+}
+
+void	ay_log_file_destroy ( log_file **ioLogFile )
+{
+	ay_log_file_destroy_ext(ioLogFile, 1);
+}
+
+void	ay_log_file_destroy_no_close ( log_file **ioLogFile )
+{
+	ay_log_file_destroy_ext(ioLogFile, 0);
 }

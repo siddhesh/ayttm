@@ -245,7 +245,7 @@ static void action_callback( GtkWidget *widget, void *d )
 	
 	conversation_action( logfile, FALSE );
 	
-	ay_log_file_destroy( &logfile );
+	ay_log_file_destroy_no_close( &logfile );
 }
 
 

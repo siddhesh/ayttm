@@ -118,9 +118,10 @@ void conversation_action( log_file *li, int to_end )
 	
 	logfile = ay_log_file_create( li->filename );
 	logfile->log_started = li->log_started;
+	err = ay_log_file_open( logfile, "r" );
+
 	logfile->filepos = li->filepos;
 	
-	err = ay_log_file_open( logfile, "r" );
 	
 	if ( err != 0 )
 	{

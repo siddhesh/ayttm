@@ -83,6 +83,15 @@ void		ay_log_file_close( log_file *ioLogFile );
 */
 void		ay_log_file_destroy( log_file **ioLogFile );
 
+
+/** Free all memory allocated for a log file and set it to NULL.
+	
+	@note This will not close the file
+	
+	@param	ioLogFile		the log file which we are destroying
+*/
+void		ay_log_file_destroy_no_close( log_file **ioLogFile );
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
