@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.45 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.46 $",
+	"$Date: 2003/12/11 06:27:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -521,7 +521,7 @@ static void eb_icq_user_info(toc_conn * conn, char * user, char * message )
 
 static void eb_icq_new_group(char * group)
 {
-	printf("===> %p %x\n", find_grouplist_by_name(group),
+	eb_debug(DBG_TOC, "===> %p %x\n", find_grouplist_by_name(group),
 			group_mgmt_check_moved(group));
 	if(!find_grouplist_by_name(group) && !group_mgmt_check_moved(group)) {
 		add_group(group);

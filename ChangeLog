@@ -1,3 +1,16 @@
+* Thu Dec 11 2003 06:26 GMT [philip]	0.4.5-4
+- modules/icq-toc/icq-toc.c
+printf -> eb_debug
+
+* Wed Dec 10 2003 09:37 GMT [philip]	0.4.5-3
+- modules/yahoo2/
+major work for webcam broadcasts
+- src/input_list.h
+make name/label part of widget rather than each widget type
+add tooltip property
+- AUTHORS/
+philip works again
+
 * Fri Dec 05 2003 11:55 GMT [colin]	0.4.5-2
 - modules/msn2/msn.C
 Gnomemeeting changed --callto to --call...
