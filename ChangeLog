@@ -1,3 +1,8 @@
+* Wed Oct 22 2003 18:25 GMT [colin]	0.4.3-13
+- src/chat_room.c
+autocomplete usernames with tab
+fix bug where local_user->alias is null
+
 * Wed Oct 22 2003 18:25 GMT [colin]	0.4.3-12
 - modules/msn2/msn.C
 Add auto rename pref

@@ -250,6 +250,62 @@ void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, 
 	}	
 }
 
+static char * complete_nickname( LList * l, const char *begin, int *choice)
+{
+	char * complete = NULL;
+	LList *possible = NULL;
+	LList *cur = NULL;
+	
+	*choice = TRUE;
+	
+	if (begin == NULL)
+		return NULL;
+	for (cur = l; cur && cur->data; cur = cur->next) {
+		char * curnick = (char *) cur->data;
+		if (!strncasecmp(curnick, begin, strlen(begin))) {
+			possible = l_list_prepend(possible, curnick);
+		}
+	}
+	if (possible == NULL)
+		return NULL;
+	else if (l_list_length(possible) == 1) {
+		complete = strdup((char *)possible->data);
+		l_list_free(possible);
+		possible=NULL;
+		*choice = FALSE;
+		return complete;
+	} else {
+		int i = 0;
+		char *last_good = NULL;
+		for (i = 0; i < 255; i ++) {
+			int common = TRUE;
+			char * sub = malloc(i+1);
+			memset(sub,0,i+1);
+			strncpy(sub,(char*)possible->data, i);
+			cur = possible;
+			while (cur && cur->data) {
+				char * compareto = cur->data;
+				if (strncasecmp(compareto, sub, strlen(sub))) {
+					common = FALSE;
+					break;
+				} 
+				cur = cur->next;
+			}
+			if (common == TRUE) {
+				if (last_good) free(last_good);
+				last_good = sub;
+			} else {
+				l_list_free(possible);
+				free(sub);
+				return last_good;
+			}
+		}
+	}
+	if (possible)
+		l_list_free(possible);
+	return complete;
+}
+
 static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
   eb_chat_room *cr = (eb_chat_room *)data;
@@ -258,6 +314,44 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
   eb_chat_room_update_window_title(cr, FALSE);
   set_tab_normal (cr);
   
+  if (event->keyval == GDK_Tab) {
+	int x = gtk_editable_get_position(GTK_EDITABLE (cr->entry));
+	if (x > 0) {
+		char * word= gtk_editable_get_chars(GTK_EDITABLE (cr->entry), 0, x);
+		char * last_word = strrchr(word, ' ');
+		char * nick = NULL;
+		int choice = TRUE;
+		
+		if (last_word == NULL)
+			last_word = word;
+		
+		if (last_word == NULL) {
+			gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+			return FALSE;
+		}
+		if (last_word != word) 
+			last_word++;
+		eb_debug(DBG_CORE, "word caught: %s\n",last_word);
+		
+		nick = complete_nickname(cr->fellows, last_word, &choice);
+		
+		if (nick != NULL) {
+			int b = strlen(word) - strlen(last_word);
+			
+			gtk_editable_delete_text(GTK_EDITABLE (cr->entry), b, x);
+			eb_debug(DBG_CORE, "insert %s at %d\n",nick, b);
+			gtk_editable_insert_text(GTK_EDITABLE (cr->entry), nick, strlen(nick), &b);
+			if (!choice)
+				gtk_editable_insert_text(GTK_EDITABLE (cr->entry), " ", strlen(" "), &b);
+			gtk_editable_set_position(GTK_EDITABLE (cr->entry), b);
+			gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+			return TRUE;
+		}
+	}
+	gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+	return FALSE;
+  }
+
   if (!iGetLocalPref("do_multi_line"))
 	  return FALSE;
   
@@ -1304,12 +1398,18 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 		time(&t);
 		cur_time = localtime(&t);
 		if (iGetLocalPref("do_convo_timestamp")) {
+			char *disp = chat_room->local_user->alias;
+			if (!strcmp(disp, ""))
+				disp = chat_room->local_user->handle;
 			g_snprintf(buff, 2048, "<B><FONT COLOR=\"%s\">%d:%.2d:%.2d</FONT> <FONT COLOR=\"%s\">%s: </FONT></B>",
 			 color, 
 			 cur_time->tm_hour, cur_time->tm_min,
-			 cur_time->tm_sec, color, chat_room->local_user->alias);
+			 cur_time->tm_sec, color, disp);
 		} else {
-			g_snprintf(buff, 2048, "<FONT COLOR=\"%s\"><B>%s: </B></FONT>", color, chat_room->local_user->alias);
+			char *disp = chat_room->local_user->alias;
+			if (!strcmp(disp, ""))
+				disp = chat_room->local_user->handle;
+			g_snprintf(buff, 2048, "<FONT COLOR=\"%s\"><B>%s: </B></FONT>", color, disp);
 		}
 	}
 	else
