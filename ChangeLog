@@ -1,3 +1,7 @@
+* Sun May 11 2003 13:35 GMT [philip]	0.3.0-182
+- modules/yahoo2/yahoo.c
+Correctly handle multiple webcam invites from the same buddy
+
 * Sun May 11 2003 13:15 GMT [philip]	0.3.0-181
 - src/image_window.c
 We can now see moving pictures - jas_init had to be called for each

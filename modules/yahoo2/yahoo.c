@@ -127,8 +127,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.52 $",
-	"$Date: 2003/05/11 10:03:38 $",
+	"$Revision: 1.53 $",
+	"$Date: 2003/05/11 13:35:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1603,15 +1603,28 @@ static void eb_yahoo_webcam_invite_callback(gpointer data, int result)
 		return;
 	
 	if(result) {
-		struct webcam_feed *wf;
+		struct webcam_feed *wf=NULL;
 		eb_local_account *ela = yahoo_find_local_account_by_id(wd->id);
 		eb_yahoo_local_account_data *yla;
 		if(ela) {
+			YList *l;
 			yla = ela->protocol_local_account_data;
-			wf = y_new0(struct webcam_feed, 1);
-			wf->id = wd->id;
-			wf->who = wd->who;
-			yla->webcams = y_list_prepend(yla->webcams, wf);
+			for(l = yla->webcams; l; l = y_list_next(l)) {
+				wf = l->data;
+				if(!strcmp(wd->who, wf->who))
+					break;
+				wf = NULL;
+			}
+
+			if(wf) {
+				FREE(wd->who);
+				yahoo_webcam_close_feed(wf->id, wf->who);
+			} else {
+				wf = y_new0(struct webcam_feed, 1);
+				wf->id = wd->id;
+				wf->who = wd->who;
+				yla->webcams = y_list_prepend(yla->webcams, wf);
+			}
 			yahoo_webcam_get_feed(wd->id, wd->who);
 		} else
 			FREE(wd->who);
