@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 12:17 GMT [colin]	0.3.0-16
+- modules/yahoo2/yahoo.c
+disable multiaccounting
+
 * Mon Apr 28 2003 12:17 GMT [colin]	0.3.0-15
 - modules/msn2/msn.C
 some multiaccount cleans

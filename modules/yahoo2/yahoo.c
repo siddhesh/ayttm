@@ -120,15 +120,15 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.28 $",
-	"$Date: 2003/04/28 11:48:53 $",
+	"$Revision: 1.29 $",
+	"$Date: 2003/04/28 12:20:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
 	NULL
 };
 struct service SERVICE_INFO = {"Yahoo", -1, 
-	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER | SERVICE_CAN_ICONVERT | SERVICE_CAN_MULTIACCOUNT, 
+	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER | SERVICE_CAN_ICONVERT, 
 	NULL};
 /* End Module Exports */
 
@@ -698,6 +698,7 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 			changed = 1;
 			con=add_new_contact(bud->group, contact_name, SERVICE_INFO.protocol_id);
 		}
+		/* FIXME use ela */
 		ea = eb_yahoo_new_account(NULL, bud->id);
 		add_account(con->nick, ea);
 	}
@@ -755,6 +756,7 @@ static void ext_yahoo_got_ignore(int id, YList * ign)
 			}
 			con=add_new_contact(bud->group, contact_name, SERVICE_INFO.protocol_id);
 		}
+		/* FIXME use ela */
 		ea = eb_yahoo_new_account(NULL, bud->id);
 		add_account(con->nick, ea);
 	}
@@ -788,6 +790,7 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 
 		sender = find_account_by_handle(who, SERVICE_INFO.protocol_id);
 		if (sender == NULL) {
+			/* FIXME use ela */
 			sender = eb_yahoo_new_account(NULL, who);
 			add_dummy_contact(who, sender);
 		}
@@ -1427,6 +1430,7 @@ static void eb_yahoo_authorize_callback(gpointer data, int result)
 
 	if(result) {
 		if(!find_account_by_handle(ay->who, SERVICE_INFO.protocol_id)) {
+			/* FIXME use ela */
 			eb_account *ea = eb_yahoo_new_account(NULL, ay->who);
 			add_unknown_account_window_new(ea);
 		}
