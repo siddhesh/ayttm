@@ -21,8 +21,9 @@
 
 #include "intl.h"
 
+#include <stddef.h>
 #include <gtk/gtk.h>
-#include "llist.h"
+
 #include "plugin_api.h"
 #include "activity_bar.h"
 
@@ -36,14 +37,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-static void cancel_clicked(GtkButton * btn, gpointer data);
-static gint delete_event(GtkWidget *widget, GdkEvent *event, gpointer null);
-static int update_activity(void * data);
+static void	s_cancel_clicked(GtkButton * btn, gpointer data);
+static gint	s_delete_event(GtkWidget *widget, GdkEvent *event, gpointer null);
+static int	s_update_activity(void * data);
 #ifdef __cplusplus
 }
 #endif
 
-/*
+/**
  * The activity_bar_pack class - this contains the label, progress bar and
  * cancel button.  It calls the cancel callback when cancelled and handles
  * updating of the label and progress bar.
@@ -51,10 +52,10 @@ static int update_activity(void * data);
  */
 class ay_activity_bar_pack {
 	private:
-	GtkWidget *lbl, *hbox, *pbar, *cbtn;
-	activity_bar_cancel_callback cancel_callback;
-	void *userdata;
-	int tag;
+	GtkWidget *m_lbl, *m_hbox, *m_pbar, *m_cbtn;
+	activity_bar_cancel_callback m_cancel_callback;
+	void *m_userdata;
+	int m_tag;
 
 	public:
 	ay_activity_bar_pack(const char *label,
@@ -62,29 +63,30 @@ class ay_activity_bar_pack {
 	void update_label(const char *label);
 	void update_activity( void );
 	void cancel( void );
-	int get_tag( void );
+	int get_tag( void ) const;
 	~ay_activity_bar_pack( void );
 
 	friend class ay_activity_window;
 };
 
-/*
+/**
  * The activity_window class - this contains a list of all progress bars.
  * you can add/remove progress bars from it.  It handles the timer that
  * updates all existing progress bars.
  * The window is created and displayed when the first progress bar is
  * added, and deleted when the last one is removed.
- * Do NOT create more than one instance of this class.
+ *
+ * @warning Do NOT create more than one instance of this class.
  * One instance is created static in this file.  When it goes out of
  * scope, all destructors will be called.  This should take care of
  * dynamically allocated memory.
  */
 class ay_activity_window {
 	private:
-	static LList *packs;
-	static GtkWidget *window, *vbox;
-	static int last_tag;
-	static int timeout;
+	static LList *s_packs;
+	static GtkWidget *s_window, *s_vbox;
+	static int s_last_tag;
+	static int s_timeout;
 
 	void create_window( void );
 	void show( void );
@@ -92,16 +94,16 @@ class ay_activity_window {
 	public:
 	int add_pack(ay_activity_bar_pack *abp);
 	void remove_pack(ay_activity_bar_pack *abp);
-	ay_activity_bar_pack * get_pack_by_tag(int tag);
+	ay_activity_bar_pack * get_pack_by_tag(int tag) const;
 	void close_window( void );
 	~ay_activity_window( void );
 };
 /* initialise static variables */
-LList *ay_activity_window::packs=NULL;
-GtkWidget *ay_activity_window::window=NULL;
-GtkWidget *ay_activity_window::vbox=NULL;
-int ay_activity_window::last_tag=0;
-int ay_activity_window::timeout=0;
+LList *ay_activity_window::s_packs=NULL;
+GtkWidget *ay_activity_window::s_window=NULL;
+GtkWidget *ay_activity_window::s_vbox=NULL;
+int ay_activity_window::s_last_tag=0;
+int ay_activity_window::s_timeout=0;
 
 /* Create the only window that will exist */
 static ay_activity_window aw;
@@ -111,72 +113,71 @@ static ay_activity_window aw;
  */
 ay_activity_bar_pack::ay_activity_bar_pack(const char *label,
 		activity_bar_cancel_callback cancel_callback, void *userdata)
+:	m_cancel_callback( cancel_callback ),
+	m_userdata( userdata )
 {
-	this->cancel_callback = cancel_callback;
-	this->userdata = userdata;
+	m_lbl = gtk_label_new(label);
+	gtk_label_set_justify(GTK_LABEL(m_lbl), GTK_JUSTIFY_LEFT);
+	gtk_widget_show(m_lbl);
 
-	this->lbl = gtk_label_new(label);
-	gtk_label_set_justify(GTK_LABEL(this->lbl), GTK_JUSTIFY_LEFT);
-	gtk_widget_show(this->lbl);
+	m_hbox = gtk_hbox_new(FALSE, 0);
 
-	this->hbox = gtk_hbox_new(FALSE, 0);
-
-	this->pbar = gtk_progress_bar_new();
-	gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(pbar), 
+	m_pbar = gtk_progress_bar_new();
+	gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(m_pbar), 
 			GTK_PROGRESS_LEFT_TO_RIGHT );
-	gtk_progress_set_activity_mode(GTK_PROGRESS(pbar), TRUE);
-	gtk_box_pack_start(GTK_BOX(this->hbox), this->pbar, TRUE, TRUE, 10);
-	gtk_widget_show(this->pbar);
+	gtk_progress_set_activity_mode(GTK_PROGRESS(m_pbar), TRUE);
+	gtk_box_pack_start(GTK_BOX(m_hbox), m_pbar, TRUE, TRUE, 10);
+	gtk_widget_show(m_pbar);
 
 	if(cancel_callback) {
-		this->cbtn = gtk_button_new_with_label(_("Cancel"));
-		gtk_signal_connect(GTK_OBJECT(this->cbtn), "clicked",
-				GTK_SIGNAL_FUNC(cancel_clicked), this);
-		gtk_box_pack_start(GTK_BOX(this->hbox), this->cbtn, FALSE, FALSE, 10);
-		gtk_widget_show(this->cbtn);
+		m_cbtn = gtk_button_new_with_label(_("Cancel"));
+		gtk_signal_connect(GTK_OBJECT(m_cbtn), "clicked",
+				GTK_SIGNAL_FUNC(s_cancel_clicked), this);
+		gtk_box_pack_start(GTK_BOX(m_hbox), m_cbtn, FALSE, FALSE, 10);
+		gtk_widget_show(m_cbtn);
 	} else {
-		this->cbtn = NULL;
+		m_cbtn = NULL;
 	}
 
-	gtk_widget_show(this->hbox);
+	gtk_widget_show(m_hbox);
 
-	this->tag = aw.add_pack(this);
+	m_tag = aw.add_pack(this);
 }
 
 void ay_activity_bar_pack::update_label(const char * label)
 {
-	gtk_label_set_text(GTK_LABEL(lbl), label);
+	gtk_label_set_text(GTK_LABEL(m_lbl), label);
 }
 
 void ay_activity_bar_pack::update_activity( void )
 {
-	float new_val = gtk_progress_get_value(GTK_PROGRESS(pbar)) + 3;
-	GtkAdjustment *adj = GTK_PROGRESS(pbar)->adjustment;
+	float new_val = gtk_progress_get_value(GTK_PROGRESS(m_pbar)) + 3;
+	GtkAdjustment *adj = GTK_PROGRESS(m_pbar)->adjustment;
 
 	if (new_val > adj->upper)
 		new_val = adj->lower;
 
-	gtk_progress_set_value(GTK_PROGRESS(pbar), new_val);
+	gtk_progress_set_value(GTK_PROGRESS(m_pbar), new_val);
 }
 
 void ay_activity_bar_pack::cancel( void )
 {
-	if(cancel_callback)
-		cancel_callback(userdata);
+	if(m_cancel_callback)
+		m_cancel_callback(m_userdata);
 }
 
-int ay_activity_bar_pack::get_tag( void )
+int ay_activity_bar_pack::get_tag( void ) const
 {
-	return tag;
+	return m_tag;
 }
 
 ay_activity_bar_pack::~ay_activity_bar_pack()
 {
-	gtk_widget_hide(hbox);
-	gtk_widget_hide(lbl);
+	gtk_widget_hide(m_hbox);
+	gtk_widget_hide(m_lbl);
 
-	gtk_widget_destroy(hbox);
-	gtk_widget_destroy(lbl);
+	gtk_widget_destroy(m_hbox);
+	gtk_widget_destroy(m_lbl);
 
 	aw.remove_pack(this);
 }
@@ -189,56 +190,56 @@ ay_activity_bar_pack::~ay_activity_bar_pack()
  */
 void ay_activity_window::create_window( void )
 {
-	window = gtk_window_new(GTK_WINDOW_DIALOG);
-	gtk_signal_connect(GTK_OBJECT(window), "delete_event", 
-			GTK_SIGNAL_FUNC(delete_event), NULL);
-	gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, TRUE);
-	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_MOUSE);
-	vbox = gtk_vbox_new(TRUE, 0);
+	s_window = gtk_window_new(GTK_WINDOW_DIALOG);
+	gtk_signal_connect(GTK_OBJECT(s_window), "delete_event", 
+			GTK_SIGNAL_FUNC(s_delete_event), NULL);
+	gtk_window_set_policy(GTK_WINDOW(s_window), FALSE, TRUE, TRUE);
+	gtk_window_set_position(GTK_WINDOW(s_window), GTK_WIN_POS_MOUSE);
+	s_vbox = gtk_vbox_new(TRUE, 0);
 
-	gtk_container_add(GTK_CONTAINER(window), vbox);
+	gtk_container_add(GTK_CONTAINER(s_window), s_vbox);
 
-	timeout = eb_timeout_add(50, update_activity, &packs);
+	s_timeout = eb_timeout_add(50, s_update_activity, &s_packs);
 }
 
 void ay_activity_window::show( void )
 {
-	gtk_widget_show(vbox);
-	gtk_widget_show(window);
+	gtk_widget_show(s_vbox);
+	gtk_widget_show(s_window);
 }
 
 int ay_activity_window::add_pack(ay_activity_bar_pack *abp)
 {
-	if(!window)
+	if(!s_window)
 		create_window();
 
-	packs = l_list_prepend(packs, abp);
-	gtk_box_pack_start(GTK_BOX(vbox), abp->lbl, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox), abp->hbox, TRUE, TRUE, 0);
+	s_packs = l_list_prepend(s_packs, abp);
+	gtk_box_pack_start(GTK_BOX(s_vbox), abp->m_lbl, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(s_vbox), abp->m_hbox, TRUE, TRUE, 0);
 
-	if(! GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
+	if(! GTK_WIDGET_VISIBLE(GTK_WIDGET(s_window)) )
 		show();
 
-	return ++last_tag;
+	return ++s_last_tag;
 }
 
 void ay_activity_window::remove_pack(ay_activity_bar_pack *abp)
 {
-	packs = l_list_remove(packs, abp);
+	s_packs = l_list_remove(s_packs, abp);
 
-	if(abp->tag == last_tag)
-		last_tag--;
+	if(abp->m_tag == s_last_tag)
+		s_last_tag--;
 
-	if(!packs)
+	if(!s_packs)
 		close_window();
 }
 
-ay_activity_bar_pack * ay_activity_window::get_pack_by_tag(int tag)
+ay_activity_bar_pack * ay_activity_window::get_pack_by_tag(int tag) const
 {
 	LList *l;
-	for(l = packs; l; l = l_list_next(l)) {
+	for(l = s_packs; l; l = l_list_next(l)) {
 		ay_activity_bar_pack *abp = (ay_activity_bar_pack *)l->data;
-		if(abp->tag == tag) {
+		if(abp->m_tag == tag) {
 			return abp;
 		}
 	}
@@ -248,28 +249,28 @@ ay_activity_bar_pack * ay_activity_window::get_pack_by_tag(int tag)
 
 void ay_activity_window::close_window( void )
 {
-	if(timeout) {
-		eb_timeout_remove(timeout);
-		timeout = 0;
+	if(s_timeout) {
+		eb_timeout_remove(s_timeout);
+		s_timeout = 0;
 	}
 
-	if(window) {
-		gtk_widget_hide(window);
-		gtk_widget_destroy(window);
-		window = vbox = NULL;
+	if(s_window) {
+		gtk_widget_hide(s_window);
+		gtk_widget_destroy(s_window);
+		s_window = s_vbox = NULL;
 	}
 
-	while(packs) {
-		ay_activity_bar_pack *abp = (ay_activity_bar_pack *)packs->data;
+	while(s_packs) {
+		ay_activity_bar_pack *abp = (ay_activity_bar_pack *)s_packs->data;
 		abp->cancel();
-		packs = l_list_remove(packs, abp);
+		s_packs = l_list_remove(s_packs, abp);
 		delete abp;
 	}
 }
 
-/*
- * destroy the activity window and all data associated with it
- * will call cancel callbacks for all pending bars
+/**
+ * Destroy the activity window and all data associated with it
+ * @note This will call cancel callbacks for all pending bars
  */ 
 ay_activity_window::~ay_activity_window( void )
 {
@@ -285,7 +286,7 @@ extern "C" {
 /*
  * Callbacks
  */
-static void cancel_clicked(GtkButton * btn, gpointer data)
+static void s_cancel_clicked(GtkButton * btn, gpointer data)
 {
 	ay_activity_bar_pack *abp = (ay_activity_bar_pack *)data;
 
@@ -295,13 +296,13 @@ static void cancel_clicked(GtkButton * btn, gpointer data)
 	delete abp;
 }
 
-static gint delete_event(GtkWidget *widget, GdkEvent *event, gpointer null)
+static gint s_delete_event(GtkWidget *widget, GdkEvent *event, gpointer null)
 {
 	aw.close_window();
 	return FALSE;
 }
 
-static int update_activity(void * data)
+static int s_update_activity(void * data)
 {
 	LList *l = *((LList **)data);
 	for(; l; l = l_list_next(l)) {
@@ -316,10 +317,10 @@ static int update_activity(void * data)
  * Start C interface
  */
 
-/*
+/**
  * Update the label associated with an activity bar
- * @tag: a tag that identifies the activity bar
- * @label: the text to be displayed on the label
+ * @param	tag		a tag that identifies the activity bar
+ * @param	label	the text to be displayed on the label
  */
 void ay_activity_bar_update_label(int tag, const char *label)
 {
@@ -328,24 +329,24 @@ void ay_activity_bar_update_label(int tag, const char *label)
 		abp->update_label(label);
 }
 
-/*
+/**
  * Remove an existing activity bar.  Destroy the window if this is the last
- * @tag: a tag that identifies the activity bar
+ * @param	tag		a tag that identifies the activity bar
  */
 void ay_activity_bar_remove(int tag)
 {
 	ay_activity_bar_pack *abp = aw.get_pack_by_tag(tag);
 	if(abp)
-		cancel_clicked(NULL, abp);
+		s_cancel_clicked(NULL, abp);
 }
 
-/*
+/**
  * Add a new activity bar, create the window if this is the first
- * @label: The text to display against this activity bar
- * @cancel_callback: a function to be called if the user clicks cancel
- * @userdata: the callback data to be passed to cancel_callback
+ * @param	label				the text to display against this activity bar
+ * @param	cancel_callback		a function to be called if the user clicks cancel
+ * @param	userdata			the callback data to be passed to cancel_callback
  *
- * Returns: a tag to identify this activity bar
+ * @return	a tag to identify this activity bar
  */
 int ay_activity_bar_add(const char *label, 
 		activity_bar_cancel_callback cancel_callback, void *userdata)
