@@ -693,9 +693,9 @@ static eb_account * find_account_with_id_or_ela( const char * handle, int servic
 			for(l3 = ((struct contact*)l2->data)->accounts; l3; l3=l3->next) {
 				eb_account * ea = l3->data;
 
-				if(ea->ela == ela 
-				&& ea->service_id == service_id
-				&& !strcasecmp(handle, ea->handle))
+				if( ((ela && ea->ela == ela) || 
+						(!ela && ea->service_id == service_id))
+					&& !strcasecmp(handle, ea->handle))
 					return ea;
 			}
 		}
@@ -729,6 +729,8 @@ eb_account * find_account_by_handle( const char * handle, int service_id)
 
 eb_account * find_account_with_ela( const char * handle, eb_local_account *ela)
 {
+	if(!ela)
+		return NULL;
 	return find_account_with_id_or_ela(handle, ela->service_id, ela);
 }
 

@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.39 $",
-	"$Date: 2003/04/30 06:03:59 $",
+	"$Revision: 1.40 $",
+	"$Date: 2003/04/30 09:37:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -672,16 +672,16 @@ static void ext_yahoo_got_identities(int id, YList * ids)
 
 static void ext_yahoo_got_buddies(int id, YList * buds)
 {
-	YList * buddy;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *yla;
 	eb_account *ea = NULL;
 	int changed = 0;
 
-	for(buddy = buds; buddy; buddy=buddy->next) {
-		struct yahoo_buddy *bud = buddy->data;
+	for(; buds; buds=buds->next) {
+		struct yahoo_buddy *bud = buds->data;
 		char *contact_name;
 		struct contact *con;
+		grouplist *g;
 
 		/*
 		if(find_contact_by_handle(bud->id))
@@ -700,7 +700,12 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 			continue;
 		}
 
-		con = find_contact_by_nick(contact_name);
+		g = find_grouplist_by_name(bud->group);
+		con = find_contact_in_group_by_nick(contact_name, g);
+		if(!con)
+			con = find_contact_in_group_by_nick(bud->id, g);
+		if(!con)
+			con = find_contact_by_nick(contact_name);
 		if(!con)
 			con = find_contact_by_nick(bud->id);
 		if(!con) {
@@ -727,8 +732,8 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 
 static void ext_yahoo_got_ignore(int id, YList * ign)
 {
-	eb_account *ea = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	eb_account *ea = NULL;
 	int changed = 0;
 
 	for(; ign; ign = ign->next) {

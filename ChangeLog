@@ -1,3 +1,9 @@
+* Wed Apr 30 2003 09:30 GMT [philip]	0.3.0-60
+- src/util.c
+find_account_with_id_or_ela is exclusive or
+- modules/yahoo2/yahoo.c
+better search for existing account in account list
+
 * Wed Apr 30 2003 06:03 GMT [philip]	0.3.0-59
 - modules/
 put module_version definition after inclusion of config.h
