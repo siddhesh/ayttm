@@ -396,6 +396,12 @@ static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 
 void	ayttm_prefs_init( void )
 {
+#ifdef __MINGW32__
+	const int	buff_size = 1024;
+	char		buff[buff_size];
+	const char	*base_dir = "\\Program Files\\ayttm\\";
+#endif
+
 	/* set default prefs */
 
 	/* window positions, etc */
@@ -455,29 +461,23 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_play_receive", 1 );
 	
 #ifdef __MINGW32__
-	{
-		const int	buff_size = 1024;
-		char		buff[buff_size];
-		const char	*base_dir = "\\Program Files\\ayttm\\";
+	snprintf( buff, buff_size, "%s%s", base_dir, BuddyArriveDefault );
+	cSetLocalPref( "BuddyArriveFilename", buff );
 		
-		snprintf( buff, buff_size, "%s%s", base_dir, BuddyArriveDefault );
-		cSetLocalPref( "BuddyArriveFilename", buff );
+	snprintf( buff, buff_size, "%s%s", base_dir, BuddyLeaveDefault );
+	cSetLocalPref( "BuddyAwayFilename", buff );
 		
-		snprintf( buff, buff_size, "%s%s", base_dir, BuddyLeaveDefault );
-		cSetLocalPref( "BuddyAwayFilename", buff );
+	snprintf( buff, buff_size, "%s%s", base_dir, BuddyLeaveDefault );
+	cSetLocalPref( "BuddyLeaveFilename", buff );
 		
-		snprintf( buff, buff_size, "%s%s", base_dir, BuddyLeaveDefault );
-		cSetLocalPref( "BuddyLeaveFilename", buff );
+	snprintf( buff, buff_size, "%s%s", base_dir, SendDefault );
+	cSetLocalPref( "SendFilename", buff );
 		
-		snprintf( buff, buff_size, "%s%s", base_dir, SendDefault );
-		cSetLocalPref( "SendFilename", buff );
+	snprintf( buff, buff_size, "%s%s", base_dir, ReceiveDefault );
+	cSetLocalPref( "ReceiveFilename", buff );
 		
-		snprintf( buff, buff_size, "%s%s", base_dir, ReceiveDefault );
-		cSetLocalPref( "ReceiveFilename", buff );
-		
-		snprintf( buff, buff_size, "%s%s", base_dir, ReceiveDefault );
-		cSetLocalPref( "FirstMsgFilename", buff );
-	}
+	snprintf( buff, buff_size, "%s%s", base_dir, ReceiveDefault );
+	cSetLocalPref( "FirstMsgFilename", buff );
 #else
 	cSetLocalPref( "BuddyArriveFilename", BuddyArriveDefault );
 	cSetLocalPref( "BuddyAwayFilename", BuddyLeaveDefault );
@@ -503,13 +503,8 @@ void	ayttm_prefs_init( void )
 
 	/* modules */
 #ifdef __MINGW32__
-	{
-		const int	buff_size = 1024;
-		char		buff[buff_size];
-		
-		snprintf( buff, buff_size, "%s%s", config_dir, MODULE_DIR );
-		cSetLocalPref( "modules_path", buff );
-	}
+	snprintf( buff, buff_size, "%s%s", base_dir, MODULE_DIR );
+	cSetLocalPref( "modules_path", buff );
 #else
 	cSetLocalPref( "modules_path", MODULE_DIR );
 #endif
