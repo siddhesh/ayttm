@@ -1,3 +1,17 @@
+* Sat Apr 05 2003 18:25 GMT [andy]	0.2.3-35
+- */libtoc/libtoc.[ch]
+static/const/include fixes
+- src/activity_bar.C
+Add include of stddef.h
+Made some functions const
+Change some comments so they look nice in doxygen
+Change member variable names
+Remove 'this' pointer all over ay_activity_bar_pack's constructor
+- src/dialog.h
+Remove progress window decls
+- src/progress_window.[ch]
+const fixes
+
 * Sat Apr 05 2003 14:48 GMT [philip]	0.2.3-34
 - modules/yahoo2
 Clean up callback handling and implement cancel pending connect
