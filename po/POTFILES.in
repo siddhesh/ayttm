@@ -1,4 +1,5 @@
 libproxy/proxy.c
+src/about.c
 src/activity_bar.C
 src/add_contact_window.c
 src/away_window.c
