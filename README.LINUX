@@ -7,11 +7,18 @@ RedHat:
 	3) make
 	4) make install
 
-Mandrake 10 (unconfirmed):
+Mandrake 10
+	# Base automake/autoconf tools can not properly install smileys. so use
+	# -i option to install everything. 
+	# Smileys will not be install.
+	0) Install autoconf 2.59
+	   Install automake 1.7
+	   Install libltdl3-devel
+	   Install libgtk+1.2-devel
 	1) install and build jasper
-	2) ./configure --disable-arts
+	2) ./configure
 	3) make
-	4) make install
+	4) make -i install
 
 Mandrake 9.2 (automake-1.4, autconf-2.13, libtool-1.4)
 	# Base automake/autoconf tools can not properly install smileys. so use

@@ -1,3 +1,7 @@
+* Mon Jul 12 2004 21:03 GMT [edward] 0.4.6-23
+- Update for Mandrake 10. Documentation change
+  README.LINUX
+
 * Mon Jul 12 2004 18:15 GMT [edward] 0.4.6-22
 - #980589 Right Arrow Key not avail
   src/chat_window.c
