@@ -136,6 +136,8 @@ LList * glist_to_llist(GList * g, int free_old);
 
 int send_url(const char *url);
 int eb_send_message (const char *to, const char *msg, int service);
+LList * ay_save_account_information(int service_id);
+void ay_restore_account_information(LList *saved);
 
 #ifdef __cplusplus
 } /* extern "C" */

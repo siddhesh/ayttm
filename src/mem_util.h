@@ -64,6 +64,8 @@ char * strdup(const char *s);
 
 #endif
 
+#include "llist.h"
+
 #if !defined(TRUE) && !defined(FALSE)
 enum {FALSE, TRUE};
 #endif
@@ -83,6 +85,5 @@ enum {FALSE, TRUE};
 char * ay_string_append(char * str, char * append);
 char * ay_str_to_utf8(const char * in);
 char * ay_utf8_to_str(const char * in);
-
 #endif
 

@@ -39,6 +39,7 @@
 #include "value_pair.h"
 #include "messages.h"
 #include "status.h"
+#include "mem_util.h"
 
 #ifdef HAVE_XSS
 #include <X11/Xlib.h>
@@ -112,7 +113,9 @@ static void reload_service_accounts(int service_id)
 	const int			buffer_size = 256;
 	char				buff[buffer_size];
 	char				buff2[buffer_size];
-
+	LList			       *saved_info = NULL;
+	
+	saved_info = ay_save_account_information(service_id);
 	while(node)
 	{
 		oela=node->data;
@@ -139,6 +142,8 @@ static void reload_service_accounts(int service_id)
 		}
 		node = node->next;
 	}
+	ay_restore_account_information(saved_info);
+	l_list_free(saved_info);
 }
 
 

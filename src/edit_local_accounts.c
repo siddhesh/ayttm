@@ -37,7 +37,7 @@
 #include "messages.h"
 #include "dialog.h"
 #include "add_contact_window.h"
-
+#include "mem_util.h"
 #include "gtk/gtkutils.h"
 
 #include "pixmaps/ok.xpm"
@@ -73,11 +73,6 @@ static GdkPixmap *checkboxonxpm = NULL;
 static GdkPixmap *checkboxonxpmmask = NULL;
 static GdkPixmap *checkboxoffxpm = NULL;
 static GdkPixmap *checkboxoffxpmmask = NULL;
-
-typedef struct _account_information {
-	eb_account *ea;
-	char *local_acc;
-} account_information;
 
 static void rebuild_set_status_menu(void)
 {
@@ -352,50 +347,6 @@ static void cancel_callback(GtkWidget * widget, gpointer data)
 		gtk_main_quit();
 }
 
-static LList * save_account_information(void)
-{
-	LList *saved = NULL;
-	LList *walk = NULL;
-	
-	for (walk = get_all_contacts(); walk; walk=walk->next) {
-		struct contact *c = (struct contact *)walk->data;
-		LList *accs = c->accounts;
-		for (; accs; accs = accs->next) {
-			eb_account *ea = (eb_account *)accs->data;
-			account_information * ai = g_new0(account_information,1);
-			ai->ea = ea;
-			if (ea->ela)
-				ai->local_acc = strdup(ea->ela->handle);
-			else
-				ai->local_acc = NULL;
-			eb_debug(DBG_CORE, " SAVED { %p(%s), %d, %s }\n", ea, ea->handle, ea->service_id, ea->ela?ea->ela->handle:NULL);
-			saved = l_list_append(saved, ai);
-		}
-	}
-	return saved;
-}
-
-static void restore_account_information(LList *saved)
-{
-	LList *walk = NULL;
-	
-	for (walk = saved; walk; walk=walk->next) {
-		account_information * ai = (account_information *)walk->data;
-		eb_account *ea = ai->ea;
-		if (ai->local_acc)
-			ea->ela = find_local_account_by_handle(ai->local_acc, ea->service_id);
-		else
-			ea->ela = NULL;
-		if (!ea->ela) {
-			/* ooh an orphaned ea */
-			ea->ela = find_local_account_for_remote(ea, 0);
-			/* if still NULL, too bad. */
-		}
-		eb_debug(DBG_CORE, " RESTORED { %p(%s), %d, %s(%s) }\n", ea, ea->handle, ea->service_id, ai->local_acc, ea->ela?ea->ela->handle:"NULL");
-		free(ai->local_acc);
-	}
-}
-
 static void ok_callback(GtkWidget * widget, gpointer data)
 {
 	FILE *fp;
@@ -495,7 +446,7 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 
 	fclose(fp);
 
-	saved_acc_info = save_account_information();
+	saved_acc_info = ay_save_account_information(-1);
 	
 	acc_walk = accounts;
 	if (acc_walk) {
@@ -537,7 +488,7 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 		load_accounts();
 		rebuild_set_status_menu();
 	}
-	restore_account_information(saved_acc_info);
+	ay_restore_account_information(saved_acc_info);
 	l_list_free(saved_acc_info);
 }
 		
