@@ -1265,7 +1265,7 @@ void rename_contact( struct contact * c, char *newname)
 	LList *l = NULL;
 	struct contact *con;
 	
-	if(!strcmp(c->nick, newname))
+	if(!c || !strcmp(c->nick, newname))
 		return;
 
 	eb_debug(DBG_CORE,"Renaming %s to %s\n",c->nick, newname);

@@ -254,7 +254,7 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_container_add(GTK_CONTAINER(hbuttonbox4), button3);
 	GTK_WIDGET_SET_FLAGS(button3, GTK_CAN_DEFAULT);
 
-	button4 = gtk_button_new_with_label(_("Save"));
+	button4 = gtk_button_new_with_label(_("Save to current directory"));
 	gtk_widget_show(button4);
 	gtk_container_add(GTK_CONTAINER(hbuttonbox4), button4);
 	GTK_WIDGET_SET_FLAGS(button4, GTK_CAN_DEFAULT);
