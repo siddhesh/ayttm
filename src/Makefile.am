@@ -13,7 +13,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
 	offline_queue_mgmt.c tcp_util.c image_window.c action.c about.c \
-	messages.c edit_list_window.c flash_window_title.c
+	messages.c edit_list_window.c flash_window_title.c ssl.c
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
@@ -26,7 +26,8 @@ noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	externs.h llist.h mem_util.h offline_queue_mgmt.h tcp_util.h \
 	image_window.h action.h about.h messages.h \
 	edit_local_accounts.h  platform_defs.h edit_list_window.h \
-	ui_about_window.h ui_file_selection_dlg.h ui_log_window.h ui_message_windows.h ui_prefs_window.h
+	ui_about_window.h ui_file_selection_dlg.h ui_log_window.h \
+	ui_message_windows.h ui_prefs_window.h ssl.h
 
 EXTRA_DIST = 
 

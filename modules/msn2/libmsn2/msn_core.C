@@ -1,7 +1,8 @@
 /* msn_core.c - this contains all the functions used to do anything with MSN */
 /* WARNING - Ayttm's libmsn2 differs from the original one and Meredydd,
    its original author, does not provide support for it :) */
-
+/* libmsn2 now uses MSNP8. Many thanks to the guys at www.hypothetic.org for
+   all their great reverse-engineering works! */
 #include <stdio.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -30,6 +31,7 @@
 #include "msn_core.h"
 #include "msn_bittybits.h"
 #include "msn_interface.h"
+#include "../../../src/ssl.h" /* should  clean */
 
 #ifdef __MINGW32__
 #include <glib.h>
@@ -305,7 +307,7 @@ void msn_sync_lists(msnconn * conn, int version)
 
   snprintf(buf, sizeof(buf), "SYN %d %d\r\n", next_trid, version);
   write(conn->sock, buf, strlen(buf));
-
+  info->total_lst = -1; /* init */
   msn_add_callback(conn, msn_syncdata, next_trid, info);
 
   next_trid++;
@@ -341,92 +343,70 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
       info->serial=atoi(args[2]);
       ext_latest_serial(conn, info->serial);
     }
+    info->total_lst = atoi(args[3]);
   }
 
   if(!strcmp(args[0], "LST"))
   {
-    if(numargs >=3 && !strcmp(args[2], "FL"))
+    char *handle = args[1];
+    char *fname  = args[2];	  
+    int lists = atoi(args[3]);
+    char *groups = args[4];
+    
+    info->total_lst--;
+    
+    if(numargs >=3 && lists&LIST_FL) 
     {
-      if(!strcmp(args[5], "0"))
-      {
-        info->fl=NULL; info->complete|=LST_FL;
-      } else if (numargs >=7) {
         userdata * newuser=new userdata();
-        newuser->username=msn_permstring(args[6]);
-        newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
-	if(numargs>8)
-		newuser->groups=msn_permstring(args[8]);
-	else
-		newuser->groups=NULL;
+        newuser->username=msn_permstring(handle);
+        newuser->friendlyname=msn_decode_URL(msn_permstring(fname));
+	newuser->groups=msn_permstring(groups);
 	ext_got_friend(conn, newuser->username, newuser->groups);
         msn_add_to_llist(info->fl, newuser);
-        if(atoi(args[4])==atoi(args[5]))
-        { info->complete|=LST_FL; }
-      }
     }
-    if(numargs >=3 && !strcmp(args[2], "RL"))
+    if(numargs >=3 && lists&LIST_RL) 
     {
-      if(!strcmp(args[5], "0"))
-      {
-        info->rl=NULL; info->complete|=LST_RL; // no mates! :-)
-      } else if (numargs >=7) {
         userdata * newuser=new userdata();
-        newuser->username=msn_permstring(args[6]);
-        newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
+        newuser->username=msn_permstring(handle);
+        newuser->friendlyname=msn_decode_URL(msn_permstring(fname));
         msn_add_to_llist(info->rl, newuser);
-        if(atoi(args[4])==atoi(args[5]))
-        { info->complete|=LST_RL; }
-      }
     }
-    if(numargs >=3 && !strcmp(args[2], "AL"))
+    if(numargs >=3 && lists&LIST_AL) 
     {
-      if(!strcmp(args[5], "0"))
-      {
-        info->al=NULL; info->complete|=LST_AL;
-      } else if (numargs >=7) {
         userdata * newuser=new userdata();
-        newuser->username=msn_permstring(args[6]);
-        newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
+        newuser->username=msn_permstring(handle);
+        newuser->friendlyname=msn_decode_URL(msn_permstring(fname));
         msn_add_to_llist(info->al, newuser);
-        if(atoi(args[4])==atoi(args[5]))
-        { info->complete|=LST_AL; }
-      }
     }
-    if(numargs >=3 && !strcmp(args[2], "BL"))
+    if(numargs >=3 && lists&LIST_BL) 
     {
-      if(!strcmp(args[5], "0"))
-      {
-        info->bl=NULL; info->complete|=LST_BL;
-      } else  if (numargs >=7) {
         userdata * newuser=new userdata();
-        newuser->username=msn_permstring(args[6]);
-        newuser->friendlyname=msn_decode_URL(msn_permstring(args[6]));
+        newuser->username=msn_permstring(handle);
+        newuser->friendlyname=msn_decode_URL(msn_permstring(fname));
         msn_add_to_llist(info->bl, newuser);
-        if(atoi(args[4])==atoi(args[5]))
-        { info->complete|=LST_BL; }
-      }
     }
   }
   
-  if(numargs >=7 && !strcmp(args[0], "LSG"))
+  if(numargs >=3 && !strcmp(args[0], "LSG"))
   {
-	  ext_got_group(conn, args[5], msn_decode_URL(args[6]));
+	  ext_got_group(conn, args[1], msn_decode_URL(args[2]));
   }
-  if(numargs >=4 && !strcmp(args[0], "GTC"))
+  
+  if(numargs >=1 && !strcmp(args[0], "GTC"))
   {
     info->gtc=args[3][0];
     info->complete|=COMPLETE_GTC;
     ext_got_GTC(conn, args[3][0]);
   }
 
-  if(numargs >=4 && !strcmp(args[0], "BLP"))
+  if(numargs >=1 && !strcmp(args[0], "BLP"))
   {
     info->blp=args[3][0];
     info->complete|=COMPLETE_BLP;
     ext_got_BLP(conn, args[3][0]);
   }
 
-  if(info->complete == (LST_FL|LST_RL|LST_AL|LST_BL|COMPLETE_BLP|COMPLETE_GTC))
+  if(info->total_lst == 0)
   {
     msn_del_callback(conn, trid);
     msn_check_rl(conn, info);
@@ -434,6 +414,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
     ext_got_info(conn, info);
    /* delete info; */
   }
+  
 }
 
 void msn_check_rl(msnconn * conn, syncinfo * info)
@@ -542,12 +523,80 @@ void msn_request_SB(msnconn * nsconn, char * rcpt, message * msg, void * tag)
   next_trid++;
 }
 
+
+static void msn_https_cb1(int fd, int error, void *data);
+static void msn_https_cb2(int fd, int error, void *data);
+
 void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
 {
   conninfo_SB * info=(conninfo_SB *)data;
 
   msn_del_callback(conn, trid);
 
+  if(!strcmp(args[0], "USR") && !strcmp(args[2], "TWN")) {
+	 char *url = strdup(args[4]);
+	 https_data *hdata = (https_data *)malloc(sizeof(https_data));
+	 
+	 char *ru = NULL, *realurl = NULL, *endurl = NULL, *finalurl = NULL;
+	 char *lc=NULL, *id=NULL, *tw=NULL;
+	 
+	 char *remote_host = NULL;
+
+	 if (strstr(((authdata_NS *)conn->auth)->username,"@hotmail.com"))
+	 	remote_host = "loginnet.passport.com";
+	 else if (strstr(((authdata_NS *)conn->auth)->username,"@msn.com"))
+	 	remote_host = "msnialogin.passport.com";
+	 else
+	 	remote_host = "login.passport.com";
+
+	 while (strstr(url, ",")) {
+		*(strstr(url,",")) = '&'; 
+	 }
+	 
+	 lc = strdup(strstr(url, "lc=")+3);
+	 id = strdup(strstr(url, "id=")+3);
+	 tw = strdup(strstr(url, "tw=")+3);
+	 ru = strstr(url, "ru=")+3;
+	 
+	 *(strstr(lc, "&")) = 0;
+	 *(strstr(id, "&")) = 0;
+	 *(strstr(tw, "&")) = 0;
+	 endurl = strstr(ru, "&");
+	 
+	 realurl=strdup("http://messenger.msn.com"); /* shouldn't be hardcoded, better translate ru= param */
+	 *ru = 0;
+	 
+	 finalurl = (char *)malloc(strlen(url)+strlen(realurl)+strlen(endurl)+1);
+	 snprintf(finalurl, strlen(url)+strlen(realurl)+strlen(endurl),
+			 "%s%s%s", url, realurl, endurl);
+	 	 
+	 snprintf(buf, sizeof(buf), "GET /login.srf?%s HTTP/1.0\r\n\r\n", finalurl);
+	 
+	 if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
+	 
+	 hdata->url = strdup(buf);
+	 hdata->remote_host = strdup(remote_host);
+	 hdata->lc = strdup(lc);
+	 hdata->id = strdup(id);
+	 hdata->tw = strdup(tw);
+	 hdata->conn = conn;
+	 hdata->info = info;
+	 
+	 free(lc);
+	 free(id);
+	 free(tw);
+	 free(finalurl);
+	 free(realurl);
+	 free(url);
+	 
+	 if (ext_async_socket(remote_host, 443, (void *)msn_https_cb1, hdata) < 0) {
+		 if(DEBUG) printf("immediate connect failure to %s\n", remote_host);    
+		 ext_show_error(conn, "Could not connect to MSN HTTPS server.");
+		 ext_closing_connection(conn);
+	 }
+	 return;
+  }
+  
   if(strcmp(args[0], "XFR"))
   {
     msn_show_verbose_error(conn, atoi(args[0]));
@@ -583,6 +632,197 @@ void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_
   msn_connect(newconn, args[3], port);
 }
 
+static void msn_https_cb1(int fd, int error, void *data) 
+{
+	 SockInfo *sock = (SockInfo*)malloc(sizeof(SockInfo));
+	 char *urlread = NULL;
+	 char *cookie0 = NULL, *cookie1 = NULL, *cookie2 = NULL;
+	 char *tmp = NULL;
+	 https_data *hdata = (https_data *)data;	
+	 
+	 sock->sock = fd;
+	 printf("sock->sock = %d\n",sock->sock);
+	 if (DEBUG) printf("entering msn_https_cb1\n");
+	 if(fd == -1 || error)
+	 {
+		 ext_show_error(hdata->conn, "Could not connect to https server.");
+		 ext_closing_connection(hdata->conn);
+		 return;
+	 }
+
+	 ssl_init();
+	 if (!ssl_init_socket(sock)) {
+		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
+		 ext_closing_connection(hdata->conn);
+		 return;
+	 }
+	 
+	 ssl_write(sock->ssl, hdata->url, strlen(hdata->url));
+	 
+	 while (ssl_read(sock->ssl, buf, sizeof(buf))) {
+		 size_t s = (size_t)strlen(buf) +1;
+		 
+		 if (urlread) {
+			 s += strlen(urlread)+1;
+			 tmp = strdup(urlread);
+		 } 
+		 
+		 urlread = (char *)realloc(urlread, s);
+		 
+		 snprintf(urlread, s-1, "%s%s", tmp?tmp:"", buf);
+		 free(tmp); tmp = NULL;
+		 if(strstr(buf, "</HTML>"))
+			 break;
+		 bzero(buf, sizeof(buf));
+	 }
+	 
+	 if (DEBUG) printf("---ANSWER---\n%s\n---END---\n",urlread);
+	 
+	 if (!strstr(urlread, "BrowserTest") || !strstr(urlread, "MSPPost")) {
+		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (bad cookies).");
+		 ext_closing_connection(hdata->conn);
+		 return;
+	 }
+	 
+	 tmp = strdup(strstr(urlread, "BrowserTest"));
+	 *(strstr(tmp+1, "\r\n")) = 0;
+	 hdata->cookie0 = strdup(tmp);
+	 free(tmp); tmp = NULL;
+	 
+	 tmp = strdup(strstr(urlread, "MSPPost"));
+	 *(strstr(tmp+1, "\r\n")) = 0;
+	 hdata->cookie1 = strdup(tmp);
+	 free(tmp); tmp = NULL;
+	 
+	 if (DEBUG) printf("got cookies: Cookie1: %s\nCookie2: %s\n", hdata->cookie0, hdata->cookie1);
+	 
+	 
+	 snprintf(buf, sizeof(buf),  
+		"GET /ppsecure/post.srf?lc=%s&id=%s&tw=%s&cbid=%s&da=passport.com&login=%s&domain=%s&passwd=%s&sec=&mspp_shared=&padding= HTTP/1.0\r\n"
+		"Cookie: %s\r\n"
+		"Cookie: %s\r\n\r\n",
+		hdata->lc, hdata->id, hdata->tw, hdata->id,
+		((authdata_NS *)hdata->conn->auth)->username,
+		"passport.com",
+		"************",
+		hdata->cookie0, hdata->cookie1);
+	 
+	 if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
+
+	 bzero(buf, sizeof(buf));
+	 snprintf(buf, sizeof(buf),  
+		"GET /ppsecure/post.srf?lc=%s&id=%s&tw=%s&cbid=%s&da=passport.com&login=%s&domain=%s&passwd=%s&sec=&mspp_shared=&padding= HTTP/1.0\r\n"
+		"Cookie: %s\r\n"
+		"Cookie: %s\r\n\r\n",
+		hdata->lc, hdata->id, hdata->tw, hdata->id,
+		((authdata_NS *)hdata->conn->auth)->username,
+		"passport.com",
+		((authdata_NS *)hdata->conn->auth)->password,
+		hdata->cookie0, hdata->cookie1);
+	 
+	 
+	 ssl_done_socket(sock);
+	 sock->ssl = NULL;
+	 close(sock->sock);
+	 
+	 free (hdata->url); 
+	 hdata->url = strdup(buf);
+	 
+	 if (ext_async_socket(hdata->remote_host, 443, (void *)msn_https_cb2, hdata) < 0) {
+		 if(DEBUG) printf("immediate connect failure to %s\n", hdata->remote_host);    
+		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server.");
+		 ext_closing_connection(hdata->conn);
+	 }
+}
+ 	 
+static void msn_https_cb2(int fd, int error, void *data) 
+{
+	 SockInfo *sock = (SockInfo*)malloc(sizeof(SockInfo));
+	 char *urlread = NULL;
+	 char *cookie0 = NULL, *cookie1 = NULL, *cookie2 = NULL;
+	 char *tmp = NULL;	
+	 https_data *hdata = (https_data *)data;	
+	 sock->sock = fd;
+	 
+	 if (DEBUG) printf("entering msn_https_cb2\n");
+	 if(fd == -1 || error)
+	 {
+		 ext_show_error(hdata->conn, "Could not connect to https server.");
+		 ext_closing_connection(hdata->conn);
+		 return;
+	 }
+
+	 if (!ssl_init_socket(sock)) {
+		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
+		 ext_closing_connection(hdata->conn);
+		 return;
+	 }
+	 
+	 ssl_write(sock->ssl, hdata->url, strlen(hdata->url));
+	 
+	 free(urlread); urlread = NULL;
+	 free(tmp); tmp = NULL;
+
+	 bzero(buf, sizeof(buf));
+	 while (ssl_read(sock->ssl, buf, sizeof(buf))) {
+		 size_t s = (size_t)strlen(buf) +1;
+		 
+		 if (urlread) {
+			 s += strlen(urlread)+1;
+			 tmp = strdup(urlread);
+		 } 
+		 
+		 urlread = (char *)realloc(urlread, s);
+		 
+		 snprintf(urlread, s-1, "%s%s", tmp?tmp:"", buf);
+		 free(tmp); tmp = NULL;
+		 if(strstr(buf, "</HTML>"))
+			 break;
+		 bzero(buf, sizeof(buf));
+		 
+	 }
+	 ssl_done_socket(sock);
+	 sock->ssl = NULL;
+	 close(sock->sock);
+
+	 if (DEBUG) printf("---ANSWER---\n%s\n---END---\n", urlread);
+	 
+	 if ((tmp = strstr(urlread, "passportdone.asp")) != NULL) {
+		 char *t = NULL;
+		 char *p = NULL;
+		 
+		 t = strdup(strstr(tmp,"&t=")+3);
+		 p = strdup(strstr(tmp,"&p=")+3);
+		 *strstr(t, "&") = 0;
+		 *strstr(p, "\"") = 0;
+	 
+		 bzero(buf, sizeof(buf));
+		 snprintf(buf, sizeof(buf),
+			"USR %d TWN S t=%s&p=%s\r\n", next_trid, t, p);
+	 
+	 	 free (t);
+		 free (p);
+		 write(hdata->conn->sock, buf, strlen(buf));
+		 msn_add_callback(hdata->conn, msn_connect_4, next_trid, hdata->info);
+		 
+		 next_trid++;
+	 } else {
+		msn_show_verbose_error(hdata->conn, 911);
+   		msn_clean_up(hdata->conn);
+	 }
+	
+	  free(hdata->url);
+	  free(hdata->remote_host);
+	  free(hdata->lc);
+	  free(hdata->id);
+	  free(hdata->tw);
+	  free(hdata->cookie0);
+	  free(hdata->cookie1);
+	  free(hdata);
+	  hdata=NULL;	 
+}
+
+ 
 void msn_SBconn_3(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
 {
   authdata_SB * auth=(authdata_SB *)conn->auth;
@@ -677,6 +917,19 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
     {
       call=(callback *)list->data;
       if(call->trid==trid)
+      {
+        (call->func)(conn, trid, args, numargs, call->data);
+        return;
+      }
+      list=list->next;
+      if(list==NULL) { break; } // defaults
+    }
+  } else if (list!=NULL && (!strcmp(args[0],"LSG") || !strcmp(args[0],"LST"))) {
+	  /* hack because LSG/LST don't have trid anymore */
+    while(1)
+    {
+      call=(callback *)list->data;
+      if(call->func==msn_syncdata)
       {
         (call->func)(conn, trid, args, numargs, call->data);
         return;
@@ -811,7 +1064,7 @@ void msn_handle_default(msnconn * conn, char ** args, int numargs)
 	  ext_got_group(conn, args[4], msn_decode_URL(args[3]));
 	  return;
   }
-    
+  
   if(isdigit(args[0][0]) && strlen(args[0])>2)
   {
     msn_show_verbose_error(conn, atoi(args[0]));
@@ -1990,7 +2243,7 @@ static void msn_connect_cb2(int fd, int error, void *data)
   printf("Connected\n"); // DEBUG
   
 
-  snprintf(buf, sizeof(buf), "VER %d MSNP7\r\n", next_trid);
+  snprintf(buf, sizeof(buf), "VER %d MSNP8 CVR0\r\n", next_trid);
   write(conn->sock, buf, strlen(buf));
   msn_add_callback(conn, msn_connect_2, next_trid, (callback_data *)info);
   next_trid++;
@@ -2028,7 +2281,7 @@ void msn_connect_2(msnconn * conn, int trid, char ** args, int numargs, callback
   msn_del_callback(conn, trid);
 
   if (numargs < 3) return;
-  if(strcmp(args[0], "VER") || strcmp(args[2], "MSNP7")) // if either *differs*...
+  if(strcmp(args[0], "VER") || strcmp(args[2], "MSNP8")) // if either *differs*...
   {
     ext_show_error(NULL, "MSN Protocol negotiation failed.");
     delete info;
@@ -2038,7 +2291,7 @@ void msn_connect_2(msnconn * conn, int trid, char ** args, int numargs, callback
     return;
   }
 
-  snprintf(buf, sizeof(buf), "USR %d MD5 I %s\r\n", next_trid, info->username);
+  snprintf(buf, sizeof(buf), "CVR %d 0x0409 winnt 5.2 i386 MSNMSGR 6.0.0250 MSMSGS %s\r\n", next_trid, info->username);
   write(conn->sock, buf, strlen(buf));
 
   msn_add_callback(conn, msn_connect_3, next_trid, data);
@@ -2065,25 +2318,11 @@ void msn_connect_3(msnconn * conn, int trid, char ** args, int numargs, callback
     return;
   }
 
-  // OK, the challenge just arrived as args[4]
-
-  md5_init(&state);
-  md5_append(&state, (md5_byte_t *)(args[4]), strlen(args[4]));
-  md5_append(&state, (md5_byte_t *)(info->password), strlen(info->password));
-  md5_finish(&state, digest);
-
-  snprintf(buf, sizeof(buf), "USR %d MD5 S ", next_trid);
+  snprintf(buf, sizeof(buf), "USR %d TWN I %s\r\n", next_trid, info->username);
+  
   write(conn->sock, buf, strlen(buf));
+  msn_add_callback(conn, msn_SBconn_2, next_trid, data);
 
-  for(a=0; a<16; a++)
-  {
-    snprintf(buf, sizeof(buf), "%02x", digest[a]);
-    write(conn->sock, buf, 2);
-  }
-
-  write(conn->sock, "\r\n", 2);
-
-  msn_add_callback(conn, msn_connect_4, next_trid, data);
   next_trid++;
 }
 

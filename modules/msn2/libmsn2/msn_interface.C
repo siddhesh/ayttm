@@ -17,13 +17,20 @@
 
 #include "msn_core.h"
 #include "msn_interface.h"
-
+#include "msn_bittybits.h"
+#include "ssl.h"
 struct pollfd socks[21];
 
 int countsocks(void);
 int do_msn_debug = 1;
 
 msnconn * mainconn;
+
+void ext_syncing_lists(msnconn *, int){}
+void ext_got_friend(msnconn *, char *, char *){}
+void ext_got_pong(msnconn *){}
+void ext_got_group(msnconn *, char *, char *){}
+void ext_netmeeting_invite(msnconn *, char *, char *, invitation_voice *){}
 
 main()
 {
@@ -70,7 +77,11 @@ main()
       if(socks[a].revents & (POLLIN|POLLOUT|POLLPRI))
       {
         //printf("Incoming on socket number %d (%d)\n", a, socks[a].fd);
-        msn_handle_incoming(socks[a].fd, socks[a].revents&POLLIN, socks[a].revents&POLLOUT);
+	char **args;
+	int nargs;
+	args = msn_read_line(mainconn, &nargs);
+        msn_handle_incoming(mainconn, socks[a].revents&POLLIN, socks[a].revents&POLLOUT,
+		args, nargs);
       }
       socks[a].revents=0;
     }
@@ -436,3 +447,4 @@ void ext_got_friend(char *name, char *groups)
 void ext_syncing_lists(int state)
 {
 }
+

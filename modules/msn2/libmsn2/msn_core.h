@@ -270,6 +270,11 @@ int is_on_list(char *handle, llist *lst) ;
 #define COMPLETE_BLP 16
 #define COMPLETE_GTC 32
 
+#define LIST_FL 1
+#define LIST_AL 2
+#define LIST_BL 4
+#define LIST_RL 8
+
 // Intermediate steps in synchronisation
 class syncinfo : public callback_data
 {
@@ -281,13 +286,13 @@ class syncinfo : public callback_data
   llist * bl;
 
   unsigned int complete;
-
+  int total_lst;
   int serial;
 
   char blp;
   char gtc;
 
-  syncinfo() { blp='A'; gtc='A'; fl=rl=al=bl=NULL; complete=0; serial=0; }
+  syncinfo() { blp='A'; gtc='A'; fl=rl=al=bl=NULL; total_lst = 0; complete=0; serial=0; }
   ~syncinfo()
   {
     if(fl!=NULL) { delete fl; }
@@ -381,6 +386,17 @@ class connectinfo : public callback_data
   ~connectinfo()
   { if(username!=NULL) { delete [] username; } if(password!=NULL) { delete [] password; } }
 };
+
+typedef struct _https_data {
+	char *url;
+	char *remote_host;
+	char *lc;
+	char *id;
+	char *tw;
+	char *cookie0, *cookie1;
+	conninfo_SB * info;
+	msnconn *conn;
+} https_data;
 
 void msn_connect_2(msnconn * conn, int trid, char ** args, int numargs, callback_data * data);
 void msn_connect_3(msnconn * conn, int trid, char ** args, int numargs, callback_data * data);
