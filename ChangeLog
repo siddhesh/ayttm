@@ -1,3 +1,7 @@
+* Tue Apr 22 2003 19:48 UTC [edward]	0.3.0-pre17
+- libproxy/proxy.c
+Fixes to get MINGW32 to compile.
+
 * Tue Apr 22 2003 01:02 GMT [colin]	0.3.0-pre16
 - modules/*toc/*toc.c
 Finish fix for 725040
