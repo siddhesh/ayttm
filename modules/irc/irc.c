@@ -85,8 +85,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:52 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/02 14:30:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1371,9 +1371,9 @@ static eb_account * irc_read_config(LList *config, struct contact *contact)
 	ia->status = IRC_OFFLINE;
 
 	/* string magic - point to the first char after '@' */
-	if (strrchr(temp, '@') != NULL)
+	if (strrchr(ea->handle, '@') != NULL)
 	{
-		temp = strrchr(temp, '@') + 1;
+		temp = strrchr(ea->handle, '@') + 1;
 		strncpy(ia->server, temp, 254);
 	}
 

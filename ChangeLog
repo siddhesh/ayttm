@@ -1,3 +1,7 @@
+* Wed Apr 02 2003 14:40 GMT [edward]	0.2.3-pre74
+- modules/irc/irc.c
+Someone added a problem when fixing a memory leak.
+
 * Wed Apr 02 2003 09:07 GMT [colin]	0.2.3-pre73
 - src/add_contact_window.c
   src/prefs_window.c
