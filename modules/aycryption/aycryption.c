@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.18 $",
-	"$Date: 2003/09/04 07:05:35 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/10/26 17:19:22 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -147,6 +147,10 @@ static int aycryption_init()
 	gtk_signal_connect(GTK_OBJECT(gpg_log_window), "delete-event", 
 			GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), NULL);
 	
+	gtk_widget_realize(gpg_log_window);
+	gtk_widget_realize(gpg_log_swindow);
+	gtk_widget_realize(gpg_log_text);
+
 	tag1=eb_add_menu_item(_("GPG settings..."), EB_CHAT_WINDOW_MENU, set_gpg_key, ebmCONTACTDATA, NULL);
 	if(!tag1) {
 		eb_debug(DBG_MOD, "Error!  Unable to add aycryption menu to chat window menu\n");

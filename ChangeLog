@@ -1,7 +1,14 @@
+* Sun Oct 26 2003 17:30 GMT [colin]	0.4.4-3
+- src/chat_window.c
+Implement login/logoff history
+- modules/aycryption/aycryption.c
+Missing realize()
+
 * Sun Oct 26 2003 14:53 GMT [nicolas]	0.4.4-2
 - modules/aim-oscar/aim-oscar.c
 Bugfixes, proxy connection support, group chat support.
 
+>>>>>>> 1.596
 * Sat Oct 25 2003 17:30 GMT [colin]	0.4.4-1
 Release
 

@@ -58,6 +58,8 @@
 #include "edit_local_accounts.h"
 
 #include "gtk/gtkutils.h"
+#include "gtk/extgtktext.h"
+#include "gtk/gtk_eb_html.h"
 
 #include "pixmaps/login_icon.xpm"
 #include "pixmaps/blank_icon.xpm"
@@ -313,17 +315,83 @@ static void get_info(GtkWidget * w, eb_account *ea )
 	}  
 }
 
-/* FIXME: use gtk_label_set_text() */
+static GtkWidget *status_message_window = NULL;
+static GtkWidget *status_message_swindow = NULL;
+static GtkWidget *status_message_window_text = NULL;
+
+static void create_log_window(void)
+{
+	if (status_message_window != NULL)
+		return;
+	
+	status_message_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	status_message_window_text = ext_gtk_text_new(NULL,NULL);
+	status_message_swindow = gtk_scrolled_window_new(NULL,NULL);
+	
+	gtk_window_set_title(GTK_WINDOW(status_message_window), _("Ayttm - history"));
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(status_message_swindow), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+	
+	gtk_eb_html_init(EXT_GTK_TEXT(status_message_window_text));
+	gtk_widget_set_usize(status_message_window_text, 450, 150);
+	
+	gtk_container_add(GTK_CONTAINER(status_message_swindow), status_message_window_text);
+	gtk_container_add(GTK_CONTAINER(status_message_window), status_message_swindow);
+	gtk_widget_show(status_message_window_text);
+	gtk_widget_show(status_message_swindow);
+	
+	gtk_signal_connect(GTK_OBJECT(status_message_window), "delete-event", 
+			GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), NULL);
+	
+	gtk_widget_realize(status_message_window);
+	gtk_widget_realize(status_message_swindow);
+	gtk_widget_realize(status_message_window_text);
+}
+
+static char *last_inserted = NULL;
+
 static void update_status_message(gchar * message )
 {
+	if (status_message_window == NULL)
+		create_log_window();
+
 	if(status_bar) {
-		gtk_widget_destroy(status_message);
-		status_message = gtk_label_new(message);
-		gtk_container_add(GTK_CONTAINER(status_bar), status_message);
-		gtk_widget_show(status_message);
+		char *tstamp_mess = NULL;
+		time_t t;
+		struct tm * cur_time;
+		
+		time(&t);
+		cur_time = localtime(&t);
+		tstamp_mess = g_strdup_printf("<font color=#888888><b>%d:%.2d:%.2d</b></font> %s<br>",
+				cur_time->tm_hour,
+				 cur_time->tm_min, 
+				cur_time->tm_sec,
+			 	message);
+		
+		if (last_inserted) {
+			if (!strcmp(last_inserted,message))
+				return;
+			else {
+				free(last_inserted);
+				last_inserted = strdup(message);
+			}
+		}
+		else {
+			last_inserted = strdup(message);
+		}
+		
+		gtk_label_set_text(GTK_LABEL(status_message), message);
+		gtk_eb_html_add(EXT_GTK_TEXT(status_message_window_text), tstamp_mess, 0, 0, 0);
+		g_free(tstamp_mess);
 	}
 }
 
+static void status_show_messages(GtkWidget *bar, void *data)
+{
+	gtk_widget_show(status_message_window);
+	gtk_widget_show(status_message_window_text);
+	gtk_widget_show(status_message_window_text);
+	gdk_window_raise(status_message_window->window);
+}
 
 static void collapse_contact( GtkTreeItem * treeItem, gpointer data )
 {
@@ -711,11 +779,22 @@ static void eb_status( GtkCheckMenuItem * widget, gpointer stats )
 		return;
 	}
 	eb_debug(DBG_CORE, "Setting %s to state %d\n", eb_services[s->ela->service_id].name, s->status);
+
 	eb_debug(DBG_CORE, "Current state is %i\n", current_state);
 	if (current_state != s->status) {
+		char buff[1024];
+		char *sname = NULL;
+		LList *l = eb_services[s->ela->service_id].sc->get_states();
+		int i = 0;
+		for (i = 0; i <= s->status; i++) {
+			sname = (char *)l->data;
+			l = l->next;
+		}
 		eb_debug(DBG_CORE, "Calling set_current_state: %i\n", s->status);
 		eb_services[s->ela->service_id].sc->set_current_state(s->ela, s->status);
 		new_state = eb_services[s->ela->service_id].sc->get_current_state(s->ela);
+		snprintf(buff,1024, _("Setting %s (on %s) to %s"), s->ela->handle, get_service_name(s->ela->service_id), sname);
+		update_status_message(buff);
 		/* Did the state change work? */
 		if(new_state != s->status)
 			eb_set_active_menu_status(s->ela->status_menu, new_state);
@@ -742,7 +821,10 @@ static void eb_sign_on_predef(int all)
 	while(node) {
 		eb_local_account *ac = (eb_local_account*)(node->data);
 		if (!ac->connected && (all || ac->connect_at_startup)) {
+			char buff[1024];
 			RUN_SERVICE(ac)->login(ac) ;
+			snprintf(buff,1024,_("Setting %s (on %s) to Online"), ac->handle, get_service_name(ac->service_id));
+			update_status_message(buff);
 		}
 		node = node->next ;
 	}
@@ -767,8 +849,9 @@ void eb_sign_off_all()
 	LList *node = accounts ;
 	while(node) {
 		eb_local_account *ac = (eb_local_account*)(node->data);
-		if (ac && ac->connected)
+		if (ac && ac->connected) {
 			RUN_SERVICE(ac)->logout(ac) ;
+		}
 		if (ac && ac->mgmt_flush_tag) {
 			eb_timeout_remove(ac->mgmt_flush_tag);
 			ac->mgmt_flush_tag=0;
@@ -1009,10 +1092,24 @@ static void set_status_label(eb_account *ea, int update_contact)
 			tmp,
 			strlen(tmp)?")":"");
 	
+	if (ea->status) {
+		char *current = NULL;
+		gtk_label_get(GTK_LABEL(ea->status), &current);
+		printf("current %s c %s\n",current,c);
+		if (current && strcmp(current, c)) {
+			char buff[1024];
+			g_snprintf(buff, 1024, _("%s is now %s"), 
+					ea->account_contact->nick,
+					strlen(tmp)?tmp:"Online");
+			update_status_message(buff);
+		}
+	}
+	
 	while (strchr(c,'\n') != NULL) {
 		char *t = strchr(c,'\n');
 		*t = ' ';
 	}
+
 	if(strlen(c) == 20) {
 		c[19] = c[18] = c[17] = '.';
 		if(!status_tips)
@@ -1500,7 +1597,7 @@ static void contact_login(struct contact * ec)
 	}
 	
 	eb_chat_window_do_timestamp(ec, 1);
-	g_snprintf(buff, 1024, _("%s is now online"), ec->nick);
+	g_snprintf(buff, 1024, _("%s is now Online"), ec->nick);
 	update_window_title(ec);
 	update_status_message(buff);
 }
@@ -1534,7 +1631,7 @@ static void contact_logoff(struct contact * ec)
 	do_trigger_offline(ec);
 
 	eb_chat_window_do_timestamp(ec, 0);
-	g_snprintf(buff, 1024, _("%s is now offline"), ec->nick);
+	g_snprintf(buff, 1024, _("%s is now Offline"), ec->nick);
 	update_window_title(ec);
 	update_status_message(buff); 
 }
@@ -2140,14 +2237,21 @@ void eb_status_window()
 	gtk_handle_box_set_handle_position(GTK_HANDLE_BOX(hbox), GTK_POS_LEFT);
 	gtk_handle_box_set_snap_edge(GTK_HANDLE_BOX(hbox), GTK_POS_LEFT);
 	status_message = gtk_label_new(_("Welcome To Ayttm"));
-	status_bar = gtk_frame_new(NULL);
-	gtk_frame_set_shadow_type(GTK_FRAME(status_bar), GTK_SHADOW_IN );
 	gtk_widget_show(status_message);
-	gtk_container_add(GTK_CONTAINER(status_bar), status_message);
+	
+	status_bar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_button_relief(GTK_TOOLBAR(status_bar), GTK_RELIEF_NONE);
+	gtk_container_set_border_width(GTK_CONTAINER(status_bar), 0);
+	gtk_toolbar_set_space_size(GTK_TOOLBAR(status_bar), 1);
 	gtk_widget_show(status_bar);
 	gtk_container_add(GTK_CONTAINER(hbox), status_bar);
 	gtk_widget_show(hbox);
-		
+	
+	create_log_window();
+	
+	gtk_toolbar_append_item(GTK_TOOLBAR(status_bar),NULL,NULL,NULL,status_message,
+			GTK_SIGNAL_FUNC(status_show_messages),NULL); 
+ 	
         gtk_box_pack_start(GTK_BOX(statusbox), hbox ,FALSE, FALSE,0);
         gtk_window_set_title(GTK_WINDOW(statuswindow), _(PACKAGE_STRING"-"RELEASE));
 	
