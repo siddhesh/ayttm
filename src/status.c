@@ -1270,7 +1270,7 @@ void contact_update_status(struct contact * ec)
 			if(account->service_id == ec->default_chatb) {
 				ea = account;
 				break;
-			} else if(ea == NULL) {
+			} else if(ea == NULL || !ea->online) {
 				ea = account;
 			}
 		} else if(ea == NULL) {

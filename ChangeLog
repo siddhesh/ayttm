@@ -1,3 +1,7 @@
+* Mon Jun  9 2003 07:39 GMT [philip]	0.3.1-28
+- src/status.c
+this time really show the correct icon 
+
 * Sun Jun  8 2003 15:54 GMT [colin]	0.3.1-27
 - po/pt_BR.po
 new translation from Fabricio@linuxcult.com
