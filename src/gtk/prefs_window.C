@@ -1092,8 +1092,8 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtk_container_add( GTK_CONTAINER(info_frame), vbox );
 
 	gtkut_button( _("Ignore fonts"), &m_prefs.do_ignore_font, vbox );
-	gtkut_button( _("Ignore foreground colours"), &m_prefs.do_ignore_fore, vbox );
-	gtkut_button( _("Ignore background colours"), &m_prefs.do_ignore_back, vbox );
+	gtkut_button( _("Ignore foreground colors"), &m_prefs.do_ignore_fore, vbox );
+	gtkut_button( _("Ignore background colors"), &m_prefs.do_ignore_back, vbox );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), info_frame, FALSE, FALSE, 0 );
 	
