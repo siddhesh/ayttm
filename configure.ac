@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.2, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=12
+RELEASE=13
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -58,6 +58,7 @@ LIBS="$LIBS -L/usr/local/lib"
 AC_CHECK_LIB([audiofile], [_af_ulaw2linear])
 AC_CHECK_LIB([ltdl], [lt_dlopen])
 AC_CHECK_LIB([pspell], [pspell_manager_check])
+AC_CHECK_LIB([pspell], [aspell_manager_check])
 
 # Checks for header files.
 AC_PATH_XTRA

@@ -1,3 +1,6 @@
+* Tue Jul 08 2003 04:07 GMT [philip]	0.3.2-13
+- check for pspell in pspell and aspell - thanks to Ben Reser
+
 * Mon Jul 07 2003 20:21 GMT [colin]	0.3.2-12
 - src/chat_room.c
 Fix compilation of aim & icq
