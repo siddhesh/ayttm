@@ -1,3 +1,7 @@
+* Wed Apr 09 2003 21:38 GMT [colin]	0.2.3-86
+- modules/icq-toc/libtoc/libtoc.c
+Fix undefined symbol
+
 * Wed Apr 09 2003 18:31 GMT [colin]	0.2.3-85
 - src/plugin.c
 Don't display error if ref_count < 0
