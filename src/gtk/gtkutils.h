@@ -44,7 +44,7 @@ void gtkut_widget_get_uposition(GtkWidget *widget, gint *px, gint *py);
 	@param	inSignalFunc	the callback function to call when it is clicked
 	@param	inCallbackData	the callback data
 	
-	@returns	the list 'ioGroup' with the new radio ubtton added to it
+	@returns	the list 'ioGroup' with the new radio button added to it
 */
 GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox,
 			const char *inButtonText, int inIsSelected,
