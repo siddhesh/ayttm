@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.35 $",
-	"$Date: 2003/08/07 06:21:19 $",
+	"$Revision: 1.36 $",
+	"$Date: 2003/08/30 11:48:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -397,7 +397,7 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 	strncat(nick, ila->server, 255 - strlen(nick));
 
 	/* ... and search for the sender */
-	ea = find_account_by_handle(nick, SERVICE_INFO.protocol_id);
+	ea = find_account_with_ela(nick, ela);
 		
 	if (!ea)
 	{
@@ -411,7 +411,8 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		ea->protocol_account_data = ia;
 		ea->ela = ela;
 		add_dummy_contact(orig_nick, ea);
-	}
+	} else if (!ea->ela)
+		ea->ela = ela;
 
 	ia = (irc_account *)ea->protocol_account_data;
 
@@ -509,7 +510,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		strncat(nick, ila->server, 255 - strlen(nick));
 		
 		/* Search and set offline */
-		ea = find_account_by_handle(nick, SERVICE_INFO.protocol_id);
+		ea = find_account_with_ela(nick, ela);
 		if (ea)
 		{
 			ia = (irc_account *)ea->protocol_account_data;
@@ -521,6 +522,8 @@ static void irc_parse (eb_local_account * ela, char *buff)
 				buddy_update_status(ea);
 				ia->realserver[0] = '\0';
 			}
+			if (!ea->ela)
+				ea->ela = ela; 
 		}
 	}
 	else if (!strncmp(split_buff[1], "311", 3))
@@ -538,9 +541,12 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		strncat(nick, ila->server, 255 - strlen(nick));
 		
 		/* Search and set online */
-		ea = find_account_by_handle(nick, SERVICE_INFO.protocol_id);
+		ea = find_account_with_ela(nick, ela);
 		if (ea)
 		{
+			if (!ea->ela)
+				ea->ela = ela;
+			
 			ia = (irc_account *)ea->protocol_account_data;
 			if (ia->status == IRC_OFFLINE)
 			{
@@ -577,9 +583,11 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		strncat(nick, ila->server, 255 - strlen(nick));
 		
 		/* Search and set idle time */
-		ea = find_account_by_handle(nick, SERVICE_INFO.protocol_id);
+		ea = find_account_with_ela(nick, ela);
 		if (ea)
 		{
+			if (!ea->ela)
+				ea->ela = ela;
 			ia = (irc_account *)ea->protocol_account_data;
 			ia->idle = atoi(buff2[4]);
 			buddy_update_status(ea);
@@ -604,9 +612,11 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		strncat(nick, ila->server, 255 - strlen(nick));
 		
 		/* Search and set realserver */
-		ea = find_account_by_handle(nick, SERVICE_INFO.protocol_id);
+		ea = find_account_with_ela(nick, ela);
 		if (ea)
 		{
+			if (!ea->ela)
+				ea->ela = ela;
 			ia = (irc_account *)ea->protocol_account_data;
 			strncpy(ia->realserver, buff2[4], 255);
 			if (ea->infowindow)
@@ -631,9 +641,11 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		strncat(nick, ila->server, 255 - strlen(nick));
 		
 		/* Search and set online */
-		ea = find_account_by_handle(nick, SERVICE_INFO.protocol_id);
+		ea = find_account_with_ela(nick, ela);
 		if (ea)
 		{
+			if (!ea->ela)
+				ea->ela = ela;
 			ia = (irc_account *)ea->protocol_account_data;
 			if (ia->status == IRC_OFFLINE)
 			{
