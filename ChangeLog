@@ -1,3 +1,7 @@
+* Tue Apr 01 2003 15:50 GMT [colin]	0.2.3-pre66
+- po/fr.po
+Fix missing file after CVS move 
+
 * Mon Mar 31 2003 11:22 GMT [colin]	0.2.3-pre65
 - src/log_window.c
 Fix negative length in strncpy
