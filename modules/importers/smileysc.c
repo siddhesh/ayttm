@@ -24,6 +24,7 @@
 #endif
 #include "plugin_api.h"
 #include "smileys.h"
+#include "prefs.h"
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -46,8 +47,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Console Smileys",
 	"Load Console smiley theme",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:32 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/03 19:51:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

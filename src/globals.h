@@ -45,21 +45,13 @@ extern int is_away;
 
 extern char geometry[256];
 
-#ifdef HAVE_ICONV_H
-extern int use_recoding;
-extern char local_encoding[];
-extern char remote_encoding[];
-#endif
-
 /* The location of our config files */
 extern char config_dir[];
 
 /* debug messages */
-extern int do_ayttm_debug;
-extern int do_ayttm_debug_html;
-
-#define DBG_HTML do_ayttm_debug_html
-#define DBG_CORE do_ayttm_debug
+extern int	iGetLocalPref( const char *key );
+#define DBG_HTML iGetLocalPref( "do_ayttm_debug_html" )
+#define DBG_CORE iGetLocalPref( "do_ayttm_debug" )
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 #define extern extern

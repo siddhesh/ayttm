@@ -45,6 +45,7 @@
 #include "add_contact_window.h"
 #include "sound.h"
 #include "dialog.h"
+#include "prefs.h"
 #include "gtk_globals.h"
 #include "status.h"
 #include "away_window.h"
@@ -119,7 +120,7 @@ char * recode_if_needed(char * source_text, int direction)
 	iconv_t conv_desc;
 	int tries;
 
-	if( use_recoding == 1 ) {
+	if( iGetLocalPref( "use_recoding" ) == 1 ) {
 		if( direction == RECODE_TO_REMOTE )
 			conv_desc = iconv_open( cGetLocalPref("remote_encoding"), cGetLocalPref("local_encoding") );
 		else
@@ -175,7 +176,7 @@ char * recode_if_needed(char * source_text, int direction)
 			fprintf( stderr, "Ayttm: recoding from %s to %s is not valid, sorry!\n"
 			   "Turning recoding off.\n",
 			   cGetLocalPref("local_encoding"), cGetLocalPref("remote_encoding"));
-			use_recoding = 0;
+			iSetLocalPref( "use_recoding", 0 );
 			return g_strdup(source_text);
 		}
 	}
@@ -929,19 +930,56 @@ static void send_typing_status(chat_window *cw)
 	}
 }
 
+static gboolean	check_tab_accelerators( const GtkWidget *inWidget, const chat_window *inCW, GdkModifierType inModifiers, const GdkEventKey *inEvent )
+{
+	if ( inCW->notebook != NULL )  /* only change tabs if this window is tabbed */
+	{
+		GdkDeviceKey 	accel_prev_tab;
+		GdkDeviceKey 	accel_next_tab;
+		
+		
+		gtk_accelerator_parse(cGetLocalPref("accel_next_tab"), &(accel_next_tab.keyval), &(accel_next_tab.modifiers));
+		gtk_accelerator_parse(cGetLocalPref("accel_prev_tab"), &(accel_prev_tab.keyval), &(accel_prev_tab.modifiers));
+	
+		/*
+		* this does not allow for using the same keyval for both prev and next
+		* when next contains every modifier that previous has (with some more)
+		* but i really don't think that will be a huge problem =)
+		*/
+		if ((inModifiers == accel_prev_tab.modifiers) && (inEvent->keyval == accel_prev_tab.keyval))
+		{
+			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
+			gtk_notebook_prev_page( GTK_NOTEBOOK(inCW->notebook) );
+			return( gtk_true() );
+		}
+		else if ((inModifiers == accel_next_tab.modifiers) && (inEvent->keyval == accel_next_tab.keyval))
+		{
+			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
+			gtk_notebook_next_page( GTK_NOTEBOOK(inCW->notebook) );
+			return( gtk_true() );
+		}
+	}
+	
+	return( gtk_false() );
+}
+
 static gboolean chat_singleline_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	chat_window *cw = (chat_window *)data;
-	if(!(event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK)))
+	chat_window				*cw = (chat_window *)data;
+	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+	
+	if( !modifiers )
 		send_typing_status(cw);
-
+	else
+		check_tab_accelerators( widget, cw, modifiers, event );
+	
 	return gtk_true();
 }
 
 static gboolean chat_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	chat_window *cw = (chat_window *)data;
-	GdkModifierType modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+	chat_window				*cw = (chat_window *)data;
+	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
 	eb_update_window_title(cw, FALSE);
 
@@ -999,21 +1037,11 @@ static gboolean chat_key_press(GtkWidget *widget, GdkEventKey *event, gpointer d
 			cw_reset_message(cw);
 			cw_set_message(cw, cw->hist_pos->data);
 		}
-	} else if (cw->notebook != NULL)  /* only change tabs if this window is tabbed */ {
-		/*
-		* this does not allow for using the same keyval for both prev and next
-		* when next contains every modifier that previous has (with some more)
-		* but i really don't think that will be a huge problem =)
-		*/
-		if ((modifiers == accel_prev_tab.modifiers) && (event->keyval == accel_prev_tab.keyval)) {
-			gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
-			gtk_notebook_prev_page( GTK_NOTEBOOK(cw->notebook) );
-			return gtk_true();
-		} else if ((modifiers == accel_next_tab.modifiers) && (event->keyval == accel_next_tab.keyval)) {
-			gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
-			gtk_notebook_next_page( GTK_NOTEBOOK(cw->notebook) );
-			return gtk_true();
-		}
+	}
+	else if (cw->notebook != NULL)  /* only change tabs if this window is tabbed */
+	{
+		if ( check_tab_accelerators( widget, cw, modifiers, event ) )
+			return( gtk_true() );
 	}
 
 	if(cw->preferred==NULL || modifiers)

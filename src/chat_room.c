@@ -29,6 +29,7 @@
 #include "util.h"
 #include "sound.h"
 #include "dialog.h"
+#include "prefs.h"
 #include "smileys.h"
 #include "service.h"
 #include "add_contact_window.h"

@@ -104,9 +104,6 @@ GtkWidget * do_icon_button (char *label, char **xpm, GtkWidget *w);
 } /* extern "C" */
 #endif
 
-/*prefs.c*/
-#include "prefs.h"
-
 /*editcontacts.c*/
 void eb_new_user();
 

@@ -50,7 +50,7 @@
 #include "contact_actions.h"
 #include "sound.h"
 #include "plugin.h"
-#include "prefs_window.h"
+#include "prefs.h"
 #include "offline_queue_mgmt.h"
 
 #include "gtk/gtkutils.h"
@@ -258,14 +258,17 @@ static void eb_save_size( GtkWidget * widget, gpointer data )
 	
 	if (h<10 || w < 10) 
 		return;
+		
 	iSetLocalPref("length_contact_window",h);
 	iSetLocalPref("width_contact_window",w);
+
 	gtkut_widget_get_uposition(statuswindow, &x, &y);
 	iSetLocalPref("x_contact_window",x);
 	iSetLocalPref("y_contact_window",y);
 	iSetLocalPref("status_show_level",status_show);
 	eb_debug(DBG_CORE,"saving window size\n");
-	write_prefs();
+	
+	ayttm_prefs_write();
 }
 
 static void get_info(GtkWidget * w, eb_account *ea )
@@ -599,7 +602,7 @@ static void eb_edit_accounts( GtkWidget * widget, gpointer stats )
 
 static void build_prefs_callback( GtkWidget * widget, gpointer stats )
 {
-	build_prefs();
+	ayttm_prefs_show_window();
 }
 
 static void launch_group_chat( GtkWidget * widget, gpointer userdata )

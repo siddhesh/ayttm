@@ -72,7 +72,7 @@ typedef struct {
 	ebmType type;		/* What kind of data structure do we send back? */
 } menu_data;
 
-eb_PLUGIN_INFO *FindPluginByName(char *name);
+eb_PLUGIN_INFO *FindPluginByName(const char *name);
 
 int unload_module(eb_PLUGIN_INFO *epi);
 void unload_modules();

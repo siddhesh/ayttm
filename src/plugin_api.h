@@ -148,7 +148,7 @@ __declspec(dllimport) int do_plugin_debug;
 #else
 extern int do_plugin_debug;
 #endif
-#define DBG_MOD do_plugin_debug
+#define DBG_MOD iGetLocalPref( "do_plugin_debug" )
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -55,7 +55,7 @@ static void print_do_print(char * value, void * data)
 	system(cmd);
 	
 	cSetLocalPref("print_cmd", value);
-	write_prefs();
+	ayttm_prefs_write();
 	
 	g_free(begin);
 	g_free(cmd);

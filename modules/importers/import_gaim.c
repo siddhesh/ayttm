@@ -22,16 +22,16 @@
  *
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <glib.h>
+
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
 #include "service.h"
 #include "dialog.h"
+#include "prefs.h"
 #include "util.h"
 #include "plugin_api.h"
 
@@ -55,8 +55,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Gaim Buddy List", 
 	"Import the Gaim Buddy List", 
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:32 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/03 19:51:35 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -25,7 +25,7 @@
 #ifndef __PREFS_H__
 #define __PREFS_H__
 
-#include "llist.h"
+#include "input_list.h"
 
 
 #define MAX_PREF_NAME_LEN 255
@@ -35,25 +35,129 @@
 extern "C" {
 #endif
 
+
+typedef struct
+{
+	const char		*module_type;
+	const char		*brief_desc;
+	const char		*loaded_status;
+	const char		*version;
+	const char		*date;
+	const char		*file_name;
+	const char		*status_desc;
+	const char		*service_name;
+	
+	input_list		*pref_list;
+} module_pref;
+
+struct prefs
+{
+	struct
+	{
+		int		do_login_on_startup;
+		int		do_ayttm_debug;
+		int		use_alternate_browser;
+		char	alternate_browser[MAX_PREF_LEN];
+
+		#ifdef HAVE_ISPELL
+			int		do_spell_checking;
+			char	spell_dictionary[MAX_PREF_LEN];
+		#endif
+	} general;
+	
+	struct
+	{
+		int		do_logging;
+		int		do_restore_last_conv;
+	} logging;
+	
+	struct
+	{
+		int		do_tabbed_chat;
+		int		do_tabbed_chat_orient;	/* Tab Orientation:  0 => bottom, 1 => top, 2=> left, 3 => right */
+	} layout;
+	
+	struct
+	{
+		int		do_ignore_unknown;
+		int		font_size;
+		int		do_raise_window;
+		int		do_send_idle_time;
+		int		do_ignore_fore;
+		int		do_ignore_back;
+		int		do_ignore_font;
+		char	accel_prev_tab[MAX_PREF_LEN];
+		char	accel_next_tab[MAX_PREF_LEN];
+	} chat;
+	
+	struct
+	{
+		int		do_no_sound_when_away;
+		int		do_no_sound_for_ignore;
+		int		do_online_sound;
+		int		do_play_send;
+		int		do_play_first;
+		int		do_play_receive;
+		
+		char	BuddyArriveFilename[MAX_PREF_LEN];
+		char	BuddyAwayFilename[MAX_PREF_LEN];
+		char	BuddyLeaveFilename[MAX_PREF_LEN];
+		char	SendFilename[MAX_PREF_LEN];
+		char	ReceiveFilename[MAX_PREF_LEN];
+		char	FirstMsgFilename[MAX_PREF_LEN];
+		
+		double	SoundVolume;
+	} sound;
+	
+	struct
+	{
+		int		proxy_type;
+		char	proxy_host[MAX_PREF_LEN];
+		int		proxy_port;
+		
+		int		do_proxy_auth;
+		char	proxy_user[MAX_PREF_LEN];
+		char	proxy_password[MAX_PREF_LEN];
+		
+		int		use_recoding;
+		char	local_encoding[MAX_PREF_LEN];
+		char	remote_encoding[MAX_PREF_LEN];
+	} advanced;
+	
+	struct
+	{
+		LList	*module_info;
+	} module;
+};
+
+
+void	ayttm_prefs_init( void );
+void	ayttm_prefs_read( void );
+void	ayttm_prefs_write( void );
+
+void		ayttm_prefs_show_window( void );
+module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName );
+void		ayttm_prefs_apply( struct prefs *inPrefs );
+void		ayttm_prefs_cancel( struct prefs *inPrefs );
+
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-__declspec(dllimport) void *GetPref(char *key);
+__declspec(dllimport) void *GetPref( const char *key );
 #else
-void	*GetPref(char *key);
+void	*GetPref( const char *key );
 #endif
 
-void	*SetPref(char *key, void *data);
+void	*SetPref( const char *key, void *data );
 
-int		iGetLocalPref(char *key);
-void	iSetLocalPref(char *key, int data);
+void	iSetLocalPref( const char *key, int data );
+int		iGetLocalPref( const char *key );
 
-float	fGetLocalPref(char *key);
-void	fSetLocalPref(char *key, float data);
+void	fSetLocalPref( const char *key, float data );
+float	fGetLocalPref( const char *key);
 
-char	*cGetLocalPref(char *key);
-void	cSetLocalPref(char *key, char *data);
+void	cSetLocalPref( const char *key, char *data );
+char	*cGetLocalPref( const char *key );
 
-void	save_account_info(char *service, LList *pairs);
-void	reload_service_accounts(int service_id);
+void	save_account_info( const char *service, LList *pairs );
 
 #ifdef __cplusplus
 }

@@ -40,6 +40,8 @@ typedef long __off32_t;
 #include "value_pair.h"
 #include "dialog.h"
 #include "prefs_window.h"
+#include "status.h"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
@@ -73,17 +75,17 @@ static gint compare_plugin_name(gconstpointer a, gconstpointer b) {
 
 static eb_PLUGIN_INFO *FindLoadedPluginByService(char *service)
 {
-	GList *plugins=GetPref(EB_PLUGIN_LIST);
-	GList *PluginData = g_list_find_custom(plugins, service, compare_plugin_loaded_service);
+	LList *plugins=GetPref(EB_PLUGIN_LIST);
+	LList *PluginData = l_list_find_custom(plugins, service, compare_plugin_loaded_service);
 	if(PluginData)
 		return(PluginData->data);
 	return(NULL);
 }
 
-eb_PLUGIN_INFO *FindPluginByName(char *name)
+eb_PLUGIN_INFO *FindPluginByName(const char *name)
 {
-	GList *plugins=GetPref(EB_PLUGIN_LIST);
-	GList *PluginData = g_list_find_custom(plugins, name, compare_plugin_name);
+	LList *plugins=GetPref(EB_PLUGIN_LIST);
+	LList *PluginData = l_list_find_custom(plugins, name, compare_plugin_name);
 	if(PluginData)
 		return(PluginData->data);
 	return(NULL);
@@ -93,14 +95,14 @@ eb_PLUGIN_INFO *FindPluginByName(char *name)
 /* Will add/update info about a plugin */
 static void SetPluginInfo(PLUGIN_INFO *pi, char *name, lt_dlhandle Module, PLUGIN_STATUS status, const char *status_desc, char *service, gboolean force)
 {
-	GList *plugins=NULL;
+	LList *plugins=NULL;
 	eb_PLUGIN_INFO *epi=NULL;
 
 	epi=FindPluginByName(name);
 	if(!epi) {
 		epi=g_new0(eb_PLUGIN_INFO, 1);
 		plugins=GetPref(EB_PLUGIN_LIST);
-		plugins=g_list_append(plugins, epi);
+		plugins=l_list_append(plugins, epi);
 		SetPref(EB_PLUGIN_LIST, plugins);
 	}
 	else if(force==TRUE || epi->status!=PLUGIN_LOADED) {
@@ -187,9 +189,12 @@ int unload_module(eb_PLUGIN_INFO *epi)
 	return(0);
 }
 
-void unload_modules(void) {
-	GList *plugins=GetPref(EB_PLUGIN_LIST);
-	for(plugins=GetPref(EB_PLUGIN_LIST); plugins; plugins=plugins->next) {
+void unload_modules(void)
+{
+	LList *plugins = GetPref(EB_PLUGIN_LIST);
+	
+	for ( ; plugins; plugins=plugins->next)
+	{
 		unload_module(plugins->data);
 	}
 }
@@ -421,6 +426,34 @@ static int init_menu(char *menu_name, menu_func redraw_menu, ebmType type)
 	md->type=type;
 	SetPref(menu_name, md);
 	return(0);
+}
+
+static void rebuild_import_menu( void )
+{
+	GtkWidget *import_submenuitem;
+
+	import_submenuitem = GetPref("widget::import_submenuitem");
+	if(!import_submenuitem) {
+		eb_debug(DBG_CORE, "Not rebuilding import menu, it's never been built.\n");
+		return;
+	}
+	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(import_submenuitem));
+	eb_import_window(import_submenuitem);
+	gtk_widget_draw(GTK_WIDGET(import_submenuitem), NULL);
+}
+
+static void rebuild_profile_menu( void )
+{
+	GtkWidget *profile_submenuitem;
+
+	profile_submenuitem = GetPref("widget::profile_submenuitem");
+	if(!profile_submenuitem) {
+		eb_debug(DBG_CORE, "Not rebuilding profile menu, it's never been built.\n");
+		return;
+	}
+	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(profile_submenuitem));
+	eb_profile_window(profile_submenuitem);
+	gtk_widget_draw(GTK_WIDGET(profile_submenuitem), NULL);
 }
 
 /* Set up information about how menus are redrawn and what kind of data should be sent to callbacks */

@@ -22,9 +22,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
+#include "intl.h"
 
 #include <gtk/gtk.h>
 #include <gdk/gdkprivate.h>
@@ -104,6 +102,45 @@ static void refresh_service_contacts(int type)
 	eb_debug(DBG_CORE, "<Leaving\n");
 	return;
 }
+
+static void reload_service_accounts(int service_id)
+{
+	LList				*node = accounts;
+	LList				*account_pairs = NULL;
+	eb_local_account	*oela = NULL;
+	eb_local_account	*nela = NULL;
+	const int			buffer_size = 256;
+	char				buff[buffer_size];
+	char				buff2[buffer_size];
+
+	while(node)
+	{
+		oela=node->data;
+		if(oela->service_id != service_id || oela->connected) {
+			node = node->next;
+			continue;
+		}
+		eb_debug(DBG_CORE, "Account: handle:%s service: %s\n", oela->handle, get_service_name(oela->service_id));
+		snprintf(buff, buffer_size, "%s:%s", get_service_name(oela->service_id), oela->handle);
+		account_pairs = GetPref(buff);
+		nela = eb_services[oela->service_id].sc->read_local_account_config(account_pairs);
+		if(!nela) {
+			snprintf(buff2, buffer_size, _("Unable to create account for %s.\nCheck your config file."), buff);
+			do_error_dialog(buff2, _("Invalid account"));
+			oela->service_id=get_service_id("NO SERVICE");
+		}
+		else {
+			nela->service_id = oela->service_id;
+			node->data=nela;
+			//FIXME: This should probably be left to the service to clean up, though at this point, it may not exist
+			free(oela->handle);
+			free(oela->protocol_local_account_data);
+			free(oela);
+		}
+		node = node->next;
+	}
+}
+
 
 /* Add a new service, or replace an existing one */
 int add_service(struct service *Service_Info)

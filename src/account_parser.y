@@ -1,18 +1,15 @@
 %token ACCOUNT END_ACCOUNT
 
 %{
-        #include <gtk/gtk.h>
-        #include <stdio.h>
         #include <stdlib.h>
         #include <string.h>
 
         #include "globals.h"
-        #include "account.h"
         #include "value_pair.h"
         #include "service.h"
         #include "util.h"
 
-	extern void save_account_info(char *service, LList *pairs);
+
 	extern int Line;
 	#define accounterror(error) printf("Parse error on line %d: %s\n", Line, error );
 	extern int accountlex();

@@ -29,6 +29,7 @@
 #include "globals.h"
 #include "plugin.h"
 #include "dialog.h"
+#include "prefs.h"
 
 
 static void eb_gtk_dialog_callback(GtkWidget *widget, gpointer data)

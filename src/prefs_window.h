@@ -25,21 +25,9 @@
 #ifndef __PREFS_WINDOW_H__
 #define __PREFS_WINDOW_H__
 
+#include "prefs.h"
 
-void write_prefs();
-void eb_read_prefs();
-void build_prefs();
-void rebuild_import_menu();
-void rebuild_profile_menu();
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void rebuild_set_status_menu();
-
-#ifdef __cplusplus
-}
-#endif
+void	ayttm_prefs_window_create( struct prefs *inPrefs );
 
 #endif

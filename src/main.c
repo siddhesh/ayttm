@@ -61,7 +61,7 @@ int WinVer;
 #include "smileys.h"
 #include "console_session.h"
 #include "crash.h"
-#include "prefs_window.h"
+#include "prefs.h"
 
 
 #define PACKAGE "ayttm"
@@ -155,7 +155,6 @@ static void eb_cli_help (const char * cmd)
 
 /* Global variable, referenced in globals.h */
 char config_dir[1024] = "";
-GtkWidget *current_parent_widget = NULL;
 
 
 static void start_login(gboolean new)
@@ -372,7 +371,7 @@ int main(int argc, char *argv[])
 	if (crash) {
 		gtk_set_locale();
 		gtk_init(&argc, &argv);
-		eb_read_prefs();
+		ayttm_prefs_read();
 		crash_main(crash_param);
 		return 0;
 	}
@@ -489,8 +488,10 @@ int main(int argc, char *argv[])
 
 	/* Initalize the menus that are available through the plugin_api */
 	init_menus();
+	
+	ayttm_prefs_init();
 
-	eb_read_prefs();
+	ayttm_prefs_read();
 
 	/* Load all the modules in the module_path preference, details can be found in the preferences module tab */
 	load_modules();
