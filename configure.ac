@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.3, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=19
+RELEASE=20
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -385,6 +385,11 @@ AC_SUBST(EB_LIBS)
 AC_SUBST(EB_LDFLAGS)
 AC_SUBST(OPTIONAL_PLUG_DIR)
 AC_SUBST(DEBUG_LIBMSN)
+
+HOST=`echo $host | sed -e 's/^[[^-]]*-[[^-]]*-\([[^-]]*\).*/\1/'`
+HOST=`echo -n ${HOST%${HOST#?}} | tr a-z A-Z; echo ${HOST#?} | tr A-Z a-z`
+AC_DEFINE_UNQUOTED(HOST, "$HOST", [OS that this system was built for])
+AC_SUBST(HOST)
 
 case "$host" in
 *-mingw*)

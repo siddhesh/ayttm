@@ -75,8 +75,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"LiveJournal",
 	"Ayttm client for LiveJournal (http://www.livejournal.com/)",
-	"$Revision: 1.1 $",
-	"$Date: 2003/08/01 09:52:29 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/08/04 04:47:14 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -467,7 +467,8 @@ static int ay_lj_ping_timeout_callback(gpointer data)
 	lj_local_account *lla = ela->protocol_local_account_data;
 	char buff[1024];
 
-	snprintf(buff, sizeof(buff), "mode=checkfriends&user=%s&password=%s&lastupdate=%s", ela->handle, lla->password, lla->last_update);
+	snprintf(buff, sizeof(buff), "mode=checkfriends&user=%s&password=%s&lastupdate=%s", 
+			ela->handle, lla->password, lla->last_update);
 
 	send_http_request(buff, _ay_lj_got_update, ela);
 	return 1;
@@ -548,7 +549,8 @@ static void lj_get_buddies(eb_local_account *ela)
 	snprintf(buff, sizeof(buff), _("Fetching buddies for %s..."), ela->handle);
 	ay_activity_bar_update_label(lla->connect_progress_tag, buff);
 
-	snprintf(buff, sizeof(buff), "mode=getfriends&user=%s&password=%s", ela->handle, lla->password);
+	snprintf(buff, sizeof(buff), "mode=getfriends&user=%s&password=%s", 
+			ela->handle, lla->password);
 
 	send_http_request(buff, _ay_lj_got_buddies, ela);
 }
@@ -600,7 +602,9 @@ static void ay_lj_login(eb_local_account *ela)
 
 	url_to_host_port_path(lj_url, lj_host, &lj_port, lj_path);
 
-	snprintf(buff, sizeof(buff), "mode=login&user=%s&password=%s", ela->handle, lla->password);
+	snprintf(buff, sizeof(buff), "clientversion=%s-%s/%s&mode=login&user=%s&password=%s", 
+			HOST, PACKAGE, VERSION,
+			ela->handle, lla->password);
 	snprintf(buff2, sizeof(buff2), _("Logging in to LiveJournal account: %s"), ela->handle);
 
 	ela->connecting = 1;
