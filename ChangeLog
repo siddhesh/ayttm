@@ -1,3 +1,9 @@
+* Sat Oct 25 2003 09:25 GMT [colin]	0.4.3-15
+- src/chat_window.c
+  src/chat_room.c
+autocomplete: Fix issues with modifiers and punctuation.
+Refactor a bit
+
 * Fri Oct 24 2003 17:25 GMT [colin]	0.4.3-14
 - src/chat_window.c
   src/chat_room.c

@@ -250,8 +250,11 @@ void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, 
 	}	
 }
 extern char * complete_word( LList * l, const char *begin, int *choice);
-extern int auto_complete(GtkWidget *w, LList *l, GdkEventKey *event);
-extern void auto_complete_insert(GtkWidget *w, GdkEventKey *event);
+extern int chat_auto_complete(GtkWidget *w, LList *l, GdkEventKey *event);
+extern void chat_auto_complete_insert(GtkWidget *w, GdkEventKey *event);
+extern void chat_history_up (chat_window *cw);
+extern void chat_history_down(chat_window *cw);
+extern void chat_scroll(chat_window *cw, GdkEventKey *event);
 extern LList *session_words;
 
 static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
@@ -275,6 +278,7 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	}
       else if ( iGetLocalPref("do_enter_send") )
 	{
+	  chat_auto_complete_insert(cr->entry, event);	
 	  /*Prevents a newline from being printed*/
 	  gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
 
@@ -284,101 +288,26 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
     }
   else if (event->keyval == GDK_Up && (modifiers == 0) )
     {
-      gint p=0;
-
-      if(cr->history==NULL) { return gtk_true(); }
-
-      if(cr->hist_pos==NULL)
-      {
-        char * s;
-        LList * node;
-
-        s= gtk_editable_get_chars(GTK_EDITABLE (cr->entry), 0, -1);
-
-        for(node=cr->history; node!=NULL ; node=node->next)
-        {
-          cr->hist_pos=node;
-        }
-
-        if(strlen(s)>0)
-        {
-          cr->history=l_list_append(cr->history, strdup(s));
-          //cr->hist_pos=cr->history->next;
-          g_free(s); // that strdup() followed by g_free() looks stupid, but it isn't
-                        // - strdup() uses vanilla malloc(), and the destroy code uses
-                        // vanilla free(), so we can't use something that needs to be
-                        // g_free()ed (apparently glib uses an incompatible allocation
-                        //system
-          cr->this_msg_in_history=1;
-        }
-
-      } else {
-        cr->hist_pos=cr->hist_pos->prev;
-        if(cr->hist_pos==NULL)
-        {
-          LList * node;
-          eb_debug(DBG_CORE,"history Wrapped!\n");
-          for(node=cr->history; node!=NULL ; node=node->next)
-          {
-            cr->hist_pos=node;
-          }
-        }
-      }
-
-      gtk_editable_delete_text(GTK_EDITABLE (cr->entry), 0, -1);
-      gtk_editable_insert_text(GTK_EDITABLE (cr->entry), cr->hist_pos->data, strlen(cr->hist_pos->data), &p);
+	    chat_history_up(cr);
     }
   else if (event->keyval == GDK_Down && (modifiers == 0) )
     {
-      gint p=0;
-
-      if(cr->history==NULL || cr->hist_pos==NULL) { return gtk_true(); }
-      cr->hist_pos=cr->hist_pos->next;
-      if(cr->hist_pos==NULL)
-      {
-        gtk_editable_delete_text(GTK_EDITABLE (cr->entry), 0, -1);
-      } else {
-        gtk_editable_delete_text(GTK_EDITABLE (cr->entry), 0, -1);
-        gtk_editable_insert_text(GTK_EDITABLE (cr->entry), cr->hist_pos->data, strlen(cr->hist_pos->data), &p);
-      }
+	    chat_history_down(cr);
     }
-  else if (event->keyval == GDK_Page_Up)
+  else if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down)
   {
-	  GtkWidget *scwin = cr->chat->parent;
-	  GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
-	  if (ga && ga->value > ga->page_size) {
-		  gtk_adjustment_set_value(ga, ga->value - ga->page_size);
-		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
-	  } else if (ga) {
-		  gtk_adjustment_set_value(ga, 0);
-		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
-	  }
-  }
-  else if (event->keyval == GDK_Page_Down)
-  {
-	  GtkWidget *scwin = cr->chat->parent;
-	  GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
-	  if (ga && ga->value < ga->upper - ga->page_size) {
-		  gtk_adjustment_set_value(ga, ga->value + ga->page_size);
-		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
-	  } else if (ga) {
-		  gtk_adjustment_set_value(ga, ga->upper);
-		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
-	  }		
+	  chat_scroll(cr, event);
   }
   else if ( iGetLocalPref("do_auto_complete") && 
 	  	((event->keyval >= GDK_a && event->keyval <= GDK_z)
 		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) ) {
-	  	return auto_complete(cr->entry, cr->fellows, event)
-				|| (iGetLocalPref("do_auto_complete") && auto_complete(cr->entry, session_words, event));
+	  	return chat_auto_complete(cr->entry, cr->fellows, event)
+				|| (iGetLocalPref("do_auto_complete") && chat_auto_complete(cr->entry, session_words, event));
   } else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab || event->keyval == GDK_Right)) {
-		int x = gtk_editable_get_position(GTK_EDITABLE (cr->entry));
-		if (x)
-			gtk_editable_select_region(GTK_EDITABLE (cr->entry), x, x);
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+		chat_auto_complete_validate(cr->entry);
 		return TRUE;
   } else if (iGetLocalPref("do_auto_complete") && event->keyval == GDK_space) {
-		auto_complete_insert(cr->entry, event);
+		chat_auto_complete_insert(cr->entry, event);
   }
   else if (cr->notebook != NULL)
   {

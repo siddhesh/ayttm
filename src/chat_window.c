@@ -1074,7 +1074,7 @@ char * complete_word( LList * l, const char *begin, int *choice)
 	
 	for (cur = l; cur && cur->data; cur = cur->next) {
 		char * curnick = (char *) cur->data;
-		if (!strncasecmp(curnick, begin, strlen(begin))) {
+		if (!strncmp(curnick, begin, strlen(begin))) {
 			possible = l_list_prepend(possible, curnick);
 		}
 		list_length++;
@@ -1098,7 +1098,7 @@ char * complete_word( LList * l, const char *begin, int *choice)
 			cur = possible;
 			while (cur && cur->data) {
 				char * compareto = cur->data;
-				if (strncasecmp(compareto, sub, strlen(sub))) {
+				if (strncmp(compareto, sub, strlen(sub))) {
 					common = FALSE;
 					break;
 				} 
@@ -1119,59 +1119,73 @@ char * complete_word( LList * l, const char *begin, int *choice)
 	return complete;
 }
 
-int auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
-{
-		int x = gtk_editable_get_position(GTK_EDITABLE (entry));
-		if (GTK_EDITABLE(entry)->selection_start_pos > 0
-		&& GTK_EDITABLE(entry)->selection_start_pos < x)
-			x=GTK_EDITABLE(entry)->selection_start_pos;
-		if (x > 0) {
-			char * word= gtk_editable_get_chars(GTK_EDITABLE (entry), 0, x);
-			char * last_word = strrchr(word, ' ');
-			char * comp_word = NULL;
-			char * nick = NULL;
-			int choice = TRUE;
-
-			if (last_word == NULL)
-				last_word = strrchr(word, '\n');
-			
-			if (last_word == NULL)
-				last_word = word;
-
-			if (last_word == NULL) {
-				return FALSE;
-			}
-			if (last_word != word) 
-				last_word++;
-
-			comp_word = malloc(strlen(last_word)+2);
-			sprintf(comp_word, "%s%c",last_word,event->keyval);
-			eb_debug(DBG_CORE, "word caught: %s\n",comp_word);
-			nick = complete_word(words, comp_word, &choice);
-
-			if (nick != NULL) {
-				int b = strlen(word) - strlen(last_word);
-				int inserted=b;
-				if (GTK_EDITABLE(entry)->selection_start_pos > 0)
-					gtk_editable_delete_selection(GTK_EDITABLE(entry));
-				gtk_editable_delete_text(GTK_EDITABLE (entry), b, x);
-				eb_debug(DBG_CORE, "insert %s at %d\n",nick, b);
-				gtk_editable_insert_text(GTK_EDITABLE (entry), nick, strlen(nick), &b);
-				if (!choice)
-					gtk_editable_insert_text(GTK_EDITABLE (entry), " ", strlen(" "), &b);
-				gtk_editable_set_position(GTK_EDITABLE (entry), b);
-				gtk_editable_select_region(GTK_EDITABLE (entry), x+1, b);
-				gtk_signal_emit_stop_by_name(GTK_OBJECT(entry), "key_press_event");
-				return TRUE;
-			}
-		}
-		return FALSE;
-	
-}
-
-void auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
+int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 {
 	int x = gtk_editable_get_position(GTK_EDITABLE (entry));
+
+	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+
+	if (modifiers && modifiers != GDK_SHIFT_MASK)
+		return FALSE;		
+
+	if ((event->keyval >= GDK_Shift_L && event->keyval <= GDK_Meta_R) ) {
+		return FALSE;
+	}
+	
+	if (GTK_EDITABLE(entry)->selection_start_pos > 0
+	&& GTK_EDITABLE(entry)->selection_start_pos < x)
+		x=GTK_EDITABLE(entry)->selection_start_pos;
+	if (x > 0) {
+		char * word= gtk_editable_get_chars(GTK_EDITABLE (entry), 0, x);
+		char * last_word = strrchr(word, ' ');
+		char * comp_word = NULL;
+		char * nick = NULL;
+		int choice = TRUE;
+
+		if (last_word == NULL)
+			last_word = strrchr(word, '\n');
+
+		if (last_word == NULL)
+			last_word = word;
+
+		if (last_word == NULL) {
+			return FALSE;
+		}
+		if (last_word != word) 
+			last_word++;
+
+		comp_word = malloc(strlen(last_word)+2);
+		sprintf(comp_word, "%s%c",last_word,event->keyval);
+		eb_debug(DBG_CORE, "word caught: %s\n",comp_word);
+		nick = complete_word(words, comp_word, &choice);
+
+		if (nick != NULL) {
+			int b = strlen(word) - strlen(last_word);
+			int inserted=b;
+			if (GTK_EDITABLE(entry)->selection_start_pos > 0)
+				gtk_editable_delete_selection(GTK_EDITABLE(entry));
+			gtk_editable_delete_text(GTK_EDITABLE (entry), b, x);
+			eb_debug(DBG_CORE, "insert %s at %d\n",nick, b);
+			gtk_editable_insert_text(GTK_EDITABLE (entry), nick, strlen(nick), &b);
+			if (!choice)
+				gtk_editable_insert_text(GTK_EDITABLE (entry), " ", strlen(" "), &b);
+			gtk_editable_set_position(GTK_EDITABLE (entry), b);
+			gtk_editable_select_region(GTK_EDITABLE (entry), x+1, b);
+			gtk_signal_emit_stop_by_name(GTK_OBJECT(entry), "key_press_event");
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+void chat_auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
+{
+	int x = gtk_editable_get_position(GTK_EDITABLE (entry));
+
+	if ((event->keyval >= GDK_Shift_L && event->keyval <= GDK_Meta_R) ) {
+		return;
+	}
+	
 	if (GTK_EDITABLE(entry)->selection_start_pos > 0
 	&& GTK_EDITABLE(entry)->selection_start_pos < x)
 		x=GTK_EDITABLE(entry)->selection_start_pos;
@@ -1184,7 +1198,7 @@ void auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 		int found=0;
 
 		/* trim last space */
-		if (strlen (word) && word[strlen(word)-1]==' ') {
+		if (strlen (word) && (word[strlen(word)-1] == ' ' || ispunct(word[strlen(word)-1]))) {
 			word[strlen(word)-1]='\0';
 		}
 
@@ -1202,7 +1216,7 @@ void auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 			last_word++;
 
 		while(l && l->data) {
-			if (!strcasecmp((char *)l->data, last_word)) {
+			if (!strcmp((char *)l->data, last_word)) {
 				found=1;
 				break;
 			}
@@ -1214,6 +1228,93 @@ void auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 		}
 	}
 	
+}
+
+void chat_history_up (chat_window *cw)
+{
+	int p=0;
+	if ( cw->history == NULL ) 
+		return;
+
+	if ( cw->hist_pos == NULL )
+	{
+		LList	*node = NULL;
+		char	*s = gtk_editable_get_chars(GTK_EDITABLE (cw->entry), 0, -1);
+
+		for ( node = cw->history; node != NULL ; node = node->next )
+			cw->hist_pos = node;
+
+		if ( strlen( s ) > 0 )
+		{
+			cw->history=l_list_append( cw->history, strdup( s ) );
+			g_free( s ); 
+			cw->this_msg_in_history = 1;
+		}
+	}
+	else
+	{
+		cw->hist_pos=cw->hist_pos->prev;
+
+		if ( cw->hist_pos==NULL )
+		{
+			LList	*node = NULL;
+
+			eb_debug(DBG_CORE,"history Wrapped!\n");
+			for ( node = cw->history; node != NULL ; node = node->next )
+				cw->hist_pos = node;
+		}
+	}
+
+	gtk_editable_delete_text(GTK_EDITABLE (cw->entry), 0, -1);
+	gtk_editable_insert_text(GTK_EDITABLE (cw->entry), cw->hist_pos->data, strlen(cw->hist_pos->data), &p);
+}
+
+void chat_history_down(chat_window *cw) 
+{
+	int p=0;
+	if ( cw->history == NULL || cw->hist_pos == NULL ) 
+		return;
+
+	cw->hist_pos = cw->hist_pos->next;
+
+	gtk_editable_delete_text(GTK_EDITABLE (cw->entry), 0, -1);
+
+	if ( cw->hist_pos != NULL )
+		gtk_editable_insert_text(GTK_EDITABLE (cw->entry), cw->hist_pos->data, strlen(cw->hist_pos->data), &p);
+}	
+
+void chat_scroll(chat_window *cw, GdkEventKey *event) 
+{
+	GtkWidget *scwin = cw->chat->parent;
+	if (event->keyval == GDK_Page_Up) {
+		GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
+		if (ga && ga->value > ga->page_size) {
+			gtk_adjustment_set_value(ga, ga->value - ga->page_size);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		} else if (ga) {
+			gtk_adjustment_set_value(ga, 0);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		}
+	}
+	else if (event->keyval == GDK_Page_Down) {
+		GtkWidget *scwin = cw->chat->parent;
+		GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
+		if (ga && ga->value < ga->upper - ga->page_size) {
+			gtk_adjustment_set_value(ga, ga->value + ga->page_size);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		} else if (ga) {
+			gtk_adjustment_set_value(ga, ga->upper);
+			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		}		
+	}
+}	
+
+void chat_auto_complete_validate (GtkWidget *entry)
+{
+	int x = gtk_editable_get_position(GTK_EDITABLE (entry));
+	if (x)
+		gtk_editable_select_region(GTK_EDITABLE (entry), x, x);		
+	gtk_signal_emit_stop_by_name(GTK_OBJECT(entry), "key_press_event");	
 }
 
 static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
@@ -1233,6 +1334,8 @@ static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer 
 		}
 		else if ( iGetLocalPref("do_enter_send") )
 		{
+			chat_auto_complete_insert(cw->entry, event);
+			
 			/*Prevents a newline from being printed*/
 			gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "key_press_event" );
 
@@ -1244,100 +1347,35 @@ static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer 
 	}
 	else if ( (event->keyval == GDK_Up) && (modifiers == 0) )
 	{
-		if ( cw->history == NULL ) 
-			return( gtk_true() );
-
-		if ( cw->hist_pos == NULL )
-		{
-			LList	*node = NULL;
-			char	*s = cw_get_message(cw);
-
-			for ( node = cw->history; node != NULL ; node = node->next )
-				cw->hist_pos = node;
-
-			if ( strlen( s ) > 0 )
-			{
-				cw->history=l_list_append( cw->history, strdup( s ) );
-				g_free( s ); 
-				cw->this_msg_in_history = 1;
-			}
-		}
-		else
-		{
-			cw->hist_pos=cw->hist_pos->prev;
-			
-			if ( cw->hist_pos==NULL )
-			{
-				LList	*node = NULL;
-				
-				eb_debug(DBG_CORE,"history Wrapped!\n");
-				for ( node = cw->history; node != NULL ; node = node->next )
-					cw->hist_pos = node;
-			}
-		}
-
-		cw_reset_message( cw );
-		cw_set_message( cw, cw->hist_pos->data );
+		chat_history_up(cw);
 	}
 	else if ( (event->keyval == GDK_Down) && (modifiers == 0) )
 	{
-		if ( cw->history == NULL || cw->hist_pos == NULL ) 
-			return( gtk_true() );
-		
-		cw->hist_pos = cw->hist_pos->next;
-		
-		cw_reset_message( cw );
-		
-		if ( cw->hist_pos != NULL )
-			cw_set_message( cw, cw->hist_pos->data );
+		chat_history_down(cw);
 	}
-	else if (event->keyval == GDK_Page_Up)
+	else if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down)
 	{
-		GtkWidget *scwin = cw->chat->parent;
-		GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
-		if (ga && ga->value > ga->page_size) {
-			gtk_adjustment_set_value(ga, ga->value - ga->page_size);
-			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
-		} else if (ga) {
-			gtk_adjustment_set_value(ga, 0);
-			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
+		chat_scroll(cw, event);
+	} 
+	else if (iGetLocalPref("do_auto_complete"))
+	{	
+		if ((event->keyval >= GDK_a && event->keyval <= GDK_z)
+		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) {
+			return chat_auto_complete(cw->entry, session_words, event);
+		} else if (event->keyval == GDK_Tab || event->keyval == GDK_Right) {
+			chat_auto_complete_validate(cw->entry);
+			return TRUE;
+		} else if (event->keyval==GDK_space || ispunct(event->keyval)) {
+			chat_auto_complete_insert(cw->entry, event);
 		}
 	}
-	else if (event->keyval == GDK_Page_Down)
-	{
-		GtkWidget *scwin = cw->chat->parent;
-		GtkAdjustment *ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scwin));
-		if (ga && ga->value < ga->upper - ga->page_size) {
-			gtk_adjustment_set_value(ga, ga->value + ga->page_size);
-			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
-		} else if (ga) {
-			gtk_adjustment_set_value(ga, ga->upper);
-			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
-		}		
-	} 
-	else if ( iGetLocalPref("do_auto_complete") && 
-		((event->keyval >= GDK_a && event->keyval <= GDK_z)
-		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) ) {
-		
-		return auto_complete(cw->entry, session_words, event);
-	} else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab || event->keyval == GDK_Right)) {
-		int x = gtk_editable_get_position(GTK_EDITABLE (cw->entry));
-		if (x)
-			gtk_editable_select_region(GTK_EDITABLE (cw->entry), x, x);
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
-		return TRUE;
-	} else if (iGetLocalPref("do_auto_complete") && event->keyval == GDK_space) {
-		auto_complete_insert(cw->entry, event);
-	}
-	else if (cw->notebook != NULL)
+	
+	if (cw->notebook != NULL)
 	{
 		// check tab changes if this is a tabbed chat window
 		if ( check_tab_accelerators( widget, cw, modifiers, event ) )
 			return( gtk_true() );
-	} else {
-	
-	return FALSE;
-  }
+	} 
 	
 	if ( (cw->preferred != NULL) && (modifiers == 0) )
 		send_typing_status(cw);
