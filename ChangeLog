@@ -1,3 +1,7 @@
+* Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre12
+- src/dialog.c
+enable ENTER to validate input
+
 * Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre11
 - modules/*toc/*toc.c
 ask pass stuff

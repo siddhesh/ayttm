@@ -343,6 +343,15 @@ static void input_window_ok(GtkWidget * widget, gpointer data)
 	g_free(text);
 }
 
+static gboolean	enter_pressed( GtkWidget *widget, GdkEventKey *event, gpointer data )
+{
+	if (event->keyval == GDK_Return) {
+		input_window_ok(NULL, data);
+		gtk_widget_destroy(((text_input_window*)data)->window);
+	}
+	return TRUE;
+}
+
 void do_text_input_window(const char *title, const char *value, 
 		void (*action)(const char *text, void *data), 
 		void *data )
@@ -386,9 +395,11 @@ void do_text_input_window_multiline(const char *title, const char *value,
 
 	if (ismulti)
 		input_window->text = gtk_text_new(NULL, NULL);
-	else
+	else {
 		input_window->text = gtk_entry_new();
-	
+		gtk_signal_connect(GTK_OBJECT(input_window->text), "key_press_event",
+			GTK_SIGNAL_FUNC(enter_pressed), input_window);
+	}
 	if (ispassword)
 		gtk_entry_set_visibility(GTK_ENTRY(input_window->text), FALSE);
 	
@@ -416,9 +427,7 @@ void do_text_input_window_multiline(const char *title, const char *value,
   	gtk_widget_set_usize(hbox2, 200,25);
 
 	button = gtkut_create_icon_button( _("OK"), ok_xpm, input_window->window );
-	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
-	gtk_window_set_default(GTK_WINDOW(input_window->window), button);
-	     
+		     
 	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_ok,
 			input_window);
 
