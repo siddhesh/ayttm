@@ -1,3 +1,7 @@
+* Wed Jul 09 2003 10:32 GMT [colin]	0.3.2-20
+- modules/smileys/smiley_themer.c
+Fix prefs like smiley_directory being ignored
+
 * Wed Jul 09 2003 10:32 GMT [colin]	0.3.2-19
 - src/chat_window.c src/chat_room.[ch]
 Fix focus bugs in tabbed chatrooms

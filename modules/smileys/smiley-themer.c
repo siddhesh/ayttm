@@ -72,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.10 $",
-	"$Date: 2003/05/31 19:40:03 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/07/09 15:38:42 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -115,7 +115,7 @@ static int plugin_init()
 	il = il->next;
 	il->widget.checkbox.value = &do_smiley_debug;
 	il->widget.checkbox.name = "do_smiley_debug";
-	il->widget.checkbox.label= _("Enable debugging:");
+	il->widget.checkbox.label= _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
 
 	load_themes();
@@ -139,6 +139,8 @@ static int plugin_finish()
 static int reload_prefs()
 {
 	is_setting_state=0;
+	unload_themes();
+	load_themes();
 	activate_theme_by_name(last_selected);
 	return 0;
 }
@@ -383,6 +385,8 @@ static void load_themes()
 		return;
 	}
 
+	LOG(("Opened smileydirectory %s\n",smiley_directory));
+	
 	theme = calloc(1, sizeof(struct smiley_theme));
 	theme->name = _("Default");
 	theme->smileys = eb_smileys();
