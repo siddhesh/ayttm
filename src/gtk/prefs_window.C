@@ -2924,6 +2924,20 @@ void	ay_account_panel::Build( GtkWidget *inParent )
 	if ( m_prefs.pref_list != NULL )
 	{
 		RenderAccountPrefs();
+	} else {	
+		GtkWidget	*label = gtk_label_new( NULL );
+		gtk_widget_show( label );
+
+		GString		*labelText = NULL;
+
+		labelText = g_string_new( _("[The account '") );
+		labelText = g_string_append( labelText, m_prefs.screen_name );
+		labelText = g_string_append( labelText, _("' has no preferences]") );
+
+		gtk_label_set_text( GTK_LABEL(label), labelText->str );
+		gtk_box_pack_start( GTK_BOX(m_top_container), GTK_WIDGET(label), FALSE, FALSE, 2 );
+
+		g_string_free( labelText, TRUE );
 	}
 
 	GtkWidget	*connect_button = gtkut_create_label_button( _( "Connect" ), GTK_SIGNAL_FUNC(s_connect_account), this );
