@@ -1,3 +1,7 @@
+* Mon Oct 20 2003 10:00 GMT [colin]	0.4.3-5
+- src/ssl.c
+Missing init
+
 * Sun Oct 19 2003 16:00 GMT [colin]	0.4.3-4
 - modules/msn2
 fix possible crash

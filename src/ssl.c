@@ -34,7 +34,7 @@
 #include <fcntl.h>
 #include "globals.h"
 
-static SSL_CTX *ssl_ctx;
+static SSL_CTX *ssl_ctx = NULL;
 
 void ssl_init(void)
 {
@@ -65,6 +65,7 @@ void ssl_done(void)
 		return;
 	
 	SSL_CTX_free(ssl_ctx);
+	ssl_ctx = NULL;
 }
 
 int ssl_init_socket(SockInfo *sockinfo, char *hostname, unsigned short port)
