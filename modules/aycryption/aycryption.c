@@ -39,6 +39,9 @@
 #include "debug.h"
 #include "platform_defs.h"
 #include "select-keys.h"
+#include <gtk/gtk.h>
+#include "gtk/extgtktext.h"
+#include "gtk/gtk_eb_html.h"
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -49,11 +52,12 @@
 
 
 /* Function Prototypes */
-static char *translate_out(const eb_local_account * local, const eb_account * remote,
+static char *aycryption_out(const eb_local_account * local, const eb_account * remote,
 			    const struct contact *contact, const char * s);
-static char *translate_in(const eb_local_account * local, const eb_account * remote,
+static char *aycryption_in(const eb_local_account * local, const eb_account * remote,
 			   const struct contact *contact, const char * s);
 static void set_gpg_key(ebmCallbackData *data);
+static void show_gpg_log(ebmCallbackData *data);
 static GpgmeData pgp_encrypt ( GpgmeData plain, GpgmeRecipients rset, int sign );
 
 const char *gpgmegtk_passphrase_cb (void *opaque, const char *desc, void **r_hd);
@@ -72,7 +76,12 @@ static int ref_count = 0;
 static int gpgme_inited = 0;
 static void *tag1=NULL;
 static void *tag2=NULL;
+static void *tag3=NULL;
+static void *tag4=NULL;
 
+static GtkWidget *gpg_log_window = NULL;
+static GtkWidget *gpg_log_text = NULL;
+static GtkWidget *gpg_log_swindow = NULL;
 static int do_aycryption_debug = 0;
 #define DBG_CRYPT do_aycryption_debug
 
@@ -81,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.9 $",
-	"$Date: 2003/05/06 17:04:41 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/05/06 21:57:47 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -116,8 +125,26 @@ static int aycryption_init()
 	il->widget.checkbox.label = strdup(_("Enable debugging"));
 	il->type = EB_INPUT_CHECKBOX;
 
-	outgoing_message_filters = l_list_append(outgoing_message_filters, &translate_out);
-	incoming_message_filters = l_list_append(incoming_message_filters, &translate_in);
+	outgoing_message_filters = l_list_append(outgoing_message_filters, &aycryption_out);
+	incoming_message_filters = l_list_append(incoming_message_filters, &aycryption_in);
+	
+	gpg_log_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gpg_log_text = ext_gtk_text_new(NULL,NULL);
+	gpg_log_swindow = gtk_scrolled_window_new(NULL,NULL);
+	
+	gtk_window_set_title(GTK_WINDOW(gpg_log_window), _("Aycryption - status"));
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(gpg_log_swindow), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+	
+	gtk_eb_html_init(EXT_GTK_TEXT(gpg_log_text));
+	gtk_widget_set_usize(gpg_log_text, 450, 150);
+	
+	gtk_container_add(GTK_CONTAINER(gpg_log_swindow), gpg_log_text);
+	gtk_container_add(GTK_CONTAINER(gpg_log_window), gpg_log_swindow);
+	gtk_widget_show(gpg_log_text);
+	gtk_widget_show(gpg_log_swindow);
+	
+	gtk_signal_connect(GTK_OBJECT(gpg_log_window), "delete-event", 
+			GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), NULL);
 	
 	tag1=eb_add_menu_item(_("GPG settings..."), EB_CHAT_WINDOW_MENU, set_gpg_key, ebmCONTACTDATA, NULL);
 	if(!tag1) {
@@ -130,6 +157,22 @@ static int aycryption_init()
 		eb_debug(DBG_MOD, "Error!  Unable to add aycryption menu to contact menu\n");
 		return(-1);
 	}
+	tag3=eb_add_menu_item(_("GPG status..."), EB_CHAT_WINDOW_MENU, show_gpg_log, ebmCONTACTDATA, NULL);
+	if(!tag3) {
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag1);
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag2);
+		eb_debug(DBG_MOD, "Error!  Unable to add aycryption menu to chat window menu\n");
+		return(-1);
+	}
+	tag4=eb_add_menu_item(_("GPG status..."), EB_CONTACT_MENU, show_gpg_log, ebmCONTACTDATA, NULL);
+	if(!tag4) {
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag1);
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag2);
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag3);
+		eb_debug(DBG_MOD, "Error!  Unable to add aycryption menu to contact menu\n");
+		return(-1);
+	}
+
 
 	if(!gpgme_inited) {
 		const char *version = gpgme_check_version(NULL);
@@ -143,8 +186,8 @@ static int aycryption_init()
 
 static int aycryption_finish()
 {
-	outgoing_message_filters = l_list_remove(outgoing_message_filters, &translate_out);
-	incoming_message_filters = l_list_remove(incoming_message_filters, &translate_in);
+	outgoing_message_filters = l_list_remove(outgoing_message_filters, &aycryption_out);
+	incoming_message_filters = l_list_remove(incoming_message_filters, &aycryption_in);
 	
 	while(plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
@@ -152,12 +195,30 @@ static int aycryption_finish()
 		plugin_info.prefs = il;
 	}
 
+	if (tag1)
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag1);
+	if (tag2)
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag2);
+	if (tag3)
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag3);
+	if (tag4)
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag4);
+	
+	gtk_widget_destroy(gpg_log_window);
 	return 0;
 }
 
 /*******************************************************************************
  *                             End Module Code
  ******************************************************************************/
+
+static void show_gpg_log(ebmCallbackData *data)
+{
+	gtk_widget_show(gpg_log_window);
+	gtk_widget_show(gpg_log_swindow);
+	gtk_widget_show(gpg_log_text);
+	gdk_window_raise(gpg_log_window->window);
+}
 
 static void set_gpg_key(ebmCallbackData *data)
 {
@@ -193,8 +254,22 @@ static void set_gpg_key(ebmCallbackData *data)
 	write_contact_list();
 	
 }
+static char *logcolor[3] = {"#ffa8a8", "#a8a8a8", "#a8ffa8"};
+typedef enum {
+	LOG_ERR=0,
+	LOG_NORM,
+	LOG_OK
+} LogLevel;
+	
+static void log_action(const struct contact *ct, int loglevel, const char *string)
+{
+	
+	char buf[1024];
+	snprintf(buf, 1024, _("<font color=%s><b>%s</b>: %s</font><br>"),logcolor[loglevel], ct->nick, string);
+	gtk_eb_html_add(EXT_GTK_TEXT(gpg_log_text), buf, 0, 0, 0);
+}
 
-static char *translate_out(const eb_local_account * local, const eb_account * remote,
+static char *aycryption_out(const eb_local_account * local, const eb_account * remote,
 			    const struct contact *ct, const char * s)
 {
 	char *p = NULL;
@@ -204,6 +279,8 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 	GpgmeRecipients rset;
 	if ((!ct->gpg_do_encryption || !ct->gpg_key || ct->gpg_key[0]=='\0')
 	&& !ct->gpg_do_signature) {
+		if (ct->gpg_do_encryption)
+			log_action(ct, LOG_ERR, "Could not encrypt message.");
 		return strdup(s);
 	}
         gpgme_recipients_new (&rset);
@@ -216,7 +293,7 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 		ay_do_error(_("Aycryption"), buf);
 		eb_debug(DBG_CRYPT,"can't init outgoing crypt: %d %p %c\n",
 				ct->gpg_do_encryption, ct->gpg_key, ct->gpg_key[0]);
-		
+		log_action(ct, LOG_ERR, "Could not encrypt message.");
 		return strdup(s);
 	} else {
 		GpgmeData plain = NULL;
@@ -231,18 +308,20 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 			cipher = pgp_encrypt (plain, rset, FALSE);
 			gpgme_data_release (plain); plain = NULL;
   			gpgme_recipients_release (rset); rset = NULL;
+			log_action(ct, LOG_NORM, "Sent encrypted, unsigned message.");
 		/* sign only */
 		} else if (!(ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
 		&& ct->gpg_do_signature) {
 			cipher = pgp_encrypt(plain, NULL, TRUE);
-			gpgme_data_release (plain); plain = NULL;		
+			gpgme_data_release (plain); plain = NULL;
+			log_action(ct, LOG_NORM, "Sent uncrypted, signed message.");		
 		/* encrypt and sign */
 		} else if (ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0]
 		&& ct->gpg_do_signature) {
 			cipher = pgp_encrypt (plain, rset, TRUE);
 			gpgme_data_release (plain); plain = NULL;
   			gpgme_recipients_release (rset); rset = NULL;
-		
+			log_action(ct, LOG_NORM, "Sent encrypted, signed message.");
 		}
 		err = gpgme_data_rewind (cipher);
 		if (err)
@@ -265,7 +344,7 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 	return p;
 }
 
-static char *translate_in(const eb_local_account * local, const eb_account * remote,
+static char *aycryption_in(const eb_local_account * local, const eb_account * remote,
 			   const struct contact *ct, const char * s)
 {
 	char *p = NULL, *res = NULL;
@@ -279,6 +358,7 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 	GpgmeSigStat sigstat = 0;
 	char s_sigstat[1024];
 	int was_crypted = 1;
+	int curloglevel = 0;
 	memset(buf, 0, 1024);
 	if (strncmp (s, "-----BEGIN PGP ", strlen("-----BEGIN PGP "))) {
 		eb_debug(DBG_CRYPT, "Incoming message isn't PGP formatted\n");
@@ -289,6 +369,7 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 
 	if (err) {
             eb_debug(DBG_CRYPT,"gpgme_new failed: %s\n", gpgme_strerror (err));
+	    log_action(ct, LOG_ERR, "Memory error.");
             return strdup(s);
 	}
 	gpgme_data_new(&plain);
@@ -307,6 +388,7 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 		snprintf(buf, 1024, _("Can not decrypt message from %s.\n"
 				"Maybe he does not have your correct key."), ct->nick);
 		ay_do_error(_("Aycryption"), buf);
+		log_action(ct, LOG_ERR, "Cannot decrypt message.");
 		return strdup(s);
 	} else if (err == GPGME_No_Data) { /*plaintext signed*/
 		was_crypted = 0;
@@ -348,16 +430,17 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 	
 	switch(sigstat) {
 		case GPGME_SIG_STAT_NONE:
-			strcpy(s_sigstat, " <font color=#a8a8a8>[");
+			curloglevel = LOG_NORM;
 			break;
 		case GPGME_SIG_STAT_GOOD:
-			strcpy(s_sigstat, " <font color=#a8ffa8>[");
+			curloglevel = LOG_OK;
 			break;
 		default:
-			strcpy(s_sigstat, " <font color=#ffa8a8>[");
+			curloglevel = LOG_ERR;
 	}
-	strcat(s_sigstat, was_crypted?_("Crypted"):_("Uncrypted"));
-	strcat(s_sigstat, ", ");
+	strcpy(s_sigstat, _("Got an "));
+	strcat(s_sigstat, was_crypted?_("encrypted"):_("uncrypted"));
+	strcat(s_sigstat, " message with signature: ");
 	switch(sigstat) {
 		case GPGME_SIG_STAT_NONE:
 			strcat(s_sigstat, _("Unsigned"));
@@ -393,10 +476,13 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 			strcat(s_sigstat, _("Unknown error"));
 			break;
 	}
-	strcat(s_sigstat, "]</font>");
-	res = g_strdup_printf("%s%s", p, s_sigstat);
-	free(p);
-	return res;
+	if (curloglevel == LOG_ERR) {
+		res = g_strdup_printf("%s [%s]", p, s_sigstat);
+		free(p);
+		p = res;
+	}
+	log_action(ct, curloglevel, s_sigstat);
+	return p;
 }
 
 static GSList *create_signers_list (const char *keyid)
