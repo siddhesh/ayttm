@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.46 $",
-	"$Date: 2003/06/28 12:17:30 $",
+	"$Revision: 1.47 $",
+	"$Date: 2003/06/29 07:34:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -256,11 +256,33 @@ static void toc_init_smileys()
 
 	psmileys=add_protocol_smiley(psmileys, ":'(", "cry");
 
-	psmileys=add_protocol_smiley(psmileys, ":-*", "kiss");
-	psmileys=add_protocol_smiley(psmileys, "O:-)", "angel");
 	psmileys=add_protocol_smiley(psmileys, "=-O", "oh");
+	psmileys=add_protocol_smiley(psmileys, "=O", "oh");
+	psmileys=add_protocol_smiley(psmileys, "=-o", "oh");
+	psmileys=add_protocol_smiley(psmileys, "=o", "oh");
+	psmileys=add_protocol_smiley(psmileys, ":-O", "oh");
+	psmileys=add_protocol_smiley(psmileys, ":O", "oh");
+	psmileys=add_protocol_smiley(psmileys, ":-o", "oh");
+	psmileys=add_protocol_smiley(psmileys, ":o", "oh");
+
+	psmileys=add_protocol_smiley(psmileys, ":-*", "kiss");
+	psmileys=add_protocol_smiley(psmileys, ":*", "kiss");
+	psmileys=add_protocol_smiley(psmileys, "O:-)", "angel");
+	psmileys=add_protocol_smiley(psmileys, "O:)", "angel");
 	psmileys=add_protocol_smiley(psmileys, ":-[", "blush");
+	psmileys=add_protocol_smiley(psmileys, ":[", "blush");
 	psmileys=add_protocol_smiley(psmileys, "8-)", "cooldude");
+	psmileys=add_protocol_smiley(psmileys, "8)", "cooldude");
+	psmileys=add_protocol_smiley(psmileys, ":-$", "moneymouth");
+	psmileys=add_protocol_smiley(psmileys, ":$", "moneymouth");
+
+	psmileys=add_protocol_smiley(psmileys, ":-X", "secret");
+	psmileys=add_protocol_smiley(psmileys, ":X", "secret");
+	psmileys=add_protocol_smiley(psmileys, ":-x", "secret");
+	psmileys=add_protocol_smiley(psmileys, ":x", "secret");
+
+	psmileys=add_protocol_smiley(psmileys, ":!", "footmouth");
+	psmileys=add_protocol_smiley(psmileys, ":-!", "footmouth");
 }
 
 static LList *eb_toc_get_smileys(void)

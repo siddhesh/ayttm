@@ -41,6 +41,7 @@
 #include "plugin.h"
 #include "prefs.h"
 #include "messages.h"
+#include "status.h"
 
 #include "ui_prefs_window.h"
 
@@ -582,6 +583,7 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_ayttm_debug_html", 0 );
 	iSetLocalPref( "do_plugin_debug", 0 );
 	iSetLocalPref( "do_noautoresize", 0 );
+	iSetLocalPref( "do_show_tooltips", 1 );
 	iSetLocalPref( "use_alternate_browser", 0 );
 	cSetLocalPref( "alternate_browser", "" );
 
@@ -839,6 +841,7 @@ void	ayttm_prefs_write( void )
     fprintf( fp, "length_contact_window=%d\n", iGetLocalPref("length_contact_window") );
     fprintf( fp, "width_contact_window=%d\n", iGetLocalPref("width_contact_window") );
     fprintf( fp, "do_noautoresize=%d\n", iGetLocalPref("do_noautoresize") ) ;
+    fprintf( fp, "do_show_tooltips=%d\n", iGetLocalPref("do_show_tooltips") );
     fprintf( fp, "use_alternate_browser=%d\n", iGetLocalPref("use_alternate_browser") );
 	fprintf( fp, "alternate_browser=%s\n", cGetLocalPref("alternate_browser") );
 
@@ -923,6 +926,7 @@ void	ayttm_prefs_show_window( void )
 	
 	/* misc prefs */
 	prefs->general.do_ayttm_debug        = iGetLocalPref("do_ayttm_debug");
+	prefs->general.do_show_tooltips      = iGetLocalPref("do_show_tooltips");
 	prefs->general.use_alternate_browser = iGetLocalPref("use_alternate_browser");
 	strncpy( prefs->general.alternate_browser, cGetLocalPref("alternate_browser"), MAX_PREF_LEN );
 	
@@ -1056,6 +1060,8 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	/* misc */
 	iSetLocalPref( "do_ayttm_debug", inPrefs->general.do_ayttm_debug );
 	iSetLocalPref( "do_plugin_debug", inPrefs->general.do_ayttm_debug );
+	iSetLocalPref( "do_show_tooltips", inPrefs->general.do_show_tooltips );
+	set_tooltips_active(inPrefs->general.do_show_tooltips);
 	iSetLocalPref( "use_alternate_browser", inPrefs->general.use_alternate_browser );
 	cSetLocalPref( "alternate_browser", inPrefs->general.alternate_browser );
 

@@ -107,6 +107,7 @@ struct prefs
 	struct misc
 	{
 		int		do_ayttm_debug;
+		int		do_show_tooltips;
 		int		use_alternate_browser;
 		char	alternate_browser[MAX_PREF_LEN];
 	} general;

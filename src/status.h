@@ -79,6 +79,8 @@ int add_menu_items(void *menu, int cur_service, int should_sep,
 void set_menu_sensitivity(void);
 void reset_list (void);
 
+void set_tooltips_active(int);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

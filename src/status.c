@@ -107,6 +107,14 @@ static int status_show = -1;
 static time_t last_sound_played = 0;
 static void eb_save_size( GtkWidget * widget, gpointer data );
 
+void set_tooltips_active(int active)
+{
+	if(active)
+		gtk_tooltips_enable(status_tips);
+	else
+		gtk_tooltips_disable(status_tips);
+}
+
 void focus_statuswindow (void) 
 {
 	gdk_window_raise(statuswindow->window);
@@ -970,7 +978,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 
 		gtk_tooltips_set_tip(GTK_TOOLTIPS(status_tips), ea->list_item,
 				RUN_SERVICE(ea)->get_status_string(ea),
-				_("status info here"));
+				"");
 	}
 	if (!ea->status)
 		ea->status = gtk_label_new(c);
@@ -1013,7 +1021,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 			gtk_tooltips_set_tip(GTK_TOOLTIPS(status_tips), 
 				ea->account_contact->list_item,
 				status_line,
-				_("status info here"));
+				"");
 
 			g_free(status_line);
 		}

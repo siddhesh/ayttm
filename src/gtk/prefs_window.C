@@ -1963,6 +1963,8 @@ void	ay_misc_panel::Build( GtkWidget *inParent )
 
 	gtkut_button( _("Enable debug messages"), &m_prefs.do_ayttm_debug, m_top_vbox );
 	
+	gtkut_button( _("Show tooltips in status window"), &m_prefs.do_show_tooltips, m_top_vbox );
+	
 	SetActiveWidgets();
 }
 
@@ -2517,16 +2519,13 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 
 			LList 		*smiley_list = the_set->set_smiley_list;
 	
-			while ( smiley_list != NULL )
+			for (; smiley_list != NULL; smiley_list = l_list_next(smiley_list) )
 			{
 				smiley	*de_smile = reinterpret_cast<smiley *>(smiley_list->data);
 				
 				if ( de_smile == NULL )
-				{
-					smiley_list = smiley_list->next;
 					continue;
-				}
-				
+
 				if ( col < num_cols )
 				{
 					col++;
@@ -2548,7 +2547,6 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 					GTK_EXPAND, GTK_EXPAND, 4, 4 );
 
 				num_icons++;
-				smiley_list = smiley_list->next;
 			}
 
 			gtk_table_resize( GTK_TABLE(smilies_table), num_icons/num_cols +((num_icons % num_cols == 0) ? 0:1), num_cols );
