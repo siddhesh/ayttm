@@ -1,3 +1,7 @@
+* Wed Apr 09 2003 12:05 GMT [andy]	0.2.3-69
+- src/tcp_util.c
+Actually, we want to get INT_MAX from limits.h
+
 * Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-68
 - src/tcp_util.c
 define INT_MAX if necessary

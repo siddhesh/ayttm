@@ -34,9 +34,9 @@
 #include <netdb.h>
 #endif
 #include <sys/types.h>
+#include <limits.h>
 #ifdef __MINGW32__
 #include <winsock2.h>
-#include <limits.h>
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -57,10 +57,6 @@
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #define hstrerror strerror
-#endif
-
-#ifndef INT_MAX
-#define INT_MAX 2147483647
 #endif
 
 /**
