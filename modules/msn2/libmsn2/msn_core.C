@@ -1228,7 +1228,8 @@ static void msn_filetrans_cancel_clean(invitation_ftp *inv)
     l=l->next;
   }
 
-  msn_clean_up(conn);	
+  msn_clean_up(conn);
+  close(conn->ssock);
 }
 
 void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
@@ -1542,6 +1543,7 @@ void msn_send_file(invitation_ftp * inv, char * msg_body)
     }
   }
 
+  conn->ssock=conn->sock;
   authdata_FTP * auth=new authdata_FTP;
 
   conn->auth=auth;

@@ -87,6 +87,7 @@ class msnconn : public llist_data
 {
   public:
   int sock; // Socket (durr...)
+  int ssock;// Server socket for filetransfer
   int type; // one of the #defines below
   int ready;
   llist * users; // Users in this session - only for SB connections
