@@ -27,12 +27,15 @@
 #include "debug.h"
 
 #ifndef HAVE_GDK_PIXBUF
-int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data) { 
+
+int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data)
+{ 
 	eb_debug(DBG_CORE, "Image window support not included\n");
 	return 0; 
 }
 int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new) { return 0; }
 void ay_image_window_close(int tag) { }
+
 #else
 
 #include "intl.h"
@@ -43,6 +46,9 @@ void ay_image_window_close(int tag) { }
 
 #ifdef HAVE_LIBJASPER
 # include <jasper/jasper.h>
+#else
+# include <stdio.h>
+# include <stdlib.h>
 #endif
 
 struct ay_image_wnd {
@@ -348,4 +354,4 @@ void ay_image_window_test()
 	int tag = ay_image_window_new(320, 240, 0,0,0);
 	eb_timeout_add(500, _cycle, (void *)tag);
 }
-#endif
+#endif	/* HAVE_GDK_PIXBUF */
