@@ -1,3 +1,8 @@
+* Mon Jan 26 2004 18:31 GMT [philip]	0.4.6-2
+- modules/yahoo2/libyahoo2/yahoo_httplib.c
+fix possible segfault which could have been caused by a malformed url
+encoded string
+
 * Wed Jan 21 2004 06:41 GMT [philip]	0.4.6-1
 release
 
