@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "edit_list_window.h"
 #include "away_window.h"
 #include "gtk_globals.h"
 #include "service.h"
@@ -39,40 +40,39 @@
 
 #include "gtk/gtkutils.h"
 
-#include "pixmaps/ok.xpm"
-#include "pixmaps/cancel.xpm"
-
 #ifndef MIN
 #define MIN(x, y)	((x)<(y)?(x):(y))
 #endif
 
-/* types */
-typedef struct _away {
-        char title[2048];
-        GString *message;
-} away; 
-
 /* globals */
-static GtkWidget *away_message_text_entry = NULL;
 gint is_away = 0;
 
+static GtkWidget *awaybox;
+static GtkWidget *away_message_text_entry;
 
-static GtkWidget *awaybox = NULL;
-static GtkWidget *away_window = NULL;
+static void show_away(gchar *a_message);
 
-static GtkWidget *title = NULL;
-static GtkWidget *save_later = NULL;
-static LList *away_messages = NULL;
-static GtkWidget *away_clist = NULL;
-static gint away_open = 0;
+static void imback()
+{
+	if (awaybox)
+		gtk_widget_destroy(awaybox);
+	awaybox = NULL;
+	away_message_text_entry = NULL;
+}
 
-static void show_away(GtkWidget *w, gchar *a_message);
-static void write_away_messages();
-static void imaway (void);
-void select_msg_cb(GtkCList *clist, gint row, gint column,
-                   GdkEventButton *event, gpointer user_data);
-
-void build_away_clist();
+void show_away_choicewindow(void *w, void *data)
+{
+	char file[1024];
+	
+	if (is_away) {
+		gdk_window_raise (awaybox->window);
+		return;
+	}
+	
+	snprintf(file, 1024, "%saway_messages", config_dir);
+	show_data_choicewindow(file, _("Away message"), _("Set away"),
+				"AWAY_MESSAGE", "MESSAGE", show_away);
+}
 
 static void destroy_away()
 {
@@ -80,491 +80,16 @@ static void destroy_away()
 	eb_local_account * ela = NULL;
 
 	is_away = 0;
-
 	for (list = accounts; list; list = list->next) {
     		ela = list->data;
 		/* Only change state for those accounts which are connected */
 		if(ela->connected)
 			eb_services[ela->service_id].sc->set_away(ela, NULL);
-    }
-}
-
-static void imback()
-{
-	if (awaybox)
-		gtk_widget_destroy(awaybox);
-	awaybox = NULL;
-}
-
-static void destroy( GtkWidget *widget, gpointer data)
-{
-	away_open = 0;
-}
-
-static void load_away_messages()
-{
-	FILE * fp;
-	char buff[2048];
-	away * my_away = NULL;
-	gboolean reading_title=FALSE;
-	gboolean reading_message=FALSE;
-
-	g_snprintf (buff, 1024, "%saway_messages", config_dir);
-
-	if(!(fp = fopen(buff, "r")))
-		return;
-
-	away_messages = NULL;
-
-	while ( fgets(buff, sizeof(buff), fp))
-	{
-		g_strchomp(buff);
-		if (!g_strncasecmp(buff, "<AWAY_MESSAGE>", strlen("<AWAY_MESSAGE>"))) {
-			my_away = g_new0(away, 1);
-		} else if (!g_strncasecmp( buff, "</AWAY_MESSAGE>", strlen("</AWAY_MESSAGE>"))) {
-			away_messages = l_list_append(away_messages, my_away);
-		} else if (!g_strncasecmp(buff, "<TITLE>", strlen("<TITLE>"))) {
-			reading_title=TRUE;
-		} else if (!g_strncasecmp(buff, "</TITLE>", strlen("</TITLE>"))) {
-			reading_title=FALSE;
-		} else if (!g_strncasecmp(buff, "<MESSAGE>", strlen("<MESSAGE>"))) {
-			reading_message=TRUE;
-			my_away->message = g_string_new(NULL);
-		} else if (!g_strncasecmp(buff, "</MESSAGE>", strlen("</MESSAGE>")))  {
-			reading_message=FALSE;
-		} else if(reading_title) {
-			strncpy(my_away->title, buff, MIN(strlen(buff), sizeof(my_away->title)));
-		} else if(reading_message) {
-			if(my_away->message && my_away->message->len)
-				g_string_append_c(my_away->message, '\n');
-			g_string_append(my_away->message, buff);
-		}
-	}
-
-	fclose(fp);
-}
-
-void delete_msg_cb(GtkWidget * menuitem, gpointer data)
-{
-	away *my_away = (away *)data;
-	int i=0;
-	away *ldata = NULL;
-	
-	away_messages = l_list_remove(away_messages, my_away);
-	write_away_messages();
-	while(NULL != (ldata = (away*)gtk_clist_get_row_data(
-			GTK_CLIST(away_clist),i))) {
-		if (ldata == my_away) {
-			gtk_clist_remove(GTK_CLIST(away_clist), i);
-			break;
-		}
-		i++;
 	}
 }
 
-void deselect_msg_cb(GtkCList *clist, gint row, gint column,
-                   GdkEventButton *event, gpointer user_data) 
-{
-	if (event && event->button == 3) {
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(clist),
-				   "unselect-row");
-		select_msg_cb(clist, row, column,
-				event, user_data);
-	}
-}
 
-void select_msg_cb(GtkCList *clist, gint row, gint column,
-                   GdkEventButton *event, gpointer user_data) 
-{
-	away *my_away;
-	
-	my_away = (away *)gtk_clist_get_row_data(GTK_CLIST(away_clist),
-				row);
-	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
-			select_msg_cb, NULL);
-	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
-			deselect_msg_cb, NULL);
-	gtk_clist_select_row(clist, row, column);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(clist),
-			select_msg_cb, NULL);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(clist),
-			deselect_msg_cb, NULL);
-	if (!event)
-		return;
-	switch (event->button) {
-	case 1:
-		if (my_away) {
-			int dummy;
-			gtk_entry_set_text(GTK_ENTRY(title), my_away->title);
-			gtk_editable_delete_text(GTK_EDITABLE(away_message_text_entry), 0, -1);
-			gtk_editable_insert_text(GTK_EDITABLE(away_message_text_entry), 
-						my_away->message->str,
-						strlen(my_away->message->str), &dummy);
-		}
-		break;
-	case 3: {
-		GtkWidget *menu = gtk_menu_new();
-		gtkut_create_menu_button (GTK_MENU(menu), _("Delete"),
-			GTK_SIGNAL_FUNC(delete_msg_cb), my_away);
-		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
-				event->button, event->time );
-		}
-		break;
-	}
-}
-
-static void clicked_msg_cb (GtkWidget *widget, GdkEventButton *event,
-			    gpointer d)
-{
-	if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
-		imaway();
-}
-
-void build_away_clist()
-{
-	LList * away_list = away_messages;
-	away * my_away = NULL;
-	int i = 0;
-	char *aw[2];
-	aw[0] = _("Title");
-	aw[1] = _("Message");
-	away_clist = gtk_clist_new_with_titles(2, aw);
-	
-	gtk_clist_freeze(GTK_CLIST(away_clist));
-			
-	gtk_clist_set_column_auto_resize(GTK_CLIST(away_clist),
-					0, TRUE);
-	while (away_list) {
-		my_away = (away *)away_list->data;
-		
-		aw[0] = g_strdup(my_away->title);
-		aw[1] = g_strdup(my_away->message->str);
-		
-		if (strlen(aw[0]) > 30) {
-			aw[0][27]=aw[1][28]=aw[1][29]='.';
-			aw[0][30]='\0';
-		}
-		
-		if (strlen(aw[1]) > 50) {
-			aw[1][47]=aw[1][48]=aw[1][49]='.';
-			aw[1][50]='\0';
-		}
-		
-		if (strstr(aw[1], "\n")) {
-			int p = (int)(strstr(aw[1], "\n") - aw[1]);
-			aw[1][p]=aw[1][p+1]=aw[1][p+2]='.';
-			aw[1][p+3]='\0';
-			
-		}
-		
-		gtk_clist_append(GTK_CLIST(away_clist), aw);
-		
-		gtk_clist_set_row_data(GTK_CLIST(away_clist), i, my_away);
-		i++;
-		away_list = away_list->next;
-	}
-	gtk_widget_show(away_clist);
-	gtk_clist_set_button_actions(GTK_CLIST(away_clist), 1, 
-			GTK_BUTTON_SELECTS);
-	gtk_clist_set_button_actions(GTK_CLIST(away_clist), 2, 
-			GTK_BUTTON_SELECTS);
-	gtk_clist_set_button_actions(GTK_CLIST(away_clist), 3, 
-			GTK_BUTTON_SELECTS);
-	
-	gtk_signal_connect(GTK_OBJECT(away_clist), "select-row",
-			   GTK_SIGNAL_FUNC(select_msg_cb), NULL);
-	gtk_signal_connect(GTK_OBJECT(away_clist), "unselect-row",
-			   GTK_SIGNAL_FUNC(deselect_msg_cb), NULL);
-	gtk_signal_connect(GTK_OBJECT(away_clist), "button_press_event",
-			   GTK_SIGNAL_FUNC(clicked_msg_cb), NULL);
-	gtk_widget_set_usize(away_clist, -1, 100);
-	gtk_clist_thaw(GTK_CLIST(away_clist));
-}
-
-static void write_away_messages()
-{
-	LList * away_list = away_messages;
-	FILE *fp;
-	char buff2[2048];
-	away * my_away;
-
-	g_snprintf(buff2, 1024, "%saway_messages",config_dir);
-
-	if(!(fp = fdopen(creat(buff2,0700),"w")))
-		return;
-
-	while (away_list) {
-		my_away = (away *)away_list->data;
-
-		fprintf(fp,"<AWAY_MESSAGE>\n");
-		fprintf(fp,"<TITLE>\n");
-		strncpy(buff2, my_away->title, strlen(my_away->title) + 1);
-		g_strchomp(buff2);
-		fprintf(fp,"%s\n",buff2);
-		fprintf(fp,"</TITLE>\n");
-		fprintf(fp,"<MESSAGE>\n");
-		strncpy(buff2, my_away->message->str, strlen(my_away->message->str) + 1);
-		g_strchomp(buff2);
-		fprintf(fp,"%s\n",buff2);
-		fprintf(fp,"</MESSAGE>\n");
-		fprintf(fp,"</AWAY_MESSAGE>\n");
-
-		away_list = away_list->next;
-	}	
-	fclose(fp);
-}
-
-static LList * replace_message(LList *msglist, away *msg)
-{
-	LList *w = msglist;
-	while (w) {
-		away * omsg = (away *)w->data;
-		if (!strcmp(omsg->title, msg->title)) {
-			w->data = msg;
-			return msglist;
-		}
-		w = w->next;
-	}
-	/* not found */
-	return l_list_append(msglist, msg);
-}
-
-static void check_title( GtkWidget * widget, gpointer data)
-{
-	LList *w = away_messages;
-	char *txt = gtk_entry_get_text(GTK_ENTRY(title));
-	int replace = FALSE;
-	GList *ch = gtk_container_children(GTK_CONTAINER(save_later));
-	while (w) {
-		away * omsg = (away *)w->data;
-		if (!strcmp(omsg->title, txt)) {
-			replace = TRUE;
-			break;
-		}
-		w = w->next;
-	}
-	
-	while(ch) {
-		if (GTK_IS_LABEL(ch->data)) {
-			char *lab = NULL;
-			gtk_label_get(GTK_LABEL(ch->data), &lab);
-			if(replace && !strcmp(lab,_("Save for later use"))) 
-				gtk_label_set_text(GTK_LABEL(ch->data), 
-						_("Replace saved message"));
-			if(!replace && !strcmp(lab,_("Replace saved message"))) 
-				gtk_label_set_text(GTK_LABEL(ch->data), 
-						_("Save for later use"));
-			break;
-		}
-		ch = ch->next;
-	}
-}
-
-static void ok_callback( GtkWidget * widget, gpointer data)
-{
-	imaway();
-}
-
-static void imaway (void)
-{
-	GString * a_title = g_string_sized_new(1024);
-	GString * a_message = g_string_sized_new(1024);
-	gint save = GTK_TOGGLE_BUTTON(save_later)->active;
-	away * my_away;
-
-	gchar *buff = NULL;
-
-	buff = strdup(gtk_entry_get_text(GTK_ENTRY(title)));
-
-	if (!buff || strlen(buff) == 0) {
-		buff= gtk_editable_get_chars(GTK_EDITABLE(away_message_text_entry),0,-1);
-		if (strchr(buff,'\n') != NULL) {
-			char *t = strchr(buff,'\n');
-			*t = 0;
-		}
-	}
-	if (!buff || strlen(buff) == 0) {
-		ay_do_error( _("Away Message"), _("You have to enter a message.") );
-		return;
-	}
-	g_string_append(a_title, buff); 
-
-	free(buff);
-	
-	buff = gtk_editable_get_chars(GTK_EDITABLE(away_message_text_entry),0,-1);
-	
-	if (!buff || strlen(buff) == 0) /* in this case title can't be empty */
-		buff = strdup(a_title->str);
-	
-	g_string_append(a_message, buff);
-	
-	free (buff);
-	
-	if (save == 1) {
-		my_away = g_new0(away, 1);
-		strncpy(my_away->title, a_title->str, strlen(a_title->str));
-		my_away->message = g_string_new(NULL);
-		g_string_append(my_away->message, a_message->str);
-		away_messages = replace_message(away_messages, my_away);
-		write_away_messages();
-		build_away_clist();
-	}
-	
-	show_away(NULL, a_message->str);
-
-	g_string_free(a_title, TRUE);
-	g_string_free(a_message, TRUE);
-
-	gtk_widget_destroy(away_window);
-}
-
-static void cancel_callback( GtkWidget *widget, gpointer data)
-{
-	gtk_widget_destroy(away_window);
-}
-
-void show_away_choicewindow(void *w, void *data)
-{
-	if ( !away_open ) {
-		GtkWidget * vbox;
-		GtkWidget * hbox;
-		GtkWidget * hbox2;
-		GtkWidget * label;
-		GtkWidget * frame;
-		GtkWidget * table;
-		GtkWidget * separator;
-		GtkWidget * button;
-		GtkWidget * scrollwindow;
-		
-		away_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		gtk_window_set_policy(GTK_WINDOW(away_window), TRUE, TRUE, TRUE);
-		gtk_window_set_position(GTK_WINDOW(away_window), GTK_WIN_POS_MOUSE);
-		gtk_widget_realize(away_window);
-
-		vbox = gtk_vbox_new(FALSE, 5);
-	
-		table = gtk_table_new(2, 3, FALSE);
-
-		hbox = gtk_hbox_new(FALSE, 5);
-		label = gtk_label_new(_("Title: "));
-		gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
-				 GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(label);
-		gtk_widget_show(hbox);
-
-		title = gtk_entry_new();
-		gtk_table_attach(GTK_TABLE(table), title, 1, 2, 0, 1,
-				 GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(title);
-		
-		gtk_signal_connect(GTK_OBJECT(title), "changed",
-				GTK_SIGNAL_FUNC(check_title), NULL);
-		
-		hbox = gtk_hbox_new(FALSE, 5);
-		label = gtk_label_new(_("Away Message: "));
-		gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
-				 GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(label);
-		gtk_widget_show(hbox);
-		
-		away_message_text_entry = gtk_text_new(NULL,NULL);
-		gtk_text_set_editable(GTK_TEXT(away_message_text_entry), TRUE);
-		gtk_widget_set_usize(away_message_text_entry, 300, 60);
-		gtk_table_attach_defaults(GTK_TABLE(table), away_message_text_entry, 1, 2, 1, 2);
-		gtk_widget_show(away_message_text_entry);
-
-		save_later = gtk_check_button_new_with_label(_("Save for later use"));
-		gtk_table_attach(GTK_TABLE(table), save_later, 1, 2, 2, 3,
-				 GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(save_later);
-
-		frame = gtk_frame_new(_("New Away Message"));
-		gtk_container_add(GTK_CONTAINER(frame), table);
-		gtk_widget_show(table);
-
-		gtk_table_set_row_spacings (GTK_TABLE(table), 5);
-		gtk_table_set_col_spacings (GTK_TABLE(table), 5);
-
-		gtk_container_set_border_width(GTK_CONTAINER(away_window), 5);
-		gtk_container_set_border_width(GTK_CONTAINER(table), 5);
-
-		gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
-		gtk_widget_show(frame);
-
-		load_away_messages();
-		build_away_clist();
-		scrollwindow = gtk_scrolled_window_new(NULL, NULL);
-		gtk_scrolled_window_set_policy(
-			   GTK_SCROLLED_WINDOW (scrollwindow), 
-			   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-		gtk_container_add(GTK_CONTAINER(scrollwindow), away_clist);
-		
-		frame = gtk_frame_new(_("Existing Messages"));
-		gtk_container_add(GTK_CONTAINER(frame), scrollwindow);
-		gtk_container_set_border_width(GTK_CONTAINER(frame), 5);
-
-		gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 5);
-		gtk_widget_show(scrollwindow);
-		gtk_widget_show(frame);
-		
-		/* seperator goes here */
-
-		separator = gtk_hseparator_new();
-		gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
-		gtk_widget_show(separator);
-		
-		/* 'Set away' and 'Cancel' buttons go here */
-
-		hbox2 = gtk_hbox_new(TRUE, 5);
-
-		gtk_widget_set_usize(hbox2, 200, 25);
-
-		/* put in the pixmap and label for the 'Set away' button */
-
-		button = do_icon_button(_("Set away"), ok_xpm, away_window);
-
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				GTK_SIGNAL_FUNC(ok_callback), NULL);
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-
-		/* now start on the cancel button */
-
-		button = do_icon_button(_("Cancel"), cancel_xpm, away_window);
-
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				GTK_SIGNAL_FUNC(cancel_callback), NULL);
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-
-		hbox = gtk_hbox_new(FALSE, 0);
-		
-		gtk_box_pack_end(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
-		gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-
-		gtk_widget_show(hbox);
-		gtk_widget_show(hbox2);
-		gtk_widget_show(vbox);
-		
-		gtk_container_add(GTK_CONTAINER(away_window), vbox);
-				
-		gtk_widget_show(away_window);
-		gtk_widget_grab_focus(title);
-
-	}
-
-	gtk_window_set_title(GTK_WINDOW(away_window), _("Set as away"));
-	gtkut_set_window_icon(away_window->window, NULL);
-	gtk_signal_connect(GTK_OBJECT(away_window), "destroy",
-			GTK_SIGNAL_FUNC(destroy), NULL);
-	away_open = 1; 
-}
-
-static void show_away(GtkWidget *w, gchar *a_message)
+static void show_away(gchar *a_message)
 {
 	LList * list;
 	eb_local_account * ela = NULL;
@@ -607,7 +132,6 @@ static void show_away(GtkWidget *w, gchar *a_message)
 		gtk_widget_grab_default(label);
 		gtk_widget_show(label);
 
-	
 		gtk_signal_connect_object(GTK_OBJECT(awaybox), "destroy",
 				  GTK_SIGNAL_FUNC(destroy_away), GTK_OBJECT(awaybox));
 

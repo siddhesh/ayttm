@@ -1,3 +1,9 @@
+* Tue Apr 29 2003 14:09 GMT [colin]	0.3.0-47
+- src/away_window.[ch]
+  src/edit_list_window.[ch] ** ADDED **
+  src/Makefile.am
+Generalize list edition
+
 * Tue Apr 29 2003 14:09 GMT [colin]	0.3.0-46
 - src/prefs.[ch] src/gtk/prefs_window.[Ch] 
   src/gtk/gtk_eb_html.c
