@@ -1,3 +1,8 @@
+* Mon Nov 17 2003 00:11 GMT [breser]	0.4.4-21
+- gen
+Fix syntax error and make more friendly for people without
+a type builtin in their shell.
+
 * Mon Nov 17 2003 00:11 GMT [breser]	0.4.4-20
 - gen
 Fixed to find versioned automake and aclocal commands.
