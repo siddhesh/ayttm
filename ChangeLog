@@ -1,3 +1,7 @@
+* Mon Aug 25 18:52:24 UTC 2003 [elh]    0.4.0-3
+- src/ssl.h
+OPENSSL_NO_KRB5 undefined to fix issue with includes
+
 * Sun Aug 24 2003 22:52 GMT [colin]	0.4.0-2
 - src/util.c
 Don't return 127.0.0.1 as local address

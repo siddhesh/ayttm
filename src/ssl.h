@@ -25,6 +25,8 @@
 #include "config.h"
 
 #ifdef HAVE_OPENSSL
+/* We de not want KRB5 used as the includes are messed up for that */
+#define OPENSSL_NO_KRB5 1
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
