@@ -1861,6 +1861,9 @@ void ay_set_submenus(void)
 	/* fill in branches */
 	GtkWidget *submenuitem;
 
+	if (!main_menu_factory)
+		return; /* not a big problem, it's just too soon */
+
 	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Import");
 	eb_import_window(submenuitem);
 	SetPref("widget::import_submenuitem", submenuitem);
