@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.25 $",
-	"$Date: 2003/04/30 06:03:58 $",
+	"$Revision: 1.26 $",
+	"$Date: 2003/04/30 09:43:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -535,14 +535,14 @@ static void eb_jabber_add_user(eb_account * account )
 	eb_jabber_account_data *jad=account->protocol_account_data;
 
     jabber_contacts = l_list_append(jabber_contacts, account->handle);
-    JABBER_AddContact(jad->JConn, account->handle);
+    if (jad) JABBER_AddContact(jad->JConn, account->handle);
 }
 
 static void eb_jabber_del_user(eb_account * account )
 {
-	eb_jabber_account_data *jad=account->protocol_account_data;
-
-    if(JABBER_RemoveContact(jad->JConn, account->handle)==0)
+    eb_jabber_account_data *jad=account->protocol_account_data;
+     
+    if(jad && JABBER_RemoveContact(jad->JConn, account->handle)==0)
     	jabber_contacts = l_list_remove(jabber_contacts, account->handle);
     g_free(jad);
     account->protocol_account_data=NULL;

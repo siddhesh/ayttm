@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 09:43 GMT [colin]	0.3.0-61
+- modules/jabber/jabber.c
+"Fix" seg at user deletion
+
 * Wed Apr 30 2003 09:30 GMT [philip]	0.3.0-60
 - src/util.c
 find_account_with_id_or_ela is exclusive or
