@@ -33,6 +33,7 @@
 
 static LList *groups = NULL;
 extern LList *accounts;
+static grouplist *dummy_group = NULL;
 
 class account_hash {
 	LList * _hash[27];
@@ -134,12 +135,54 @@ eb_account * account_hash::find(const char * handle, const eb_local_account * el
 }
 
 #define ONLINE(ela) (ela->connected || ela->connecting)
-/* compares two contact names */
-int contact_cmp(const void * a, const void * b)
+/**
+ * Contact comparator
+ * @param	a	the first contact
+ * @param	b	the second contact
+ *
+ * @return	0	if contacts have the same name
+ * 		>0	if a > b
+ * 		<0	if b > a
+ */
+int contact_cmp(const void *a, const void *b)
 {
 	const struct contact *ca=a, *cb=b;
 	return strcasecmp(ca->nick, cb->nick);
 }
+
+/**
+ * Account comparator
+ * @param	a	the first account
+ * @param	b	the second account
+ *
+ * @return	0	if accounts have equal sort positioning
+ * 		>0	if a > b
+ * 		<0	if b > a
+ */
+int account_cmp(const void *a, const void *b)
+{
+	eb_account *ca=(eb_account *)a, *cb=(eb_account *)b;
+	if(ca->priority == cb->priority)
+		return strcasecmp(ca->handle, cb->handle);
+	else
+		return ca->priority - cb->priority;
+}
+	
+/**
+ * Group comparator
+ * @param	a	the first group
+ * @param	b	the second group
+ *
+ * @return	0	if groups have the same name
+ * 		>0	if a > b
+ * 		<0	if b > a
+ */
+int group_cmp(const void *a, const void *b)
+{
+	const grouplist *ga=a, *gb=b;
+	return strcasecmp(ga->name, gb->name);
+}
+
 
 /**
  * Return a group given its name
@@ -317,6 +360,20 @@ grouplist * add_group(const char *group_name)
 	return gl;
 }
 
+static struct contact * create_contact(const char *con, int type)
+{
+	struct contact * c = calloc(1, sizeof(struct contact));
+	if (con != NULL) 
+		strncpy(c->nick, con, sizeof(c->nick));
+
+	c->default_chatb = c->default_filetransb = type;
+
+	c->icon_handler = -1;
+
+	return( c );
+}
+
+
 /**
  * Add a new contact with the given name to a group and return it
  * @param	contact_name	the name of the new contact
@@ -332,10 +389,7 @@ struct contact * add_contact_with_group(const char *contact_name, grouplist *gro
 	if(!group || !contact_name)
 		return NULL;
 
-	contact = calloc(1, sizeof(struct contact));
-	strncpy(contact->nick, contact_name, sizeof(contact->nick)-1);
-	contact->default_chatb = contact->default_filetransb = default_service;
-	contact->icon_handler=-1;
+	contact = create_contact(contact_name, default_service);
 	
 	group->members = l_list_insert_sorted(group->members, contact, contact_cmp );
 
@@ -371,6 +425,44 @@ struct contact * add_contact(const char *contact_name, const char *group_name, i
 }
 
 /**
+ * Add a new account to a dummy contact.  Will not add on the server
+ * @param	contact_name	the contact name to add the account to
+ * @param	ea		the account to be added
+ * @param	ela		the local account that this account is associated with
+ *
+ * @return	the contact or NULL if parameters are invalid
+ */
+struct contact * add_dummy_contact(const char *contact_name, eb_account *ea, eb_local_account *ela)
+{
+	struct contact *c = create_contact(contact_name, ea->service_id);
+
+	c->accounts = l_list_prepend(c->accounts, ea);
+	ea->account_contact = c;
+	ea->icon_handler = ea->status_handler = -1;
+
+	if(!dummy_group) {
+		dummy_group = calloc(1, sizeof(grouplist));
+		/* don't translate this string */
+		snprintf(dummy_group->name, sizeof(dummy_group->name),
+				"__Ayttm_Dummy_Group__%d__", rand());
+	}
+
+	dummy_group->members = l_list_prepend(dummy_group->members, c);
+	c->group = dummy_group;
+	c->online = 1;
+	return c;
+}
+
+/**
+ * Clean up the dummy group
+ */
+void clean_up_dummies(void)
+{
+	if(dummy_group)
+		destroy_group(dummy_group);
+}
+
+/**
  * Add a new account to a contact attached to a local account.  Also adds the account on the server.
  * @param	handle		the handle of the new account
  * @param	contact		the contact to add the account to
@@ -398,7 +490,7 @@ eb_account * add_account(const char *handle, struct contact *contact, eb_local_a
 			contact_mgmt_queue_add(account, MGMT_ADD, contact->group->name);
 	}
 
-	contact->accounts = l_list_append(contact->accounts, account);
+	contact->accounts = l_list_insert_sorted(contact->accounts, account, account_cmp);
 	hash.add(account);
 
 	return account;
@@ -408,7 +500,7 @@ eb_account * add_account(const char *handle, struct contact *contact, eb_local_a
  * Destroy all data associated with an account.  Call this to free an account's memory
  * @param	account		the account to destroy
  */
-void destroy_account(eb_account * account)
+void destroy_account(eb_account *account)
 {
 	RUN_SERVICE(account)->free_account_data(account);
 	free(account);
@@ -419,7 +511,7 @@ void destroy_account(eb_account * account)
  * Call this to free a contact's memory
  * @param	contact		the contact to destroy
  */
-void destroy_contact(struct contact * contact)
+void destroy_contact(struct contact *contact)
 {
 	while(contact->accounts) {
 		destroy_account(contact->accounts->data);
@@ -434,7 +526,7 @@ void destroy_contact(struct contact * contact)
  * Call this to free a group's memory
  * @param	group		the group to destroy
  */
-void destroy_group(grouplist * group)
+void destroy_group(grouplist *group)
 {
 	while(group->members) {
 		destroy_contact(group->members->data);
@@ -448,7 +540,7 @@ void destroy_group(grouplist * group)
  * Remove an account from your account list.  This will destroy the account after removing it.
  * @param	account		The account to remove
  */
-void remove_account(eb_account * account)
+void remove_account(eb_account *account)
 {
 	RUN_SERVICE(account)->del_user(account);
 	account->account_contact->accounts = l_list_remove(account->account_contact->accounts, account);
@@ -460,7 +552,7 @@ void remove_account(eb_account * account)
  * Remove a contact from your contact list.  This will destroy the contact after removing it.
  * @param	contact		The contact to remove
  */
-void remove_contact(struct contact * contact)
+void remove_contact(struct contact *contact)
 {
 	contact->group->members = l_list_remove(contact->group->members, contact);
 	while(contact->accounts) {
@@ -474,7 +566,7 @@ void remove_contact(struct contact * contact)
  * Remove a group from your group list.  This will destroy the group after removing it.
  * @param	group		The group to remove
  */
-void remove_group(grouplist * group)
+void remove_group(grouplist *group)
 {
 	LList *l;
 
@@ -611,7 +703,8 @@ void move_account(eb_account * account, struct contact * new_contact)
 }
 
 /**
- * Returns a LList of all group names in case insensitive sorted order
+ * Returns a new LList of all group names in case insensitive sorted order
+ * List must be freed by caller
  *
  * @return	a sorted list of group names
  */
@@ -626,7 +719,8 @@ LList * get_group_names( void )
 }
 
 /**
- * Returns a LList of all contact names in a group in case insensitive sorted order
+ * Returns a new LList of all contact names in a group in case insensitive sorted order
+ * List must be freed by caller
  * @param	group		The group whose contacts are to be returned
  *
  * @return	a sorted list of contact names
@@ -639,5 +733,61 @@ LList * get_group_contact_names( grouplist * group )
 				(LListCompFunc)strcasecmp);
 
 	return g;
+}
+
+/**
+ * Writes the entire contact list to file
+ * @param	fp	A file pointer to write to
+ */
+void write_contact_list_to_fh(FILE *fp)
+{
+	LList *lg, *lc, *la;
+
+	for(lg=groups; lg; lg=l_list_next(lg) ) {
+		fprintf(fp,
+				"<GROUP>\n"
+				"\tNAME=\"%s\"\n",
+				((grouplist*)lg->data)->name);
+		for(lc = ((grouplist*)lg->data)->members; lc; lc=l_list_next(lc) ) {
+			struct contact *c = lc->data;
+			char *strbuf = NULL;
+			fprintf(fp, 
+					"\t<CONTACT>\n"
+					"\t\tNAME=\"%s\"\n"
+					"\t\tDEFAULT_PROTOCOL=\"%s\"\n"
+					"\t\tLANGUAGE=\"%s\"\n",
+					c->nick, eb_services[c->default_chatb].name, c->language);
+			strbuf = escape_string(c->trigger.param);
+			fprintf(fp, 
+					"\t\tTRIGGER_TYPE=\"%s\"\n"
+					"\t\tTRIGGER_ACTION=\"%s\"\n"
+					"\t\tTRIGGER_PARAM=\"%s\"\n",
+					get_trigger_type_text(c->trigger.type), 
+					get_trigger_action_text(c->trigger.action),
+					strbuf);
+			free (strbuf);
+			
+			fprintf(fp, 
+					"\t\tGPG_KEY=\"%s\"\n"
+					"\t\tGPG_CRYPT=\"%d\"\n"
+					"\t\tGPG_SIGN=\"%d\"\n"
+					(c->gpg_key!=NULL)?c->gpg_key:"",
+					c->gpg_do_encryption, c->gpg_do_signature);
+			
+			for(ga = c->accounts; ga; ga=l_list_next(ga)) {
+				eb_account *ea = ga->data;
+				fprintf( fp, "\t\t<ACCOUNT %s>\n"
+						"\t\t\tNAME=\"%s\"\n"
+						"\t\t\tLOCAL_ACCOUNT=\"%s\"\n"
+					     "\t\t</ACCOUNT>\n",
+					 eb_services[ea->service_id].name,
+					 ea->handle,
+					 ea->ela ? ea->ela->handle:"");	 
+
+			}
+			fprintf( fp, "\t</CONTACT>\n" );
+		}
+		fprintf( fp, "</GROUP>\n" );
+	}
 }
 
