@@ -1,3 +1,8 @@
+* Wed Oct  8 2003 06:07 GMT [philip]	0.4.2-13
+- modules/yahoo2/
+Fix double processing of format string leading to crash and possible
+remote exploit
+
 * Mon Oct  6 2003 22:12 GMT [colin]	0.4.2-12
 - src/chat_window.c
 possible crash?

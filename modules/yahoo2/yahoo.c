@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.66 $",
-	"$Date: 2003/09/30 19:02:45 $",
+	"$Revision: 1.67 $",
+	"$Date: 2003/10/08 06:09:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2003,9 +2003,8 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 
 	ylad = ela->protocol_local_account_data;
 
-	ela->connecting = 0;
-
 	if(succ == YAHOO_LOGIN_OK) {
+		ela->connecting = 0;
 		ela->connected = 1;
 		ylad->status = yahoo_current_status(id);
 
@@ -2042,6 +2041,8 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 
 	ay_do_error( _("Yahoo Error"), buff );
 	eb_yahoo_logout(ela);
+	ela->connecting = 0;
+
 }
 
 static void eb_yahoo_logout(eb_local_account * ela)
@@ -2064,7 +2065,7 @@ static void eb_yahoo_logout(eb_local_account * ela)
 		ylad->timeout_tag=0;
 	}
 	
-	if (ela->connected == 0) {
+	if (!(ela->connected || ela->connecting)) {
 		LOG(("eb_yahoo_logout called for already logged out account!"));
 		return;
 	}
