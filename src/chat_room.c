@@ -50,6 +50,7 @@
 #include "pixmaps/tb_volume.xpm"
 #include "pixmaps/smiley_button.xpm"
 #include "pixmaps/action.xpm"
+#include "pixmaps/invite_btn.xpm"
 
 LList * chat_rooms = NULL;
 
@@ -425,7 +426,11 @@ void do_invite_window(void *widget, eb_chat_room * room )
 {
 	GtkWidget * box;
 	GtkWidget * box2;
+	GtkWidget * mbox;
 	GtkWidget * label;
+	GtkWidget * table;
+	GtkWidget * frame;
+	GtkWidget * separator;
 	GList * list;
 		
 	if( !room || room->invite_window_is_open)
@@ -442,11 +447,24 @@ void do_invite_window(void *widget, eb_chat_room * room )
 	room->invite_window = gtk_window_new(GTK_WINDOW_DIALOG);
 	gtk_window_set_transient_for(GTK_WINDOW(room->invite_window), GTK_WINDOW(room->window));
 	gtk_window_set_position(GTK_WINDOW(room->invite_window), GTK_WIN_POS_MOUSE);
+	gtk_window_set_title(GTK_WINDOW(room->invite_window), _("Invite a contact"));
+	gtk_container_set_border_width(GTK_CONTAINER(room->invite_window), 5);
+	gtk_widget_realize(room->invite_window);
+	
 	box = gtk_vbox_new(FALSE, 3);
 	box2 = gtk_hbox_new(FALSE, 3);
-
+	table = gtk_table_new(2, 2, FALSE);
+	
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(table), 5);
+		
+	
 	label = gtk_label_new(_("Handle: "));
-	gtk_container_add(GTK_CONTAINER(box2), label);
+	mbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(mbox);
+	gtk_box_pack_end(GTK_BOX(mbox), label, FALSE, FALSE, 5);
+	gtk_table_attach(GTK_TABLE(table), mbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(label);
 
 	room->invite_buddy = gtk_combo_new();
@@ -454,36 +472,54 @@ void do_invite_window(void *widget, eb_chat_room * room )
 	gtk_combo_set_popdown_strings(GTK_COMBO(room->invite_buddy), list);
 	g_list_free(list);
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(room->invite_buddy)->entry), "");
-	gtk_container_add(GTK_CONTAINER(box2), room->invite_buddy);
 	gtk_widget_show(room->invite_buddy);
 
-	gtk_container_add(GTK_CONTAINER(box), box2);
-	gtk_widget_show(box2);
+	gtk_table_attach(GTK_TABLE(table), room->invite_buddy, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 
-	box2 = gtk_hbox_new(FALSE,3);
-	label = gtk_label_new(_("Message:"));
-	gtk_container_add(GTK_CONTAINER(box2), label);
+	label = gtk_label_new(_("Message: "));
+	mbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(mbox);
+	gtk_box_pack_end(GTK_BOX(mbox), label, FALSE, FALSE, 5);
+	gtk_table_attach(GTK_TABLE(table), mbox, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(label);
 
 	room->invite_message = gtk_entry_new();
-	gtk_container_add(GTK_CONTAINER(box2), room->invite_message );
+	gtk_table_attach(GTK_TABLE(table), room->invite_message, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(room->invite_message );
 
-	gtk_container_add(GTK_CONTAINER(box), box2);
-	gtk_widget_show(box2);
+	frame = gtk_frame_new(NULL);
 
-	label = gtk_button_new_with_label(_("Invite"));
-	gtk_container_add(GTK_CONTAINER(box), label);
+	gtk_frame_set_label(GTK_FRAME(frame), _("Invite a contact"));
+	gtk_container_add(GTK_CONTAINER(frame), table);
+
+	gtk_box_pack_start(GTK_BOX(box), frame, TRUE, TRUE, 0);
+	separator = gtk_hseparator_new();
+	gtk_box_pack_start(GTK_BOX(box), separator, FALSE, FALSE, 5);
+	gtk_widget_show(separator);
+	gtk_widget_show(frame);
+	gtk_widget_show(table);
+
+	label = gtkut_create_icon_button( _("Invite"), invite_btn_xpm, room->invite_window );
+	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
-
-
 	gtk_signal_connect(GTK_OBJECT(label), "clicked", invite_callback, room);
 
-	gtk_container_add(GTK_CONTAINER(room->invite_window), box);
+	label = gtkut_create_icon_button( _("Cancel"), cancel_xpm, room->invite_window );
+	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 0);
+	gtk_widget_show(label);
+	gtk_signal_connect_object(GTK_OBJECT(label), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), GTK_OBJECT(room->invite_window));
+	mbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_end(GTK_BOX(mbox), box2, FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(box), mbox, FALSE, FALSE, 0);
+	gtk_widget_show(mbox);
 	gtk_widget_show(box);
+	gtk_widget_show(box2);
+	gtk_widget_show(table);
+
+	gtk_container_add(GTK_CONTAINER(room->invite_window), box);
 
 	gtk_widget_show(room->invite_window);
-	
 	
 	gtk_signal_connect( GTK_OBJECT(room->invite_window), "destroy",
 						GTK_SIGNAL_FUNC(destroy_invite), room);
