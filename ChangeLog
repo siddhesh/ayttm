@@ -1,3 +1,7 @@
+* Fri Sep 24 2004 09:36 GMT [colin] 0.4.6-27
+- Added Swedish translation by Patrik Hermansson <patrik@paheco.nu>
+  po/sv.po
+
 * Tue Aug 10 2004 20:45 GMT [edward] 0.4.6-26
 - Update to notes utility. Fix added for 929347 had issues.
   modules/utility/notes.c
