@@ -30,8 +30,8 @@
 #endif
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #ifndef __MINGW32__
 #include <sys/socket.h>
@@ -75,7 +75,7 @@ static char user_info_id[1024];
 
 
 // HACK ALERT - user info hack begin
-char * info;
+static char * info = NULL;
 // end hack (user info)
 
 
@@ -91,8 +91,6 @@ enum Type
 	SIGNOFF = 4, //not used by TOC
 	KEEP_ALIVE = 5
 };
-unsigned long flap_version = 1;
-
 
 typedef struct _flap_header
 {
@@ -102,36 +100,12 @@ typedef struct _flap_header
 	short len;
 } flap_header;
 
-void (*toc_im_in)(toc_conn  * conn, char * user, char * message );
-void (*toc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
-void (*toc_chat_invite)(toc_conn * conn, char * id, char * name,
-	   char * sender, char * message );
-
-void (*toc_new_user)(char * group, char * handle);
-void (*toc_new_group)(char * group);
-void (*toc_join_ack)(toc_conn * conn, char * id, char * name);
-void (*update_user_status)(char * user, int online, time_t idle, int evil, int unavailable );
-void (*toc_error_message)(char * message);
-void (*toc_disconnect)(toc_conn * conn);
-void (*toc_chat_update_buddy)(toc_conn * conn, char * id, 
-		char * user, int online );
-
-int  (*toc_begin_file_recieve)( char * filename, unsigned long size );
-void (*toc_update_file_status)( int tag, unsigned long progress );
-void (*toc_complete_file_recieve)( int tag );
-void (*toc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,
-		char * cookie, char * filename );
-void (*toc_logged_in)(toc_conn *conn);
-
-
-void (*toc_user_info)(toc_conn  * conn, char * user, char * message );
-
 static void toc_signon_cb(int fd, int error, void *data);
 
-unsigned int get_address(char *hostname)
+static unsigned int get_address(const char *hostname)
 {
 	struct hostent *hp;
-	if ((hp = proxy_gethostbyname(hostname))) 
+	if ((hp = proxy_gethostbyname((char *)hostname))) 
 	{
 		return ((struct in_addr *)(hp->h_addr))->s_addr;
 	}
@@ -191,7 +165,7 @@ static char char_decode( char c )
 	return 0;
 }
 
-static char * base64_decode( char * input )
+static char * base64_decode( const char * input )
 {
 	char * output = g_new0( char, strlen(input) );
 	int i = 0;
@@ -235,7 +209,7 @@ if(DEBUG) {
 }
 
 //ERROR:<Error Code>:Var args
-char * parse_error(char * data)
+static char * parse_error(char * data)
 {
 	int code;
 	static char message[1024];
@@ -318,7 +292,7 @@ char * parse_error(char * data)
 }
 
 
-char *aim_encode(char * s)
+static char *aim_encode(const char * s)
 {
 	int len = strlen(s);
 	int i = 0;
@@ -352,7 +326,7 @@ char *aim_encode(char * s)
 
 
 
-char *aim_normalize(char *s)
+static char *aim_normalize(const char *s)
 {
 	static char buf[255];
 	char *t, *u;
@@ -375,7 +349,7 @@ char *aim_normalize(char *s)
 	return buf;
 }
 
-unsigned char *roast_password(char *pass)
+static unsigned char *roast_password(const char *pass)
 {
 	/* Trivial "encryption" */
 	static char rp[256];
@@ -391,7 +365,7 @@ unsigned char *roast_password(char *pass)
 
 
 
-void send_flap( toc_conn * conn, int type, char * data )
+static void send_flap( toc_conn * conn, int type, const char * data )
 {
 	char buff[2048];
 	int i;
@@ -507,7 +481,7 @@ static void toc_get_file_data( gpointer data, int source, eb_input_condition con
 	}
 }
 
-void toc_get_file( char * ip, short port, char * cookie, char * filename )
+static void toc_get_file( const char * ip, short port, const char * cookie, const char * filename )
 {
 		int fd;
 		char buff[2048];
@@ -618,7 +592,7 @@ if(DEBUG) {
 
 }
 
-void toc_get_talk( char * ip, short port, char * cookie )
+static void toc_get_talk( const char * ip, short port, const char * cookie )
 {
 	fprintf( stderr, "Trying to connect to %s:%d\n", ip, port );
 }
@@ -661,7 +635,7 @@ if(DEBUG)
 	
 }
 
-void toc_accept_user(toc_conn *conn, char *user)
+static void toc_accept_user(toc_conn *conn, const char *user)
 {
 	char buff2[2048];
 	if (user) { /* Only if User is not NULL */
@@ -674,7 +648,7 @@ void toc_accept_user(toc_conn *conn, char *user)
 	}
 }
 
-char * get_flap(toc_conn * conn )
+static char * get_flap(toc_conn * conn )
 {
 	static char buff[8192];
 	flap_header fh;
@@ -1224,7 +1198,7 @@ if(DEBUG)
 
 }
 
-unsigned int generate_code(char * username, char * password)
+static unsigned int generate_code(const char * username, const char * password)
 {
 	int sn = *username - 96;
 	int pw = *password - 96;
@@ -1237,8 +1211,8 @@ unsigned int generate_code(char * username, char * password)
 
 
 
-void toc_signon( char * username, char * password,
-		    char * server, short port, char * tinfo )
+void toc_signon( const char * username, const char * password,
+		    const char * server, short port, const char * tinfo )
 {
 	toc_conn * conn = g_new0(toc_conn, 1);
 
@@ -1349,7 +1323,7 @@ if(DEBUG)
 
 }
 
-void toc_chat_join( toc_conn * conn, char * chat_room_name )
+void toc_chat_join( toc_conn * conn, const char * chat_room_name )
 {
 	char buff[2048];
 
@@ -1358,7 +1332,7 @@ void toc_chat_join( toc_conn * conn, char * chat_room_name )
 	send_flap(conn, DATA, buff);
 }
 
-void toc_chat_accept( toc_conn * conn, char * id)
+void toc_chat_accept( toc_conn * conn, const char * id)
 {
 	char buff[2048];
 
@@ -1369,14 +1343,14 @@ void toc_chat_accept( toc_conn * conn, char * id)
 
 }
 
-void toc_chat_send( toc_conn * conn, char * id, char * message)
+void toc_chat_send( toc_conn * conn, const char * id, const char * message)
 {
 	char buff[2048];
 	g_snprintf(buff,2048, "toc_chat_send %s \"%s\"", id, aim_encode(message));
 	send_flap(conn, DATA, buff);
 }
 
-void toc_chat_leave( toc_conn * conn, char * id )
+void toc_chat_leave( toc_conn * conn, const char * id )
 {
 	char buff[2048];
 	g_snprintf(buff,2048, "toc_chat_leave %s", id);
@@ -1393,7 +1367,7 @@ void toc_set_away( toc_conn * conn, const char * message)
 	send_flap(conn, DATA, buff);
 }
 
-void toc_send_im( toc_conn * conn, char * username, char * message )
+void toc_send_im( toc_conn * conn, const char * username, const char * message )
 {
 	/* toc_send_im <Destination User> <Message> [auto] */
 
@@ -1409,7 +1383,7 @@ if(DEBUG)
 }
 
 
-void toc_add_buddies( toc_conn * conn, char * group, LList * list )
+void toc_add_buddies( toc_conn * conn, const char * group, LList * list )
 {
 	char buff[2001];
 	char buff2[2048];
@@ -1452,7 +1426,7 @@ void toc_add_buddies( toc_conn * conn, char * group, LList * list )
 	}
 }
 
-void toc_add_buddy( toc_conn * conn, char * user, char * group )
+void toc_add_buddy( toc_conn * conn, char * user, const char * group )
 {
 	/* toc_add_buddy <Buddy User 1> [<Buddy User2> [<Buddy User 3> [...]]] */
 	LList * buddies = NULL;
@@ -1463,7 +1437,7 @@ void toc_add_buddy( toc_conn * conn, char * user, char * group )
 
 }
 
-void toc_get_info( toc_conn * conn, char * user )
+void toc_get_info( toc_conn * conn, const char * user )
 {
 	char buff[2048];
 
@@ -1472,7 +1446,7 @@ void toc_get_info( toc_conn * conn, char * user )
 	send_flap(conn, DATA, buff);
 }
 
-void toc_remove_buddy( toc_conn * conn, char * user, char * group )
+void toc_remove_buddy( toc_conn * conn, const char * user, const char * group )
 {
 	char buff[2048];
 	char buff2[2048];
@@ -1515,7 +1489,7 @@ if(DEBUG)
 
 }
 
-void toc_invite( toc_conn * conn, char * id, char * buddy, char * message )
+void toc_invite( toc_conn * conn, const char * id, const char * buddy, const char * message )
 {
 	/*
 	 * toc_chat_invite <Chat Room ID> <Invite Msg> <buddy1> [<buddy2> [<buddy3> [...]]]
@@ -1527,8 +1501,8 @@ void toc_invite( toc_conn * conn, char * id, char * buddy, char * message )
 	send_flap(conn, DATA, buff );
 }
 
-void toc_file_accept( toc_conn * conn, char * nick, char * ip, short port, 
-					  char * cookie, char * filename )
+void toc_file_accept( toc_conn * conn, const char * nick, const char * ip, short port, 
+					  const char * cookie, const char * filename )
 {
 	char message[2048];
 	char uuid[] = "09461343-4C7F-11D1-8222-444553540000";
@@ -1542,8 +1516,8 @@ void toc_file_accept( toc_conn * conn, char * nick, char * ip, short port,
 
 }
 
-void toc_talk_accept( toc_conn * conn, char * nick, char * ip, short port, 
-					  char * cookie )
+void toc_talk_accept( toc_conn * conn, const char * nick, const char * ip, short port, 
+					  const char * cookie )
 {
 	char message[2048];
 	char uuid[] = "09461341-4C7F-11D1-8222-444553540000";
@@ -1557,7 +1531,7 @@ void toc_talk_accept( toc_conn * conn, char * nick, char * ip, short port,
 
 }
 
-void toc_file_cancel( toc_conn * conn, char * nick, char * cookie )
+void toc_file_cancel( toc_conn * conn, const char * nick, const char * cookie )
 {
 	char message[2048];
 	char uuid[] = "09461343-4C7F-11D1-8222-444553540000";

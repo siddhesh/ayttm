@@ -46,49 +46,49 @@ typedef struct _toc_file_conn
 	int  progress;
 } toc_file_conn;
 
-void (*icqtoc_new_user)(char * group, char * handle);
-void (*icqtoc_new_group)(char * group);
-int  (*icqtoc_begin_file_recieve)( char * filename, unsigned long size );
-void (*icqtoc_update_file_status)( int tag, unsigned long progress );
-void (*icqtoc_complete_file_recieve)( int tag );
-void (*icqtoc_im_in)(toc_conn  * conn, char * user, char * message );
-void (*icqtoc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
-void (*icqupdate_user_status)(char * user, int online, time_t idle, int evil, int unavailable );
-void (*icqtoc_error_message)(char * message);
-void (*icqtoc_disconnect)(toc_conn * conn);
-void (*icqtoc_chat_invite)(toc_conn * conn, char * id, char * name, 
+extern void (*icqtoc_new_user)(char * group, char * handle);
+extern void (*icqtoc_new_group)(char * group);
+extern int  (*icqtoc_begin_file_recieve)( const char * filename, unsigned long size );
+extern void (*icqtoc_update_file_status)( int tag, unsigned long progress );
+extern void (*icqtoc_complete_file_recieve)( int tag );
+extern void (*icqtoc_im_in)(toc_conn  * conn, char * user, char * message );
+extern void (*icqtoc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
+extern void (*icqupdate_user_status)(char * user, int online, time_t idle, int evil, int unavailable );
+extern void (*icqtoc_error_message)(char * message);
+extern void (*icqtoc_disconnect)(toc_conn * conn);
+extern void (*icqtoc_chat_invite)(toc_conn * conn, char * id, char * name, 
 		      char * sender, char * message );
-void (*icqtoc_join_ack)(toc_conn * conn, char * id, char * name);
-void (*icqtoc_chat_update_buddy)(toc_conn * conn, char * id, 
+extern void (*icqtoc_join_ack)(toc_conn * conn, char * id, char * name);
+extern void (*icqtoc_chat_update_buddy)(toc_conn * conn, char * id, 
 		                             char * user, int online );
-void (*icqtoc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,
+extern void (*icqtoc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,
 		                      char * cookie, char * filename );
 
-void (*icqtoc_user_info)(toc_conn  * conn, char * user, char * message );
-void (*icqtoc_logged_in)(toc_conn *conn);
+extern void (*icqtoc_user_info)(toc_conn  * conn, char * user, char * message );
+extern void (*icqtoc_logged_in)(toc_conn *conn);
 
 void icqtoc_callback( toc_conn * conn );
-void icqtoc_signon( char * username, char * password,
-		char * server, short port, char * info );
+void icqtoc_signon( const char * username, const char * password,
+		const char * server, short port, const char * info );
 void icqtoc_send_keep_alive( toc_conn * conn );
 void icqtoc_signoff( toc_conn * conn );
-void icqtoc_send_im( toc_conn * conn, char * username, char * message );
-void icqtoc_get_info( toc_conn * conn, char * user );
-void icqtoc_add_buddies( toc_conn * conn, char * group, LList * list );
-void icqtoc_add_buddy( toc_conn * conn, char * user, char * group );
+void icqtoc_send_im( toc_conn * conn, const char * username, const char * message );
+void icqtoc_get_info( toc_conn * conn, const char * user );
+void icqtoc_add_buddies( toc_conn * conn, const char * group, LList * list );
+void icqtoc_add_buddy( toc_conn * conn, char * user, const char * group );
 void icqtoc_set_idle( toc_conn * conn, int idle );
 void icqtoc_set_away( toc_conn * conn, const char * message);
-void icqtoc_invite( toc_conn * conn, char * id, char * buddy, char * message );
-void icqtoc_chat_join( toc_conn * conn, char * chat_room_name );
-void icqtoc_chat_send( toc_conn * conn, char * id, char * message);
-void icqtoc_chat_leave( toc_conn * conn, char * id );
-void icqtoc_chat_accept( toc_conn * conn, char * id);
-void icqtoc_file_accept( toc_conn * conn, char * nick, char * ip, short port,
-		                      char * cookie, char * filename );
-void icqtoc_file_cancel( toc_conn * conn, char * nick, char * cookie );
-void icqtoc_talk_accept( toc_conn * conn, char * nick, char * ip, short port, 
-					  char * cookie );
-void icqtoc_remove_buddy( toc_conn * conn, char * user, char * group );
+void icqtoc_invite( toc_conn * conn, const char * id, const char * buddy, const char * message );
+void icqtoc_chat_join( toc_conn * conn, const char * chat_room_name );
+void icqtoc_chat_send( toc_conn * conn, const char * id, const char * message);
+void icqtoc_chat_leave( toc_conn * conn, const char * id );
+void icqtoc_chat_accept( toc_conn * conn, const char * id);
+void icqtoc_file_accept( toc_conn * conn, const char * nick, const char * ip, short port,
+		                      const char * cookie, const char * filename );
+void icqtoc_file_cancel( toc_conn * conn, const char * nick, const char * cookie );
+void icqtoc_talk_accept( toc_conn * conn, const char * nick, const char * ip, short port, 
+					  const char * cookie );
+void icqtoc_remove_buddy( toc_conn * conn, const char * user, const char * group );
 void icqtoc_add_group(toc_conn *conn, const char *group);
 void icqtoc_remove_group(toc_conn *conn, const char *group);
 
