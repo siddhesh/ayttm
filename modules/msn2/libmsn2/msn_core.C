@@ -2142,7 +2142,9 @@ void msn_set_state(msnconn * conn, char * state)
   snprintf(buf, sizeof(buf), "CHG %d %s\r\n", next_trid, state);
   write(conn->sock, buf, strlen(buf));
   next_trid++;
-  conn->status = state;
+  
+  if (conn->status != NULL) delete conn->status;
+  conn->status = msn_permstring(state);
 }
 
 void msn_add_group(msnconn *conn, char *newgroup) {
