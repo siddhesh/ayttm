@@ -1,3 +1,7 @@
+* Wed Apr 09 2003 13:35 GMT [andy]	0.2.3-77
+- modules/msn2/msn.C
+Fix broken compile [incorrect callback prototype]
+
 * Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-76
 - src/Makefile.am
   src/progress_window.[ch] ** REMOVED **

@@ -163,8 +163,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.17 $",
-	"$Date: 2003/04/09 12:12:17 $",
+	"$Revision: 1.18 $",
+	"$Date: 2003/04/09 12:40:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -551,8 +551,10 @@ void ext_disable_conncheck() {
     }	
 }
 
-static void eb_msn_filetrans_cancel(invitation_ftp *inv)
+static void eb_msn_filetrans_cancel(void *cb_data)
 {
+	invitation_ftp *inv = (invitation_ftp *)cb_data;
+	
 	if (inv) {
 		eb_debug(DBG_MSN,"cancelling FTP transfer with %s\n", inv->other_user);
 		msn_filetrans_cancel(inv);
