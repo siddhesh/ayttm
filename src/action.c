@@ -230,7 +230,7 @@ void conversation_action(log_info *li, int to_end)
 		
 		txt = buf;
 		while (txt && *txt==' ')
-			*txt++;
+			txt++;
 		fprintf(output_fplain, "%s",txt);
 		
 		firstline = 0;

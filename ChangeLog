@@ -1,3 +1,7 @@
+* Sun Apr 27 2003 09:45 GMT [philip]	0.3.0-pre32
+- src/actions.c
+*txt++ -> txt++
+
 * Sun Apr 27 2003 00:36 GMT [colin]	0.3.0-pre31
 - src/gtk/about.c AUTHORS
 Reorder :-)
