@@ -65,6 +65,9 @@ static gint away_open = 0;
 
 static void show_away(GtkWidget *w, gchar *a_message);
 static void write_away_messages();
+void select_msg_cb(GtkCList *clist, gint row, gint column,
+                   GdkEventButton *event, gpointer user_data);
+
 void build_away_clist();
 
 static void destroy_away()
@@ -156,6 +159,18 @@ void delete_msg_cb(GtkWidget * menuitem, gpointer data)
 	}
 }
 
+void deselect_msg_cb(GtkCList *clist, gint row, gint column,
+                   GdkEventButton *event, gpointer user_data) 
+{
+	printf("deselecting row %d\n",row);
+	if (event && event->button == 3) {
+		gtk_signal_emit_stop_by_name(GTK_OBJECT(clist),
+				   "unselect-row");
+		select_msg_cb(clist, row, column,
+				event, user_data);
+	}
+}
+
 void select_msg_cb(GtkCList *clist, gint row, gint column,
                    GdkEventButton *event, gpointer user_data) 
 {
@@ -163,6 +178,18 @@ void select_msg_cb(GtkCList *clist, gint row, gint column,
 	
 	my_away = (away *)gtk_clist_get_row_data(GTK_CLIST(away_clist),
 				row);
+	printf("selecting row %d\n",row);
+	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
+			select_msg_cb, NULL);
+	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
+			deselect_msg_cb, NULL);
+	gtk_clist_select_row(clist, row, column);
+	gtk_signal_handler_unblock_by_func(GTK_OBJECT(clist),
+			select_msg_cb, NULL);
+	gtk_signal_handler_unblock_by_func(GTK_OBJECT(clist),
+			deselect_msg_cb, NULL);
+	if (!event)
+		return;
 	switch (event->button) {
 	case 1:
 		if (my_away) {
@@ -237,8 +264,9 @@ void build_away_clist()
 			GTK_BUTTON_SELECTS);
 	
 	gtk_signal_connect(GTK_OBJECT(away_clist), "select-row",
-			   GTK_SIGNAL_FUNC(select_msg_cb),
-			   NULL);
+			   GTK_SIGNAL_FUNC(select_msg_cb), NULL);
+	gtk_signal_connect(GTK_OBJECT(away_clist), "unselect-row",
+			   GTK_SIGNAL_FUNC(deselect_msg_cb), NULL);
 	gtk_widget_set_usize(away_clist, -1, 100);
 	gtk_clist_thaw(GTK_CLIST(away_clist));
 }
@@ -274,6 +302,53 @@ static void write_away_messages()
 		away_list = away_list->next;
 	}	
 	fclose(fp);
+}
+
+static LList * replace_message(LList *msglist, away *msg)
+{
+	LList *w = msglist;
+	while (w) {
+		away * omsg = (away *)w->data;
+		if (!strcmp(omsg->title, msg->title)) {
+			w->data = msg;
+			return msglist;
+		}
+		w = w->next;
+	}
+	/* not found */
+	return l_list_append(msglist, msg);
+}
+
+static void check_title( GtkWidget * widget, gpointer data)
+{
+	LList *w = away_messages;
+	char *txt = gtk_entry_get_text(GTK_ENTRY(title));
+	int replace = FALSE;
+	char *cur = NULL;
+	GList *ch = gtk_container_children(GTK_CONTAINER(save_later));
+	while (w) {
+		away * omsg = (away *)w->data;
+		if (!strcmp(omsg->title, txt)) {
+			replace = TRUE;
+			break;
+		}
+		w = w->next;
+	}
+	
+	while(ch) {
+		if (GTK_IS_LABEL(ch->data)) {
+			char *lab = NULL;
+			gtk_label_get(GTK_LABEL(ch->data), &lab);
+			if(replace && !strcmp(lab,_("Save for later use"))) 
+				gtk_label_set_text(GTK_LABEL(ch->data), 
+						_("Replace saved message"));
+			if(!replace && !strcmp(lab,_("Replace saved message"))) 
+				gtk_label_set_text(GTK_LABEL(ch->data), 
+						_("Save for later use"));
+			break;
+		}
+		ch = ch->next;
+	}
 }
 
 static void ok_callback( GtkWidget * widget, gpointer data)
@@ -316,7 +391,7 @@ static void ok_callback( GtkWidget * widget, gpointer data)
 		strncpy(my_away->title, a_title->str, strlen(a_title->str));
 		my_away->message = g_string_new(NULL);
 		g_string_append(my_away->message, a_message->str);
-		away_messages = l_list_append(away_messages, my_away);
+		away_messages = replace_message(away_messages, my_away);
 		write_away_messages();
 		build_away_clist();
 	}
@@ -369,6 +444,9 @@ void show_away_choicewindow(void *w, void *data)
 		gtk_table_attach(GTK_TABLE(table), title, 1, 2, 0, 1,
 				 GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(title);
+		
+		gtk_signal_connect(GTK_OBJECT(title), "changed",
+				GTK_SIGNAL_FUNC(check_title), NULL);
 		
 		hbox = gtk_hbox_new(FALSE, 5);
 		label = gtk_label_new(_("Away Message: "));

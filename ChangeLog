@@ -1,3 +1,8 @@
+* Sat Apr 19 2003 09:41 GMT [colin]	0.3.0-pre9
+- src/away_window.c
+Fix selection of messages
+Rplace instead of duplicate when title is the same
+
 * Fri Apr 18 2003 22:08 GMT [colin]	0.3.0-pre8
 - src/util.c
 Forgot to check when it /really/ is the same contact
