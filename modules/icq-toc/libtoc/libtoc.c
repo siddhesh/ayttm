@@ -77,6 +77,7 @@ static char user_info_id[1024];
 // HACK ALERT - user info hack begin
 static char * info = NULL;
 // end hack (user info)
+static void icqtoc_signon2(void *data, int source, eb_input_condition condition );
 
 
 enum Type
@@ -664,7 +665,7 @@ if(DEBUG)
 	FD_ZERO(&fs);
 	FD_SET(conn->fd, &fs);
 	
-	tv.tv_sec = 1;
+	tv.tv_sec = 3;
 	tv.tv_usec = 0;
 
 	if (select(conn->fd+1, &fs, NULL, NULL, &tv ) < 0) {
@@ -1260,6 +1261,22 @@ static void icqtoc_signon_cb(int fd, int error, void *data)
 	FD_SET(conn->fd, &fs);
 
 	//select(conn->fd+1, &fs, NULL, NULL, NULL );
+
+	conn->input = eb_input_add(conn->fd, EB_INPUT_READ, icqtoc_signon2, conn);
+}
+
+static void icqtoc_signon2(void *data, int source, eb_input_condition condition )
+{
+	char *flap_result=NULL;
+	toc_conn *conn = (toc_conn *)data;
+	char *norm_username = aim_normalize(conn->username);
+	unsigned short username_length = htons(strlen(norm_username));
+	char sflap_header[] = {0,0,0,1,0,1};
+	char buff[2048];
+	flap_header fh;
+
+	eb_input_remove(conn->input);
+	conn->input = 0;
 
 	flap_result=get_flap(conn);
 	if(flap_result)

@@ -33,6 +33,7 @@ typedef struct _toc_conn
     short port;
     char *username;
     char *password;
+    int input;
 } toc_conn;
 
 typedef struct _toc_file_conn

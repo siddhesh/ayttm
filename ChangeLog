@@ -1,3 +1,7 @@
+* Wed Apr 09 2003 13:35 GMT [andy]	0.2.3-78
+- modules/icq-toc/libtoc
+Try to fix "network errors" from some places
+
 * Wed Apr 09 2003 13:35 GMT [andy]	0.2.3-77
 - modules/msn2/msn.C
 Fix broken compile [incorrect callback prototype]
