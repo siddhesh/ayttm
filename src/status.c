@@ -1070,6 +1070,8 @@ static void set_status_label(eb_account *ea, int update_contact)
 	}
 	g_free(c);
 	g_free(tmp);
+
+	set_tooltips_active(iGetLocalPref("do_show_tooltips"));
 }
 	
 /* makes an account visible on the buddy list, making the contact visible
