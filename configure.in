@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([src/main.c])
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=pre3
+RELEASE=pre4
 #This is to check modules/core binary compat
 #Bump it up when necessary only (query_callbacks change, struct change etc)
 CORE_VERSION=1
@@ -66,7 +66,7 @@ else
 AC_CHECK_FUNCS([atexit bzero dcgettext dup2 getcwd gethostbyname gethostname gettimeofday getwd inet_ntoa isascii memchr memmove mempcpy memset mkdir modf munmap nl_langinfo pow select setlocale socket stpcpy strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname snprintf])
 fi
 
-ALL_LINGUAS="fr"
+ALL_LINGUAS="fr en_GB"
 AC_OUTPUT_COMMANDS([
 	# In autoconf-2.13 it is called $ac_given_srcdir.
 	# In autoconf-2.50 it is called $srcdir.

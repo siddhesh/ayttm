@@ -1,3 +1,7 @@
+* Fri Apr 18 2003 16:00 GMT [philip]	0.3.0-pre4
+- po/en_GB.po
+Added English translation
+
 * Fri Apr 18 2003 15:10 GMT [andy]	0.3.0-pre3
 - src/gtk/prefs_window.C
 Add description panels for Advanced, Services, and Utilities

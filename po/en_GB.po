@@ -1,0 +1,39 @@
+# Ayttm English Translation
+# Copyright (C) 2003 Philip S Tellis.
+# Philip S Tellis <philip.tellis@gmx.net>, 2003.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ayttm\n"
+"POT-Creation-Date: 2003-04-18 21:20+0530\n"
+"PO-Revision-Date: 2003-04-18 21:20+0530\n"
+"Last-Translator: Philip S Tellis <philip.tellis@gmx.net>\n"
+"Language-Team: Philip S Tellis <philip.tellis@gmx.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/gtk/prefs_window.C:1301
+msgid "Ignore foreground Colors"
+msgstr "Ignore foreground Colours"
+
+#: src/gtk/prefs_window.C:1302
+msgid "Ignore background Colors"
+msgstr "Ignore background Colours"
+
+#: modules/icq/icq.c:701
+msgid "Authorize ICQ User"
+msgstr "Authorise ICQ User"
+
+#: modules/icq/icq.c:1490
+msgid "Authorization Required<BR>"
+msgstr "Autorisation Required<br>"
+
+#: modules/jabber/libEBjabber.c:892
+msgid "Register? You're not authorized"
+msgstr "Register? You're not authorised"
+
+#: modules/msn2/msn.C:1316
+msgid "Authorize MSN User"
+msgstr "Authorise MSN User"
+
