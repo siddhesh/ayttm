@@ -25,7 +25,8 @@
 #ifndef __UI_PREFS_WINDOW_H__
 #define __UI_PREFS_WINDOW_H__
 
-#include "prefs.h"
+/* forward declarations */
+struct prefs;
 
 #ifdef __cplusplus
 extern "C" {

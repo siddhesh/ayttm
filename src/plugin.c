@@ -42,10 +42,6 @@ typedef long __off32_t;
 #include "messages.h"
 
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
-
 
 char *PLUGIN_TYPE_TXT[]={"SERVICE", "UTILITY", "SOUND", "LOG", "GUI", "UNKNOWN"};
 char *PLUGIN_STATUS_TXT[]={"Not Loaded", 

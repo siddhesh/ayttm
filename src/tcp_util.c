@@ -30,18 +30,18 @@
 #include "intl.h"
 
 #include <string.h>
-#ifndef __MINGW32__
-#include <netdb.h>
-#endif
 #include <sys/types.h>
 #include <limits.h>
+
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
+#include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -50,14 +50,8 @@
 
 #include "globals.h"
 #include "plugin_api.h"
-
-
-/* so the compiler tells us about mismatches */
 #include "tcp_util.h"
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#define hstrerror strerror
-#endif
+
 
 /**
  * ay_socket_new
@@ -327,7 +321,6 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 	error = connect(servfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 #ifdef __MINGW32__
 	err = WSAGetLastError();
-#define EINPROGRESS WSAEINPROGRESS
 #else
 	err = errno;
 #endif

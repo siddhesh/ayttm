@@ -60,12 +60,7 @@ unsigned int module_version() {return CORE_VERSION;}
 
 #include "pixmaps/irc_online.xpm"
 #include "pixmaps/irc_away.xpm"
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#define write(a,b,c) send(a,b,c,0)
-#define read(a,b,c)  recv(a,b,c,0)
-#define usleep(a) Sleep(a)
-#endif
+
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -87,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.10 $",
-	"$Date: 2003/04/27 12:30:38 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/04/27 14:16:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

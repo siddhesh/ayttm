@@ -40,10 +40,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "util.h"
 #include "tcp_util.h"
 #include "messages.h"
+#include "platform_defs.h"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 /* already declared in dialog.h - but that uses gtk */
 void do_list_dialog(char * message, char * title, char **list,
@@ -80,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Auto-translator",
 	"Automatic translation",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/27 12:30:39 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/27 14:16:21 $",
 	&ref_count,
 	trans_init,
 	trans_finish,

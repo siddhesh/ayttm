@@ -26,8 +26,8 @@
 
 #include <gdk/gdkprivate.h>
 #ifndef __MINGW32__
-# include <gdk/gdkx.h>
-# include <X11/Xlib.h>
+#include <gdk/gdkx.h>
+#include <X11/Xlib.h>
 #endif
 #include <string.h>
 #include <stdlib.h>
@@ -46,9 +46,6 @@
 #include <X11/extensions/scrnsaver.h>
 #endif /* HAVE_MIT_SAVER_EXTENSION */
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 static guint idle_timer;
 static time_t lastsent = 0;

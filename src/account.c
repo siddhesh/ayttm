@@ -31,9 +31,7 @@
 #include "value_pair.h"
 #include "util.h"
 #include "add_contact_window.h"
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
+
 #ifndef NAME_MAX
 #define NAME_MAX 4096
 #endif

@@ -31,11 +31,12 @@
 #include "intl.h"
 
 #include <string.h>
+#include <assert.h>
+#include <stdlib.h>
+
 #ifndef __MINGW32__
 #include <X11/Xlib.h>
 #endif
-#include <assert.h>
-#include <stdlib.h>
 
 #include "service.h"
 #include "globals.h"
@@ -61,9 +62,6 @@
 #include "pixmaps/blank_icon.xpm"
 #include "pixmaps/logoff_icon.xpm"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 void update_contact_list();
 

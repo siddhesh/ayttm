@@ -38,9 +38,6 @@
 
 #include "gtk/gtkutils.h"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 static void create_action_menu(char *html_file, char *plain_file, int sens);
 static void save_action(char *action);

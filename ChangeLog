@@ -1,7 +1,42 @@
+* Sun Apr 27 2003 15:10 GMT [andy]	0.3.0-6
+- src/platform_defs.h		** ADDED **
+  libproxy/proxy.c
+  modules/aim-toc/aim-toc.c
+  modules/icq-toc/icq-toc.c
+  modules/irc/irc.c
+  modules/msn2/msn.C
+  modules/utility/autotrans.c
+  modules/utility/notes.c
+  modules/utility/rainbow.c
+  modules/yahoo2/yahoo.c
+  src/Makefile.am
+  src/account.c
+  src/action.c
+  src/chat_window.c
+  src/globals.h
+  src/input_list.c
+  src/log_window.c
+  src/main.c
+  src/message_parse.c
+  src/nomodule.c
+  src/offline_queue_mgmt.c
+  src/plugin.c
+  src/prefs.c
+  src/service.c
+  src/smileys.h
+  src/status.c
+  src/tcp_util.c
+  src/ui_prefs_window.h
+  src/util.c
+  src/gtk/gtk_eb_html.c
+  src/gtk/gtkspell.c
+  src/gtk/prefs_window.C
+Consolidate platform-specific [re-]definitions into platform_defs.h
+[note that platform_defs.h is included in globals.h]
+
 * Sun Apr 27 2003 13:20 GMT [andy]	0.3.0-5
 - configure.in
 Added extra C flag for darwin
-
 - pixmaps/error.xpm				** ADDED **
   pixmaps/info.xpm				** ADDED **
   src/about.[ch]				** ADDED **

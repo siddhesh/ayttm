@@ -65,9 +65,6 @@ typedef unsigned long ulong;
 #include "pixmaps/icq_online.xpm"
 #include "pixmaps/icq_away.xpm"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 #define DBG_TOC do_icq_debug
 int do_icq_debug = 0;
@@ -97,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.20 $",
-	"$Date: 2003/04/27 12:30:38 $",
+	"$Revision: 1.21 $",
+	"$Date: 2003/04/27 14:16:17 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

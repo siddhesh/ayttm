@@ -29,19 +29,19 @@
 #include <ctype.h>
 #include <assert.h>
 
+#ifdef __MINGW32__
+#include <sys/stat.h>
+#endif
+
 #include "service.h"
 #include "value_pair.h"
 #include "globals.h"
 #include "defaults.h"
 #include "libproxy/libproxy.h"
 #include "plugin.h"
+#include "prefs.h"
 
 #include "ui_prefs_window.h"
-
-#ifdef __MINGW32__
-#include <sys/stat.h>
-#define	snprintf	_snprintf
-#endif
 
 
 enum {

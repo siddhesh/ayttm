@@ -83,12 +83,6 @@ unsigned int module_version() {return CORE_VERSION;}
 #if defined(HAVE_GLIB)
 # include <glib.h>
 #endif
-#if defined(__MINGW32__)
-# define snprintf _snprintf
-# include <winsock2.h>
-# define write(a,b,c) send(a,b,c,0)
-# define read(a,b,c)  recv(a,b,c,0)
-#endif
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -126,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.25 $",
-	"$Date: 2003/04/27 12:30:40 $",
+	"$Revision: 1.26 $",
+	"$Date: 2003/04/27 14:16:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

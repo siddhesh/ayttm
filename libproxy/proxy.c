@@ -29,19 +29,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef __MINGW32__
-#include <sys/socket.h>
-#endif
 #include <errno.h>
 #include <glib.h>
 #include <unistd.h>
 
 #ifdef __MINGW32__
-#define sleep(a)	Sleep(a)
-#define bcopy(a,b,c)  memcpy(b,a,c)
-#define bzero(a,b)    memset(a,0,b)
 #include <winsock2.h>
-#define ECONNREFUSED WSAECONNREFUSED
 #else
 #include <arpa/inet.h>
 #endif
@@ -49,6 +42,7 @@
 #include "libproxy.h"
 #include "tcp_util.h"
 #include "messages.h"
+#include "platform_defs.h"
 
 
 static int proxy_inited=0;

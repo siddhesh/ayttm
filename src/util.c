@@ -56,9 +56,6 @@
 #include "dialog.h"
 #include "service.h"
 #include "offline_queue_mgmt.h"
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 
 #ifndef NAME_MAX

@@ -36,10 +36,7 @@ unsigned int module_version() {return CORE_VERSION;}
 #include "externs.h"
 #include "plugin_api.h"
 #include "prefs.h"
-
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
+#include "platform_defs.h"
 
 
 /*******************************************************************************
@@ -80,8 +77,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Rainbow",
 	"Turns all outgoing messages rainbow colours",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/18 08:46:11 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/27 14:16:22 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,

@@ -27,28 +27,25 @@
  */
 
 #include "intl.h"
-#include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
 #include <assert.h>
 #include <ctype.h>
 #include <time.h>
 
+#include <gdk/gdkkeysyms.h>
+
 #include "globals.h"
-#include "gtk/gtk_eb_html.h"
-#include "log_window.h"
 #include "util.h"
 #include "prefs.h"
 #include "action.h"
 
+#include "gtk/gtk_eb_html.h"
+
 #include "pixmaps/cancel.xpm"
 #include "pixmaps/action.xpm"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 static void eb_log_show(log_window *lw);
 

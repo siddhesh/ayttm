@@ -37,12 +37,10 @@ unsigned int module_version() {return CORE_VERSION;}
 #endif
 #include "plugin_api.h"
 #include "prefs.h"
+#include "platform_defs.h"
+
 #ifndef NAME_MAX
 #define NAME_MAX 512
-#endif
-#ifdef __MINGW32__
-#define mkdir(a,b) _mkdir(a)
-#define snprintf _snprintf
 #endif
 
 
@@ -74,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Keep notes on contacts", 
 	"Keep notes about your contacts and buddies", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/18 08:46:11 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/27 14:16:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

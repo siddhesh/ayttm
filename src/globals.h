@@ -30,6 +30,7 @@
 #ifndef __GLOBALS_H__
 #define __GLOBALS_H__
 
+#include "platform_defs.h"
 #include "llist.h"
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)

@@ -58,10 +58,6 @@
 #include "activity_bar.h"
 #include "dialog.h"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
-
 
 char filename[1024];
 // static unsigned long filename_len = 0; // unused

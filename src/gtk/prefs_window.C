@@ -50,10 +50,6 @@
 #include "pixmaps/cancel.xpm"
 #include "pixmaps/error.xpm"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
-
 
 // forward declaration
 class ay_prefs_window_panel;

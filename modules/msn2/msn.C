@@ -42,11 +42,8 @@
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
-#include <sys/socket.h>
 #include <sys/poll.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 #endif
 
 #include "info_window.h"
@@ -69,13 +66,10 @@
 #include "tcp_util.h"
 #include "messages.h"
 #include "dialog.h"
+#include "platform_defs.h"
 
 #include "libproxy/libproxy.h"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#define sleep(a) Sleep(a)
-#endif
 
 /*************************************************************************************
  *                             Begin Module Code
@@ -166,8 +160,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.27 $",
-	"$Date: 2003/04/27 12:30:39 $",
+	"$Revision: 1.28 $",
+	"$Date: 2003/04/27 14:16:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

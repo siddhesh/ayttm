@@ -17,17 +17,10 @@
  */
 
 #include "intl.h"
+
 #include <gtk/gtk.h>
 #include <glib.h>
-
 #include <sys/types.h>
-#ifndef __MINGW32__
-#include <sys/wait.h>
-
-#if HAVE_POLL_H
-#include <sys/poll.h>
-#endif
-#endif
 #include <unistd.h>   
 #include <stdio.h>    
 #include <signal.h>
@@ -36,12 +29,17 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "messages.h"
-
-
-#ifdef __MINGW32__
-#define snprintf _snprintf
+#ifndef __MINGW32__
+#include <sys/wait.h>
+#if HAVE_POLL_H
+#include <sys/poll.h>
 #endif
+#endif
+
+#include "messages.h"
+#include "platform_defs.h"
+
+
 /* TODO:
  * asynchronous lookups
  */

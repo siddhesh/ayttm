@@ -66,10 +66,6 @@ typedef unsigned long ulong;
 #include "pixmaps/aim_away.xpm"
 
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
-
 #define DBG_TOC do_aim_debug
 int do_aim_debug = 0;
 
@@ -98,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.22 $",
-	"$Date: 2003/04/27 12:30:37 $",
+	"$Revision: 1.23 $",
+	"$Date: 2003/04/27 14:16:16 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

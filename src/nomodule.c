@@ -41,10 +41,6 @@
 #include "pixmaps/nomodule_away.xpm"
 
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
-
 #define SERVICE_INFO nomodule_SERVICE_INFO
 /* This will end up being an array, one for each protocol we know about */
 struct service SERVICE_INFO = { NULL, -1, SERVICE_CAN_NOTHING, NULL };

@@ -74,9 +74,6 @@
 #include "pixmaps/smiley_button.xpm"
 #include "pixmaps/action.xpm"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
 
 #define BUF_SIZE 1024  /* Maximum message length */
 #ifndef NAME_MAX

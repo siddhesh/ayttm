@@ -32,10 +32,6 @@
 
 #include "gtk/gtkutils.h"
 
-#ifdef __MINGW32__
-#define snprintf _snprintf
-#endif
-
 
 void	eb_input_render( input_list * il, void * box )
 {

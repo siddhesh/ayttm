@@ -46,9 +46,7 @@
 #include "pixmaps/dt_icon.xpm"
 #include "pixmaps/admin_icon.xpm"
 #include "pixmaps/no_such_smiley.xpm"
-#ifdef __MINGW32__
-#define snprintf g_snprintf
-#endif
+
 
 static GData * font_cache;
 static gboolean cache_init = FALSE;
