@@ -129,8 +129,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.58 $",
-	"$Date: 2003/06/04 22:07:22 $",
+	"$Revision: 1.59 $",
+	"$Date: 2003/06/10 05:04:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -729,9 +729,13 @@ static void eb_yahoo_set_profile(ebmCallbackData * data)
 static void ext_yahoo_got_identities(int id, YList * ids)
 {
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
-	eb_yahoo_local_account_data * ylad = ela->protocol_local_account_data;
+	eb_yahoo_local_account_data * ylad;
 	struct act_identity * i;
 	char buff[1024];
+	if(!ela)
+		return;
+
+	ylad = ela->protocol_local_account_data;
 	LOG(("got identities"));
 	for(; ids; ids = ids->next) {
 		i = g_new0(struct act_identity, 1);
@@ -1571,7 +1575,7 @@ static void _image_window_closed(int tag, void *data)
 }
 
 static void ext_yahoo_got_webcam_image(int id, const char *who,
-		unsigned char *image, unsigned int image_size, unsigned int real_size,
+		const unsigned char *image, unsigned int image_size, unsigned int real_size,
 		unsigned int timestamp)
 {
 	struct webcam_feed *wf = NULL;

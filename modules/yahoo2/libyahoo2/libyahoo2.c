@@ -2213,8 +2213,7 @@ static int yahoo_get_webcam_data(struct yahoo_input_data *yid)
 				{
 					who = y_memdup(yid->rxqueue + begin, end - begin);
 					who[end - begin - 1] = 0;
-					YAHOO_CALLBACK(ext_yahoo_webcam_viewer)
-						(yd->client_id, who + 2, 2);
+					YAHOO_CALLBACK(ext_yahoo_webcam_viewer)(yd->client_id, who + 2, 2);
 					FREE(who);
 				}
 			}
@@ -2224,8 +2223,7 @@ static int yahoo_get_webcam_data(struct yahoo_input_data *yid)
 				/* 0 = declined viewing permission */
 				/* 1 = accepted viewing permission */
 				if (yid->wcd->timestamp == 0) {
-					YAHOO_CALLBACK(ext_yahoo_webcam_closed)
-					(yd->client_id, yid->wcm->user, 3);
+					YAHOO_CALLBACK(ext_yahoo_webcam_closed)(yd->client_id, yid->wcm->user, 3);
 				}
 			}
 			break;
@@ -2234,15 +2232,14 @@ static int yahoo_get_webcam_data(struct yahoo_input_data *yid)
 			/* 00 00 00 01 = we have data?? */
 			break;
 		case 0x02: /* image data */
-			YAHOO_CALLBACK(ext_yahoo_got_webcam_image)
-				(yd->client_id, yid->wcm->user, yid->rxqueue + begin,
-				yid->wcd->data_size, pos - begin,
-				yid->wcd->timestamp);
+			YAHOO_CALLBACK(ext_yahoo_got_webcam_image)(yd->client_id, 
+					yid->wcm->user, yid->rxqueue + begin,
+					yid->wcd->data_size, pos - begin,
+					yid->wcd->timestamp);
 			break;
 		case 0x05: /* response packets when uploading */
 			if (!yid->wcd->data_size) {
-				YAHOO_CALLBACK(ext_yahoo_webcam_data_request)
-					(yd->client_id, yid->wcd->timestamp);
+				YAHOO_CALLBACK(ext_yahoo_webcam_data_request)(yd->client_id, yid->wcd->timestamp);
 			}
 			break;
 		case 0x07: /* connection is closing */
@@ -2255,8 +2252,7 @@ static int yahoo_get_webcam_data(struct yahoo_input_data *yid)
 					closed = 2;
 					break;
 			}
-			YAHOO_CALLBACK(ext_yahoo_webcam_closed)
-				(yd->client_id, yid->wcm->user, closed);
+			YAHOO_CALLBACK(ext_yahoo_webcam_closed)(yd->client_id, yid->wcm->user, closed);
 			break;
 		case 0x0C: /* user connected */
 		case 0x0D: /* user disconnected */
@@ -2267,8 +2263,7 @@ static int yahoo_get_webcam_data(struct yahoo_input_data *yid)
 					connect=1;
 				else
 					connect=0;
-				YAHOO_CALLBACK(ext_yahoo_webcam_viewer)
-					(yd->client_id, who, connect);
+				YAHOO_CALLBACK(ext_yahoo_webcam_viewer)(yd->client_id, who, connect);
 				FREE(who);
 			}
 			break;

@@ -1,4 +1,8 @@
-* Tue Jun 10 2003 07:42 GMT [colin]	0.3.1-30
+* Tue Jun 10 2003 05:00 GMT [philip]	0.3.1-31
+- modules/yahoo2/yahoo.c
+fix crash when identities called on unknown account
+
+* Tue Jun 10 2003 00:42 GMT [colin]	0.3.1-30
 - src/status.c
 Reorder menus
 
