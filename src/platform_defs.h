@@ -47,5 +47,11 @@
 #define mkdir( x, y )	_mkdir( x )
 #endif
 
+#ifdef _AIX
+#include <glib.h>
+#define snprintf		g_snprintf
+#define strcasecmp( a, b )	g_strcasecmp( a, b )
+#define strncasecmp( a, b, c )	g_strncasecmp( a, b, c )
+#endif
 
 #endif

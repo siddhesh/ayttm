@@ -1,3 +1,18 @@
+* Fri Jul 09 2004 18:52 GMT [edward] 0.4.6-19
+- code for AIX port but #949977. Added READMEs for AIX and LINUX build issues.
+  This bug is closed, yet the final port is not complete as it requires libXShm
+  and I do not have a copy. The Solution was to use glib functions.
+  Also fixed bug #986853 and an unregistered one about a missing -I flag for 
+  webcam support.
+  README.LINUX
+  Makefile.am
+  README
+  README.AIX
+  configure.ac
+  src/message_parse.c
+  src/platform_defs.h
+  src/util.c
+
 * Mon Jun 28 2004 14:56 GMT [edward] 0.4.6-18
 - Fixed bug #929347
   src/utils.c
@@ -871,3 +886,4 @@ Don't return 127.0.0.1 as local address
 
 * Sat Aug 23 2003 10:52 GMT [colin]	0.4.0-1
 Release
+

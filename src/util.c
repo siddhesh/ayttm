@@ -1555,7 +1555,12 @@ LList * get_groups()
 	
 	for(node=groups; node; node = l_list_next(node))
 		newlist=l_list_insert_sorted(newlist, ((grouplist *)node->data)->name,
-				strcasecmp);
+#ifdef _AIX
+				g_strcasecmp
+#else
+				strcasecmp
+#endif
+				);
 	
 	return newlist;
 }

@@ -1,0 +1,57 @@
+1) To build AIX you will need to install the following ftp://aixpdslib.seas.ucla.edu
+
+autoconf.2.59.tar.Z
+autogen.5.5.1.tar.Z
+automake.1.8.5.tar.Z
+bash.2.05b.tar.Z
+binutils.2.13.2.tar.Z
+bison.1.875.tar.Z
+flex.2.5.4.tar.Z
+freetype.2.1.8.tar.Z
+gcc.2.95.2.tar.Z
+gdb.5.3.tar.Z
+gettext.0.13.1.tar.Z
+glib.1.2.10.tar.Z
+gtk.+-1.2.10.tar.Z
+gzip.1.2.4a.tar.Z
+jpeg.6b.tar.Z
+libiconv.1.9.2.tar.Z
+libpng.1.2.4.tar.Z
+libtool.1.5.6.tar.Z
+m4.1.4.tar.Z
+perl.5.8.3.tar.Z
+pkgconfig.0.15.0.tar.Z
+readline.4.3.tar.Z
+tiff.v3.5.3.tar.Z
+zlib.1.2.1.tar.Z
+
+
+2) And you will have to download the source for automake, automake-1.6.tar.gz, 
+and build it as well, then install overwriting the 1.8 version previously 
+installed.
+
+3) Download and build openssl
+
+Note:
+	*) Download and build gdk-pixbuf.0.17.0
+	*) Download and build JasPer
+	On AIX 4.1 gdk-pixbuf will not compile, so therefore JasPer will not
+	compile. Yahoo webcam will not work. All I have is AIX 4.1 so if someone
+	wishes to test this on AIX 4.2 or greater that would be great.
+
+	On AIX 4.1, pthread does not exist so File transfer has been disabled
+	generally.
+
+	On AIX 4.1 XShm does not exist so it does not link. If someone has this
+	library and can get me a copy for AIX 4.1 I would be grateful. This 
+	prevents full testing.
+
+4) Then you are ready to compile ayttm
+./gen
+./configure --disable-esd --disable-glibtest --disable-arts --with-openssl-prefix=/usr/local/ssl --with-libiconv-prefix=/usr/local/special
+
+Even though glib, and gtk are available the tests will fail. So we disable
+them. Nor is there an arts or esd server for AIX, well I could not find
+them, so we disable them as well
+
+Some of the string functions like snprintf, etc have been mapped to the ones provided as part of glib. 

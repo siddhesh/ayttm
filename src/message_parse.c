@@ -33,7 +33,9 @@
 #include <errno.h>
 #include <sys/time.h>
 
+#define HAVE_PTHREAD 1
 #ifdef __MINGW32__
+#undef HAVE_PTHREAD
 #include <winsock2.h>
 #else
 #include <sys/wait.h>
@@ -47,6 +49,12 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <signal.h>
+#ifdef _AIX
+#include <sys/timer.h>
+#include <sys/select.h>
+#undef func_data
+#undef HAVE_PTHREAD
+#endif
 
 #include "chat_window.h"
 #include "message_parse.h"
@@ -65,7 +73,7 @@ static int xfer_in_progress = 0;
 static FILE * fp;
 static unsigned long amount_received;
 static int fd;
-#ifndef __MINGW32__
+#ifdef HAVE_PTHREAD
 static pthread_mutex_t mutex;
 #endif
 
@@ -84,7 +92,7 @@ typedef struct {
 
 static void send_file2(void * ptr )
 {
-#ifndef __MINGW32__
+#ifdef HAVE_PTHREAD
 	send_file_struct * sfs = ptr;
 	unsigned long i = 0;
 	char buff[1025];
@@ -170,7 +178,7 @@ static void send_file2(void * ptr )
 static int update_send_progress(void * data )
 {
 	progress_callback_data * pcd = data;
-#ifndef __MINGW32__
+#ifdef HAVE_PTHREAD
 	pthread_mutex_lock(&mutex);
 #endif
 	if( xfer_in_progress > 0 )
@@ -198,7 +206,7 @@ static int update_send_progress(void * data )
 		eb_timeout_remove(pcd->timer);
 		free(pcd);
 	}
-#ifndef __MINGW32__
+#ifdef HAVE_PTHREAD
 	pthread_mutex_unlock(&mutex);
 #endif
 	return TRUE;
@@ -208,7 +216,7 @@ static void send_file( char * filename, int s )
 {
 	static send_file_struct sfs;
 	struct stat fileinfo;
-#ifndef __MINGW32__
+#ifdef HAVE_PTHREAD
 	static pthread_t thread;
 #endif
 	int i;
@@ -263,7 +271,7 @@ static void send_file( char * filename, int s )
 		printf("%s %s %d %5d %p\n", filename, filename+i+1, strlen(filename), htons(strlen(filename+i+1)), fp);
 		snprintf(label,1024,"Transferring %s...", filename);
 		pcd->tag = ay_progress_bar_add(label,fileinfo.st_size,NULL,NULL);
-#ifndef __MINGW32__
+#ifdef HAVE_PTHREAD
 		pthread_mutex_init(&mutex, NULL);
 		if(pthread_create(&thread, NULL, 
 					(void*)&send_file2, (void*)&sfs ))

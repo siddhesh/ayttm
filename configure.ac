@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.4.6], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=18
+RELEASE=19
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -29,6 +29,7 @@ AM_PROG_LIBTOOL
 AC_CHECK_TOOL(RC, windres, no)
 
 # add some platform-specific flags
+use_pthread=yes
 use_mingw=no
 case "$host" in
 *-darwin*)
@@ -37,7 +38,13 @@ case "$host" in
         ;;
 *-*-mingw*)
         use_mingw=yes
+	use_pthread=no
         ;;
+esac
+case "$host_os" in
+aix*)
+	use_pthread=no
+	;;
 esac
 
 LIBS="$LIBS -L/usr/local/lib"
@@ -86,7 +93,7 @@ AM_GNU_GETTEXT([external])
 #  Check for pthreads
 ###############################################################################
 
-if test "$use_mingw" = no ; then
+if test "$use_pthread" = yes ; then
   AC_MSG_CHECKING(how to include pthread)
   AC_MSG_RESULT([])
   AC_MSG_CHECKING(for -lpthread compiler option)
@@ -194,7 +201,7 @@ if test "$enable_webcam" != "no"; then
     ac_check_lib_save_CFLAGS=$CFLAGS
     LIBS="-ljasper -lm -ljpeg -L $with_jasper_prefix/lib $LIBS"
     if test -n "$with_jasper_prefix"; then
-        CFLAGS="$CFLAGS $with_jasper_prefix/include"
+        CFLAGS="$CFLAGS -I$with_jasper_prefix/include"
     fi
     AC_TRY_LINK([#include <jasper/jasper.h>],
 	[jas_init()],
@@ -204,7 +211,9 @@ if test "$enable_webcam" != "no"; then
 	enable_jasper_filter="no"
 	AC_MSG_WARN([Unable to find jasper, you won't be able to view webcams])])
     LIBS=$ac_check_lib_save_LIBS
-
+else
+    # if one is disabled then disable both
+    enable_jasper_filter="no"
 fi
 
 AC_ARG_WITH(openssl-prefix, AC_HELP_STRING([--with-openssl-prefix=PFX],
@@ -395,7 +404,7 @@ fi
 
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src"
 CXXFLAGS="$CXXFLAGS"
-
+EB_LDFLAGS="$EB_LDFLAGS $LDFLAGS"
 
 AC_SUBST_FILE(CHANGELOG)
 CHANGELOG="ChangeLog"

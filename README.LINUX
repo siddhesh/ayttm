@@ -1,0 +1,13 @@
+How to build on various platfoms:
+
+RedHat: 
+	EL3-WS (confirmed)
+	1) install and build jasper
+	2) ./configure
+	3) make
+
+Mandrake 10 (unconfirmed):
+	1) install and build jasper
+	2) ./configure --disable-arts
+	3) make
+
