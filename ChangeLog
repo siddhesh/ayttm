@@ -1,3 +1,7 @@
+* Sat Apr 05 2003 11:17 GMT [colin]	0.2.3-30
+- modules/jabber/libEBjabber.c
+s/everybuddy/ayttm/
+
 * Sat Apr 05 2003 10:51 GMT [colin]	0.2.3-29
 - modules/*toc
 do_error_dialog on connect problem

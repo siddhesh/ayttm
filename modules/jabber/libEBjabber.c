@@ -46,6 +46,7 @@ extern void JABBERChatRoomMessage(char *id, char *user, char *message);
 extern void JABBERChatRoomBuddyStatus(char *id, char *user, int offline);
 extern void JABBERDelBuddy(void *data);
 extern void JABBERConnected(void *data);
+extern void JABBERNotConnected(void *data);
 
 void j_on_state_handler(jconn conn, int state);
 void j_on_packet_handler(jconn conn, jpacket packet);
@@ -204,7 +205,7 @@ void jabber_callback_handler(void *data, int source, eb_input_condition cond)
     }
 }
 
-/* Functions called from the everybuddy jabber.c file */
+/* Functions called from the ayttm jabber.c file */
 
 JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	/* At this point, we don't care about host and port */
@@ -215,8 +216,8 @@ JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 
 	eb_debug(DBG_JBR,  "%s %s %i\n", handle, host, port);
 	/* Make sure the name is correct, support all formats
-	 * handle	become handle@host/everybuddy
-	 * handle@foo	becomes handle@foo/everybuddy
+	 * handle	become handle@host/ayttm
+	 * handle@foo	becomes handle@foo/ayttm
 	 * handle@foo/bar is not changed
 	 */
 
@@ -226,10 +227,10 @@ JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 			JABBERError("No jabber server specified!", "Cannot login");
 			return(NULL);
 		}
-		snprintf(jid, 256, "%s@%s/everybuddy", handle, host);
+		snprintf(jid, 256, "%s@%s/ayttm", handle, host);
 	}
 	else if(!strchr(handle, '/'))
-		snprintf(jid, 256, "%s/everybuddy", handle);
+		snprintf(jid, 256, "%s/ayttm", handle);
 
 	else
 		strncpy(jid, handle, 256);
@@ -248,6 +249,7 @@ JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	if(!JConn->conn) {
 		snprintf(buff, 4096, "Connection to the jabber server: %s failed!", host);
 		JABBERError(buff, "Jabber server not responding");
+		JABBERNotConnected(NULL);
 		free(JConn);
 		return(NULL);
 	}
@@ -349,7 +351,7 @@ int JABBER_AddContact(JABBER_Conn *JConn, char *handle) {
 			return(0);
 		}
 	}
-	/* For now, everybuddy does not understand resources */
+	/* For now, ayttm does not understand resources */
 	jid=strtok(jid, "/");
 	if(!jid)
 		jid=ojid;
@@ -419,7 +421,7 @@ int JABBER_Logout(JABBER_Conn *JConn) {
 int JABBER_ChangeState(JABBER_Conn *JConn, int state) {
 	xmlnode x,y;
 	/* Unique away states are possible, but not supported by
-	everybuddy yet.  status would hold that value */
+	ayttm yet.  status would hold that value */
 	char show[7]="", *status="";
 
 	eb_debug(DBG_JBR, "(%i)\n", state);
@@ -689,7 +691,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		}
 		else
 		{
-			/* For now, everybuddy does not understand resources */
+			/* For now, ayttm does not understand resources */
 			JIM.msg=buff;
 			eb_debug(DBG_JBR,  "JIM.msg: %s\n", JIM.msg);
 			eb_debug(DBG_JBR,  "Rendering message\n");
@@ -911,7 +913,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		status = JABBER_ONLINE;
 		type = xmlnode_get_attrib (packet->x, "type");
 		from = xmlnode_get_attrib (packet->x, "from");
-		/* For now, everybuddy does not understand resources */
+		/* For now, ayttm does not understand resources */
 		eb_debug(DBG_JBR,  "PRESENCE received type: %s from: %s\n", type, from);
 		x = xmlnode_get_tag (packet->x, "show");
 		if (x) {
@@ -1027,6 +1029,7 @@ void j_on_state_handler(jconn conn, int state) {
 		else if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
 			snprintf(buff, 4096, _("Connection to the jabber server %s failed!"), conn->user->server);
 			JABBERError(buff, _("Jabber server not responding"));
+			JABBERNotConnected(NULL);
 			jab_delete(JConn->conn);
 			JConn->conn=NULL;
 		}

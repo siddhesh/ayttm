@@ -78,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/05 10:00:33 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/05 11:17:50 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -249,6 +249,14 @@ static void eb_jabber_login( eb_local_account * account )
     jlad->activity = ay_activity_bar_add(buff, NULL, NULL);
     JABBER_Login(account->handle, jlad->password, 
 			    jabber_server,  atoi(jabber_port));
+}
+
+void JABBERNotConnected(void *data)
+{
+    eb_jabber_local_account_data * jlad;
+    jlad = (eb_jabber_local_account_data *)jabber_local_account->protocol_local_account_data;
+
+    ay_activity_bar_remove(jlad->activity);	
 }
 
 void JABBERConnected(void *data)
