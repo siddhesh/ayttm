@@ -12,6 +12,6 @@
 - recoding and filtering in chatrooms
 
 - connect should be non-blocking - implemented. 
-  Jabber and IRC need to use it.
+  IRC need to use it.
 
 - use our own linked list routines - partially done
