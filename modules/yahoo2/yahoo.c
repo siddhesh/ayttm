@@ -118,6 +118,7 @@ char pager_port[MAX_PREF_LEN]="5050";
 char filetransfer_host[MAX_PREF_LEN]="filetransfer.msg.yahoo.com";
 char filetransfer_port[MAX_PREF_LEN]="80";
 char webcam_host[MAX_PREF_LEN]="webcam.yahoo.com";
+char webcam_description[MAX_PREF_LEN]="";
 char webcam_port[MAX_PREF_LEN]="5100";
 char local_host[MAX_PREF_LEN]="";
 int conn_type=0;
@@ -128,8 +129,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.56 $",
-	"$Date: 2003/05/16 19:04:31 $",
+	"$Revision: 1.57 $",
+	"$Date: 2003/05/18 16:14:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1673,6 +1674,52 @@ static void ext_yahoo_webcam_invite(int id, char *who)
 	eb_do_dialog(buff, _("Yahoo Webcam Invitation"), eb_yahoo_webcam_invite_callback, wd);
 }
 
+static void eb_yahoo_close_webcam_window(gpointer data, int result)
+{
+	struct webcam_feed *wf = data;
+
+	if(result) {
+		ay_image_window_close(wf->image_window_tag);
+		_image_window_closed(wf->image_window_tag, wf);
+	}
+}
+
+static void ext_yahoo_webcam_closed(int id, char *who, int reason)
+{
+	struct webcam_feed *wf = NULL;
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *yla = ela->protocol_local_account_data;
+	YList *l;
+
+	char buff[1024];
+	snprintf(buff, sizeof(buff), _("%s, webcam connection closed. %s "), ela->handle, who);
+	switch(reason) {
+		case 1: strncat(buff, _("stopped broadcasting."), sizeof(buff) - strlen(buff));
+			break;
+		case 2: strncat(buff, _("cancelled viewing permission."), sizeof(buff) - strlen(buff));
+			break;
+		case 3: strncat(buff, _("declined you permission."), sizeof(buff) - strlen(buff));
+			break;
+		case 4: strncat(buff, _("does not have their webcam online."), sizeof(buff) - strlen(buff));
+			break;
+		default:strncat(buff, _("did something we don't know about."), sizeof(buff) - strlen(buff));
+			WARNING(("webcam close reason unknown %d", reason));
+			break;
+	}
+
+	strncat(buff, _("\nClose image window?"), sizeof(buff) - strlen(buff));
+
+	for(l = yla->webcams; l; l = y_list_next(l)) {
+		wf = l->data;
+		if(!strcmp(who, wf->who))
+			break;
+		wf = NULL;
+	}
+
+	eb_do_dialog(buff, _("Webcam connection closed"), eb_yahoo_close_webcam_window, wf);
+
+}
+
 static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
 {
 }
@@ -3113,6 +3160,7 @@ static void register_callbacks()
 	yc.ext_yahoo_webcam_invite_reply = ext_yahoo_webcam_invite_reply;
 	yc.ext_yahoo_webcam_data_request = ext_yahoo_webcam_data_request;
 	yc.ext_yahoo_webcam_viewer = ext_yahoo_webcam_viewer;
+	yc.ext_yahoo_webcam_closed = ext_yahoo_webcam_closed;
 
 	yahoo_register_callbacks(&yc);
 	

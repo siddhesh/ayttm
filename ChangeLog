@@ -1,10 +1,15 @@
-* Fri May 18 2003 13:34 GMT [colin]	0.3.1-pre5
+* Sun May 18 2003 16:00 GMT [philip]	0.3.1-pre6
+- modules/yahoo2/yahoo.c
+Display proper error messages when the remote user closes a webcam
+connection
+
+* Sun May 18 2003 13:34 GMT [colin]	0.3.1-pre5
 - src/chat_window.c
 Finish focus handling fixes with tabbed chat on
 - src/util.c
 Fix warning and off-by-one overflow
 
-* Fri May 18 2003 13:17 GMT [colin]	0.3.1-pre4
+* Sun May 18 2003 13:17 GMT [colin]	0.3.1-pre4
 - src/chat_window.c
 Fix focus handling with tabbed chat on
 

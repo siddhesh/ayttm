@@ -441,7 +441,7 @@ void YAHOO_CALLBACK_TYPE(ext_yahoo_system_message)(int id, char *msg);
  *	to transport then others. When image_size is 0 we can still receive
  *	a timestamp to stay in sync
  */
-void YAHOO_CALLBACK_TYPE(ext_yahoo_got_webcam_image)(int id, const char *who, 
+void YAHOO_CALLBACK_TYPE(ext_yahoo_got_webcam_image)(int id, const char * who,
 		unsigned char *image, unsigned int image_size, unsigned int real_size,
 		unsigned int timestamp);
 
@@ -469,6 +469,22 @@ void YAHOO_CALLBACK_TYPE(ext_yahoo_webcam_invite)(int id, char *from);
  *      accept - 0 (decline), 1 (accept)
  */
 void YAHOO_CALLBACK_TYPE(ext_yahoo_webcam_invite_reply)(int id, char *from, int accept);
+
+
+
+/*
+ * Name: ext_yahoo_webcam_closed
+ * 	Called when the webcam connection closed
+ * Params:
+ * 	id   - the id that identifies the server connection
+ * 	who  - the user who we where connected to
+ *      reason - reason why the connection closed
+ *	         1 = user stopped broadcasting
+ *	         2 = user cancelled viewing permission
+ *	         3 = user declines permission
+ *	         4 = user does not have webcam online
+ */
+void YAHOO_CALLBACK_TYPE(ext_yahoo_webcam_closed)(int id, char *who, int reason);
 
 
 
