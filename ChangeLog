@@ -1,3 +1,8 @@
+* Fri Apr 06 2003 13:53 GMT [edward]	0.2.3-22
+- src/image_window.c
+  src/print.c
+MINGW32 Port and include of globals.h to get DBG_CORE define
+
 * Fri Apr 05 2003 11:47 GMT [colin]	0.2.3-21
 - modules/workwizu/workwizu.c
 fix a segfault

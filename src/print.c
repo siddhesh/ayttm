@@ -33,6 +33,9 @@
 #include "print.h"
 #include "dialog.h"
 #include "prefs.h"
+#ifdef __MINGW32__
+#define snprintf _snprintf
+#endif
 
 
 static void print_do_print(char * value, void * data)

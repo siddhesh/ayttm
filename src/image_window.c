@@ -1,6 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #   include <config.h>
 #endif
+#include "globals.h"
 
 #ifndef HAVE_GDK_PIXBUF
 #include "debug.h"
