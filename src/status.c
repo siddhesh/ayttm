@@ -64,6 +64,11 @@
 #include "pixmaps/logoff_icon.xpm"
 
 
+/* define to add debug stuff to 'Help' Menu */
+/*
+#define	ADD_DEBUG_TO_MENU	1
+*/
+
 void update_contact_list();
 
 enum {
@@ -628,11 +633,13 @@ static void launch_group_chat( GtkWidget * widget, gpointer userdata )
 	open_join_chat_window();
 }
 
+#if ADD_DEBUG_TO_MENU
 static void ay_dump_structures_cb ( GtkWidget * widget, gpointer userdata )
 {
 	ay_dump_cts();	
 	ay_dump_elas();	
 }
+#endif
 
 /* Be sure to free the menu items in the status menu */
 static void eb_status_remove(GtkContainer *container,  GtkWidget * widget, gpointer stats )
@@ -1867,7 +1874,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
 #endif
 	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL }
-#if 0
+#if ADD_DEBUG_TO_MENU
 	,
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
 	{ N_("/Help/Dump structures"),NULL, ay_dump_structures_cb, 0, NULL }

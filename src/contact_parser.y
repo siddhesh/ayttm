@@ -17,19 +17,6 @@
 	static grouplist * cur_group = NULL;
 	extern int contactlex();
 
-	/*
-	static int group_cmp(const void * a, const void * b)
-	{
-		const grouplist *ga=(grouplist *)a, *gb=(grouplist *)b;
-		return strcasecmp(ga->name, gb->name);
-	}
-	*/
-	
-	static int contact_cmp(const void * a, const void * b)
-	{
-		const struct contact *ca=(struct contact *)a, *cb=(struct contact *)b;
-		return strcasecmp(ca->nick, cb->nick);
-	}
 
 	static int account_cmp(const void * a, const void * b)
 	{

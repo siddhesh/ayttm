@@ -30,6 +30,7 @@
 #include "intl.h"
 #include "select-keys.h"
 #include "debug.h"
+#include "dialog.h"
 #include "gtk/gtkutils.h"
 
 #define DIM(v) (sizeof(v)/sizeof((v)[0]))
