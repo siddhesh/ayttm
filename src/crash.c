@@ -205,7 +205,7 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	version = ay_get_last_version();
 	if (version && strcmp(version, VERSION))
 		label1 = gtk_label_new
-			(g_strdup_printf(_("%s.\nPlease DO NOT file a bugreport, as a newer version (%s) of ayttm is available."),
+			(g_strdup_printf(_("%s.\nA newer version (%s) is available; please do not file a bugreport before upgrading."),
 				text, version));
 	else
 		label1 = gtk_label_new
