@@ -1456,7 +1456,8 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 		set_tab_normal (remote_contact);
 
 		current = find_tabbed_chat_window();
-		GET_CHAT_WINDOW(current);
+		if (current)
+			GET_CHAT_WINDOW(current);
 		gtk_signal_handler_block_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
                                          chat_notebook_switch_callback, remote_contact->chatwindow);
 		if (current && current!=remote_contact->chatwindow) {

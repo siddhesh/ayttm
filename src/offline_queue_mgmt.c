@@ -184,7 +184,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 					else
 						remove_account(ea);
 				}
-				else
+				else if (CAN(ea, del_user))
 					RUN_SERVICE(ea)->del_user(ea);
 			}
 		} else {

@@ -1,3 +1,11 @@
+* Wed May 21 2003 15:20 GMT [colin]	0.3.1-pre12
+- modules/jabber/jabber.c
+Try to fix bug 740891 (sig 11)
+
+* Wed May 21 2003 15:20 GMT [colin]	0.3.1-pre11
+- src/chat_window.c
+Try to fix bug 740664 (sig 11)
+
 * Mon May 19 2003 21:41 GMT [edward]	0.3.1-pre10
 - src/gtk/gtkutils.c
 Reverted back because this did not work.
@@ -15,6 +23,7 @@ ifdef out code that causes flashing and update Inno Setup to ship modules
 properly
 
 * Sun May 18 2003 22:29 GMT [colin]	0.3.1-pre7
+>>>>>>> 1.383
 - modules/aycryption/aycryption.c
 Warn about msn nastiness
 
