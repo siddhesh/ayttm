@@ -25,6 +25,10 @@ To Install MinGW and necessary libraries.
 	compilation but you will need this as well to compile AYTTM. For
 	compilation of AYTTM please install pkg-config.exe.
 
+	You will also need the XPM packages:
+	xpm-nox-4.0.3-20020617.zip  
+	xpm-nox-dev-4.0.3-20020112.zip
+
 To BUILD AYTTM:
 
 bison

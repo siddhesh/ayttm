@@ -1,3 +1,9 @@
+* Mon Jun 28 2004 14:56 GMT [edward] 0.4.6-18
+- Fixed bug #929347
+  src/utils.c
+  src/externs.h
+  modules/utility/notes.c
+
 * Sun Jun 27 2004 16:20 GMT [tnhashmi]  0.4.6-17
 - fixed yahoo auth after protocol change
 

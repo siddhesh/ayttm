@@ -65,6 +65,9 @@
 #define NAME_MAX 4096
 #endif
 
+/* bug 929347 */
+LList *nick_modify_utility=NULL;
+
 int clean_pid(void * dummy)
 {
 #ifndef __MINGW32__
@@ -1559,6 +1562,8 @@ LList * get_groups()
 
 void rename_nick_log(char *oldgroup, char *oldnick, char *newgroup, char *newnick)
 {
+	/* bug 929347 */
+        LList * utility_walk;
 	char oldnicklog[255], newnicklog[255], buff[NAME_MAX];
 	FILE *test = NULL;
 	make_safe_filename(buff, oldnick, oldgroup);
@@ -1597,6 +1602,13 @@ void rename_nick_log(char *oldgroup, char *oldnick, char *newgroup, char *newnic
 		rename(oldnicklog, newnicklog);
 		eb_debug(DBG_CORE,"Renamed log from %s to %s\n", oldnicklog, newnicklog);
 	}
+	/* bug 929347 */
+	for(utility_walk = nick_modify_utility; utility_walk; utility_walk=utility_walk->next) {
+                void (*ifilter)(char *onick, char *nnick);
+
+                ifilter=utility_walk->data;
+                ifilter(oldnick,newnick);
+        }
 }
 
 eb_account *find_account_for_protocol(struct contact *c, int service) 

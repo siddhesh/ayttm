@@ -36,6 +36,8 @@
 #include "plugin_api.h"
 #include "prefs.h"
 #include "platform_defs.h"
+/* 929347 */
+#include "externs.h"
 
 #ifndef NAME_MAX
 #define NAME_MAX 512
@@ -72,8 +74,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Notes", 
 	"Store notes about your contacts and buddies", 
-	"$Revision: 1.8 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.9 $",
+	"$Date: 2004/06/28 14:55:36 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -85,6 +87,37 @@ static void *notes_tag1=NULL;
 static void *notes_tag2=NULL;
 
 unsigned int module_version() {return CORE_VERSION;}
+
+/* 929347 */
+static void rename_notes(char *onick, char *nnick)
+{
+	char cmd1[1024];
+	char cmd2[1024];
+#ifndef __MINGW32__
+	pid_t pid;
+#endif
+	eb_debug(DBG_MOD, "> Rename %s to %s",onick,nnick);
+	snprintf(cmd1, 1024, "%s/%s", notes_dir, onick);
+	snprintf(cmd2, 1024, "%s/%s", notes_dir, nnick);
+#ifndef __MINGW32__
+	pid = fork();
+	if (pid == 0) {
+		char *args[4];
+		int e;
+
+		args[0] = strdup("mv");
+		args[1] = strdup(cmd1);
+		args[2] = strdup(cmd2);
+		args[3] = NULL;
+		e = execvp(args[0], args);
+		free(args[0]);
+		free(args[1]);
+		free(args[2]);
+		_exit(0);
+	}
+#endif
+	eb_debug(DBG_MOD, "<\n");
+}
 
 static int plugin_init()
 {
@@ -111,6 +144,8 @@ static int plugin_init()
 	il->name = "notes_editor";
 	il->label = _("Notes Editor:");
 	il->type = EB_INPUT_ENTRY;
+	/* 929347 */
+	nick_modify_utility = l_list_append(nick_modify_utility,&rename_notes);
 	return(0);
 }
 
@@ -134,6 +169,8 @@ static int plugin_finish()
 		eb_debug(DBG_MOD, "Unable to remove Notes menu item from chat window menu!\n");
 		return(-1);
 	}
+	/* 929347 */
+	nick_modify_utility = l_list_remove(nick_modify_utility,&rename_notes);
 	return(0);
 }
 
