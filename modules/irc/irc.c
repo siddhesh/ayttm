@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.21 $",
-	"$Date: 2003/06/04 22:07:20 $",
+	"$Revision: 1.22 $",
+	"$Date: 2003/06/14 11:32:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1477,8 +1477,7 @@ static void irc_del_user( eb_account * account )
 		if (ela->service_id == SERVICE_INFO.protocol_id)
 		{
 			irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
-
-			if (!strcmp(ila->server, ia->server))
+			if (ia && ia->server && !strcmp(ila->server, ia->server))
 			{
 				ila->friends = l_list_remove( ila->friends, account );
 			}
