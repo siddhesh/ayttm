@@ -2180,19 +2180,19 @@ void eb_read_prefs()
 		char buff[1024];
 		// Base this in WinVer? Nah..
 		char *base_dir = "\\Program Files\\ayttm\\";
-		g_snprintf(buff, 1024, "%s%s",config_dir,MODULE_DIR);
+		g_snprintf(buff, 1024, "%s%s",base_dir,MODULE_DIR);
 		cSetLocalPref("modules_path", buff);
-		g_snprintf(buff, 1024, "%s%s",config_dir, BuddyArriveDefault);
+		g_snprintf(buff, 1024, "%s%s",base_dir, BuddyArriveDefault);
 		cSetLocalPref("BuddyArriveFilename", buff);
-		g_snprintf(buff, 1024, "%s%s",config_dir, BuddyLeaveDefault);
+		g_snprintf(buff, 1024, "%s%s",base_dir, BuddyLeaveDefault);
 		cSetLocalPref("BuddyAwayFilename", buff);
-		g_snprintf(buff, 1024, "%s%s",config_dir, BuddyLeaveDefault);
+		g_snprintf(buff, 1024, "%s%s",base_dir, BuddyLeaveDefault);
 		cSetLocalPref("BuddyLeaveFilename", buff);
-		g_snprintf(buff, 1024, "%s%s",config_dir, ReceiveDefault);
+		g_snprintf(buff, 1024, "%s%s",base_dir, ReceiveDefault);
 		cSetLocalPref("FirstMsgFilename", buff);
-		g_snprintf(buff, 1024, "%s%s",config_dir, ReceiveDefault);
+		g_snprintf(buff, 1024, "%s%s",base_dir, ReceiveDefault);
 		cSetLocalPref("ReceiveFilename", buff);
-		g_snprintf(buff, 1024, "%s%s",config_dir, SendDefault);
+		g_snprintf(buff, 1024, "%s%s",base_dir, SendDefault);
 		cSetLocalPref("SendFilename", buff);
 	}
 #else
