@@ -148,12 +148,12 @@ class ay_prefs_window_panel
 	protected:
 		GtkWidget	*m_top_vbox;
 		GtkWidget	*m_parent_window;
+		GtkWidget	*m_parent;
 	
 	private:
 		void	AddTopFrame( const char *in_text );
 		
 		const char					*m_name;
-		GtkWidget					*m_parent;
 		int							m_notebook_id;
 		struct prefs				*m_prefs;
 		ay_prefs_window::ePanelID	m_panel_id;
@@ -421,13 +421,20 @@ class ay_module_panel : public ay_prefs_window_panel
 		
 		virtual void	Build( GtkWidget *inParent );
 		virtual void	Apply( void );
+
+	private:	// Gtk callbacks
+		static void		s_load_module( GtkWidget *widget, void *data );
+		static void		s_unload_module( GtkWidget *widget, void *data );
 		
 	private:
 		static void		AddInfoRow( GtkWidget *inTable, int inRow, const char *inHeader, const char *inInfo );
 
 		void			RenderModulePrefs( void );
+		void			LoadModule( void );
+		void			UnloadModule( void );
 		
-		t_module_pref &m_prefs;
+		t_module_pref	&m_prefs;
+		GtkWidget		*m_top_container;	///< this holds all the widgets to be reset when the module is reloaded
 };
 
 #ifdef __cplusplus
@@ -2121,13 +2128,21 @@ void	ay_utilities_panel::Build( GtkWidget *inParent )
 
 ay_module_panel::ay_module_panel( const char *inTopFrameText, t_module_pref &inPrefs )
 :	ay_prefs_window_panel( inTopFrameText ),
-	m_prefs( inPrefs )
+	m_prefs( inPrefs ),
+	m_top_container( NULL )
 {
 }
 
 // Build
 void	ay_module_panel::Build( GtkWidget *inParent )
 {
+	if ( m_top_container != NULL )
+		gtk_widget_destroy( m_top_container );
+		
+	m_top_container = gtk_vbox_new( FALSE, 0 );
+	gtk_widget_show( m_top_container );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_top_container, TRUE, TRUE, 0 );
+	
 	const bool	has_error = (m_prefs.status_desc != NULL) && (m_prefs.status_desc[0] != '\0');
 	
 	GtkWidget	*info_frame = gtk_frame_new( _( "Info" ) );
@@ -2144,14 +2159,15 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 	AddInfoRow( info_table, row++, _( "Version:" ), m_prefs.version );
 	AddInfoRow( info_table, row++, _( "Date:" ), m_prefs.date );
 	AddInfoRow( info_table, row++, _( "Path:" ), m_prefs.file_name );
+	AddInfoRow( info_table, row++, _( "Status:" ), m_prefs.loaded_status );
 	
-	gtk_box_pack_start( GTK_BOX(m_top_vbox), info_frame, FALSE, FALSE, 5 );
+	gtk_box_pack_start( GTK_BOX(m_top_container), info_frame, FALSE, FALSE, 5 );
 	
 	GtkWidget	*spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
 	gtk_widget_set_usize( spacer, -1, 5 );
 	
-	gtk_box_pack_start( GTK_BOX(m_top_vbox), spacer, FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 
 	if ( has_error )
 	{
@@ -2179,7 +2195,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		
 		gtk_container_add( GTK_CONTAINER(frame), hbox );
 
-		gtk_box_pack_start( GTK_BOX(m_top_vbox), frame, FALSE, FALSE, 0 );
+		gtk_box_pack_start( GTK_BOX(m_top_container), frame, FALSE, FALSE, 0 );
 	}
 	else
 	{	
@@ -2192,27 +2208,51 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 			GtkWidget	*label = gtk_label_new( NULL );
 			gtk_widget_show( label );
 
-			GString		*labelText = g_string_new( _("[There are no preferences for ") );
-
-			if ( m_prefs.service_name != NULL )
-			{
-				labelText = g_string_append( labelText, m_prefs.service_name );
-			}
+			const char	*name = m_prefs.service_name;
+			
+			if ( name == NULL )
+				name = m_prefs.brief_desc;
+			
+			GString		*labelText = NULL;
+			
+			labelText = g_string_new( _("[The module '") );
+			labelText = g_string_append( labelText, name );
+			
+			if ( !m_prefs.is_loaded )
+				labelText = g_string_append( labelText, _("' is not loaded]") );
 			else
-			{
-				labelText = g_string_append( labelText, "'" );
-				labelText = g_string_append( labelText, m_prefs.brief_desc );
-				labelText = g_string_append( labelText, "'" );
-			}
-
-			labelText = g_string_append( labelText, "]" );
+				labelText = g_string_append( labelText, _("' has no preferences]") );
 
 			gtk_label_set_text( GTK_LABEL(label), labelText->str );
-			gtk_box_pack_start( GTK_BOX(m_top_vbox), GTK_WIDGET(label), FALSE, FALSE, 2 );
+			gtk_box_pack_start( GTK_BOX(m_top_container), GTK_WIDGET(label), FALSE, FALSE, 2 );
 
 			g_string_free( labelText, TRUE );
 		}
 	}
+	
+	GtkWidget	*unload_button = gtkut_create_label_button( _( "Unload Module" ), GTK_SIGNAL_FUNC(s_unload_module), this );
+	gtk_container_set_border_width( GTK_CONTAINER(unload_button), 5 );
+	gtk_widget_set_sensitive( unload_button, m_prefs.is_loaded );
+	
+	GtkWidget	*load_button = gtkut_create_label_button( _( "Load Module" ), GTK_SIGNAL_FUNC(s_load_module), this );
+	gtk_container_set_border_width( GTK_CONTAINER(load_button), 5 );
+	gtk_widget_set_sensitive( load_button, !m_prefs.is_loaded );
+	
+	GtkWidget	*button_hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( button_hbox );
+	gtk_box_pack_start( GTK_BOX(button_hbox), unload_button, FALSE, FALSE, 0 );
+	gtk_box_pack_end( GTK_BOX(button_hbox), load_button, FALSE, FALSE, 0 );
+	
+	gtk_box_pack_end( GTK_BOX(m_top_container), button_hbox, FALSE, FALSE, 0 );
+	
+	GtkWidget	*separator = gtk_hseparator_new();
+	gtk_widget_show( separator );
+	gtk_box_pack_end( GTK_BOX(m_top_container), separator, FALSE, FALSE, 0 );
+	
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_box_pack_end( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 }
 
 // Apply
@@ -2281,7 +2321,7 @@ void	ay_module_panel::RenderModulePrefs( void )
 					else
 						item_label = the_list->widget.checkbox.name;
 						
-					gtkut_button( item_label, the_list->widget.checkbox.value, m_top_vbox );
+					gtkut_button( item_label, the_list->widget.checkbox.value, m_top_container );
 					the_list->widget.checkbox.saved_value = *(the_list->widget.checkbox.value);
 				}
 				break;
@@ -2310,7 +2350,7 @@ void	ay_module_panel::RenderModulePrefs( void )
 					gtk_entry_set_text( GTK_ENTRY(widget), the_list->widget.entry.value );
 					gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
 
-					gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
+					gtk_box_pack_start( GTK_BOX(m_top_container), hbox, FALSE, FALSE, 0 );
 				}
 				break;
 			
@@ -2321,4 +2361,43 @@ void	ay_module_panel::RenderModulePrefs( void )
 
 		the_list = the_list->next;
 	}
+}
+
+// LoadModule
+void	ay_module_panel::LoadModule( void )
+{
+	int	err = ayttm_prefs_load_module( &m_prefs );
+	
+	if ( err == 0 )
+		Build( m_parent );
+}
+
+// UnloadModule
+void	ay_module_panel::UnloadModule( void )
+{
+	int	err = ayttm_prefs_unload_module( &m_prefs );
+	
+	if ( err == 0 )
+		Build( m_parent );
+}
+
+////
+// ay_module_panel callbacks
+
+// s_load_module
+void	ay_module_panel::s_load_module( GtkWidget *widget, void *data )
+{
+	ay_module_panel	*the_panel = reinterpret_cast<ay_module_panel *>( data );
+	assert( the_panel != NULL );
+
+	the_panel->LoadModule();
+}
+
+// s_unload_module
+void	ay_module_panel::s_unload_module( GtkWidget *widget, void *data )
+{
+	ay_module_panel	*the_panel = reinterpret_cast<ay_module_panel *>( data );
+	assert( the_panel != NULL );
+
+	the_panel->UnloadModule();
 }

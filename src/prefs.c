@@ -40,6 +40,7 @@
 #include "libproxy/libproxy.h"
 #include "plugin.h"
 #include "prefs.h"
+#include "messages.h"
 
 #include "ui_prefs_window.h"
 
@@ -289,6 +290,57 @@ static void	s_destroy_input_list( input_list *inList )
 	}
 }
 
+static void	s_reset_module_info( t_module_pref *outModulePref )
+{
+	assert( outModulePref != NULL );
+	
+	if ( outModulePref->brief_desc != NULL )
+		free( (void *)outModulePref->brief_desc );
+		
+	if ( outModulePref->version != NULL )
+		free( (void *)outModulePref->version );
+		
+	if ( outModulePref->date != NULL )
+		free( (void *)outModulePref->date );
+		
+	if ( outModulePref->file_name != NULL )
+		free( (void *)outModulePref->file_name );
+		
+	if ( outModulePref->status_desc != NULL )
+		free( (void *)outModulePref->status_desc );
+		
+	if ( outModulePref->service_name != NULL )
+		free( (void *)outModulePref->service_name );
+	
+	s_destroy_input_list( outModulePref->pref_list );
+	outModulePref->pref_list = NULL;
+}
+
+static void	s_fill_in_module_pref_info( t_module_pref *outModulePref, const eb_PLUGIN_INFO *inPluginInfo )
+{
+	assert( outModulePref != NULL );
+	assert( inPluginInfo != NULL );
+	
+
+	s_reset_module_info( outModulePref );
+	
+	outModulePref->module_type = PLUGIN_TYPE_TXT[inPluginInfo->pi.type-1];
+	outModulePref->brief_desc = s_strdup_allow_null( inPluginInfo->pi.brief_desc );
+	outModulePref->loaded_status = PLUGIN_STATUS_TXT[inPluginInfo->status];
+	/* In the following lines, the space between "$" and "Revision: " and
+		"$" and "Date: " is intentional.  We cannot simply put them together
+		otherwise cvs inserts the revison and date!
+	*/	
+	outModulePref->version = s_strdup_strip( "$" "Revision: ", " $", inPluginInfo->pi.version );
+	outModulePref->date = s_strdup_strip( "$" "Date: ", " $", inPluginInfo->pi.date );
+	outModulePref->file_name = s_strdup_allow_null( inPluginInfo->name );
+	outModulePref->status_desc = s_strdup_allow_null( inPluginInfo->status_desc );
+	outModulePref->service_name = s_strdup_allow_null( inPluginInfo->service );
+	
+	outModulePref->is_loaded = (inPluginInfo->status == PLUGIN_LOADED);
+	
+	outModulePref->pref_list = s_copy_input_list( inPluginInfo->pi.prefs );
+}
 
 static LList	*s_create_module_prefs_list( void )
 {
@@ -306,20 +358,8 @@ static LList	*s_create_module_prefs_list( void )
 		
 		pref_info = calloc( 1, sizeof( t_module_pref ) );
 
-		pref_info->module_type = PLUGIN_TYPE_TXT[plugin_info->pi.type-1];
-		pref_info->brief_desc = s_strdup_allow_null( plugin_info->pi.brief_desc );
-		pref_info->loaded_status = PLUGIN_STATUS_TXT[plugin_info->status];
-		/* In the following lines, the space between "$" and "Revision: " and
-			"$" and "Date: " is intentional.  We cannot simply put them together
-			otherwise cvs inserts the revison and date!
-		*/	
-		pref_info->version = s_strdup_strip( "$" "Revision: ", " $", plugin_info->pi.version );
-		pref_info->date = s_strdup_strip( "$" "Date: ", " $", plugin_info->pi.date );
-		pref_info->file_name = s_strdup_allow_null( plugin_info->name );
-		pref_info->status_desc = s_strdup_allow_null( plugin_info->status_desc );
-		pref_info->service_name = s_strdup_allow_null( plugin_info->service );
-		pref_info->pref_list = s_copy_input_list( plugin_info->pi.prefs );
-			
+		s_fill_in_module_pref_info( pref_info, plugin_info );
+				
 		module_prefs_list = l_list_append( module_prefs_list, pref_info );
 	}
 	
@@ -335,15 +375,8 @@ static void	s_destroy_module_prefs_list( LList *io_module_prefs_list )
 		
 		if ( pref_info == NULL )
 			continue;
-			
-		free( (void *)pref_info->brief_desc );
-		free( (void *)pref_info->version );
-		free( (void *)pref_info->date );
-		free( (void *)pref_info->file_name );
-		free( (void *)pref_info->status_desc );
-		free( (void *)pref_info->service_name );
-		
-		s_destroy_input_list( pref_info->pref_list );
+
+		s_reset_module_info( pref_info );	
 	}
 	
 	l_list_free( io_module_prefs_list );
@@ -905,6 +938,46 @@ t_module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, con
 		return( NULL );
 		
 	return( search_result->data );
+}
+
+int		ayttm_prefs_unload_module( t_module_pref *ioPrefs )
+{
+	eb_PLUGIN_INFO	*plugin_info = NULL;
+	int				err = 0;
+	
+	err = unload_module_full_path( ioPrefs->file_name );
+	
+	if ( err != 0 )
+		return( err );
+	
+	plugin_info = FindPluginByName( ioPrefs->file_name );
+	
+	if ( plugin_info == NULL )	
+		return( -1 );
+
+	s_fill_in_module_pref_info( ioPrefs, plugin_info );
+	
+	return( 0 );
+}
+
+int		ayttm_prefs_load_module( t_module_pref *ioPrefs )
+{
+	eb_PLUGIN_INFO	*plugin_info = NULL;
+	int				err = 0;
+	
+	err = load_module_full_path( ioPrefs->file_name );
+	
+	if ( err != 0 )
+		return( err );
+	
+	plugin_info = FindPluginByName( ioPrefs->file_name );
+	
+	if ( plugin_info == NULL )	
+		return( -1 );
+
+	s_fill_in_module_pref_info( ioPrefs, plugin_info );
+	
+	return( 0 );
 }
 
 void	ayttm_prefs_apply( struct prefs *inPrefs )

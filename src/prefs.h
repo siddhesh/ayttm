@@ -47,6 +47,8 @@ typedef struct
 	const char		*status_desc;
 	const char		*service_name;
 	
+	int				is_loaded;
+	
 	input_list		*pref_list;
 } t_module_pref;
 
@@ -144,6 +146,8 @@ void	ayttm_prefs_write( void );
 
 void			ayttm_prefs_show_window( void );
 t_module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName );
+int				ayttm_prefs_unload_module( t_module_pref *ioPrefs );
+int				ayttm_prefs_load_module( t_module_pref *ioPrefs );
 void			ayttm_prefs_apply( struct prefs *inPrefs );
 void			ayttm_prefs_cancel( struct prefs *inPrefs );
 
