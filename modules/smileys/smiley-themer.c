@@ -59,8 +59,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.2 $",
-	"$Date: 2003/05/08 19:02:02 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/05/08 19:11:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -245,6 +245,8 @@ static void reset_smileys(ebmCallbackData *data)
 	/* Set smileys back to default regardless of what they are now */
 	smileys = eb_smileys();
 
+	strcpy(last_selected, "");
+
 	eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
 	theme->menu_tag=eb_add_menu_item(theme->name, EB_IMPORT_MENU, enable_smileys, ebmIMPORTDATA, theme);
 }
@@ -258,6 +260,8 @@ static void enable_smileys(ebmCallbackData *data)
 
 	smileys = theme->smileys;
 
+	strncpy(last_selected, theme->name, sizeof(last_selected)-1);
+
 	eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
 	theme->menu_tag=eb_add_menu_item("Default Smilies", EB_IMPORT_MENU, reset_smileys, ebmIMPORTDATA, theme);
 }
@@ -266,6 +270,7 @@ static void load_themes()
 {
 	struct dirent *entry;
 	DIR *theme_dir = opendir(smiley_directory);
+	struct smiley_theme *selected=NULL;
 	if(!theme_dir)
 		return;
 
@@ -290,8 +295,14 @@ static void load_themes()
 		ay_add_smiley_set( theme->name, theme->smileys );
 
 		themes = l_list_prepend(themes, theme);
+
+		if(!strcmp(last_selected, theme->name))
+			selected = theme;
 	}
 
 	closedir(theme_dir);
+
+	if(selected)
+		enable_smileys((ebmCallbackData *)selected);
 }
 
