@@ -1,3 +1,7 @@
+* Tue May  6 2003 14:53 GMT [philip]	0.3.0-145
+- configure.ac
+build modules/aycryption/Makefile as well - I thought it was already here
+
 * Tue May  6 2003 13:39 GMT [colin]	0.3.0-144
 - modules/msn2/msn.C
 use dummy contacts as long as noone chose to add the contact
