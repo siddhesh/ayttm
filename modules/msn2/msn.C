@@ -154,8 +154,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.37 $",
-	"$Date: 2003/04/29 08:32:01 $",
+	"$Revision: 1.38 $",
+	"$Date: 2003/04/29 12:13:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -493,8 +493,6 @@ typedef struct _eb_msn_local_account_data
 	int listsyncing;
 } eb_msn_local_account_data;
 
-static eb_local_account *msn_local_account;
-
 class pending_invitation : public llist_data
 {
   public:
@@ -605,7 +603,6 @@ static void eb_msn_login( eb_local_account * account )
 	
 	account->connecting = 1;
 	
-	msn_local_account = account;
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
 	char buff[1024];
 	snprintf(buff, sizeof(buff), _("Logging in to MSN account: %s"), account->handle);
@@ -657,7 +654,7 @@ static void eb_msn_logout( eb_local_account * account )
 	mlad->activity_tag = mlad->connect_tag = 0;
 	eb_debug(DBG_MSN, "Logging out\n");
 	for (l = mlad->msn_contacts; l != NULL && l->data != NULL; l = l->next) {
-		eb_account * ea = (eb_account *)find_account_by_handle((char *)l->data, SERVICE_INFO.protocol_id);
+		eb_account * ea = (eb_account *)find_account_with_ela((char *)l->data, account);
 		if (ea) {
 			eb_msn_account_data * mad = (eb_msn_account_data *)ea->protocol_account_data;
 			mad->status=MSN_OFFLINE;
@@ -980,7 +977,7 @@ static void eb_msn_authorize_callback( gpointer data, int response )
   ela = cb_data->ela;
   eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 
-  eb_account *ac = find_account_by_handle(username,SERVICE_INFO.protocol_id);
+  eb_account *ac = find_account_with_ela(username, ela);
 
   if (!mlad) {
 	  eb_debug(DBG_MSN, "leaving authorize_callback due to mlad==NULL\n");
@@ -1373,9 +1370,9 @@ static void eb_msn_get_info( eb_local_account * reciever, eb_account * sender)
 void ext_got_friend(msnconn *conn, char *name, char *groups) 
 {
 	char *group = NULL, groupname[255];
-	eb_account *ea = find_account_by_handle(name, SERVICE_INFO.protocol_id);
 	eb_local_account *ela = (eb_local_account *)conn->ext_data;
 	if(!ela) return;
+	eb_account *ea = find_account_with_ela(name, ela);
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 
 	if (ea)
@@ -1456,6 +1453,7 @@ typedef struct _movecb_data
 	char oldgr[255];
 	char newgr[255];
 	char handle[255];
+	eb_local_account *ela;
 } movecb_data;
 
 static int finish_group_move(movecb_data *tomove);
@@ -1494,6 +1492,7 @@ static void eb_msn_real_change_group(eb_local_account *ela, eb_account * ea, con
 		strncpy(tomove->handle, ea->handle, sizeof(tomove->handle));
 		strncpy(tomove->newgr, int_new_group, sizeof(tomove->newgr));
 		strncpy(tomove->oldgr, int_old_group, sizeof(tomove->oldgr));
+		tomove->ela = ela;
 		eb_timeout_add(1000, (eb_timeout_function)finish_group_move, (gpointer)tomove);
 		return;
 	} 
@@ -1519,9 +1518,10 @@ static int finish_group_move(movecb_data *tomove)
 	char *ngroup = tomove->newgr;
 	char *ogroup = tomove->oldgr;
 	char *handle = tomove->handle;
-	eb_account *ea = find_account_by_handle(handle, SERVICE_INFO.protocol_id);
+	eb_local_account *ela = tomove->ela;
+	
+	eb_account *ea = find_account_with_ela(handle, ela);
 	if (!ea) {eb_debug(DBG_MSN, "ea is NULL !!\n"); return 0;}
-	eb_local_account *ela = ea->ela;
 	if(!ela) { eb_debug(DBG_MSN, "ea->ela is NULL !!\n"); return 0; }
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	if (ela && ea && ogroup && ngroup) {
@@ -1891,7 +1891,9 @@ void ext_got_info(msnconn * conn, syncinfo * info)
 
   for( ; existing != NULL && existing->data != NULL; existing = existing->next) {
 	 char *cnt = (char*) existing->data;
-	 eb_account *ea = find_account_by_handle(cnt, SERVICE_INFO.protocol_id);
+	 eb_account *ea = find_account_with_ela(cnt, ela);
+	 if (!ea)
+		 ea = find_account_by_handle(cnt, SERVICE_INFO.protocol_id); /* get orphaned */
 	 if (ea && strcmp(ea->account_contact->group->name, _("Ignore"))
 	 && (ea->ela == ela || ea->ela == NULL)) {
 		 if (!is_on_list(cnt,info->al)) {
@@ -1963,7 +1965,7 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
     int state=0;
     char *tmp = Utf8ToStr(friendlyname);
     state=get_status_num(status);
-    ea = find_account_by_handle(buddy, SERVICE_INFO.protocol_id);
+    ea = find_account_with_ela(buddy, ela);
     if (ea) {
         mad = (eb_msn_account_data *)ea->protocol_account_data;
 	if (!strcmp(buddy, ea->account_contact->nick)) {	
@@ -1997,7 +1999,8 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
 
 void ext_buddy_offline(msnconn * conn, char * buddy)
 {
-	eb_account * ea = (eb_account *)find_account_by_handle(buddy, SERVICE_INFO.protocol_id);
+	eb_local_account *ela = (eb_local_account *)conn->ext_data;
+	eb_account * ea = (eb_account *)find_account_with_ela(buddy, ela);
 	eb_msn_account_data * mad = NULL;
 
 	eb_debug(DBG_MSN, "%s is now offline\n", buddy);
@@ -2085,7 +2088,7 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
       
       ecr->fellows = NULL;
       ecr->connected = FALSE;
-      ecr->local_user = msn_local_account;
+      ecr->local_user = (eb_local_account *)conn->ext_data;
       ecr->protocol_local_chat_room_data=conn;
 
       eb_join_chat_room(ecr);
@@ -2095,7 +2098,7 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
       while(l!=NULL)
       {
 	eb_account *acc = NULL;
-	acc = find_account_by_handle(((char_data *)l->data)->c,SERVICE_INFO.protocol_id);
+	acc = find_account_with_ela(((char_data *)l->data)->c, ecr->local_user);
         eb_chat_room_buddy_arrive(ecr, acc?acc->account_contact->nick:((char_data *)l->data)->c, 
 				       ((char_data *)l->data)->c);
         l=l->next;
@@ -2139,7 +2142,7 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
     }
   } else {
     eb_account *acc = NULL;
-    acc = find_account_by_handle(username, SERVICE_INFO.protocol_id);	 
+    acc = find_account_with_ela(username, ecr->local_user);	 
     eb_debug(DBG_MSN, "Ordinary chat arrival\n");
     eb_chat_room_buddy_arrive(ecr, acc ? acc->account_contact->nick:username, username);
   }
@@ -2149,7 +2152,8 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
 
 void ext_user_left(msnconn * conn, char * username)
 {
-  eb_account * ea = find_account_by_handle(username, SERVICE_INFO.protocol_id);
+  eb_local_account *ela = (eb_local_account *)conn->ext_data;	
+  eb_account * ea = find_account_with_ela(username, ela);
   eb_chat_room * ecr=eb_msn_get_chat_room(conn);
 
   if(ecr!=NULL)
@@ -2196,15 +2200,12 @@ void ext_got_IM(msnconn * conn, char * username, char * friendlyname, message * 
     if(!ela)
     {
         eb_debug(DBG_MSN, "Unable to find local account by handle: %s\n", local_account_name);
-        ela=msn_local_account;
+	return;
     }
     /* Do we need to set our state? */
-    sender = find_account_by_handle(username, SERVICE_INFO.protocol_id);
+    sender = find_account_with_ela(username, ela);
     if (sender == NULL) {
         eb_debug(DBG_MSN, "Cannot find sender: %s, calling AddHotmail\n", username);
-//        AddHotmail(im->sender, &newHandle);
-//        sender = find_account_by_handle(newHandle, SERVICE_INFO.protocol_id);
-//        free(newHandle);
     }
     if (sender == NULL) {
         eb_debug(DBG_MSN, "Still cannot find sender: %s, calling add_unknown\n", username);
@@ -2358,7 +2359,8 @@ void ext_new_mail_arrived(msnconn * conn, char * from, char * subject) {
 }
 void ext_typing_user(msnconn * conn, char * username, char * friendlyname)
 {
-  eb_account * ea = find_account_by_handle(username, SERVICE_INFO.protocol_id);
+  eb_local_account *ela = (eb_local_account *)conn->ext_data;
+  eb_account * ea = find_account_with_ela(username, ela);
   if(ea != NULL && iGetLocalPref("do_typing_notify"))
      eb_update_status(ea, _("typing..."));
 }
@@ -2396,7 +2398,7 @@ void ext_closing_connection(msnconn * conn)
     if(!ela)
     {
         eb_debug(DBG_MSN, "Unable to find local account by handle: %s\n", local_account_name);
-        ela=msn_local_account;
+	return;
     }
     mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
     /* We're being called as part of an  msn_clean_up anyway, so make sure eb_msn_logout doesn't try to clean up */
@@ -2742,12 +2744,12 @@ static void invite_gnomemeeting(ebmCallbackData * data)
 	eb_msn_local_account_data *mlad =
 		(eb_msn_local_account_data *)from->protocol_local_account_data;
 	
-	acc = find_account_by_handle(ecd->remote_account, SERVICE_INFO.protocol_id);
+	acc = find_account_with_ela(ecd->remote_account, from);
 	if (!acc) {
 		cont = find_contact_by_nick(ecd->contact);
 		if (!cont)
 			return;
-		acc = find_account_for_protocol(cont, SERVICE_INFO.protocol_id);
+		acc = find_account_for_protocol(cont, SERVICE_INFO.protocol_id); /*FIXME*/
 	}
 	if(!acc) {
 		  ay_do_error( _("MSN Error"), _("Cannot find a valid remote account to invite your contact.") );

@@ -1,5 +1,9 @@
+* Tue Apr 29 2003 12:09 GMT [colin]	0.3.0-38
+- modules/msn2/msn.C
+use find_account_with_ela(char *, eb_local_account *)
+
 * Tue Apr 29 2003 11:30 GMT [colin]	0.3.0-37
-- modules/yahoo.c
+- modules/yahoo2/yahoo.c
 use find_account_with_ela(char *, eb_local_account *)
 
 * Tue Apr 29 2003 11:30 GMT [colin]	0.3.0-36
