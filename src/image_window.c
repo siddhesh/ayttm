@@ -28,6 +28,10 @@
 #include <stdlib.h>
 #include "debug.h"
 
+/* these two have to be outside the #ifdef */
+unsigned char *(*image_2_jpg)(const unsigned char *, long *) = NULL;
+unsigned char *(*image_2_jpc)(const unsigned char *, long *) = NULL;
+
 #ifndef HAVE_GDK_PIXBUF
 #include "globals.h"
 
@@ -64,9 +68,6 @@ struct ay_image_wnd {
 static int last_tag = 0;
 static LList *images = NULL;
 
-
-unsigned char *(*image_2_jpg)(const unsigned char *, long *) = NULL;
-unsigned char *(*image_2_jpc)(const unsigned char *, long *) = NULL;
 
 static struct ay_image_wnd * get_image_wnd_by_tag(int tag)
 {

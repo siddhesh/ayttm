@@ -1,3 +1,9 @@
+* Tue Feb 17 2004 15:17 GMT [philip]	0.4.6-11
+- src/image_window.c
+define image_2_jpc and image_2_jpg *outside* the #ifdef
+so now we can load the yahoo module even without gdk-pixbuf-dev
+thanks to Pete Jewell for reporting this in bug 896846
+
 * Mon Feb 16 2004 08:16 GMT [philip]	0.4.6-10
 - modules/image_filter/img2jpc.c
 jp2 compression handled.  We now have small images
