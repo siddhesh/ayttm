@@ -1,0 +1,18 @@
+
+===============
+Copyright infos
+===============
+
+Libfaim is maintained in the Gaim source tree, the version included in ayttm
+is from Gaim CVS of October 1st 2003 :
+
+ * Most libfaim code copyright (C) 1998-2001 Adam Fritzler <afritz@auk.cx>
+ * Some libfaim code copyright (C) 2001-2003 Mark Doliner <thekingant@users.sourceforge.net>
+
+A lot of code in aim-oscar.c comes from, of was inspired by the Gaim oscar
+module :
+
+ * Some code copyright (C) 1998-1999, Mark Spencer <markster@marko.net>
+ * Some code copyright (C) 1999-2001, Eric Warmenhoven
+ * Some code copyright (C) 2001-2003, Sean Egan
+ * Some code copyright (C) 2001-2003, Mark Doliner <thekingant@users.sourceforge.net>

@@ -89,6 +89,10 @@ faim_internal aim_snac_t *aim_remsnac(aim_session_t *sess, aim_snacid_t id)
 	for (prev = (aim_snac_t **)&sess->snac_hash[index]; (cur = *prev); ) {
 		if (cur->id == id) {
 			*prev = cur->next;
+			if (cur->flags & AIM_SNACFLAGS_DESTRUCTOR) {
+				free(cur->data);
+				cur->data = NULL;
+			}
 			return cur;
 		} else
 			prev = &cur->next;
@@ -104,7 +108,7 @@ faim_internal aim_snac_t *aim_remsnac(aim_session_t *sess, aim_snacid_t id)
  * maxage is the _minimum_ age in seconds to keep SNACs.
  *
  */
-faim_internal void aim_cleansnacs(aim_session_t *sess, int maxage)
+faim_export void aim_cleansnacs(aim_session_t *sess, int maxage)
 {
 	int i;
 
@@ -122,10 +126,8 @@ faim_internal void aim_cleansnacs(aim_session_t *sess, int maxage)
 
 				*prev = cur->next;
 
-				/* XXX should we have destructors here? */
 				free(cur->data);
 				free(cur);
-
 			} else
 				prev = &cur->next;
 		}

@@ -1,3 +1,10 @@
+* Thu Oct  2 2003 12:15 GMT [nicolas]   0.4.2-6
+- modules/aim-oscar/libfaim/*
+  modules/aim-oscar/Makefile.am
+  modules/aim-oscar/aim-oscar.c
+  modules/aim-oscar/aim.h
+Update to latest libfaim (from Gaim), start updating aim-oscar module.
+
 * Tue Oct  1 2003 11:55 GMT [elh]	0.4.2-5
 - Makefile.am
   README.WIN32
