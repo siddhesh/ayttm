@@ -1971,11 +1971,12 @@ static void yahoo_yab_read(struct yab *yab, unsigned char *d, int len)
 	data[len]='\0';
 
 	DEBUG_MSG(("Got yab: %s", data));
-	st = strstr(data, "userid=\"") + strlen("userid=\"");
-	en = strchr(st, '"');
-	*en++ = '\0';
-
-	yab->id = yahoo_xmldecode(st);
+	st = strstr(data, "userid=\"");
+	if(st) {
+		st += strlen("userid=\"");
+		en = strchr(st, '"'); *en++ = '\0';
+		yab->id = yahoo_xmldecode(st);
+	}
 
 	st = strstr(en, "fname=\"");
 	if(st) {
@@ -2337,6 +2338,8 @@ static void yahoo_process_yab_connection(struct yahoo_input_data *yid)
 
 	while(find_input_by_id_and_type(id, YAHOO_CONNECTION_YAB) 
 			&& (yab = yahoo_getyab(yid)) != NULL) {
+		if(!yab->id)
+			continue;
 		changed=1;
 		for(buds = yd->buddies; buds; buds=buds->next) {
 			struct yahoo_buddy * bud = buds->data;

@@ -1,3 +1,7 @@
+* Wed Jul 16 2003 09:09 GMT [philip]	0.3.3-pre1
+- modules/yahoo2/libyahoo2/libyahoo2.c
+Fix bug 770652 - crash on read yab
+
 * Tue Jul 15 2003 10:11 GMT [colin]	0.3.2-29
 - modules/irc/irc.c
 Fix IRC failing connect leaving connect window open
