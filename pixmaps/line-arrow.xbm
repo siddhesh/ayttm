@@ -1,5 +1,0 @@
-/* Created with The GIMP */
-#define line_arrow_width 6
-#define line_arrow_height 9
-static unsigned char line_arrow_bits[] = {
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
