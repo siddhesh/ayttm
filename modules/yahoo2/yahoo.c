@@ -128,8 +128,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.54 $",
-	"$Date: 2003/05/12 19:47:04 $",
+	"$Revision: 1.55 $",
+	"$Date: 2003/05/16 18:47:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1726,7 +1726,7 @@ static void ext_yahoo_contact_added(int id, char *myid, char *who, char *msg)
 	struct yahoo_authorize_data *ay = g_new0(struct yahoo_authorize_data, 1);
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 
-	snprintf(buff, sizeof(buff), _("%s, the yahoo user %s has added you to their contact list"), (myid?myid:ela->handle), who);
+	snprintf(buff, sizeof(buff), _("%s, the yahoo user %s has added you to their contact list."), (myid?myid:ela->handle), who);
 	if(msg) {
 		strcat(buff, _(" with the following message:\n"));
 		strcat(buff, msg);

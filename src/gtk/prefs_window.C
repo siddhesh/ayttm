@@ -1,4 +1,4 @@
-/*
+/*
  * Ayttm 
  *
  * Copyright (C) 2003, the Ayttm team
@@ -865,7 +865,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParentWindow,
 			break;
 		
 		case ay_prefs_window::PANEL_FILTERS:
-			section_info = _("Filters change messages when sending and/or receiving them.\nThis may be used to add functionality such as translation and\nencryption");
+			section_info = _("Filters change messages when sending and/or receiving them.\nThis may be used to add functionality such as translation and\nencryption.");
 			break;
 			
 		case ay_prefs_window::PANEL_IMPORTERS:

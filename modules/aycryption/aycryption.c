@@ -90,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.11 $",
-	"$Date: 2003/05/06 22:40:28 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/05/16 18:47:02 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -469,12 +469,12 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 		case GPGME_SIG_STAT_GOOD_EXP:
 			strcat(s_sigstat, _(" correctly signed (by "));
 			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
-			strcat(s_sigstat, ") message, but signature has expired.");
+			strcat(s_sigstat, _(") message, but signature has expired."));
 			break;
 		case GPGME_SIG_STAT_GOOD_EXPKEY:
 			strcat(s_sigstat, _(" correctly signed (by "));
 			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
-			strcat(s_sigstat, ") message, but key has expired.");
+			strcat(s_sigstat, _(") message, but key has expired."));
 			break;
 		default:
 			strcat(s_sigstat, _(" message - Unknown signature status (file a bugreport)!"));

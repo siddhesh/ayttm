@@ -1,3 +1,11 @@
+* Fri May 16 2003 16:05 GMT [edward]	0.3.0-198
+- src/gtk/prefs_window.C
+  modules/yahoo2/yahoo.c
+  modules/aycryption/aycryption.c
+Add missing dots to sentences
+- po/fr.po
+Update translation
+
 * Fri May 16 2003 16:05 GMT [edward]	0.3.0-197
 - src/Makefile.am
   mingw32/Makefile.am
