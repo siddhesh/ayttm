@@ -1,3 +1,13 @@
+* Thu Jan 20 2004 08:16 GMT [chris]     0.4.6-8
+ - src/account.c
+ - src/chat_room.c
+ - src/chat_window.h
+ - src/ssl_certificate.c
+ - src/status.c
+ - src/util.c
+Fix several compiler warnings (missing fn declarations,
+discarding const qualifier)
+
 * Thu Jan 29 2004 05:19 GMT [philip]	0.4.6-7
 - modules/yahoo2/libyahoo2/yahoo_fn.[ch]
 ISO C does not allow unnamed unions

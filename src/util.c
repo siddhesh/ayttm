@@ -36,6 +36,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <assert.h>
+#include <libproxy.h>
 
 #ifdef __MINGW32__
 #include <winsock2.h>
@@ -58,6 +59,7 @@
 #include "service.h"
 #include "offline_queue_mgmt.h"
 #include "add_contact_window.h"
+#include "messages.h"
 
 #ifndef NAME_MAX
 #define NAME_MAX 4096

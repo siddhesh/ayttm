@@ -37,6 +37,7 @@
 #include "add_contact_window.h"
 #include "edit_local_accounts.h"
 #include "plugin_api.h"
+#include "messages.h"
 
 #ifndef NAME_MAX
 #define NAME_MAX 4096

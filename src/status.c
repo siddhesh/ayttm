@@ -57,10 +57,12 @@
 #include "offline_queue_mgmt.h"
 #include "about.h"
 #include "edit_local_accounts.h"
+#include "messages.h"
 
 #include "gtk/gtkutils.h"
 #include "gtk/extgtktext.h"
 #include "gtk/gtk_eb_html.h"
+#include "gtk/gtkutils.h"
 
 #include "pixmaps/login_icon.xpm"
 #include "pixmaps/blank_icon.xpm"

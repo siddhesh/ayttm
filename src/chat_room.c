@@ -37,6 +37,7 @@
 #include "messages.h"
 #include "mem_util.h"
 #include "chat_window.h"
+#include "dialog.h"
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
 
@@ -707,7 +708,7 @@ static void add_chatroom_mru (const char * name)
 		if (i == 0 || strcmp(cur->data, name)) {
 			/* not the same twice */
 			
-			fprintf(fp, "%s\n", cur->data);
+			fprintf(fp, "%s\n", (const char*) cur->data);
 			i++;
 		}
 		cur = cur->next;
@@ -793,7 +794,7 @@ static void update_public_sensitivity(GtkWidget * widget, gpointer data ) {
 	}
 }
 
-static void choose_list_cb(char *text, gpointer data) {
+static void choose_list_cb(const char *text, gpointer data) {
 	int pos;
 	
 	gtk_editable_delete_text(GTK_EDITABLE(GTK_COMBO(chat_room_name)->entry), 0, -1);

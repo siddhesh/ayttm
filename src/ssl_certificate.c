@@ -36,6 +36,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "globals.h"
+#include "dialog.h"
 
 static SSLCertificate *ssl_certificate_new_lookup(X509 *x509_cert, char *host, int port, int lookup);
 
