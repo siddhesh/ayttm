@@ -495,7 +495,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
 	
-	gint height=430;
+	gint height=460;
 	if(height > gdk_screen_height() - 40)
 		height = gdk_screen_height() - 40;
 
@@ -831,7 +831,7 @@ ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
 	m_top_scrollbox = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(m_top_scrollbox), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	gtk_box_pack_start( GTK_BOX(m_super_vbox), GTK_WIDGET(m_top_scrollbox), TRUE, TRUE, 0 );
-	gtk_widget_set_usize( m_top_scrollbox, -1, 430 );
+	gtk_widget_set_usize( m_top_scrollbox, -1, 460 );
 	gtk_widget_show(m_top_scrollbox);
 
 	m_top_vbox = gtk_vbox_new( FALSE, 0 );
@@ -1070,6 +1070,7 @@ ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &in
 void	ay_chat_panel::Build( GtkWidget *inParent )
 {
 	gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
+	gtkut_button( _("Show timestamps in chat window"), &m_prefs.do_convo_timestamp, m_top_vbox );
 	gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
 	gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
 	

@@ -530,13 +530,13 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_typing_notify", 1 );
 	iSetLocalPref( "do_send_typing_notify", 1 );
 	iSetLocalPref( "do_escape_close", 1 );
-	iSetLocalPref( "do_convo_timestamp", 1 );
+	iSetLocalPref( "do_convo_timestamp", 0 );
 	iSetLocalPref( "do_enter_send", 1 );
 	iSetLocalPref( "do_ignore_unknown", 0 );
 	iSetLocalPref( "do_multi_line", 1 );
 	iSetLocalPref( "do_raise_window", 0 );
 	iSetLocalPref( "do_send_idle_time", 0 );
-	iSetLocalPref( "do_timestamp", 1 );
+	iSetLocalPref( "do_timestamp", 0 );
 	iSetLocalPref( "do_ignore_fore", 1 );
 	iSetLocalPref( "do_ignore_back", 1 );
 	iSetLocalPref( "do_ignore_font", 1 );
@@ -879,6 +879,7 @@ void	ayttm_prefs_show_window( void )
 
 
 	/* chat prefs */
+	prefs->chat.do_convo_timestamp    = iGetLocalPref("do_convo_timestamp");
 	prefs->chat.do_ignore_unknown     = iGetLocalPref("do_ignore_unknown");
 	prefs->chat.do_raise_window       = iGetLocalPref("do_raise_window");	
 	prefs->chat.do_send_idle_time     = iGetLocalPref("do_send_idle_time");
@@ -1010,6 +1011,7 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	assert( inPrefs != NULL );
 
 	/* chat */
+	iSetLocalPref( "do_convo_timestamp", inPrefs->chat.do_convo_timestamp );
 	iSetLocalPref( "do_ignore_unknown", inPrefs->chat.do_ignore_unknown );
 	iSetLocalPref( "do_raise_window", inPrefs->chat.do_raise_window );
 	iSetLocalPref( "do_send_idle_time", inPrefs->chat.do_send_idle_time );

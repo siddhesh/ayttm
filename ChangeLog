@@ -1,3 +1,7 @@
+* Mon Jun  2 2003 10:35 GMT [philip]	0.3.1-15
+- src/prefs.h src/gtk/prefs_window.C
+Add pref for conversation timestamping
+
 * Mon Jun  2 2003 10:26 GMT [philip]	0.3.1-14
 - modules/msn2/msn.C
 remove fprintf
