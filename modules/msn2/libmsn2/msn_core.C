@@ -619,7 +619,7 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
   // First, we find which msnconn this socket belongs to
 
   callback * call = NULL;
-  int trid;
+  int trid=0;
 
   // first, siphon off any file transfer traffic to the special handler
   if(conn->type==CONN_FTP)
@@ -1108,11 +1108,12 @@ void msn_handle_new_invite(msnconn * conn, char * from, char * friendlyname, cha
 	   http://www.linphone.org/ <= probably simpler ;-)
 	   RFC3428
 	 */
-	ext_show_error(conn, "Your contact tries to use the "
-			"SIP MSN Voice Protocol. " 
-			"SIP isn't supported yet.\n"
-			"You may ask your contact to use netmeeting, which "
-			"is supported.");
+	snprintf(buf, sizeof(buf), "%s (%s) would like to have a voice chat "
+			"with you, but they use the SIP MSN Voice Protocol. "
+			"Ayttm doesn't support SIP yet.\n"
+			"You should ask your contact to use netmeeting instead.",
+			friendlyname, from);
+	ext_show_error(conn, buf);
 	delete tmp2;
 	delete tmp1;
 	msn_netmeeting_reject(inv);

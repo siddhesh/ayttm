@@ -1,3 +1,7 @@
+* Sun Jun 15 2003 07:00 GMT [philip]	0.3.1-37
+- modules/msn/libmsn2/msn_core.C
+better error message for SIP
+
 * Sat Jun 14 2003 11:18 GMT [colin]	0.3.1-36
 - modules/irc/irc.c
 fix crash
