@@ -1,4 +1,9 @@
-* Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre13
+* Sun Oct 12 2003 10:30 GMT [colin]	0.4.3-pre14
+- modules/msn2/msn.C
+Split too long messages, as suggested by Adam 
+Butler (spacedoubtman@users.sf.net)
+
+* Sun Oct 12 2003 10:30 GMT [colin]	0.4.3-pre13
 - modules/*toc/*toc.c
 don't linkify outgoing messages
 patch by Adam Butler (spacedoubtman@users.sf.net)

@@ -171,8 +171,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.69 $",
-	"$Date: 2003/10/12 14:43:59 $",
+	"$Revision: 1.70 $",
+	"$Date: 2003/10/12 15:15:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -859,9 +859,27 @@ static void eb_msn_send_im( eb_local_account * from, eb_account * account_to,
 	msg->content = msn_permstring("text/plain; charset=UTF-8");
         if(strlen(mess)>1100)
         {
-          char buf[1024];
-          snprintf(buf, 1024, "Warning - your last message was too long for the MSN service. The last %d characters were not sent.", strlen(mess)-1100);
-          ay_do_warning( "MSN Warning", buf );
+          char *begin = NULL;
+	  char *remain = NULL;
+	  char *lastspace = NULL;
+	  
+	  begin = (char *)malloc(1100*sizeof(char));
+	  
+	  strncpy(begin, mess, 1090);
+	  
+	  lastspace = strrchr(begin, ' ');
+	  *lastspace = '\0';
+	  
+	  remain = (char *) malloc ((strlen(mess)-strlen(begin)+2)*sizeof(char));
+	  remain = strdup(mess+strlen(begin)+1);
+	  
+	  eb_msn_send_im(from, account_to, begin);
+	  eb_msn_send_im(from, account_to, remain);
+	  
+	  free(begin);
+	  free(remain);
+	  
+	  return;
         }
 	msg->body = g_strndup(tmp, 1098);
 	free(tmp);
@@ -1336,9 +1354,27 @@ static void eb_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
 	char *tmp = StrToUtf8(mess);
         if(strlen(mess)>1100)
         {
-          char buf[1024];
-          snprintf(buf, 1024, "Warning - your last message was too long for the MSN service. The last %d characters were not sent.", strlen(mess)-1100);
- 		  ay_do_warning( "MSN Warning", buf );
+          char *begin = NULL;
+	  char *remain = NULL;
+	  char *lastspace = NULL;
+	  
+	  begin = (char *)malloc(1100*sizeof(char));
+	  
+	  strncpy(begin, mess, 1090);
+	  
+	  lastspace = strrchr(begin, ' ');
+	  *lastspace = '\0';
+	  
+	  remain = (char *) malloc ((strlen(mess)-strlen(begin)+2)*sizeof(char));
+	  remain = strdup(mess+strlen(begin)+1);
+	  
+	  eb_msn_send_chat_room_message(room, begin);
+	  eb_msn_send_chat_room_message(room, remain);
+	  
+	  free(begin);
+	  free(remain);
+	  
+	  return;
         }
 	
 	msg->body = g_strndup(tmp, 1098);
