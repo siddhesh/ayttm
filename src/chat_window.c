@@ -1881,9 +1881,9 @@ static void eb_update_window_title_to_tab (int tab, gboolean new_message)
 			cw->contact->nick, cw->local_user->alias,
 			cw->preferred->handle,
 			GET_SERVICE (cw->local_user).name);
-
-		gtk_window_set_title (GTK_WINDOW (cw->contact->chatwindow->window), buff);
-	} else if(cw && cw->contact != NULL)
+		if (cw->contact->chatwindow && cw->contact->chatwindow->window)
+			gtk_window_set_title (GTK_WINDOW (cw->contact->chatwindow->window), buff);
+	} else if(cw && cw->contact != NULL && cw->contact->chatwindow && cw->contact->chatwindow->window)
       		gtk_window_set_title (GTK_WINDOW (cw->contact->chatwindow->window),
 			cw->contact->nick);
 }
