@@ -176,7 +176,7 @@ msgid ""
 "Reason: %s\n"
 "Would you like to authorize them?"
 msgstr ""
-"L'utilisateur ICQ voudrait vous ajouter à ses contacts.\n"
+"L'utilisateur ICQ %s voudrait vous ajouter à ses contacts.\n"
 "Raison: %s\n"
 "Voulez-vous l'y autoriser ?"
 
@@ -456,7 +456,7 @@ msgstr "<b>Serveur :</b> %s<br>"
 #: modules/irc/irc.c:1668
 #, c-format
 msgid "<b>Idle time and online status:</b> %s<br>"
-msgstr "<B>Temps libre et statut : </b> %s<br>"
+msgstr "<B>Temps d'inactivité et statut : </b> %s<br>"
 
 #: modules/irc/irc.c:1673
 #, c-format
@@ -947,8 +947,7 @@ msgstr "Oui, mais non"
 msgid ""
 "The yahoo user %s has invited you to a conference - %s, the topic is %s.\n"
 msgstr ""
-"L'utilisateur yahoo %s vous a invité à une conférence - %s, le sujet est %"
-"s.\n"
+"L'utilisateur yahoo %s vous a invité à une conférence - %s, le sujet est %s.\n"
 
 #: modules/yahoo2/yahoo.c:1225
 msgid "Do you want to join?"
@@ -982,7 +981,7 @@ msgstr "Invitation webcam Yahoo"
 #: modules/yahoo2/yahoo.c:1648
 #, c-format
 msgid "%s has rejected your request to be added as a buddy%s%s"
-msgstr "%s, l'utilisateur Yahoo %s a refusé votre demande d'ajout%s"
+msgstr "L'utilisateur Yahoo %s a refusé votre demande d'ajout%s%s"
 
 #: modules/yahoo2/yahoo.c:1649
 msgid " with the message:\n"
@@ -1138,7 +1137,7 @@ msgstr "Erreur Action"
 #: src/action.c:83
 #, c-format
 msgid "Command line is invalid (missing %s and %p)."
-msgstr "La ligne de commande est invalide (il manque %s)."
+msgstr "La ligne de commande est invalide (il manque %s et %p)."
 
 #: src/action.c:96
 msgid "Cannot run command : fork() failed."
@@ -1470,7 +1469,7 @@ msgstr "déconnecté(e)"
 msgid ""
 "<body bgcolor=#e0c96d width=*><b> %s changed status to %s @ %s.</b></body>"
 msgstr ""
-"<body bgcolor=#e0c96d width=*><b> %s est maintenant %s @ %s.</b></body>"
+"<body bgcolor=#e0c96d width=*><b> %s est maintenant %s à %s.</b></body>"
 
 #: src/chat_window.c:1514
 msgid "(Online)"
@@ -1572,7 +1571,7 @@ msgstr "Choisissez le fichier"
 #: src/crash.c:151
 #, c-format
 msgid "Ayttm process (%ld) received signal %ld"
-msgstr "Le processus ayttm (%ld) a reçu un signal %d"
+msgstr "Le processus ayttm (%ld) a reçu le signal %ld"
 
 #: src/crash.c:189
 msgid "Ayttm has crashed"
@@ -2354,7 +2353,7 @@ msgid ""
 "Try a clean install (or read README)."
 msgstr ""
 "La version du plugin (%d) n'est pas la même que celle du noyau (%d), ce qui "
-"signifie qu'ils ne sont pascompatibles binairement.\n"
+"signifie qu'ils ne sont pas compatibles binairement.\n"
 "Essayez une installation propre (ou lisez le README)."
 
 #: src/plugin.c:392
