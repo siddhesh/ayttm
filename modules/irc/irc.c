@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.25 $",
-	"$Date: 2003/06/27 12:21:07 $",
+	"$Revision: 1.26 $",
+	"$Date: 2003/06/27 12:54:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -677,7 +677,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 					i++;
 			}
 		} else {
-			printf("IRC: RPL_NAMEREPLY without joining channel %s on %s!\n", tempstring, ila->server);
+			eb_debug(DBG_MOD,"IRC: RPL_NAMEREPLY without joining channel %s on %s!\n", tempstring, ila->server);
 		}
 		g_strfreev (buff2);
 	}
@@ -820,7 +820,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		char nick[256];
 		char tempstring[BUF_LEN];
 		char *alpha;
-		printf("got invite %s\n",buff);
+		eb_debug(DBG_MOD,"got invite %s\n",buff);
 		g_strchomp(buff);
 		buff2 = g_strsplit(buff, " ", 4);
 		strncpy(tempstring, buff2[3]+1, BUF_LEN);
