@@ -1,3 +1,7 @@
+* Fri Dec 12 2003 10:30 GMT [philip]	0.4.5-7
+- src/status.c
+finally fix that statusbar
+
 * Fri Dec 12 2003 07:07 GMT [philip]	0.4.5-6
 - modules/yahoo2/yahoo.c
 fix possible crash (which may have caused bug 821649
