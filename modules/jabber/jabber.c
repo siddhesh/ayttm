@@ -80,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.16 $",
-	"$Date: 2003/04/10 09:26:02 $",
+	"$Revision: 1.17 $",
+	"$Date: 2003/04/10 09:29:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -483,10 +483,8 @@ static void eb_jabber_set_current_state( eb_local_account * account, int state )
 {
 	eb_jabber_local_account_data * jlad = account->protocol_local_account_data;
 
-	printf("SET STATE\n");
 	if (is_setting_state) {
 		jlad->status = state;
-		printf("IS SETING STATE\n");
 		return;
 	}
 	
