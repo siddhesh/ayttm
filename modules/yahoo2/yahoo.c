@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.17 $",
-	"$Date: 2003/04/10 18:40:26 $",
+	"$Revision: 1.18 $",
+	"$Date: 2003/04/11 05:25:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -280,7 +280,7 @@ typedef struct {
 
 typedef struct {
 	int id;
-	eb_acccount *ea;
+	eb_account *ea;
 } eb_ext_yahoo_typing_notify_data;
 
 typedef struct {
@@ -1477,7 +1477,7 @@ static int eb_yahoo_send_typing(eb_local_account *from, eb_account *to)
 		eb_timeout_remove(yad->typing_timeout_tag);
 
 	if( !iGetLocalPref("do_send_typing_notify") )
-		return;
+		return 0;
 
 	yahoo_send_typing(ylad->id, ylad->act_id, to->handle, 1);
 
