@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "globals.h"
 #include "service.h"
@@ -97,6 +98,7 @@ static LList *_eb_smileys = NULL;
 
 static t_smiley_set_list	*s_smiley_sets = NULL;
 
+static int fast_sqrt(int n);
 
 /// compare two t_smiley_sets for sort order
 static int	s_compare_smiley_set( const void *a, const void *b )
@@ -280,7 +282,7 @@ gchar * eb_smilify( const char *text, LList *protocol_smileys )
   while(text[ipos]!='\0')
   {
     /* ignore anything in < > */
-    while(text[ipos] == '<') {
+    while(text[ipos] == '<' && text[ipos+1] && isalpha(text[ipos+1])) {
       while(text[ipos] && text[ipos] != '>') {
 	if (ipos < strlen(text))
         	g_string_append_c(newstr, text[ipos++]);
@@ -439,9 +441,12 @@ void show_smileys_cb (smiley_callback_data *data) {
 	GdkBitmap *mask;
 	GtkWidget *smiley_window;
 	LList     *done = NULL;
-	int len = 0, real_len = 0, x=-1, y=0;
+	LList * l;
+	smiley * dsmile = NULL;
+	int real_len = 0, x=-1, y=0;
 	int win_w=0, win_h=0, w, h;
 	int win_x, win_y;
+	int rows, cols;
 	
 	/* close popup if open */
 	if (data->c_room && data->c_room->smiley_window) {
@@ -467,25 +472,32 @@ void show_smileys_cb (smiley_callback_data *data) {
 		smileys = RUN_SERVICE(account)->get_smileys();
 	else 
 		return;
-	len = l_list_length(smileys);
-	smileys_table = gtk_table_new(5,len/5 +((len%5==0)?1:2),TRUE);
 	for(;smileys;smileys=smileys->next) {
-		LList * l;
 		gboolean already_done = FALSE;
-		smiley * dsmile = NULL;
-		msmiley = (smileys->data);
+		msmiley = smileys->data;
+		
 		for(l=done; l; l=l->next) {
-			if(!strcmp((char*)l->data, msmiley->name)) {
+			protocol_smiley * done_smiley = l->data;
+			if(!strcmp(msmiley->name, done_smiley->name)) {
 				already_done = TRUE;
 				break;
 			}
 		}
 
-		if(already_done)
+		if(already_done || !get_smiley_by_name(msmiley->name))
 			continue;
+		
+		done = l_list_append(done, msmiley);
+		real_len++;
+	}
 
-		done = l_list_append(done, msmiley->name);
+	rows = fast_sqrt(real_len) - 1;
+	if(rows<5) rows=5;
+	cols = real_len/rows + !(!(real_len%rows));
+	smileys_table = gtk_table_new(rows, cols,TRUE);
 
+	for(l = done; l; l=l_list_next(l)) {
+		msmiley = l->data;
 		dsmile = get_smiley_by_name(msmiley->name);
 		if(dsmile != NULL) {
 			GtkWidget *parent = NULL;
@@ -496,12 +508,12 @@ void show_smileys_cb (smiley_callback_data *data) {
 			icon = gdk_pixmap_create_from_xpm_d(parent->window, &mask, NULL, dsmile->pixmap);
 			iconwid = gtk_pixmap_new(icon, mask);
 			sscanf (dsmile->pixmap [0], "%d %d", &w, &h);
-			if(x<5) {
+			if(x<rows) {
 				x++;
 				if(y==0) 
 					win_h+=h+2;
 			}
-			if(x==5) {
+			if(x==rows) {
 				y++;
 				x=0;
 				win_w+=w+2;
@@ -519,13 +531,11 @@ void show_smileys_cb (smiley_callback_data *data) {
 			y,y+1,
 			x,x+1,
 			GTK_FILL, GTK_FILL, 0, 0);
-			real_len++;
 		}
 	}
 
 	l_list_free(done);
 	done = NULL;
-	gtk_table_resize(GTK_TABLE(smileys_table), 5,real_len/5 +((real_len%5==0)?0:1));
 
 	smiley_window = gtk_window_new(GTK_WINDOW_DIALOG);
 	gtk_window_set_modal(GTK_WINDOW(smiley_window), FALSE);
@@ -554,4 +564,17 @@ void show_smileys_cb (smiley_callback_data *data) {
 	else if (data && data->c_window)
 		data->c_window->smiley_window = smiley_window;
 
+}
+
+static int fast_sqrt(int n)
+{
+	int guess=n/4;
+	int result;
+
+	do {
+		result = n/guess;
+		guess = (guess+result)/2;
+	} while(guess!=result);
+
+	return result;
 }

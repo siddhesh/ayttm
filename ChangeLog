@@ -1,3 +1,8 @@
+* Sat Jun 28 2003 08:05 GMT [philip]	0.3.1-47
+- src/smileys.c
+fix parsing issue with smileys that start with <
+better calculation of smiley window size
+
 * Sat Jun 28 2003 06:40 GMT [philip]	0.3.1-46
 - modules/msn2/msn.C
 added MSN6 smileys from Raphael Hickenbick (alpharoid AT hotmail.com)
