@@ -84,14 +84,17 @@ static int plugin_finish();
 static int ref_count = 0;
 static char icq_server[MAX_PREF_LEN] = "toc.oscar.aol.com";
 static char icq_port[MAX_PREF_LEN] = "80";
+static int icq_fallback_ports[]={9898, 80, 0};
+static int icq_last_fallback=0;
+static int should_fallback=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.11 $",
-	"$Date: 2003/04/09 12:12:17 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/04/09 15:02:13 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -736,12 +739,19 @@ static void eb_icq_login( eb_local_account * account )
 {
 	struct eb_icq_local_account_data * alad;
 	char buff[1024];
-
+	int port = atoi(icq_port);
+	
 	account->connecting = 1;
 	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
 
 	snprintf(buff, sizeof(buff), _("Logging in to ICQ account: %s"), account->handle);
  	alad->activity_tag = ay_activity_bar_add(buff, ay_icq_cancel_connect, account);
+
+	if (should_fallback) {
+		port = icq_fallback_ports[icq_last_fallback];
+		icq_last_fallback++;
+		should_fallback = 0;
+	}
 
 	alad->connect_tag = icqtoc_signon( account->handle, alad->password,
 			      icq_server, atoi(icq_port), alad->icq_info);
@@ -765,8 +775,14 @@ static void eb_icq_logged_in (toc_conn *conn)
 	if(alad->conn->fd == -1 )
 	{
 		g_warning("eb_icq UNKNOWN CONNECTION PROBLEM");
-		do_error_dialog(_("Cannot connect to ICQ due to network problem."), _("ICQ Error"));
-		eb_icq_logout(ela);
+		if(icq_fallback_ports[icq_last_fallback] != 0) {
+			should_fallback=1;
+			eb_icq_login(ela);
+		} else {
+			do_error_dialog(_("Cannot connect to ICQ due to network problem."), _("ICQ Error"));
+			should_fallback=0;
+			icq_last_fallback=0;
+		}
 		return;
 	}
 	eb_debug(DBG_TOC, "eb_icq_login %d %d\n", alad->conn->fd, alad->conn->seq_num );

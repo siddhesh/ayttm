@@ -1,3 +1,9 @@
+* Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-80
+- modules/aim-toc/aim-toc.c
+remove a printf
+- modules/icq-toc/icq-toc.c
+Fallback ports
+
 * Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-79
 - modules/aim-toc/aim-toc.c
 Fallback ports
