@@ -1,3 +1,7 @@
+* Fri May 30 2003 09:27 GMT [colin]	0.3.1-5
+- modules/aycryption/aycryption.c
+Applied patch from Ben Reser - clean kopete's <br/>
+
 * Thu May 29 2003 18:44 GMT [colin]	0.3.1-4
 - modules/smileys/console_smileys/Makefile.am
 Fix smileydir quotes (caused problems with debian packaging)

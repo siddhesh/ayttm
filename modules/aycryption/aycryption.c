@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.13 $",
-	"$Date: 2003/05/18 22:31:11 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/05/30 09:29:31 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -212,6 +212,33 @@ static int aycryption_finish()
 /*******************************************************************************
  *                             End Module Code
  ******************************************************************************/
+
+/* removes the <br/> crap that kopete adds */
+static void br_to_nl(char * text)
+{
+	int i, j;
+	int visible = 1;
+	for (i=0, j=0; text[i]; i++)
+	{
+		if(text[i] == '<')
+		{
+			if (!strncasecmp(text+i+1, "br/", 3))
+			{
+				visible = 0;
+				text[j++] = '\n';
+			}
+		}
+		else if (text[i] == '>')
+		{
+			if(!visible)
+				visible = 1;
+			continue;
+		}
+		if (visible)
+			text[j++] = text[i];
+	}
+	text[j] = '\0';
+}
 
 static void show_gpg_log(ebmCallbackData *data)
 {
@@ -348,7 +375,7 @@ static char *aycryption_out(const eb_local_account * local, const eb_account * r
 static char *aycryption_in(const eb_local_account * local, const eb_account * remote,
 			   const struct contact *ct, const char * s)
 {
-	char *p = NULL, *res = NULL;
+	char *p = NULL, *res = NULL, *s_nohtml = NULL;
 	GpgmeData plain = NULL, cipher = NULL;
 	GpgmeKey key = NULL;
         struct passphrase_cb_info_s info;
@@ -375,8 +402,23 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	}
 	gpgme_data_new(&plain);
 	gpgme_data_new(&cipher);
-        
-	gpgme_data_write(cipher, s, strlen(s));
+       
+	/* Clean out kopete HTML crap
+	 * < vdanen> so like KDE to just bloat stuff for the hell of it
+	 */
+	s_nohtml = strdup(s);
+	if (!s_nohtml)
+	{
+		eb_debug(DBG_CRYPT,"Couldn't copy message to strip html");
+		log_action(ct, LOG_ERR, "Memory eror while stripping html.");
+		return strdup(s);
+	}
+	br_to_nl(s_nohtml);
+	eb_debug(DBG_CRYPT,"html stripped: %s\n",s_nohtml);
+
+	gpgme_data_write(cipher, s_nohtml, strlen(s_nohtml));
+
+	free(s_nohtml);
 	
 	if (!getenv("GPG_AGENT_INFO")) {
             info.c = ctx;
