@@ -873,7 +873,7 @@ int proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
 			return ay_socket_new_async(
 			      inet_ntoa(sin->sin_addr), 
 			      ntohs(sin->sin_port), 
-			      callback, data, scb);     
+			      callback, data, scb);
 		else {
 			if (connect(sockfd, serv_addr, addrlen) == 0) {
 				return sockfd;
