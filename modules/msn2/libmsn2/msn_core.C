@@ -678,7 +678,7 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 
 	 if (DEBUG) printf("---ANSWER---\n%s\n---END---\n",urlread);
 	 
-	 if (!strstr(urlread, "BrowserTest") || !strstr(urlread, "MSPPost")) {
+	 if (!urlread || !strstr(urlread, "BrowserTest") || !strstr(urlread, "MSPPost")) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (bad cookies).");
 		 ext_closing_connection(hdata->conn);
 		 return;
@@ -786,7 +786,7 @@ static void msn_https_cb2(int fd, int error, void *data)
 
 	 if (DEBUG) printf("---ANSWER---\n%s\n---END---\n", urlread);
 	 
-	 if ((tmp = strstr(urlread, "passportdone.asp")) != NULL) {
+	 if (urlread && (tmp = strstr(urlread, "passportdone.asp")) != NULL) {
 		 char *t = NULL;
 		 char *p = NULL;
 		 
