@@ -480,6 +480,8 @@ int socks4_connect(int  sock, struct sockaddr *serv_addr, int addrlen )
    return -1;
 }
 
+/* http://archive.socks.permeo.com/rfc/rfc1928.txt */
+/* http://archive.socks.permeo.com/rfc/rfc1929.txt */
 int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
 {
    int i;
@@ -494,8 +496,9 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
    struct sockaddr_in bind_addr;
    struct sockaddr_in sin;
    struct hostent * hostinfo;
-   char buff[255];
-
+   char buff[530];
+   int need_auth = 0;
+   int j;   
    getsockopt( sockfd, SOL_SOCKET, SO_TYPE, &type, &size );
    printf(" %d %d %d \n", SOCK_STREAM, SOCK_DGRAM, type );
 
@@ -542,28 +545,81 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
    }
 
    buff[0] = 0x05;  //use socks v5
-   buff[1] = 0x01;  //we support only one method (no authenticaton)
-   buff[2] = 0x00;  //we support the method type "no authentication"
+   if(proxy_user && strlen(proxy_user)) {
+	   buff[1] = 0x02;  //we support (no authentication & username/pass)
+	   buff[2] = 0x00;  //we support the method type "no authentication"
+	   buff[3] = 0x02;  //we support the method type "username/passw"
+	   need_auth=1;
+   } else {
+	   buff[1] = 0x01;  //we support (no authentication)
+	   buff[2] = 0x00;  //we support the method type "no authentication"
+   }	 
+
 
    if( type != SOCK_DGRAM )
    {
-	   write( sockfd, buff, 3 );
-
-	   read( sockfd, buff, 2 );
+	   int l = 0;
+	   write( sockfd, buff, 3+need_auth );
+	   
+	   l = read( sockfd, buff, 2 );
+	   printf("read %d\n",l);
    }
    else
    {
-	   write( tcplink, buff, 3 );
+	   write( tcplink, buff, 3+need_auth );
 	   read( tcplink, buff, 2 );
 	   fprintf(stderr, "We got a response back from the SOCKS server\n");
    }
 
-
-   if( buff[1] != 0x00 )
-   {
+   printf("buff[] %d %d proxy_user %s\n",buff[0],buff[1], proxy_user);
+   if( buff[1] == 0x00 )
+	   need_auth = 0;
+   else if (buff[1] == 0x02 && proxy_user && strlen(proxy_user))
+	   need_auth = 1;
+   else {
 	   fprintf(stderr, "No Acceptable Methods");
+	   return -1;
    }
-
+   printf("need_auth=%d\n",need_auth);
+   if (need_auth) {
+	/* subneg start */
+	buff[0] = 0x01; 		/* subneg version  */
+	printf("[%d]",buff[0]);
+	buff[1] = strlen(proxy_user);   /* username length */
+	printf("[%d]",buff[1]);
+	for (i=0; i < strlen(proxy_user) && i<255; i++) {
+		      buff[i+2] = 
+			    proxy_user[i];  /* AUTH     */
+		      printf("%c",buff[i+2]);
+	}
+	i+=2;
+	buff[i] = strlen(proxy_password);
+	printf("[%d]",buff[i]);
+	i++;
+	for (j=0; j < strlen(proxy_password) && j<255; j++) {
+		      buff[i+j] = 
+			    proxy_password[j];  /* AUTH     */
+			printf("%c",buff[i+j]);
+	}
+	i+=(j);
+	buff[i]=0;
+	if( type != SOCK_DGRAM )
+	{
+		write( sockfd, buff, i );
+		read( sockfd, buff, 2 );
+	}
+	else
+	{
+		write( tcplink, buff, i );
+		read( tcplink, buff, 2 );
+		fprintf(stderr, "We got a response back from the SOCKS server\n");
+	}
+	if (buff[1] != 0) {
+		do_error_dialog(_("Socks5 proxy refused our authentication."),_("Proxy error"));
+		return -1;
+	}
+   }
+   
    buff[0] = 0x05; //use socks5
    buff[1] = ((type == SOCK_STREAM) ? 0x01 : 0x03); //connect
    buff[2] = 0x00; //reserved
