@@ -1,3 +1,7 @@
+* Sat Jun 28 2003 11:35 GMT [colin]	0.3.1-51
+- src/gtk/extgtktext.c
+Links are now opened on double-click
+
 * Sat Jun 28 2003 11:35 GMT [colin]	0.3.1-50
 - src/chat_room.c src/chat_window.c
 Handle pageup/pagedown

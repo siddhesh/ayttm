@@ -2005,15 +2005,6 @@ gtk_text_button_press (GtkWidget      *widget,
 	  find_mouse_cursor (text, (gint)event->x, (gint)event->y);
 	  draw_cursor (text, FALSE);
 
-          mark=find_mark(text, text->cursor_mark.index); 
-          if (MARK_CURRENT_DATA(text,&mark))
-          {
-              func=MARK_CURRENT_DATA_FUNC(text, &mark);
-	      if (func)
-		      func(text->text_area, MARK_CURRENT_DATA(text,&mark));
-
-          }
-	  
 	  /* Set it now, so we display things right. We'll unset it
 	   * later if things don't work out */
 	  editable->has_selection = TRUE; 
@@ -2024,7 +2015,21 @@ gtk_text_button_press (GtkWidget      *widget,
 	  break;
 	  
 	case GDK_2BUTTON_PRESS:
-	  gtk_text_select_word (text, event->time);
+	  gtk_grab_add (widget);
+	  
+	  undraw_cursor (text, FALSE);
+	  find_mouse_cursor (text, (gint)event->x, (gint)event->y);
+	  draw_cursor (text, FALSE);
+
+          mark=find_mark(text, text->cursor_mark.index); 
+          if (MARK_CURRENT_DATA(text,&mark))
+          {
+              func=MARK_CURRENT_DATA_FUNC(text, &mark);
+	      if (func)
+		      func(text->text_area, MARK_CURRENT_DATA(text,&mark));
+
+          } else
+		  gtk_text_select_word (text, event->time);
 	  break;
 	  
 	case GDK_3BUTTON_PRESS:
