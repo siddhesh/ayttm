@@ -150,8 +150,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.31 $",
-	"$Date: 2003/04/28 11:48:51 $",
+	"$Revision: 1.32 $",
+	"$Date: 2003/04/28 12:18:53 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1106,9 +1106,8 @@ void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long r
 
 static void eb_msn_add_user(eb_account * account )
 {
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
-	if(!ela) return;
+	eb_local_account *ela = account->ela;
+	if(!ela) { eb_debug(DBG_MSN, "ea->ela is NULL !!\n"); return; }
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 
 	mlad->msn_contacts = l_list_append(mlad->msn_contacts, account->handle);
@@ -1125,9 +1124,8 @@ static void eb_msn_add_user(eb_account * account )
 
 static void eb_msn_del_user(eb_account * account )
 {
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
-	if(!ela) return;
+	eb_local_account *ela = account->ela;
+	if(!ela) { eb_debug(DBG_MSN, "ea->ela is NULL !!\n"); return; }
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	mlad->msn_contacts = l_list_remove(mlad->msn_contacts, account->handle);
 	if (mlad->mc != NULL) {
@@ -1152,9 +1150,8 @@ static eb_account * eb_msn_new_account(eb_local_account *ela, const char * accou
 
 static void eb_msn_ignore_user(eb_account *ea)
 {
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
-	if(!ela) return;
+	eb_local_account *ela = ea->ela;
+	if(!ela) { eb_debug(DBG_MSN, "ea->ela is NULL !!\n"); return; }
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 
 	if (!ea)
@@ -1169,9 +1166,8 @@ static void eb_msn_ignore_user(eb_account *ea)
 
 static void eb_msn_unignore_user(eb_account *ea, const char *new_group)
 {
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
-	if(!ela) return;
+	eb_local_account *ela = ea->ela;
+	if(!ela) { eb_debug(DBG_MSN, "ea->ela is NULL !!\n"); return; }
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 
 	if (!ea)
@@ -1507,8 +1503,8 @@ static void eb_msn_real_change_group(eb_local_account *ela, eb_account * ea, con
 
 static void eb_msn_change_group(eb_account * ea, const char *new_group)
 {
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	eb_local_account *ela = ea->ela;
+	if(!ela) { eb_debug(DBG_MSN, "ea->ela is NULL !!\n"); return; }
 	if (ela)
 		eb_msn_real_change_group(ela, ea, ea->account_contact->group->name, new_group);
 }
@@ -1519,8 +1515,9 @@ static int finish_group_move(movecb_data *tomove)
 	char *ogroup = tomove->oldgr;
 	char *handle = tomove->handle;
 	eb_account *ea = find_account_by_handle(handle, SERVICE_INFO.protocol_id);
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if (!ea) {eb_debug(DBG_MSN, "ea is NULL !!\n"); return 0;}
+	eb_local_account *ela = ea->ela;
+	if(!ela) { eb_debug(DBG_MSN, "ea->ela is NULL !!\n"); return 0; }
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	if (ela && ea && ogroup && ngroup) {
 		char *id = value_pair_get_value(mlad->msn_grouplist, ngroup);
