@@ -1,3 +1,8 @@
+* Sat Jul 05 2003 17:16 GMT [colin]	0.3.2-3
+- modules/irc/irc.c
+Use dummy contacts instead of Unknown group
+Make IRC multi-account aware
+
 * Sat Jul 05 2003 13:14 GMT [colin]	0.3.2-2
 - src/status.c
 Fix "Set status" sensitivity

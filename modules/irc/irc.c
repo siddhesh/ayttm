@@ -82,13 +82,13 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.27 $",
-	"$Date: 2003/06/27 13:35:05 $",
+	"$Revision: 1.28 $",
+	"$Date: 2003/07/05 17:17:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
 };
-struct service SERVICE_INFO = { "IRC", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
+struct service SERVICE_INFO = { "IRC", -1, SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
 /* End Module Exports */
 
 static char *eb_irc_get_color(void) { static char color[]="#880088"; return color; }
@@ -182,44 +182,44 @@ static int is_setting_state = 0;
 
 /* Local prototypes */
 static unsigned char *strip_color (unsigned char *text);
-           static int sendall(int s, char *buf, int len);
-      static int irc_query_connected (eb_account * account);
-          static void irc_parse_incoming_message (eb_local_account * ela, char *buff);
-          static void irc_parse (eb_local_account * ela, char *buff);
-          static void irc_callback (void *data, int source, eb_input_condition condition);
-          static void irc_ask_after_users ( eb_local_account * account );
-          static int irc_keep_alive( gpointer data );
-          static void irc_login( eb_local_account * account);
-          static void irc_logout( eb_local_account * ela );
-          static void irc_send_im( eb_local_account * account_from, eb_account * account_to,char *message );
+static int sendall(int s, char *buf, int len);
+static int irc_query_connected (eb_account * account);
+static void irc_parse_incoming_message (eb_local_account * ela, char *buff);
+static void irc_parse (eb_local_account * ela, char *buff);
+static void irc_callback (void *data, int source, eb_input_condition condition);
+static void irc_ask_after_users ( eb_local_account * account );
+static int irc_keep_alive( gpointer data );
+static void irc_login( eb_local_account * account);
+static void irc_logout( eb_local_account * ela );
+static void irc_send_im( eb_local_account * account_from, eb_account * account_to,char *message );
 static eb_local_account * irc_read_local_config(LList * pairs);
-       static LList * irc_write_local_config( eb_local_account * account );
-  static eb_account * irc_read_config(eb_account *ea, LList *config );
-       static LList * irc_get_states();
-          static int irc_get_current_state(eb_local_account * account );
-          static void irc_set_current_state(eb_local_account * account, int state );
-        static char * irc_check_login(char * user, char * pass);
-          static void irc_add_user( eb_account * account );
-          static void irc_del_user( eb_account * account );
-      static int irc_is_suitable (eb_local_account *local, eb_account *remote);
-	static eb_account * irc_new_account(eb_local_account *ela, const char * account );
-       static char * irc_get_status_string( eb_account * account );
-          static char ** irc_get_status_pixmap( eb_account * account);
-          static void irc_set_idle(eb_local_account * account, int idle );
-          static void irc_set_away( eb_local_account * account, char * message);
-          static void irc_send_file( eb_local_account * from, eb_account * to, char * file );
-          static void irc_info_update(info_window * iw);
-          static void irc_info_data_cleanup(info_window * iw);
-          static void irc_get_info( eb_local_account * account_from, eb_account * account_to);
-          static void irc_join_chat_room(eb_chat_room *room);
-          static void irc_leave_chat_room(eb_chat_room *room);
-          static void irc_send_chat_room_message(eb_chat_room *room, char *message);
-          static void irc_send_invite( eb_local_account * account, eb_chat_room * room, char * user, char * message);
+static LList * irc_write_local_config( eb_local_account * account );
+static eb_account * irc_read_config(eb_account *ea, LList *config );
+static LList * irc_get_states();
+static int irc_get_current_state(eb_local_account * account );
+static void irc_set_current_state(eb_local_account * account, int state );
+static char * irc_check_login(char * user, char * pass);
+static void irc_add_user( eb_account * account );
+static void irc_del_user( eb_account * account );
+static int irc_is_suitable (eb_local_account *local, eb_account *remote);
+static eb_account * irc_new_account(eb_local_account *ela, const char * account );
+static char * irc_get_status_string( eb_account * account );
+static char ** irc_get_status_pixmap( eb_account * account);
+static void irc_set_idle(eb_local_account * account, int idle );
+static void irc_set_away( eb_local_account * account, char * message);
+static void irc_send_file( eb_local_account * from, eb_account * to, char * file );
+static void irc_info_update(info_window * iw);
+static void irc_info_data_cleanup(info_window * iw);
+static void irc_get_info( eb_local_account * account_from, eb_account * account_to);
+static void irc_join_chat_room(eb_chat_room *room);
+static void irc_leave_chat_room(eb_chat_room *room);
+static void irc_send_chat_room_message(eb_chat_room *room, char *message);
+static void irc_send_invite( eb_local_account * account, eb_chat_room * room, char * user, char * message);
 static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account, int is_public);
-          static void irc_accept_invite( eb_local_account * account, void * invitation );
-          static void irc_decline_invite( eb_local_account * account, void * invitation );
-          static void eb_irc_read_prefs_config(LList * values);
-       static LList * eb_irc_write_prefs_config();
+static void irc_accept_invite( eb_local_account * account, void * invitation );
+static void irc_decline_invite( eb_local_account * account, void * invitation );
+static void eb_irc_read_prefs_config(LList * values);
+static LList * eb_irc_write_prefs_config();
 
 /* taken from X-Chat 1.6.4: src/common/util.c */
 /* Added: stripping of CTCP/2 color/formatting attributes, which is
@@ -417,7 +417,8 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		ia->status = IRC_OFFLINE;
 		strncpy(ia->server, ila->server, 255);
 		ea->protocol_account_data = ia;
-		add_unknown_with_name(ea, orig_nick);
+		ea->ela = ela;
+		add_dummy_contact(orig_nick, ea);
 	}
 
 	ia = (irc_account *)ea->protocol_account_data;
@@ -1578,22 +1579,13 @@ static eb_account * irc_new_account(eb_local_account *ela, const char * account 
 	}
 	else
 	{
-		fprintf(stderr, "Warning - IRC account name without @server part,\n"
-				"picking first local account's server\n");
-
-		for( node = accounts; node; node = node->next )
+		if (ela->service_id == SERVICE_INFO.protocol_id)
 		{
-			eb_local_account * ela = (eb_local_account *)(node->data);
-		
-			if (ela->service_id == SERVICE_INFO.protocol_id)
-			{
-				irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
+			irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
 
-				strncpy(ia->server, ila->server, 254);
-				strncat(ea->handle, "@", 254-strlen(ea->handle));
-				strncat(ea->handle, ia->server, 254-strlen(ea->handle));
-				break;
-			}
+			strncpy(ia->server, ila->server, 254);
+			strncat(ea->handle, "@", 254-strlen(ea->handle));
+			strncat(ea->handle, ia->server, 254-strlen(ea->handle));
 		}
 	}
 
@@ -1900,23 +1892,15 @@ static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account
 	}
 	else
 	{
-		fprintf(stderr, "Warning - chat_room name without @server part,\n"
-				"picking first local account's server\n");
-
-		for( node = accounts; node; node = node->next )
+		if (account->service_id == SERVICE_INFO.protocol_id)
 		{
-			eb_local_account * ela = (eb_local_account *)(node->data);
-		
-			if (ela->service_id == SERVICE_INFO.protocol_id)
-			{
-				irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
+			irc_local_account * ila = (irc_local_account *)account->protocol_local_account_data;
 
-				chatroom_server = strdup(ila->server);
-				strncat(channelname, "@", strlen(name)+100-strlen(channelname));
-				strncat(channelname, chatroom_server, strlen(name)+100-strlen(channelname));
-				break;
-			}
-		}
+			chatroom_server = strdup(ila->server);
+			strncat(channelname, "@", strlen(name)+100-strlen(channelname));
+			strncat(channelname, chatroom_server, strlen(name)+100-strlen(channelname));
+		} else 
+			return NULL;
 	}
 
 	g_strdown(channelname);
@@ -1938,7 +1922,7 @@ static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account
 	strncpy(ecr->room_name, channelname, sizeof(ecr->room_name));
 
 	ecr->connected = 0;
-	ecr->local_user = irc_search_for_local_account (chatroom_server);
+	ecr->local_user = account;
 
 	eb_join_chat_room(ecr);
 
