@@ -1,3 +1,7 @@
+* Sun Oct  5 2003 22:05 GMT [colin]   0.4.2-9
+- modules/jabber
+more MULTI_ACCOUNT fixes
+
 * Sat Oct  4 2003 11:05 GMT [colin]   0.4.2-8
 - modules/jabber
 Jabber typing notifications

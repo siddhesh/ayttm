@@ -197,12 +197,12 @@ void jabber_callback_handler(void *data, int source, eb_input_condition cond)
     /* Is this connection still good? */
     if(!JConn->conn) {
 	eb_debug(DBG_JBR, "Logging out because JConn->conn is NULL\n");
-        JABBERLogout(NULL);
+        JABBERLogout(JConn);
         eb_input_remove(JConn->listenerID);
     }
     else if(JConn->conn->state==JCONN_STATE_OFF || JConn->conn->fd==-1) {
         /* No, clean up */
-        JABBERLogout(NULL);
+        JABBERLogout(JConn);
         eb_input_remove(JConn->listenerID);
         jab_delete(JConn->conn);
         JConn->conn=NULL;
@@ -254,7 +254,7 @@ int JABBER_Login(char *handle, char *passwd, char *host, int use_ssl, int port) 
 	if(!JConn->conn) {
 		snprintf(buff, 4096, "Connection to server '%s' failed.", host);
 		JABBERError(buff, _("Jabber Error"));
-		JABBERNotConnected(NULL);
+		JABBERNotConnected(JConn);
 		free(JConn);
 		return(0);
 	}
@@ -262,7 +262,7 @@ int JABBER_Login(char *handle, char *passwd, char *host, int use_ssl, int port) 
 	{
 		snprintf( buff, 4096, "Error connecting to server '%s':\n   Invalid user name.", host );
 		JABBERError( buff, _("Jabber Error") );
-		JABBERNotConnected( NULL );
+		JABBERNotConnected( JConn );
 		free( JConn );
 		return( 0 );
 	}
@@ -426,11 +426,12 @@ int JABBER_Logout(JABBER_Conn *JConn) {
 			jab_stop(JConn->conn);
 			jab_delete(JConn->conn);
 		}
+		JABBERLogout(JConn);
 		JConn->conn=NULL;
 		JCremoveConn(JConn);
 	}
 	eb_debug(DBG_JBR,  "Leaving\n");
-	JABBERLogout(NULL);
+	
 	return(0);
 }
 
@@ -1072,13 +1073,13 @@ void j_on_state_handler(jconn conn, int state) {
 			eb_input_remove(JConn->listenerID);
 			/* FIXME: Do we need to free anything? */
 			j_remove_agents_from_host(JCgetServerName(JConn));
+			JABBERLogout(JConn);
 			JConn->conn=NULL;
-			JABBERLogout(NULL);
 		}
 		else if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
 			snprintf(buff, 4096, _("Connection to the jabber server %s failed!"), conn->user->server);
 			JABBERError(buff, _("Jabber server not responding"));
-			JABBERLogout(NULL);
+			JABBERLogout(JConn);
 			jab_delete(JConn->conn);
 			JConn->conn=NULL;
 		}
