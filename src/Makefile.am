@@ -11,7 +11,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	plugin_api.c plugin.c file_select.c contact_actions.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
-	offline_queue_mgmt.c tcp_util.c image_window.c
+	offline_queue_mgmt.c tcp_util.c image_window.c print.c print.h
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \

@@ -32,6 +32,7 @@
 #include "smileys.h"
 #include "service.h"
 #include "add_contact_window.h"
+#include "print.h"
 
 #ifdef HAVE_ISPELL
 #include "gtk/gtkspell.h"
@@ -42,7 +43,7 @@
 #include "pixmaps/ok.xpm"
 #include "pixmaps/tb_volume.xpm"
 #include "pixmaps/smiley_button.xpm"
-
+#include "pixmaps/print.xpm"
 
 LList * chat_rooms = NULL;
 
@@ -820,6 +821,12 @@ static void destroy_chat_window(GtkWidget * widget, gpointer data)
 	gtk_widget_destroy(ecr->window);
 }
 
+static void print_callback(GtkWidget *widget, gpointer d)
+{
+	eb_chat_room * ecr = (eb_chat_room *)d;
+	print_conversation(ecr->loginfo);
+}
+
 static void _show_smileys_cb(GtkWidget * widget, smiley_callback_data *data)
 {
 	show_smileys_cb(data);
@@ -839,6 +846,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	GtkWidget * iconwid;
 	GtkWidget * send_button;
 	GtkWidget * close_button;
+	GtkWidget * print_button;
 	GtkWidget * separator;
 	GtkWidget * entry_box;
 	gboolean    enableSoundButton = FALSE;
@@ -985,35 +993,34 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_container_set_border_width(GTK_CONTAINER(toolbar), 0);
 	gtk_toolbar_set_space_size(GTK_TOOLBAR(toolbar), 5);
 	
+#define TOOLBAR_APPEND(txt,icn,cbk,cwx) \
+	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),txt,txt,txt,icn,GTK_SIGNAL_FUNC(cbk),cwx); 
+#define TOOLBAR_SEPARATOR() {\
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));\
+	separator = gtk_vseparator_new();\
+	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);\
+	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL, NULL);\
+	gtk_widget_show(separator);\
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); }
+#define ICON_CREATE(icon,iconwid,xpm) {\
+	icon = gdk_pixmap_create_from_xpm_d(chat_room->window->window, &mask, NULL, xpm); \
+	iconwid = gtk_pixmap_new(icon, mask); \
+	gtk_widget_show(iconwid); }
+
 	/* smileys */
 	if ( iGetLocalPref("do_smiley") ) {
 		smiley_callback_data * scd = g_new0(smiley_callback_data,1);
 		scd->c_room = chat_room;
 		scd->c_window = NULL;
-		icon = gdk_pixmap_create_from_xpm_d(chat_room->window->window, 
-						&mask, NULL, smiley_button_xpm);
-		iconwid = gtk_pixmap_new(icon, mask);
-		gtk_widget_show(iconwid);
-		chat_room->smiley_button = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-							    _("Smiley"),
-							    _("Insert Smiley"),
-							    _("Smiley"),
-							    iconwid,
-							    GTK_SIGNAL_FUNC(_show_smileys_cb),
-							    scd);
+		ICON_CREATE(icon, iconwid, smiley_button_xpm);
+		chat_room->smiley_button = 
+			TOOLBAR_APPEND(_("Insert Smiley"), iconwid, _show_smileys_cb, scd);
 		/*Create the separator for the toolbar*/
 
-		gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
-		separator = gtk_vseparator_new();
-		gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);
-		gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL, NULL);
-		gtk_widget_show(separator);
-		gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+		TOOLBAR_SEPARATOR();
 	}
 
-	icon = gdk_pixmap_create_from_xpm_d(chat_room->window->window, &mask, NULL, tb_volume_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
+	ICON_CREATE(icon, iconwid, tb_volume_xpm);
 	
   	chat_room->sound_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 						GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
@@ -1048,36 +1055,21 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON( chat_room->sound_button ), 
 				     enableSoundButton );
 
-	icon = gdk_pixmap_create_from_xpm_d(chat_room->window->window, &mask, NULL, tb_mail_send_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
 
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
-	separator = gtk_vseparator_new();
-	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);
-	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL, NULL);
-	gtk_widget_show(separator);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+	ICON_CREATE(icon, iconwid, print_xpm);
+	print_button = TOOLBAR_APPEND(_("Print"), iconwid, print_callback, chat_room);
 
-	send_button = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), 
-				"send",
-				_("Send Message"),
-				"send",
-				iconwid,
-				GTK_SIGNAL_FUNC(send_cr_message),
-				chat_room);
+	TOOLBAR_SEPARATOR();
+
+	ICON_CREATE(icon, iconwid, tb_mail_send_xpm);
+	send_button = TOOLBAR_APPEND(_("Send Message"), iconwid, send_cr_message, chat_room);
 	
-	icon = gdk_pixmap_create_from_xpm_d(chat_room->window->window, &mask, NULL, cancel_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
+	ICON_CREATE(icon, iconwid, cancel_xpm);
 
-	close_button = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-				"close",
-				_("Close"),
-				"close",
-				iconwid,
-				GTK_SIGNAL_FUNC(destroy_chat_window),
-				chat_room);
+	TOOLBAR_SEPARATOR();
+	
+	close_button = TOOLBAR_APPEND(_("Close"), iconwid, destroy_chat_window, chat_room);
 	
 	chat_room->status_label = gtk_label_new(" ");
 	gtk_box_pack_start(GTK_BOX(hbox2), chat_room->status_label, FALSE, FALSE, 0);
@@ -1099,6 +1091,10 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 
 	/*then mark the fact that we have joined that room*/
 	chat_room->connected = 1;
+
+#undef TOOLBAR_APPEND
+#undef ICON_CREATE
+#undef TOOLBAR_SEPARATOR
 	
 	/* actually call the callback :P .... */
 	if (!chat_room) {
@@ -1117,7 +1113,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		eb_debug(DBG_CORE,"!RUN_SERVICE(chat_room->local_user)->join_chat_room\n");
 		return;
 	}
-	
+		
 	init_loginfo(chat_room);
 	RUN_SERVICE(chat_room->local_user)->join_chat_room(chat_room);
 	gtk_widget_grab_focus(chat_room->entry);
@@ -1137,6 +1133,7 @@ static void init_loginfo(eb_chat_room *chat_room)
 		chat_room->loginfo->log_started = 0;
 		if ((chat_room->loginfo->fp = fopen(buff, "a")) == NULL)
 			perror(buff);
+		chat_room->loginfo->filepos=0;
 	}
 }
 

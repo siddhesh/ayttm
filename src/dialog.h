@@ -96,6 +96,7 @@ void do_error_dialog(char *message, char *title);
 void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widget, gpointer data), gpointer data );
 void do_list_dialog( gchar * message, gchar * title, char **list, void (*action)(char * text, gpointer data), gpointer data );
 void do_text_input_window( gchar * title, gchar * value, void (*action)(char * text, gpointer data), gpointer data );
+void do_text_input_window_multiline( gchar * title, gchar * value, int ismulti, void (*action)(char * text, gpointer data), gpointer data );
 void eb_icon(GdkWindow *);
 GtkWidget * do_icon_button (char *label, char **xpm, GtkWidget *w);
 

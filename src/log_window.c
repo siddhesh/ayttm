@@ -41,8 +41,11 @@
 #include "log_window.h"
 #include "util.h"
 #include "prefs.h"
+#include "print.h"
 
 #include "pixmaps/cancel.xpm"
+#include "pixmaps/print.xpm"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
@@ -118,14 +121,16 @@ void eb_log_load_information(log_window* lw)
   gchar date_buffer[128];
   gchar* p3[1];
   GSList* gl = NULL, *gl1 = NULL;
+  char posbuf[128];
   gint idx;
   gboolean empty = TRUE;
   
   gtk_clist_freeze(GTK_CLIST(lw->date_list)); /* freeze, thaw?  So corny. */
 
-  if (lw->remote)
+  if (lw->remote) {
 	  make_safe_filename(name_buffer, lw->remote->nick, lw->remote->group->name);
-  else if (lw->filename)
+	  lw->filename = strdup(name_buffer);
+  } else if (lw->filename)
 	  strncpy(name_buffer, lw->filename, sizeof(name_buffer));
   else
 	  return;
@@ -133,6 +138,8 @@ void eb_log_load_information(log_window* lw)
   if ( (fp = fopen(name_buffer, "r")) != NULL) {
     gl = g_slist_alloc();
 
+    lw->fp = fp;
+    
     while (fgets(read_buffer, 4096, fp) != NULL) {
       empty=FALSE;	    
       if ((p1 = strstr(read_buffer, _("Conversation started on "))) != NULL) 
@@ -161,29 +168,33 @@ void eb_log_load_information(log_window* lw)
 
 	/* add new gslist entry */
 	gl1 = g_slist_alloc();
+	snprintf(posbuf, sizeof(posbuf), "%lu", ftell(fp));
 	gl = g_slist_append(gl, gl1);	
-
+	gl1 = g_slist_append(gl1, strdup(posbuf));
+	printf("%s at %s\n", p3[0],posbuf);
+	
 	/* set the datapointer for the clist */
 	gtk_clist_set_row_data(GTK_CLIST(lw->date_list), idx, gl1);
       } else if ((p1 = strstr(read_buffer, _("Conversation ended on "))) == NULL) {
 	if (gl1 != NULL) {
-	  gl1 = g_slist_append(gl1, strdup(read_buffer));
+		gl1 = g_slist_append(gl1, strdup(read_buffer));
 	}
 	else
 	{
-			  char buff1[4096];
-			  p3[0] = _("Undated Log");
+		char buff1[4096];
+		p3[0] = _("Undated Log");
 
-			  	strncpy(buff1, read_buffer, sizeof(buff1));
-				idx = gtk_clist_append(GTK_CLIST(lw->date_list), p3);
+		strncpy(buff1, read_buffer, sizeof(buff1));
+		idx = gtk_clist_append(GTK_CLIST(lw->date_list), p3);
+		/* add new gslist entry */
+		snprintf(posbuf, sizeof(posbuf), "%lu", ftell(fp));
+		gl = g_slist_append(gl, gl1);	
+		gl1 = g_slist_append(gl1, strdup(posbuf));
+		printf("%s at %s\n", p3[0],posbuf);
 
-				/* add new gslist entry */
-				gl1 = g_slist_alloc();
-				gl = g_slist_append(gl, gl1);	
-
-				/* set the datapointer for the clist */
-				gtk_clist_set_row_data(GTK_CLIST(lw->date_list), idx, gl1);
-				gl1 = g_slist_append(gl1, strdup(buff1));
+		/* set the datapointer for the clist */
+		gtk_clist_set_row_data(GTK_CLIST(lw->date_list), idx, gl1);
+		gl1 = g_slist_append(gl1, strdup(buff1));
 	}
       }
     }
@@ -226,6 +237,19 @@ static void close_log_window_callback(GtkWidget* button, gpointer data)
   log_window* lw = (log_window*)data;
   gtk_widget_destroy(lw->window);
 }
+
+static void print_callback(GtkWidget *widget, gpointer d)
+{
+	log_window* lw = (log_window*)d;
+	log_info *li = g_new0(log_info, 1);
+	
+	li->filename = strdup(lw->filename);
+	li->log_started = 0;
+	li->fp = lw->fp;
+	li->filepos = lw->filepos;
+	print_conversation(li);
+}
+
 
 static gboolean search_callback(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
@@ -341,6 +365,16 @@ static void select_date_callback (GtkCList *clist, gint row, gint column,
   log_window* lw = (log_window*)user_data;
 
   string_list = (GSList*)gtk_clist_get_row_data(GTK_CLIST(clist), row);
+  while (string_list && !string_list->data)
+	  string_list = g_slist_next(string_list);
+  if (string_list && string_list->data) {
+	  lw->filepos = atol((char *)string_list->data);
+	  eb_debug(DBG_CORE,"filepos now %lu\n",lw->filepos);
+	  string_list = g_slist_next(string_list);
+  } else 
+	 eb_debug(DBG_CORE,"string_list->data null\n");
+
+  
   set_html_text(string_list, lw);
   current_row = row; last_pos=0;
 }
@@ -360,8 +394,11 @@ log_window* eb_log_window_new(struct contact *rc)
   GtkWidget* toolbar;
   GtkWidget* search_label;
   GtkWidget* search_entry;
+  GtkWidget* separator;
   lw->remote = rc;
   lw->filename = NULL;
+  lw->fp = NULL;
+  lw->filepos=0;
   
   if (rc)
 	  rc->logwindow = lw;
@@ -421,18 +458,29 @@ log_window* eb_log_window_new(struct contact *rc)
 
   
   /* close button*/
-  icon0 = gdk_pixmap_create_from_xpm_d(lw->window->window, &mask, NULL, cancel_xpm);
-  iconwid0 = gtk_pixmap_new(icon0, mask);
-  gtk_widget_show(iconwid0);
-  button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-				   GTK_TOOLBAR_CHILD_BUTTON,
-				   NULL,
-				   "close",
-				   "Close",
-				   "close",
-				   iconwid0,
-				   GTK_SIGNAL_FUNC(close_log_window_callback),
-				   lw);
+#define TOOLBAR_APPEND(txt,icn,cbk,cwx) \
+	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),txt,txt,txt,icn,GTK_SIGNAL_FUNC(cbk),cwx); 
+#define TOOLBAR_SEPARATOR() {\
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));\
+	separator = gtk_vseparator_new();\
+	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);\
+	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL, NULL);\
+	gtk_widget_show(separator);\
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); }
+#define ICON_CREATE(icon,iconwid,xpm) {\
+	icon = gdk_pixmap_create_from_xpm_d(lw->window->window, &mask, NULL, xpm); \
+	iconwid = gtk_pixmap_new(icon, mask); \
+	gtk_widget_show(iconwid); }
+	
+  gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+  
+  ICON_CREATE(icon0, iconwid0, print_xpm);
+  button = TOOLBAR_APPEND(_("Print"), iconwid0, print_callback, lw);
+
+  TOOLBAR_SEPARATOR();
+  ICON_CREATE(icon0, iconwid0, cancel_xpm);
+  button = TOOLBAR_APPEND(_("Close"), iconwid0, close_log_window_callback, lw);
+  
   gtk_widget_show(GTK_WIDGET(button));
   gtk_widget_show(GTK_WIDGET(toolbar));
 

@@ -55,6 +55,8 @@
 #include "smileys.h"
 #include "service.h"
 #include "log_window.h"
+#include "print.h"
+
 #ifdef HAVE_ISPELL
 #include "gtk/gtkspell.h"
 #endif
@@ -68,6 +70,8 @@
 #include "pixmaps/tb_mail_send.xpm"
 #include "pixmaps/cancel.xpm"
 #include "pixmaps/smiley_button.xpm"
+#include "pixmaps/print.xpm"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
@@ -595,6 +599,13 @@ static void view_log_callback(GtkWidget *widget, gpointer d)
 	eb_view_log(data->contact);
 }
 
+static void print_callback(GtkWidget *widget, gpointer d)
+{
+	chat_window* data = (chat_window*)d;
+	GET_CHAT_WINDOW(data);
+	print_conversation(data->loginfo);
+}
+
 /*This is the callback for ignoring a user*/
 
 static void ignore_dialog_callback (gpointer userdata, int response)
@@ -829,6 +840,14 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 				 GTK_SIGNAL_FUNC(view_log_callback), cw);
 		gtk_menu_append(GTK_MENU(menu), button);
 		gtk_widget_show(button);
+
+		button = gtk_menu_item_new_with_label(_("Print..."));
+		gtk_signal_connect(GTK_OBJECT(button), "activate",
+				 GTK_SIGNAL_FUNC(print_callback), cw);
+		gtk_menu_append(GTK_MENU(menu), button);
+		gtk_widget_show(button);
+
+		eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 
 		/*Send File Selection*/
 
@@ -1467,6 +1486,11 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 	
 	fseek(fp,lastlocation, SEEK_SET);
 
+	if (cw->loginfo) {
+		cw->loginfo->filepos = lastlocation;
+		eb_debug(DBG_CORE,"set cw->loginfo->filepos to %lu\n",cw->loginfo->filepos);
+	} 
+	
 	/* now we display the log */
 
 	ext_gtk_text_freeze(EXT_GTK_TEXT(cw->chat));
@@ -1674,6 +1698,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	GtkWidget *sendf_button;
 	GtkWidget *send_button;
 	GtkWidget *view_log_button;
+	GtkWidget *print_button;
 	GtkWidget *close_button;
 	GtkWidget *ignore_button;
 	GtkWidget *iconwid;
@@ -1795,7 +1820,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 					tab_cw->chat->allocation.width, 
 					tab_cw->chat->allocation.height);
 	else
-		gtk_widget_set_usize(cw->chat, 375, 150);
+		gtk_widget_set_usize(cw->chat, 400, 150);
+
 	gtk_container_add(GTK_CONTAINER(scrollwindow), cw->chat);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
 				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
@@ -1822,7 +1848,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 						tab_cw->entry->allocation.width, 
 						tab_cw->entry->allocation.height);
 		else
-			gtk_widget_set_usize(cw->entry, 375, 50);
+			gtk_widget_set_usize(cw->entry, 400, 50);
 		gtk_container_add(GTK_CONTAINER(scrollwindow), cw->entry);
 
 		gtk_text_set_editable(GTK_TEXT(cw->entry), TRUE);
@@ -1970,16 +1996,23 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 				   GTK_ACCEL_VISIBLE);
 	gtk_menu_append(GTK_MENU(menu), button);
 
-	/*** MIZHI
-	 * view log file selection
-	 */
-
 	button = gtk_menu_item_new_with_label(_("View log"));
 	gtk_signal_connect(GTK_OBJECT(button), "activate",
 			   GTK_SIGNAL_FUNC(view_log_callback),
 			   cw);
+
 	gtk_widget_add_accelerator(button, "activate", accel_group, 
 				   GDK_l, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
+	gtk_menu_append(GTK_MENU(menu), button);
+
+	button = gtk_menu_item_new_with_label(_("Print..."));
+	gtk_signal_connect(GTK_OBJECT(button), "activate",
+			   GTK_SIGNAL_FUNC(print_callback),
+			   cw);
+
+	gtk_widget_add_accelerator(button, "activate", accel_group, 
+				   GDK_p, GDK_CONTROL_MASK,
 				   GTK_ACCEL_VISIBLE);
 	gtk_menu_append(GTK_MENU(menu), button);
 
@@ -2069,14 +2102,15 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	cw_set_sound_active(cw, enableSoundButton);
 
-	TOOLBAR_SEPARATOR();
-	/*** MIZHI
-	 * create the button for the log viewing functions
-	 */
-
 	ICON_CREATE(icon, iconwid, tb_search_xpm);
 	view_log_button = TOOLBAR_APPEND(_("View Log CTRL+L"), iconwid, view_log_callback, cw);
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
+
+	ICON_CREATE(icon, iconwid, print_xpm);
+	print_button = TOOLBAR_APPEND(_("Print CTRL+P"), iconwid, print_callback, cw);
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
+
+	TOOLBAR_SEPARATOR();
 
 	/*This is the send file button*/
 
@@ -2108,6 +2142,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	}
 	
 #undef TOOLBAR_APPEND
+#undef ICON_CREATE
+#undef TOOLBAR_SEPARATOR
 	
 	cw->status_label = gtk_label_new(" ");
 	gtk_box_pack_start(GTK_BOX(hbox), cw->status_label, FALSE, FALSE, 0);
@@ -2124,9 +2160,14 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	cw->loginfo = g_new0(log_info, 1);
 	cw->loginfo->filename = strdup(buff);
 	cw->loginfo->log_started = 0;
-	if ((cw->loginfo->fp = fopen(buff, "a")) == NULL)
+	if ((cw->loginfo->fp = fopen(buff, "a")) == NULL) {
 		perror(buff);
-
+		cw->loginfo->filepos=0;
+	} else {
+		cw->loginfo->filepos=ftell(cw->loginfo->fp);
+		eb_debug(DBG_CORE,"init set filepos to %lu\n",cw->loginfo->filepos);
+	}
+	
 	gtk_widget_show(cw->chat);
 	gtk_widget_show(cw->entry);
 

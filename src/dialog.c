@@ -482,19 +482,29 @@ static void input_window_ok(GtkWidget * widget, gpointer data)
 	text_input_window * window = (text_input_window*)data;
 	char * text = gtk_editable_get_chars(GTK_EDITABLE(window->text), 0, -1);
 	window->callback(text, window->data);
+	g_free(text);
 }
 
 void do_text_input_window(gchar * title, gchar * value, 
 		void (*action)(char * text, gpointer data), 
 		gpointer data )
 {
+	do_text_input_window_multiline(title, value, 1, action, data);
+}
+
+void do_text_input_window_multiline(gchar * title, gchar * value, 
+		int ismulti,
+		void (*action)(char * text, gpointer data), 
+		gpointer data )
+{
 	GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
-	GtkWidget * frame = gtk_frame_new(NULL); 
+	GtkWidget * label; 
 	GtkWidget * hbox;
 	GtkWidget * hbox2;
 	GtkWidget * separator;
 	GtkWidget * button;
-
+	int dummy;
+	char *window_title;
 	text_input_window * input_window = g_new0(text_input_window, 1);
 	input_window->callback = action;
 	input_window->data = data;
@@ -504,20 +514,26 @@ void do_text_input_window(gchar * title, gchar * value,
     	gtk_widget_realize(input_window->window);
 
 	gtk_container_set_border_width(GTK_CONTAINER(input_window->window), 5);
-	gtk_frame_set_label(GTK_FRAME(frame), title);
+	label = gtk_label_new(title);
 
-	input_window->text = gtk_text_new(NULL, NULL);
-	gtk_widget_set_usize(input_window->text, 400, 200);
-	gtk_text_insert(GTK_TEXT(input_window->text),
-			NULL, NULL, NULL, value, strlen(value));
-	gtk_text_set_editable(GTK_TEXT(input_window->text),
+	if (ismulti)
+		input_window->text = gtk_text_new(NULL, NULL);
+	else
+		input_window->text = gtk_entry_new();
+	
+	gtk_widget_set_usize(input_window->text, 400, ismulti?200:-1);
+	gtk_editable_insert_text(GTK_EDITABLE(input_window->text),
+				 value, strlen(value), &dummy);
+	gtk_editable_set_editable(GTK_EDITABLE(input_window->text),
 			TRUE);
 
-	gtk_container_add(GTK_CONTAINER(frame), input_window->text);
+	gtk_widget_show(label);
 	gtk_widget_show(input_window->text);
 
-	gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
-	gtk_widget_show(frame);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+	gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), input_window->text, TRUE, TRUE, 0);
 
 
 	separator = gtk_hseparator_new();
@@ -551,7 +567,12 @@ void do_text_input_window(gchar * title, gchar * value,
 	gtk_container_add(GTK_CONTAINER(input_window->window), vbox);
 	gtk_widget_show(vbox);
 
-    	gtk_window_set_title(GTK_WINDOW(input_window->window), title);
+	if (strstr(title,"\n")) 
+		window_title = g_strndup(title, (int)(strstr(title,"\n") - title));
+	else
+		window_title = g_strdup(title);
+    	gtk_window_set_title(GTK_WINDOW(input_window->window), window_title);
+	g_free(window_title);
 	eb_icon(input_window->window->window);
 
 	gtk_signal_connect(GTK_OBJECT(input_window->window), "destroy",

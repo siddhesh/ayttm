@@ -17,6 +17,7 @@ src/nomodule.c
 src/plugin.c
 src/prefs.c
 src/prefs_window.c
+src/print.c
 src/progress_window.c
 src/status.c
 src/trigger.c

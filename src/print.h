@@ -21,48 +21,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-
-/*
- * log_window.h
- */
-#ifndef __LOG_WINDOW_H
-#define __LOG_WINDOW_H
-
-#include <gtk/gtk.h>
-#include <glib.h>
+ 
+#include "intl.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkkeysyms.h>
+#include <assert.h>
+#include <ctype.h>
+#include <time.h>
 
-struct contact;
+#include "globals.h"
+#include "gtk/gtk_eb_html.h"
+#include "log_window.h"
 
-typedef struct _log_window
-{
-  GtkWidget* window;
-  GtkWidget* date_list;
-  GtkWidget* date_scroller;
-  GtkWidget* html_display;
-  GtkWidget* html_scroller;
-  GtkWidget* date_html_hbox;
+typedef struct _print_window {
+	log_info *loginfo;
+	long oldpos;
+} print_window;
 
-  GtkWidget* close_button;
-  struct contact* remote;
-  char *filename;
-  GSList* entries;   /* list of gslists */
-  FILE *fp;
-  long filepos;
-} log_window;
-
-typedef struct _log_info
-{
-  FILE *fp;
-  char *filename;
-  int log_started;
-  long filepos;
-} log_info;
-
-//log_window* eb_log_window_new(struct _chat_window* cw);
-log_window* eb_log_window_new(struct contact* rc);
-void log_parse_and_add(char *buff, void *text);
-void eb_log_load_information(log_window* lw);
-void eb_log_message(log_info *loginfo, gchar buff[], gchar *message);
-void eb_log_close(log_info *loginfo);
-#endif
+void print_conversation(log_info *loginfo);

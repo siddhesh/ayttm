@@ -391,6 +391,7 @@ static void write_general_prefs(FILE *fp)
     fprintf(fp,"x_contact_window=%d\n", iGetLocalPref("x_contact_window"));
     fprintf(fp,"y_contact_window=%d\n", iGetLocalPref("y_contact_window"));
     fprintf(fp,"status_show_level=%d\n", iGetLocalPref("status_show_level"));
+    fprintf(fp, "print_cmd=%s\n", cGetLocalPref("print_cmd"));
 #ifdef HAVE_ISPELL
     fprintf(fp,"do_spell_checking=%d\n", do_spell_checking) ;
     if (do_spell_checking) {
@@ -2204,7 +2205,8 @@ void eb_read_prefs()
 	cSetLocalPref("SendFilename", SendDefault);
 #endif
 	iSetLocalPref("FontSize", font_size_def);
-
+	cSetLocalPref("print_cmd", "html2ps %s | lpr");
+	
 	g_snprintf(buff, 1024, "%sprefs",config_dir);
 	fp = fopen(buff, "r");
 	if(!fp)
