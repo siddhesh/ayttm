@@ -6,7 +6,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	account.c info_window.c chat_window.c util.c add_contact_window.c \
 	edit_contact_window.c edit_account_window.c  sound.c dialog.c \
 	prefs.c prefs_window.c away_window.c browser.c message_parse.c \
-	progress_window.c activity_bar.C \
+	activity_bar.C \
 	chat_room.c value_pair.c edit_group_window.c log_window.c \
 	trigger.c console_session.c input_list.c nomodule.c \
 	plugin_api.c plugin.c file_select.c contact_actions.c \
@@ -16,7 +16,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
-	sound.h dialog.h prefs.h prefs_window.h progress_window.h away_window.h\
+	sound.h dialog.h prefs.h prefs_window.h away_window.h\
 	message_parse.h help_menu.h chat_room.h value_pair.h log_window.h \
 	info_window.h log_window.h trigger.h console_session.h \
 	browser.h input_list.h plugin.h plugin_api.h debug.h \

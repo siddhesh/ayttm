@@ -1,3 +1,8 @@
+* Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-76
+- src/Makefile.am
+  src/progress_window.[ch] ** REMOVED **
+Remove old progress_window
+
 * Wed Apr 09 2003 13:20 GMT [andy]	0.2.3-75
 - modules/jabber/jabber.c
   modules/jabber/libEBjabber.c
