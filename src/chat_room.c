@@ -338,11 +338,17 @@ static GList * chat_service_list()
 static void invite_callback( GtkWidget * widget, gpointer data )
 {
 	eb_chat_room * ecr = data;
+	char *acc = NULL;
+	char * invited = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(ecr->invite_buddy)->entry),0,-1);
+	if (!strstr(invited, "(") || !strstr(invited, ")"))
+		return;
+	acc = strstr(invited, "(")+1;
+	*strstr(acc, ")") = '\0';
 	RUN_SERVICE(ecr->local_user)->send_invite(
 				ecr->local_user, ecr,
-				gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(ecr->invite_buddy)->entry)),
+				acc,
 				gtk_entry_get_text(GTK_ENTRY(ecr->invite_message)));
-
+	g_free(invited);
 	gtk_widget_destroy(ecr->invite_window);
 }
 
@@ -1230,7 +1236,9 @@ static LList * get_group_contacts(gchar *group, eb_chat_room * room)
 		while (accounts) {
 			if( ((struct account *)accounts->data)->ela == room->local_user
 			&&  ((struct account *)accounts->data)->online) {
-				newlist = l_list_append(newlist, ((struct account *)accounts->data)->handle);	
+				char *buf = g_strdup_printf("%s (%s)", contact->nick, 
+						((struct account *)accounts->data)->handle);
+				newlist = l_list_append(newlist, buf);	
 			}
 			accounts = accounts->next;
 		}

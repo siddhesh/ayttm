@@ -1,4 +1,8 @@
-* Fri May  2 2003 09:51 GMT [philip]	0.3.0-99
+* Fri May  2 2003 14:04 GMT [colin]	0.3.0-99
+- src/chat_room.c
+Display c->nick with a->handle
+
+* Fri May  2 2003 14:04 GMT [colin]	0.3.0-99
 - modules/msn2
 Fix connection failing silently
 
