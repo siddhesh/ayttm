@@ -43,6 +43,7 @@ static void save_action(char *action);
 
 static void action_do_action(char * value, void * data)
 {
+#ifndef __MINGW32__
 	char *filename_html;
 	char *filename_plain;
 	char **files = data;
@@ -99,6 +100,7 @@ static void action_do_action(char * value, void * data)
 		do_error_dialog(_("Cannot run command : fork() failed."), _("Action error"));
 		perror("fork");
 	}		
+#endif
 }
 
 static void action_prepare(GtkWidget *w, void *data)
@@ -111,6 +113,7 @@ static void action_prepare(GtkWidget *w, void *data)
 
 void conversation_action(log_info *li, int to_end)
 {
+#ifndef __MINGW32__
 	char buf[4096], *output_html, *output_plain;
 	int firstline = 1;
 	char *tempdir = NULL;
@@ -202,6 +205,7 @@ void conversation_action(log_info *li, int to_end)
 	g_free(output_html);
 	g_free(output_plain);
 	fclose(loginfo->fp);
+#endif
 }
 
 static void add_command_cb(GtkWidget * w, void * a)

@@ -91,10 +91,7 @@ class ay_prefs_window
 			PANEL_CHAT_GENERAL,
 			PANEL_CHAT_TABS,
 			PANEL_PROXY,
-#ifdef HAVE_ICONV_H
 			PANEL_ENCODING,
-#endif
-			
 			PANEL_MAX
 		};
 
