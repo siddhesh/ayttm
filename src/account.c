@@ -149,7 +149,8 @@ int load_accounts_from_file(const char *file)
 	FILE * fp;
 	extern int accountparse();
 	extern FILE * accountin;
-	LList *accounts_old = accounts;
+	char buff[1024];
+	LList *accounts_old = accounts, *naccounts = NULL;
 
 	if(!(fp = fopen(file,"r")))
 		return 0;
@@ -163,9 +164,24 @@ int load_accounts_from_file(const char *file)
 		LList *walk = accounts_old;
 		for (; walk; walk = walk->next) 
 			accounts = l_list_append(accounts, walk->data);
-		ay_set_submenus();
-		ay_edit_local_accounts();		
 	}
+	fp = NULL;
+	naccounts = accounts;
+	g_snprintf(buff, 1024, "%saccounts", eb_config_dir());
+	fp = fdopen(creat(buff, 0700), "w");
+	while (fp && naccounts) {
+		LList *config = NULL;
+		eb_local_account *ela = (eb_local_account *)(naccounts->data);
+		config = RUN_SERVICE(ela)->write_local_config(ela);
+
+		fprintf(fp, "<ACCOUNT %s>\n", get_service_name(ela->service_id));
+		value_pair_print_values(config, fp, 1);
+		fprintf(fp, "</ACCOUNT>\n");
+
+		naccounts = naccounts->next;
+	}
+	fclose(fp);
+	ay_set_submenus();
 	return accounts != NULL;
 }
 

@@ -1,3 +1,15 @@
+* Sat Jul 05 2003 13:14 GMT [colin]	0.3.2-2
+- src/status.c
+Fix "Set status" sensitivity
+- src/plugin_api.h
+Allow modules to set menu sensitivity
+- src/main.c src/edit_local_accounts.c
+Allow no local account
+- src/account.c
+Save local accounts after load_accounts_from_file()
+- modules/importers/import_everybuddy.c
+Update menus after importing
+
 * Fri Jul 04 2003 11:19 GMT [colin]	0.3.2-1
 Release :)
 

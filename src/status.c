@@ -1926,6 +1926,7 @@ void set_menu_sensitivity(void)
 {
 	int online = connected_local_accounts();
 	
+	menu_set_sensitive(main_menu_factory, N_("/Chat/Set status"), l_list_length(accounts));
 	menu_set_sensitive(main_menu_factory, N_("/Chat/New group chat..."), online);
 	menu_set_sensitive(main_menu_factory, N_("/Chat/Set as away..."), online);
 	menu_set_sensitive(main_menu_factory, N_("/Chat/Sign off all"), online);

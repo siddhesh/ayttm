@@ -478,15 +478,10 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 
 	gtk_widget_destroy(account_window);
 
-	/* if this was an initial launch, start up EB */
-	if (!had_accounts) {
-		load_accounts();
-		load_contacts();
-		eb_status_window();
-	} else {
-		load_accounts();
-		rebuild_set_status_menu();
-	}
+	load_accounts();
+	rebuild_set_status_menu();
+	set_menu_sensitivity();
+	
 	ay_restore_account_information(saved_acc_info);
 	l_list_free(saved_acc_info);
 }

@@ -155,12 +155,12 @@ char config_dir[1024] = "";
 
 static void start_login(gboolean new)
 {
+	eb_status_window();
+
    	if (new)
 		ay_edit_local_accounts();
-	else {
-		eb_status_window();
+	else
 		eb_sign_on_startup() ;
-	}
 }
  
 int main(int argc, char *argv[])
@@ -511,7 +511,7 @@ int main(int argc, char *argv[])
 	load_modules();
 
 	accounts_success = load_accounts();
-	if (accounts_success)
+	//if (accounts_success)
 		load_contacts();
 
 	start_login(!accounts_success);

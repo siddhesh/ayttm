@@ -62,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"Everybuddy Settings", 
 	"Imports your Everybuddy settings into Ayttm", 
-	"$Revision: 1.10 $",
-	"$Date: 2003/05/06 17:04:47 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/07/05 13:18:32 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -116,14 +116,16 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 	
 	char buff[1024];
 	int a=0,c=0,p=0,m=0;
+	
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(accountsbutton))) {
 		snprintf(buff, 1024, "%s/.everybuddy/accounts", getenv("HOME"));
 		if (!load_accounts_from_file(buff)) {
 			ay_do_error(_("Import error"), _("Cannot import accounts.\n"
 					"Check that ~/.everybuddy/accounts exists "
 					"and is readable."));
-		} else
+		} else {
 			a=1;
+		}
 	}
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(contactsbutton))) {
 		snprintf(buff, 1024, "%s/.everybuddy/contacts", getenv("HOME"));
@@ -202,7 +204,7 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 		return;
 	} else {
 		char message[1024];
-		snprintf(message, 1024, "Successfully imported %s%s%s%s%s%s%s "
+		snprintf(message, 1024, "Successfully imported %s%s%s%s%s%s%s."
 				"from Everybuddy.",
 				a?"accounts":"",
 				(a && (c||p||m))?", ":"",
@@ -215,6 +217,8 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 		ay_do_info(_("Import success"), message);
 	}
 	gtk_widget_destroy(window);
+	ay_set_submenus();
+	set_menu_sensitivity();
 }
 
 static void cancel_callback(GtkWidget * widget, gpointer data) {

@@ -144,6 +144,9 @@ void eb_timeout_remove(int tag);
 
 const char *eb_config_dir();
 
+extern void ay_set_submenus(void);
+extern void set_menu_sensitivity(void);
+
 /* Service */
 
 /* Debugging */
