@@ -1,19 +1,19 @@
 TODO 0.3.1
-- Use pspell for spell-checker
-- Phase in multiple accounts per service
-  - add service flag for multi account if service supports it
-- Yahoo webcam support
-- Standardise on autoconf/automake versions (2.53/1.6)
+* Use pspell for spell-checker
+* Phase in multiple accounts per service
+  * add service flag for multi account if service supports it
+* Yahoo webcam support
+* Standardise on autoconf/automake versions (2.53/1.6)
 
 
 TODO later
-- Native file transfer for all protocols.
-- clean up the code
-- recoding and filtering in chatrooms
-- Non-blocking connection in IRC
-- use our own linked list routines - partially done
-- Yahoo voice support ? 
-- GPG encryption utility
+* Native file transfer for all protocols.
+* clean up the code
+* recoding and filtering in chatrooms
+* Non-blocking connection in IRC
+* use our own linked list routines - partially done
+* Yahoo voice support ? 
+* GPG encryption utility
 
 eternal TODO
-- Make ayttm fully stable in stable releases. 
+* Make ayttm fully stable in stable releases. 
