@@ -410,6 +410,9 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  modules/icq-toc/Makefile
                  modules/icq-toc/libtoc/Makefile
                  modules/aim-oscar/Makefile
+		 modules/aim-oscar/libfaim/Makefile
+		 modules/aim-oscar/libfaim/include/Makefile
+		 modules/aim-oscar/libfaim/src/Makefile
                  modules/icq/Makefile
                  modules/icq/libicq/Makefile
                  modules/importers/Makefile
