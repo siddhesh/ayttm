@@ -217,6 +217,12 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	}
 		
 	ea = eb_services[service_id].sc->new_account(ela, account);
+	
+	if (!ea) {
+		ay_do_error(_("Error"), _("Creation of this contact is impossible.\nThe service chosen is unavailable."));
+		g_free(service);
+		return;
+	}
 	ea->service_id = service_id;
 	
 	g_free(service);

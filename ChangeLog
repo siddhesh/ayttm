@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-72
+- src/status.c
+Prevent segfault when trying to add a contact with nonavailable service 
+
 * Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-71
 - src/status.c
 Update menus when unloading modules 

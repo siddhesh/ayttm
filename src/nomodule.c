@@ -207,7 +207,7 @@ static char * eb_nomodule_get_status_string( eb_account * account )
 {
 	static char string[255];
 
-	snprintf(string, 255, _("(Offline)"));		
+	snprintf(string, 255, _("Offline"));		
 
 	return string;
 }
