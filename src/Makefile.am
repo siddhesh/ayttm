@@ -88,7 +88,7 @@ contact_parser.c: contact_parser.y
 		mv y.tab.h $*.h
 
 account_scanner.c: account_scanner.l
-	$(LEX) $(AM_LFLAGS) $(LFLAGS) -it -Paccount $< > $@
+	$(LEX) $(AM_LFLAGS) $(LFLAGS) -i -t -Paccount $< > $@
 
 contact_scanner.c: contact_scanner.l
-	$(LEX) $(AM_LFLAGS) $(LFLAGS) -it -Pcontact $< > $@
+	$(LEX) $(AM_LFLAGS) $(LFLAGS) -i -t -Pcontact $< > $@
