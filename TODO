@@ -14,6 +14,7 @@ TODO later
 * use our own linked list routines - partially done
 * Yahoo voice support ? 
 * GPG encryption utility
+* 1-to-1 conversation -> group chat by inviting a user
 
 eternal TODO
 * Make ayttm fully stable in stable releases. 
