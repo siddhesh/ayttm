@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.32 $",
-	"$Date: 2003/04/28 18:22:34 $",
+	"$Revision: 1.33 $",
+	"$Date: 2003/04/28 18:30:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2019,6 +2019,9 @@ static void eb_yahoo_set_buddy_nick(eb_yahoo_local_account_data *ylad,
 	struct yab * yab;
 	char * tmp;
 	int i;
+
+	if(!bud)
+		return;
 
 	yab = y_new0(struct yab, 1);
 
