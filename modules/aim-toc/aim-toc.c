@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.28 $",
-	"$Date: 2003/04/28 15:04:49 $",
+	"$Revision: 1.29 $",
+	"$Date: 2003/04/28 15:32:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -738,7 +738,7 @@ static void eb_aim_del_user( eb_account * account )
 static void eb_aim_add_user( eb_account * account )
 {
 	LList * node;
-	struct eb_aim_local_account_data *alad = (struct eb_aim_local_account_data *)account->ela->protocol_local_account_data;
+	struct eb_aim_local_account_data *alad = account->ela?(struct eb_aim_local_account_data *)account->ela->protocol_local_account_data:NULL;
 	
 	if (!alad) return;
 	assert( eb_services[account->service_id].protocol_id == SERVICE_INFO.protocol_id );
@@ -996,8 +996,6 @@ static eb_account * eb_aim_read_config( LList * config, struct contact *contact 
 	} else 
 		ea->ela = find_local_account_for_remote(ea, 0);
 	
-	if (!ea->ela)
-		return NULL;
     ea->account_contact = contact;
 	ea->list_item = NULL;
 	ea->online = 0;

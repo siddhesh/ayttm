@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 13:58 GMT [colin]	0.3.0-23
+- modules/*toc
+Segfaults fixes
+
 * Mon Apr 28 2003 13:58 GMT [colin]	0.3.0-22
 - src/spellcheck.C
 Segfaults fixes
