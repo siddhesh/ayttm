@@ -106,8 +106,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/04 09:15:45 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/04 12:12:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -683,18 +683,24 @@ static void clean_up (int sock)
 
 void eb_workwizu_logout (eb_local_account *account)
 {  
-	LList *l;
+	LList *l = NULL;
 	wwz_account_data *wad = (wwz_account_data *) account->protocol_local_account_data;
 	if (!account->connected) 
 		return;
 	eb_debug(DBG_WWZ, "Logging out\n");
-	for (l = wwz_contacts; l && l->data; l = l->next) {
-		eb_account * ea = (eb_account *)find_account_by_handle((char *)l->data, SERVICE_INFO.protocol_id);
+	l = wwz_contacts;
+	while (l && l->data) {
+		LList *next = l->next;
+		eb_account * ea = NULL;
+		
+		if (l)
+			ea = (eb_account *)find_account_by_handle((char *)l->data, SERVICE_INFO.protocol_id);
 		if(ea) {
 			buddy_logoff(ea);
-			eb_workwizu_del_user(ea);
 			buddy_update_status(ea);
+			eb_workwizu_del_user(ea);
 		}
+		l = next;
 	}
 	account->connected = 0;
 	eb_set_active_menu_status(account->status_menu, WWZ_OFFLINE);
