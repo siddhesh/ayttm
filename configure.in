@@ -151,7 +151,7 @@ AC_ARG_ENABLE(gdk_pixbuf,
 [  --disable-gdk-pixbuf    Do not use gdk-pix-buf (webcam support)])
 if test "$enable_gdk_pixbuf" != "no"; then
     AM_PATH_GDK_PIXBUF(, [AC_DEFINE(HAVE_GDK_PIXBUF, 1, [Define if you have gdk-pixbuf])],
-        AC_MSG_WARN([Unable to find gdk-pixbuf-devel, you won't be able to view webcams]))
+        [AC_MSG_WARN([Unable to find gdk-pixbuf-devel, you won't be able to view webcams])])
 fi
 else
  	GTK_CFLAGS="-mno-cygwin -fnative-struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -D_REENTRANT -Wall -g -I../mingw32"
