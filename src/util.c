@@ -497,16 +497,6 @@ int connected_local_accounts(void)
 eb_local_account * find_suitable_local_account( eb_local_account * first, int second )
 {
 	LList * node;
-	LList * states;
-	
-	/* The last state in the list of states will be the OFFLINE state
-	 * The first state in the list will be the ONLINE states
-	 * The rest of the states are the various AWAY states
-	 */
-	
-	states = eb_services[second].sc->get_states();
-	
-	l_list_free(states);
 	
 	if( first && ( first->connected || first->connecting) )
 		return first;

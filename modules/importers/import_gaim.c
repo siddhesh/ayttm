@@ -56,8 +56,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Gaim Buddy List", 
 	"Import the Gaim Buddy List", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/18 08:46:07 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/22 08:47:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -96,6 +96,8 @@ void import_gaim_accounts(ebmCallbackData *data)
     gchar buff[1024];
     gchar c[1024];
     gchar group[1024];
+    gchar *fname, *handle;
+    struct contact *cnt;
     FILE * fp;
     gint AIM_ID=-1;
     g_snprintf(buff, 1024, "%s/gaim.buddy", getenv("HOME"));
@@ -116,25 +118,19 @@ void import_gaim_accounts(ebmCallbackData *data)
                 add_group(group);
             }
         } else if (*c == 'b') {
-            if(find_account_by_handle(c+2, AIM_ID))
-            {
-                continue;
-            }
-            if(!find_contact_by_nick(c+2))
-            {
-                add_new_contact( group, c+2, AIM_ID );
-            }
-            if(!find_account_by_handle(c+2, AIM_ID))
-            {
-                eb_account * ea = eb_services[AIM_ID].sc->new_account(c+2);
-		if(!ea) {
-			g_snprintf(c, 1024, "Unable to create account for AIM service.  Aborting import.");
-			do_message_dialog(c, "Error", 0);
-			fclose(fp);
-			return;
+		handle = c+2;
+		if (strchr(handle,':')) {
+			fname = strchr(handle,':') + 1;
+			*(strchr(handle,':')) = '\0';
 		}
-                add_account( c+2, ea );
-//                RUN_SERVICE(ea)->add_user(ea);
+		else
+			fname = handle;
+		
+            if(!find_account_by_handle(handle, AIM_ID))
+            {
+                eb_account * ea = eb_services[AIM_ID].sc->new_account(handle);
+                add_account( fname, ea );
+		move_contact (group, find_contact_by_nick(fname));
             }
         } else if (*c == 'p') {
             /*no need*/
