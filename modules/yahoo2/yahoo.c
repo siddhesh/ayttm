@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.29 $",
-	"$Date: 2003/04/28 12:20:30 $",
+	"$Revision: 1.30 $",
+	"$Date: 2003/04/28 13:03:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2230,45 +2230,31 @@ static void eb_yahoo_unignore_user(eb_account * ea, const char *new_group)
 
 static void eb_yahoo_change_group(eb_account * ea, const char *new_group)
 {
-	LList *node;
+	eb_yahoo_local_account_data *ylad;
 
-	for (node = accounts; node; node = node->next) {
-		eb_local_account *ela = node->data;
-		eb_yahoo_local_account_data *ylad;
-		
-		if (!ela->connected || ela->service_id != SERVICE_INFO.protocol_id)
-			continue;
-
-		ylad = ela->protocol_local_account_data;
-
-		yahoo_change_buddy_group(ylad->id, ea->handle,
-				ea->account_contact->group->name, new_group);
-
-		yahoo_refresh(ylad->id);
-
+	if (!ea->ela->connected || ea->ela->service_id != SERVICE_INFO.protocol_id)
 		return;
-	}
+
+	ylad = ea->ela->protocol_local_account_data;
+
+	yahoo_change_buddy_group(ylad->id, ea->handle,
+			ea->account_contact->group->name, new_group);
+
+	yahoo_refresh(ylad->id);
 }
 
-static void eb_yahoo_rename_group(const char *old_group, const char *new_group)
+static void eb_yahoo_rename_group(eb_local_account *ela, const char *old_group, const char *new_group)
 {
-	LList *node;
+	eb_yahoo_local_account_data *ylad;
 
-	for (node = accounts; node; node = node->next) {
-		eb_local_account *ela = node->data;
-		eb_yahoo_local_account_data *ylad;
-		
-		if (!ela->connected || ela->service_id != SERVICE_INFO.protocol_id)
-			continue;
-
-		ylad = ela->protocol_local_account_data;
-
-		yahoo_group_rename(ylad->id, old_group, new_group);
-
-		yahoo_refresh(ylad->id);
-
+	if (!ela->connected || ela->service_id != SERVICE_INFO.protocol_id)
 		return;
-	}
+
+	ylad = ela->protocol_local_account_data;
+
+	yahoo_group_rename(ylad->id, old_group, new_group);
+
+	yahoo_refresh(ylad->id);
 }
 
 static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * account)

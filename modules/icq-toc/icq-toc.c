@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.23 $",
-	"$Date: 2003/04/28 11:48:46 $",
+	"$Revision: 1.24 $",
+	"$Date: 2003/04/28 13:03:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1148,15 +1148,11 @@ static void eb_icq_real_change_group(eb_account * ea, const char *old_group, con
 	if( eb_services[ea->service_id].protocol_id != SERVICE_INFO.protocol_id )
 		return;
 
-	for( node = accounts; node; node=node->next )
+	if( ea->ela && ea->ela->connected && ea->ela->service_id == ea->service_id)
 	{
-		eb_local_account * ela = node->data;
-		if( ela && ela->connected && ela->service_id == ea->service_id)
-		{
-			alad = ela->protocol_local_account_data;
-			icqtoc_remove_buddy(alad->conn, ea->handle, (char *)old_group);
-			icqtoc_add_buddy(alad->conn, ea->handle, (char *)new_group);
-		}
+		alad = ea->ela->protocol_local_account_data;
+		icqtoc_remove_buddy(alad->conn, ea->handle, (char *)old_group);
+		icqtoc_add_buddy(alad->conn, ea->handle, (char *)new_group);
 	}
 }
 
@@ -1165,39 +1161,29 @@ static void eb_icq_change_group(eb_account * ea, const char *new_group)
 	eb_icq_real_change_group(ea, ea->account_contact->group->name, new_group);
 }
 
-static void eb_icq_del_group(const char *group)
+static void eb_icq_del_group(eb_local_account *ela, const char *group)
 {
 	struct eb_icq_local_account_data * alad;
-	LList * node;
-	
-	for( node = accounts; node; node=node->next )
+
+	if( ela && ela->connected && ela->service_id == SERVICE_INFO.protocol_id)
 	{
-		eb_local_account * ela = node->data;
-		if( ela && ela->connected && ela->service_id == SERVICE_INFO.protocol_id)
-		{
-			alad = ela->protocol_local_account_data;
-			icqtoc_remove_group(alad->conn, group);
-		}
+		alad = ela->protocol_local_account_data;
+		icqtoc_remove_group(alad->conn, group);
 	}
 }
 	
-static void eb_icq_add_group(const char *group)
+static void eb_icq_add_group(eb_local_account *ela, const char *group)
 {
 	struct eb_icq_local_account_data * alad;
-	LList * node;
 	
-	for( node = accounts; node; node=node->next )
+	if( ela && ela->connected && ela->service_id == SERVICE_INFO.protocol_id)
 	{
-		eb_local_account * ela = node->data;
-		if( ela && ela->connected && ela->service_id == SERVICE_INFO.protocol_id)
-		{
-			alad = ela->protocol_local_account_data;
-			icqtoc_add_group(alad->conn, group);
-		}
-	}	
+		alad = ela->protocol_local_account_data;
+		icqtoc_add_group(alad->conn, group);
+	}
 }
 
-static void eb_icq_rename_group(const char *old_group, const char *new_group)
+static void eb_icq_rename_group(eb_local_account *ela, const char *old_group, const char *new_group)
 {
 	LList *l;
 	

@@ -138,7 +138,7 @@ grouplist * add_group(const char *group_name)
 		eb_local_account *ela = node->data;
 		if (CAN(ela, add_group)) {
 			if (ONLINE(ela))
-				RUN_SERVICE(ela)->add_group(group_name);
+				RUN_SERVICE(ela)->add_group(ela, group_name);
 			else
 				group_mgmt_queue_add(ela, NULL, MGMT_GRP_ADD, group_name);
 		}
@@ -256,7 +256,7 @@ void remove_group(grouplist * group)
 		eb_local_account * ela = l->data;
 		if(CAN(ela, del_group)) {
 			if (ONLINE(ela))
-				RUN_SERVICE(ela)->del_group(group->name);
+				RUN_SERVICE(ela)->del_group(ela, group->name);
 			else
 				group_mgmt_queue_add(ela, group->name, MGMT_GRP_DEL, NULL);
 		}
@@ -300,7 +300,7 @@ void rename_group(grouplist * group, const char * new_name)
 		eb_local_account * ela = l->data;
 		if(CAN(ela, rename_group)) {
 			if (ONLINE(ela))
-				RUN_SERVICE(ela)->rename_group(group->name, new_name);
+				RUN_SERVICE(ela)->rename_group(ela, group->name, new_name);
 			else
 				group_mgmt_queue_add(ela, NULL, MGMT_GRP_REN, new_name);
 		}

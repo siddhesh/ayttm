@@ -150,8 +150,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.32 $",
-	"$Date: 2003/04/28 12:18:53 $",
+	"$Revision: 1.33 $",
+	"$Date: 2003/04/28 13:03:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1535,12 +1535,9 @@ static int finish_group_move(movecb_data *tomove)
 	return TRUE;
 }
 
-static void eb_msn_del_group(const char *group) 
+static void eb_msn_del_group(eb_local_account *ela, const char *group) 
 {
 	char *id = NULL;
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
-	if(!ela) return;
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 
 	if (!group || !strlen(group))
@@ -1565,12 +1562,9 @@ static void eb_msn_del_group(const char *group)
 	free( id );
 }
 
-static void eb_msn_add_group(const char *group) 
+static void eb_msn_add_group(eb_local_account *ela, const char *group) 
 {
 	char *id = NULL;
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
-	if(!ela) return;
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	
 	if (!group || !strlen(group) || !strcmp(group,_("Buddies")))
@@ -1589,12 +1583,9 @@ static void eb_msn_add_group(const char *group)
 		free( id );
 }
 
-static void eb_msn_rename_group(const char *ogroup, const char *ngroup) 
+static void eb_msn_rename_group(eb_local_account *ela, const char *ogroup, const char *ngroup) 
 {
 	char *id = NULL;
-	/* MULTIACCOUNT UNCLEAN */
-	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
-	if(!ela) return;
 	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	
 	if (!ogroup || !strlen(ogroup) || !strcmp(ogroup,_("Buddies")))

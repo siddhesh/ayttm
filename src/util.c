@@ -848,7 +848,7 @@ void remove_group( grouplist * g )
 		if (ela->connected && RUN_SERVICE(ela)->del_group) {
 			eb_debug(DBG_CORE, "dropping group %s in %s\n",
 				g->name, get_service_name(ela->service_id));
-			RUN_SERVICE(ela)->del_group(g->name);
+			RUN_SERVICE(ela)->del_group(ela, g->name);
 		} else if (RUN_SERVICE(ela)->del_group) {
 			group_mgmt_queue_add(ela, g->name, MGMT_GRP_DEL, NULL);
 		}
@@ -876,7 +876,7 @@ void add_group( char * name )
 			if (ela->connected) {
 				eb_debug(DBG_CORE, "adding group %s in %s\n",
 					name, get_service_name(ela->service_id));
-				RUN_SERVICE(ela)->add_group(name);
+				RUN_SERVICE(ela)->add_group(ela, name);
 			} else {
 				group_mgmt_queue_add(ela, NULL, MGMT_GRP_ADD, name);
 			}
@@ -911,7 +911,7 @@ void rename_group( grouplist *current_group, char * new_name )
 			if (ela->connected) {
 				eb_debug(DBG_CORE, "renaming group %s to %s in %s\n",
 					oldname, new_name, get_service_name(ela->service_id));
-				RUN_SERVICE(ela)->rename_group(oldname, new_name);
+				RUN_SERVICE(ela)->rename_group(ela, oldname, new_name);
 			} else {
 				group_mgmt_queue_add(ela, oldname, MGMT_GRP_REN, new_name);
 			}

@@ -2,11 +2,11 @@
 AC_INIT([src/main.c])
 AC_PREREQ(2.53)
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=17
+RELEASE=18
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
-CORE_VERSION=5
+CORE_VERSION=6
 
 AM_CONFIG_HEADER(config.h)
 

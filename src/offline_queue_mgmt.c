@@ -231,7 +231,7 @@ int group_mgmt_check_moved(const char *groupname)
 	return 0;
 }
 
-int group_mgmt_flush(const eb_local_account *ela)
+int group_mgmt_flush(eb_local_account *ela)
 {
 	FILE *queue, *temp;
 	char buff[NAME_MAX], queue_name[NAME_MAX], temp_name[NAME_MAX];
@@ -270,13 +270,13 @@ int group_mgmt_flush(const eb_local_account *ela)
 			}
 			
 			if (action == MGMT_GRP_ADD && CAN(ela, add_group)) {
-				RUN_SERVICE(ela)->add_group(newgroup);
+				RUN_SERVICE(ela)->add_group(ela, newgroup);
 			}
 			if (action == MGMT_GRP_REN && CAN(ela, rename_group)) {
-				RUN_SERVICE(ela)->rename_group(oldgroup,newgroup);					
+				RUN_SERVICE(ela)->rename_group(ela, oldgroup,newgroup);					
 			}
 			if (action == MGMT_GRP_DEL && CAN(ela, del_group)) {
-				RUN_SERVICE(ela)->del_group(oldgroup);
+				RUN_SERVICE(ela)->del_group(ela, oldgroup);
 			}
 		} else {
 			/* not for me */

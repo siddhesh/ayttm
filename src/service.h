@@ -110,11 +110,11 @@ struct service_callbacks {
 
 	/* deletes group on server 
 	   unspecified results if called with a non-empty group ! */
-	void (*del_group)(const char *group);
+	void (*del_group)(eb_local_account *ela, const char *group);
 	
-	void (*add_group)(const char *group);
+	void (*add_group)(eb_local_account *ela, const char *group);
 	
-	void (*rename_group)(const char *old_group, const char *new_group);
+	void (*rename_group)(eb_local_account *ela, const char *old_group, const char *new_group);
 
 	/*Informs the service of an account that it needs to manage*/
 	int (*is_suitable)(eb_local_account *local, eb_account *remote);

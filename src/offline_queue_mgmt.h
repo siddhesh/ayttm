@@ -20,7 +20,7 @@ void contact_mgmt_queue_add(const eb_account *ea, int action, const char *new_gr
 void group_mgmt_queue_add(const eb_local_account *ela, const char *old_group, int action, const char *new_group);
 int contact_mgmt_flush(eb_local_account *ela);
 int group_mgmt_check_moved(const char *groupname);
-int group_mgmt_flush(const eb_local_account *ela);
+int group_mgmt_flush(eb_local_account *ela);
 
 #ifdef __cplusplus
 }
