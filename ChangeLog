@@ -1,3 +1,18 @@
+* Tue Apr 01 2003 18:52 GMT [andy]	0.2.3-pre68
+- modules/aim-oscar/aim-oscar.c
+  modules/aim-toc/aim-toc.c
+  modules/icq/icq.c
+  modules/icq-toc/icq-toc.c
+  modules/irc/irc.c
+  modules/jabber/jabber.c
+  modules/msn2/msn.C
+  modules/smtp/smtp.c
+  modules/yahoo2/yahoo.c
+  src/contact_parser.y
+  src/nomodule.c
+  src/value_pair.c
+Fix memory leaks resulting from the use of value_pair_get_value()
+
 * Tue Apr 01 2003 15:50 GMT [colin]	0.2.3-pre67
 - src/log_window.c
 Fix log parsing after a log format change
