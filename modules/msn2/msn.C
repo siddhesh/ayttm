@@ -164,8 +164,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.15 $",
-	"$Date: 2003/04/06 14:46:36 $",
+	"$Revision: 1.16 $",
+	"$Date: 2003/04/09 12:02:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -552,12 +552,11 @@ void ext_disable_conncheck() {
     }	
 }
 
-static void eb_msn_filetrans_cancel(int tag)
+static void eb_msn_filetrans_cancel(invitation_ftp *inv)
 {
-	transfer_window *w = eb_find_window_by_tag(tag);
-	if (w && w->inv) {
-		eb_debug(DBG_MSN,"cancelling FTP transfer with %s\n", w->inv->other_user);
-		msn_filetrans_cancel(w->inv);
+	if (inv) {
+		eb_debug(DBG_MSN,"cancelling FTP transfer with %s\n", inv->other_user);
+		msn_filetrans_cancel(inv);
 	}
 }
 
@@ -791,11 +790,9 @@ static void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
           if(users!=NULL && users->next==NULL && !strcmp(((char_data *)users->data)->c, to->handle))
           {
 	    invitation_ftp * inv = msn_filetrans_send(c, file);
-#ifdef __MINGW32__
-	    int tag = progress_window_new(inv->filename, inv->filesize);
-#else
-	    int tag = progress_window_new(filename, inv->filesize);
-#endif
+	    char label[1024];
+	    snprintf(label, 1024, "Sending %s...",inv->filename);
+	    int tag = ay_progress_bar_add(label, inv->filesize, eb_msn_filetrans_cancel, inv);
 	    transfer_window * t_win = new transfer_window;
 	    t_win->inv = inv;
 	    t_win->window_tag = tag;
@@ -1053,10 +1050,12 @@ static void eb_msn_netmeeting_callback( gpointer data, int response )
 static void eb_msn_filetrans_accept(char * filename, void * inv_vd)
 {
   invitation_ftp * inv=(invitation_ftp *)inv_vd;
-  int tag = progress_window_new(filename, inv->filesize);
-  transfer_window * t_win = new transfer_window;
+  char label[1024];
+  snprintf(label, 1024, "Receiving %s...", filename);
   
-  progress_window_set_close_cb(tag, eb_msn_filetrans_cancel);
+  int tag = ay_progress_bar_add(label, inv->filesize, eb_msn_filetrans_cancel, inv);
+  
+  transfer_window * t_win = new transfer_window;
   
   eb_debug(DBG_MSN, "Accepting now\n");
   t_win->inv = inv;
@@ -1074,7 +1073,7 @@ void ext_filetrans_success(invitation_ftp * inv) {
 	do_error_dialog(buf, _("File transfered"));
 	transfer_window * t_win = eb_find_window_by_inv(inv);
 	if (t_win) {
-          progress_window_close(t_win->window_tag);
+          ay_activity_bar_remove(t_win->window_tag);
 	  msn_del_from_llist(transfer_windows, t_win);
 	}
 }
@@ -1086,7 +1085,7 @@ void ext_filetrans_failed(invitation_ftp * inv, int err, char * msg)
         do_error_dialog(buf, "Transfer failed");
 	transfer_window * t_win = eb_find_window_by_inv(inv);
 	if (t_win) {
-          progress_window_close(t_win->window_tag);
+          ay_activity_bar_remove(t_win->window_tag);
 	  msn_del_from_llist(transfer_windows, t_win);
 	}
 }
@@ -1096,9 +1095,11 @@ void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long r
         int tag=-1;
 	transfer_window * t_win = NULL;
 	t_win = eb_find_window_by_inv(inv);
-	if (t_win != NULL)
+	if (t_win != NULL) {
 	  tag = t_win->window_tag;
-        update_progress(tag, recv);
+	  ay_activity_bar_update_label(tag, status);
+          ay_progress_bar_update_progress(tag, recv);
+        }
 }
 
 static void eb_msn_add_user(eb_account * account )
@@ -1983,13 +1984,11 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
         if(pfs->app == APP_FTP && !strcmp(pfs->dest, username))
         {
 	  invitation_ftp * inv = msn_filetrans_send(conn, pfs->path);
-#ifdef __MINGW32__
-	  int tag = progress_window_new(inv->filename, inv->filesize);
-#else
-	  int tag = progress_window_new(filename, inv->filesize);
-#endif
+	  char label[1024];
+	  snprintf(label, 1024, "Sending %s...",inv->filename);
+	  int tag = ay_progress_bar_add(label, inv->filesize, eb_msn_filetrans_cancel, inv);
 	  transfer_window * t_win = new transfer_window;
-	  progress_window_set_close_cb(tag, eb_msn_filetrans_cancel);
+	  
 	  t_win->inv = inv;
 	  t_win->window_tag = tag;
 	  msn_add_to_llist(transfer_windows, t_win);

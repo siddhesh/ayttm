@@ -56,11 +56,14 @@ class ay_activity_bar_pack {
 	activity_bar_cancel_callback m_cancel_callback;
 	void *m_userdata;
 	int m_tag;
-
+	unsigned long m_size;
+	
 	public:
 	ay_activity_bar_pack(const char *label,
-		activity_bar_cancel_callback cancel_callback, void *userdata);
+		activity_bar_cancel_callback cancel_callback, void *userdata, 
+		unsigned long size, int mode);
 	void update_label(const char *label);
+	void update_progress(const unsigned long done);
 	void update_activity( void );
 	void cancel( void );
 	int get_tag( void ) const;
@@ -112,9 +115,11 @@ static ay_activity_window aw;
  * methods for ay_activity_bar_pack
  */
 ay_activity_bar_pack::ay_activity_bar_pack(const char *label,
-		activity_bar_cancel_callback cancel_callback, void *userdata)
+		activity_bar_cancel_callback cancel_callback, void *userdata, 
+		unsigned long size, int mode)
 :	m_cancel_callback( cancel_callback ),
-	m_userdata( userdata )
+	m_userdata( userdata ),
+	m_size( size )
 {
 	m_lbl = gtk_label_new(label);
 	gtk_label_set_justify(GTK_LABEL(m_lbl), GTK_JUSTIFY_LEFT);
@@ -125,7 +130,7 @@ ay_activity_bar_pack::ay_activity_bar_pack(const char *label,
 	m_pbar = gtk_progress_bar_new();
 	gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(m_pbar), 
 			GTK_PROGRESS_LEFT_TO_RIGHT );
-	gtk_progress_set_activity_mode(GTK_PROGRESS(m_pbar), TRUE);
+	gtk_progress_set_activity_mode(GTK_PROGRESS(m_pbar), mode);
 	gtk_box_pack_start(GTK_BOX(m_hbox), m_pbar, TRUE, TRUE, 10);
 	gtk_widget_show(m_pbar);
 
@@ -150,11 +155,18 @@ void ay_activity_bar_pack::update_label(const char * label)
 	gtk_label_set_text(GTK_LABEL(m_lbl), label);
 }
 
+void ay_activity_bar_pack::update_progress(const unsigned long done)
+{
+	gtk_progress_set_percentage(GTK_PROGRESS(m_pbar), ((float)done)/((float)m_size));
+}
+
 void ay_activity_bar_pack::update_activity( void )
 {
 	float new_val = gtk_progress_get_value(GTK_PROGRESS(m_pbar)) + 3;
 	GtkAdjustment *adj = GTK_PROGRESS(m_pbar)->adjustment;
-
+	if (m_size > 0)
+		return;
+	
 	if (new_val > adj->upper)
 		new_val = adj->lower;
 
@@ -334,6 +346,18 @@ void ay_activity_bar_update_label(int tag, const char *label)
 }
 
 /**
+ * Update the label associated with an activity bar
+ * @param	tag		a tag that identifies the activity bar
+ * @param	label	the text to be displayed on the label
+ */
+void ay_progress_bar_update_progress(int tag, const unsigned long done)
+{
+	ay_activity_bar_pack *abp = aw.get_pack_by_tag(tag);
+	if(abp)
+		abp->update_progress(done);
+}
+
+/**
  * Remove an existing activity bar.  Destroy the window if this is the last
  * @param	tag		a tag that identifies the activity bar
  */
@@ -356,7 +380,24 @@ int ay_activity_bar_add(const char *label,
 		activity_bar_cancel_callback cancel_callback, void *userdata)
 {
 	ay_activity_bar_pack *abp = 
-		new ay_activity_bar_pack(label, cancel_callback, userdata);
+		new ay_activity_bar_pack(label, cancel_callback, userdata, 0, TRUE);
+
+	return abp->get_tag();
+}
+
+/**
+ * Add a new progress bar, create the window if this is the first
+ * @param	label				the text to display against this activity bar
+ * @param	cancel_callback			a function to be called if the user clicks cancel
+ * @param	userdata			the callback data to be passed to cancel_callback
+ *
+ * @return	a tag to identify this activity bar
+ */
+int ay_progress_bar_add(const char *label, unsigned long size, 
+		activity_bar_cancel_callback cancel_callback, void *userdata)
+{
+	ay_activity_bar_pack *abp = 
+		new ay_activity_bar_pack(label, cancel_callback, userdata, size, FALSE);
 
 	return abp->get_tag();
 }

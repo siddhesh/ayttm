@@ -1,3 +1,11 @@
+* Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-71
+- modules/msn2
+Use new activity_bar
+
+* Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-70
+- src/activity_bar.[Ch]
+Add a progress-bar mode (to replace progress_window.c)
+
 * Wed Apr 09 2003 12:05 GMT [andy]	0.2.3-69
 - src/tcp_util.c
 Actually, we want to get INT_MAX from limits.h

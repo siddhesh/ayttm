@@ -30,9 +30,11 @@ extern "C" {
 
 int ay_activity_bar_add(const char *label, 
 		activity_bar_cancel_callback cancel_callback, void *userdata);
+int ay_progress_bar_add(const char *label, unsigned long size,
+		activity_bar_cancel_callback cancel_callback, void *userdata);
 void ay_activity_bar_remove(int tag);
 void ay_activity_bar_update_label(int tag, const char *label);
-
+void ay_progress_bar_update_progress(int tag, const unsigned long done);
 #ifdef __cplusplus
 }
 #endif

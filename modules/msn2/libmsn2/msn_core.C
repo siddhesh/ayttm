@@ -1289,10 +1289,12 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
         return;
       }
       if(auth->bytes_done%2045==0) { auth->num_ignore=3; }
-      if(auth->bytes_done%1024==0) 
-        ext_filetrans_progress(auth->inv, "Receiving file", auth->bytes_done, auth->inv->filesize);
-      if(auth->bytes_done%8192==0) /* force getting out of loop to be able to do something else */
-	      return;
+      if(auth->bytes_done%1024==0) {
+	char fstatus[1024];
+	snprintf(fstatus, 1024, "Receiving %s...", auth->inv->filename);
+        ext_filetrans_progress(auth->inv, fstatus, auth->bytes_done, auth->inv->filesize);
+	return;
+      }
     }
     ext_register_sock(conn->sock, 1, 0);
     if (DEBUG) printf("registered again\n");
@@ -1461,8 +1463,9 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
             return;
           }
         }
-
-        ext_filetrans_progress(auth->inv, "Sending file", auth->bytes_done, auth->inv->filesize);
+	char fstatus[1024];
+	snprintf(fstatus, 1024, "Sending %s...", auth->inv->filename);
+        ext_filetrans_progress(auth->inv, fstatus, auth->bytes_done, auth->inv->filesize);
       }
     }
   }
