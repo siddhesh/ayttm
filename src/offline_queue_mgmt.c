@@ -36,8 +36,8 @@
 #endif
 
 
-/* FIXME: temporary */
-eb_account * find_account_by_handle( char * handle, int type );
+/* FIXME: temporary UGLY !!! */
+eb_account * find_account_by_handle( const char * handle, int type );
 /* end FIXME */
 
 void contact_mgmt_queue_add(const eb_account *ea, int action, const char *new_group)
