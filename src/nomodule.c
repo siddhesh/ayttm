@@ -193,7 +193,7 @@ static void eb_nomodule_del_user( eb_account * account )
 	return;
 }
 
-static eb_account * eb_nomodule_new_account(const eb_local_account *ela, const char * account )
+static eb_account * eb_nomodule_new_account(eb_local_account *ela, const char * account )
 {
 	return NULL;
 }
