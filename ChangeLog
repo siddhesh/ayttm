@@ -1,3 +1,7 @@
+* Mon Apr 07 2003 05:20 GMT [philip]	0.2.3-47
+- src/edit_local_accounts.c
+don't crash on first startup - when no accounts exist
+
 * Sun Apr 06 2003 18:35 GMT [philip]	0.2.3-46
 - modules/yahoo2/libyahoo2/
 add some more documentation and move definitions for MINGW32 into the C

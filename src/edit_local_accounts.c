@@ -94,11 +94,11 @@ static void read_contacts()
 	LList * node;
 
 	if (checkboxonxpm == NULL)
-		checkboxonxpm = gdk_pixmap_create_from_xpm_d(statuswindow->window, 
+		checkboxonxpm = gdk_pixmap_create_from_xpm_d(account_window->window, 
 							&checkboxonxpmmask, NULL,
 							checkbox_on_xpm);
 	if (checkboxoffxpm == NULL)
-		checkboxoffxpm = gdk_pixmap_create_from_xpm_d(statuswindow->window, 
+		checkboxoffxpm = gdk_pixmap_create_from_xpm_d(account_window->window, 
 							&checkboxoffxpmmask, NULL,
 							checkbox_off_xpm);
 	
