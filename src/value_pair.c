@@ -65,15 +65,15 @@ LList * value_pair_add(LList * list, const char * key, const char * value)
 {
 	char		*tmp = escape_string(value);
 	value_pair	*vp = NULL;
-	char		*value = NULL;
+	char		*old_value = NULL;
 	
 	
-	value = value_pair_get_value( list, key );
+	old_value = value_pair_get_value( list, key );
 	
-	if ( value != NULL )
+	if ( old_value != NULL )
 	{
 		list = value_pair_remove(list, key);
-		free( value );
+		free( old_value );
 	}
 
 	vp = calloc(1, sizeof(value_pair));
