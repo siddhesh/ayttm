@@ -1,15 +1,15 @@
 ayttm (0.4.6-1) unstable; urgency=low
 
   * New upstream version
-    - Fix some Yahoo segfaults
+    - Fix Yahoo authentication and some segfaults
     - Yahoo webcam support, but only for non-official clients
       because of Jpeg2000 licensing problem
     - Statusbar size fix
-    - Closes: #226665: implicitly declared function returns a 
+    - Closes: #226665: implicitly declared function returns a
       pointer that is used (thanks Lamont)
   * Add gettext to Build-Depends
 
- -- Chris Halls <halls@debian.org>  Thu,  8 Jan 2004 11:48:03 +0100
+ -- Chris Halls <halls@debian.org>  Thu, 15 Jan 2004 08:06:09 +0100
 
 ayttm (0.4.5-2) unstable; urgency=low
 

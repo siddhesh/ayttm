@@ -5,9 +5,9 @@ PIXMAP_DIRS = msn
 # instead we'll use a dist-hook target and hope it's supported by all
 # versions of automake
 
-EXTRA_DIST = penguin_talk.xpm ayttm.xpm ayttmlogo.xpm ok.xpm tb_yes.xpm \
-	tb_no.xpm cancel.xpm tb_volume.xpm tb_edit.xpm tb_open.xpm \
-	tb_book_red.xpm tb_preferences.xpm \
+EXTRA_DIST = penguin_talk.xpm ayttm.xpm ayttmlogo.xpm ayttm_32x32.xpm \
+        ok.xpm tb_yes.xpm tb_no.xpm cancel.xpm tb_volume.xpm tb_edit.xpm \
+	tb_open.xpm tb_book_red.xpm tb_preferences.xpm \
 	tb_trash.xpm tb_book_open.xpm ignore.xpm blank_icon.xpm \
 	login_icon.xpm logoff_icon.xpm yahoo_away.xpm yahoo_online.xpm \
 	icq_online.xpm icq_away.xpm irc_away.xpm irc_online.xpm \
