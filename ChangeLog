@@ -1,3 +1,7 @@
+* Tue Apr 08 2003 18:20 GMT [philip]	0.2.3-62
+- modules/aim-toc/aim-toc.c, modules/icq-toc/icq-toc.c
+include tcp_util.h
+
 * Tue Apr 08 2003 17:47 GMT [colin]	0.2.3-61
 - modules/aim-toc/aim-toc.c
 Handle aim:addbuddy URLs as well

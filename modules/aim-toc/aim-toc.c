@@ -52,6 +52,7 @@ typedef unsigned long ulong;
 #include "dialog.h"
 #include "progress_window.h"
 #include "activity_bar.h"
+#include "tcp_util.h"
 #include "message_parse.h"
 #include "value_pair.h"
 #include "info_window.h"
@@ -89,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.10 $",
-	"$Date: 2003/04/08 15:14:47 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/04/08 18:23:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -783,7 +784,6 @@ static void eb_aim_logged_in (toc_conn *conn)
 		eb_set_active_menu_status(ela->status_menu, AIM_ONLINE);
 
 	is_setting_state = 0;
-	ela->connecting = 0;
 	ela->connected = 1;
 	
 	toc_add_buddy(alad->conn,ela->handle,
@@ -806,9 +806,11 @@ static void eb_aim_logout( eb_local_account * account )
 	LList *l;
 	struct eb_aim_local_account_data * alad;
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
-	eb_input_remove(alad->input);
-	eb_timeout_remove(alad->keep_alive);
-	alad->connect_tag = 0;
+	if(alad->input)
+		eb_input_remove(alad->input);
+	if(alad->keep_alive)
+		eb_timeout_remove(alad->keep_alive);
+	alad->connect_tag = alad->input = alad->keep_alive = 0;
 	if(alad->conn)
 	{
 		eb_debug(DBG_TOC, "eb_aim_logout %d %d\n", alad->conn->fd, alad->conn->seq_num );
@@ -1227,13 +1229,13 @@ static void eb_aim_read_prefs_config(LList * values)
 	c = value_pair_get_value(values, "server");
 	if(c)
 	{
-		strncpy(aim_server, c, sizeof(aim_server));
+		strncpy(aim_server, c, sizeof(aim_server)-1);
 		free( c );
 	}
 	c = value_pair_get_value(values, "port");
 	if(c)
 	{
-		strncpy(aim_port, c, sizeof(aim_port));
+		strncpy(aim_port, c, sizeof(aim_port)-1);
 		free( c );
 	}
 	c = value_pair_get_value(values, "do_aim_debug");

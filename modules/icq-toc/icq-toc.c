@@ -54,6 +54,7 @@ typedef unsigned long ulong;
 #include "activity_bar.h"
 #include "message_parse.h"
 #include "value_pair.h"
+#include "tcp_util.h"
 #include "info_window.h"
 #include "plugin_api.h"
 #include "smileys.h"
@@ -90,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/08 15:14:48 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/08 18:23:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
