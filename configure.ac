@@ -2,7 +2,7 @@
 AC_INIT([src/main.c])
 AC_PREREQ(2.53)
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=44
+RELEASE=45
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -374,6 +374,12 @@ AC_SUBST(EB_LIBS)
 AC_SUBST(EB_LDFLAGS)
 AC_SUBST(OPTIONAL_PLUG_DIR)
 AC_SUBST(DEBUG_LIBMSN)
+
+MINGW32=""
+if test "x$host_alias" = "xmingw32" ; then
+	MINGW32=mingw32
+fi
+AC_SUBST(MINGW32)
 
 AC_CONFIG_FILES([Makefile ayttm.spec
                  doc/Makefile

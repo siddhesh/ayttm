@@ -1,4 +1,5 @@
-SUBDIRS = pixmaps po m4 intl libproxy sounds doc src modules mingw32
+DIST_SUBDIRS = pixmaps po m4 intl libproxy sounds doc src modules mingw32
+SUBDIRS = pixmaps po m4 intl libproxy sounds doc src modules @MINGW32@
 ACLOCAL_AMFLAGS = -I m4
 
 Utilitiesdir = $(datadir)/applnk/Internet
