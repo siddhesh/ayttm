@@ -89,7 +89,7 @@ class ay_prefs_window
 			PANEL_SOUND_GENERAL,
 			PANEL_SOUND_FILES,
 			PANEL_CHAT_GENERAL,
-			PANEL_CHAT_LAYOUT,
+			PANEL_CHAT_TABS,
 			PANEL_PROXY,
 #ifdef HAVE_ICONV_H
 			PANEL_ENCODING,
@@ -115,10 +115,10 @@ class ay_prefs_window
 		static ay_prefs_window	*s_only_prefs_window;		///< the instance of the prefs window
 		
 		struct prefs			&m_prefs;
-		GtkWidget				*m_prefs_window_widget;		///< the actual dialog widget
+		GtkWidget				*m_prefs_window_widget;	///< the actual dialog widget
 		
 		GtkTree					*m_tree;
-		GList					*m_panels;					///< a list of the panels (ay_prefs_window_panel *)
+		GList					*m_panels;		///< a list of the panels (ay_prefs_window_panel *)
 };
 
 /// A prefs panel
@@ -168,19 +168,18 @@ class ay_general_panel : public ay_prefs_window_panel
 		virtual void	Apply( void );
 	
 	private:	// Gtk callbacks
-		static void		s_set_use_alternate_browser( GtkWidget *widget, int *data );
+		static void		s_toggle_checkbox( GtkWidget *widget, int *data );
 		static void		s_set_browser_path( char *selected_filename, void *data );
 		static void		s_get_alt_browser_path( GtkWidget *t_browser_browse_button, int *data );
-		static void		s_set_use_spell( GtkWidget *widget, int *data );
 		
 	private:
 		void	SetActiveWidgets( void );
 		
 		struct prefs::general &m_prefs;
 		
+		GtkWidget	*m_dictionary_entry;
 		GtkWidget	*m_alternate_browser_entry;
 		GtkWidget	*m_browser_browse_button;
-		GtkWidget	*m_dictionary_entry;
 };
 
 /// Logging prefs panel
@@ -195,40 +194,8 @@ class ay_logging_panel : public ay_prefs_window_panel
 		struct prefs::logging &m_prefs;
 };
 
-/// Layout prefs panel
-class ay_layout_panel : public ay_prefs_window_panel
-{
-	public:
-		ay_layout_panel( const char *inTopFrameText, struct prefs::layout &inPrefs );
-		
-		virtual void	Build( GtkWidget *inParent );
-	
-	private:	// Gtk callbacks
-		static void		s_set_tabbed( GtkWidget *w, void *data );
-		static void		s_change_orientation( GtkWidget *widget, void *data );
 
-		typedef struct
-		{
-			ay_layout_panel	*m_panel;
-			
-			union
-			{
-				int		m_orientation_id;
-				int		*m_toggle_data;
-			};
-		} t_cb_data;
-		
-		t_cb_data	m_cb_data[4];	///< one for each orientation
-		t_cb_data	m_toggle_data;	///< for the toggle button
-	private:
-		void	SetActiveWidgets( void );
-		
-		struct prefs::layout &m_prefs;
-		
-		GtkWidget	*m_tab_frame;
-};
-
-/// Sound:General prefs panel
+/// Sound prefs panel
 class ay_sound_general_panel : public ay_prefs_window_panel
 {
 	public:
@@ -255,6 +222,7 @@ class ay_sound_files_panel : public ay_prefs_window_panel
 		static void		s_testsoundfile( GtkWidget *widget, void *data );
 		static void		s_soundvolume_changed( GtkAdjustment *adjust, void *data );
 
+		/// Callback data struct for the files panel
 		typedef struct
 		{
 			ay_sound_files_panel	*m_panel;
@@ -264,14 +232,10 @@ class ay_sound_files_panel : public ay_prefs_window_panel
 		t_cb_data	m_cb_data[SOUND_MAX];
 
 	private:
-		GtkWidget	*AddSoundFileSelectionBox( const char *labelString,
-							GtkWidget *vbox,
-							const char *initialFilename,
-							int userdata );
+		GtkWidget	*AddSoundFileSelectionBox( const char *inLabelString,
+						const char *inInitialFilename, int inSoundID );
 							
-		GtkWidget	*AddSoundVolumeSelectionBox( const char *labelString,
-							  GtkWidget *vbox,
-							  GtkAdjustment *adjust );
+		GtkWidget	*AddSoundVolumeSelectionBox( const char *inLabelString, GtkAdjustment *inAdjustment );
 		
 		struct prefs::sound &m_prefs;
 		
@@ -291,30 +255,59 @@ class ay_chat_panel : public ay_prefs_window_panel
 		ay_chat_panel( const char *inTopFrameText, struct prefs::chat &inPrefs );
 		
 		virtual void	Build( GtkWidget *inParent );
-		virtual void	Apply( void );
+		virtual void	Apply( void );		
+		
+	private:
+		struct prefs::chat &m_prefs;
+		
+		GtkWidget		*m_font_size_entry;
+};
 
+/// Chat:Tabs prefs panel
+class ay_tabs_panel : public ay_prefs_window_panel
+{
+	public:
+		ay_tabs_panel( const char *inTopFrameText, struct prefs::tabs &inPrefs );
+		
+		virtual void	Build( GtkWidget *inParent );
+		virtual void	Apply( void );		
+	
 	private:	// Gtk callbacks
+		static void		s_set_tabbed( GtkWidget *w, void *data );
+		static void		s_change_orientation( GtkWidget *widget, void *data );
 		static gboolean	s_newkey_callback( GtkWidget *keybutton, GdkEventKey *event, void *data );
 		static void		s_getnewkey( GtkWidget *keybutton, void *data );
-		
+
+		/// Callback data struct for the tabs panel
 		typedef struct
 		{
-			ay_chat_panel	*m_panel;
-			GdkDeviceKey	*m_device_key;
+			ay_tabs_panel	*m_panel;
+			
+			union
+			{
+				int				m_orientation_id;
+				int				*m_toggle_data;
+				GdkDeviceKey	*m_device_key;
+			};
 		} t_cb_data;
 		
-		t_cb_data	m_cb_data[2];	///< one for each key
+		t_cb_data	m_orientation_cb_data[4];	///< callback data for each orientation
+		t_cb_data	m_key_cb_data[2];			///< callback data for each key
+		t_cb_data	m_toggle_data;				///< callback data for the toggle button
 		
 	private:
 		void	AddKeySet( const char *labelString, t_cb_data *cb_data, GtkWidget *vbox );
+		void	SetActiveWidgets( void );
 		
-		struct prefs::chat &m_prefs;
+		struct prefs::tabs &m_prefs;
+		
+		GtkWidget		*m_orientation_frame;
+		GtkWidget		*m_hotkey_frame;
 
 		GdkDeviceKey 	m_local_accel_prev_tab;
 		GdkDeviceKey 	m_local_accel_next_tab;
 
 		guint 			m_accel_change_handler_id;
-		GtkWidget		*m_font_size_entry;
 };
 
 /// Proxy prefs panel
@@ -330,6 +323,7 @@ class ay_proxy_panel : public ay_prefs_window_panel
 		static void		s_set_proxy_type( GtkWidget *w, void *data );
 		static void		s_set_proxy_auth( GtkWidget *w, void *data );
 		
+		/// Callback data struct for the proxy panel
 		typedef struct
 		{
 			ay_proxy_panel	*m_panel;
@@ -419,7 +413,7 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 	_( "Sound" ),
 	_( "Sound:Files" ),
 	_( "Chat" ),
-	_( "Chat:Layout" ),
+	_( "Chat:Tabs" ),
 	_( "Advanced:Proxy" ),
 	_( "Advanced:Encoding" )
 };
@@ -464,7 +458,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	for ( int i = PANEL_GENERAL; i < PANEL_MAX; i++ )
 	{
 		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::Create( notebook, m_prefs,
-														static_cast<ePanelID>(i), s_titles[i] );
+				static_cast<ePanelID>(i), s_titles[i] );
 		
 		if ( the_panel == NULL )
 			continue;
@@ -730,8 +724,8 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParent, struc
 			new_panel = new ay_logging_panel( inName, inPrefs.logging );
 			break;
 
-		case ay_prefs_window::PANEL_CHAT_LAYOUT:
-			new_panel = new ay_layout_panel( inName, inPrefs.layout );
+		case ay_prefs_window::PANEL_CHAT_TABS:
+			new_panel = new ay_tabs_panel( inName, inPrefs.tabs );
 			break;
 
 		case ay_prefs_window::PANEL_SOUND_GENERAL:
@@ -857,9 +851,9 @@ void	ay_prefs_window_panel::AddTopFrame( const char *in_text )
 ay_general_panel::ay_general_panel( const char *inTopFrameText, struct prefs::general &inPrefs )
 :	ay_prefs_window_panel( inTopFrameText ),
 	m_prefs( inPrefs ),
+	m_dictionary_entry( NULL ),
 	m_alternate_browser_entry( NULL ),
-	m_browser_browse_button( NULL ),
-	m_dictionary_entry( NULL )
+	m_browser_browse_button( NULL )
 {
 }
 
@@ -868,13 +862,29 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 {
 	GtkWidget	*brbutton = NULL;
 	GtkWidget	*hbox = NULL;
+	GtkWidget	*spacer = NULL;
+	GtkWidget	*label = NULL;
 
 #ifdef HAVE_ISPELL
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
-	brbutton = eb_button( _("Use spell checking - dictionary (empty for default):"), &m_prefs.do_spell_checking, hbox );
-	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_set_use_spell), this );
+	brbutton = eb_button( _("Use spell checking"), &m_prefs.do_spell_checking, hbox );
+	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
+	
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
+	
+	hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, 15, -1 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
+	
+	label = gtk_label_new( _("Dictionary (blank for default):") );
+	gtk_widget_show( label );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	
 	m_dictionary_entry = gtk_entry_new();
 	gtk_widget_show( m_dictionary_entry );
@@ -884,15 +894,18 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 #endif
 
-	eb_button( _("Enable debug messages"), &m_prefs.do_ayttm_debug, m_top_vbox );
-
 	brbutton = eb_button( _("Use alternate browser"), &m_prefs.use_alternate_browser, m_top_vbox );
-	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_set_use_alternate_browser), this );
+	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
 
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
-	GtkWidget	*label = gtk_label_new( _("Alternate browser command\n(%s will be replaced by the URL):") );
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, 15, -1 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
+	
+	label = gtk_label_new( _("Browser command:") );
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
@@ -907,6 +920,8 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 	gtk_box_pack_start( GTK_BOX(hbox), m_browser_browse_button, FALSE, FALSE, 5 );
 
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
+
+	eb_button( _("Enable debug messages"), &m_prefs.do_ayttm_debug, m_top_vbox );
 	
 	SetActiveWidgets();
 }
@@ -919,16 +934,22 @@ void	ay_general_panel::Apply( void )
 	{
 		const char	*new_dict = gtk_entry_get_text( GTK_ENTRY(m_dictionary_entry) );
 
-	    if ( (new_dict != NULL) && strncmp( new_dict, m_prefs.spell_dictionary, MAX_PREF_LEN ) )
+		if ( (new_dict != NULL) && strncmp( new_dict, m_prefs.spell_dictionary, MAX_PREF_LEN ) )
 			gtkspell_stop();
-    }
+	}
 	
-    if ( m_dictionary_entry != NULL )
-		strncpy( m_prefs.spell_dictionary, gtk_entry_get_text(GTK_ENTRY(m_dictionary_entry)), MAX_PREF_LEN );
+	strncpy( m_prefs.spell_dictionary, gtk_entry_get_text(GTK_ENTRY(m_dictionary_entry)), MAX_PREF_LEN );
 #endif
-    
-	if( m_alternate_browser_entry != NULL )
- 		strncpy( m_prefs.alternate_browser, gtk_entry_get_text(GTK_ENTRY(m_alternate_browser_entry)), MAX_PREF_LEN );
+
+	char	alt_browser_command[MAX_PREF_LEN];
+	
+	strncpy( alt_browser_command, gtk_entry_get_text(GTK_ENTRY(m_alternate_browser_entry)), MAX_PREF_LEN );
+	
+	// add "%s" for the URL if the user didn't
+	if ( !strstr( alt_browser_command, "%s" ) )
+		strncat( alt_browser_command, " %s", MAX_PREF_LEN );
+	
+	strncpy( m_prefs.alternate_browser, alt_browser_command, MAX_PREF_LEN );
 }
 
 // SetActiveWidgets
@@ -944,8 +965,8 @@ void	ay_general_panel::SetActiveWidgets( void )
 ////
 // ay_general_panel callbacks
 
-// s_set_use_alternate_browser
-void	ay_general_panel::s_set_use_alternate_browser( GtkWidget *widget, int *data )
+// s_toggle_checkbox
+void	ay_general_panel::s_toggle_checkbox( GtkWidget *widget, int *data )
 {
 	ay_general_panel	*the_panel = reinterpret_cast<ay_general_panel *>( data );
 	assert( the_panel != NULL );
@@ -978,16 +999,6 @@ void	ay_general_panel::s_get_alt_browser_path( GtkWidget *t_browser_browse_butto
 		ay_general_panel::s_set_browser_path, the_panel );
 }
 
-#ifdef HAVE_ISPELL
-	// s_set_use_spell
-	void	ay_general_panel::s_set_use_spell( GtkWidget *widget, int *data )
-	{
-		ay_general_panel	*the_panel = reinterpret_cast<ay_general_panel *>( data );
-		assert( the_panel != NULL );
-
-		the_panel->SetActiveWidgets();
-	}
-#endif
 
 ////////////////
 //// ay_logging_panel implementation
@@ -1003,108 +1014,6 @@ void	ay_logging_panel::Build( GtkWidget *inParent )
 {
 	eb_button( _("Save all conversations to logfiles"), &m_prefs.do_logging, m_top_vbox );
 	eb_button( _("Restore last conversation when opening a chat window"), &m_prefs.do_restore_last_conv, m_top_vbox );
-}
-
-////////////////
-//// ay_layout_panel implementation
-
-ay_layout_panel::ay_layout_panel( const char *inTopFrameText, struct prefs::layout &inPrefs )
-:	ay_prefs_window_panel( inTopFrameText ),
-	m_prefs( inPrefs ),
-	m_tab_frame( NULL )
-{
-}
-
-// Build
-void	ay_layout_panel::Build( GtkWidget *inParent )
-{
-	m_toggle_data.m_panel = this;
-	m_toggle_data.m_toggle_data = &m_prefs.do_tabbed_chat;
-	gtkut_check_button( m_top_vbox, _("Use tabs in chat windows"), m_prefs.do_tabbed_chat,
-		GTK_SIGNAL_FUNC(s_set_tabbed), &m_toggle_data );
-	
-	m_tab_frame = gtk_frame_new( _( "Tab position" ) );
-	gtk_widget_show( m_tab_frame );
-	gtk_container_set_border_width( GTK_CONTAINER(m_tab_frame), 5 );
-	
-	GtkWidget	*vbox = gtk_vbox_new( FALSE, 4 );
-	gtk_widget_show( vbox );
-	gtk_container_add( GTK_CONTAINER(m_tab_frame), vbox );
-	
-	/* Because it seems that the 'clicked' function is called when we create the radio buttons [!],
-		we must save our current value and restore it after the creation of the radio buttons
-	*/
-	const int	old_value = m_prefs.do_tabbed_chat_orient;
-	
-	GSList		*radio_group = NULL;
-	
-	m_cb_data[0].m_panel = this;
-	m_cb_data[0].m_orientation_id = 0;
-
-	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
-			_("Bottom"), (m_prefs.do_tabbed_chat_orient == 0),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_cb_data[0]) );
-	
-	m_cb_data[1].m_panel = this;
-	m_cb_data[1].m_orientation_id = 1;
-
-	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
-			_("Top"), (m_prefs.do_tabbed_chat_orient == 1),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_cb_data[1]) );
-	
-	m_cb_data[2].m_panel = this;
-	m_cb_data[2].m_orientation_id = 2;
-
-	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
-			_("Left"), (m_prefs.do_tabbed_chat_orient == 2),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_cb_data[2]) );
-	
-	m_cb_data[3].m_panel = this;
-	m_cb_data[3].m_orientation_id = 3;
-
-	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
-			_("Right"), (m_prefs.do_tabbed_chat_orient == 3),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_cb_data[3]) );
-
-	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_tab_frame, FALSE, FALSE, 5 );
-	
-	SetActiveWidgets();
-	
-	m_prefs.do_tabbed_chat_orient = old_value;
-}
-
-// SetActiveWidgets
-void	ay_layout_panel::SetActiveWidgets( void )
-{
-	gtk_widget_set_sensitive( m_tab_frame, m_prefs.do_tabbed_chat );
-}
-
-////
-// ay_layout_panel callbacks
-
-// s_set_tabbed
-void	ay_layout_panel::s_set_tabbed( GtkWidget *w, void *data )
-{
-	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
-	assert( cb_data != NULL );
-
-	ay_layout_panel	*the_panel = cb_data->m_panel;
-	
-	// toggle the data
-	int	*value = cb_data->m_toggle_data;
-	*value = !(*value);
-	
-	the_panel->SetActiveWidgets();
-}
-
-// s_change_orientation
-void	ay_layout_panel::s_change_orientation( GtkWidget *widget, void *data )
-{
-	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
-	assert( cb_data != NULL );
-	
-	ay_layout_panel	*the_panel = cb_data->m_panel;
-	the_panel->m_prefs.do_tabbed_chat_orient = cb_data->m_orientation_id;
 }
 
 
@@ -1148,26 +1057,20 @@ ay_sound_files_panel::ay_sound_files_panel( const char *inTopFrameText, struct p
 // Build
 void	ay_sound_files_panel::Build( GtkWidget *inParent )
 {
-	m_arrivesound_entry = AddSoundFileSelectionBox( _("Contact signs on: "), m_top_vbox,
-					   m_prefs.BuddyArriveFilename, SOUND_BUDDY_ARRIVE );
+	m_arrivesound_entry = AddSoundFileSelectionBox( _("Contact signs on: "), m_prefs.BuddyArriveFilename, SOUND_BUDDY_ARRIVE );
 					   
-	m_awaysound_entry = AddSoundFileSelectionBox( _("Contact goes away: "), m_top_vbox,
-					   m_prefs.BuddyAwayFilename, SOUND_BUDDY_AWAY );
+	m_awaysound_entry = AddSoundFileSelectionBox( _("Contact goes away: "), m_prefs.BuddyAwayFilename, SOUND_BUDDY_AWAY );
 					   
-	m_leavesound_entry = AddSoundFileSelectionBox( _("Contact signs off: "), m_top_vbox,
-					   m_prefs.BuddyLeaveFilename, SOUND_BUDDY_LEAVE );
+	m_leavesound_entry = AddSoundFileSelectionBox( _("Contact signs off: "), m_prefs.BuddyLeaveFilename, SOUND_BUDDY_LEAVE );
 
-	m_sendsound_entry = AddSoundFileSelectionBox( _("Message sent: "), m_top_vbox,
-					   m_prefs.SendFilename, SOUND_SEND );
+	m_sendsound_entry = AddSoundFileSelectionBox( _("Message sent: "), m_prefs.SendFilename, SOUND_SEND );
 
-	m_receivesound_entry = AddSoundFileSelectionBox( _("Message received: "), m_top_vbox,
-					   m_prefs.ReceiveFilename, SOUND_RECEIVE );
+	m_receivesound_entry = AddSoundFileSelectionBox( _("Message received: "), m_prefs.ReceiveFilename, SOUND_RECEIVE );
 
-	m_firstmsgsound_entry = AddSoundFileSelectionBox( _("First message received: "), m_top_vbox,
-					   m_prefs.FirstMsgFilename, SOUND_FIRSTMSG );
+	m_firstmsgsound_entry = AddSoundFileSelectionBox( _("First message received: "), m_prefs.FirstMsgFilename, SOUND_FIRSTMSG );
 
-	m_volumesound_entry = AddSoundVolumeSelectionBox( _("Relative volume (dB)"), m_top_vbox,
-					  GTK_ADJUSTMENT(gtk_adjustment_new( m_prefs.SoundVolume, -40,0,1,5,0 )) );
+	m_volumesound_entry = AddSoundVolumeSelectionBox( _("Relative volume (dB)"),
+				GTK_ADJUSTMENT(gtk_adjustment_new( m_prefs.SoundVolume, -40,0,1,5,0 )) );
 
 }
 
@@ -1183,53 +1086,78 @@ void	ay_sound_files_panel::Apply( void )
 }
 
 // AddSoundFileSelectionBox
-GtkWidget	*ay_sound_files_panel::AddSoundFileSelectionBox( const char *labelString, GtkWidget *vbox,
-								const char *initialFilename, int userdata ) 
+GtkWidget	*ay_sound_files_panel::AddSoundFileSelectionBox( const char *inLabelString,
+						const char *inInitialFilename, int inSoundID ) 
 {
+	GtkWidget	*vbox = gtk_vbox_new( FALSE, 1 );
+	gtk_widget_show( vbox );
+	
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
-	gtk_box_pack_start( GTK_BOX (vbox), hbox, FALSE, FALSE, 0 );
+	gtk_widget_show( hbox );
 
-	GtkWidget	*label = gtk_label_new( labelString );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 3 );
-	gtk_widget_set_usize( label, 125, 10 );
+	GtkWidget	*label = gtk_label_new( inLabelString );
 	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, 125, 15 );
+	gtk_box_pack_start( GTK_BOX(hbox), label, TRUE, TRUE, 3 );
+
+	const int	button_width = 54;
+	
+	GtkWidget	*preview_button = gtk_button_new_with_label( _("Preview") );
+	gtk_widget_show( preview_button );
+	gtk_widget_set_usize( preview_button, button_width, -1 );
+	gtk_signal_connect( GTK_OBJECT(preview_button), "clicked", GTK_SIGNAL_FUNC(s_testsoundfile), &(m_cb_data[inSoundID]) );
+	gtk_box_pack_start( GTK_BOX(hbox), preview_button, FALSE, FALSE, 5 );
+	
+	gtk_box_pack_start( GTK_BOX(vbox), hbox, FALSE, FALSE, 0 );
+
+	hbox = gtk_hbox_new( FALSE, 3 );
+	gtk_widget_show( hbox );
+	
+	GtkWidget	*spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, 15, 15 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 3 );
 
 	GtkWidget	*widget = gtk_entry_new();
-	gtk_entry_set_text( GTK_ENTRY (widget), initialFilename );
-	gtk_box_pack_start( GTK_BOX(hbox), widget, TRUE, TRUE, 0 );
 	gtk_widget_show( widget );
+	gtk_entry_set_text( GTK_ENTRY (widget), inInitialFilename );
+	gtk_box_pack_start( GTK_BOX(hbox), widget, TRUE, TRUE, 0 );
 
-	m_cb_data[userdata].m_panel = this;
-	m_cb_data[userdata].m_sound_id = userdata;
-
-	GtkWidget	*button = gtk_button_new_with_label( _("Browse") );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_getsoundfile), &(m_cb_data[userdata]) );
-	gtk_box_pack_start( GTK_BOX(hbox), button, FALSE, FALSE, 5 );
-	gtk_widget_show( button );
-
-	button = gtk_button_new_with_label( _("Preview") );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_testsoundfile), &(m_cb_data[userdata]) );
-	gtk_box_pack_start( GTK_BOX(hbox), button, FALSE, FALSE, 5 );
-	gtk_widget_show( button );
-	gtk_widget_show( hbox );
+	GtkWidget	*browse_button = gtk_button_new_with_label( _("Browse") );
+	gtk_widget_show( browse_button );
+	gtk_widget_set_usize( browse_button, button_width, -1 );
+	
+	m_cb_data[inSoundID].m_panel = this;
+	m_cb_data[inSoundID].m_sound_id = inSoundID;
+	gtk_signal_connect( GTK_OBJECT(browse_button), "clicked", GTK_SIGNAL_FUNC(s_getsoundfile), &(m_cb_data[inSoundID]) );
+	gtk_box_pack_start( GTK_BOX(hbox), browse_button, FALSE, FALSE, 5 );
+	
+	gtk_box_pack_start( GTK_BOX(vbox), hbox, FALSE, FALSE, 0 );
+	
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_box_pack_start( GTK_BOX(vbox), spacer, FALSE, FALSE, 3 );
+	
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), vbox, FALSE, FALSE, 0 );
 
 	return( widget );
 }
 
 // AddSoundVolumeSelectionBox
-GtkWidget	*ay_sound_files_panel::AddSoundVolumeSelectionBox( const char *labelString, GtkWidget *vbox,
-								GtkAdjustment *adjust )
+GtkWidget	*ay_sound_files_panel::AddSoundVolumeSelectionBox( const char *inLabelString, GtkAdjustment *inAdjustment )
 {
 	GtkWidget *hbox = gtk_hbox_new( FALSE, 3 );
-	gtk_box_pack_start( GTK_BOX (vbox), hbox, FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 
-	GtkWidget *label = gtk_label_new( labelString );
+	GtkWidget *label = gtk_label_new( inLabelString );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 3 );
 	gtk_widget_set_usize( label, 125, 10 );
 	gtk_widget_show( label );
 
-	GtkWidget *widget = gtk_hscale_new( adjust );
-	gtk_signal_connect( GTK_OBJECT(adjust), "value_changed", GTK_SIGNAL_FUNC(s_soundvolume_changed), this );
+	GtkWidget *widget = gtk_hscale_new( inAdjustment );
+	gtk_signal_connect( GTK_OBJECT(inAdjustment), "value_changed", GTK_SIGNAL_FUNC(s_soundvolume_changed), this );
 	gtk_box_pack_start( GTK_BOX(hbox), widget, TRUE, TRUE, 0 );
 	gtk_widget_show( widget );
 
@@ -1359,7 +1287,6 @@ void	ay_sound_files_panel::s_soundvolume_changed( GtkAdjustment *adjust, void *d
 ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &inPrefs )
 :	ay_prefs_window_panel( inTopFrameText ),
 	m_prefs( inPrefs ),
-	m_accel_change_handler_id( 0 ),
 	m_font_size_entry( NULL )
 {
 }
@@ -1392,31 +1319,115 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtk_widget_show( m_font_size_entry );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
-
-	gtk_accelerator_parse( m_prefs.accel_next_tab,
-		&(m_local_accel_next_tab.keyval), &(m_local_accel_next_tab.modifiers) );
-	gtk_accelerator_parse( m_prefs.accel_prev_tab,
-		&(m_local_accel_prev_tab.keyval), &(m_local_accel_prev_tab.modifiers) );
-
-	m_cb_data[0].m_panel = this;
-	m_cb_data[0].m_device_key = &m_local_accel_prev_tab;
-	AddKeySet( _("Hotkey to go to previous tab (requires a modifier)"), &(m_cb_data[0]), m_top_vbox );
-	
-	m_cb_data[1].m_panel = this;
-	m_cb_data[1].m_device_key = &m_local_accel_next_tab;
-	AddKeySet( _("Hotkey to go to next tab (requires a modifier)"), &(m_cb_data[1]), m_top_vbox );
 }
 
 // Apply
 void	ay_chat_panel::Apply( void )
 {
-	char	*ptr = NULL;
-
-	if ( m_font_size_entry != NULL )
-	{
-		ptr = gtk_entry_get_text( GTK_ENTRY(m_font_size_entry) );
+	const char	*ptr = gtk_entry_get_text( GTK_ENTRY(m_font_size_entry) );
+	
+	if ( ptr != NULL )
 		m_prefs.font_size = atoi( ptr );
-	}
+}
+
+////////////////
+//// ay_tabs_panel implementation
+
+ay_tabs_panel::ay_tabs_panel( const char *inTopFrameText, struct prefs::tabs &inPrefs )
+:	ay_prefs_window_panel( inTopFrameText ),
+	m_prefs( inPrefs ),
+	m_orientation_frame( NULL ),
+	m_hotkey_frame( NULL ),
+	m_accel_change_handler_id( 0 )
+{
+}
+
+// Build
+void	ay_tabs_panel::Build( GtkWidget *inParent )
+{
+	m_toggle_data.m_panel = this;
+	m_toggle_data.m_toggle_data = &m_prefs.do_tabbed_chat;
+	gtkut_check_button( m_top_vbox, _("Use tabs in chat windows"), m_prefs.do_tabbed_chat,
+		GTK_SIGNAL_FUNC(s_set_tabbed), &m_toggle_data );
+	
+	// orientation
+	m_orientation_frame = gtk_frame_new( _( "Tab Position" ) );
+	gtk_widget_show( m_orientation_frame );
+	gtk_container_set_border_width( GTK_CONTAINER(m_orientation_frame), 3 );
+	
+	GtkWidget	*vbox = gtk_vbox_new( FALSE, 4 );
+	gtk_widget_show( vbox );
+	gtk_container_add( GTK_CONTAINER(m_orientation_frame), vbox );
+	
+	/* Because it seems that the 'clicked' function is called when we create the radio buttons [!],
+		we must save our current value and restore it after the creation of the radio buttons
+	*/
+	const int	old_value = m_prefs.do_tabbed_chat_orient;
+	
+	GSList		*radio_group = NULL;
+	
+	m_orientation_cb_data[0].m_panel = this;
+	m_orientation_cb_data[0].m_orientation_id = 0;
+
+	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
+			_("Bottom"), (m_prefs.do_tabbed_chat_orient == 0),
+			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[0]) );
+	
+	m_orientation_cb_data[1].m_panel = this;
+	m_orientation_cb_data[1].m_orientation_id = 1;
+
+	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
+			_("Top"), (m_prefs.do_tabbed_chat_orient == 1),
+			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[1]) );
+	
+	m_orientation_cb_data[2].m_panel = this;
+	m_orientation_cb_data[2].m_orientation_id = 2;
+
+	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
+			_("Left"), (m_prefs.do_tabbed_chat_orient == 2),
+			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[2]) );
+	
+	m_orientation_cb_data[3].m_panel = this;
+	m_orientation_cb_data[3].m_orientation_id = 3;
+
+	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
+			_("Right"), (m_prefs.do_tabbed_chat_orient == 3),
+			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[3]) );
+
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_orientation_frame, FALSE, FALSE, 5 );
+	
+	m_prefs.do_tabbed_chat_orient = old_value;
+
+	// hotkeys
+	gtk_accelerator_parse( m_prefs.accel_next_tab,
+		&(m_local_accel_next_tab.keyval), &(m_local_accel_next_tab.modifiers) );
+	gtk_accelerator_parse( m_prefs.accel_prev_tab,
+		&(m_local_accel_prev_tab.keyval), &(m_local_accel_prev_tab.modifiers) );
+
+	m_hotkey_frame = gtk_frame_new( _( "Hotkeys" ) );
+	gtk_widget_show( m_hotkey_frame );
+	gtk_container_set_border_width( GTK_CONTAINER(m_hotkey_frame), 3 );
+	
+	GtkWidget	*hotkey_vbox = gtk_vbox_new( FALSE, 4 );
+	gtk_widget_show( hotkey_vbox );
+	gtk_container_add( GTK_CONTAINER(m_hotkey_frame), hotkey_vbox );
+
+	m_key_cb_data[0].m_panel = this;
+	m_key_cb_data[0].m_device_key = &m_local_accel_prev_tab;
+	AddKeySet( _("Previous tab:"), &(m_key_cb_data[0]), hotkey_vbox );
+	
+	m_key_cb_data[1].m_panel = this;
+	m_key_cb_data[1].m_device_key = &m_local_accel_next_tab;
+	AddKeySet( _("Next tab:"), &(m_key_cb_data[1]), hotkey_vbox );
+	
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_hotkey_frame, FALSE, FALSE, 5 );
+	
+	SetActiveWidgets();
+}
+
+void	ay_tabs_panel::Apply( void )
+{
+	char	*ptr = NULL;
 
 	ptr = gtk_accelerator_name( m_local_accel_next_tab.keyval, m_local_accel_next_tab.modifiers );
 	strncpy( m_prefs.accel_next_tab, ptr, MAX_PREF_LEN );
@@ -1428,34 +1439,84 @@ void	ay_chat_panel::Apply( void )
 }
 
 // AddKeySet
-void	ay_chat_panel::AddKeySet( const char *labelString, t_cb_data *cb_data, GtkWidget *vbox )
+void	ay_tabs_panel::AddKeySet( const char *inLabelString, t_cb_data *cb_data, GtkWidget *vbox )
 {
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 2 );
-	gtk_box_pack_start( GTK_BOX (vbox), hbox, FALSE, FALSE, 0 );
+	gtk_widget_show( hbox );
+	gtk_box_pack_start( GTK_BOX(vbox), hbox, FALSE, FALSE, 5 );
 
-	GtkWidget	*label = gtk_label_new( labelString );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 3 );
-	gtk_widget_set_usize( label, 275, 10 );
-	gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
+	GtkWidget	*label = gtk_label_new( inLabelString );
 	gtk_widget_show( label );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+	gtk_widget_set_usize( label, 75, 10 );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 3 );
 
 	const char	*clabel = gtk_accelerator_name( cb_data->m_device_key->keyval, cb_data->m_device_key->modifiers );
 	GtkWidget	*button = gtk_button_new_with_label( clabel );
 	g_free( (void *)clabel );
-
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_getnewkey), cb_data );
-	gtk_box_pack_start( GTK_BOX(hbox), button, FALSE, FALSE, 5 );
 	gtk_widget_show( button );
 
-	gtk_widget_show( hbox );
+	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_getnewkey), cb_data );
+	gtk_box_pack_start( GTK_BOX(hbox), button, TRUE, TRUE, 5 );
+}
+
+// SetActiveWidgets
+void	ay_tabs_panel::SetActiveWidgets( void )
+{
+	gtk_widget_set_sensitive( m_orientation_frame, m_prefs.do_tabbed_chat );
+	gtk_widget_set_sensitive( m_hotkey_frame, m_prefs.do_tabbed_chat );
 }
 
 ////
-// ay_chat_panel callbacks
+// ay_tabs_panel callbacks
+
+// s_set_tabbed
+void	ay_tabs_panel::s_set_tabbed( GtkWidget *w, void *data )
+{
+	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
+	assert( cb_data != NULL );
+
+	ay_tabs_panel	*the_panel = cb_data->m_panel;
+	
+	// toggle the data
+	int	*value = cb_data->m_toggle_data;
+	*value = !(*value);
+	
+	the_panel->SetActiveWidgets();
+}
+
+// s_change_orientation
+void	ay_tabs_panel::s_change_orientation( GtkWidget *widget, void *data )
+{
+	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
+	assert( cb_data != NULL );
+	
+	ay_tabs_panel	*the_panel = cb_data->m_panel;
+	the_panel->m_prefs.do_tabbed_chat_orient = cb_data->m_orientation_id;
+}
 
 // s_newkey_callback
-gboolean	ay_chat_panel::s_newkey_callback( GtkWidget *keybutton, GdkEventKey *event, void *data )
+gboolean	ay_tabs_panel::s_newkey_callback( GtkWidget *keybutton, GdkEventKey *event, void *data )
 {
+	// IF the user hits escape
+	//	THEN cancel the hotkey selection
+	if ( event->keyval == GDK_Escape )
+	{
+		t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
+		assert( cb_data != NULL );
+
+		ay_tabs_panel		*the_panel = cb_data->m_panel;
+		GtkWidget		*label = GTK_BIN(keybutton)->child;
+		const GdkDeviceKey	*the_key = cb_data->m_device_key;
+
+		gtk_label_set_text( GTK_LABEL(label), gtk_accelerator_name( the_key->keyval, the_key->modifiers) );
+		gtk_signal_disconnect( GTK_OBJECT(keybutton), the_panel->m_accel_change_handler_id );
+		gtk_grab_remove( keybutton );
+		the_panel->m_accel_change_handler_id = 0;
+		
+		return( gtk_true() );
+	}
+	
 	/* remove stupid things like.. numlock scrolllock and capslock
 	 * mod1 = alt, mod2 = numlock, mod3 = modeshift/altgr, mod4 = meta, mod5 = scrolllock */
 	const int	state = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
@@ -1490,8 +1551,8 @@ gboolean	ay_chat_panel::s_newkey_callback( GtkWidget *keybutton, GdkEventKey *ev
 					t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
 					assert( cb_data != NULL );
 
-					ay_chat_panel	*the_panel = cb_data->m_panel;
-					GtkWidget		*label = GTK_BIN(keybutton)->child;
+					ay_tabs_panel	*the_panel = cb_data->m_panel;
+					GtkWidget	*label = GTK_BIN(keybutton)->child;
 					GdkDeviceKey	*the_key = cb_data->m_device_key;
 
 					the_key->keyval = event->keyval;
@@ -1510,18 +1571,18 @@ gboolean	ay_chat_panel::s_newkey_callback( GtkWidget *keybutton, GdkEventKey *ev
 }
 
 // getnewkey
-void	ay_chat_panel::s_getnewkey( GtkWidget *keybutton, void *data )
+void	ay_tabs_panel::s_getnewkey( GtkWidget *keybutton, void *data )
 {
 	GtkWidget	*label = GTK_BIN(keybutton)->child;
 	
 	t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
 	assert( cb_data != NULL );
 
-	ay_chat_panel	*the_panel = cb_data->m_panel;
+	ay_tabs_panel	*the_panel = cb_data->m_panel;
 	
 	if ( the_panel->m_accel_change_handler_id == 0 )
 	{
-		gtk_label_set_text( GTK_LABEL(label), _("Please press new key and modifier now.") );
+		gtk_label_set_text( GTK_LABEL(label), _("<Press modifier + key or escape to cancel>") );
 
 		gtk_object_set_data( GTK_OBJECT(keybutton), "accel", data );
 
@@ -1536,6 +1597,7 @@ void	ay_chat_panel::s_getnewkey( GtkWidget *keybutton, void *data )
 					GTK_SIGNAL_FUNC(s_newkey_callback), data );
 	}
 }
+
 
 ////////////////
 //// ay_proxy_panel implementation

@@ -478,10 +478,6 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_strip_html", 0 );
 	iSetLocalPref( "do_restore_last_conv", 0 );
 	
-	/* layout */
-	iSetLocalPref( "do_tabbed_chat", 0 );
-	iSetLocalPref( "do_tabbed_chat_orient", 0 );	/* Tab Orientation:  0 => bottom, 1 => top, 2=> left, 3 => right */
-	
 	/* chat */
 	iSetLocalPref( "do_typing_notify", 1 );
 	iSetLocalPref( "do_send_typing_notify", 1 );
@@ -498,6 +494,10 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_ignore_back", 1 );
 	iSetLocalPref( "do_ignore_font", 1 );
 	iSetLocalPref( "do_smiley", 1 );
+	
+	/* tabs */
+	iSetLocalPref( "do_tabbed_chat", 0 );
+	iSetLocalPref( "do_tabbed_chat_orient", 0 );	/* Tab Orientation:  0 => bottom, 1 => top, 2=> left, 3 => right */
 	
 	/* NOTE that the way the defaults for accelerators are stored is likely GTK-specific */
 	cSetLocalPref( "accel_prev_tab", "<Control>Left" );
@@ -751,10 +751,6 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_strip_html=%d\n", iGetLocalPref("do_strip_html") );
 	fprintf( fp, "do_restore_last_conv=%d\n", iGetLocalPref("do_restore_last_conv") );
 
-	/* layout */
-	fprintf( fp, "do_tabbed_chat=%d\n", iGetLocalPref("do_tabbed_chat") );
-	fprintf( fp, "do_tabbed_chat_orient=%d\n", iGetLocalPref("do_tabbed_chat_orient") );
-
 	/* chat */
 	fprintf( fp, "do_typing_notify=%d\n", iGetLocalPref("do_typing_notify") );
 	fprintf( fp, "do_send_typing_notify=%d\n", iGetLocalPref("do_send_typing_notify") );
@@ -771,6 +767,10 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_ignore_back=%d\n", iGetLocalPref("do_ignore_back") );
 	fprintf( fp, "do_ignore_font=%d\n", iGetLocalPref("do_ignore_font") );
 	fprintf( fp, "do_smiley=%d\n", iGetLocalPref("do_smiley" ) );
+
+	/* tabs */
+	fprintf( fp, "do_tabbed_chat=%d\n", iGetLocalPref("do_tabbed_chat") );
+	fprintf( fp, "do_tabbed_chat_orient=%d\n", iGetLocalPref("do_tabbed_chat_orient") );
 	fprintf( fp, "accel_next_tab=%s\n", cGetLocalPref("accel_next_tab") );
 	fprintf( fp, "accel_prev_tab=%s\n", cGetLocalPref("accel_prev_tab") );
 
@@ -835,10 +835,6 @@ void	ayttm_prefs_show_window( void )
 	prefs->logging.do_logging            = iGetLocalPref("do_logging");
 	prefs->logging.do_restore_last_conv  = iGetLocalPref("do_restore_last_conv");
 
-	/* layout prefs */
-	prefs->layout.do_tabbed_chat        = iGetLocalPref("do_tabbed_chat");
-	prefs->layout.do_tabbed_chat_orient = iGetLocalPref("do_tabbed_chat_orient");
-
 	/* chat prefs */
 	prefs->chat.do_ignore_unknown     = iGetLocalPref("do_ignore_unknown");
 	prefs->chat.font_size	          = iGetLocalPref("FontSize");
@@ -847,9 +843,13 @@ void	ayttm_prefs_show_window( void )
 	prefs->chat.do_ignore_fore        = iGetLocalPref("do_ignore_fore");
 	prefs->chat.do_ignore_back        = iGetLocalPref("do_ignore_back");
 	prefs->chat.do_ignore_font        = iGetLocalPref("do_ignore_font");
-	
-	strncpy( prefs->chat.accel_next_tab, cGetLocalPref("accel_next_tab"), MAX_PREF_LEN );
-	strncpy( prefs->chat.accel_prev_tab, cGetLocalPref("accel_prev_tab"), MAX_PREF_LEN );
+
+	/* tabs prefs */
+	prefs->tabs.do_tabbed_chat        = iGetLocalPref("do_tabbed_chat");
+	prefs->tabs.do_tabbed_chat_orient = iGetLocalPref("do_tabbed_chat_orient");
+
+	strncpy( prefs->tabs.accel_next_tab, cGetLocalPref("accel_next_tab"), MAX_PREF_LEN );
+	strncpy( prefs->tabs.accel_prev_tab, cGetLocalPref("accel_prev_tab"), MAX_PREF_LEN );
 	
 	/* sound prefs */
 	prefs->sound.do_no_sound_when_away = iGetLocalPref("do_no_sound_when_away");
@@ -926,10 +926,6 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	/* logging */
 	iSetLocalPref( "do_logging", inPrefs->logging.do_logging );
 	iSetLocalPref( "do_restore_last_conv", inPrefs->logging.do_restore_last_conv );
-	
-	/* layout */
-	iSetLocalPref( "do_tabbed_chat", inPrefs->layout.do_tabbed_chat );
-	iSetLocalPref( "do_tabbed_chat_orient", inPrefs->layout.do_tabbed_chat_orient );
 
 	/* chat */
 	iSetLocalPref( "do_ignore_unknown", inPrefs->chat.do_ignore_unknown );
@@ -940,8 +936,12 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	iSetLocalPref( "do_ignore_back", inPrefs->chat.do_ignore_back );
 	iSetLocalPref( "do_ignore_font", inPrefs->chat.do_ignore_font );
 	
-	cSetLocalPref( "accel_prev_tab", inPrefs->chat.accel_prev_tab );
-	cSetLocalPref( "accel_next_tab", inPrefs->chat.accel_next_tab );
+	/* tabs */
+	iSetLocalPref( "do_tabbed_chat", inPrefs->tabs.do_tabbed_chat );
+	iSetLocalPref( "do_tabbed_chat_orient", inPrefs->tabs.do_tabbed_chat_orient );
+	
+	cSetLocalPref( "accel_prev_tab", inPrefs->tabs.accel_prev_tab );
+	cSetLocalPref( "accel_next_tab", inPrefs->tabs.accel_next_tab );
 	
 	/* sound */
 	iSetLocalPref( "do_no_sound_when_away", inPrefs->sound.do_no_sound_when_away );

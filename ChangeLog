@@ -1,3 +1,8 @@
+* Wed Apr 16 2003 17:20 GMT [andy]	0.2.3-111
+- src/prefs.[ch]
+  src/gtk/prefs_window.C
+Clean up some pref layouts and move some things around
+
 * Wed Apr 16 2003 11:15 GMT [andy]	0.2.3-110
 -src/input_list.c
 Make labels line up better for module prefs

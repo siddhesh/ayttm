@@ -70,12 +70,6 @@ struct prefs
 		int		do_restore_last_conv;
 	} logging;
 	
-	struct layout
-	{
-		int		do_tabbed_chat;
-		int		do_tabbed_chat_orient;	/* Tab Orientation:  0 => bottom, 1 => top, 2=> left, 3 => right */
-	} layout;
-	
 	struct chat
 	{
 		int		do_ignore_unknown;
@@ -85,9 +79,15 @@ struct prefs
 		int		do_ignore_fore;
 		int		do_ignore_back;
 		int		do_ignore_font;
+	} chat;
+	
+	struct tabs
+	{
+		int		do_tabbed_chat;
+		int		do_tabbed_chat_orient;	/* Tab Orientation:  0 => bottom, 1 => top, 2=> left, 3 => right */
 		char	accel_prev_tab[MAX_PREF_LEN];
 		char	accel_next_tab[MAX_PREF_LEN];
-	} chat;
+	} tabs;
 	
 	struct sound
 	{
