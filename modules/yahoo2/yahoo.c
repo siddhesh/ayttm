@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.45 $",
-	"$Date: 2003/05/02 09:02:24 $",
+	"$Revision: 1.46 $",
+	"$Date: 2003/05/06 08:33:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -993,10 +993,11 @@ static void ext_yahoo_got_file(int id, char *from, char *url, long expires, char
 {
 	char buff[1024];
 	eb_yahoo_file_transfer_data *yftd = g_new0(eb_yahoo_file_transfer_data, 1);
+	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 
 	snprintf(buff, sizeof(buff), 
-			_("The yahoo user %s has sent you a file%s%s, Do you want to accept it?"),
-			from, 
+			_("%s, the yahoo user %s has sent you a file%s%s, Do you want to accept it?"),
+			ela->handle, from, 
 			(msg && *msg ? _(" with the message ") : ""), 
 			(msg && *msg ? msg : ""));
 
@@ -1217,12 +1218,13 @@ static void ext_yahoo_got_conf_invite(int id, char *who, char *room, char *msg, 
 {
 	char buff[1024];
 	eb_yahoo_chat_room_data *ycrd = g_new0(eb_yahoo_chat_room_data, 1);
+	eb_yahoo_local_account_data *ela = yahoo_find_local_account_by_id(id);
 
 	if(!who || !room)
 		return;
 
-	snprintf(buff, sizeof(buff), _("The yahoo user %s has invited you to a conference - %s, the topic is %s.\n")
-			_("Do you want to join?"), who, room, msg);
+	snprintf(buff, sizeof(buff), _("%s, the yahoo user %s has invited you to a conference - %s, the topic is %s.\n")
+			_("Do you want to join?"), ela->handle, who, room, msg);
 
 	ycrd->id = id;
 	ycrd->host = strdup(who);
@@ -1599,9 +1601,10 @@ static void ext_yahoo_webcam_invite(int id, char *who)
 {
 	char buff[1024];
 	struct yahoo_authorize_data *wd = g_new0(struct yahoo_authorize_data, 1);
+	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 
-	snprintf(buff, sizeof(buff), _("The yahoo user %s has invited you to view their webcam."
-				"Do you want to accept?"), who);
+	snprintf(buff, sizeof(buff), _("%s, the yahoo user %s has invited you to view their webcam."
+				"Do you want to accept?"), ela->handle, who);
 
 	wd->id = id;
 	wd->who = strdup(who);
@@ -1654,8 +1657,9 @@ static void ext_yahoo_contact_added(int id, char *myid, char *who, char *msg)
 {
 	char buff[1024];
 	struct yahoo_authorize_data *ay = g_new0(struct yahoo_authorize_data, 1);
+	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 
-	snprintf(buff, sizeof(buff), _("The yahoo user %s has added you to their contact list"), who);
+	snprintf(buff, sizeof(buff), _("%s, the yahoo user %s has added you to their contact list"), (myid?myid:ela->handle), who);
 	if(msg) {
 		strcat(buff, _(" with the following message:\n"));
 		strcat(buff, msg);
