@@ -109,6 +109,7 @@ struct prefs
 		int		do_ayttm_debug;
 		int		do_show_tooltips;
 		int		use_alternate_browser;
+		int		do_version_check;
 		char	alternate_browser[MAX_PREF_LEN];
 	} general;
 	

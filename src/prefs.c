@@ -567,6 +567,9 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_play_first", 1 );
 	iSetLocalPref( "do_play_receive", 1 );
 	
+	/* version checking */
+	cSetLocalPref( "last_warned_version", "0.0.0");
+	
 	ayttm_prefs_read_file(AYTTMRC);
 	
 	cSetLocalPref( "BuddyArriveFilename", cGetLocalPref("default_arrive_snd"));
@@ -586,7 +589,8 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_show_tooltips", 1 );
 	iSetLocalPref( "use_alternate_browser", 0 );
 	cSetLocalPref( "alternate_browser", "" );
-
+	iSetLocalPref( "do_version_check", 0);
+	
 	/* advanced */
 	iSetLocalPref( "proxy_type", PROXY_NONE );
 	cSetLocalPref( "proxy_host", "" );
@@ -835,14 +839,15 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "SoundVolume=%f\n", fGetLocalPref("SoundVolume") );
 	
 	/* misc */
-    fprintf( fp, "do_ayttm_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
-    fprintf( fp, "do_ayttm_debug_html=%d\n", iGetLocalPref("do_ayttm_debug_html") );
-    fprintf( fp, "do_plugin_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
-    fprintf( fp, "length_contact_window=%d\n", iGetLocalPref("length_contact_window") );
-    fprintf( fp, "width_contact_window=%d\n", iGetLocalPref("width_contact_window") );
-    fprintf( fp, "do_noautoresize=%d\n", iGetLocalPref("do_noautoresize") ) ;
-    fprintf( fp, "do_show_tooltips=%d\n", iGetLocalPref("do_show_tooltips") );
-    fprintf( fp, "use_alternate_browser=%d\n", iGetLocalPref("use_alternate_browser") );
+	fprintf( fp, "do_ayttm_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
+	fprintf( fp, "do_ayttm_debug_html=%d\n", iGetLocalPref("do_ayttm_debug_html") );
+	fprintf( fp, "do_plugin_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
+	fprintf( fp, "do_version_check=%d\n", iGetLocalPref("do_version_check") );
+	fprintf( fp, "length_contact_window=%d\n", iGetLocalPref("length_contact_window") );
+	fprintf( fp, "width_contact_window=%d\n", iGetLocalPref("width_contact_window") );
+	fprintf( fp, "do_noautoresize=%d\n", iGetLocalPref("do_noautoresize") ) ;
+	fprintf( fp, "do_show_tooltips=%d\n", iGetLocalPref("do_show_tooltips") );
+	fprintf( fp, "use_alternate_browser=%d\n", iGetLocalPref("use_alternate_browser") );
 	fprintf( fp, "alternate_browser=%s\n", cGetLocalPref("alternate_browser") );
 
 	/* advanced */
@@ -857,6 +862,9 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "local_encoding=%s\n", cGetLocalPref("local_encoding") );
 	fprintf( fp, "remote_encoding=%s\n", cGetLocalPref("remote_encoding") );
 	 
+	/* version checking */
+	fprintf( fp, "last_warned_version=%s\n",cGetLocalPref("last_warned_version"));
+	
 	/* modules */
 	fprintf( fp, "modules_path=%s\n", cGetLocalPref("modules_path") );
 	fprintf( fp, "plugins\n" );
@@ -929,7 +937,7 @@ void	ayttm_prefs_show_window( void )
 	prefs->general.do_show_tooltips      = iGetLocalPref("do_show_tooltips");
 	prefs->general.use_alternate_browser = iGetLocalPref("use_alternate_browser");
 	strncpy( prefs->general.alternate_browser, cGetLocalPref("alternate_browser"), MAX_PREF_LEN );
-	
+	prefs->general.do_version_check     = iGetLocalPref("do_version_check");
 	/* advanced */
 	prefs->advanced.proxy_type      = iGetLocalPref("proxy_type");
 	strncpy( prefs->advanced.proxy_host, cGetLocalPref("proxy_host"), MAX_PREF_LEN );
@@ -1061,6 +1069,7 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	iSetLocalPref( "do_ayttm_debug", inPrefs->general.do_ayttm_debug );
 	iSetLocalPref( "do_plugin_debug", inPrefs->general.do_ayttm_debug );
 	iSetLocalPref( "do_show_tooltips", inPrefs->general.do_show_tooltips );
+	iSetLocalPref( "do_version_check", inPrefs->general.do_version_check);
 	set_tooltips_active(inPrefs->general.do_show_tooltips);
 	iSetLocalPref( "use_alternate_browser", inPrefs->general.use_alternate_browser );
 	cSetLocalPref( "alternate_browser", inPrefs->general.alternate_browser );

@@ -1965,6 +1965,8 @@ void	ay_misc_panel::Build( GtkWidget *inParent )
 	
 	gtkut_button( _("Show tooltips in status window"), &m_prefs.do_show_tooltips, m_top_vbox );
 	
+	gtkut_button( _("Check for latest version when signing on all"), &m_prefs.do_version_check, m_top_vbox );
+	
 	SetActiveWidgets();
 }
 

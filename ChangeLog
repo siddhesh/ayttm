@@ -1,3 +1,9 @@
+* Sat Jul 19 2003 11:05 GMT [colin]	0.3.3-3
+- src/status.c src/util.[ch] src/prefs.[ch] src/gtk/prefs_window.C
+add version checker
+- libproxy/proxy.c
+return sockfd from proxy_connect_host when there's no callback
+
 * Fri Jul 18 2003 20:15 GMT [philip]	0.3.3-2
 - modules/yahoo2/libyahoo2/libyahoo2.c
 add debug info for bug 773849

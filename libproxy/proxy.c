@@ -874,8 +874,13 @@ int proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
 			      inet_ntoa(sin->sin_addr), 
 			      ntohs(sin->sin_port), 
 			      callback, data, scb);     
-		else
-			return connect(sockfd, serv_addr, addrlen);
+		else {
+			if (connect(sockfd, serv_addr, addrlen) == 0) {
+				return sockfd;
+			} else {
+				return -1;
+			}
+		}
 		break;
 		}
       case PROXY_HTTP:    /* Http proxy */

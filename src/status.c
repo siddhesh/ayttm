@@ -649,6 +649,55 @@ static void ay_dump_structures_cb ( GtkWidget * widget, gpointer userdata )
 }
 #endif
 
+static void ay_compare_version (const char *version, int warn_again)
+{
+	char *warned = cGetLocalPref("last_warned_version");
+	
+	if (strcmp(version, VERSION)) {
+		/* versions differ, should I warn ? */
+		if (warn_again || !warned || strcmp(warned, version)) {
+			char * buf = g_strdup_printf(_("A new release of ayttm is available.\n"
+					"Last version is %s, while you have %s.\n"), version, VERSION);
+			ay_do_info(_("New release available !"), buf);
+			cSetLocalPref("last_warned_version", (char *)version);
+			ayttm_prefs_write();
+		}
+	}
+	else if (warn_again) {
+		ay_do_info(_("No new release"), _("You have the last release of ayttm installed."));
+		cSetLocalPref("last_warned_version", (char *)version);
+		ayttm_prefs_write();
+	}
+}
+
+static void ay_check_release ( GtkWidget * widget, gpointer userdata )
+{
+	char *rss = NULL;
+	int found = 0;
+	char *version = NULL;
+	int is_auto = GPOINTER_TO_INT(userdata);
+	rss = ay_http_get("http://sourceforge.net/export/rss2_projfiles.php?group_id=77614");
+	if (rss != NULL) {
+		if (strstr(rss, "\t\t\t<title>ayttm ")) {
+			/* beginning matches */
+			char *released = NULL;
+			released = strstr(rss, "\t\t\t<title>ayttm ");
+			if (released && strstr(released, " released (")) {
+				/* end matches */
+				version = g_strndup(released + strlen("\t\t\t<title>ayttm "), 
+							strlen("x.x.x"));
+				found = 1;
+			}
+		}
+	}
+	free(rss);
+	if (version) {
+		eb_debug(DBG_CORE, "Last version: %s\n", version);
+		ay_compare_version(version, !is_auto);
+		free(version);
+	}
+}
+
 /* Be sure to free the menu items in the status menu */
 static void eb_status_remove(GtkContainer *container,  GtkWidget * widget, gpointer stats )
 {
@@ -709,6 +758,9 @@ static void eb_sign_on_predef(int all)
 void eb_sign_on_all() 
 {
 	eb_sign_on_predef(1);
+	if (iGetLocalPref("do_version_check")) {
+		ay_check_release(NULL, GINT_TO_POINTER(1));
+	}
 }
 
 void eb_sign_on_startup() 
@@ -1895,7 +1947,9 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Help/_Manual..."),	NULL, show_manual, 0, NULL },
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
 #endif
-	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL }
+	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL },
+	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
+	{ N_("/Help/_Check for new release"),NULL, ay_check_release, 0, GINT_TO_POINTER(0) }
 #if ADD_DEBUG_TO_MENU
 	,
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
@@ -1915,7 +1969,7 @@ static void menu_set_sensitive(GtkItemFactory *ifactory, const gchar *path,
 
 	widget = gtk_item_factory_get_item(ifactory, path);
 	if(widget == NULL) {
-		printf("unknown menu entry %s\n", path);
+		eb_debug(DBG_CORE, "unknown menu entry %s\n", path);
 		return;
 	}
 	gtk_widget_set_sensitive(widget, sensitive);

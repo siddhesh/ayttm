@@ -1837,3 +1837,112 @@ void ay_dump_elas()
 				ela->connect_at_startup);
 	}	
 }
+
+/* taken from Yahoo's httplib */
+static int ay_http_readline(char *ptr, int maxlen, int fd)
+{
+	int n, rc;
+	char c;
+
+	for (n = 1; n < maxlen; n++) {
+
+		do {
+			rc = read(fd, &c, 1);
+		} while(rc == -1 && errno == EINTR);
+
+		if (rc == 1) {
+			if(c == '\r')			/* get rid of \r */
+				continue;
+			*ptr = c;
+			if (c == '\n')
+				break;
+			ptr++;
+		} else if (rc == 0) {
+			if (n == 1)
+				return (0);		/* EOF, no data */
+			else
+				break;			/* EOF, w/ data */
+		} else {
+			return -1;
+		}
+	}
+
+	*ptr = 0;
+	return (n);
+}
+
+char * ay_http_get(const char *uri) {
+	char *result = NULL;
+	char *server = NULL, *oserver = NULL;
+	char *url = NULL;
+	int sock = 0;
+	char buf[4096];
+	
+	server = strdup(uri);
+	
+	oserver = server;
+	
+	if (!strstr(server, "://")) {
+		eb_debug(DBG_CORE, "bad url (no host)!\n");
+		return NULL;
+	}
+	server = strstr(server, "://") + 3*sizeof(char);
+	
+	if (!strstr(server, "/")) {
+		eb_debug(DBG_CORE, "bad url (no url)!\n");
+		return NULL;
+	}
+	url = strstr(server, "/")+sizeof(char);
+	
+	*(url-sizeof(char)) = '\0';
+	
+	eb_debug(DBG_CORE,"Getting %s from %s\n", url, server);
+	sock = proxy_connect_host(server, 80, NULL, NULL, NULL);
+	/* FIXME: won't work with proxy */
+	if (sock <= 0) {
+		ay_do_error(_("Can't connect"), _("Connection to the server failed."));
+		return NULL;
+	}
+
+	strcpy(buf, "GET /");
+	strcat(buf, url);
+	strcat(buf, " HTTP/1.1\r\nHost: ");
+	strcat(buf, server);
+	strcat(buf, "\r\n\r\n");
+	
+	eb_debug(DBG_CORE, "<%s", buf);
+	
+	if (write (sock, buf, strlen(buf)) < strlen(buf)) {
+		eb_debug(DBG_CORE, "Couldn't write to sock !\n");
+		return NULL;
+	}
+	
+	if (ay_http_readline(buf, sizeof(buf), sock) < 0) {
+		eb_debug(DBG_CORE, "readline error\n");
+		return NULL;
+	}
+	
+	while (strcmp(buf,"")) { 
+		/* getting headers */
+		if (ay_http_readline(buf, sizeof(buf), sock) < 0) {
+			eb_debug(DBG_CORE, "readline error\n");
+			return NULL;
+		}
+	}
+	
+	while (ay_http_readline(buf, sizeof(buf), sock) > 0) {
+		char *ores = NULL;
+		if (result) {
+			ores = g_strdup(result);
+			g_free(result);
+		} else
+			ores = g_strdup("");
+		
+		result = g_strdup_printf("%s%s", ores, buf);
+		g_free(ores);
+		
+	}
+	
+	close(sock);
+	return result;
+}

@@ -136,6 +136,7 @@ int eb_send_message (const char *to, const char *msg, int service);
 LList * ay_save_account_information(int service_id);
 void ay_restore_account_information(LList *saved);
 
+char * ay_http_get(const char *uri);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
