@@ -1,3 +1,7 @@
+* Mon Jul 07 2003 10:36 GMT [colin]	0.3.2-9
+- modules/irc.c src/chat_room.[ch]
+Don't show "xx has joined the chat" at channel arrival
+
 * Mon Jul 07 2003 05:20 GMT [philip]	0.3.2-8
 - src/account.c src/util.[ch] src/chat_room.h
 move chat_room utility functions from util.h to chat_room.h

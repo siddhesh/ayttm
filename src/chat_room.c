@@ -844,7 +844,7 @@ eb_chat_room *find_tabbed_chat_room(void)
 }
 
 
-static void eb_chat_room_refresh_list(eb_chat_room * room )
+void eb_chat_room_refresh_list(eb_chat_room * room )
 {
 	LList * node;
 	gtk_clist_clear(GTK_CLIST(room->fellows_widget));

@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.29 $",
-	"$Date: 2003/07/05 22:38:06 $",
+	"$Revision: 1.30 $",
+	"$Date: 2003/07/07 10:37:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -433,14 +433,10 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		tempstring2 = strdup("");
 	}
 	g_strfreev (buff2);
-	if(!is_nickserv)
-	{
-		eb_parse_incoming_message(ela, ea, tempstring2);
-	}
-	else if(strstr(tempstring2,"This nickname") || 
+	if(is_nickserv && (strstr(tempstring2,"This nickname") || 
 		(strstr(tempstring2, "NickServ") && 
 		 (strstr(tempstring2, "identify") ||
-		  strstr(tempstring2, "IDENTIFY"))))
+		  strstr(tempstring2, "IDENTIFY")))))
 	{
 	        int ret;
 		char ps[255];
@@ -448,12 +444,14 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		  g_snprintf(ps, 255, "NICKSERV :identify %s\n", ila->password);
 		  fprintf(stderr, "IRC: NICKSERV sending password to NickServ\n");
 		  ret = sendall(ila->fd, ps, strlen(ps));
-	  if (ret == -1) irc_logout(ela);
+		  if (ret == -1) irc_logout(ela);
 		} else {
-		  g_snprintf(ps, 255, "identify %s", ila->password);
+		  g_snprintf(ps, 255, "IDENTIFY %s", ila->password);
 		  fprintf(stderr, "IRC: PRIVMSG sending password to NickServ\n");
 		  irc_send_im( ela, ea,ps);
 		}
+	} else if(!is_nickserv) {
+		eb_parse_incoming_message(ela, ea, tempstring2);
 	}
 	free(tempstring2);
 	return;
@@ -670,21 +668,31 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		g_strdown(tempstring);
 		ecr = find_chat_room_by_id(tempstring);
 		if (ecr) {
+			eb_chat_room_buddy * ecrb = NULL;
 			if ((*(buff2[5] + 1) == '@') || (*(buff2[5] + 1) == '+'))
 				buddy = buff2[5] + 2;
 			else 
 				buddy = buff2[5] + 1;
-			if (!eb_chat_room_buddy_connected( ecr, buddy ))
-				eb_chat_room_buddy_arrive( ecr, buddy, buddy);
+			if (!eb_chat_room_buddy_connected( ecr, buddy )) {
+				ecrb = g_new0(eb_chat_room_buddy, 1 );
+				strncpy( ecrb->alias, buddy, sizeof(ecrb->alias));
+				strncpy( ecrb->handle, buddy, sizeof(ecrb->handle));
+				ecr->fellows = l_list_append(ecr->fellows, ecrb);
+			}
 			while (buff2[i] != NULL) {
 					if ((*(buff2[i]) == '@') || (*(buff2[i]) == '+'))
 						buddy = buff2[i] + 1;
 					else
 						buddy = buff2[i];
-					if (!eb_chat_room_buddy_connected( ecr, buddy ))
-						eb_chat_room_buddy_arrive( ecr, buddy, buddy);
+					if (!eb_chat_room_buddy_connected( ecr, buddy )) {
+						ecrb = g_new0(eb_chat_room_buddy, 1 );
+						strncpy( ecrb->alias, buddy, sizeof(ecrb->alias));
+						strncpy( ecrb->handle, buddy, sizeof(ecrb->handle));
+						ecr->fellows = l_list_append(ecr->fellows, ecrb);
+					}
 					i++;
 			}
+			eb_chat_room_refresh_list(ecr);
 		} else {
 			eb_debug(DBG_MOD,"IRC: RPL_NAMEREPLY without joining channel %s on %s!\n", tempstring, ila->server);
 		}

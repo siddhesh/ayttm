@@ -52,6 +52,7 @@ void eb_chat_room_show_message( eb_chat_room * chat_room, char * user, char * me
 eb_chat_room* eb_start_chat_room( eb_local_account *ela, char * name , int is_public);
 void eb_chat_room_buddy_arrive( eb_chat_room * room, char * alias, char * handle );
 void eb_chat_room_buddy_leave( eb_chat_room * room, char * handle );
+void eb_chat_room_refresh_list(eb_chat_room * room );
 int eb_chat_room_buddy_connected( eb_chat_room * room, char * user );
 void open_join_chat_window();
 char* next_chatroom_name();
