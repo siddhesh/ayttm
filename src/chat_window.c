@@ -331,10 +331,8 @@ static void end_conversation(chat_window* cw)
 	g_free(cw);
 }
 
-static void remove_smiley_window(struct contact *ct)
+static void remove_smiley_window(chat_window *cw)
 {
-	chat_window *cw = ct->chatwindow;
-
 	GET_CHAT_WINDOW(cw);
 	if(cw->smiley_window != NULL) {
 		/* close smileys popup */
@@ -354,7 +352,7 @@ static void destroy_event(GtkWidget *widget, gpointer userdata)
 	/* gotta clean up all of the people we're talking with */
 	gtk_signal_disconnect_by_func(GTK_OBJECT(cw->window),
 			   GTK_SIGNAL_FUNC(handle_focus), cw);
-	remove_smiley_window(cw->contact);
+	remove_smiley_window(cw);
 
 	end_conversation(cw);
 }
@@ -377,7 +375,7 @@ static void close_tab_callback(GtkWidget *button, gpointer userdata)
 {
 	chat_window *cw = (chat_window*)userdata;
 
-	remove_smiley_window(cw->contact);
+	remove_smiley_window(cw);
 	remove_tab (cw->contact);
 }
 

@@ -61,8 +61,6 @@ static int is_setting_state = 0;
 
 static int ref_count = 0;
 
-static char smtp_host[MAX_PREF_LEN] = "127.0.0.1";
-static char smtp_port[MAX_PREF_LEN] = "25";
 static int do_smtp_debug = 0;
 static int default_online = 0;
 
@@ -72,8 +70,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP",
 	"Provides Simple Mail Transfer Protocol (SMTP) support",
-	"$Revision: 1.18 $",
-	"$Date: 2003/07/30 15:54:54 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/07/31 09:02:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -97,20 +95,6 @@ static int plugin_init()
 	ref_count = 0;
 
 	plugin_info.prefs = il;
-	il->widget.entry.value = smtp_host;
-	il->widget.entry.name = "smtp_host";
-	il->widget.entry.label = _("SMTP Server:");
-	il->type = EB_INPUT_ENTRY;
-
-	il->next = calloc(1, sizeof(input_list));
-	il = il->next;
-	il->widget.entry.value = smtp_port;
-	il->widget.entry.name = "smtp_port";
-	il->widget.entry.label = _("Port:");
-	il->type = EB_INPUT_ENTRY;
-
-	il->next = calloc(1, sizeof(input_list));
-	il = il->next;
 	il->widget.checkbox.value = &do_smtp_debug;
 	il->widget.checkbox.name = "do_smtp_debug";
 	il->widget.checkbox.label = _("Enable debugging");
@@ -179,9 +163,46 @@ typedef struct eb_smtp_account_data {
 } eb_smtp_account_data;
 
 typedef struct eb_smtp_local_account_data {
-	char password[255];	/* in case of SMTP Auth? */
-	int status;		/* always online */
+	char password[MAX_PREF_LEN];	/* in case of SMTP Auth? */
+	int status;			/* always online */
+	char smtp_host[MAX_PREF_LEN];
+	char smtp_port[MAX_PREF_LEN];
 } eb_smtp_local_account_data;
+
+static void smtp_account_prefs_init(eb_local_account *ela)
+{
+	eb_smtp_local_account_data *sla = ela->protocol_local_account_data;
+
+	input_list *il = calloc(1, sizeof(input_list));
+
+	ela->prefs = il;
+	il->widget.entry.value = ela->handle;
+	il->widget.entry.name = "SCREEN_NAME";
+	il->widget.entry.label = _("_Email Address:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = calloc(1, sizeof(input_list));
+	il = il->next;
+	il->widget.entry.value = sla->password;
+	il->widget.entry.name = "PASSWORD";
+	il->widget.entry.label = _("_Password:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = calloc(1, sizeof(input_list));
+	il = il->next;
+	il->widget.entry.value = sla->smtp_host;
+	il->widget.entry.name = "smtp_host";
+	il->widget.entry.label = _("SMTP _Server:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = calloc(1, sizeof(input_list));
+	il = il->next;
+	il->widget.entry.value = sla->smtp_port;
+	il->widget.entry.name = "smtp_port";
+	il->widget.entry.label = _("P_ort:");
+	il->type = EB_INPUT_ENTRY;
+
+}
 
 static LList * eb_smtp_buddies = NULL;
 
@@ -199,7 +220,6 @@ static eb_local_account *eb_smtp_read_local_account_config(LList * pairs)
 {
 	eb_local_account *ela;
 	eb_smtp_local_account_data *sla;
-	char	*str = NULL;
 
 	if(!pairs) {
 		WARNING(("eb_smtp_read_local_account_config: pairs == NULL"));
@@ -209,53 +229,25 @@ static eb_local_account *eb_smtp_read_local_account_config(LList * pairs)
 	ela = calloc(1, sizeof(eb_local_account));
 	sla = calloc(1, sizeof(eb_smtp_local_account_data));
 
-	str = value_pair_get_value(pairs, "SCREEN_NAME");
-	strncpy(ela->handle, str, sizeof(ela->handle));
-	free(str);
-	strncpy(ela->alias, ela->handle, sizeof(ela->alias));
-	str = value_pair_get_value(pairs, "PASSWORD");
-	strncpy(sla->password, str, sizeof(sla->password));
-	free( str );
-	str = value_pair_get_value(pairs,"CONNECT");
-	ela->connect_at_startup=(str && !strcmp(str,"1"));
-	free(str);
-
 	sla->status = SMTP_STATUS_OFFLINE;
 
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = sla;
+
+	smtp_account_prefs_init(ela);
+	eb_update_from_value_pair(ela->prefs, pairs);
+
+	if(!sla->smtp_host[0])
+		strncpy(sla->smtp_host, "127.0.0.1", sizeof(sla->smtp_host));
+	if(!sla->smtp_port[0])
+		strncpy(sla->smtp_port, "25", sizeof(sla->smtp_host));
 
 	return ela;
 }
 
 static LList *eb_smtp_write_local_config(eb_local_account * account)
 {
-	eb_smtp_local_account_data *sla = account->protocol_local_account_data;
-	LList *list = NULL;
-	value_pair *vp;
-
-	vp = calloc(1, sizeof(value_pair));
-	strcpy(vp->key, "SCREEN_NAME");
-	strcpy(vp->value, account->handle);
-
-	list = l_list_append(list, vp);
-
-	vp = calloc(1, sizeof(value_pair));
-	strcpy(vp->key, "PASSWORD");
-	strcpy(vp->value, sla->password);
-
-	list = l_list_append(list, vp);
-
-	vp = g_new0( value_pair, 1 );
-	strcpy( vp->key, "CONNECT" );
-	if (account->connect_at_startup)
-		strcpy( vp->value, "1");
-	else 
-		strcpy( vp->value, "0");
-	
-	list = l_list_append( list, vp );
-
-	return list;
+	return eb_input_to_value_pair(account->prefs);
 }
 
 static void _buddy_change_state(void * data, void * user_data)
@@ -592,6 +584,7 @@ static void eb_smtp_send_im(eb_local_account * account_from,
 {
 	char localhost[255];
 	struct smtp_callback_data * d;
+	eb_smtp_local_account_data *sla = account_from->protocol_local_account_data;
 
 	if(gethostname(localhost, sizeof(localhost)-1) == -1) {
 		strcpy(localhost, "localhost");
@@ -605,7 +598,7 @@ static void eb_smtp_send_im(eb_local_account * account_from,
 	d->from = account_from;
 	d->to = account_to;
 	d->msg = strdup(message);
-	d->tag = ay_socket_new_async(smtp_host, atoi(smtp_port), eb_smtp_got_connected, d, NULL);
+	d->tag = ay_socket_new_async(sla->smtp_host, atoi(sla->smtp_port), eb_smtp_got_connected, d, NULL);
 
 	pending_connects = l_list_append(pending_connects, (void *)d->tag);
 }

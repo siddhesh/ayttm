@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.32 $",
-	"$Date: 2003/07/30 15:54:54 $",
+	"$Revision: 1.33 $",
+	"$Date: 2003/07/31 09:02:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -173,7 +173,7 @@ typedef struct _jabber_info_data
 
 typedef struct _eb_jabber_local_account_data
 {
-	char password[255]; // account password
+	char password[MAX_PREF_LEN];	// account password
 	int fd;				// the file descriptor
 	int status;			// the current status of the user
 	JABBER_Conn	*JConn;
@@ -362,73 +362,63 @@ static void eb_jabber_send_im( eb_local_account * from, eb_account * account_to,
     JABBER_SendMessage(jad->JConn, account_to->handle, message);
 }
 
+static void jabber_account_prefs_init(eb_local_account *ela)
+{
+	eb_jabber_local_account_data *jlad = ela->protocol_local_account_data;
+	input_list *il = g_new0(input_list, 1);
+
+	ela->prefs = il;
+
+	il->widget.entry.value = ela->handle;
+	il->widget.entry.name = "SCREEN_NAME";
+	il->widget.entry.label= _("_Yahoo Id:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = jlad->password;
+	il->widget.entry.name = "PASSWORD";
+	il->widget.entry.label= _("_Password:");
+	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ela->connect_at_startup;
+	il->widget.checkbox.name = "CONNECT";
+	il->widget.checkbox.label= _("_Connect at startup");
+	il->type = EB_INPUT_CHECKBOX;
+}
+
 static eb_local_account * eb_jabber_read_local_account_config( LList * values )
 {
-	char buff[255];
-	char * name, *pass,*str;
+	char buff[255], *tmp;
 
 	eb_local_account * ela = NULL;
 	eb_jabber_local_account_data *jlad = NULL;
 
-	name=value_pair_get_value( values, "SCREEN_NAME" );
-	if(!name) {
-		fprintf(stderr, "Error!  SCREEN_NAME not defined for jabber account!\n");
-	}
-	else {
-		pass=value_pair_get_value(values, "PASSWORD");
-		if(!pass) {
-			fprintf(stderr, "Error!  PASSWORD not defined for jabber account %s!\n", name);
-		}
-		else {
-			jlad = g_new0(eb_jabber_local_account_data,1);
-			jlad->status = JABBER_OFFLINE;
-			strcpy( jlad->password, pass);
-			free( pass );
+	jlad = g_new0(eb_jabber_local_account_data,1);
+	jlad->status = JABBER_OFFLINE;
 
-			ela = g_new0( eb_local_account, 1);
-			strncpy(ela->handle, name, MAX_PREF_LEN);
+	ela = g_new0( eb_local_account, 1);
+	ela->protocol_local_account_data = jlad;
 
-			/*the alias will be the persons login minus the @servername */
-			strcpy( buff, ela->handle );
-			strtok( buff, "@" );
-			strcpy(ela->alias, buff );
-			ela->service_id = SERVICE_INFO.protocol_id;
-			ela->protocol_local_account_data = jlad;
-		}
-		free(name);
-	}
-	str = value_pair_get_value(values,"CONNECT");
-	ela->connect_at_startup=(str && !strcmp(str,"1"));
-	free(str);
+	jabber_account_prefs_init(ela);
+	eb_update_from_value_pair(ela->prefs, values);
+
+	/*the alias will be the persons login minus the @servername */
+	strcpy( buff, ela->handle );
+	tmp = strchr(buff, '@');
+	if(tmp)
+		*tmp='\0';
+	strcpy(ela->alias, buff );
+	ela->service_id = SERVICE_INFO.protocol_id;
 
 	return ela;
 }
 
 static LList * eb_jabber_write_local_config( eb_local_account * account )
 {
-	value_pair * val;
-	LList * vals = NULL;
-	eb_jabber_local_account_data * jlad = account->protocol_local_account_data;
-
-	val = g_new0( value_pair, 1 );
-	strcpy(val->key, "SCREEN_NAME" );
-	strcpy(val->value, account->handle );
-	vals = l_list_append( vals, val );
-
-	val = g_new0( value_pair, 1 );
-	strcpy(val->key, "PASSWORD");
-	strcpy(val->value, jlad->password );
-	vals = l_list_append( vals, val );
-
-	val = g_new0( value_pair, 1 );
-	strcpy( val->key, "CONNECT" );
-	if (account->connect_at_startup)
-		strcpy( val->value, "1");
-	else 
-		strcpy( val->value, "0");
-	
-	vals = l_list_append( vals, val );
-	return vals;
+	return eb_input_to_value_pair(account->prefs);
 }
 
 static eb_account * eb_jabber_read_account_config( eb_account *ea, LList * config)
