@@ -1,5 +1,5 @@
 /*
- * EveryBuddy 
+ * Ayttm
  *
  * Copyright (C) 2003, the Ayttm team
  * Modified by Nicolas Peninguy <ayttm@free-anatole.net>
@@ -47,6 +47,7 @@ typedef unsigned long ulong;
 #include "info_window.h"
 #include "activity_bar.h"
 /* #include "eb_aim.h" */
+#include "away_window.h"
 #include "gtk/gtk_eb_html.h"
 #include "service.h"
 #include "llist.h"
@@ -60,6 +61,8 @@ typedef unsigned long ulong;
 #include "plugin_api.h"
 #include "smileys.h"
 #include "messages.h"
+#include "config.h"
+#include "dialog.h"
 
 #include "pixmaps/aim_online.xpm"
 #include "pixmaps/aim_away.xpm"
@@ -74,7 +77,7 @@ typedef unsigned long ulong;
 #define plugin_finish aim_oscar_LTX_plugin_finish
 #define module_version aim_oscar_LTX_module_version
 
-unsigned int module_version() {return 17;}
+unsigned int module_version () {return CORE_VERSION;}
 
 /* Function Prototypes */
 static int plugin_init   ();
@@ -89,8 +92,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.15 $",
-	"$Date: 2003/10/09 20:29:43 $",
+	"$Revision: 1.16 $",
+	"$Date: 2003/10/13 22:56:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -167,6 +170,7 @@ struct eb_aim_account_data
 struct eb_aim_local_account_data
 {
 	char password[255];
+	char tmp_password[255];
 	gint status;
 	gint listsyncing;
 	gint perm_deny;
@@ -179,6 +183,8 @@ struct eb_aim_local_account_data
 	
 	int input;
 	int login_activity_bar;
+
+	int prompt_password;
 };
 
 typedef struct _aim_info_data 
@@ -341,10 +347,13 @@ faim_cb_parse_login (aim_session_t *sess, aim_frame_t *fr, ...)
 	
 	ay_activity_bar_update_label (alad->login_activity_bar, "Sending password...");
 	
-	LOG (("Login=%s | Password=%s\n", account->handle, alad->password))
+	LOG (("Login=%s | Password=%s\n", account->handle, alad->tmp_password))
 
 	aim_send_login (sess, fr->conn, account->handle,
-			alad->password, &info, key);
+			alad->tmp_password, &info, key);
+	
+	memset (alad->tmp_password, 0, sizeof (alad->tmp_password));
+
 	return 1;
 }
 
@@ -1228,23 +1237,18 @@ connect_error (struct eb_aim_local_account_data *alad, char *msg)
 	ay_do_error ("AIM Error", msg);
 }
 
-
 static void
-ay_aim_login (eb_local_account *account)
+ay_oscar_finish_login (const char *password, void *data)
 {
-	struct eb_aim_local_account_data *alad;
+	eb_local_account *account = (eb_local_account *)data;
+	struct eb_aim_local_account_data *alad =
+		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
 	char buf[256];
 
-	if (account->connected || account->connecting) return;
-	account->connecting = 1;
-
-	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
-
-	ref_count++;
-	LOG (("ay_aim_login: Incrementing ref_count to %i\n", ref_count))
-	
 	snprintf (buf, sizeof(buf), "Logging in to AIM account: %s", account->handle);
 	alad->login_activity_bar = ay_activity_bar_add (buf, ay_aim_cancel_connect, account);
+
+	strncpy (alad->tmp_password, password, sizeof (alad->tmp_password));
 
 	aim_session_init(&(alad->aimsess), AIM_SESS_FLAGS_NONBLOCKCONNECT, 1);
 	aim_setdebuggingcb (&(alad->aimsess), faim_cb_oscar_debug);
@@ -1299,7 +1303,29 @@ ay_aim_login (eb_local_account *account)
 				    ay_aim_callback, account);
 	LOG (("ADDING TAG = %d\n", alad->input))
 	
-	//alad->timer = eb_timeout_add(100, aim_poll_server, &(alad->aimsess));	
+}
+
+static void
+ay_aim_login (eb_local_account *account)
+{
+	struct eb_aim_local_account_data *alad;
+	char buf[256];
+
+	if (account->connected || account->connecting) return;
+	account->connecting = 1;
+
+	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	ref_count++;
+	LOG (("ay_aim_login: Incrementing ref_count to %i\n", ref_count))
+
+	if (alad->prompt_password || !alad->password || !strlen(alad->password)) {
+		
+		snprintf (buf, sizeof (buf), "AIM password for: %s", account->handle);
+		do_password_input_window (buf, "", ay_oscar_finish_login, account);
+	} else {
+		ay_oscar_finish_login(alad->password, account);
+	}
 }
 
 
@@ -1341,6 +1367,7 @@ ay_aim_logout (eb_local_account *account)
 	l_list_foreach (alad->buddies, make_buddy_offline, NULL);
 	
 	account->connected = 0;
+	account->connecting = 0;
 }
 
 static LList *
@@ -1371,7 +1398,14 @@ oscar_init_account_prefs (eb_local_account *ela)
 	il->widget.entry.label= "Password:";
 	il->type = EB_INPUT_PASSWORD;
 
-	il->next = g_new0(input_list, 1);
+	il->next = g_new0 (input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &alad->prompt_password;
+	il->widget.checkbox.name = "prompt_password";
+	il->widget.checkbox.label= "_Ask for password at Login time";
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0 (input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &(ela->connect_at_startup);
 	il->widget.checkbox.name = "CONNECT";
@@ -1485,9 +1519,8 @@ ay_aim_del_user (eb_account *account)
 	g_free (account->protocol_account_data);
 }
 
-#if 0
-
-void eb_aim_set_away(eb_local_account * account, gchar * message)
+static void
+ay_oscar_set_away (eb_local_account * account, gchar * message)
 {
 	struct eb_aim_local_account_data * alad;
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
@@ -1496,20 +1529,21 @@ void eb_aim_set_away(eb_local_account * account, gchar * message)
 		if(account->status_menu)
 		{
 			eb_set_active_menu_status(account->status_menu, AIM_AWAY);
+			LOG (("SETTING AWAY"))
 
 		}
-        aim_bos_setprofile(&(alad->aimsess), alad->conn, profile, message, AIM_CAPS_CHAT);
+		// aim_bos_setprofile(&(alad->aimsess), alad->conn, profile, message, AIM_CAPS_CHAT);
+		LOG (("MESSAGE : %s", message))
 	} else {
 		if(account->status_menu)
 		{
 			eb_set_active_menu_status(account->status_menu, AIM_ONLINE);
 
 		}
-        aim_bos_setprofile(&(alad->aimsess), alad->conn, profile, NULL, AIM_CAPS_CHAT);
+		// aim_bos_setprofile(&(alad->aimsess), alad->conn, profile, NULL, AIM_CAPS_CHAT);
+		LOG (("PAS DE MESSAGE"))
 	}
 }
-
-#endif
 
 static void
 ay_aim_send_im (eb_local_account *account_from,
@@ -1561,24 +1595,48 @@ ay_aim_get_current_state (eb_local_account * account)
 static void
 ay_aim_set_current_state (eb_local_account * account, gint state)
 {
+	char *awaymsg;
 	struct eb_aim_local_account_data * alad;
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
-	assert( eb_services[account->service_id].protocol_id == SERVICE_INFO.protocol_id );
+	LOG (("ay_aim_set_current_state = %d", state))
 
-	if(account == NULL || account->protocol_local_account_data == NULL )
-	{
-		WARNING (("ACCOUNT state == NULL!!!!!!!!!!!"))
+	switch (state) {
+	case AIM_ONLINE:
+		if (account->connected == 0 && account->connecting == 0) {
+			ay_aim_login (account);
+		}
+
+		/* This is how we suppress away message */
+		aim_locate_setprofile(&(alad->aimsess),
+				      NULL, NULL, 0, /* Profile */
+				      NULL, "", 0, /* Away message */
+				      0); /* What we can do */
+		break;
+
+	case AIM_AWAY:
+		if (account->connected == 0 && account->connecting == 0) {
+			ay_aim_login (account);
+		}
+		if (is_away) {
+			awaymsg = get_away_message();
+		} else {
+			awaymsg = "User is currently away";
+		}
+		aim_locate_setprofile(&(alad->aimsess),
+				      NULL, NULL, 0,
+				      "iso-8859-1", awaymsg, strlen (awaymsg),
+				      0);
+		break;
+
+	case AIM_OFFLINE:
+		if (account->connected) {
+			ay_aim_logout (account);
+		}
+		break;
 	}
 
-	if(alad->status == AIM_OFFLINE && state != AIM_OFFLINE )
-	{
-		ay_aim_login(account);
-	}
-	else if(alad->status != AIM_OFFLINE && state == AIM_OFFLINE )
-	{
-		ay_aim_logout(account);
-	}
+	alad->status = state;
 }
 
 static char **
@@ -1709,7 +1767,7 @@ query_callbacks ()
 	sc->get_status_pixmap = ay_aim_get_status_pixmap;
 
 	sc->set_idle = NULL; /* eb_aim_set_idle; */
-	sc->set_away = NULL; /* eb_aim_set_away; */
+	sc->set_away = ay_oscar_set_away;
 
 	/* Chat room */ /* Not yet implemented */
 

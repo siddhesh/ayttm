@@ -1,3 +1,8 @@
+* Mon Oct 13 2003 22:49 GMT [nicolas]	0.4.3-pre15
+- modules/aim-oscar/aim-oscar.c
+Fix a bug preventing from login if a previous login failed,
+add the password prompting stuff, make the away state work.
+
 * Sun Oct 12 2003 10:30 GMT [colin]	0.4.3-pre14
 - modules/msn2/msn.C
 Split too long messages, as suggested by Adam 
