@@ -71,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/27 12:30:39 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/27 19:25:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -81,10 +81,9 @@ PLUGIN_INFO plugin_info =
 struct service SERVICE_INFO = {
 	"SMTP",
 	-1,
-	TRUE,	/* all messages are offline */
-	FALSE, 
-	TRUE, 	/* true so i can prevent file transfer altogether */
-	FALSE, 
+	SERVICE_CAN_OFFLINEMSG |	/* all messages are offline */
+	SERVICE_CAN_FILETRANSFER, 	/* true so i can prevent file 
+					   transfer altogether */
 	NULL
 };
 /* End Module Exports */
