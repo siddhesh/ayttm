@@ -1,7 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([src/main.c])
+AC_PREREQ(2.53)
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=1
+RELEASE=2
 #This is to check modules/core binary compat
 #Bump it up when necessary only (query_callbacks change, struct change etc)
 CORE_VERSION=1
@@ -38,10 +39,11 @@ AC_PATH_XTRA
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h])
 if test "x$host_alias" != "xmingw32"; then
-AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h errno.h fcntl.h langinfo.h libintl.h limits.h locale.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h stdlib.h string.h strings.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h unistd.h utmp.h getopt.h iconv.h])
+AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
 else
-AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h sys/utsname.h])
+AC_CHECK_HEADERS([sys/utsname.h])
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -54,23 +56,22 @@ AC_STRUCT_TM
 AC_TYPE_UID_T
 
 # Checks for library functions.
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
 AC_FUNC_ALLOCA
 AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_FUNC_MMAP
 AC_TYPE_SIGNAL
+AC_FUNC_STAT
+AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
-if test "x$host_alias" != "xmingw32"; then
-AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify atexit bzero dcgettext dup2 getcwd gethostbyname gethostname gettimeofday getwd inet_ntoa isascii memchr memmove mempcpy memset mkdir modf munmap nl_langinfo pow select setlocale socket stpcpy strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname getopt_long getopt snprintf])
-else
 AC_CHECK_FUNCS([atexit bzero dcgettext dup2 getcwd gethostbyname gethostname gettimeofday getwd inet_ntoa isascii memchr memmove mempcpy memset mkdir modf munmap nl_langinfo pow select setlocale socket stpcpy strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname snprintf])
+if test "x$host_alias" != "xmingw32"; then
+AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify getopt_long getopt])
 fi
 
 ALL_LINGUAS="fr en_GB"
-AC_OUTPUT_COMMANDS([
-	# In autoconf-2.13 it is called $ac_given_srcdir.
-	# In autoconf-2.50 it is called $srcdir.
-	test -n "$ac_given_srcdir" || ac_given_srcdir="$srcdir"])
 AM_GNU_GETTEXT
 
 if test "x$host_alias" = "xmingw32"; then
@@ -106,14 +107,14 @@ if test $have_ispell = yes; then
   AC_DEFINE(HAVE_ISPELL, , Define if we have ispell)
 fi
 
-AC_ARG_ENABLE(esd, 
-[  --disable-esd           compile without ESD soundserver])
+AC_ARG_ENABLE(esd, AC_HELP_STRING([--disable-esd],
+		[compile without ESD soundserver]))
 
 dnl want crash dialog
 AC_SUBST(REQUIRES)
 REQUIRES=
-AC_ARG_ENABLE(crash-dialog,
-	[  --disable-crash-dialog  Disable crash dialog],
+AC_ARG_ENABLE(crash-dialog, AC_HELP_STRING([--disable-crash-dialog],
+		[Disable crash dialog]),
 	[enable_crash_dialog=$enableval], [enable_crash_dialog=yes])
 if test "$enable_crash_dialog" != "no"; then
 dnl check if GDB is somewhere
@@ -151,8 +152,8 @@ AM_PATH_GLIB(1.2.0, [AC_DEFINE(HAVE_GLIB, 1, [Define if you have glib])],
 AM_PATH_GTK(1.2.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
 	AC_MSG_ERROR([Unable to find gtk-devel version 1.2.0 or higher]))
 
-AC_ARG_ENABLE(gdk_pixbuf, 
-[  --disable-gdk-pixbuf    Do not use gdk-pix-buf (webcam support)])
+AC_ARG_ENABLE(gdk_pixbuf, AC_HELP_STRING([--disable-gdk-pixbuf],
+		[Do not use gdk-pix-buf (webcam support)]))
 if test "$enable_gdk_pixbuf" != "no"; then
     AM_PATH_GDK_PIXBUF(, [AC_DEFINE(HAVE_GDK_PIXBUF, 1, [Define if you have gdk-pixbuf])],
         [AC_MSG_WARN([Unable to find gdk-pixbuf-devel, you won't be able to view webcams])])
@@ -164,8 +165,8 @@ fi
 EB_CFLAGS="$EB_CFLAGS $GLIB_CFLAGS $GTK_CFLAGS $GDK_PIXBUF_CFLAGS"
 EB_LIBS="$EB_LIBS $GLIB_LIBS $GTK_LIBS $GDK_PIXBUF_LIBS"
 
-AC_ARG_ENABLE(japanese, 
-[  --enable-japanese       compile with Japanese support])
+AC_ARG_ENABLE(japanese, AC_HELP_STRING([--enable-japanese],
+		[compile with Japanese support]))
 if test "$enable_japanese" = "yes"; then
     AC_DEFINE(JAPANESE, , Define if we compile for japanese support)
 fi
@@ -216,8 +217,8 @@ fi
 # Check needed for the Xft    stuff                                       #
 ###########################################################################
 have_xft=no
-AC_ARG_ENABLE(xft, 
-[  --enable-xft            compile with anti-aliased font support])
+AC_ARG_ENABLE(xft, AC_HELP_STRING([--enable-xft],
+		[compile with anti-aliased font support]))
 if test "$enable_xft" = yes ; then
     XFT_CFLAGS=`xft-config --cflags`
     XFT_LDFLAGS=`xft-config --libs`
@@ -249,28 +250,28 @@ fi
 
 ### Begin Optional Service related options ######################################
 
-AC_ARG_ENABLE(oscar,
-[  --enable-oscar          include oscar service])
-AC_ARG_ENABLE(workwizu,
-[  --enable-workwizu       include workwizu service])
-AC_ARG_ENABLE(broken_icq, 
-[  --enable-broken-icq     include broken icq service instead of working one])
-AC_ARG_ENABLE(aim_toc, 
-[  --disable-aim-toc       exclude aim-toc service])
-AC_ARG_ENABLE(icq_toc, 
-[  --disable-icq-toc       exclude icq-toc service])
-AC_ARG_ENABLE(icq, 
-[  --disable-icq           exclude icq service])
-AC_ARG_ENABLE(irc, 
-[  --disable-irc           exclude irc service])
-AC_ARG_ENABLE(jabber, 
-[  --disable-jabber        exclude jabber service])
-AC_ARG_ENABLE(msn, 
-[  --disable-msn           exclude msn service])
-AC_ARG_ENABLE(libmsn2_debug, 
-[  --enable-libmsn2-debug  enable debugging of libmsn2])
-AC_ARG_ENABLE(yahoo, 
-[  --disable-yahoo         exclude yahoo service])
+AC_ARG_ENABLE(oscar, AC_HELP_STRING([--enable-oscar],
+		[include oscar service]))
+AC_ARG_ENABLE(workwizu, AC_HELP_STRING([--enable-workwizu],
+		[include workwizu service]))
+AC_ARG_ENABLE(broken_icq, AC_HELP_STRING([--enable-broken-icq],
+		[include broken icq service instead of working one]))
+AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
+		[exclude aim-toc service]))
+AC_ARG_ENABLE(icq_toc, AC_HELP_STRING([--disable-icq-toc],
+		[exclude icq-toc service]))
+AC_ARG_ENABLE(icq, AC_HELP_STRING([--disable-icq],
+		[exclude icq service]))
+AC_ARG_ENABLE(irc, AC_HELP_STRING([--disable-irc],
+		[exclude irc service]))
+AC_ARG_ENABLE(jabber, AC_HELP_STRING([--disable-jabber],
+		[exclude jabber service]))
+AC_ARG_ENABLE(msn, AC_HELP_STRING([--disable-msn],
+		[exclude msn service]))
+AC_ARG_ENABLE(libmsn2_debug, AC_HELP_STRING([--enable-libmsn2-debug],
+		[enable debugging of libmsn2]))
+AC_ARG_ENABLE(yahoo, AC_HELP_STRING([--disable-yahoo],
+		[exclude yahoo service]))
 
 OPTIONAL_PLUG_DIR=""
 DEBUG_LIBMSN=""
@@ -321,12 +322,12 @@ fi
 
 with_krb4_dir=/usr/kerberos
 
-AC_ARG_ENABLE(zephyr, 
-[  --enable-zephyr         include Zephyr service])
-AC_ARG_ENABLE(krb4, 
-[  --disable-krb4          disable KerberosIV in Zephyr])
-AC_ARG_WITH(krb4-dir,  
-[  --with-krb4-dir=dir     specify top dir of KerberosIV installation (default: /usr/kerberos])
+AC_ARG_ENABLE(zephyr, AC_HELP_STRING([--enable-zephyr],
+		[include Zephyr service]))
+AC_ARG_ENABLE(krb4, AC_HELP_STRING([--disable-krb4],
+		[disable KerberosIV in Zephyr]))
+AC_ARG_WITH(krb4-dir, AC_HELP_STRING([--with-krb4-dir=dir],
+		[specify top dir of KerberosIV installation (default: /usr/kerberos]))
 
 #echo "DEBUG: zephyr_val = $zephyr_val"
 if test "$enable_zephyr" = yes; then
@@ -351,8 +352,8 @@ if test "$enable_zephyr" = yes; then
   fi
 fi
 
-AC_ARG_ENABLE(all-warnings,
-[  --enable-all-warnings   enable all compiler warnings - for developers])
+AC_ARG_ENABLE(all-warnings, AC_HELP_STRING([--enable-all-warnings],
+		[enable all compiler warnings - for developers]))
 
 if test "$enable_all_warnings" = yes; then
 	CFLAGS="$CFLAGS -Wall"
@@ -374,7 +375,7 @@ AC_SUBST(EB_LDFLAGS)
 AC_SUBST(OPTIONAL_PLUG_DIR)
 AC_SUBST(DEBUG_LIBMSN)
 
-AC_OUTPUT([Makefile ayttm.spec
+AC_CONFIG_FILES([Makefile ayttm.spec
                  doc/Makefile
                  intl/Makefile
                  libproxy/Makefile
@@ -410,8 +411,12 @@ AC_OUTPUT([Makefile ayttm.spec
 		 mingw32/Makefile])
 
 if test "x$host_alias" = "xmingw32" ; then
-        echo "editing src/Makefile final time"
+	AC_CONFIG_COMMANDS(src/Makefile, 
+	[echo "editing src/Makefile final time"
         cat src/Makefile | sed 's/^LIBS = .*/LIBS = \$(EB_LIBS)/' > .ACE
 	cp -f .ACE src/Makefile
+	])
 fi
+
+AC_OUTPUT
 
