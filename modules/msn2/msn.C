@@ -173,8 +173,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/03 07:09:34 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/03 17:34:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -184,8 +184,7 @@ struct service SERVICE_INFO = { "MSN", -1, FALSE, TRUE, TRUE, FALSE, NULL };
 /* End Module Exports */
 
 static void *mi1, *mi2;
-
-
+void eb_msn_set_current_state( eb_local_account * account, gint state );
 
 int plugin_init()
 {
@@ -634,11 +633,14 @@ void eb_msn_connected(eb_local_account * account)
 	{
 		/* Make sure set_current_state doesn't call us back */
 		account->connected=-1;
-		eb_set_active_menu_status(account->status_menu, MSN_ONLINE);
+		eb_set_active_menu_status(account->status_menu, mlad->status);
 	}
 	account->connected=1;
 	account->connecting = 0;
-	mlad->status=MSN_ONLINE;
+	if (mlad->status == MSN_OFFLINE)
+		mlad->status=MSN_ONLINE;
+        eb_debug(DBG_MSN,"SETTTING STATE TO %d\n",mlad->status);
+        eb_msn_set_current_state(account, mlad->status);
 	/*progress_window_close(mlad->connect_tag);*/
 }
 
@@ -906,7 +908,6 @@ gint eb_msn_get_current_state( eb_local_account * account )
 void eb_msn_set_current_state( eb_local_account * account, gint state )
 {
 	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
-	/* UNUSED LList *contacts=NULL; */
 
 	if(!account || !account->protocol_local_account_data)
 	{
@@ -1732,7 +1733,7 @@ void ext_got_info(msnconn * conn, syncinfo * info)
 	  msn_set_friendlyname(conn, tmp); 
 	  free(tmp);
   }
-  msn_set_state(conn, "NLN");
+  
   /* hack to check conn status */
   if (conncheck_handler == -1 && do_check_connection)
      conncheck_handler = eb_timeout_add(10000, (eb_timeout_function)checkconn, (gpointer)conn);

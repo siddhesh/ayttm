@@ -1,3 +1,7 @@
+* Thu Apr 03 2003 17:33 GMT [colin]	0.2.3-7
+- modules/msn2
+Going from Offline to $status now works
+
 * Thu Apr 03 2003 16:53 GMT [edward]	0.2.3-6
 - src/prefs_window.c
 I used the wrong path for the modules, etc.
