@@ -1,3 +1,7 @@
+* Fri May  9 2003 05:55 GMT [philip]	0.3.0-167
+- modules/importers modules/smileys
+move all smiley modules to modules/smileys
+
 * Fri May  9 2003 05:18 GMT [philip]	0.3.0-166
 - configure.ac modules/Makefile.am modules/smileys
 Add smiley-themer module to core distribution
