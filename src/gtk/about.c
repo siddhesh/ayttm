@@ -53,7 +53,7 @@ static tDevInfo sAyttmDevTeam[AYTTM_TEAM_SIZE] =
 
 /* Everybuddy developers */
 
-#define	EVERYBUDDY_TEAM_SIZE	(10)
+#define	EVERYBUDDY_TEAM_SIZE	(11)
 
 static tDevInfo sEverybuddyDevTeam[EVERYBUDDY_TEAM_SIZE] =
 {
@@ -66,7 +66,8 @@ static tDevInfo sEverybuddyDevTeam[EVERYBUDDY_TEAM_SIZE] =
 	{"Erik Inge Bolso", 	"<knan@mo.himolde.no>", 	"IRC Devel"},
 	{"Colin Leroy", 	"<colin@colino.net>", 		"Various hacks, i18n, Ayttm fork"},
 	{"Philip Tellis", 	"<philip.tellis@iname.com>", 	"Yahoo Devel"},
-	{"Toby A. Inkster", 	"<tobyink@goddamn.co.uk>", 	"Patches"}
+	{"Toby A. Inkster", 	"<tobyink@goddamn.co.uk>", 	"Patches"},
+	{"Mark Spencer", 	"<no email>", 			"Special thanks"}
 };
 
 #define	HELP_TEAM_SIZE	(4)
@@ -232,18 +233,6 @@ void	ay_ui_show_about(void *useless, void *null)
 	/* list of Everybuddy developers */
 	table = sMakeDeveloperTable( EVERYBUDDY_TEAM_SIZE, sEverybuddyDevTeam );
 	gtk_box_pack_start(vbox2, GTK_WIDGET(table), TRUE, TRUE, 5);
-
-	/* separator */
-	separator = gtk_hseparator_new();
-	gtk_widget_show( separator );
-	gtk_box_pack_start(vbox2, separator, TRUE, TRUE, 5);
-
-	/* text */
-	label = GTK_LABEL(gtk_label_new( _("And a special thanks to Mark Spencer, initial creator of GAIM,\nfor all the tremendous support he has given.") ));
-	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
-	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-	gtk_widget_show( GTK_WIDGET(label) );
-	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
 
 	/* close button */
 	ok = gtk_button_new_with_label(_("Close"));
