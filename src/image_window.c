@@ -69,7 +69,6 @@ static unsigned char * image_2_jpg(const unsigned char * in_img, long *size)
 	jas_image_t *image;
 	int infmt;
 	static int outfmt;
-	static int init;
 
 	/*
 	static int ctr;
@@ -82,14 +81,12 @@ static unsigned char * image_2_jpg(const unsigned char * in_img, long *size)
 		fclose(fp);
 	}
 	*/
-	if(!init) {
-		if(jas_init()) {
-			eb_debug(DBG_CORE, "Could not init jasper\n");
-			return ay_memdup(in_img, *size);
-		}
-		init=1;
-		outfmt = jas_image_strtofmt("jpg");
+	if(jas_init()) {
+		eb_debug(DBG_CORE, "Could not init jasper\n");
+		return ay_memdup(in_img, *size);
 	}
+	if(!outfmt)
+		outfmt = jas_image_strtofmt("jpg");
 
 	if(!(in = jas_stream_memopen((unsigned char *)in_img, *size))) {
 		eb_debug(DBG_CORE, "Could not open jasper input stream\n");
@@ -269,7 +266,7 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 			gdk_pixbuf_loader_close(aiw->loader);
 		aiw->loader_open = 0;
 	}
-	if(!aiw->loader) {
+	if(!aiw->loader_open) {
 		aiw->loader = gdk_pixbuf_loader_new();
 		aiw->loader_open = 1;
 	}
@@ -308,5 +305,47 @@ void ay_image_window_close(int tag)
 	aiw->callback = aiw->callback_data = NULL;
 	
 	gtk_widget_destroy(aiw->window);
+}
+
+static int _cycle(void *data)
+{
+	int tag = (int)data;
+	int size;
+	FILE *img;
+	char fn[100];
+	static int i;
+	unsigned char *in_img;
+	snprintf(fn, sizeof(fn), "/home/philip/webcam-images/ayttm-img-%03d.jpc", i);
+	img = fopen(fn, "rb");
+	if(!img) {
+		fprintf(stderr, "Could not open %s\n", fn);
+		return 1;
+	}
+	fseek(img, 0, SEEK_END);
+	size = ftell(img);
+	fseek(img, 0, SEEK_SET);
+
+	in_img = malloc(size);
+	fprintf(stderr, "Wanted %d, got %d\n", size, fread(in_img, 1, size, img));
+	fclose(img);
+
+	ay_image_window_add_data(tag, in_img, size, 1);
+	ay_image_window_add_data(tag, 0, 0, 0);
+
+	free(in_img);
+
+	i++;
+
+	if(i==65)
+		return 0;
+
+	return 1;
+}
+
+int eb_timeout_add(int, int (*callback)(void *), void *);
+void ay_image_window_test()
+{
+	int tag = ay_image_window_new(320, 240, 0,0,0);
+	eb_timeout_add(500, _cycle, (void *)tag);
 }
 #endif

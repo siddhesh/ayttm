@@ -1,3 +1,10 @@
+* Sun May 11 2003 13:15 GMT [philip]	0.3.0-181
+- src/image_window.c
+We can now see moving pictures - jas_init had to be called for each
+image
+- src/smileys.c
+Fix C++ declaration in C source file
+
 * Sun May 11 2003 11:15 GMT [andy]	0.3.0-180
 - configure.ac
 Some cleanups

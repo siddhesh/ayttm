@@ -109,9 +109,10 @@ static int	s_compare_smiley_set( const void *a, const void *b )
 
 void	ay_add_smiley_set( const char *inName, LList *inSmileyList )
 {
+	t_smiley_set	*new_set;
 	ay_remove_smiley_set( inName );
 	
-	t_smiley_set	*new_set = calloc( 1, sizeof(t_smiley_set) );
+	new_set = calloc( 1, sizeof(t_smiley_set) );
 	
 	new_set->set_name = strdup( inName );
 	new_set->set_smiley_list = inSmileyList;
