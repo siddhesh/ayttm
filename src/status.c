@@ -1850,24 +1850,6 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 }
 
 static GtkItemFactoryEntry menu_items[] = {
-	{ N_("/_File"),		NULL,       NULL, 0, "<Branch>" },
-	{ N_("/File/_Import"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/File/---"),	NULL,         NULL, 0, "<Separator>" },
-	{ N_("/File/_Quit"),	"<control>Q", delete_event, 0, NULL },
-
-	{ N_("/_Edit"),		NULL,       NULL, 0, "<Branch>" },
-	{ N_("/Edit/_Preferences..."),
-  				NULL, build_prefs_callback, 0, NULL },
-	{ N_("/Edit/_My accounts..."),
-  				NULL, eb_edit_accounts, 0, NULL },
-	{ N_("/Edit/---"),	NULL, NULL, 0, "<Separator>" },
-	{ N_("/Edit/Add a con_tact account..."),		
-  				NULL, add_callback, 0, NULL },
-	{ N_("/Edit/Add a _group..."),
-  				NULL, add_group_callback, 0, NULL },
-	{ N_("/Edit/---"),	NULL,         NULL, 0, "<Separator>" },
-	{ N_("/Edit/Set _profile"),	NULL, 	    NULL, 0, NULL },
-	
 	{ N_("/_Chat"),		NULL,       NULL, 0, "<Branch>" },
 	{ N_("/Chat/Set _status"),	
 				NULL, 	    NULL, 0, NULL },
@@ -1882,7 +1864,23 @@ static GtkItemFactoryEntry menu_items[] = {
 				NULL, show_away_choicewindow, 0, NULL },
 	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
 	{ N_("/Chat/_Smileys"),	NULL, 	    NULL, 0, NULL },
+	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
+	{ N_("/Chat/_Quit"),	"<control>Q", delete_event, 0, NULL },
 
+	{ N_("/_Edit"),		NULL,       NULL, 0, "<Branch>" },
+	{ N_("/Edit/_Preferences..."),
+  				NULL, build_prefs_callback, 0, NULL },
+	{ N_("/Edit/_My accounts..."),
+  				NULL, eb_edit_accounts, 0, NULL },
+	{ N_("/Edit/---"),	NULL, NULL, 0, "<Separator>" },
+	{ N_("/Edit/Add a con_tact account..."),		
+  				NULL, add_callback, 0, NULL },
+	{ N_("/Edit/Add a _group..."),
+  				NULL, add_group_callback, 0, NULL },
+	{ N_("/Edit/---"),	NULL,         NULL, 0, "<Separator>" },
+	{ N_("/Edit/_Import"),	NULL, 	    NULL, 0, NULL },
+	{ N_("/Edit/Set _profile"),	NULL, 	    NULL, 0, NULL },
+	
 	{ N_("/_Help"),		NULL, NULL, 0, "<Branch>" },
 #ifndef __MINGW32__
 	{ N_("/Help/_Web site..."),	NULL, show_website, 0, NULL },
@@ -1969,7 +1967,7 @@ void ay_set_submenus(void)
 	if (!main_menu_factory)
 		return; /* not a big problem, it's just too soon */
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Import");
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Edit/Import");
 	eb_import_window(submenuitem);
 	SetPref("widget::import_submenuitem", submenuitem);
 
