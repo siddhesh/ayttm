@@ -1,10 +1,10 @@
 * Important notes
 =================
-As of CVS version 0.2.3-107, modules are installed in $prefix/lib/ayttm
-instead of $prefix/share/ayttm/modules. It means that the old modules in
-$prefix/share/ayttm/modules shouldn't be used anymore because they are not
-binary compatible anymore, and should be deleted. You also _have_ to fix 
-your prefs file to change modules paths.
+As of version 0.3.0 [CVS version 0.2.3-107], modules are installed in
+$prefix/lib/ayttm instead of $prefix/share/ayttm/modules. This means that
+the old modules in $prefix/share/ayttm/modules shouldn't be used anymore
+because they are not binary compatible anymore, and should be deleted.
+You also _must_ fix your prefs file to change modules paths.
 If you get a popup saying "Plugin version differs from core version, which 
 means it is probably not binary compatible." at startup, it means you 
 didn't read this file.
@@ -16,7 +16,7 @@ didn't read this file.
 * How to help & be helped
 =========================
   - bugreports:
-    If you experience a fatal bug (segfault), you can file a bugreport
+    If you experience a fatal bug (crash), you can file a bugreport
     on SF.net's bugtracker. The more precise it is, the easier we'll 
     find out how to fix it. In particular, a backtrace is really 
     useful. After a crash you should have a `core' file in your 
@@ -28,9 +28,9 @@ didn't read this file.
     and copy/paste the result to your bugreport.
     You can also easily, automatically get stacktraces by running 
     ./configure --enable-crash-dialog. It'll popup the stack trace every
-    time ayttm segfaults.
+    time ayttm crashes.
 
-  - If you experience lots of segfaults after an update (in particular 
+  - If you experience lots of crashes after an update (in particular 
     for CVS updates), it is probably caused by a change in a structure
     shared between core and modules. Try a "make clean && make && sudo
     make install" instead of simply "make && sudo make install".
@@ -38,10 +38,9 @@ didn't read this file.
     want to hear from you :) Please send a patch (ideally, against CVS)
     to SF.net's patchtracker. use `cvs diff -u`.
   - Translations: The existing translations are quite out of date after
-    the fork. I plan to update the french one, but that'll be when i'll
-    have more time, could be quite long. If you want to submit a 
-    translation (or an update to one of the existing), you're very 
-    welcome.
+    the fork. I plan to update the French one, but that'll be when I'll
+    have more time, could be quite long. New translations or updates
+    to existing ones are very welcome.
 
 * General
 =========
