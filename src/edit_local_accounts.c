@@ -75,13 +75,7 @@ static GdkPixmap *checkboxoffxpmmask = NULL;
 
 static void rebuild_set_status_menu(void)
 {
-	GtkWidget *set_status_submenuitem;
-
-	set_status_submenuitem = GetPref("widget::set_status_submenuitem");
-	gtk_menu_item_remove_submenu(GTK_MENU_ITEM
-				     (set_status_submenuitem));
-	eb_set_status_window(set_status_submenuitem);
-	gtk_widget_draw(GTK_WIDGET(set_status_submenuitem), NULL);
+	ay_set_submenus();
 }
 
 static void destroy(GtkWidget * widget, gpointer data)

@@ -78,7 +78,9 @@ typedef struct account {
 } eb_account;
 
 int load_accounts();
+int load_accounts_from_file(const char *file);
 int load_contacts();
+int load_contacts_from_file(const char *file);
 void write_contact_list();
 void write_account_list();
 eb_account *dummy_account(char *handle, char *group, eb_local_account *ela);

@@ -136,6 +136,7 @@ account:
 			$$ = eb_services[id].sc->read_account_config($5, cur_contact);
 			if ($$)
 				$$->service_id = id;
+
 			/* take the first suitable account */
 			if ($$ && $$->ela == NULL)
 				$$->ela = find_local_account_for_remote($$, FALSE);

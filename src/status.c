@@ -717,6 +717,12 @@ static gint get_account_position( eb_account * ea)
 	return i;
 }
 
+void reset_list (void)
+{
+	LList *grps = groups;
+	for (grps = groups; grps; grps = grps->next)
+		remove_group_line(grps->data);
+}
 /* General purpose update Contact List */
 void update_contact_list ()
 {
@@ -1839,6 +1845,24 @@ static void get_main_menu( GtkWidget  *window,
 		*menubar = gtk_item_factory_get_widget (item_factory, "<main>");
 }
 
+void ay_set_submenus(void)
+{
+	/* fill in branches */
+	GtkWidget *submenuitem;
+
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Import");
+	eb_import_window(submenuitem);
+	SetPref("widget::import_submenuitem", submenuitem);
+	
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set profile");
+	eb_profile_window(submenuitem);
+	SetPref("widget::profile_submenuitem", submenuitem);
+	
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set status");
+	eb_set_status_window(submenuitem);
+	SetPref("widget::set_status_submenuitem", submenuitem);
+}
+
 void eb_status_window()
 {
 	GtkWidget *statusbox;
@@ -1846,7 +1870,6 @@ void eb_status_window()
 	GtkWidget *label;
 	GtkWidget *menubox;
 	GtkWidget *menu;
-	GtkWidget *submenuitem;
 	GtkWidget *hbox;
 	GtkWidget *radioonline, *radiocontact, *radioaccount;
 	GtkAccelGroup *accel = NULL;
@@ -1876,19 +1899,7 @@ void eb_status_window()
 
 	get_main_menu(statuswindow, &menu);
 	
-	/* fill in branches */
-	
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Import");
-	eb_import_window(submenuitem);
-	SetPref("widget::import_submenuitem", submenuitem);
-	
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set profile");
-	eb_profile_window(submenuitem);
-	SetPref("widget::profile_submenuitem", submenuitem);
-	
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set status");
-	eb_set_status_window(submenuitem);
-	SetPref("widget::set_status_submenuitem", submenuitem);
+	ay_set_submenus();
 
 	gtk_container_add(GTK_CONTAINER(menubox), menu );
 	gtk_widget_show(menu);

@@ -67,6 +67,7 @@ void eb_import_window(void *import_submenuitem);
 void eb_profile_window(void *profile_submenuitem);
 void eb_set_status_window(void *set_status_submenuitem);
 void eb_status_window();
+void ay_set_submenus(void);
 /*GtkWidget* MakeStatusButton(eb_local_account * ela);*/
 void update_contact_list ();
 void update_user(eb_account * ea );
@@ -75,6 +76,7 @@ void focus_statuswindow (void);
 int add_menu_items(void *menu, int cur_service, int should_sep,
 			struct contact *conn, eb_account *acc, eb_local_account *ela);
 void set_menu_sensitivity(void);
+void reset_list (void);
 
 #ifdef __cplusplus
 } /* extern "C" */

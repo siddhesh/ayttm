@@ -137,44 +137,54 @@ void write_contact_list()
  * call account parse after opening the file and we are home free
  */
 
-int load_accounts()
+int load_accounts_from_file(const char *file)
 {
 	FILE * fp;
-	char buff2[1024];
 	extern int accountparse();
 	extern FILE * accountin;
+	LList *accounts_old = accounts;
 
-	snprintf(buff2, 1024, "%saccounts",config_dir);
-
-	if(!(fp = fopen(buff2,"r")))
+	if(!(fp = fopen(file,"r")))
 		return 0;
-	accounts = NULL;
 
 	accountin = fp;
 	accountparse();
 	eb_debug(DBG_CORE, "closing fp\n");
 	fclose(fp);
+	if (accounts_old) {
+		/* we already had accounts */
+		LList *walk = accounts_old;
+		for (; walk; walk = walk->next) 
+			accounts = l_list_append(accounts, walk->data);
+		ay_set_submenus();
+		ay_edit_local_accounts();		
+	}
 	return accounts != NULL;
 }
 
+int load_accounts()
+{
+	char buff2[1024];
+	snprintf(buff2, 1024, "%saccounts",config_dir);
+	accounts = NULL;
+	return load_accounts_from_file(buff2);
+}
 /*
  * to load the contact list we also use flex and bison, so we just
  * call the parser,  (isn't life so simple now :) )
  */
 
-int load_contacts()
+int load_contacts_from_file(const char *file)
 {
 	FILE * fp;
-	char buff2[1024];
 	extern int contactparse();
 	extern FILE * contactin;
 	LList *cts = NULL;
-	snprintf(buff2, 1024, "%scontacts",config_dir);
-
-	if(!(fp = fopen(buff2,"r")))
+	LList *old_groups = groups;
+	
+	if(!(fp = fopen(file,"r")))
 		return 0;
 	contactin = fp;
-	groups = NULL;
 
 	contactparse();
 
@@ -182,6 +192,50 @@ int load_contacts()
 	
 	/* rename logs from old format (contact->nick) to new 
 	   (contact->nick "-" contact->group->name) */
+	
+	if (old_groups) {
+	while (old_groups) {
+		grouplist *grp = (grouplist *)old_groups->data;
+		grouplist *oldgrp = NULL;
+		if ((oldgrp = find_grouplist_by_name(grp->name)) == NULL) {
+			add_group(grp->name);
+			oldgrp = find_grouplist_by_name(grp->name);
+		} 
+		while (grp->members) {
+			struct contact * oldct = (struct contact *) grp->members->data;
+			if (!find_contact_in_group_by_nick(oldct->nick, oldgrp)) {
+				LList *w = oldct->accounts;
+				while(w) {
+					eb_account *ea = (eb_account *)w->data;
+					if(find_account_by_handle(ea->handle, ea->service_id)) {
+						oldct->accounts = l_list_remove(oldct->accounts, ea);
+						w = oldct->accounts;
+					} else
+						w = w->next;
+				}
+				if (!l_list_empty(oldct->accounts) && oldct->accounts->data)
+					oldgrp->members = l_list_append(oldgrp->members, 
+							oldct);	
+			} else {
+				struct contact * newct = find_contact_in_group_by_nick(oldct->nick, oldgrp);
+				while(oldct->accounts) {
+					eb_account *ea = (eb_account *)oldct->accounts->data;
+					if (!find_account_by_handle(ea->handle, ea->service_id)) {
+						newct->accounts = l_list_append(newct->accounts, 
+								ea);
+					}
+					oldct->accounts = oldct->accounts->next;
+				}
+			}
+			grp->members = grp->members->next;
+		}
+		
+		old_groups = old_groups->next;
+	}
+	reset_list();
+	update_contact_list();	
+	write_contact_list();
+	}	
 	cts = get_all_contacts();
 	for (; cts && cts->data; cts=cts->next) {
 		struct contact * c = (struct contact *)cts->data;
@@ -195,6 +249,15 @@ int load_contacts()
 			rename_nick_log(NULL, c->nick, c->group->name, c->nick);
 	}
 	return 1;
+}
+
+int load_contacts()
+{
+	char buff2[1024];
+	snprintf(buff2, 1024, "%scontacts",config_dir);
+	groups = NULL;
+	
+	return load_contacts_from_file(buff2);
 }
 
 eb_account *dummy_account(char *handle, char *group, eb_local_account *ela)

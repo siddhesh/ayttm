@@ -1,3 +1,9 @@
+* Mon Apr 28 2003 04:28 GMT [colin]	0.3.0-29
+- src/status.[ch] src/edit_local_accounts.c
+  src/account.[ch] 
+add load_accounts_from_file() and load_contacts_from_file() 
+functions
+
 * Mon Apr 28 2003 22:30 GMT [colin]	0.3.0-28
 - modules/*toc/*toc.c
 avoid segfault when ea->ela is null at buddy logout

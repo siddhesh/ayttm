@@ -600,10 +600,10 @@ grouplist * find_grouplist_by_name(char * name)
 	if (name == NULL)
 		return NULL;
 
-	for(l1 = groups; l1; l1=l1->next )
+	for(l1 = groups; l1; l1=l1->next ) {
 		if(!strcasecmp(((grouplist *)l1->data)->name, name))
 			return l1->data;
-
+	}
 	return NULL;
 }
 
