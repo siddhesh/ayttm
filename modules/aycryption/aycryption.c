@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.15 $",
-	"$Date: 2003/05/31 09:18:04 $",
+	"$Revision: 1.16 $",
+	"$Date: 2003/06/04 10:27:25 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -295,6 +295,9 @@ static void log_action(const struct contact *ct, int loglevel, const char *strin
 	char buf[1024];
 	snprintf(buf, 1024, _("<font color=%s><b>%s</b>: %s</font><br>"),logcolor[loglevel], ct->nick, string);
 	gtk_eb_html_add(EXT_GTK_TEXT(gpg_log_text), buf, 0, 0, 0);
+	if (loglevel == LOG_ERR) {
+		show_gpg_log(NULL);
+	}
 }
 
 static char *aycryption_out(const eb_local_account * local, const eb_account * remote,
@@ -315,12 +318,9 @@ static char *aycryption_out(const eb_local_account * local, const eb_account * r
 	if ((ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
 	&& gpgme_recipients_add_name_with_validity( rset, ct->gpg_key, 
 		GPGME_VALIDITY_FULL) ) {
-		snprintf(buf, 4096, _("Can not encrypt message to %s.\n"
-				"Maybe you did not set his key."), ct->nick);
-		ay_do_error(_("Aycryption"), buf);
 		eb_debug(DBG_CRYPT,"can't init outgoing crypt: %d %p %c\n",
 				ct->gpg_do_encryption, ct->gpg_key, ct->gpg_key[0]);
-		log_action(ct, LOG_ERR, "Could not encrypt message.");
+		log_action(ct, LOG_ERR, "Could not encrypt message - you may have to set your contact's key.");
 		return strdup(s);
 	} else {
 		GpgmeData plain = NULL;
@@ -426,10 +426,7 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	err = gpgme_op_decrypt_verify (ctx, cipher, plain, &sigstat);
 
 	if (err && err != GPGME_No_Data) {
-		snprintf(buf, 4096, _("Can not decrypt message from %s.\n"
-				"Maybe he does not have your correct key."), ct->nick);
-		ay_do_error(_("Aycryption"), buf);
-		log_action(ct, LOG_ERR, "Cannot decrypt message.");
+		log_action(ct, LOG_ERR, "Cannot decrypt message - maybe your contact uses an incorrect key.");
 		return strdup(s);
 	} else if (err == GPGME_No_Data) { /*plaintext signed*/
 		was_crypted = 0;
@@ -522,7 +519,7 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 			break;
 	}
 	if (curloglevel == LOG_ERR) {
-		res = g_strdup_printf("%s [%s]", p, s_sigstat);
+		res = strdup(s);
 		free(p);
 		p = res;
 	}
