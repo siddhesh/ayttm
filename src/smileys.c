@@ -168,61 +168,61 @@ LList * eb_smileys(void)
 
 void init_smileys(void)
 {
-  smileys=add_smiley(smileys, "smile", smile_xpm);
-  smileys=add_smiley(smileys, "sad", sad_xpm);
-  smileys=add_smiley(smileys, "wink", wink_xpm);
-  smileys=add_smiley(smileys, "biglaugh", biglaugh_xpm);
-  smileys=add_smiley(smileys, "laugh", laugh_xpm);
-  smileys=add_smiley(smileys, "cry", cry_xpm);
-  smileys=add_smiley(smileys, "tongue", tongue_xpm);
-  smileys=add_smiley(smileys, "cooldude", cooldude_xpm);
-  smileys=add_smiley(smileys, "note", note_xpm);
-  smileys=add_smiley(smileys, "dude", dude_xpm);
-  smileys=add_smiley(smileys, "worried", worried_xpm);
-  smileys=add_smiley(smileys, "grin", grin_xpm);
-  smileys=add_smiley(smileys, "confused", confused_xpm);
-  smileys=add_smiley(smileys, "blank", blankface_xpm);
-  smileys=add_smiley(smileys, "blush", blush_xpm);
-  smileys=add_smiley(smileys, "oh", oh_xpm);
-  smileys=add_smiley(smileys, "heyyy", heyyy_xpm);
-  smileys=add_smiley(smileys, "lovey", lovey_xpm);
-  smileys=add_smiley(smileys, "angry", angry_xpm);
-  smileys=add_smiley(smileys, "wine", wine_xpm);
-  smileys=add_smiley(smileys, "beer", beer_xpm);
+  smileys=add_smiley(smileys, "smile", smile_xpm, NULL);
+  smileys=add_smiley(smileys, "sad", sad_xpm, NULL);
+  smileys=add_smiley(smileys, "wink", wink_xpm, NULL);
+  smileys=add_smiley(smileys, "biglaugh", biglaugh_xpm, NULL);
+  smileys=add_smiley(smileys, "laugh", laugh_xpm, NULL);
+  smileys=add_smiley(smileys, "cry", cry_xpm, NULL);
+  smileys=add_smiley(smileys, "tongue", tongue_xpm, NULL);
+  smileys=add_smiley(smileys, "cooldude", cooldude_xpm, NULL);
+  smileys=add_smiley(smileys, "note", note_xpm, NULL);
+  smileys=add_smiley(smileys, "dude", dude_xpm, NULL);
+  smileys=add_smiley(smileys, "worried", worried_xpm, NULL);
+  smileys=add_smiley(smileys, "grin", grin_xpm, NULL);
+  smileys=add_smiley(smileys, "confused", confused_xpm, NULL);
+  smileys=add_smiley(smileys, "blank", blankface_xpm, NULL);
+  smileys=add_smiley(smileys, "blush", blush_xpm, NULL);
+  smileys=add_smiley(smileys, "oh", oh_xpm, NULL);
+  smileys=add_smiley(smileys, "heyyy", heyyy_xpm, NULL);
+  smileys=add_smiley(smileys, "lovey", lovey_xpm, NULL);
+  smileys=add_smiley(smileys, "angry", angry_xpm, NULL);
+  smileys=add_smiley(smileys, "wine", wine_xpm, NULL);
+  smileys=add_smiley(smileys, "beer", beer_xpm, NULL);
 
-  smileys=add_smiley(smileys, "boy", boy_xpm);
-  smileys=add_smiley(smileys, "lightbulb", bulb_xpm);
-  smileys=add_smiley(smileys, "cake", cake_xpm);
-  smileys=add_smiley(smileys, "cat", cat_xpm);
-  smileys=add_smiley(smileys, "coffee", coffee_xpm);
-  smileys=add_smiley(smileys, "dog", dog_xpm);
-  smileys=add_smiley(smileys, "letter", email_xpm);
-  smileys=add_smiley(smileys, "gift", gift_xpm);
-  smileys=add_smiley(smileys, "girl", girl_xpm);
-  smileys=add_smiley(smileys, "kiss", kiss_xpm);
-  smileys=add_smiley(smileys, "phone", phone_xpm);
-  smileys=add_smiley(smileys, "a/s/l", question_xpm);
-  smileys=add_smiley(smileys, "boy_right", run_xpm);
-  smileys=add_smiley(smileys, "girl_left", runback_xpm);
-  smileys=add_smiley(smileys, "star", star_xpm);
-  smileys=add_smiley(smileys, "sun", sun_xpm);
-  smileys=add_smiley(smileys, "no", thumbdown_xpm);
-  smileys=add_smiley(smileys, "yes", thumbup_xpm);
-  smileys=add_smiley(smileys, "angel", angel_xpm);
-  smileys=add_smiley(smileys, "bat", bat_xpm);
-  smileys=add_smiley(smileys, "neutral", neutral_xpm);
-  smileys=add_smiley(smileys, "broken_heart", brheart_xpm);
-  smileys=add_smiley(smileys, "clock", clock_xpm);
-  smileys=add_smiley(smileys, "dead_flower", deadflower_xpm);
-  smileys=add_smiley(smileys, "film", film_xpm);
-  smileys=add_smiley(smileys, "flower", flower_xpm);
-  smileys=add_smiley(smileys, "handcuffs", handcuffs_xpm);
-  smileys=add_smiley(smileys, "heart", heart_xpm);
+  smileys=add_smiley(smileys, "boy", boy_xpm, NULL);
+  smileys=add_smiley(smileys, "lightbulb", bulb_xpm, NULL);
+  smileys=add_smiley(smileys, "cake", cake_xpm, NULL);
+  smileys=add_smiley(smileys, "cat", cat_xpm, NULL);
+  smileys=add_smiley(smileys, "coffee", coffee_xpm, NULL);
+  smileys=add_smiley(smileys, "dog", dog_xpm, NULL);
+  smileys=add_smiley(smileys, "letter", email_xpm, NULL);
+  smileys=add_smiley(smileys, "gift", gift_xpm, NULL);
+  smileys=add_smiley(smileys, "girl", girl_xpm, NULL);
+  smileys=add_smiley(smileys, "kiss", kiss_xpm, NULL);
+  smileys=add_smiley(smileys, "phone", phone_xpm, NULL);
+  smileys=add_smiley(smileys, "a/s/l", question_xpm, NULL);
+  smileys=add_smiley(smileys, "boy_right", run_xpm, NULL);
+  smileys=add_smiley(smileys, "girl_left", runback_xpm, NULL);
+  smileys=add_smiley(smileys, "star", star_xpm, NULL);
+  smileys=add_smiley(smileys, "sun", sun_xpm, NULL);
+  smileys=add_smiley(smileys, "no", thumbdown_xpm, NULL);
+  smileys=add_smiley(smileys, "yes", thumbup_xpm, NULL);
+  smileys=add_smiley(smileys, "angel", angel_xpm, NULL);
+  smileys=add_smiley(smileys, "bat", bat_xpm, NULL);
+  smileys=add_smiley(smileys, "neutral", neutral_xpm, NULL);
+  smileys=add_smiley(smileys, "broken_heart", brheart_xpm, NULL);
+  smileys=add_smiley(smileys, "clock", clock_xpm, NULL);
+  smileys=add_smiley(smileys, "dead_flower", deadflower_xpm, NULL);
+  smileys=add_smiley(smileys, "film", film_xpm, NULL);
+  smileys=add_smiley(smileys, "flower", flower_xpm, NULL);
+  smileys=add_smiley(smileys, "handcuffs", handcuffs_xpm, NULL);
+  smileys=add_smiley(smileys, "heart", heart_xpm, NULL);
   
-  smileys=add_smiley(smileys, "moon", moon_xpm);
-  smileys=add_smiley(smileys, "devil", devil_xpm);
-  smileys=add_smiley(smileys, "camera", photo_xpm);
-  smileys=add_smiley(smileys, "rainbow", rainbow_xpm);
+  smileys=add_smiley(smileys, "moon", moon_xpm, NULL);
+  smileys=add_smiley(smileys, "devil", devil_xpm, NULL);
+  smileys=add_smiley(smileys, "camera", photo_xpm, NULL);
+  smileys=add_smiley(smileys, "rainbow", rainbow_xpm, NULL);
   
   _eb_smileys = smileys;
 
@@ -369,27 +369,44 @@ LList * add_protocol_smiley(LList * list, const char * text, const char * name)
   return l_list_append(list, psmile);
 }
 
-LList * add_smiley( LList * list, const char *name, gchar **data )
+LList * add_smiley( LList * list, const char *name, char **data, const char *service )
 {
   smiley * psmile;
 
   psmile=g_new0(smiley, 1);
   strncpy(psmile->name, name, sizeof(psmile->name));
+  if(service)
+	  psmile->service = strdup(service);
   psmile->pixmap=data;
   return l_list_append(list, psmile);
 }
 
-smiley * get_smiley_by_name( const char *name )
+static smiley * get_smiley_by_name( const char *name )
 {
-  smiley * psmile;
-  LList * l = smileys;
-  while(l != NULL) {
-    psmile = (smiley *)(l->data);
-    if(!strcmp(psmile->name,name)) 
-       return psmile;
-    l=l->next;
-  }
-  return NULL;
+	smiley * psmile;
+	LList * l;
+	for(l=smileys; l; l=l_list_next(l)) {
+		psmile = (smiley *)(l->data);
+		if(!strcmp(psmile->name,name)) 
+			return psmile;
+	}
+	return NULL;
+}
+
+static smiley * get_smiley_by_name_and_service( const char *name, const char *service )
+{
+	smiley * psmile, *possibility=NULL;
+	LList * l;
+	for(l=smileys; l; l=l_list_next(l)) {
+		psmile = (smiley *)(l->data);
+		if(strcmp(psmile->name,name) != 0) 
+			continue;
+		if(!service || (psmile->service && !strcmp(psmile->service, service)))
+			return psmile;
+		if(!possibility)
+			possibility = psmile;
+	}
+	return possibility;
 }
 
 static void insert_smiley_cb (GtkWidget * widget, smiley_callback_data *data) 
@@ -487,7 +504,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 
 	for(l = done; l; l=l_list_next(l)) {
 		msmiley = l->data;
-		dsmile = get_smiley_by_name(msmiley->name);
+		dsmile = get_smiley_by_name_and_service(msmiley->name, GET_SERVICE(account).name);
 		if(dsmile != NULL) {
 			GtkWidget *parent = NULL;
 			if (data && data->c_window)

@@ -36,6 +36,7 @@ typedef struct protocol_smiley_struct protocol_smiley;
 
 struct smiley_struct
 {
+	char 	*service;
 	char	name[64];
 	gchar	**pixmap; // from an xpm file, you know the drill...
 };
@@ -72,14 +73,12 @@ gchar * eb_smilify( const char *text, LList *protocol_smileys );
 
 LList * eb_default_smileys( void );
 
-LList * add_smiley( LList *list, const char *name, gchar **data );
+LList * add_smiley( LList *list, const char *name, char **data, const char *service );
 
 LList * add_protocol_smiley( LList *list, const char *text, const char *name );
 
 /* someone figure out how to do this with LList * const */
 LList * eb_smileys( void );
-
-smiley * get_smiley_by_name( const char *name );
 
 typedef struct _smiley_callback_data smiley_callback_data;
 

@@ -1,3 +1,9 @@
+* Wed Jul 09 2003 18:30 GMT [philip]	0.3.2-21
+- src/smileys.[ch] modules/smileys/smiley-themer.c
+Support multiprotocol themes so that if a theme supports
+multiple protocols, ayttm will automatically switch between
+them depending on the conversation protocol
+
 * Wed Jul 09 2003 10:32 GMT [colin]	0.3.2-20
 - modules/smileys/smiley_themer.c
 Fix prefs like smiley_directory being ignored

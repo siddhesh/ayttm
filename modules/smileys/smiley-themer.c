@@ -72,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.11 $",
-	"$Date: 2003/07/09 15:38:42 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/07/09 18:33:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -302,6 +302,7 @@ static struct smiley_theme * load_theme(const char *theme_name)
 	FILE *themerc;
 	char buff[1024];
 	struct smiley_theme *theme;
+	char *curr_protocol=NULL;
 
 	snprintf(buff, sizeof(buff), "%s/%s/%s",
 			smiley_directory, theme_name, rcfilename);
@@ -333,6 +334,10 @@ static struct smiley_theme * load_theme(const char *theme_name)
 				theme->date = strdup(value);
 			else if(!strcmp(key, "revision"))
 				theme->revision = strdup(value);
+			else if(!strcmp(key, "protocol")) {
+				FREE(curr_protocol);
+				curr_protocol = strdup(value);
+			}
 		} else {
 			snprintf(filepath, sizeof(filepath), "%s/%s/%s",
 					smiley_directory, theme_name, value);
@@ -342,7 +347,7 @@ static struct smiley_theme * load_theme(const char *theme_name)
 				continue;
 			}
 
-			theme->smileys = add_smiley(theme->smileys, key, smiley_data);
+			theme->smileys = add_smiley(theme->smileys, key, smiley_data, curr_protocol);
 		}
 	}
 	
