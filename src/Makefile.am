@@ -4,7 +4,7 @@ bin_PROGRAMS = ayttm
 
 if MINGW32
 localedir = locale
-WIN32_SOURCES = ayttm.rc
+WIN32_SRC = ayttm.rc
 WIN32_LD = -mwindows -Wl,--export-all-symbols -Wl,--out-implib,libayttm.a
 WIN32_LIBS = -lws2_32 -lwinmm
 else
@@ -22,7 +22,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
 	offline_queue_mgmt.c tcp_util.c image_window.c action.c about.c \
-	messages.c edit_list_window.c flash_window_title.c ssl.c $(WIN32_SOURCE)
+	messages.c edit_list_window.c flash_window_title.c ssl.c $(WIN32_SRC)
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
