@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.50 $",
-	"$Date: 2003/06/02 10:33:25 $",
+	"$Revision: 1.51 $",
+	"$Date: 2003/06/02 15:40:12 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1861,10 +1861,11 @@ void ext_got_info(msnconn * conn, syncinfo * info)
   char* local_account_name=((authdata_SB *)conn->auth)->username;
   eb_local_account *ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
   eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
-  if (ela == NULL)
+  if (ela == NULL) {
 	  eb_debug(DBG_MSN, "ela is null ! :-s");
-  else
+  } else {
 	  eb_msn_connected(ela);
+  }
   
   if(fname_pref[0]!='\0') { 
 	  char * tmp = StrToUtf8(fname_pref);

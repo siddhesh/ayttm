@@ -1,3 +1,7 @@
+* Mon Jun  2 2003 16:05 GMT [philip]	0.3.1-16
+- modules/msn2/msn.C
+fix quirk with eb_debug in if conditions
+
 * Mon Jun  2 2003 10:35 GMT [philip]	0.3.1-15
 - src/prefs.h src/gtk/prefs_window.C
 Add pref for conversation timestamping
