@@ -163,16 +163,16 @@ int do_msn_debug = 0;
 static char msn_server[MAX_PREF_LEN] = "messenger.hotmail.com";
 static char msn_port[MAX_PREF_LEN] = "1863";
 static int do_guess_away = 0;
-static int do_check_connection;
-static int do_reconnect;
-
+static int do_check_connection = 0;
+static int do_reconnect = 0;
+static int do_rename_contacts = 0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.70 $",
-	"$Date: 2003/10/12 15:15:05 $",
+	"$Revision: 1.71 $",
+	"$Date: 2003/10/22 18:28:29 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -224,6 +224,13 @@ static int plugin_init()
 	il->widget.checkbox.value = &do_reconnect;
 	il->widget.checkbox.name = "do_reconnect";
 	il->widget.checkbox.label = _("Reconnect if connection unexpectedly drops");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &do_rename_contacts;
+	il->widget.checkbox.name = "do_rename_contacts";
+	il->widget.checkbox.label = _("Rename my MSN-only contacts whenever they change their alias");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
@@ -2090,7 +2097,8 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
     ea = find_account_with_ela(buddy, ela);
     if (ea) {
         mad = (eb_msn_account_data *)ea->protocol_account_data;
-	if (!strcmp(buddy, ea->account_contact->nick)) {	
+	if ((do_rename_contacts && l_list_length(ea->account_contact->accounts) == 1)
+	|| !strcmp(buddy, ea->account_contact->nick)) {	
 	   rename_contact(ea->account_contact, tmp);	
 	}
     } else {
