@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.11 $",
-	"$Date: 2003/04/07 05:44:01 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/04/07 15:12:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1718,10 +1718,15 @@ static void eb_yahoo_logout(eb_local_account * ela)
 		for (; l; l=l->next) {
 			struct yahoo_buddy *bud = l->data;
 			eb_account *ea = find_account_by_handle(bud->id, SERVICE_INFO.protocol_id);
+			eb_yahoo_account_data *yad;
 			if(!ea)
 				continue;
 			buddy_logoff(ea);
 			buddy_update_status(ea);
+			yad = ea->protocol_account_data;
+			yad->status = YAHOO_STATUS_OFFLINE;
+			yad->away = 1;
+
 		}
 	}
 
@@ -2243,7 +2248,7 @@ static char **eb_yahoo_get_status_pixmap(eb_account * ea)
 	if(yad->away < 0 || yad->away > 1)
 		WARNING(("%s->away is %d", ea->handle, yad->away));
 
-	if (yad->away)
+	if (yad->away )
 		return yahoo_away_xpm;
 	else
 		return yahoo_online_xpm;

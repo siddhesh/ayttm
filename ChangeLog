@@ -1,3 +1,7 @@
+* Mon Apr 07 2003 15:11 GMT [colin]	0.2.3-52
+- modules/yahoo/yahoo.c
+Fix contacts' icon and status staying online after login/logout
+
 * Mon Apr 07 2003 10:34 GMT [colin]	0.2.3-51
 - modules/jabber/jabber.c
 Implement cancel connect
