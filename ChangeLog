@@ -1,3 +1,7 @@
+* Thu May  1 2003 19:30 GMT [colin]	0.3.0-89
+- src/chat_window.[ch] src/away_window.[ch]
+add initial webcam support - only stubs right now
+
 * Thu May  1 2003 19:30 GMT [philip]	0.3.0-88
 - modules/yahoo2
 add initial webcam support - only stubs right now

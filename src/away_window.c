@@ -52,7 +52,7 @@ static GtkWidget *away_message_text_entry;
 
 static void show_away(gchar *a_message, void *unused);
 
-static void imback()
+void away_window_set_back(void)
 {
 	if (awaybox)
 		gtk_widget_destroy(awaybox);
@@ -124,7 +124,7 @@ static void show_away(gchar *a_message, void *unused)
 
 		label = gtk_button_new_with_label(_("I'm Back"));
 		gtk_signal_connect_object(GTK_OBJECT(label), "clicked",
-				  GTK_SIGNAL_FUNC(imback), GTK_OBJECT(awaybox));
+				  GTK_SIGNAL_FUNC(away_window_set_back), GTK_OBJECT(awaybox));
 
 		gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, FALSE, 0);
 		GTK_WIDGET_SET_FLAGS(label, GTK_CAN_DEFAULT);

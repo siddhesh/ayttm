@@ -68,8 +68,9 @@ typedef struct _chat_window
 
 	/* Set to FALSE on init, TRUE when away msg first sent,
 	FALSE when user sends regular message */
-	gint away_msg_sent;
-
+	time_t away_msg_sent;
+	time_t away_warn_displayed;
+	
 	log_window* lw;
 
 	GtkWidget* notebook; /* when using tabbed chat, this is the same for all chat_window structs. */

@@ -582,7 +582,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	is there for code clarity. */
 
 	if (data->away_msg_sent)
-		data->away_msg_sent = FALSE;
+		data->away_msg_sent = (time_t)NULL;
 	
 	/* Log the message */
 
@@ -995,6 +995,25 @@ static gboolean chat_singleline_key_press(GtkWidget *widget, GdkEventKey *event,
 	return gtk_true();
 }
 
+static void chat_away_set_back(GtkWidget *widget, gpointer data)
+{
+	if (gtk_object_get_user_data (GTK_OBJECT(widget)) != 0) {
+		chat_window *cw = (chat_window *)data;
+		cw->away_warn_displayed = (time_t)NULL;
+		away_window_set_back();
+	}
+}
+
+static void chat_warn_if_away(chat_window *cw)
+{
+	if (is_away && (time(NULL) - cw->away_warn_displayed) > (60*30)) {
+		cw->away_warn_displayed = time(NULL);
+		do_dialog(_("You are currently away. \n\nDo you want to be back Online?"), 
+			  _("Away"), chat_away_set_back, cw);
+	}
+	
+}
+
 static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
 {
 	chat_window				*cw = (chat_window *)data;
@@ -1015,6 +1034,7 @@ static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer 
 			/*Prevents a newline from being printed*/
 			gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "key_press_event" );
 
+			chat_warn_if_away(cw);
 			send_message( NULL, cw );
 			
 			return( gtk_true() );
@@ -1789,7 +1809,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	/* first we allocate room for the new chat window */
 	cw = g_new0(chat_window,1);
 	cw->contact = remote;
-	cw->away_msg_sent = 0;
+	cw->away_msg_sent = (time_t)NULL;
+	cw->away_warn_displayed = (time_t)NULL;
 	cw->preferred = NULL;
 	cw->local_user = NULL;
 
