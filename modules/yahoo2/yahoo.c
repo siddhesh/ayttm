@@ -127,8 +127,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.49 $",
-	"$Date: 2003/05/08 12:04:03 $",
+	"$Revision: 1.50 $",
+	"$Date: 2003/05/08 20:25:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2508,7 +2508,7 @@ static char *eb_yahoo_get_status_string(eb_account * ea)
 		if (eb_yahoo_status_codes[i].id == yad->status) {
 			if(yad->away > 100 && do_show_away_time) {
 				static char buff[1024];
-				snprintf(buff, sizeof(buff), _("%s for %d:%2d:%2d"), 
+				snprintf(buff, sizeof(buff), _("%s for %d:%02d:%02d"), 
 						eb_yahoo_status_codes[i].label,
 						yad->away/3600, (yad->away/60)%60, yad->away%60);
 				return buff;
