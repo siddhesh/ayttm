@@ -1,3 +1,9 @@
+* Fri Oct 10 2003 04:55 GMT [philip]	0.4.3-pre5
+- modules/yahoo2/yahoo.c
+Prompt for password if not given in prefs
+- modules/*
+minor bug fixes and remove warnings
+
 * Thu Oct  9 2003 20:17 GMT [nicolas]	0.4.3-pre4
 - modules/aim-oscar/aim-oscar.c
 Better connection error checking, add account prefs, parse

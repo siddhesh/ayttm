@@ -223,7 +223,7 @@ static char * base64_decode(const char *text)
 	gint32 tmp2 = 0;
 	int len = 0, n = 0;
 	if (!text)
-		return;
+		return strdup(text);
 
 	c = text;
 

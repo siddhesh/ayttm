@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.37 $",
-	"$Date: 2003/10/05 21:49:39 $",
+	"$Revision: 1.38 $",
+	"$Date: 2003/10/10 04:57:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1216,10 +1216,16 @@ static int eb_jabber_send_typing_stop(void *data)
 	eb_account *to = tcd->to;
 	eb_jabber_local_account_data *jlad = (eb_jabber_local_account_data *)from->protocol_local_account_data;
 	eb_jabber_account_data *jad = (eb_jabber_account_data *)to->protocol_account_data;	
+	/* Stop typing notify is always sent */
+	/*
 	if (!iGetLocalPref("do_typing_notify"))
-		return;
+		return 0;
+	*/
 	JABBER_Send_typing(jlad->JConn, from->handle, to->handle, 0);
 	free(tcd);
+
+	/* return 0 to remove the timeout */
+	return 0;
 }
 
 static int eb_jabber_send_typing( eb_local_account * from, eb_account * to )

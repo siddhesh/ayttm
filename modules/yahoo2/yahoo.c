@@ -68,6 +68,7 @@
 #include "image_window.h"
 #include "tcp_util.h"
 #include "messages.h"
+#include "dialog.h"
 
 #include "yahoo2.h"
 #include "yahoo2_callbacks.h"
@@ -124,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.68 $",
-	"$Date: 2003/10/08 06:13:54 $",
+	"$Revision: 1.69 $",
+	"$Date: 2003/10/10 04:57:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -288,9 +289,11 @@ static void eb_yahoo_free_account_data(eb_account * account)
 
 typedef struct {
 	char password[MAX_PREF_LEN];
+	int prompt_password;
 	char *act_id;
 	int do_mail_notify;
 	int login_invisible;
+	int initial_state;
 	int ignore_system;
 	int fd;
 	int id;
@@ -461,7 +464,6 @@ static int ext_yahoo_log(char *fmt,...)
 /* Forward Declarations */
 
 static void eb_yahoo_add_user(eb_account * ea);
-static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode);
 static void eb_yahoo_logout(eb_local_account * ela);
 static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * account);
 
@@ -1903,16 +1905,6 @@ static int eb_yahoo_query_connected(eb_account * ea)
 	return yad->status != YAHOO_STATUS_OFFLINE;
 }
 
-static void eb_yahoo_login(eb_local_account * ela)
-{
-	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
-	LOG(("eb_yahoo_login"));
-	if (ylad->login_invisible)
-		eb_yahoo_login_with_state(ela, YAHOO_STATUS_INVISIBLE);
-	else
-		eb_yahoo_login_with_state(ela, YAHOO_STATUS_AVAILABLE);
-}
-
 struct connect_callback_data {
 	eb_local_account *ela;
 	yahoo_connect_callback callback;
@@ -1952,19 +1944,14 @@ static void ay_yahoo_cancel_connect(void *data)
 	is_setting_state = 0;
 }
 
-static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
+static void eb_yahoo_finish_login(const char *password, eb_local_account *ela)
 {
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	char buff[1024];
-	
-	/* don't allow double connects */
-	if(ela->connecting)
-		return;
-
 	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
-	ela->connecting = 1;
+
 	ref_count++;
-	ylad->id = yahoo_init_with_attributes(ela->handle, ylad->password,
+	ylad->id = yahoo_init_with_attributes(ela->handle, password,
 			"pager_host", pager_host,
 			"pager_port", atoi(pager_port),
 			"filetransfer_host", filetransfer_host,
@@ -1978,18 +1965,41 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 
 	ylad->connect_progress_tag = ay_activity_bar_add(buff, ay_yahoo_cancel_connect, ela);
 
-	LOG(("eb_yahoo_login_with_state"));
+	LOG(("eb_yahoo_finish_login"));
 	yahoo_set_log_level(do_yahoo_debug?YAHOO_LOG_DEBUG:YAHOO_LOG_NONE);
 
 	ela->connected = 0;
 	ylad->status = YAHOO_STATUS_OFFLINE;
-	yahoo_login(ylad->id, login_mode);
 
-/*	if (ylad->id <= 0) {
-		do_message_dialog(_("Could not connect to Yahoo server.  Please verify that you are connected to the net and the pager host and port are correctly entered."), _("Yahoo Connect Failed"), 0);
+	if(ylad->initial_state != -1)
+		yahoo_login(ylad->id, ylad->initial_state);
+	else if(ylad->login_invisible)
+		yahoo_login(ylad->id, YAHOO_STATUS_INVISIBLE);
+	else
+		yahoo_login(ylad->id, YAHOO_STATUS_AVAILABLE);
+
+	ylad->initial_state = -1;
+}
+
+static void eb_yahoo_login(eb_local_account * ela)
+{
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	char buff[1024];
+
+	/* don't allow double connects */
+	if(ela->connecting)
 		return;
+
+	ela->connecting = 1;
+
+	if(ylad->prompt_password) {
+		snprintf(buff, sizeof(buff), _("Yahoo! Password for: %s"), ela->handle);
+		do_password_input_window(buff, "", 
+				(void(*)(char*,gpointer))eb_yahoo_finish_login,
+			       	ela);
+	} else {
+		eb_yahoo_finish_login(ylad->password, ela);
 	}
-*/
 }
 
 static void ext_yahoo_login_response(int id, int succ, char *url)
@@ -2039,7 +2049,7 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 		ay_activity_bar_remove(ylad->connect_progress_tag);
 	ylad->connect_progress_tag = 0;
 
-	ay_do_error( _("Yahoo Error"), buff );
+	ay_do_warning( _("Yahoo Error"), buff );
 	eb_yahoo_logout(ela);
 	ela->connecting = 0;
 
@@ -2164,6 +2174,13 @@ static void yahoo_init_account_prefs(eb_local_account * ela)
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
+	il->widget.checkbox.value = &ylad->prompt_password;
+	il->widget.checkbox.name = "prompt_password";
+	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
 	il->widget.checkbox.name = "CONNECT";
 	il->widget.checkbox.label= _("_Connect at startup");
@@ -2207,6 +2224,7 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = ylad;
 	ylad->status = YAHOO_STATUS_OFFLINE;
+	ylad->initial_state = -1;
 
 	yahoo_init_account_prefs(ela);
 
@@ -2307,7 +2325,8 @@ static void eb_yahoo_set_current_state(eb_local_account * ela, int state)
 		LOG(("Sanity Check: ylad->status == online but ela->connected == 0"));
 	}
 	if (ylad->status == YAHOO_STATUS_OFFLINE && yahoo_state != YAHOO_STATUS_OFFLINE) {
-		eb_yahoo_login_with_state(ela, yahoo_state);
+		ylad->initial_state = yahoo_state;
+		eb_yahoo_login(ela);
 		return;
 	} else if (ylad->status != YAHOO_STATUS_OFFLINE && yahoo_state == YAHOO_STATUS_OFFLINE) {
 		eb_yahoo_logout(ela);

@@ -19,10 +19,7 @@
  *
  */ 
  
-#include "intl.h"
-
 #include "messages.h"
-
 #include "ui_message_windows.h"
 
 
