@@ -1833,10 +1833,8 @@ static void eb_update_window_title (chat_window * cw, gboolean new_message)
 				buff);
 		}
 	}
-	/*
 	if(new_message)
 		flash_title(cw->contact->chatwindow->window->window);
-	*/
 }
 
 
