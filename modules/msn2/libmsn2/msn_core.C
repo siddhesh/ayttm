@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef __MINGW32__
-#include <sys/poll.h>15
+#include <sys/poll.h>
 #endif
 #include <fcntl.h>
 #include <time.h>
