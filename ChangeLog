@@ -1,3 +1,9 @@
+* Sun Apr 06 2003 09:10 GMT [philip]	0.2.3-38
+- modules/yahoo2
+Fix infinite read loop and problem with logout introduced in 0.2.3-34
+Add even more logging
+Logout only after the server tells us we're logged out
+
 * Sun Apr 06 2003 00:05 GMT [andy]	0.2.3-37
 - modules/jabber/jabber.c
   modules/msn2/msn.C

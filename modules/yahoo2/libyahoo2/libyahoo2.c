@@ -1657,7 +1657,7 @@ static void yahoo_yab_read(struct yab *yab, unsigned char *d, int len)
 	char *data = (char *)d;
 	data[len]='\0';
 
-	NOTICE(("Got yab: %s", data));
+	DEBUG_MSG(("Got yab: %s", data));
 	st = strstr(data, "userid=\"") + strlen("userid=\"");
 	en = strchr(st, '"');
 	*en++ = '\0';
@@ -1840,7 +1840,7 @@ int yahoo_read_ready(int id, int fd)
 	char buf[1024];
 	int len;
 
-	DEBUG_MSG(("callback"));
+	LOG(("read callback"));
 
 	if(!yid)
 		return -2;
@@ -1853,7 +1853,8 @@ int yahoo_read_ready(int id, int fd)
 		int e = errno;
 		DEBUG_MSG(("len == %d (<= 0)", len));
 
-		yid->yd->current_status = -1;
+		if(yid->type == YAHOO_CONNECTION_PAGER)
+			yid->yd->current_status = -1;
 		yahoo_input_close(yid);
 
 		/* no need to return an error, because we've already fixed it */
@@ -2077,8 +2078,9 @@ void yahoo_logoff(int id)
 		return;
 	yd = yid->yd;
 
-	if(yd->current_status != -1) {
+	LOG(("yahoo_logoff: current status: %d", yd->current_status));
 
+	if(yd->current_status != -1) {
 		pkt = yahoo_packet_new(YAHOO_SERVICE_LOGOFF, YAHOO_STATUS_AVAILABLE, yd->session_id);
 		yd->current_status = -1;
 
@@ -2088,11 +2090,11 @@ void yahoo_logoff(int id)
 		}
 	}
 
-	/*
-	do {
+	
+/*	do {
 		yahoo_input_close(yid);
-	} while((yid = find_input_by_id(id)));
-	*/
+	} while((yid = find_input_by_id(id)));*/
+	
 }
 
 void yahoo_get_list(int id)
@@ -2133,6 +2135,10 @@ void yahoo_get_yab(int id)
 			yd->cookie_y, yd->cookie_t);
 
 	yid->fd = yahoo_http_get(url, buff);
+	if(yid->fd <= 0) {
+		FREE(yid);
+		return;
+	}
 
 	inputs = y_list_prepend(inputs, yid);
 
@@ -2217,6 +2223,10 @@ void yahoo_set_yab(int id, struct yab * yab)
 			yd->cookie_y, yd->cookie_t);
 
 	yid->fd = yahoo_http_get(url, buff);
+	if(yid->fd <= 0) {
+		FREE(yid);
+		return;
+	}
 
 	inputs = y_list_prepend(inputs, yid);
 

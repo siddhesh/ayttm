@@ -122,8 +122,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/05 19:55:11 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/04/06 09:15:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1680,9 +1680,12 @@ static void eb_yahoo_logout(eb_local_account * ela)
 	const YList * l = NULL;
 	int i = 0;
 
+	LOG(("eb_yahoo_logout"));
+
 	ylad = ela->protocol_local_account_data;
 
 	if (ylad == NULL || ylad->id <= 0) {
+		LOG(("ylad NULL or invalid id"));
 		return;
 	}
 
@@ -2440,6 +2443,7 @@ static int ext_yahoo_connect(char *host, int port)
  */
 typedef struct {
 	int id;
+	int fd;
 	gpointer data;
 	int tag;
 } eb_yahoo_callback_data;
@@ -2491,6 +2495,7 @@ static void ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond)
 {
 	eb_yahoo_callback_data *d = g_new0(eb_yahoo_callback_data, 1);
 	d->id = id;
+	d->fd = fd;
 	d->tag = eb_input_add(fd, cond, eb_yahoo_callback, d);
 	LOG(("%d added %d for %d", id, fd, cond));
 
@@ -2503,10 +2508,11 @@ static void ext_yahoo_remove_handler(int id, int fd)
 	for(l = handlers; l; l = l->next)
 	{
 		eb_yahoo_callback_data *d = l->data;
-		if(d->id == id) {
+		if(d->id == id && d->fd == fd) {
 			LOG(("%d removed %d", id, fd));
 			eb_input_remove(d->tag);
 			handlers = y_list_remove_link(handlers, l);
+			FREE(d);
 			break;
 		}
 	}
