@@ -415,7 +415,7 @@ static int total_rooms;
 
 char * next_chatroom_name(void)
 {
-	return g_strdup_printf(_("Chatroom #%d"), ++total_rooms);
+	return g_strdup_printf(_("Chatroom %d"), ++total_rooms);
 }
 
 static void join_chat_callback(GtkWidget * widget, gpointer data )

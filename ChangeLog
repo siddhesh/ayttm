@@ -1,4 +1,9 @@
-* Sun Apr 13 2003 10:50 GMT [andy]	0.2.3-96
+* Sun Apr 13 2003 16:51 GMT [colin]	0.2.3-97
+- src/chat_room.c
+Default names don't get # in names as it is not legal 
+in TOC chatrooms
+
+* Sun Apr 13 2003 16:50 GMT [colin]	0.2.3-96
 - src/chat_room.[hc]
 - modules/*toc/*toc.c
   modules/*toc/libtoc/libtoc.[ch]
