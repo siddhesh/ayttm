@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.54 $",
-	"$Date: 2003/06/28 06:49:37 $",
+	"$Revision: 1.55 $",
+	"$Date: 2003/06/29 12:11:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1395,6 +1395,11 @@ static eb_chat_room * eb_msn_make_chat_room( gchar * name, eb_local_account * ac
 static void eb_msn_send_invite( eb_local_account * account, eb_chat_room * room,
 						  char * user, char * message )
 {
+	if (!room->protocol_local_chat_room_data) {
+		ay_do_warning( _("MSN Warning"), _("Cannot invite user: connection to the chatroom has been closed."));
+		return;	
+	}
+	
         msn_invite_user( ((msnconn *)room->protocol_local_chat_room_data), user );
 }
 

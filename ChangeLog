@@ -1,3 +1,7 @@
+* Sun Jun 29 2003 12:10 GMT [colin]	0.3.2-pre3
+- modules/msn2/msn.C
+Fix possible segfault
+
 * Sun Jun 29 2003 07:30 GMT [philip]	0.3.2-pre2
 - src/prefs.[ch] src/gtk/prefs_window.C src/status.[ch]
 allow tooltips to be disabled through a pref
