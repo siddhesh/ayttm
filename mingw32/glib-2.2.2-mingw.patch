@@ -1,0 +1,18 @@
+diff -ur glib-2.2.2-official/build/win32/compile-resource glib-2.2.2/build/win32/compile-resource
+--- glib-2.2.2-official/build/win32/compile-resource	Fri Jun 20 17:34:24 2003
++++ glib-2.2.2/build/win32/compile-resource	Fri Jun 20 17:19:30 2003
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#!/bin/sh
+ 
+ # Script to compile a resource file for a DLL if there is a .rc file
+ # for it. The resource source file is supposed to contain a version
+diff -ur glib-2.2.2-official/build/win32/lt-compile-resource glib-2.2.2/build/win32/lt-compile-resource
+--- glib-2.2.2-official/build/win32/lt-compile-resource	Fri Jun 20 17:34:30 2003
++++ glib-2.2.2/build/win32/lt-compile-resource	Fri Jun 20 17:19:38 2003
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#!/bin/sh
+ 
+ # Script to compile a resource file for a DLL in the same way that
+ # libtool would, if it knew about .rc files.
