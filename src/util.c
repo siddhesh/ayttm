@@ -775,10 +775,16 @@ void strip_html(char * text)
 						visible = 0; /* don't break */
 				case 'u':
 				case 'U':
-				case 'p':
-				case 'P':
 					if(text[i+2] == '>')
 						visible = 0;
+					break;
+				case 'p':
+				case 'P':
+					if(text[i+2] == '>'
+					|| !strncasecmp(text+i+1, "p    ", 5)
+					|| !strncasecmp(text+i+1, "p   >", 5))
+						visible = 0;
+					
 					break;
 				case 'b':
 				case 'B':
