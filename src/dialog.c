@@ -161,9 +161,9 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 	gtk_widget_realize(dialog_window);
 	
 	label = gtk_label_new(message);
-	gtk_widget_set_usize(label, 240, -1);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
 	gtk_widget_show(label);
+	gtk_widget_set_usize(label, 240, -1);
 
 	gtk_misc_set_alignment (GTK_MISC (label), 0.1, 0.5);
 
@@ -221,10 +221,10 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 	gtk_widget_realize(dialog_window);
 	gtk_window_set_title(GTK_WINDOW(dialog_window), title );
 	gtk_window_set_position(GTK_WINDOW(dialog_window), GTK_WIN_POS_MOUSE);
-	gtk_widget_set_usize(dialog_window, 350, 
-				dialog_window->requisition.height<150? 150:dialog_window->requisition.height);
-
+	gtk_widget_set_usize(dialog_window, 350, 150);
 	gtk_widget_show(dialog_window);
+	if (dialog_window->requisition.height > 150)
+		gtk_widget_set_usize(dialog_window, 350, -1);
 }
 
 

@@ -772,7 +772,7 @@ static GtkWidget *get_local_accounts(chat_window *cw)
 	subsequent_act = first_act;
 	do {
 		snprintf(buff, sizeof(buff), "%s:%s", 
-			get_service_name(subsequent_act->service_id), subsequent_act->alias);
+			get_service_name(subsequent_act->service_id), subsequent_act->handle);
 		button = gtk_menu_item_new_with_label(buff);
 		gtk_menu_append(GTK_MENU(submenu), button);
 		cwa = g_new0(chat_window_account, 1);
