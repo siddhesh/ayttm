@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.4.4, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=23
+RELEASE=24
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -156,7 +156,16 @@ if test "$enable_esd" != no ; then
     fi
 fi
 
-AM_PATH_GARTS
+AM_PATH_GARTS(1.1.3, arts=yes, arts=old, arts=no)
+
+if test "$arts" = old ; then
+  # Older than 1.1.3 - check for older arts
+  AM_PATH_GARTS(,arts=yes)
+  if test "$arts" = yes ; then
+    AC_DEFINE(ARTS_FREE_IS_BROKEN, 1, [Define if arts_init(); arts_free(); arts_init() breaks])
+  fi
+fi
+
 if test "$arts" = yes ; then
     AC_DEFINE(ARTS_SOUND, , Define if we use arts)
     EB_CFLAGS="$EB_CFLAGS $ARTS_CFLAGS"

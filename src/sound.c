@@ -67,12 +67,11 @@ int clean_pid(void * dummy);	/* util.h */
 
 #define BUFFERED_FRAME_COUNT 20000
 
-/* This is for when arts_init(); arts_free(); arts_init(); does not work
+/* ARTS_FREE_IS_BROKEN is defined in config.h when
+ * arts_init(); arts_free(); arts_init(); does not work
  * with GlobalComm=Arts::X11GlobalComm in ~/.mcoprc
- * This is KDE bug #34541
- * Chris Halls <chris.halls@nikocity.de>
+ * This is KDE bug #34541, known to be fixed with arts >= 1.1.3
  */
-#define ARTS_FREE_IS_BROKEN
 
 #endif	/* ARTS_SOUND */
 

@@ -8,8 +8,7 @@
   # stolen from Manish Singh
   # Shamelessly stolen from Owen Taylor
 
-
-dnl AM_PATH_GARTS([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
+dnl AM_PATH_GARTS([MINIMUM-VERSION, [ACTION-IF-FOUND], [ACTION-IF-TOO-OLD], [ACTION-IF-NOT-FOUND])
 dnl Test for ARTS, and define ARTS_CFLAGS and ARTS_LIBS
 dnl
 
@@ -49,12 +48,12 @@ AC_DEFUN(AM_PATH_GARTS,
 
   if test x$enable_arts = xyes ; then
     AC_MSG_RESULT(yes  - user override)
-    arts=yes
+    arts_found=yes
   elif test x$enable_arts = xno ; then
     AC_MSG_RESULT(no  - user override)
     ARTS_CFLAGS=""
     ARTS_LIBS=""
-    arts=no
+    arts_found=no
   else
     echo -n "automatic: "
 
@@ -87,13 +86,13 @@ int main ()
   return 0;
 }
 
-], arts=yes, arts=no,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
+], arts_found=yes, arts_found=no,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
 
     # restore CFLAGS & LIBS
     CFLAGS="$ac_save_CFLAGS"
     LIBS="$ac_save_LIBS"
 
-    if test "x$arts" = xyes ; then
+    if test "x$arts_found" = xyes ; then
       AC_MSG_RESULT(yes)
     else
       AC_MSG_RESULT(no)
@@ -126,8 +125,45 @@ int main ()
     fi
     
   fi
+
+  rm -f conf.artstest
   
+  ifelse([$1], ,:,
+  [
+    if test "x$arts_found" = xyes ; then
+      AC_MSG_CHECKING([for ARTS version >= $1])
+      NEED_ARTS_MAJOR=`expr $1 : '\([[0-9]][[0-9]]*\)'`
+      NEED_ARTS_MINOR=`expr $1 : '[[0-9]][[0-9]]*\.\([[0-9]][[0-9]]*\)'`
+      NEED_ARTS_MICRO=`expr $1 : '[[0-9]][[0-9]]*\.[[0-9]][[0-9]]*\.\([[0-9]][[0-9]]*\)'`
+      NEED_ARTS_VERSION=`expr $NEED_ARTS_MAJOR \* 100000 \+ $NEED_ARTS_MINOR \* 100 \+ $NEED_ARTS_MICRO`
+      
+      arts_version="`$ARTSC_CONFIG --arts-version`"
+      HAVE_ARTS_MAJOR=`expr $arts_version : '\([[0-9]][[0-9]]*\)'`
+      HAVE_ARTS_MINOR=`expr $arts_version : '[[0-9]][[0-9]]*\.\([[0-9]][[0-9]]*\)'`
+      HAVE_ARTS_MICRO=`expr $arts_version : '[[0-9]][[0-9]]*\.[[0-9]][[0-9]]*\.\([[0-9]][[0-9]]*\)'`
+      HAVE_ARTS_VERSION=`expr $HAVE_ARTS_MAJOR \* 100000 \+ $HAVE_ARTS_MINOR \* 100 \+ $HAVE_ARTS_MICRO`
+
+      if test "$NEED_ARTS_VERSION" -le "$HAVE_ARTS_VERSION"; then
+	AC_MSG_RESULT([yes])
+      else
+	AC_MSG_RESULT([no])
+	arts_found=old
+        CFLAGS="$ac_save_CFLAGS"
+        LIBS="$ac_save_LIBS"
+        ARTS_CFLAGS=""
+        ARTS_LIBS=""
+      fi
+    fi
+  ])
+
   AC_SUBST(ARTS_CFLAGS)
   AC_SUBST(ARTS_LIBS)
-  rm -f conf.artstest
+
+  if test "x$arts_found" = xyes ; then
+    ifelse([$2], ,:, $2)
+  elif test "x$arts_found" = xold ; then
+    ifelse([$3], ,:, $3)
+  else
+    ifelse([$4], ,:, $4)
+  fi
 ])

@@ -1,3 +1,8 @@
+* Tue Nov 25 2003 22:00 GMT [chris]     0.4.4-24
+- m4/arts.m4 configure.ac src/sound.c
+Autodetect broken arts_free() for arts < 1.1.3.
+Only fork for arts if arts_free is broken.
+
 * Wed Nov 19 2003 21:05 GMT [colin]	0.4.4-23
 - configure.ac po/es.po
 New Spanish translation by Ricardo Mones
