@@ -155,7 +155,7 @@ ay_log_window::ay_log_window( struct contact *inRemoteContact )
 ay_log_window::ay_log_window( const char *inFileName )
 :	m_remote( NULL )
 {
-	m_filename = NULL;
+	m_filename = strdup(inFileName);
 	m_fp = NULL;
 	m_filepos = 0;
 	

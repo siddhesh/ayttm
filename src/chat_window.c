@@ -1821,7 +1821,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	smiley_callback_data * scd = g_new0(smiley_callback_data,1);
 	scd->c_window = NULL;
 	scd->c_room = NULL;
-
+	
 	if ( iGetLocalPref("do_ignore_unknown") && !strcmp(_("Unknown"), remote->group->name))
 		return NULL;
 
@@ -1832,6 +1832,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	cw->away_warn_displayed = (time_t)NULL;
 	cw->preferred = NULL;
 	cw->local_user = NULL;
+	cw->smiley_window = NULL;
 
 	vbox = gtk_vbox_new(FALSE,0);	
 
