@@ -1,3 +1,9 @@
+* Tue Apr 15 2003 13:13 GMT [colin]	0.2.3-103
+- src/action.c
+Background execution of actions
+- libproxy/proxy.c
+should fix proxy
+
 * Tue Apr 15 2003 09:35 GMT [philip]	0.2.3-102
 - modules/yahoo2
 Implement non-blocking connects for http too

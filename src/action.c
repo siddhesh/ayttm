@@ -33,23 +33,28 @@
 #include "action.h"
 #include "dialog.h"
 #include "prefs.h"
+#include "mem_util.h"
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
 
-static void create_action_menu(void);
+static void create_action_menu(char *html_file, char *plain_file);
 static void save_action(char *action);
 
 static void action_do_action(char * value, void * data)
 {
-	char filename_html[255];
-	char filename_plain[255];
-	char *begin = NULL, *end = NULL, *cmd = NULL, *tvalue;
+	char *filename_html;
+	char *filename_plain;
+	char **files = data;
+	char *begin = NULL, *end = NULL, *cmd = NULL, *tvalue = NULL;
 	int found = FALSE;
+	pid_t child;
 	
-	snprintf(filename_html, 255, "%stmp_html", config_dir);
-	snprintf(filename_plain, 255, "%stmp_plain", config_dir);
-
+	filename_html = files[0];
+	filename_plain = files[1];
+	
+	printf("files: %x %x %s\n", data, files[0], files[0]);
+	
 	tvalue = strdup(value);
 	if (strstr(tvalue, "%s") != NULL) {
 		begin = g_strndup(tvalue, (int)(strstr(tvalue, "%s") - tvalue));
@@ -72,34 +77,43 @@ static void action_do_action(char * value, void * data)
 		eb_debug(DBG_CORE, "action command: %s\n",cmd);	
 		found = TRUE;
 	} 
+	
+	free(filename_html);
+	free(filename_plain);
+	
 	if (!found) {
 		do_error_dialog(_("Command line is invalid (missing %s and %p)."), _("Action error"));
-		unlink(filename_html);
-		unlink(filename_plain);
 		return;
 	}
 
-	system(cmd);
-	
-	save_action(value);
-
-	g_free(begin);
-	g_free(cmd);
-	
-	unlink(filename_html);
-	unlink(filename_plain);
+	child = fork();
+	if (child == 0) {
+		/* in child */
+		system(cmd);
+		g_free(cmd);
+		_exit(0);
+	} else if (child > 0) {
+		save_action(value);
+		g_free(begin);
+	} else {
+		do_error_dialog(_("Cannot run command : fork() failed."), _("Action error"));
+		perror("fork");
+	}		
 }
 
 static void action_prepare(GtkWidget *w, void *data)
 {
 	char *val = gtk_widget_get_name(w);
-	action_do_action(val, NULL);
+	char **c = data;
+	printf("%s %s\n",c[0],c[1]);
+	action_do_action(val, data);
 }
 
 void conversation_action(log_info *li, int to_end)
 {
-	char buf[4096], output_html[255], output_plain[255];
+	char buf[4096], *output_html, *output_plain;
 	int firstline = 1;
+	char *tempdir = NULL;
 	log_info *loginfo = g_new0(log_info, 1);
 	FILE *output_fhtml;
 	FILE *output_fplain;
@@ -128,10 +142,16 @@ void conversation_action(log_info *li, int to_end)
 		return;
 	}
 	
-	snprintf(output_html, 255, "%stmp_html", config_dir);
-	snprintf(output_plain, 255, "%stmp_plain", config_dir);
-	output_fhtml = fopen(output_html, "w");
-	output_fplain = fopen(output_plain, "w");
+	tempdir = getenv("TEMP");
+	if (!tempdir)
+		tempdir = getenv("TMP");
+	if (!tempdir)
+		tempdir = "/tmp";
+	
+	output_html = g_strdup_printf("%s/tmp_htmlXXXXXX", tempdir);
+	output_plain = g_strdup_printf("%s/tmp_plainXXXXXX", tempdir);
+	output_fhtml = fdopen(mkstemp(output_html), "w");
+	output_fplain = fdopen(mkstemp(output_plain), "w");
 	
 	if (output_fhtml == NULL || output_fplain == NULL) {
 		perror("fopen");
@@ -167,8 +187,6 @@ void conversation_action(log_info *li, int to_end)
 		fclose(loginfo->fp);
 		fclose(output_fhtml);
 		fclose(output_fplain);
-		unlink(output_html);
-		unlink(output_plain);
 		return;
 	}
 	
@@ -178,16 +196,11 @@ void conversation_action(log_info *li, int to_end)
 	
 	if (ftell(loginfo->fp) == loginfo->filepos) {
 		do_error_dialog(_("Cannot use log: no data available."),_("Action error"));
-		unlink(output_html);
-		unlink(output_plain);
 	} else	{
-		create_action_menu();
+		create_action_menu(output_html, output_plain);
 	}
-	/*	do_text_input_window_multiline(_("Enter command:\n"
-						 "(%s: current conversation's file (as HTML)\n"
-						 " %p: current conversation's file (as text)"), 
-			     cGetLocalPref("action_cmd"), FALSE, action_do_action, NULL); 
-	*/
+	g_free(output_html);
+	g_free(output_plain);
 	fclose(loginfo->fp);
 }
 
@@ -197,7 +210,7 @@ static void add_command_cb(GtkWidget * w, void * a)
 			_("Enter command:\n"
 			  " %s = displayed conversation's file (as HTML)\n"
 			  " %p = displayed conversation's file (as text)"), 
-			"", FALSE, action_do_action, NULL); 
+			"", FALSE, action_do_action, a); 
 }
 
 
@@ -213,7 +226,8 @@ static LList *load_actions(void)
 		return NULL;
 	
 	while (fgets(buf, sizeof(buf), in)) {
-		char *val = strndup(buf,strlen(buf)-1);
+		char *val = strdup(buf);
+		val[strlen(val)-1] = '\0';
 		
 		list = l_list_append(list, val);
 	}
@@ -245,19 +259,25 @@ static void save_action(char *action)
 	fclose(in);	
 }
 
-static void create_action_menu(void)
+static void create_action_menu(char *html_file, char *plain_file)
 {
 	GtkWidget *menu = NULL;
 	LList *commands = NULL, *walk = NULL;
+	char **files = ay_new(char *, 2);
 	
+	files[0] = strdup(html_file);	/* free after callback */
+	files[1] = strdup(plain_file);
+	
+	printf("a %x %x %s\n",files, files[0], files[0]);
 	menu = gtk_menu_new();
 	eb_menu_button (GTK_MENU(menu), _("New command..."),
-			GTK_SIGNAL_FUNC(add_command_cb), NULL);
+			GTK_SIGNAL_FUNC(add_command_cb), files);
 
 	commands = load_actions();
 	
 	if (l_list_empty(commands)) {
 		/* create the print command so people will understand... */
+		
 		save_action("html2ps %s | lpr");
 		commands = load_actions();
 	}
@@ -267,7 +287,7 @@ static void create_action_menu(void)
 		walk = commands;
 		while (walk) {
 			GtkWidget *m = eb_menu_button(GTK_MENU(menu), walk->data, 
-					GTK_SIGNAL_FUNC(action_prepare), NULL);
+					GTK_SIGNAL_FUNC(action_prepare), files);
 			gtk_widget_set_name(m, walk->data);
 			walk = walk->next;
 		}

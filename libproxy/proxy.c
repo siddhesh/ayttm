@@ -705,31 +705,48 @@ int http_connect(int sockfd, struct sockaddr *serv_addr, int addrlen )
 int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data)
 {
    int tmp;
+   ay_socket_callback callback = (ay_socket_callback)cb;
    if (!proxy_inited)
 	   proxy_autoinit();
 
+   if (callback == NULL) {
+	   fprintf(stderr, "proxy_connect callback is null\n");
+	   return -1;
+   }
    switch (proxy_type) {
       case PROXY_NONE:    /* No proxy */
-	      if (!cb) {
-		      tmp=(connect(sockfd,serv_addr,addrlen));
-	              return tmp;
-	      } else {
-		      struct sockaddr_in *sin = (struct sockaddr_in *)serv_addr;
-		      return ay_socket_new_async(
-				      inet_ntoa(sin->sin_addr), 
-				      ntohs(sin->sin_port), 
-				      (ay_socket_callback)cb, data, NULL);     
-	      }
-	      break;
+		{
+		struct sockaddr_in *sin = (struct sockaddr_in *)serv_addr;
+		return ay_socket_new_async(
+			      inet_ntoa(sin->sin_addr), 
+			      ntohs(sin->sin_port), 
+			      callback, data, NULL);     
+		break;
+		}
       case PROXY_HTTP:    /* Http proxy */
-         return ( http_connect(sockfd, serv_addr, addrlen) < 0 ? -1 : 0 );
-	      break;
+		if ( (tmp=http_connect(sockfd, serv_addr, addrlen)) > 0 ) {
+			callback(tmp, 0, data);
+			return 0;
+		} else {
+			return -1;
+		}
+		break;
       case PROXY_SOCKS4:  /* SOCKS4 proxy */
-	      return socks4_connect(sockfd, serv_addr, addrlen);
-	      break;
+		if ( (tmp=socks4_connect(sockfd, serv_addr, addrlen)) > 0 ) {
+			callback(tmp, 0, data);
+			return 0;
+		} else {
+			return -1;
+		}
+		break;
       case PROXY_SOCKS5:  /* SOCKS5 proxy */
-	      return socks5_connect(sockfd, serv_addr, addrlen);
-	      break;
+		if ( (tmp=socks5_connect(sockfd, serv_addr, addrlen)) > 0 ) {
+			callback(tmp, 0, data);
+			return 0;
+		} else {
+			return -1;
+		}
+		break;
       default:
 	      fprintf(stderr,"Unknown proxy type : %d.\n",proxy_type);
 	      break;
