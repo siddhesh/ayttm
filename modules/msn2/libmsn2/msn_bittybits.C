@@ -64,7 +64,6 @@ char ** msn_read_line(msnconn *conn, int * numargs)
   }
   if (!finished) {
     *numargs=0;
-    printf("incomplete read !\n");
     return NULL;
   }
   

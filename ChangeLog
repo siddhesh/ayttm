@@ -1,3 +1,7 @@
+* Tue Apr 01 2003 20:50 GMT [colin]	0.2.3-pre69
+- modules/msn2/libmsn2/msn_bittybits.C
+Remove a scary printf()
+
 * Tue Apr 01 2003 18:52 GMT [andy]	0.2.3-pre68
 - modules/aim-oscar/aim-oscar.c
   modules/aim-toc/aim-toc.c
