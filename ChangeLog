@@ -1,3 +1,9 @@
+* Tue May  6 2003 13:30 GMT [philip]	0.3.0-139
+- configure.ac acinclude.m4
+Use gpgme macro and don't include GPGME stuff in EB_CFLAGS,LIBS
+- modules/aycryption/Makefile.am
+Let the module rather than the core link to gpgme
+
 * Tue May  6 2003 08:37 GMT [philip]	0.3.0-138
 - modules/msn2/msn.C
 Print local handle in authorise user dialog

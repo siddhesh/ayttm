@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=138
+RELEASE=139
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -328,16 +328,8 @@ if test "$enable_icq_toc" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq-toc"
 fi
 if test "$enable_aycryption" != no; then
-	GPGME_CFLAGS=`gpgme-config --cflags`
-	if test $? != 0 ; then
-	 enable_aycryption=no;
-	 echo "you have to install gpgme 0.3 to use encryption"
-	else
-	 GPGME_LDFLAGS=`gpgme-config --libs`
-	 EB_CFLAGS="$EB_CFLAGS $GPGME_CFLAGS"
-	 EB_LIBS="$EB_LIBS $GPGME_LDFLAGS"
-	 OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aycryption"
-	fi;
+	AM_PATH_GPGME(, [OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aycryption"], 
+		AC_MSG_WARN(You need gpgme to compile the aycryption module))
 fi
 
 ### End Optional Service  options ######################################
