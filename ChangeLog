@@ -1,3 +1,10 @@
+* Tue May 14 2003 18:42 GMT [edward]	0.3.0-192
+- mingw32/Makefile.am
+  mingw32/makeebdll
+  README.WIN32
+Fixed README and makefiles, should now compile and run fine on W2K on up
+machines! Yay!!!
+
 * Tue May 14 2003 13:20 GMT [edward]	0.3.0-191
 - libproxy/proxy.c
   libproxy/libproxy.h

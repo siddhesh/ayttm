@@ -1,5 +1,32 @@
 #!/bin/sh
-export LIBS="/target/lib/intl.lib /target/lib/iconv.lib /target/lib/dirent.lib libltdl/libltdl.a libproxy/libproxy.a /target/lib/gtk.lib /target/lib/gdk.lib /target/lib/glib-2.0.lib -lwinmm -lws2_32 -lwst -lmsvcrt"
+if [ X"$CC" = X ]
+then
+	CC=gcc-2
+	export CC
+fi
+if [ X"$CXX" = X ]
+then
+	CXX=g++-2
+	export CXX
+fi
+if [ X"$msnative_struct" = X ]
+then
+   case `$CC --version | sed -e 's,\..*,.,' -e q` in
+      2.)
+        if $CC -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
+          msnative_struct='-fnative-struct'
+        fi
+        ;;
+      *)
+        if $CC -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+          msnative_struct='-mms-bitfields'
+        fi
+        ;;
+  esac
+  export msnative_struct
+fi
+
+export LIBS="/target/lib/dirent.lib libltdl/libltdl.a libproxy/libproxy.a /target/lib/gtk.lib /target/lib/gdk.lib /target/lib/gmodule-2.0.lib /target/lib/glib-2.0.lib /target/lib/intl.lib /target/lib/iconv.lib -lwinmm -lws2_32 -lwst -lmsvcrt"
 cd ..
 dlltool --export-all --output-def ayttm.def src/*.o src/gtk/*.o libproxy/*.o
 dlltool --dllname ayttm.exe --def ayttm.def --output-lib libayttm.a

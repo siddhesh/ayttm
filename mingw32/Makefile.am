@@ -1,4 +1,4 @@
-EXTRA_DIST = aim-toc.la autotrans.la config.h gdk-pixbuf.m4 giles_smiles.la glib.m4 gtk.m4 icq.la icq-toc.la import_gaim.la import_gnomeicu.la importicq.la importlicq.la irc.la jabber.la Makefile.am middle.la msn2.la msn_smileys.la notes.la rainbow.la smileysc.la yahoo2.la yahoo_smileys.la gdk/win32/gdkprivate-win32.h
+EXTRA_DIST = aim-toc.la autotrans.la config.h gdk-pixbuf.m4 giles_smiles.la glib.m4 gtk.m4 icq.la icq-toc.la import_gaim.la import_gnomeicu.la importicq.la importlicq.la irc.la jabber.la Makefile.am middle.la msn2.la msn_smileys.la notes.la rainbow.la smileysc.la yahoo2.la yahoo_smileys.la gdk/win32/gdkprivate-win32.h makedll makeebdll
 
 @PACKAGE@rc: Makefile
 	@rm -f @PACKAGE@rc >/dev/null 2>&1;
@@ -15,6 +15,10 @@ ayttm.exe: ayttmrc
 	./makeebdll
 	cp ayttmrc /cygdrive/c
 	cp ../ayttm.exe /cygdrive/c/Program\ Files/ayttm
+	cp /target/lib/g*.dll /cygdrive/c/Program\ Files/ayttm
+	cp /target/lib/iconv.dll /cygdrive/c/Program\ Files/ayttm
+	cp /target/lib/libXpm-noX4.dll /cygdrive/c/Program\ Files/ayttm
+	cp /target/lib/libintl-1.dll /cygdrive/c/Program\ Files/ayttm
 
 plugins: modules sound importers utilities aim-toc icq-toc irc yahoo2 jabber smtp smileys
 
