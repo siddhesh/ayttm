@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-69
+- modules/msn2/msn.C
+Remove menu tags when unloading (or segfault)
+
 * Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-68
 - src/service.c
 Fix the order of things in module load

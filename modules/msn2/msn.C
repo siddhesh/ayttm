@@ -154,8 +154,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.39 $",
-	"$Date: 2003/04/29 12:46:25 $",
+	"$Revision: 1.40 $",
+	"$Date: 2003/04/30 19:20:47 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -394,7 +394,7 @@ static int plugin_init()
 
 	if ((mi2 = eb_add_menu_item(_("Invite to Gnomemeeting"), EB_CONTACT_MENU,
 			      invite_gnomemeeting, ebmCONTACTDATA, NULL)) == NULL) {
-		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, mi2);
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, mi1);
 		eb_debug(DBG_MOD, "Error!  Unable to add Language menu to contact menu\n");
 		return (-1);
 	}
@@ -411,6 +411,13 @@ static int plugin_finish()
 		g_free(plugin_info.prefs);
 		plugin_info.prefs = il;
 	}
+	
+	if (mi1)
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, mi1);
+	if (mi2)
+		eb_remove_menu_item(EB_CONTACT_MENU, mi2);
+	mi1 = NULL;
+	mi2 = NULL;
 	eb_debug(DBG_MSN, "Returning the ref_count: %i\n", ref_count);
 	return(ref_count);
 }
