@@ -55,6 +55,9 @@
 #undef func_data
 #undef HAVE_PTHREAD
 #endif
+#ifdef __NetBSD__
+#undef HAVE_PTHREAD
+#endif
 
 #include "chat_window.h"
 #include "message_parse.h"

@@ -1,3 +1,9 @@
+* Tue Jul 13 2004 16:08 GMT [edward] 0.4.6-24
+- Update for Netbsd 1.6.2 (bug #753330)
+  README.NETBSD
+  configure.ac
+  src/message_parse.c
+
 * Mon Jul 12 2004 21:03 GMT [edward] 0.4.6-23
 - Update for Mandrake 10. Documentation change
   README.LINUX

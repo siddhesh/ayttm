@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.4.6], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=23
+RELEASE=24
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -44,6 +44,12 @@ case "$host" in
 esac
 case "$host_os" in
 aix*)
+	use_pthread=no
+	;;
+netbsd*)
+	CFLAGS="$CFLAGS -I/usr/pkg/include"
+	CXXFLAGS="$CXXFLAGS -I/usr/pkg/include"
+	LDFLAGS="$LDFLAGS -L/usr/pkg/lib -lltdl"
 	use_pthread=no
 	;;
 esac
