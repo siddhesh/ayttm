@@ -340,11 +340,7 @@ static void destroy_event(GtkWidget *widget, gpointer userdata)
 	/* gotta clean up all of the people we're talking with */
 	gtk_signal_disconnect_by_func(GTK_OBJECT(cw->window),
 			   GTK_SIGNAL_FUNC(handle_focus), cw);
-	if(cw->smiley_window != NULL && cw->smiley_window->window != NULL) {
-		/* close smileys popup */
-		gtk_widget_destroy(cw->smiley_window);
-		cw->smiley_window = NULL;
-	}
+	remove_smiley_window(cw->contact);
 
 	end_conversation(cw);
 }
@@ -368,7 +364,7 @@ static void remove_smiley_window(struct contact *ct)
 	chat_window *cw = ct->chatwindow;
 
 	GET_CHAT_WINDOW(cw);
-	if(cw->smiley_window != NULL && cw->smiley_window->window != NULL) {
+	if(cw->smiley_window != NULL) {
 		/* close smileys popup */
 		gtk_widget_destroy(cw->smiley_window);
 		cw->smiley_window = NULL;
@@ -701,6 +697,7 @@ static void set_sound_callback(GtkWidget * sound_button, gpointer userdata)
 static void close_win (GtkWidget * close_button, gpointer userdata)
 {
 	chat_window * cw = (chat_window *)userdata;
+	
 	gtk_widget_destroy(cw->window);
 }
 
@@ -1839,6 +1836,15 @@ static void eb_update_window_title (chat_window * cw, gboolean new_message)
 }
 
 
+static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
+{
+	smiley_callback_data *scd = data;
+	if ( !data )
+		return;
+
+	g_free( scd );
+}
+
 chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remote)
 {
 	GtkWidget *vbox;
@@ -1868,10 +1874,6 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	gboolean	enableSoundButton = FALSE;
 	const int	tabbedChat = iGetLocalPref("do_tabbed_chat");
 
-	smiley_callback_data * scd = g_new0(smiley_callback_data,1);
-	scd->c_window = NULL;
-	scd->c_room = NULL;
-	
 	if ( iGetLocalPref("do_ignore_unknown") && !strcmp(_("Unknown"), remote->group->name))
 		return NULL;
 
@@ -2045,9 +2047,6 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	gtk_signal_connect(GTK_OBJECT(cw->window), "focus_in_event",
 			   GTK_SIGNAL_FUNC(handle_focus), cw);
 
-	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_event), cw);	
-
 	hbox = gtk_hbox_new(FALSE, 0);
 	gtk_widget_set_usize(hbox, 200, 25);
 
@@ -2215,9 +2214,13 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	/* smileys */
 	if( iGetLocalPref("do_smiley") ) {
-		ICON_CREATE(icon, iconwid, smiley_button_xpm);
+		smiley_callback_data * scd = g_new0(smiley_callback_data,1);
 		scd->c_window = cw;
+
+		ICON_CREATE(icon, iconwid, smiley_button_xpm);
 		cw->smiley_button = TOOLBAR_APPEND(_("Insert Smiley"), iconwid, _show_smileys_cb, scd);
+		gtk_signal_connect(GTK_OBJECT(cw->smiley_button), "destroy",
+			   GTK_SIGNAL_FUNC(destroy_smiley_cb_data), scd);
 		/*Create the separator for the toolbar*/
 
 		TOOLBAR_SEPARATOR();
@@ -2308,6 +2311,9 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	
 	gtk_widget_show(cw->chat);
 	gtk_widget_show(cw->entry);
+
+	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
+			   GTK_SIGNAL_FUNC(destroy_event), cw);	
 
 	return cw;
 }

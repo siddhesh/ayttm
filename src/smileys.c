@@ -504,8 +504,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 			if(x==5) {
 				y++;
 				x=0;
-				if(x==0) 
-					win_w+=w+2;
+				win_w+=w+2;
 			}
 			gtk_widget_show(iconwid);
 			button = gtk_button_new();
@@ -547,7 +546,8 @@ void show_smileys_cb (smiley_callback_data *data) {
 		win_x -= 20;
 	while ((win_y)+win_h > gdk_screen_height() - 30)
 		win_y -= 20;
-	gdk_window_move_resize(smiley_window->window, win_x, win_y, win_w, win_h);
+	gtk_widget_set_uposition(smiley_window, win_x, win_y);
+/*	gtk_widget_set_usize(smiley_window, win_w, win_h);*/
 	
 	if (data && data->c_room)
 		data->c_room->smiley_window = smiley_window;

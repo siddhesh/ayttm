@@ -625,13 +625,6 @@ static void destroy(GtkWidget * widget, gpointer data)
 	}
 	RUN_SERVICE(ecr->local_user)->leave_chat_room(ecr);
 		
-	if ( ecr->smiley_window != NULL && ecr->smiley_window->window != NULL )
-	{
-		/* destroy smiley window */
-		gtk_widget_destroy(ecr->smiley_window);
-		ecr->smiley_window = NULL;
-	}
-	
 	free_chat_room( ecr );
 }
 
@@ -910,8 +903,16 @@ static void destroy_chat_window(GtkWidget * widget, gpointer data)
 
 static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 {
-	if ( data != NULL )
-		g_free( data );
+	smiley_callback_data *scd = data;
+	if ( !data )
+		return;
+
+	if(scd->c_room->smiley_window ) {
+		gtk_widget_destroy(scd->c_room->smiley_window);
+		scd->c_room->smiley_window = NULL;
+	}
+	
+	g_free( scd );
 }
 
 static void action_callback(GtkWidget *widget, gpointer d)
@@ -1055,8 +1056,6 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_window_set_title(GTK_WINDOW(chat_room->window), room_title);
 	g_free(room_title);
 	gtkut_set_window_icon(chat_room->window->window, NULL);
-	gtk_signal_connect(GTK_OBJECT(chat_room->window), "destroy",
-					   GTK_SIGNAL_FUNC(destroy), chat_room );
 	gtk_signal_connect(GTK_OBJECT(chat_room->window), "focus_in_event",
 					   GTK_SIGNAL_FUNC(handle_focus), chat_room);
 
@@ -1168,6 +1167,8 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 
 	gtk_container_set_border_width(GTK_CONTAINER(chat_room->window), 5);
 	
+	gtk_signal_connect(GTK_OBJECT(chat_room->window), "destroy",
+					   GTK_SIGNAL_FUNC(destroy), chat_room );
 	gtk_widget_show(chat_room->window);
 
 	/*then mark the fact that we have joined that room*/

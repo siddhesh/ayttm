@@ -1,3 +1,7 @@
+* Mon Jun  2 2003 19:30 GMT [philip]	0.3.1-17
+- src/chat_room.c src/chat_window.c src/smileys.c
+try to fix smiley button related bugs
+
 * Mon Jun  2 2003 16:05 GMT [philip]	0.3.1-16
 - modules/msn2/msn.C
 fix quirk with eb_debug in if conditions
