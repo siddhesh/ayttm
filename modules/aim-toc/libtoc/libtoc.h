@@ -46,26 +46,26 @@ typedef struct _toc_file_conn
 	int  progress;
 } toc_file_conn;
 
-extern void (*toc_new_user)(char * group, char * handle);
-extern void (*toc_new_group)(char * group);
-extern int  (*toc_begin_file_recieve)( const char * filename, unsigned long size );
-extern void (*toc_update_file_status)( int tag, unsigned long progress );
-extern void (*toc_complete_file_recieve)( int tag );
-extern void (*toc_im_in)(toc_conn  * conn, char * user, char * message );
-extern void (*toc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
-extern void (*update_user_status)(char * user, int online, time_t idle, int evil, int unavailable );
-extern void (*toc_error_message)(char * message);
-extern void (*toc_disconnect)(toc_conn * conn);
-extern void (*toc_chat_invite)(toc_conn * conn, char * id, char * name, 
+void (*toc_new_user)(char * group, char * handle);
+void (*toc_new_group)(char * group);
+int  (*toc_begin_file_recieve)( const char * filename, unsigned long size );
+void (*toc_update_file_status)( int tag, unsigned long progress );
+void (*toc_complete_file_recieve)( int tag );
+void (*toc_im_in)(toc_conn  * conn, char * user, char * message );
+void (*toc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
+void (*update_user_status)(char * user, int online, time_t idle, int evil, int unavailable );
+void (*toc_error_message)(char * message);
+void (*toc_disconnect)(toc_conn * conn);
+void (*toc_chat_invite)(toc_conn * conn, char * id, char * name, 
 		      char * sender, char * message );
-extern void (*toc_join_ack)(toc_conn * conn, char * id, char * name);
-extern void (*toc_chat_update_buddy)(toc_conn * conn, char * id, 
+void (*toc_join_ack)(toc_conn * conn, char * id, char * name);
+void (*toc_chat_update_buddy)(toc_conn * conn, char * id, 
 		                             char * user, int online );
-extern void (*toc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,
+void (*toc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,
 		                      char * cookie, char * filename );
 
-extern void (*toc_user_info)(toc_conn  * conn, char * user, char * message );
-extern void (*toc_logged_in)(toc_conn *conn);
+void (*toc_user_info)(toc_conn  * conn, char * user, char * message );
+void (*toc_logged_in)(toc_conn *conn);
 
 void toc_callback( toc_conn * conn );
 void toc_signon( const char * username, const char * password,

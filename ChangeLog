@@ -1,3 +1,7 @@
+* Sun Apr 06 2003 10:25 GMT [colin]	0.2.3-41
+- modules/*toc/libtoc/libtoc.h
+fix toc modules (broken in -35)
+
 * Sun Apr 06 2003 09:55 GMT [colin]	0.2.3-40
 - modules/msn2
 implement cancel connect
