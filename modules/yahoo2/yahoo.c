@@ -113,6 +113,10 @@ char pager_host[MAX_PREF_LEN]="scs.yahoo.com";
 char pager_port[MAX_PREF_LEN]="5050";
 char filetransfer_host[MAX_PREF_LEN]="filetransfer.msg.yahoo.com";
 char filetransfer_port[MAX_PREF_LEN]="80";
+char webcam_host[MAX_PREF_LEN]="webcam.yahoo.com";
+char webcam_port[MAX_PREF_LEN]="5100";
+char local_host[MAX_PREF_LEN]="";
+int conn_type=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info =
@@ -120,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.42 $",
-	"$Date: 2003/05/01 11:46:21 $",
+	"$Revision: 1.43 $",
+	"$Date: 2003/05/01 18:31:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -166,6 +170,20 @@ static int plugin_init()
 	il->widget.entry.value = filetransfer_port;
 	il->widget.entry.name = "filetransfer_port";
 	il->widget.entry.label= _("File Transfer Port:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = webcam_host;
+	il->widget.entry.name = "webcam_host";
+	il->widget.entry.label= _("Webcam Host:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = webcam_port;
+	il->widget.entry.name = "webcam_port";
+	il->widget.entry.label= _("Webcam Port:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
@@ -348,7 +366,6 @@ static yahoo_idlabel eb_yahoo_status_codes[] = {
 	{YAHOO_STATUS_IDLE, "Idle"},
 	{YAHOO_STATUS_OFFLINE, "Offline"},
 	{YAHOO_STATUS_CUSTOM, "[Custom]"},
-	{YAHOO_STATUS_TYPING, "Typing"},
 	{0, NULL}
 };
 
@@ -366,8 +383,7 @@ static int eb_to_yahoo_state_translation[] = {
 	YAHOO_STATUS_INVISIBLE,
 	YAHOO_STATUS_IDLE,
 	YAHOO_STATUS_OFFLINE,
-	YAHOO_STATUS_CUSTOM,
-	YAHOO_STATUS_TYPING
+	YAHOO_STATUS_CUSTOM
 };
 
 static int yahoo_to_eb_state_translation(int state)
@@ -1433,6 +1449,61 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela)
  * Conference code ends here
  ******************************/
 
+/******************************
+ * Yahoo Chat code starts here
+ */
+static void ext_yahoo_chat_cat_xml(int id, char *xml) 
+{
+}
+
+static void ext_yahoo_chat_join(int id, char *room, char * topic, YList *members)
+{
+}
+
+static void ext_yahoo_chat_userjoin(int id, char *room, struct yahoo_chat_member *who)
+{
+}
+
+static void ext_yahoo_chat_userleave(int id, char *room, char *who)
+{
+}
+
+static void ext_yahoo_chat_message(int id, char *who, char *room, char *msg, int msgtype, int utf8)
+{
+}
+
+/*
+ * Yahoo Chat code ends here
+ ******************************/
+
+/******************************
+ * Webcam code starts here
+ */
+static void ext_yahoo_got_webcam_image(int id, 
+		unsigned char *image, unsigned int image_size, unsigned int real_size,
+		unsigned int timestamp)
+{
+}
+
+static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
+{
+}
+
+static void ext_yahoo_webcam_data_request(int id, int send)
+{
+}
+
+static void ext_yahoo_webcam_invite(int id, char *from)
+{
+}
+
+static void ext_yahoo_webcam_invite_reply(int id, char *from, int accept)
+{
+}
+
+/*
+ * Webcam code ends here
+ ******************************/
 
 static void eb_yahoo_authorize_callback(gpointer data, int result)
 {
@@ -1666,6 +1737,7 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 
 	LOG(("eb_yahoo_login_with_state"));
 	yahoo_set_log_level(do_yahoo_debug?YAHOO_LOG_DEBUG:YAHOO_LOG_NONE);
+	strncpy(local_host, get_local_addresses(), sizeof(local_host));
 
 	ela->connected = 0;
 	ylad->status = YAHOO_STATUS_OFFLINE;
@@ -2838,6 +2910,18 @@ static void register_callbacks()
 	yc.ext_yahoo_remove_handler = ext_yahoo_remove_handler;
 	yc.ext_yahoo_connect_async = ext_yahoo_connect_async;
 	yc.ext_yahoo_connect = ext_yahoo_connect;
+
+	yc.ext_yahoo_chat_cat_xml = ext_yahoo_chat_cat_xml;
+	yc.ext_yahoo_chat_join = ext_yahoo_chat_join;
+	yc.ext_yahoo_chat_userjoin = ext_yahoo_chat_userjoin;
+	yc.ext_yahoo_chat_userleave = ext_yahoo_chat_userleave;
+	yc.ext_yahoo_chat_message = ext_yahoo_chat_message;
+
+	yc.ext_yahoo_got_webcam_image = ext_yahoo_got_webcam_image;
+	yc.ext_yahoo_webcam_invite = ext_yahoo_webcam_invite;
+	yc.ext_yahoo_webcam_invite_reply = ext_yahoo_webcam_invite_reply;
+	yc.ext_yahoo_webcam_data_request = ext_yahoo_webcam_data_request;
+	yc.ext_yahoo_webcam_viewer = ext_yahoo_webcam_viewer;
 
 	yahoo_register_callbacks(&yc);
 	

@@ -1,3 +1,7 @@
+* Thu May  1 2003 19:30 GMT [philip]	0.3.0-88
+- modules/yahoo2
+add initial webcam support - only stubs right now
+
 * Thu May  1 2003 19:10 GMT [philip]	0.3.0-87
 - src/util.c
 fix segfault when node was null because ela was returned first (730895)

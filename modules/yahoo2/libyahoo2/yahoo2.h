@@ -90,6 +90,33 @@ void yahoo_conference_message(int id, const char * from, YList *who, const char 
 void yahoo_conference_logon(int id, const char * from, YList *who, const char *room);
 void yahoo_conference_logoff(int id, const char * from, YList *who, const char *room);
 
+/* Get a list of chatrooms */
+void yahoo_get_chatrooms(int id,int chatroomid);
+/* join room with specified roomname and roomid */
+void yahoo_chat_logon(int id, const char *from, const char *room, const char *roomid);
+/* Send message "msg" to room with specified roomname, msgtype is 1-normal message or 2-/me mesage */
+void yahoo_chat_message(int id, const char *from, const char *room, const char *msg, const int msgtype, const int utf8);
+/* Log off chat */
+void yahoo_chat_logoff(int id, const char *from);
+
+/* requests a webcam feed */
+/* who is the person who's webcam you would like to view */
+void yahoo_webcam_get_feed(int id, const char *who);
+
+/* sends an image when uploading */
+/* image points to a JPEG-2000 image, lenght is the length of the image */
+/* in bytes. The timestamp is the time in milliseconds since we started the */
+/* webcam. */
+void yahoo_webcam_send_image(int id, unsigned char *image, unsigned int length, unsigned int timestamp);
+
+/* this function should be called if we want to allow a user to watch the */
+/* webcam. Who is the user we want to accept. */
+/* Accept user (accept = 1), decline user (accept = 0) */
+void yahoo_webcam_accept_viewer(int id, const char* who, int accept);
+
+/* send an invitation to a user to view your webcam */
+void yahoo_webcam_invite(int id, const char *who);
+
 /* will set up a connection and initiate file transfer.
  * callback will be called with the fd that you should write
  * the file data to

@@ -43,7 +43,7 @@ enum yahoo_status {
 	YAHOO_STATUS_CUSTOM = 99,
 	YAHOO_STATUS_IDLE = 999,
 	YAHOO_STATUS_OFFLINE = 0x5a55aa56, /* don't ask */
-	YAHOO_STATUS_TYPING = 0x16
+	YAHOO_STATUS_NOTIFY = 0x16
 };
 #define YAHOO_STATUS_GAME	0x2 		/* Games don't fit into the regular status model */
 
@@ -102,7 +102,40 @@ enum yahoo_log_level {
 enum yahoo_connection_type {
 	YAHOO_CONNECTION_PAGER=0,
 	YAHOO_CONNECTION_FT,
-	YAHOO_CONNECTION_YAB
+	YAHOO_CONNECTION_YAB,
+	YAHOO_CONNECTION_WEBCAM_MASTER,
+	YAHOO_CONNECTION_WEBCAM,
+	YAHOO_CONNECTION_CHATCAT
+};
+
+enum yahoo_webcam_direction_type {
+        YAHOO_WEBCAM_DOWNLOAD=0,
+        YAHOO_WEBCAM_UPLOAD
+};
+
+/* chat member attribs */
+#define YAHOO_CHAT_MALE 0x8000
+#define YAHOO_CHAT_FEMALE 0x10000
+#define YAHOO_CHAT_FEMALE 0x10000
+#define YAHOO_CHAT_DUNNO 0x400
+#define YAHOO_CHAT_WEBCAM 0x10
+
+struct yahoo_webcam {
+	int direction;     /* Uploading or downloading */
+	int conn_type;     /* 0=Dialup, 1=DSL/Cable, 2=T1/Lan */
+
+	char *user;        /* user we are viewing */
+	char *server;      /* webcam server to connect to */
+	char *key;         /* key to connect to the server with */
+	char *description; /* webcam description */
+	char *my_ip;       /* own ip number */
+};
+
+struct yahoo_webcam_data {
+	unsigned int data_size;
+	unsigned int to_read;
+	unsigned int timestamp;
+	unsigned char packet_type;
 };
 
 struct yahoo_data {
@@ -161,6 +194,14 @@ typedef void (*yahoo_get_fd_callback)(int id, int fd, int error, void *data);
 typedef void (*yahoo_get_url_handle_callback)(int id, int fd, int error,
 		const char *filename, unsigned long size, void *data);
 
+
+struct yahoo_chat_member {
+	char *id;
+	int  age;
+	int  attribs;
+	char *alias;
+	char *location;
+};
 
 #ifdef __cplusplus
 }
