@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.49 $",
-	"$Date: 2003/05/07 13:40:09 $",
+	"$Revision: 1.50 $",
+	"$Date: 2003/06/02 10:33:25 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1750,7 +1750,7 @@ void ext_register_sock(msnconn *conn, int s, int reading, int writing)
 	  if(writing)
 	  { parent->tags[a].tag_w = eb_input_add(s, EB_INPUT_WRITE, eb_msn_incoming, conn);}
 	  parent->tags[a].fd=s;
-	  fprintf(stderr,"Added socket %d\n", a);
+	  eb_debug(DBG_MSN, "Added socket %d\n", a);
 	  return;
 	}
       }
@@ -1862,7 +1862,7 @@ void ext_got_info(msnconn * conn, syncinfo * info)
   eb_local_account *ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
   eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
   if (ela == NULL)
-	  printf("ela is null ! :-s");
+	  eb_debug(DBG_MSN, "ela is null ! :-s");
   else
 	  eb_msn_connected(ela);
   
