@@ -4,7 +4,7 @@
  * Copyright (C) 2003, the Ayttm team
  * 
  * Ayttm is derivative of Everybuddy
- * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
+ * Copyright (C) 2003, Colin Leroy <colin@colino.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

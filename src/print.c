@@ -4,7 +4,7 @@
  * Copyright (C) 2003, the Ayttm team
  * 
  * Ayttm is derivative of Everybuddy
- * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
+ * Copyright (C) 2003, Colin Leroy <colin@colino.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ void print_do_print(char * value, void * data)
 	char filename[255];
 	char *begin = NULL, *end = NULL, *cmd = NULL;
 	snprintf(filename, 255, "%stmp_print", config_dir);
-	printf("entered %s\n",value);	
 
 	if (strstr(value, "%s") == NULL) {
 		do_error_dialog(_("Print command line is invalid (missing %s)."), _("Print error"));
@@ -71,7 +70,8 @@ void print_conversation(log_info *li)
 	pw->loginfo->log_started = li->log_started;
 	pw->loginfo->filepos = li->filepos;
 	
-	printf("printing %s (starting from %lu)\n", pw->loginfo->filename, 
+	eb_debug(DBG_CORE,"printing %s (starting from %lu)\n", 
+			pw->loginfo->filename, 
 			pw->loginfo->filepos); 
 	
 	pw->loginfo->fp = fopen(pw->loginfo->filename, "r");

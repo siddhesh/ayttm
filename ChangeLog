@@ -1,3 +1,7 @@
+* Thu Apr 03 2003 12:09 GMT [colin]	0.2.3-4
+- src/print.[ch]
+copyright and printf stuff
+
 * Thu Apr 03 2003 11:39 GMT [colin]	0.2.3-3
 - pixmaps/print.xpm ** NEW FILE **
   src/print.c ** NEW FILE **
