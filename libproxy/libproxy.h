@@ -24,6 +24,10 @@
 #ifndef _INC_LIBPROXY_H
 #define _INC_LIBPROXY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #ifdef __MINGW32__
 #include <winsock2.h>
@@ -60,6 +64,9 @@ int proxy_recv( int s, void * buff, int len, unsigned int flags );
 extern int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int
 			 addrlen, void *cb, void *data) ;
 
+extern int proxy_connect_host
+			(char *host, int port, void *cb, void *data) ;
+
 /* proxy setting */
 extern int proxy_set_proxy(int proxy_type,char *proxy_host,int proxy_port);
 /* proxy user and password setting */
@@ -78,6 +85,10 @@ extern char * proxy_user;
 extern char * proxy_password;
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 #define extern extern
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

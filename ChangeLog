@@ -1,3 +1,7 @@
+* Wed Apr 16 2003 21:56 GMT [colin]	0.2.3-116
+- libproxy
+add proxy_connect_host(host, port, cb, data) function
+
 * Wed Apr 16 2003 21:56 GMT [colin]	0.2.3-115
 - src/action.c
 remove printfs

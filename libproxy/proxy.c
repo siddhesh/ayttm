@@ -702,6 +702,23 @@ int http_connect(int sockfd, struct sockaddr *serv_addr, int addrlen )
    return (http_tunnel_init(sockfd, serv_addr, addrlen));       
 }
 
+int proxy_connect_host (char *host, int port, void *cb, void *data)
+{
+	struct hostent *hp;
+	struct sockaddr_in sin;
+	if ((hp = proxy_gethostbyname((char *)host)) == NULL) 
+	{
+		do_error_dialog("Could not resolve host.", "Proxy error");
+		perror("ghbn");
+	}
+	sin.sin_addr.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(port);
+	
+	return proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data);
+
+}
+
 int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data)
 {
    int tmp;
