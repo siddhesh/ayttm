@@ -1,3 +1,7 @@
+* Thu Apr 03 2003 07:02 GMT [colin]	0.2.3-pre75
+- modules/msn2/msn.C
+fix crash
+
 * Wed Apr 02 2003 14:40 GMT [edward]	0.2.3-pre74
 - modules/irc/irc.c
 Someone added a problem when fixing a memory leak.
