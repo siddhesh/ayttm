@@ -46,6 +46,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #endif
 
 #include "info_window.h"
@@ -171,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.71 $",
-	"$Date: 2003/10/22 18:28:29 $",
+	"$Revision: 1.72 $",
+	"$Date: 2003/11/05 11:43:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

@@ -1,3 +1,7 @@
+* Wed Nov 5 2003 11:30 GMT [colin]	0.4.4-10
+- modules/msn2/msn.C
+Fix bsd build
+
 * Sun Nov 2 2003 18:30 GMT [colin]	0.4.4-9
 - src/chat_window.c
 Fix possible crash
