@@ -32,14 +32,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chat_window.h"
-#include "gtk_globals.h"
 #include "value_pair.h"
 #include "service.h"
+#include "globals.h"
 
 /* Can never be online */
 /* #include "pixmaps/nomodule_online.xpm" */
 #include "pixmaps/nomodule_away.xpm"
+
+
+#ifdef __MINGW32__
+#define snprintf _snprintf
+#endif
 
 #define SERVICE_INFO nomodule_SERVICE_INFO
 /* This will end up being an array, one for each protocol we know about */
@@ -67,24 +71,7 @@ enum
 
 /*   callbacks used by Ayttm    */
 
-/*static int pixmaps = 0;
-static GdkPixmap * eb_nomodule_pixmap[NOMODULE_OFFLINE+1];
-static GdkBitmap * eb_nomodule_bitmap[NOMODULE_OFFLINE+1];
-
-static void eb_nomodule_init_pixmaps()
-{
-	int i = NOMODULE_OFFLINE;
-	char ** xpm;
-
-	xpm = nomodule_away_xpm;
-	eb_nomodule_pixmap[i] = gdk_pixmap_create_from_xpm_d(statuswindow->window,
-		&eb_nomodule_bitmap[i], NULL, xpm);
-	pixmaps = 1;
-}
-*/
-
-
-static gboolean eb_nomodule_query_connected(eb_account * account)
+static int eb_nomodule_query_connected(eb_account * account)
 {		
 	return FALSE;
 }
@@ -108,9 +95,8 @@ static void eb_nomodule_send_im( eb_local_account * account_from,
 
 static eb_local_account * eb_nomodule_read_local_config(LList * pairs)
 {
-
-	eb_local_account * ela = g_new0(eb_local_account, 1);
-	struct eb_nomodule_local_account_data * ala = g_new0(struct eb_nomodule_local_account_data, 1);
+	eb_local_account * ela = calloc( 1, sizeof( eb_local_account ) );
+	struct eb_nomodule_local_account_data * ala = calloc( 1, sizeof( struct eb_nomodule_local_account_data ) );
 	char *ptr=NULL;
 	
 	eb_debug(DBG_CORE, "eb_nomodule_read_local_config: entering\n");	
@@ -151,8 +137,8 @@ static LList * eb_nomodule_write_local_config( eb_local_account * account )
 			
 static eb_account * eb_nomodule_read_config( LList * config, struct contact *contact )
 {
-	eb_account * ea = g_new0(eb_account, 1 );
-	struct eb_nomodule_account_data * aad =  g_new0(struct eb_nomodule_account_data,1);
+	eb_account * ea = calloc( 1, sizeof( eb_account ) );
+	struct eb_nomodule_account_data * aad =  calloc( 1, sizeof( struct eb_nomodule_account_data ) );
 	char		*str = NULL;
 	
 	aad->status = 0;
@@ -220,7 +206,7 @@ static char * eb_nomodule_get_status_string( eb_account * account )
 {
 	static char string[255];
 
-	g_snprintf(string, 255, _("(Offline)"));		
+	snprintf(string, 255, _("(Offline)"));		
 
 	return string;
 }
@@ -261,11 +247,19 @@ static LList * eb_nomodule_write_prefs_config()
 	return NULL;
 }
 
+static void	eb_nomodule_free_account_data( eb_account *account )
+{
+	if ( account == NULL )
+		return;
+		
+	free( account->protocol_account_data );
+}
+
 struct service_callbacks * eb_nomodule_query_callbacks()
 {
 	struct service_callbacks * sc;
 	
-	sc = g_new0( struct service_callbacks, 1 );
+	sc = calloc( 1, sizeof( struct service_callbacks ) );
 	sc->query_connected = eb_nomodule_query_connected;
 	sc->login = eb_nomodule_login;
 	sc->logout = eb_nomodule_logout;
@@ -297,5 +291,7 @@ struct service_callbacks * eb_nomodule_query_callbacks()
 	sc->read_prefs_config = eb_nomodule_read_prefs_config;
 	sc->write_prefs_config = eb_nomodule_write_prefs_config;
 
+	sc->free_account_data = eb_nomodule_free_account_data;
+	
 	return sc;
 }

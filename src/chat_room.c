@@ -51,7 +51,9 @@ LList * chat_rooms = NULL;
 static LList * get_contacts( eb_chat_room * room );
 static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
 static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_message);
+
 static void init_loginfo(eb_chat_room *chat_room);
+static void	destroy_loginfo( eb_chat_room *chat_room );
 
 static char *last_clicked_fellow = NULL;
 static guint32 last_time_clicked = 0;
@@ -72,6 +74,28 @@ static const char *cr_colors[]={
 */
 static const int nb_cr_colors = 9;
 
+
+static void	free_chat_room( eb_chat_room *chat_room )
+{
+	LList	*history = NULL;
+	
+	if ( chat_room == NULL )
+		return;
+		 
+	chat_rooms = l_list_remove( chat_rooms, chat_room );
+
+	destroy_loginfo( chat_room );
+	
+	history = chat_room->history;
+
+	for ( ; history != NULL ; history = history->next)
+		free( history->data );
+	
+	l_list_free( chat_room->history );
+	
+	memset( chat_room, 0, sizeof( eb_chat_room ) );
+	g_free( chat_room );
+}
 
 static void handle_fellow_click (char *name, eb_chat_room *cr)
 {
@@ -378,7 +402,6 @@ static void do_invite_window(eb_chat_room * room )
 	
 	gtk_signal_connect( GTK_OBJECT(room->invite_window), "destroy",
 						GTK_SIGNAL_FUNC(destroy_invite), room);
-
 }
 
 	
@@ -553,7 +576,8 @@ static void destroy(GtkWidget * widget, gpointer data)
 		chat_rooms = l_list_remove(chat_rooms, data);
 	}
 	RUN_SERVICE(ecr->local_user)->leave_chat_room(ecr);
-	g_free(ecr);
+	
+	free_chat_room( ecr );
 }
 
 static LList * find_chat_room_buddy( eb_chat_room * room, gchar * user )
@@ -590,9 +614,10 @@ gboolean eb_chat_room_buddy_connected(eb_chat_room * room, gchar * user)
 
 static void eb_chat_room_private_log_reference(eb_chat_room *room, char *alias, char *handle)
 {
-	struct contact *con = find_contact_by_handle(handle);
-	char buff[1024];
-	log_info *li = g_new0(log_info, 1);
+	struct contact	*con = find_contact_by_handle(handle);
+	const int		buff_size = 1024;
+	char			buff[buff_size];
+	log_info		*li = NULL;
 	
 	if (con == NULL)
 		return;
@@ -600,22 +625,23 @@ static void eb_chat_room_private_log_reference(eb_chat_room *room, char *alias, 
 	if (!strcmp(handle, room->local_user->handle))
 		return;
 	
+	li = g_new0(log_info, 1);
+	
 	make_safe_filename(buff, con->nick, con->group->name);
 	li->log_started = 0;
 	li->fp = fopen(buff, "a");
 	li->filename = NULL; /* don't care */
 	
-	memset(&buff, 0, 1024);
+	memset(&buff, 0, buff_size);
 	if (!room->loginfo)
 		init_loginfo(room);
 	
-	g_snprintf(buff, 1024, "You had a <a href=\"log://%s\">group chat with %s (%s)</a>.\n",
+	g_snprintf(buff, buff_size, "You had a <a href=\"log://%s\">group chat with %s (%s)</a>.\n",
 			room->loginfo->filename,
 			alias, handle);
 	
 	eb_log_message(li, "", buff);
 	eb_log_close(li);
-	
 }
 
 void eb_chat_room_buddy_arrive( eb_chat_room * room, gchar * alias, gchar * handle )
@@ -813,13 +839,25 @@ static void invite_button_callback( GtkWidget * widget, gpointer data )
 
 static void destroy_chat_window(GtkWidget * widget, gpointer data)
 {
-	eb_chat_room * ecr = data;
-	if(ecr->smiley_window != NULL && ecr->smiley_window->window != NULL) {
-		/* close smileys popup */
+	eb_chat_room	*ecr = data;
+	
+	if ( ecr == NULL )
+		return;
+		
+	if ( ecr->smiley_window != NULL && ecr->smiley_window->window != NULL )
+	{
+		/* destroy smiley window */
 		gtk_widget_destroy(ecr->smiley_window);
 		ecr->smiley_window = NULL;
 	}
+	
 	gtk_widget_destroy(ecr->window);
+}
+
+static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
+{
+	if ( data != NULL )
+		g_free( data );
 }
 
 static void print_callback(GtkWidget *widget, gpointer d)
@@ -1016,6 +1054,9 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		ICON_CREATE(icon, iconwid, smiley_button_xpm);
 		chat_room->smiley_button = 
 			TOOLBAR_APPEND(_("Insert Smiley"), iconwid, _show_smileys_cb, scd);
+	
+		gtk_signal_connect(GTK_OBJECT(chat_room->smiley_button), "destroy",
+					   GTK_SIGNAL_FUNC(destroy_smiley_cb_data), scd);
 		/*Create the separator for the toolbar*/
 
 		TOOLBAR_SEPARATOR();
@@ -1136,6 +1177,20 @@ static void init_loginfo(eb_chat_room *chat_room)
 			perror(buff);
 		chat_room->loginfo->filepos=0;
 	}
+}
+
+static void	destroy_loginfo( eb_chat_room *chat_room )
+{
+	if ( (chat_room == NULL) || (chat_room->loginfo == NULL) )
+		return;
+			
+	free( chat_room->loginfo->filename );
+	
+	if ( chat_room->loginfo->fp != NULL )
+		fclose( chat_room->loginfo->fp );
+		
+	memset( chat_room->loginfo, 0, sizeof( log_info ) );
+	g_free( chat_room->loginfo );
 }
 
 static LList * get_group_contacts(gchar *group, eb_chat_room * room)

@@ -55,7 +55,6 @@
 #include "contact_actions.h"
 #include "smileys.h"
 #include "service.h"
-#include "log_window.h"
 #include "print.h"
 
 #ifdef HAVE_ISPELL
@@ -107,16 +106,19 @@ LList *incoming_message_filters=NULL;
     Recodes source text with iconv() and puts it in translated_text
     returns pointer to recoded text
 */
-#define RECODE_TO_REMOTE	1
-#define RECODE_TO_LOCAL		0
+enum
+{
+	RECODE_TO_LOCAL = 0,
+	RECODE_TO_REMOTE
+};
 
-char * recode_if_needed(char * source_text, int direction)
+static char	*recode_if_needed( const char *source_text, int direction)
 {
 	size_t inleft;
 	size_t outleft;
-	char * ptr_src_text = source_text;
-	char * ptr_recoded_text = g_new0(char, strlen(source_text)*2 + 1);
-	char * recoded_text = ptr_recoded_text;
+	const char		*ptr_src_text = source_text;
+	char * const	recoded_text = g_new0(char, strlen(source_text)*2 + 1);
+	char 			*ptr_recoded_text = recoded_text;
 	iconv_t conv_desc;
 	int tries;
 
@@ -134,7 +136,7 @@ char * recode_if_needed(char * source_text, int direction)
 			outleft = inleft * 2 + 1;
 
 			for(tries = 0; tries < 4; tries++ ) {
-				if( iconv(conv_desc, &ptr_src_text, &inleft, &ptr_recoded_text, &outleft) == (size_t)(-1) ){
+				if( iconv(conv_desc, (char **)&ptr_src_text, &inleft, &ptr_recoded_text, &outleft) == (size_t)(-1) ){
 					if( inleft && errno == EILSEQ ) {
 						if( tries == 3 ) {
 							strncpy( ptr_recoded_text, ptr_src_text,
@@ -177,9 +179,17 @@ char * recode_if_needed(char * source_text, int direction)
 			   "Turning recoding off.\n",
 			   cGetLocalPref("local_encoding"), cGetLocalPref("remote_encoding"));
 			iSetLocalPref( "use_recoding", 0 );
+			
+			if ( recoded_text != NULL )
+				g_free( recoded_text );
+				
 			return g_strdup(source_text);
 		}
 	}
+			
+	if ( recoded_text != NULL )
+		g_free( recoded_text );
+		
 	return g_strdup(source_text);
 }
 
@@ -1238,8 +1248,13 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		remote_contact->chatwindow = eb_chat_window_new(account, remote_contact);
 
 		if (!remote_contact->chatwindow)
+		{
+			if ( message != NULL )
+				g_free( message );
+				
 			return;
-
+		}
+		
 		gtk_widget_show(remote_contact->chatwindow->window);
 		firstmsg = TRUE; 
 		
@@ -1357,7 +1372,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 #ifdef __MINGW32__
 	redraw_chat_window(remote_contact->chatwindow->chat);
 #endif
-	free(message);
+	g_free(message);
 }
 
 void eb_chat_window_display_contact(struct contact * remote_contact)
