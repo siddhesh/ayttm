@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([src/main.c])
 AM_INIT_AUTOMAKE(ayttm, 0.2.3)
-RELEASE=90
+RELEASE=91
 AM_CONFIG_HEADER(config.h)
 
 if test "x$host_alias" = "xmingw32"; then
