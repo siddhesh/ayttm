@@ -1,16 +1,15 @@
 %token ACCOUNT END_ACCOUNT GROUP END_GROUP CONTACT END_CONTACT
 %{
-        #include <gtk/gtk.h>
-        #include <stdio.h>
-        #include <stdlib.h>
-        #include <string.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
 
-        #include "globals.h"
-        #include "account.h"
-        #include "value_pair.h"
-        #include "service.h"
-        #include "trigger.h"
-        #include "util.h"
+	#include "globals.h"
+	#include "account.h"
+	#include "value_pair.h"
+	#include "service.h"
+	#include "trigger.h"
+	#include "util.h"
 
 	extern int Line_contact;
 	#define contacterror(error) printf("Parse error on line %d: %s\n", Line_contact, error );
@@ -66,18 +65,18 @@ start:
 ;
 
 group_list:
-		group group_list { $$ = l_list_prepend( $2, $1 ); }
-	|	EPSILON { $$ = 0; }
+	group group_list {$$ = l_list_prepend( $2, $1 ); }
+|	EPSILON { $$ = 0; }
 ;
 
 group:
 	 GROUP value_list
 	{
 		char * c;
-		cur_group = g_new0(grouplist, 1);
+		cur_group = calloc(1, sizeof(grouplist));
 		c = value_pair_get_value( $2, "NAME" );
 		strncpy( cur_group->name, c , sizeof(cur_group->name));
-		g_free(c);
+		free(c);
 		cur_group->tree = NULL;
 		value_pair_free($2);
 	}
@@ -86,64 +85,57 @@ group:
 ;
 
 contact_list:
-		contact contact_list { $$ = l_list_insert_sorted( $2, $1, contact_cmp ); }
-	|	EPSILON { $$ = 0; }
+	contact contact_list { $$ = l_list_insert_sorted( $2, $1, contact_cmp ); }
+|	EPSILON { $$ = 0; }
 ;
 
 contact:
 	CONTACT value_list
 	{
 		char * c;
-		cur_contact = g_new0( struct contact, 1 );
+		cur_contact = calloc(1, sizeof(struct contact));
 		c = value_pair_get_value( $2, "NAME" );
 		strncpy( cur_contact->nick, c , sizeof(cur_contact->nick));
-		g_free(c);
+		free(c);
 		c = value_pair_get_value( $2, "TRIGGER_TYPE" );
 		cur_contact->trigger.type = get_trigger_type_num(c);
-		g_free(c);
+		free(c);
 		c = value_pair_get_value( $2, "TRIGGER_ACTION" );
 		cur_contact->trigger.action = get_trigger_action_num(c);
-		g_free(c);
+		free(c);
 		c = value_pair_get_value( $2, "TRIGGER_PARAM" );
-		if(c)
-		{
+		if(c) {
 			strncpy( cur_contact->trigger.param ,c, sizeof(cur_contact->trigger.param) );
-			g_free(c);
-		}
-		else
-		{
+			free(c);
+		} else {
 			cur_contact->trigger.param[0] = '\0';
 		}
 
-                c = value_pair_get_value( $2, "LANGUAGE" );
-                if(c!=NULL)
-                {
-                  strncpy(cur_contact->language, c, sizeof(cur_contact->language));
-		  g_free(c);
-                } else {
-                  cur_contact->language[0] = '\0';
-                }
+		c = value_pair_get_value( $2, "LANGUAGE" );
+		if(c!=NULL) {
+			strncpy(cur_contact->language, c, sizeof(cur_contact->language));
+			free(c);
+		} else {
+			cur_contact->language[0] = '\0';
+		}
 
-                c = value_pair_get_value( $2, "DEFAULT_PROTOCOL" );
-		cur_contact->default_chatb = get_service_id(c);
-		g_free(c);
-		cur_contact->default_filetransb = cur_contact->default_chatb;
+		c = value_pair_get_value( $2, "DEFAULT_PROTOCOL" );
+		cur_contact->default_filetransb = cur_contact->default_chatb = get_service_id(c);
+		free(c);
 		cur_contact->group = cur_group;
-		cur_contact->list_item = NULL;
-		cur_contact->tree = NULL;
-		cur_contact->pix = NULL;
-		cur_contact->status = NULL;
 		cur_contact->icon_handler = -1;
-		cur_contact->label = NULL;
 		value_pair_free($2);
 	}
-	account_list END_CONTACT { cur_contact->accounts = $4;
-		$$=cur_contact; }
+	account_list END_CONTACT 
+	{
+		cur_contact->accounts = $4;
+		$$=cur_contact;
+	}
 ;	
 
 account_list:
-	 	account account_list{ $$ = l_list_insert_sorted( $2, $1 , account_cmp); }
-	 |	EPSILON { $$ = 0; }
+ 	account account_list{ $$ = l_list_insert_sorted( $2, $1, account_cmp); }
+|	EPSILON { $$ = 0; }
 
 ;
 
@@ -153,15 +145,27 @@ account:
 		{
 			int id = get_service_id($3);
 
-			$$ = eb_services[id].sc->read_account_config($5, cur_contact);
-			if ($$)
+			$$ = calloc(1, sizeof(eb_account));
+			if($$) {
+				char *c;
 				$$->service_id = id;
+				$$->account_contact = cur_contact;
+				c = value_pair_get_value( $5, "NAME" );
+				strncpy($$->handle, c, sizeof($$->handle)-1);
+				free(c);
+				c = value_pair_get_value( $5, "LOCAL_ACCOUNT");
+				if(c) {
+					$$->ela = find_local_account_by_handle(c, id);
+					free(c);
+				} else {
+					$$->ela = find_local_account_for_remote($$, 0);
+				}
+				$$->icon_handler = $$->status_handler = -1;
+				$$ = eb_services[id].sc->read_account_config($$, $5);
+			}
 
-			/* take the first suitable account */
-			if ($$ && $$->ela == NULL)
-				$$->ela = find_local_account_for_remote($$, FALSE);
 			value_pair_free($5);
-			g_free($3);
+			free($3);
 		}
 	}
 					
@@ -178,7 +182,7 @@ key_pair:
 		{
 			{
 				char * tmp = escape_string ($3);
-				value_pair * vp = g_new0( value_pair, 1 );
+				value_pair * vp = calloc(1, sizeof(value_pair));
 				strncpy( vp->key, $1 , sizeof(vp->key));
 				strncpy( vp->value, tmp, sizeof(vp->value) );
 				free(tmp);

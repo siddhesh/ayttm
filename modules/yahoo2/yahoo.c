@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.41 $",
-	"$Date: 2003/04/30 21:56:45 $",
+	"$Revision: 1.42 $",
+	"$Date: 2003/05/01 11:46:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1895,36 +1895,16 @@ static LList *eb_yahoo_write_local_config(eb_local_account * ela)
 	return list;
 }
 
-static eb_account *eb_yahoo_read_account_config(LList * config, struct contact * contact)
+static eb_account *eb_yahoo_read_account_config(eb_account *ea, LList * config)
 {
-	eb_account *ea = g_new0(eb_account, 1);
 	eb_yahoo_account_data *yad = g_new0(eb_yahoo_account_data, 1);
-	char	*str = NULL;
 
 	yad->status = YAHOO_STATUS_OFFLINE;
 	yad->away = 1;
 	yad->status_message = NULL;
 	yad->typing_timeout_tag = 0;
 
-	str = value_pair_get_value(config, "NAME");
-	strncpy(ea->handle, str, 255);
-	free( str );
-	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
-	if (str) {
-		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
-		g_free(str);
-	} else 
-		ea->ela = find_local_account_for_remote(ea, 0);
-
-	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = yad;
-	ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
 
 	eb_yahoo_add_user(ea);
 

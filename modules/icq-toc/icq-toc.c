@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.32 $",
-	"$Date: 2003/05/01 08:54:08 $",
+	"$Revision: 1.33 $",
+	"$Date: 2003/05/01 11:46:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -973,39 +973,15 @@ static LList * eb_icq_write_local_config( eb_local_account * account )
 
 	
 
-static eb_account * eb_icq_read_config( LList * config, struct contact *contact )
+static eb_account * eb_icq_read_config( eb_account *ea, LList * config )
 {
-    eb_account * ea = g_new0(eb_account, 1 );
-    struct eb_icq_account_data * aad =  g_new0(struct eb_icq_account_data,1);
-	char		*str = NULL;
+	struct eb_icq_account_data * aad =  g_new0(struct eb_icq_account_data,1);
 	
 	aad->status = ICQ_OFFLINE;
-
-    /*you know, eventually error handling should be put in here*/
-	str = value_pair_get_value( config, "NAME");
-    strncpy(ea->handle, str, 255);
-	free( str );
-
-    ea->service_id = SERVICE_INFO.protocol_id;
-    ea->protocol_account_data = aad;
-	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
-	if (str) {
-		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
-		free(str);
-	} else 
-		ea->ela = find_local_account_for_remote(ea, 0);
-	
-    ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
-	
+	ea->protocol_account_data = aad;
 	eb_icq_add_user(ea);
 
-    return ea;
+	return ea;
 }
 
 static LList * eb_icq_get_states()

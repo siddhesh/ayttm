@@ -81,10 +81,11 @@ static void refresh_service_contacts(int type)
 				if(account->service_id == type) {
 					eb_debug(DBG_CORE, "Refreshing %s - %i\n", account->handle, type);
 					config = value_pair_add(NULL, "NAME", account->handle);
+					config = value_pair_add(config, "LOCAL_ACCOUNT", account->ela->handle);
 					if(RUN_SERVICE(account)->free_account_data)
 						RUN_SERVICE(account)->free_account_data(account);
-					g_free(account);
-					account = eb_services[type].sc->read_account_config(config, con);
+					account->protocol_account_data = NULL;
+					account = eb_services[type].sc->read_account_config(account, config);
 					/* Is this a nomodule account?  Make it the right service number */
 					if(account->service_id==-1)
 					       account->service_id=type;

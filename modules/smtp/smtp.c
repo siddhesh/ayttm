@@ -71,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.11 $",
-	"$Date: 2003/04/30 06:22:35 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/05/01 11:46:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -389,29 +389,13 @@ static void eb_smtp_del_user(eb_account * account)
 	eb_smtp_buddies = l_list_remove(eb_smtp_buddies, account->handle);
 }
 
-static eb_account *eb_smtp_read_account_config(LList * config, struct contact * contact)
+static eb_account *eb_smtp_read_account_config(eb_account *ea, LList * config)
 {
-	eb_account *ea = calloc(1, sizeof(eb_account));
 	eb_smtp_account_data *sad = calloc(1, sizeof(eb_smtp_account_data));
-	char	*str = NULL;
 
 	sad->status = SMTP_STATUS_OFFLINE;
 
-	str = value_pair_get_value(config, "NAME");
-	strncpy(ea->handle, str, sizeof(ea->handle));
-	free( str );
-	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
-	if (str) {
-		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
-		g_free(str);
-	}
-	
-
-	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = sad;
-	ea->account_contact = contact;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
 
 	eb_smtp_add_user(ea);
 

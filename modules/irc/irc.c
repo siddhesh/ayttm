@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.17 $",
-	"$Date: 2003/05/01 08:54:09 $",
+	"$Revision: 1.18 $",
+	"$Date: 2003/05/01 11:46:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -193,7 +193,7 @@ static unsigned char *strip_color (unsigned char *text);
           static void irc_send_im( eb_local_account * account_from, eb_account * account_to,char *message );
 static eb_local_account * irc_read_local_config(LList * pairs);
        static LList * irc_write_local_config( eb_local_account * account );
-  static eb_account * irc_read_config(LList *config, struct contact *contact);
+  static eb_account * irc_read_config(eb_account *ea, LList *config );
        static LList * irc_get_states();
           static int irc_get_current_state(eb_local_account * account );
           static void irc_set_current_state(eb_local_account * account, int state );
@@ -1348,60 +1348,29 @@ static LList * irc_write_local_config( eb_local_account * account )
 	return list;
 }
 
-static eb_account * irc_read_config(LList *config, struct contact *contact)
+static eb_account * irc_read_config(eb_account *ea, LList *config)
 {
-	eb_account * ea = g_new0(eb_account, 1 );
 	irc_account * ia = g_new0(irc_account, 1);
-	char *temp = NULL;
+	char * temp;
 
 		
 	ea->protocol_account_data = ia;
-	ea->service_id = SERVICE_INFO.protocol_id;
-	ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
-	ea->infowindow = NULL;
 	
 	/* This func expects account names of the form Nick@server,
 	   for example Knan@irc.midgardsormen.net */
 
-	temp = value_pair_get_value(config, "NAME");
-	if (temp)
-	{
-		 strncpy(ea->handle, temp, 254);
-		 free( temp );
-		 temp = NULL;
-	}
+	temp = strrchr(ea->handle, '@');
+	if(temp)
+		strncpy(ia->server, temp+1, sizeof(ia->server));
 	
-	temp = value_pair_get_value(config, "LOCAL_ACCOUNT");
-	if (temp) {
-		ea->ela = find_local_account_by_handle(temp, SERVICE_INFO.protocol_id);
-		g_free(temp);
-	} else 
-		ea->ela = find_local_account_for_remote(ea, 0);
-
 	ia->idle = 0;
 	ia->status = IRC_OFFLINE;
 
-	/* string magic - point to the first char after '@' */
-	if (strrchr(ea->handle, '@') != NULL)
-	{
-		temp = strrchr(ea->handle, '@') + 1;
-		strncpy(ia->server, temp, 254);
-	}
-
-	if (ea->ela && ea->ela->service_id == SERVICE_INFO.protocol_id)
-	{
-		irc_local_account * ila = (irc_local_account *)ea->ela->protocol_local_account_data;
+	if(ea->ela) {
+		irc_local_account * ila = ea->ela->protocol_local_account_data;
 
 		if (!strcmp(ila->server, ia->server))
-		{
 			ila->friends = l_list_append( ila->friends, ea );
-		}
 	}
 	return ea;
 }

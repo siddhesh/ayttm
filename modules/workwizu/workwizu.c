@@ -113,8 +113,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.10 $",
-	"$Date: 2003/04/29 08:32:02 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/05/01 11:46:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -855,27 +855,11 @@ LList *eb_workwizu_write_local_config (eb_local_account *account)
 	return vals;	
 }
 
-eb_account *eb_workwizu_read_config (LList *config, struct contact *contact)
+eb_account *eb_workwizu_read_config (eb_account *ea, LList *config)
 {
-	eb_account *ea = g_new0(eb_account, 1);
-	char *tmp;
 	wwz_user *user = g_new0(wwz_user,1);
 	
-	ea->online = FALSE;	
-	tmp = value_pair_get_value(config, "NAME");
-	strncpy(ea->handle, tmp, 255);
-	g_free(tmp);
-	
-	ea->service_id = SERVICE_INFO.protocol_id;
-	ea->protocol_account_data = NULL;
-	ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
 	user->uid = atoi(ea->handle);
-	
 	user->typing_handler = -1;
 	
 	ea->protocol_account_data = user;

@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/29 08:31:57 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/05/01 11:46:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1261,31 +1261,17 @@ eb_local_account * eb_aim_read_local_config(LList * pairs)
 }
 
 
-eb_account * eb_aim_read_config( LList * config, struct contact *contact )
+eb_account * eb_aim_read_config( eb_account *ea, LList * config )
 {
-    eb_account * ea = g_new0(eb_account, 1 );
-    struct eb_aim_account_data * aad =  g_new0(struct eb_aim_account_data,1);
-	char	*str = NULL;
+	struct eb_aim_account_data * aad =  g_new0(struct eb_aim_account_data,1);
 	
 	aad->status = AIM_OFFLINE;
 
-    /*you know, eventually error handling should be put in here*/
-	str = value_pair_get_value( config, "NAME");
-    strncpy(ea->handle, str, 255);
-
-    ea->service_id = SERVICE_INFO.protocol_id;
-    ea->protocol_account_data = aad;
-    ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
+	ea->protocol_account_data = aad;
 	
 	eb_aim_add_user(ea);
 
-    return ea;
+	return ea;
 }
 
 

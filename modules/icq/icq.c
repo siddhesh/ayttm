@@ -98,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ Service", 
 	"ICQ Protocol Support", 
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/29 08:31:58 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/05/01 11:46:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1014,32 +1014,12 @@ static void icq_login( eb_local_account * account)
 	}
 }
 
-static eb_account * icq_read_config(LList *config, struct contact *contact)
+static eb_account * icq_read_config(eb_account *ea, LList *config)
 {
-	eb_account * ea = g_new0(eb_account, 1 );
 	struct icq_account_data * iad =  g_new0(struct icq_account_data,1);
-	char	*str = NULL;
-	
 	
 	iad->status = STATUS_OFFLINE;
-	
-
-	/*you know, eventually error handling should be put in here*/
-	str = value_pair_get_value(config, "NAME");
-	strncpy(ea->handle, str, 255);
-	free( str );
-	
-
-	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = iad;
-    ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
-	
 	icq_add_user(ea);
 	
 	return ea;

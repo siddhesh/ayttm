@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.26 $",
-	"$Date: 2003/04/30 09:43:53 $",
+	"$Revision: 1.27 $",
+	"$Date: 2003/05/01 11:46:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -430,33 +430,14 @@ static LList * eb_jabber_write_local_config( eb_local_account * account )
 	return vals;
 }
 
-static eb_account * eb_jabber_read_account_config( LList * config, struct contact * contact)
+static eb_account * eb_jabber_read_account_config( eb_account *ea, LList * config)
 {
-	eb_account * ea = g_new0(eb_account, 1);
 	eb_jabber_account_data * jad = g_new0( eb_jabber_account_data, 1 );
-	char	*str = NULL;
 
 	jad->status = JABBER_OFFLINE;
 	jad->JConn = NULL;
-	str = value_pair_get_value( config, "NAME");
-	strncpy(ea->handle, str, 255 );
-	free( str );
-	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
-	if (str) {
-		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
-		g_free(str);
-	} else 
-		ea->ela = find_local_account_for_remote(ea, 0);
 	
-	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = jad;
-	ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
 
 	eb_jabber_add_user(ea);
 

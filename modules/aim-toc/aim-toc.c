@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.34 $",
-	"$Date: 2003/05/01 08:54:08 $",
+	"$Revision: 1.35 $",
+	"$Date: 2003/05/01 11:46:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -973,40 +973,13 @@ static LList * eb_aim_write_local_config( eb_local_account * account )
 
 	
 
-static eb_account * eb_aim_read_config( LList * config, struct contact *contact )
+static eb_account * eb_aim_read_config( eb_account *ea, LList * config )
 {
-    eb_account * ea = g_new0(eb_account, 1 );
-    struct eb_aim_account_data * aad =  g_new0(struct eb_aim_account_data,1);
-	char	*str = NULL;
-	
+	struct eb_aim_account_data * aad =  g_new0(struct eb_aim_account_data,1);
 	aad->status = AIM_OFFLINE;
-
-    /*you know, eventually error handling should be put in here*/
-	str = value_pair_get_value( config, "NAME");
-    strncpy(ea->handle, str, 255);
-	free( str );
-
-    ea->service_id = SERVICE_INFO.protocol_id;
-    ea->protocol_account_data = aad;
-	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
-	if (str) {
-		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
-		
-		free(str);
-	} else 
-		ea->ela = find_local_account_for_remote(ea, 0);
-	
-    ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
-	
+	ea->protocol_account_data = aad;
 	eb_aim_add_user(ea);
-
-    return ea;
+	return ea;
 }
 
 static LList * eb_aim_get_states()

@@ -132,37 +132,15 @@ static LList * eb_nomodule_write_local_config( eb_local_account * account )
 	return list;
 }
 			
-static eb_account * eb_nomodule_read_config( LList * config, struct contact *contact )
+static eb_account * eb_nomodule_read_config( eb_account *ea, LList * config )
 {
-	eb_account * ea = calloc( 1, sizeof( eb_account ) );
 	struct eb_nomodule_account_data * aad =  calloc( 1, sizeof( struct eb_nomodule_account_data ) );
-	char		*str = NULL;
 	
 	aad->status = 0;
 
-	/*you know, eventually error handling should be put in here*/
-	str = value_pair_get_value( config, "NAME");
-	strncpy(ea->handle, str, 255);
-	free( str );
-
-	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
-	if (str) {
-		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
-		free(str);
-	} else 
-		ea->ela = find_local_account_for_remote(ea, 0);
-
-	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = aad;
-	ea->account_contact = contact;
-	ea->list_item = NULL;
-	ea->online = 0;
-	ea->status = NULL;
-	ea->pix = NULL;
-	ea->icon_handler = -1;
-	ea->status_handler = -1;
 	
-    return ea;
+	return ea;
 }
 
 static LList * eb_nomodule_get_states()

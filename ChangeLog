@@ -1,3 +1,10 @@
+* Thu May  1 2003 11:35 GMT [philip]	0.3.0-78
+- src/contact_parser.y src/service.[ch]
+- modules/*service
+Let contact_parser.y create eb_account, let each account create
+only protocol_account_data.  contact_parser no longer requires
+gtk/glib
+
 * Thu May  1 2003 12:17 GMT [andy]	0.3.0-77
 - configure.ac
   src/service.c

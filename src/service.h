@@ -70,8 +70,7 @@ struct service_callbacks {
 	LList * (*write_local_config)( eb_local_account * account );
 
 	/* reads contact information */
-	eb_account * (*read_account_config) (LList * config, 
-			struct contact *contact);
+	eb_account * (*read_account_config) (eb_account *ea, LList * config);
 
 	/*Returns the list of all possible states that the user can be in*/
 	LList * (*get_states)();
