@@ -247,6 +247,8 @@ static void action_callback(GtkWidget *widget, gpointer d)
 	li->fp = lw->fp;
 	li->filepos = lw->filepos;
 	conversation_action(li, FALSE);
+	free(li->filename);
+	g_free(li);
 }
 
 

@@ -106,12 +106,13 @@ void conversation_action(log_info *li, int to_end)
 	int firstline = 1;
 	char *tempdir = NULL;
 	char **files;
-	log_info *loginfo = g_new0(log_info, 1);
+	log_info *loginfo = NULL;
 	FILE *output_fhtml;
 	FILE *output_fplain;
 
 	if (!li || !li->filename)
 		return;
+		
 	loginfo = g_new0(log_info, 1);
 	loginfo->filename = strdup(li->filename);
 	loginfo->log_started = li->log_started;
@@ -127,10 +128,12 @@ void conversation_action(log_info *li, int to_end)
 	
 	if (!loginfo->fp) {
 		ay_do_error( _("Action Error"), _("Cannot use log: no logfile available.") );
+		g_free(loginfo);
 		return;
 	}
 	if (fseek(loginfo->fp, loginfo->filepos, SEEK_SET) < 0) {
 		ay_do_error( _("Action Error"), _("Cannot use log: logfile too short (!?).") );
+		g_free(loginfo);
 		return;
 	}
 	
@@ -163,6 +166,7 @@ void conversation_action(log_info *li, int to_end)
 		printf(" %s %s\n", output_html, output_plain);
 		ay_do_error( _("Action Error"), _("Cannot use log: Impossible to create temporary file.") );
 		fclose(loginfo->fp);
+		g_free(loginfo);
 		return;
 	}
 	
@@ -232,6 +236,7 @@ void conversation_action(log_info *li, int to_end)
 		fclose(loginfo->fp);
 		fclose(output_fhtml);
 		fclose(output_fplain);
+		g_free(loginfo);
 		return;
 	}
 	
@@ -257,5 +262,6 @@ void conversation_action(log_info *li, int to_end)
 					"ACTION", "COMMAND", action_do_action, files);
 	}
 	fclose(loginfo->fp);
+	g_free(loginfo);
 #endif
 }
