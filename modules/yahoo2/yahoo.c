@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.64 $",
-	"$Date: 2003/09/24 15:26:33 $",
+	"$Revision: 1.65 $",
+	"$Date: 2003/09/27 09:05:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1777,7 +1777,13 @@ static int eb_yahoo_send_typing_stop(gpointer data)
 {
 	eb_ext_yahoo_typing_notify_data *tcd = data;
 	eb_local_account * ela = yahoo_find_local_account_by_id(tcd->id);
-	eb_yahoo_local_account_data * ylad = ela->protocol_local_account_data;
+	eb_yahoo_local_account_data * ylad = NULL;
+	
+	if (!ela) {
+		ext_yahoo_log("ela == null !\n");
+		return 0;
+	}
+	ylad = ela->protocol_local_account_data;
 
 	ext_yahoo_log("Stop typing\n");
 

@@ -1,3 +1,7 @@
+* Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-10
+- modules/yahoo2/yahoo.c
+Test a possibly null pointer (may fix 812252)
+
 * Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-9
 - src/chat_window.c
 Fix a crash when using the window close button with tabs
