@@ -180,7 +180,7 @@ static void browse_file( GtkWidget* widget, gpointer data )
 }
 
 
-trigger_type get_trigger_type_num(gchar *text)
+trigger_type get_trigger_type_num(const char *text)
 {
   if(!text) return -1;
 
@@ -200,7 +200,7 @@ trigger_type get_trigger_type_num(gchar *text)
   return -1;
 }
 
-trigger_action get_trigger_action_num(gchar *text)
+trigger_action get_trigger_action_num(const char *text)
 {
   if(!text) return -1;
 	

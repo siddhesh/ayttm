@@ -45,8 +45,8 @@ struct contact;
 
 void destroy_window();
 
-trigger_type get_trigger_type_num(char *text);
-trigger_action get_trigger_action_num(char *text);
+trigger_type get_trigger_type_num(const char *text);
+trigger_action get_trigger_action_num(const char *text);
 
 char * get_trigger_type_text(trigger_type type);
 char * get_trigger_action_text(trigger_action action);

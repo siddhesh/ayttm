@@ -761,7 +761,7 @@ eb_account * find_account_with_ela( const char * handle, eb_local_account *ela)
 	return find_account_with_id_or_ela(handle, ela->service_id, ela);
 }
 
-eb_local_account * find_local_account_by_handle( char * handle, int type)
+eb_local_account * find_local_account_by_handle( const char * handle, int type)
 {
 	LList * l1;
 

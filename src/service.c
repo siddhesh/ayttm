@@ -189,7 +189,7 @@ int add_service(struct service *Service_Info)
 }
 
 /* This now creates a service if the name is not recognized */
-int get_service_id( char * servicename )
+int get_service_id( const char * servicename )
 {
 	int i;
 	char buf[1024];

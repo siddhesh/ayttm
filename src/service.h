@@ -249,7 +249,7 @@ extern "C" {
 #endif
 
 int add_service(struct service *Service_Info);
-int get_service_id( char * servicename );
+int get_service_id( const char * servicename );
 char* get_service_name( int serviceid );
 
 void load_modules();

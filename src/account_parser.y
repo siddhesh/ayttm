@@ -86,7 +86,7 @@ key_pair:
 			{
 				value_pair * vp = g_new0( value_pair, 1 );
 				char * value = unescape_string($3);
-				strncpy( vp->key, $1 , sizeof(vp->key));
+				strncpy( vp->key, $1, sizeof(vp->key));
 				strncpy( vp->value, value, sizeof(vp->value));
 
 				free($1);

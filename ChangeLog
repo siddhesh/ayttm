@@ -1,3 +1,7 @@
+* Mon Jun  2 2003 05:34 GMT [philip]	0.3.1-11
+- src/service.[ch] src/trigger.[ch] src/util.[ch]
+make some functions take const char * args instead of char *
+
 * Sun Jun  1 2003 14:15 GMT [philip]	0.3.1-10
 - src/gtk/prefs_window.C
 make OK button activate on Enter, and Cancel button on Escape
