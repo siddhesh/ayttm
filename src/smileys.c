@@ -23,7 +23,6 @@
 #include "globals.h"
 #include "service.h"
 #include "smileys.h"
-#include "prefs.h"
 #include "value_pair.h"
 
 #include "pixmaps/smile.xpm"
@@ -81,6 +80,7 @@
 #include "pixmaps/msn/moon.xpm"
 #include "pixmaps/msn/devil.xpm"
 
+
 static char *no_smileys[] = {
 	"http://",
 	"https://",
@@ -90,33 +90,71 @@ static char *no_smileys[] = {
 	NULL
 };
 
-LList *smileys=NULL;
+LList *smileys = NULL;
 static LList *default_smileys = NULL;
 
-static LList *_eb_smileys=NULL;
+static LList *_eb_smileys = NULL;
 
-static LList	*s_smiley_sets = NULL;
+static t_smiley_set_list	*s_smiley_sets = NULL;
 
 
+/// compare two t_smiley_sets for sort order
+static int	s_compare_smiley_set( const void *a, const void *b )
+{
+	const t_smiley_set *first = a;
+	const t_smiley_set *second = b;
 
-void	ay_add_smiley_set( const char *inName, LList *inSet )
+	return( strcasecmp( first->set_name, second->set_name ) );
+}
+
+void	ay_add_smiley_set( const char *inName, LList *inSmileyList )
 {
 	ay_remove_smiley_set( inName );
 	
-	s_smiley_sets = value_pair_add( s_smiley_sets, inName, (const char *)inSet );
+	t_smiley_set	*new_set = calloc( 1, sizeof(t_smiley_set) );
+	
+	new_set->set_name = strdup( inName );
+	new_set->set_smiley_list = inSmileyList;
+	
+	s_smiley_sets = l_list_insert_sorted( s_smiley_sets, new_set, s_compare_smiley_set );
 }
 
-LList *ay_lookup_smiley_set( const char *inName )
+t_smiley_set_list	*ay_get_smiley_sets( void )
 {
-	void	*current = value_pair_get_value( s_smiley_sets, inName );
+	return( s_smiley_sets );
+}
+
+t_smiley_set *ay_lookup_smiley_set( const char *inName )
+{
+	t_smiley_set_list	*tmp = s_smiley_sets;
 	
-	return( (LList *)current );
+	while ( tmp != NULL )
+	{
+		t_smiley_set	*the_set = tmp->data;
+		
+		if ( the_set == NULL )
+			continue;
+			
+		if ( !strncmp( the_set->set_name, inName, strlen(the_set->set_name) ) )
+			return( the_set );
+			
+		tmp = tmp->next;
+	}
+	
+	return( NULL );
 }
 
 void	ay_remove_smiley_set( const char *inName )
 {
-	if ( ay_lookup_smiley_set( inName ) )
-		s_smiley_sets = value_pair_remove( s_smiley_sets, inName );
+	t_smiley_set	*the_set = ay_lookup_smiley_set( inName );
+	
+	if ( the_set != NULL )
+	{
+		s_smiley_sets = l_list_remove( s_smiley_sets, the_set );
+		
+		free( (char *)the_set->set_name );
+		free( the_set );
+	}
 }
 
 /* someone figure out how to do this with LList * const */

@@ -1,3 +1,12 @@
+* Sun May 11 2003 11:15 GMT [andy]	0.3.0-180
+- configure.ac
+Some cleanups
+- mingw32/Makefile.am
+Spaces->tabs and fix ./gen warnings
+- src/smileys.[ch]
+  src/gtk/prefs_window.C
+Fix prefs window to show smiles for new theme plugin
+
 * Sun May 11 2003 10:00 GMT [philip]	0.3.0-179
 - src/image_window.c modules/yahoo2/yahoo.c
 Yahoo webcam works - really!

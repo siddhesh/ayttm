@@ -102,7 +102,6 @@ class ay_prefs_window
 			PANEL_FILTERS,
 			PANEL_UTILITIES,
 			PANEL_IMPORTERS,
-			PANEL_SMILIES,
 			
 			PANEL_MAX
 		};
@@ -474,8 +473,7 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 	_( "Services" ),
 	_( "Filters" ),
 	_( "Utilities" ),
-	_( "Importers" ),
-	_( "Smilies" )
+	_( "Importers" )
 };
 
 ay_prefs_window	*ay_prefs_window::s_only_prefs_window = NULL;
@@ -873,11 +871,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParentWindow,
 		case ay_prefs_window::PANEL_IMPORTERS:
 			section_info = _("Importers allow you to import contacts and other preferences\ninto Ayttm from a variety of other applications.");
 			break;
-			
-		case ay_prefs_window::PANEL_SMILIES:
-			section_info = _("Smilies provide different graphics to change how character\nsequences such as :-) and :-S are displayed.");
-			break;
-			
+		
 		default:
 			assert( false );
 			break;
@@ -913,7 +907,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::CreateModulePanel( GtkWidget *inPa
 	else if ( !strcmp( inPrefs.module_type, "IMPORTER" ) )
 		snprintf( name, name_len, "%s:%s", _( "Importers" ), inPrefs.module_name );
 	else if ( !strcmp( inPrefs.module_type, "SMILEY" ) )
-		snprintf( name, name_len, "%s:%s", _( "Smilies" ), inPrefs.module_name );
+		snprintf( name, name_len, "%s:%s", _( "Utilities" ), inPrefs.module_name );
 	else if ( !strcmp( inPrefs.module_type, "UTILITY" ) )
 		snprintf( name, name_len, "%s:%s", _( "Utilities" ), inPrefs.module_name );
 	else
@@ -2451,18 +2445,30 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		}
 	}
 	
-	if ( !strcmp( m_prefs.module_type, "SMILEY" ) )
-	{
-		LList *smiley_list = ay_lookup_smiley_set( m_prefs.module_name );
+	LList	*smiley_sets = ay_get_smiley_sets();
+	
+	if ( !strcmp( m_prefs.module_type, "SMILEY" ) && (smiley_sets != NULL) )
+	{	
+		spacer = gtk_label_new( "" );
+		gtk_widget_show( spacer );
+		gtk_widget_set_usize( spacer, -1, 5 );
+		gtk_box_pack_start( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 		
-		if ( smiley_list != NULL )
+		// a scrolled window for the smiley sets
+		GtkWidget	*scrolled_win = gtk_scrolled_window_new( NULL, NULL );
+		gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scrolled_win), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
+		
+		gtk_box_pack_start( GTK_BOX(m_top_container), GTK_WIDGET(scrolled_win), TRUE, TRUE, 0 );
+		
+		GtkWidget	*vbox = gtk_vbox_new( FALSE, 0 );
+		gtk_widget_show( vbox );
+		
+		while ( smiley_sets != NULL )
 		{
-			spacer = gtk_label_new( "" );
-			gtk_widget_show( spacer );
-			gtk_widget_set_usize( spacer, -1, 5 );
-			gtk_box_pack_start( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
+			t_smiley_set	*the_set = reinterpret_cast<t_smiley_set *>(smiley_sets->data);
 			
-			GtkWidget	*smilies_frame = gtk_frame_new( NULL );
+			GtkWidget	*smilies_frame = gtk_frame_new( the_set->set_name );
+			gtk_container_set_border_width( GTK_CONTAINER(smilies_frame), 5 );
 			gtk_widget_show( smilies_frame );
 			
 			GtkWidget	*smilies_table = gtk_table_new( 0, 0, TRUE );
@@ -2473,7 +2479,9 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 			int			col = -1;
 			int			num_icons = 0;
 			const int	num_cols = 5;
-			
+
+			LList 		*smiley_list = the_set->set_smiley_list;
+	
 			while ( smiley_list != NULL )
 			{
 				smiley	*de_smile = reinterpret_cast<smiley *>(smiley_list->data);
@@ -2511,8 +2519,14 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 			gtk_table_resize( GTK_TABLE(smilies_table), num_icons/num_cols +((num_icons % num_cols == 0) ? 0:1), num_cols );
 			gtk_container_add( GTK_CONTAINER(smilies_frame), smilies_table );
 	
-			gtk_box_pack_start( GTK_BOX(m_top_container), smilies_frame, FALSE, FALSE, 5 );
+			gtk_box_pack_start( GTK_BOX(vbox), smilies_frame, FALSE, FALSE, 0 );
+			
+			smiley_sets = smiley_sets->next;
 		}
+		
+		gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(scrolled_win), GTK_WIDGET(vbox) );
+	
+		gtk_widget_show( scrolled_win );
 	}
 	
 	GtkWidget	*unload_button = gtkut_create_label_button( _( "Unload Module" ), GTK_SIGNAL_FUNC(s_unload_module), this );

@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=179
+RELEASE=180
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -40,9 +40,9 @@ case "$host" in
 esac
 
 LIBS="$LIBS -L/usr/local/lib"
+
 # Checks for libraries.
 AC_CHECK_LIB([audiofile], [_af_ulaw2linear])
-AC_CHECK_LIB([ltdl], [lt_dlopen])
 AC_CHECK_LIB([pspell], [pspell_manager_check])
 
 # Checks for header files.
@@ -84,10 +84,9 @@ fi
 ALL_LINGUAS="fr en_GB"
 AM_GNU_GETTEXT
 
-if test "x$host_alias" = "xmingw32"; then
-	cat confdefs.h > T
-	grep -v HAVE_ARGZ_H T > confdefs.h
-fi
+###############################################################################
+#  Check for pthreads
+###############################################################################
 
 AC_MSG_CHECKING(how to include pthread)
 AC_MSG_RESULT([])
@@ -97,6 +96,7 @@ LIBS="$LIBS -lpthread"
 AC_TRY_LINK_FUNC(pthread_create, [AC_MSG_RESULT(yes)
 	have_l_pthread=yes], [AC_MSG_RESULT(no)
 	have_l_pthread=no] )
+
 if test "$have_l_pthread" = no; then
   AC_MSG_CHECKING(for -pthread compiler option)
   LIBS="$TMP_LIBS"
@@ -110,12 +110,16 @@ if test "$have_l_pthread" = no; then
 	AC_MSG_ERROR(No pthread capability found)])
 fi
 
+###############################################################################
+#  Check for iconv
+###############################################################################
+
 AC_SEARCH_LIBS(libiconv_open, iconv)
 
-AC_ARG_ENABLE(esd, AC_HELP_STRING([--disable-esd],
-		[compile without ESD soundserver]))
+###############################################################################
+#  Check for Crash Dialog
+###############################################################################
 
-dnl want crash dialog
 AC_SUBST(REQUIRES)
 REQUIRES=
 AC_ARG_ENABLE(crash-dialog, AC_HELP_STRING([--disable-crash-dialog],
@@ -131,6 +135,13 @@ dnl check if GDB is somewhere
 	fi
 	AC_MSG_RESULT($enable_crash_dialog)
 fi
+
+###############################################################################
+#  Check for ESD/ARTS
+###############################################################################
+
+AC_ARG_ENABLE(esd, AC_HELP_STRING([--disable-esd],
+		[compile without ESD soundserver]))
 
 AC_MSG_CHECKING(whether we want ESD support)
 AC_MSG_RESULT($enable_esd)
@@ -172,12 +183,6 @@ if test "x$host_alias" != "xmingw32"; then
 	EB_LIBS="$EB_LIBS $GLIB_LIBS $GTK_LIBS $GDK_PIXBUF_LIBS"
 fi
 
-AC_ARG_ENABLE(japanese, AC_HELP_STRING([--enable-japanese],
-		[compile with Japanese support]))
-if test "$enable_japanese" = "yes"; then
-    AC_DEFINE(JAPANESE, , Define if we compile for japanese support)
-fi
-
 
 ###############################################################################
 #  Check for the X screensaver extension
@@ -189,16 +194,6 @@ AC_CHECK_HEADER(X11/extensions/scrnsaver.h, [have_xss=yes], [have_xss=no],
 	 #include <X11/Xlib.h>
 	 #endif
 	])
-
-AC_MSG_CHECKING(for jasper)
-ac_check_lib_save_LIBS=$LIBS
-LIBS="-ljasper -lm -ljpeg  $LIBS"
-AC_TRY_LINK([#include <jasper/jasper.h>],
-	[jas_init()],
-	[EB_LIBS="$EB_LIBS -ljasper -lm -ljpeg"
-	AC_DEFINE(HAVE_LIBJASPER, 1, [Define if you have jasper])
-	AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])
-LIBS=$ac_check_lib_save_LIBS
 
 if test "$have_xss" = yes; then
 	# Let's figure out what library it's in...
@@ -227,14 +222,27 @@ if test "$have_xss" = yes; then
 	fi
 fi
 
+###############################################################################
+#  Check for jasper
+###############################################################################
+
+AC_MSG_CHECKING(for jasper)
+ac_check_lib_save_LIBS=$LIBS
+LIBS="-ljasper -lm -ljpeg  $LIBS"
+AC_TRY_LINK([#include <jasper/jasper.h>],
+	[jas_init()],
+	[EB_LIBS="$EB_LIBS -ljasper -lm -ljpeg"
+	AC_DEFINE(HAVE_LIBJASPER, 1, [Define if you have jasper])
+	AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])
+LIBS=$ac_check_lib_save_LIBS
 
 ###########################################################################
-# Check needed for the Xft    stuff                                       #
+# Check for Xft stuff
 ###########################################################################
-have_xft=no
 AC_ARG_ENABLE(xft, AC_HELP_STRING([--enable-xft],
 		[compile with anti-aliased font support]))
 if test "$enable_xft" = yes ; then
+	have_xft=no
     XFT_CFLAGS=`xft-config --cflags`
     XFT_LDFLAGS=`xft-config --libs`
     CFLAGS="$CFLAGS $XFT_CFLAGS"
@@ -253,22 +261,8 @@ if test "$enable_xft" = yes ; then
 fi
 
 ###########################################################################
-# Check needed for the Jabber stuff                                       #
+# Begin Optional Modules
 ###########################################################################
-
-AC_CHECK_LIB(nsl, gethostent)
-if test "x$host_alias" != "xmingw32" ; then
-AC_CHECK_FUNC(connect,AC_DEFINE(HAVE_LIBSOCKET,, Define if we have libsocket),[
-      AC_CHECK_LIB(socket, connect, , AC_MSG_ERROR([
-	  *************************************************************
-	  *  You do not seem to have the socket call available as a   *
-	  *  function or in the socket library.  This problem must be *
-	  *  fixed before you can continue.                           *
-	  *************************************************************]))])
-fi
-
-
-### Begin Optional Service related options ######################################
 
 AC_ARG_ENABLE(oscar, AC_HELP_STRING([--enable-oscar],
 		[include oscar service]))
@@ -298,7 +292,7 @@ AC_ARG_ENABLE(yahoo, AC_HELP_STRING([--disable-yahoo],
 OPTIONAL_PLUG_DIR=""
 DEBUG_LIBMSN=""
 
-if test "$enable_oscar" == yes; then
+if test "$enable_oscar" = yes; then
  	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aim-oscar"
 fi
 if test "$enable_msn" != no; then
@@ -326,10 +320,10 @@ fi
 if test "$enable_jabber" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR jabber"
 fi
-if test "$enable_broken_icq" == yes; then
+if test "$enable_broken_icq" = yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq"
 fi
-if test "$enable_smtp" == yes; then
+if test "$enable_smtp" = yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR smtp"
 fi
 if test "$enable_aim_toc" != no; then
@@ -343,7 +337,9 @@ if test "$enable_aycryption" != no; then
 		AC_MSG_WARN(You need gpgme to compile the aycryption module))
 fi
 
-### End Optional Service  options ######################################
+###########################################################################
+# End Optional Modules
+###########################################################################
 
 AC_ARG_ENABLE(all-warnings, AC_HELP_STRING([--enable-all-warnings],
 		[enable all compiler warnings - for developers]))
@@ -371,10 +367,16 @@ AC_SUBST(EB_LDFLAGS)
 AC_SUBST(OPTIONAL_PLUG_DIR)
 AC_SUBST(DEBUG_LIBMSN)
 
-MINGW32=""
-if test "x$host_alias" = "xmingw32" ; then
-	MINGW32=mingw32
-fi
+case "$host" in
+*-mingw*)
+	# lists more subdirectories to build
+	MINGW32="mingw32"
+	;;
+*)
+	MINGW32=""
+	;;
+esac
+
 AC_SUBST(MINGW32)
 
 AC_CONFIG_FILES([Makefile ayttm.spec
