@@ -209,7 +209,7 @@ static char * check_login_validity(char * text[])
 	 * change it if you think this is confusing
 	 */
 	if (USER_NAME[text] == NULL || strlen(USER_NAME[text]) == 0)
-		return NULL;
+		return strdup(_("You have to enter an account."));
 
 	while (l) {
 		if (!strcmp(l->data, SERVICE_TYPE[text]))

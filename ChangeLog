@@ -1,4 +1,14 @@
-* Thu Apr 17 2003 08:15 GMT [colin]	0.2.3-119
+* Thu Apr 17 2003 09:30 GMT [colin]	0.2.3-121
+- src/edit_local_accounts.c
+Empty account are not ok
+
+* Thu Apr 17 2003 09:30 GMT [colin]	0.2.3-120
+- modules/msn2
+Use proxy (not for filetransfers...)
+- modules/aim-toc modules/icq-toc libproxy/proxy.c libproxy/libproxy.h
+Add ay_socket_status_callback handling
+
+* Thu Apr 17 2003 09:30 GMT [colin]	0.2.3-119
 - libproxy
 socks4 & socks5 work
 

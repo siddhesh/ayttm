@@ -703,7 +703,7 @@ int http_connect(int sockfd, struct sockaddr *serv_addr, int addrlen )
    return (http_tunnel_init(sockfd, serv_addr, addrlen));       
 }
 
-int proxy_connect_host (char *host, int port, void *cb, void *data)
+int proxy_connect_host (char *host, int port, void *cb, void *data, void *scb)
 {
 	struct hostent *hp;
 	struct sockaddr_in sin;
@@ -716,7 +716,7 @@ int proxy_connect_host (char *host, int port, void *cb, void *data)
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	
-	return proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data);
+	return proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data, scb);
 
 }
 
@@ -742,10 +742,11 @@ static int conn_nok(int sockfd, void *cb, void *data)
 	}	
 }
 
-int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data)
+int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data, void *scb)
 {
    int tmp;
    ay_socket_callback callback = (ay_socket_callback)cb;
+   
    if (!proxy_inited)
 	   proxy_autoinit();
 
@@ -760,7 +761,7 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
 			return ay_socket_new_async(
 			      inet_ntoa(sin->sin_addr), 
 			      ntohs(sin->sin_port), 
-			      callback, data, NULL);     
+			      callback, data, scb);     
 		else
 			return connect(sockfd, serv_addr, addrlen);
 		break;

@@ -127,14 +127,14 @@ static int connect_address(unsigned int addy, unsigned short port, void *cb, voi
 
 		if (fd > -1) 
 		{
-			if (proxy_connect(fd, (struct sockaddr *)&sin, sizeof(sin),NULL,NULL) > -1) 
+			if (proxy_connect(fd, (struct sockaddr *)&sin, sizeof(sin),NULL,NULL,NULL) > -1) 
 			{
 				return fd;
 			}
 		}
 		return -1;
 	} else {
-		return proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data);
+		return proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data,NULL);
 	}
 }
 

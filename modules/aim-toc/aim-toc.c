@@ -92,8 +92,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.16 $",
-	"$Date: 2003/04/13 16:56:41 $",
+	"$Revision: 1.17 $",
+	"$Date: 2003/04/17 09:58:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1018,6 +1018,7 @@ static void eb_aim_set_current_state( eb_local_account * account, int state )
 	case AIM_ONLINE:
 		if (account->connected == 0 && account->connecting == 0) {
 			eb_aim_login(account);
+			return;
 		}
 		toc_set_away(alad->conn, NULL);
 		break;

@@ -1956,8 +1956,6 @@ void msn_connect(msnconn * conn, char * server, int port)
 	ext_show_error(conn, "Could not connect to MSN SB server.");
 	ext_closing_connection(conn);
     }
-    //conn->sock = ext_connect_socket(server,port);
-    //msn_connect_cb(conn->sock,0,conn);
     return;
   }
   conn->ready = 0;
@@ -1966,8 +1964,6 @@ void msn_connect(msnconn * conn, char * server, int port)
 	  ext_show_error(conn, "Could not connect to MSN server.");   
 	  ext_closing_connection(conn);
   }
-  //conn->sock = ext_connect_socket(server,port);
-  //msn_connect_cb2(conn->sock,0,conn);
   
 }
 

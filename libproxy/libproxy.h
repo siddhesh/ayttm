@@ -62,10 +62,10 @@ int proxy_recv( int s, void * buff, int len, unsigned int flags );
 
 /* connect function */
 extern int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int
-			 addrlen, void *cb, void *data) ;
+			 addrlen, void *cb, void *data, void *scb) ;
 
 extern int proxy_connect_host
-			(char *host, int port, void *cb, void *data) ;
+			(char *host, int port, void *cb, void *data, void *scb) ;
 
 /* proxy setting */
 extern int proxy_set_proxy(int proxy_type,char *proxy_host,int proxy_port);

@@ -68,6 +68,7 @@
 #include "add_contact_window.h"
 #include "offline_queue_mgmt.h"
 #include "tcp_util.h"
+#include "libproxy/libproxy.h"
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -163,8 +164,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.19 $",
-	"$Date: 2003/04/11 16:02:29 $",
+	"$Revision: 1.20 $",
+	"$Date: 2003/04/17 09:58:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2328,8 +2329,7 @@ int ext_async_socket(char *host, int port, void *cb, void *data)
 {
   msnconn *conn = (msnconn *)data;
   
-  int tag = ay_socket_new_async(host, port, (ay_socket_callback)cb, data, 
-		  ay_msn_connect_status);
+  int tag = proxy_connect_host(host, port, cb, data, ay_msn_connect_status);
   
   if (conn->type == CONN_NS) {
 	  char *handle = ((authdata_NS *)conn->auth)->username;
