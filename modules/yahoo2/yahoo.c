@@ -65,6 +65,7 @@
 #include "file_select.h"
 #include "smileys.h"
 #include "add_contact_window.h"
+#include "image_window.h"
 #include "tcp_util.h"
 #include "messages.h"
 
@@ -124,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.43 $",
-	"$Date: 2003/05/01 18:31:45 $",
+	"$Revision: 1.44 $",
+	"$Date: 2003/05/02 06:05:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -288,15 +289,35 @@ typedef struct {
 	int status;
 	char *status_message;
 	int away;
+	YList *webcams;
 } eb_yahoo_local_account_data;
 
-/*static void free_yahoo_local_account(eb_yahoo_local_account_data * yla)
+struct webcam_feed {
+	int id;
+	char *who;
+	unsigned timestamp;
+	unsigned image_size;
+	unsigned recd_size;
+	int image_window_tag;
+};
+
+static void free_yahoo_local_account(eb_yahoo_local_account_data * yla, int free_all)
 {
 	if(yla->status_message)
-		free(yla->status_message);
+		FREE(yla->status_message);
 
-	free(yla);
-}*/
+	while(yla->webcams) {
+		struct webcam_feed *wf = yla->webcams->data;
+		FREE(wf->who);
+		if(wf->image_window_tag)
+			ay_image_window_close(wf->image_window_tag);
+		FREE(wf);
+		yla->webcams = y_list_remove(yla->webcams, yla->webcams);
+	}
+
+	if(free_all)
+		free(yla);
+}
 
 typedef struct {
 	int id;
@@ -1479,10 +1500,45 @@ static void ext_yahoo_chat_message(int id, char *who, char *room, char *msg, int
 /******************************
  * Webcam code starts here
  */
-static void ext_yahoo_got_webcam_image(int id, 
+static void ext_yahoo_got_webcam_image(int id, const char *who,
 		unsigned char *image, unsigned int image_size, unsigned int real_size,
 		unsigned int timestamp)
 {
+	struct webcam_feed *wf = NULL;
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *yla = ela->protocol_local_account_data;
+	YList *l;
+
+	for(l = yla->webcams; l; l = y_list_next(l)) {
+		wf = l->data;
+		if(!strcmp(who, wf->who))
+			break;
+		wf = NULL;
+	}
+
+	if(!wf)
+		return;
+
+	if(timestamp < wf->timestamp)
+		return;
+
+	if(!wf->image_window_tag) {
+		char buff[1024];
+		snprintf(buff, sizeof(buff), _("%s's webcam"), wf->who);
+		wf->image_window_tag = ay_image_window_new(160, 120, buff);
+	}
+
+	/* we set wf->image_size to 0 after the entire image has been read */
+	/* we also guess that if current image size is different from what we expected,
+	 * then it may be a new image. */
+	ay_image_window_add_data(wf->image_window_tag, image, real_size, wf->image_size==0 || wf->image_size != image_size);
+
+	wf->image_size = image_size;
+	wf->recd_size += real_size;
+
+	if(wf->recd_size == wf->image_size)
+		wf->image_size=wf->recd_size=0;
+
 }
 
 static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
@@ -1493,8 +1549,35 @@ static void ext_yahoo_webcam_data_request(int id, int send)
 {
 }
 
-static void ext_yahoo_webcam_invite(int id, char *from)
+static void eb_yahoo_webcam_invite_callback(gpointer data, int result)
 {
+	struct yahoo_authorize_data *wd = data;
+
+	if(!wd)
+		return;
+	
+	if(result) {
+		struct webcam_feed *wf = y_new0(struct webcam_feed, 1);
+		wf->id = wd->id;
+		wf->who = wd->who;
+		yahoo_webcam_get_feed(wd->id, wd->who);
+	} else
+		FREE(wd->who);
+
+	FREE(wd);
+}
+
+static void ext_yahoo_webcam_invite(int id, char *who)
+{
+	char buff[1024];
+	struct yahoo_authorize_data *wd = g_new0(struct yahoo_authorize_data, 1);
+
+	snprintf(buff, sizeof(buff), _("The yahoo user %s has invited you to view their webcam."
+				"Do you want to accept?"), who);
+
+	wd->id = id;
+	wd->who = strdup(who);
+	eb_do_dialog(buff, _("Yahoo Webcam Invitation"), eb_yahoo_webcam_invite_callback, wd);
 }
 
 static void ext_yahoo_webcam_invite_reply(int id, char *from, int accept)
@@ -1878,8 +1961,8 @@ static void eb_yahoo_logout(eb_local_account * ela)
 	yahoo_logoff(ylad->id);
 
 	ylad->status = YAHOO_STATUS_OFFLINE;
-	FREE(ylad->status_message);
 	ylad->id = 0;
+	free_yahoo_local_account(ylad, 0);
 
 	ref_count--;
 	ela->connected = 0;

@@ -1,4 +1,10 @@
-* Fri May  2 2003 03:20 GMT [colin]	0.3.0-93
+* Fri May  2 2003 05:26 GMT [philip]	0.3.0-95
+- src/image_window.[ch]
+add copyright notice and make C++ friendly
+- modules/yahoo2
+support for viewing other people's webcam - not tested
+
+* Fri May  2 2003 03:20 GMT [colin]	0.3.0-94
 - src/contact_actions.c src/edit_account_window.c
 Fix compilation
 - src/plugin.c 
