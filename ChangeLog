@@ -1,3 +1,7 @@
+* Tue Jun  3 2003 06:05 GMT [philip]	0.3.1-18
+- src/gtk/prefs_window.C
+raise prefs window if already visible and reselected from menu
+
 * Mon Jun  2 2003 19:30 GMT [philip]	0.3.1-17
 - src/chat_room.c src/chat_window.c src/smileys.c
 try to fix smiley button related bugs
