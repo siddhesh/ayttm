@@ -75,7 +75,6 @@ static int plugin_finish();
 
 static int ref_count = 0;
 static char jabber_server[MAX_PREF_LEN] = "jabber.com";
-static char jabber_port[MAX_PREF_LEN] = "5222";
 int do_jabber_debug=0;
 
 /*  Module Exports */
@@ -83,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.34 $",
-	"$Date: 2003/09/27 12:00:39 $",
+	"$Revision: 1.35 $",
+	"$Date: 2003/10/04 11:06:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -107,13 +106,6 @@ static int plugin_init()
 		il->widget.entry.value = jabber_server;
 		il->widget.entry.name = "jabber_server";
 		il->widget.entry.label = _("Default Server:");
-		il->type = EB_INPUT_ENTRY;
-
-		il->next = g_new0(input_list, 1);
-		il = il->next;
-		il->widget.entry.value = jabber_port;
-		il->widget.entry.name = "jabber_port";
-		il->widget.entry.label = _("Port:");
 		il->type = EB_INPUT_ENTRY;
 
 		il->next = g_new0(input_list, 1);
@@ -179,6 +171,9 @@ typedef struct _eb_jabber_local_account_data
 	JABBER_Conn	*JConn;
 	int activity_tag;
 	int connect_tag;
+	int use_ssl;
+	char server_port[MAX_PREF_LEN];
+	char ssl_server_port[MAX_PREF_LEN];
 } eb_jabber_local_account_data;
 
 static eb_local_account *jabber_local_account;
@@ -280,6 +275,7 @@ static void eb_jabber_login( eb_local_account * account )
 {
     eb_jabber_local_account_data * jlad;
     char buff[1024];
+    int port = 5222;
     
     eb_debug(DBG_JBR, ">\n");
 
@@ -293,8 +289,22 @@ static void eb_jabber_login( eb_local_account * account )
     account->connecting = 1;
     snprintf(buff, sizeof(buff), _("Logging in to Jabber account: %s"), account->handle);
     jlad->activity_tag = ay_activity_bar_add(buff, ay_jabber_cancel_connect, account);
+    if (!jlad->server_port || !strlen(jlad->server_port)) {
+#ifdef HAVE_OPENSSL
+	  strcpy(jlad->ssl_server_port,"5223");
+#endif
+	  strcpy(jlad->server_port,"5222");
+    }
+    
+#ifdef HAVE_OPENSSL
+    if (jlad->use_ssl)
+	port = atoi(jlad->ssl_server_port);    
+    else
+#endif
+	port = atoi(jlad->server_port);
+    	    	    
     jlad->connect_tag = JABBER_Login(account->handle, jlad->password, 
-			    jabber_server,  atoi(jabber_port));
+			    jabber_server, jlad->use_ssl, port);
 }
 
 void JABBERNotConnected(void *data)
@@ -389,7 +399,7 @@ static void jabber_account_prefs_init(eb_local_account *ela)
 
 	il->widget.entry.value = ela->handle;
 	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= _("_Yahoo Id:");
+	il->widget.entry.label= _("_Username:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
@@ -405,6 +415,30 @@ static void jabber_account_prefs_init(eb_local_account *ela)
 	il->widget.checkbox.name = "CONNECT";
 	il->widget.checkbox.label= _("_Connect at startup");
 	il->type = EB_INPUT_CHECKBOX;
+
+#ifdef HAVE_OPENSSL
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &jlad->use_ssl;
+	il->widget.checkbox.name = "USE_SSL";
+	il->widget.checkbox.label= _("Use _SSL");
+	il->type = EB_INPUT_CHECKBOX;
+#endif	
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = jlad->server_port;
+	il->widget.entry.name = "PORT";
+	il->widget.entry.label= _("P_ort:");
+	il->type = EB_INPUT_ENTRY;
+	
+#ifdef HAVE_OPENSSL
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = jlad->ssl_server_port;
+	il->widget.entry.name = "SSL_PORT";
+	il->widget.entry.label= _("SSL Po_rt:");
+	il->type = EB_INPUT_ENTRY;
+#endif	
 }
 
 static eb_local_account * eb_jabber_read_local_account_config( LList * values )
@@ -750,12 +784,6 @@ static void eb_jabber_read_prefs_config(LList * values)
 		strcpy(jabber_server, c);
 		free( c );
 	}
-	c = value_pair_get_value(values, "port");
-	if(c)
-	{
-		strcpy(jabber_port, c);
-		free( c );
-	}
 	c = value_pair_get_value(values, "do_jabber_debug");
 	if(c)
 	{
@@ -770,7 +798,6 @@ static LList * eb_jabber_write_prefs_config()
 	char buffer[5];
 
 	config = value_pair_add(config, "server", jabber_server);
-	config = value_pair_add(config, "port", jabber_port);
 	sprintf(buffer, "%d", do_jabber_debug);
 	config = value_pair_add(config, "do_jabber_debug", buffer);
 

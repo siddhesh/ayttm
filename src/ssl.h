@@ -22,6 +22,8 @@
  *
  */
 
+#ifndef __SSL_H_
+#define __SSL_H_
 #include "config.h"
 
 #ifdef HAVE_OPENSSL
@@ -58,8 +60,11 @@ int ssl_init_socket_with_method(SockInfo *sockinfo, SSLMethod method);
 void ssl_done_socket(SockInfo *sockinfo);
 void ssl_done(void);
 void ssl_init(void);
+int ssl_set_block(SockInfo *sockinfo) ;
+int ssl_set_nonblock(SockInfo *sockinfo) ;
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

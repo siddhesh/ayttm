@@ -20,7 +20,10 @@
 #include "jabber/jabber.h"
 #include "tcp_util.h"
 #include "libproxy/libproxy.h"
-
+#include <config.h>
+#ifdef HAVE_OPENSSL
+#include "ssl.h"
+#endif
 /* local macros for launching event handlers */
 #define STATE_EVT(arg) if(j->on_state) { (j->on_state)(j, (arg) ); }
 
@@ -56,7 +59,7 @@ jconn jab_new(char *user, char *pass)
 
     j->user = jid_new(p, user);
     j->pass = pstrdup(p, pass);
-
+    
     j->state = JCONN_STATE_OFF;
     j->id = 1;
     j->fd = -1;
@@ -115,7 +118,7 @@ void jab_packet_handler(jconn j, jconn_packet_h h)
  *      j -- connection
  *
  */
-int jab_start(jconn j, int port)
+int jab_start(jconn j, int port, int use_ssl)
 {
     int tag = 0;
     if(!j || j->state != JCONN_STATE_OFF) return 0;
@@ -124,7 +127,11 @@ int jab_start(jconn j, int port)
     XML_SetUserData(j->parser, (void *)j);
     XML_SetElementHandler(j->parser, startElement, endElement);
     XML_SetCharacterDataHandler(j->parser, charData);
-
+#ifdef HAVE_OPENSSL
+    j->usessl = use_ssl;
+#else
+    j->usessl = 0;
+#endif    
     if ((tag = proxy_connect_host(j->user->server, port, 
 		    	    (ay_socket_callback)jab_continue, j, NULL)) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
@@ -140,12 +147,27 @@ void jab_continue (int fd, int error, void *data)
     char *t,*t2;
 
     j->fd = fd;
+
     if(j->fd < 0 || error) {
         STATE_EVT(JCONN_STATE_OFF)
         return;
     }
     j->state = JCONN_STATE_CONNECTED;
     STATE_EVT(JCONN_STATE_CONNECTED)
+
+#ifdef HAVE_OPENSSL
+    if (j->usessl) {
+            j->ssl_sock = (SockInfo*)malloc(sizeof(SockInfo));
+	    ssl_init();
+	    j->ssl_sock->sock = fd;
+	    if (!ssl_init_socket(j->ssl_sock)) {
+		  printf("ssl error !\n");  
+		  STATE_EVT(JCONN_STATE_OFF)
+		  return;
+	    }
+	    
+    }  
+#endif
 
     /* start stream */
     x = jutil_header(NS_CLIENT, j->user->server);
@@ -245,12 +267,18 @@ char *jab_getid(jconn j)
  *      j -- connection
  *      x -- xmlnode structure
  */
+
 void jab_send(jconn j, xmlnode x)
 {
     if (j && j->state != JCONN_STATE_OFF)
     {
 	    char *buf = xmlnode2str(x);
-	    if (buf) write(j->fd, buf, strlen(buf));
+#ifdef HAVE_OPENSSL
+	if(j->usessl && buf)
+		ssl_write(j->ssl_sock->ssl, buf, strlen(buf));
+	else if (buf)
+#endif	
+	     write(j->fd, buf, strlen(buf));
 #ifdef JDEBUG
 	    printf ("out: %s\n", buf);
 #endif
@@ -266,10 +294,16 @@ void jab_send(jconn j, xmlnode x)
  */
 void jab_send_raw(jconn j, const char *str)
 {
-    if (j && j->state != JCONN_STATE_OFF)
-        write(j->fd, str, strlen(str));
+    if (j && j->state != JCONN_STATE_OFF) {
+#ifdef HAVE_OPENSSL
+	if(j->usessl)
+		ssl_write(j->ssl_sock->ssl, str, strlen(str));
+	else
+#endif	
+		write(j->fd, str, strlen(str));
+    }
 #ifdef JDEBUG
-    printf ("out: %s\n", str);
+    printf ("rout: %s\n", str);
 #endif
 }
 
@@ -287,7 +321,12 @@ void jab_recv(jconn j)
     if(!j || j->state == JCONN_STATE_OFF)
         return;
 
-    len = read(j->fd, buf, sizeof(buf)-1);
+#ifdef HAVE_OPENSSL
+    if (j->usessl) 
+	    len = ssl_read(j->ssl_sock->ssl, buf, sizeof(buf)-1);
+    else
+#endif
+            len = read(j->fd, buf, sizeof(buf)-1);
     if(len>0)
     {
         buf[len] = '\0';
@@ -302,7 +341,7 @@ void jab_recv(jconn j)
         jab_stop(j);
     }
 }
-
+#undef JDEBUG
 /*
  *  jab_poll -- check socket for incoming data
  *

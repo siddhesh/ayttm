@@ -1,3 +1,7 @@
+* Sat Oct  4 2003 11:05 GMT [colin]   0.4.2-7
+- modules/jabber
+SSL Jabber
+
 * Thu Oct  2 2003 12:15 GMT [nicolas]   0.4.2-6
 - modules/aim-oscar/libfaim/*
   modules/aim-oscar/Makefile.am

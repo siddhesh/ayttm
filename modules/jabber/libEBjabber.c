@@ -210,7 +210,7 @@ void jabber_callback_handler(void *data, int source, eb_input_condition cond)
 
 /* Functions called from the ayttm jabber.c file */
 
-int JABBER_Login(char *handle, char *passwd, char *host, int port) {
+int JABBER_Login(char *handle, char *passwd, char *host, int use_ssl, int port) {
 	/* At this point, we don't care about host and port */
 	char jid[256+1];
 	int tag;
@@ -268,7 +268,7 @@ int JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	
 	jab_packet_handler(JConn->conn, j_on_packet_handler);
 	jab_state_handler(JConn->conn, j_on_state_handler);
-	tag = jab_start(JConn->conn, port);
+	tag = jab_start(JConn->conn, port, use_ssl);
 
 	return tag;
 }

@@ -70,13 +70,32 @@ int ssl_init_socket(SockInfo *sockinfo)
 	return ssl_init_socket_with_method(sockinfo, SSL_METHOD_SSLv23);
 }
 
-int set_block(int fd)
+static int set_block(int fd)
 {
 #ifndef __MINGW32__
   int flags = fcntl(fd, F_GETFL, 0);
   if(flags == -1) return -1;
   return fcntl(fd, F_SETFL, flags ^ O_NONBLOCK);
 #endif
+}
+
+static int set_nonblock(int fd) 
+{
+#ifndef __MINGW32__
+  int flags = fcntl(fd, F_GETFL, 0);
+  if(flags == -1) return -1;
+  return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#endif
+}
+
+int ssl_set_nonblock(SockInfo *sockinfo) 
+{
+	return set_nonblock(sockinfo->sock);
+}
+
+int ssl_set_block(SockInfo *sockinfo) 
+{
+	return set_block(sockinfo->sock);
 }
 
 int ssl_init_socket_with_method(SockInfo *sockinfo, SSLMethod method)

@@ -49,6 +49,11 @@
 #define read(a,b,c)  recv(a,b,c,0)
 #endif
 
+#include "config.h"
+#ifdef HAVE_OPENSSL
+#include "ssl.h"
+#endif
+
 #include "libxode.h"
 
 #ifndef INCL_JABBER_H
@@ -308,6 +313,10 @@ typedef struct jconn_struct
     void (*on_state)(struct jconn_struct *j, int state);
     void (*on_packet)(struct jconn_struct *j, jpacket p);
 
+#ifdef HAVE_OPENSSL
+    SockInfo *ssl_sock;
+#endif
+    int usessl;
 } *jconn, jconn_struct;
 
 typedef void (*jconn_state_h)(jconn j, int state);
@@ -318,7 +327,7 @@ jconn jab_new(char *user, char *pass);
 void jab_delete(jconn j);
 void jab_state_handler(jconn j, jconn_state_h h);
 void jab_packet_handler(jconn j, jconn_packet_h h);
-int jab_start(jconn j, int port);
+int jab_start(jconn j, int port, int use_ssl);
 void jab_stop(jconn j);
 
 int jab_getfd(jconn j);
