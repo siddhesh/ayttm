@@ -193,8 +193,8 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 	
 	buttons->no = button;
 	
-	hbox2 = gtk_hbox_new(FALSE,0);
-	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 5);
+	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 5);
 
 	button = gtkut_create_icon_button( _("Yes"), tb_yes_xpm, dialog_window );
 	
@@ -211,7 +211,7 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 	gtk_signal_connect(GTK_OBJECT(dialog_window), "key_press_event",
 			   GTK_SIGNAL_FUNC(dialog_close), buttons);
 	
-	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 0);
+	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 5);
 
 	gtk_widget_show(hbox2);
 	
