@@ -173,8 +173,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/04 09:15:44 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/04 10:12:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -629,6 +629,8 @@ void eb_msn_connected(eb_local_account * account)
 {
 	eb_msn_local_account_data * mlad;
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
+	if (mlad->status == MSN_OFFLINE)
+		mlad->status=MSN_ONLINE;
 	if(account->status_menu)
 	{
 		/* Make sure set_current_state doesn't call us back */
@@ -637,8 +639,6 @@ void eb_msn_connected(eb_local_account * account)
 	}
 	account->connected=1;
 	account->connecting = 0;
-	if (mlad->status == MSN_OFFLINE)
-		mlad->status=MSN_ONLINE;
         eb_debug(DBG_MSN,"SETTTING STATE TO %d\n",mlad->status);
         eb_msn_set_current_state(account, mlad->status);
 	/*progress_window_close(mlad->connect_tag);*/
