@@ -51,6 +51,8 @@ unsigned int module_version() {return CORE_VERSION;}
 /*  Module defines */
 #define plugin_info smtp_LTX_plugin_info
 #define SERVICE_INFO smtp_LTX_SERVICE_INFO
+#define module_version smtp_LTX_module_version
+
 
 /* Function Prototypes */
 static int plugin_init();
@@ -71,8 +73,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/28 11:48:52 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/29 08:32:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

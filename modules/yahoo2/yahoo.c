@@ -90,6 +90,8 @@ unsigned int module_version() {return CORE_VERSION;}
 /*  Module defines */
 #define plugin_info yahoo2_LTX_plugin_info
 #define SERVICE_INFO yahoo2_LTX_SERVICE_INFO
+#define module_version yahoo2_LTX_module_version
+
 
 /* Function Prototypes */
 static int plugin_init();
@@ -120,8 +122,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.35 $",
-	"$Date: 2003/04/29 06:42:18 $",
+	"$Revision: 1.36 $",
+	"$Date: 2003/04/29 08:32:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

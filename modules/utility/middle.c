@@ -43,6 +43,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define plugin_info middle_LTX_plugin_info
 #define plugin_init middle_LTX_plugin_init
 #define plugin_finish middle_LTX_plugin_finish
+#define module_version middle_LTX_module_version
+
 
 /* Function Prototypes */
 static char *plstripHTML(const eb_local_account * local, const eb_account * remote,
@@ -59,8 +61,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/18 08:46:11 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/29 08:32:02 $",
 	&ref_count,
 	middle_init,
 	middle_finish,

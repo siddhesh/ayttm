@@ -126,6 +126,7 @@ unsigned int module_version() {return CORE_VERSION;}
 
 #define plugin_type zephyr_LTX_plugin_type
 #define SERVICE_INFO zephyr_LTX_SERVICE_INFO
+#define module_version zephyr_LTX_module_version
 
 /*  Module Exports */
 PLUGIN_TYPE plugin_type=PLUGIN_SERVICE;

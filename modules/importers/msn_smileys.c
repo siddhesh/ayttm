@@ -35,6 +35,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define plugin_info msn_smileys_LTX_plugin_info
 #define plugin_init msn_smileys_LTX_plugin_init
 #define plugin_finish msn_smileys_LTX_plugin_finish
+#define module_version msn_smileys_LTX_module_version
+
 
 /* Function Prototypes */
 static void init_alt_smileys(void);
@@ -51,8 +53,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"MSN Smileys",
 	"Load MSN Messenger smiley theme",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/18 08:46:07 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/29 08:32:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

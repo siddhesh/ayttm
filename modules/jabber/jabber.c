@@ -68,6 +68,8 @@ typedef unsigned long ulong;
 #define SERVICE_INFO jabber_LTX_SERVICE_INFO
 #define plugin_init jabber_LTX_plugin_init
 #define plugin_finish jabber_LTX_plugin_finish
+#define module_version jabber_LTX_module_version
+
 
 /* Function Prototypes */
 static int plugin_init();
@@ -83,8 +85,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.23 $",
-	"$Date: 2003/04/28 15:04:52 $",
+	"$Revision: 1.24 $",
+	"$Date: 2003/04/29 08:32:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

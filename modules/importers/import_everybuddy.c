@@ -47,6 +47,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define plugin_info import_everybuddy_LTX_plugin_info
 #define plugin_init import_everybuddy_LTX_plugin_init
 #define plugin_finish import_everybuddy_LTX_plugin_finish
+#define module_version import_everybuddy_LTX_module_version
+
 
 /* Function Prototypes */
 void import_eb_accounts(ebmCallbackData *data);
@@ -60,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Everybuddy Settings", 
 	"Import the Everybuddy Settings", 
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/29 07:30:20 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/29 08:32:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

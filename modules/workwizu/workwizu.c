@@ -84,6 +84,8 @@ typedef unsigned long ulong;
 #define SERVICE_INFO workwizu_LTX_SERVICE_INFO
 #define plugin_init workwizu_LTX_plugin_init
 #define plugin_finish workwizu_LTX_plugin_finish
+#define module_version workwizu_LTX_module_version
+
 
 int plugin_init();
 int plugin_finish();
@@ -111,8 +113,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/27 12:30:39 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/29 08:32:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

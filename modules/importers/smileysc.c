@@ -33,6 +33,8 @@ unsigned int module_version() {return CORE_VERSION;}
  ******************************************************************************/
 /*  Module defines */
 #define plugin_info smileysc_LTX_plugin_info
+#define module_version smileysc_LTX_module_version
+
 
 /* Function Prototypes */
 static void init_alt_smileys(void);
@@ -49,8 +51,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Console Smileys",
 	"Load Console smiley theme",
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/18 08:46:07 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/29 08:32:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

@@ -58,6 +58,8 @@ static char notes_editor[MAX_PREF_LEN]="xedit";
 #define plugin_info notes_LTX_plugin_info
 #define plugin_init notes_LTX_plugin_init
 #define plugin_finish notes_LTX_plugin_finish
+#define module_version notes_LTX_module_version
+
 
 /* Function Prototypes */
 /* ebmCallbackData is a parent struct, the child of which will be an ebmContactData */
@@ -72,8 +74,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Keep notes on contacts", 
 	"Keep notes about your contacts and buddies", 
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/27 14:16:22 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/29 08:32:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

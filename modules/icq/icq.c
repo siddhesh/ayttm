@@ -80,6 +80,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define SERVICE_INFO icq_LTX_SERVICE_INFO
 #define plugin_init icq_LTX_plugin_init
 #define plugin_finish icq_LTX_plugin_finish
+#define module_version icq_LTX_module_version
+
 
 /* Function Prototypes */
 static int plugin_init();
@@ -96,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ Service", 
 	"ICQ Protocol Support", 
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/18 08:46:06 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/29 08:31:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -70,6 +70,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define SERVICE_INFO irc_LTX_SERVICE_INFO
 #define plugin_init irc_LTX_plugin_init
 #define plugin_finish irc_LTX_plugin_finish
+#define module_version irc_LTX_module_version
+
 
 /* Function Prototypes */
 static int plugin_init();
@@ -82,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.14 $",
-	"$Date: 2003/04/28 15:04:52 $",
+	"$Revision: 1.15 $",
+	"$Date: 2003/04/29 08:32:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -53,6 +53,8 @@ void do_list_dialog(char * message, char * title, char **list,
  ******************************************************************************/
 /*  Module defines */
 #define plugin_info autotrans_LTX_plugin_info
+#define module_version autotrans_LTX_module_version
+
 
 /* Function Prototypes */
 static char *translate_out(const eb_local_account * local, const eb_account * remote,
@@ -78,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Auto-translator",
 	"Automatic translation",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/27 14:16:21 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/29 08:32:02 $",
 	&ref_count,
 	trans_init,
 	trans_finish,

@@ -44,6 +44,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define plugin_info import_gnomeicu_LTX_plugin_info
 #define plugin_init import_gnomeicu_LTX_plugin_init
 #define plugin_finish import_gnomeicu_LTX_plugin_finish
+#define module_version import_gnomeicu_LTX_module_version
+
 
 /* Function Prototypes */
 void import_gnomeicu_accounts(ebmCallbackData *data);
@@ -57,8 +59,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import GnomeICU Contact List", 
 	"Import the GnomeICU Contact List", 
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/28 11:48:48 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/29 08:32:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

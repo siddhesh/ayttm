@@ -46,6 +46,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define plugin_info rainbow_LTX_plugin_info
 #define plugin_init rainbow_LTX_plugin_init
 #define plugin_finish rainbow_LTX_plugin_finish
+#define module_version rainbow_LTX_module_version
+
 
 /* Function Prototypes */
 /* ebmCallbackData is a parent struct, the child of which will be an ebmContactData */
@@ -77,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Rainbow",
 	"Turns all outgoing messages rainbow colours",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/27 14:16:22 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/29 08:32:02 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,

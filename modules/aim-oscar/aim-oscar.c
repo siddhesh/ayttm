@@ -70,6 +70,8 @@ typedef unsigned long ulong;
 #define SERVICE_INFO aim_oscar_LTX_SERVICE_INFO
 #define plugin_init aim_oscar_LTX_plugin_init
 #define plugin_finish aim_oscar_LTX_plugin_finish
+#define module_version aim_oscar_LTX_module_version
+
 
 /* Function Prototypes */
 int plugin_init();
@@ -82,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM Oscar Service",
 	"Aol Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/27 12:30:37 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/29 08:31:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

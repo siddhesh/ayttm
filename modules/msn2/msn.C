@@ -81,6 +81,8 @@
 #define SERVICE_INFO msn2_LTX_SERVICE_INFO
 #define plugin_init msn2_LTX_plugin_init
 #define plugin_finish msn2_LTX_plugin_finish
+#define module_version msn2_LTX_module_version
+
 
 class eb_msn_chatroom : public llist_data
 {
@@ -152,8 +154,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.36 $",
-	"$Date: 2003/04/28 17:22:25 $",
+	"$Revision: 1.37 $",
+	"$Date: 2003/04/29 08:32:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

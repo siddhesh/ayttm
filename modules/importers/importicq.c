@@ -40,6 +40,8 @@ unsigned int module_version() {return CORE_VERSION;}
 #define plugin_info importicq_LTX_plugin_info
 #define plugin_init importicq_LTX_plugin_init
 #define plugin_finish importicq_LTX_plugin_finish
+#define module_version importicq_LTX_module_version
+
 
 /* Function Prototypes */
 int plugin_init();
@@ -52,8 +54,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import ICQ99 Contact List", 
 	"Import the ICQ99 Contact List", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/28 11:48:49 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/29 08:32:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -77,6 +77,8 @@ int do_aim_debug = 0;
 #define SERVICE_INFO aim_toc_LTX_SERVICE_INFO
 #define plugin_init aim_toc_LTX_plugin_init
 #define plugin_finish aim_toc_LTX_plugin_finish
+#define module_version aim_toc_LTX_module_version
+
 
 /* Function Prototypes */
 static int plugin_init();
@@ -94,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.30 $",
-	"$Date: 2003/04/28 22:33:01 $",
+	"$Revision: 1.31 $",
+	"$Date: 2003/04/29 08:31:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
