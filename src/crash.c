@@ -54,6 +54,8 @@
 #include "globals.h"
 #include "browser.h"
 #include "messages.h"
+#include "util.h"
+#include "messages.h"
 
 
 /*

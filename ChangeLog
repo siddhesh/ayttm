@@ -1,4 +1,9 @@
-* Wed Jan 02 2004 08:22 GMX [chris]     0.4.6-pre4
+* Thu Jan 09 2004 09:49 GMT [chris]     0.4.6-pre5
+- src/crash.c
+include missing headers, needed for correct 64 bit
+compile (Debian bug#226665)
+
+* Wed Jan 07 2004 08:22 GMT [chris]     0.4.6-pre4
 - gen
 replace 'function check_gettext' with 
 POSIX sh compatible 'check_gettext()'
