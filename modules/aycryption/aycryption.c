@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.14 $",
-	"$Date: 2003/05/30 09:29:31 $",
+	"$Revision: 1.15 $",
+	"$Date: 2003/05/31 09:18:04 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -301,7 +301,7 @@ static char *aycryption_out(const eb_local_account * local, const eb_account * r
 			    const struct contact *ct, const char * s)
 {
 	char *p = NULL;
-	char buf[1024];
+	char buf[4096];
 	int nread;
 
 	GpgmeRecipients rset;
@@ -315,8 +315,7 @@ static char *aycryption_out(const eb_local_account * local, const eb_account * r
 	if ((ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
 	&& gpgme_recipients_add_name_with_validity( rset, ct->gpg_key, 
 		GPGME_VALIDITY_FULL) ) {
-		char buf[1024];
-		snprintf(buf, 1024, _("Can not encrypt message to %s.\n"
+		snprintf(buf, 4096, _("Can not encrypt message to %s.\n"
 				"Maybe you did not set his key."), ct->nick);
 		ay_do_error(_("Aycryption"), buf);
 		eb_debug(DBG_CRYPT,"can't init outgoing crypt: %d %p %c\n",
@@ -357,8 +356,8 @@ static char *aycryption_out(const eb_local_account * local, const eb_account * r
 				gpgme_strerror(err));
 
 		memset(buf, 0, sizeof(buf));
-		while (!gpgme_data_read (cipher, buf, 1024, &nread)) {
-			char tmp[1024];
+		while (!gpgme_data_read (cipher, buf, 4096, &nread)) {
+			char tmp[4096];
 			if (nread) {
 				snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
 				if (p)
@@ -380,14 +379,14 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	GpgmeKey key = NULL;
         struct passphrase_cb_info_s info;
 	int err;
-	char buf[1024];
+	char buf[4096];
 	int nread;
 	GpgmeCtx ctx = NULL;
 	GpgmeSigStat sigstat = 0;
 	char s_sigstat[1024];
 	int was_crypted = 1;
 	int curloglevel = 0;
-	memset(buf, 0, 1024);
+	memset(buf, 0, 4096);
 	if (strncmp (s, "-----BEGIN PGP ", strlen("-----BEGIN PGP "))) {
 		eb_debug(DBG_CRYPT, "Incoming message isn't PGP formatted\n");
 		return strdup(s);
@@ -427,8 +426,7 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	err = gpgme_op_decrypt_verify (ctx, cipher, plain, &sigstat);
 
 	if (err && err != GPGME_No_Data) {
-		char buf[1024];
-		snprintf(buf, 1024, _("Can not decrypt message from %s.\n"
+		snprintf(buf, 4096, _("Can not decrypt message from %s.\n"
 				"Maybe he does not have your correct key."), ct->nick);
 		ay_do_error(_("Aycryption"), buf);
 		log_action(ct, LOG_ERR, "Cannot decrypt message.");
@@ -453,8 +451,8 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	
 	memset(buf, 0, sizeof(buf));
 	while (!(err = gpgme_data_read (plain, buf, sizeof(buf), &nread))) {
-		char tmp[1024];
-		memset(tmp, 0, 1024);
+		char tmp[4096];
+		memset(tmp, 0, 4096);
 		if (nread) {
 			snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
 			if (p)
