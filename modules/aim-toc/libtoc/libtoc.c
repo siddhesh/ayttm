@@ -77,7 +77,7 @@ static char user_info_id[1024];
 // HACK ALERT - user info hack begin
 static char * info = NULL;
 // end hack (user info)
-
+static void toc_signon2(void *data, int source, eb_input_condition condition );
 
 enum Type
 {
@@ -662,7 +662,7 @@ if(DEBUG)
 	FD_ZERO(&fs);
 	FD_SET(conn->fd, &fs);
 	
-	tv.tv_sec = 1;
+	tv.tv_sec = 3;
 	tv.tv_usec = 0;
 
 	if (select(conn->fd+1, &fs, NULL, NULL, &tv ) < 0) {
@@ -1233,12 +1233,6 @@ static void toc_signon_cb(int fd, int error, void *data)
 {
 	fd_set fs;
 	toc_conn *conn = (toc_conn *)data;
-	char *flap_result=NULL;
-	char *norm_username = aim_normalize(conn->username);
-	unsigned short username_length = htons(strlen(norm_username));
-	char sflap_header[] = {0,0,0,1,0,1};
-	char buff[2048];
-	flap_header fh;
 
 	conn->fd=fd;
 	
@@ -1260,6 +1254,22 @@ static void toc_signon_cb(int fd, int error, void *data)
 
 	//select(conn->fd+1, &fs, NULL, NULL, NULL );
 
+	conn->input = eb_input_add(conn->fd, EB_INPUT_READ, toc_signon2, conn);
+}
+
+static void toc_signon2(void *data, int source, eb_input_condition condition )
+{
+	char *flap_result=NULL;
+	toc_conn *conn = (toc_conn *)data;
+	char *norm_username = aim_normalize(conn->username);
+	unsigned short username_length = htons(strlen(norm_username));
+	char sflap_header[] = {0,0,0,1,0,1};
+	char buff[2048];
+	flap_header fh;
+
+	eb_input_remove(conn->input);
+	conn->input = 0;
+	
 	flap_result=get_flap(conn);
 	if(flap_result)
 		memcpy( buff, flap_result,10);	
@@ -1304,7 +1314,7 @@ static void toc_signon_cb(int fd, int error, void *data)
 	send_flap(conn, DATA, buff );
 
 if(DEBUG)
-	printf( "toc_signon AFTER %d %d\n", conn->fd, conn->seq_num );
+	printf( "toc_signon2 AFTER %d %d\n", conn->fd, conn->seq_num );
 	
 	toc_logged_in(conn);
 }
