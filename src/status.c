@@ -1367,7 +1367,7 @@ static gint update_window_title(struct contact *ec)
 					(GtkFunction)update_window_title, 
 					NULL);
 	} else {
-		title = _("Ayttm "VERSION"-"RELEASE);
+		title = _(PACKAGE_STRING"-"RELEASE);
 	}
 	
 	gtk_window_set_title(GTK_WINDOW(statuswindow), title);
@@ -1971,7 +1971,7 @@ void eb_status_window()
 	gtk_widget_show(hbox);
 		
         gtk_box_pack_start(GTK_BOX(statusbox), hbox ,FALSE, FALSE,0);
-        gtk_window_set_title(GTK_WINDOW(statuswindow), _("Ayttm "VERSION"-"RELEASE));
+        gtk_window_set_title(GTK_WINDOW(statuswindow), _(PACKAGE_STRING"-"RELEASE));
 	
 	gtk_widget_show(statusbox);
 

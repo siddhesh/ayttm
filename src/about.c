@@ -78,7 +78,7 @@ void	ay_show_about( void )
 	tAboutInfo	the_info;
 
 	
-	the_info.m_version = "Ayttm " VERSION "-" RELEASE "\n" __DATE__;
+	the_info.m_version = PACKAGE_STRING "-" RELEASE "\n" __DATE__;
 	
 	the_info.m_ay_developers = sAyttmDevTeam;
 	the_info.m_num_ay_developers = AYTTM_TEAM_SIZE;

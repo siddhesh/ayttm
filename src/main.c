@@ -76,7 +76,7 @@ static gchar *crash_param = NULL;
 
 static void eb_cli_ver ()
 {
-	printf("Ayttm v%s-%s\n", VERSION, RELEASE);
+	printf(PACKAGE_STRING "-" RELEASE "\n");
 	printf("Copyright (C) 2003 The Ayttm team\n");
 	printf("Ayttm comes with NO WARRANTY, to the extent permitted"
 	       " by law.\n");
