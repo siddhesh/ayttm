@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.3 $",
-	"$Date: 2003/05/05 01:43:27 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/05/05 02:34:53 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -209,8 +209,13 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 	if ((ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
 	&& gpgme_recipients_add_name_with_validity( rset, ct->gpg_key, 
 		GPGME_VALIDITY_FULL) ) {
+		char buf[1024];
+		snprintf(buf, 1024, _("Can not encrypt message to %s.\n"
+				"Maybe you did not set his key."), ct->nick);
+		ay_do_error(_("Aycryption"), buf);
 		eb_debug(DBG_CRYPT,"can't init outgoing crypt: %d %p %c\n",
 				ct->gpg_do_encryption, ct->gpg_key, ct->gpg_key[0]);
+		
 		return strdup(s);
 	} else {
 		GpgmeData plain = NULL;
@@ -295,9 +300,10 @@ static char *translate_in(const eb_local_account * local, const eb_account * rem
 	err = gpgme_op_decrypt_verify (ctx, cipher, plain, &sigstat);
 	
 	if (err && err != GPGME_No_Data) {
-		if (err)
-			eb_debug(DBG_CRYPT,"error: %s\n",
-				gpgme_strerror(err));
+		char buf[1024];
+		snprintf(buf, 1024, _("Can not decrypt message from %s.\n"
+				"Maybe he does not have your correct key."), ct->nick);
+		ay_do_error(_("Aycryption"), buf);
 		return strdup(s);
 	} else if (err == GPGME_No_Data) {
 		p = strdup(s);
