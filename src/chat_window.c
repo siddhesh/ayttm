@@ -93,6 +93,9 @@
 	} \
 }
 
+/* flash_window_title.c */
+void flash_title(GdkWindow *window);
+
 LList *session_words = NULL;
 
 /* forward declaration */
@@ -1161,7 +1164,7 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 
 		if (nick != NULL) {
 			int b = strlen(word) - strlen(last_word);
-			int inserted=b;
+			/*int inserted=b;*/
 			if (GTK_EDITABLE(entry)->selection_start_pos > 0)
 				gtk_editable_delete_selection(GTK_EDITABLE(entry));
 			gtk_editable_delete_text(GTK_EDITABLE (entry), b, x);
@@ -1192,13 +1195,13 @@ void chat_auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 	if (x > 0) {
 		char * word= gtk_editable_get_chars(GTK_EDITABLE (entry), 0, x);
 		char * last_word = NULL;
-		char * nick = NULL;
-		int choice = TRUE;
+		/*char * nick = NULL;*/
+		/*int choice = TRUE;*/
 		LList *l = session_words;
 		int found=0;
 
 		/* trim last space */
-		if (strlen (word) && (word[strlen(word)-1] == ' ' || ispunct(word[strlen(word)-1]))) {
+		while (strlen (word) && (word[strlen(word)-1] == ' ' || ispunct(word[strlen(word)-1]))) {
 			word[strlen(word)-1]='\0';
 		}
 
@@ -1209,11 +1212,14 @@ void chat_auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 		if (last_word == NULL)
 			last_word = word;
 
-		if (last_word == NULL) {
+		if (last_word == NULL)
 			return;
-		}
+			
 		if (last_word != word) 
 			last_word++;
+
+		if(last_word == NULL)
+			return;
 
 		while(l && l->data) {
 			if (!strcmp((char *)l->data, last_word)) {
@@ -1266,7 +1272,7 @@ void chat_history_up (chat_window *cw)
 	}
 
 	gtk_editable_delete_text(GTK_EDITABLE (cw->entry), 0, -1);
-	gtk_editable_insert_text(GTK_EDITABLE (cw->entry), cw->hist_pos->data, strlen(cw->hist_pos->data), &p);
+	p = cw_set_message(cw, cw->hist_pos->data);
 }
 
 void chat_history_down(chat_window *cw) 
@@ -1280,7 +1286,7 @@ void chat_history_down(chat_window *cw)
 	gtk_editable_delete_text(GTK_EDITABLE (cw->entry), 0, -1);
 
 	if ( cw->hist_pos != NULL )
-		gtk_editable_insert_text(GTK_EDITABLE (cw->entry), cw->hist_pos->data, strlen(cw->hist_pos->data), &p);
+		p=cw_set_message(cw, cw->hist_pos->data);
 }	
 
 void chat_scroll(chat_window *cw, GdkEventKey *event) 
