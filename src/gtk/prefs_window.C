@@ -609,6 +609,22 @@ void	ay_prefs_window::Show( void )
 	if ( m_prefs_window_widget != NULL )
 	{
 		gtk_widget_show( m_prefs_window_widget );
+	
+		/* Because of some problem with GTK, we cannot create the tree expanded without creating drawing artifacts.
+			So we expand the tree 'by hand' after we've shown the window.
+		*/
+		GList		*child = m_tree->children;
+		GtkWidget	*the_tree_item = NULL;
+		
+		while ( child != NULL )
+		{
+			the_tree_item = GTK_WIDGET(child->data);
+			
+			gtk_tree_item_expand( GTK_TREE_ITEM(the_tree_item) );
+			
+			child = child->next;
+		}
+		
 		gtk_tree_select_item( m_tree, 0 );
 	}
 }
@@ -666,7 +682,6 @@ void	ay_prefs_window::AddToTree( const char *inName, ay_prefs_window_panel *inPa
 			
 			gtk_tree_item_set_subtree( GTK_TREE_ITEM(the_tree_item), section_tree );
 			gtk_tree_set_view_lines( GTK_TREE(section_tree), TRUE );
-			gtk_tree_item_expand( GTK_TREE_ITEM(the_tree_item) );
 		}
 	}
 	else

@@ -1,3 +1,7 @@
+* Thu Apr 24 2003 12:55 GMT [andy]	0.3.0-pre23
+- src/gtk/prefs_window.C
+Fix GTK 'double-line' problem
+
 * Thu Apr 24 2003 07:17 GMT [colin]	0.3.0-pre22
 - src/away_window.c
 Usability fixes (double-click stuff by Ben Reser) 
