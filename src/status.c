@@ -1737,7 +1737,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/_Tools"),		NULL, NULL, 0, "<Branch>" },
 	{ N_("/Tools/New group _chat..."),
   				NULL, launch_group_chat, 0, NULL },
-	{ N_("/Tools/Set as _away"),	NULL, NULL, 0, NULL },
+	{ N_("/Tools/Set as _away..."),	NULL, show_away_choicewindow, 0, NULL },
 	{ N_("/Tools/---"),		NULL, NULL, 0, "<Separator>" },
 	{ N_("/Tools/Add a con_tact account..."),		
   				NULL, add_callback, 0, NULL },
@@ -1778,7 +1778,7 @@ static void set_menu_sensitivity(void)
 	int online = connected_local_accounts();
 	
 	menu_set_sensitive(main_menu_factory, _("/Tools/New group chat..."), online);
-	menu_set_sensitive(main_menu_factory, _("/Tools/Set as away"), online);
+	menu_set_sensitive(main_menu_factory, _("/Tools/Set as away..."), online);
 	menu_set_sensitive(main_menu_factory, _("/File/Sign off all"), online);
 	menu_set_sensitive(main_menu_factory, _("/File/Sign on all"),
 				(online != l_list_length(accounts)));
@@ -1892,15 +1892,7 @@ void eb_status_window()
 	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set status");
 	eb_set_status_window(submenuitem);
 	SetPref("widget::set_status_submenuitem", submenuitem);
-	
-	away_menu = gtk_menu_new();
-	load_away_messages();
-	build_away_menu();
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Tools/Set as away");
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(submenuitem), away_menu);
-	gtk_widget_show(away_menu);
-		
 	gtk_container_add(GTK_CONTAINER(menubox), menu );
 	gtk_widget_show(menu);
 	gtk_box_pack_start(GTK_BOX(statusbox), menubox, FALSE, FALSE, 0 );

@@ -1,3 +1,8 @@
+* Thu Apr 03 2003 11:39 GMT [colin]	0.2.3-2
+- src/away_window.[ch]
+  src/status.c
+Change away messages system to be able to delete them
+  
 * Thu Apr 03 2003 10:40 GMT [colin]	0.2.3-1
 Release
 
