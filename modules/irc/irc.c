@@ -86,8 +86,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/17 10:23:36 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/17 11:28:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1118,7 +1118,7 @@ static void irc_login( eb_local_account * account)
 
 	/* Setup and connect */
 
-	host = gethostbyname(ila->server);
+	host = proxy_gethostbyname(ila->server);
 	if (!host) { 
 		char buff[1024]; 
 		snprintf(buff, sizeof(buff), _("%s: Unknown host."), ila->server);
@@ -1129,7 +1129,7 @@ static void irc_login( eb_local_account * account)
 	}
 
 	site.sin_family = AF_INET;
-	site.sin_addr.s_addr = *(long *)(host->h_addr);
+	site.sin_addr.s_addr = ((struct in_addr *)(host->h_addr))->s_addr;
 	site.sin_port = htons(atoi(ila->port));
 	/* default to port 6667 if nothing specified */
 	if (ila->port[0] == '\0') site.sin_port = htons(6667);

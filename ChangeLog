@@ -1,3 +1,9 @@
+* Thu Apr 17 2003 11:27 GMT [colin]	0.2.3-126
+- modules/irc/irc.c
+fix segfault with socks4
+- librproxy/proxy.c
+Auth in socks4 (try to, at least)
+
 * Thu Apr 17 2003 10:35 GMT [colin]	0.2.3-125
 - src/prefs.c
 call proxy_set_proxy when we disable it too

@@ -47,6 +47,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "intl.h"
 #include "libproxy.h"
 #include "tcp_util.h"
 
@@ -404,48 +405,74 @@ struct hostent *proxy_gethostbyname2(char *host,int type)
 
 }
 
+/* http://archive.socks.permeo.com/protocol/socks4.protocol */
 int socks4_connect(int  sock, struct sockaddr *serv_addr, int addrlen )
 {
    struct sockaddr_in sa;
-   unsigned char packet[12];
+   int i, packetlen;
    struct hostent * hp;
 
    if (!(hp = gethostbyname(proxy_host)))
       return -1;
    
+   if(proxy_auth && strlen(proxy_auth)) {
+	   packetlen = 9 + strlen(proxy_auth);
+   } else {
+	   packetlen = 9;
+   }
    /* Clear the structure and setup for SOCKS4 open */  
    bzero(&sa, sizeof(sa));
    sa.sin_family = AF_INET;
    sa.sin_port = htons (proxy_port);
    bcopy(hp->h_addr, (char *) &sa.sin_addr, hp->h_length);
-
+   
    /* Connect to the SOCKS4 port and send a connect packet */
    if (connect(sock, (struct sockaddr *) &sa, sizeof (sa))!=-1)
    {
       unsigned short realport;
-      
+      unsigned char packet[packetlen];
       if (!(hp = gethostbyname(proxy_realhost)))
       {
          return -1;
       }
       realport = ntohs(((struct sockaddr_in *)serv_addr)->sin_port);
-      packet[0] = 4;  /* Version number */
-      packet[1] = 1;
-      packet[2] = (((unsigned short) realport) >> 8);
-      packet[3] = (((unsigned short) realport) & 0xff);
-      packet[4] = (unsigned char) (hp->h_addr_list[0])[0];
-      packet[5] = (unsigned char) (hp->h_addr_list[0])[1];
-      packet[6] = (unsigned char) (hp->h_addr_list[0])[2];
-      packet[7] = (unsigned char) (hp->h_addr_list[0])[3];
-      packet[8] = 0;
-      if (write(sock, packet, 9) == 9)
+      packet[0] = 4;                                        /* Version */
+      packet[1] = 1;                                       /* CONNECT  */
+      packet[2] = (((unsigned short) realport) >> 8);      /* DESTPORT */
+      packet[3] = (((unsigned short) realport) & 0xff);    /* DESTPORT */
+      packet[4] = (unsigned char) (hp->h_addr_list[0])[0]; /* DESTIP   */
+      packet[5] = (unsigned char) (hp->h_addr_list[0])[1]; /* DESTIP   */
+      packet[6] = (unsigned char) (hp->h_addr_list[0])[2]; /* DESTIP   */
+      packet[7] = (unsigned char) (hp->h_addr_list[0])[3]; /* DESTIP   */
+      if(proxy_auth && strlen(proxy_auth)) {
+	      for (i=0; i < strlen(proxy_user); i++) {
+		      packet[i+8] = 
+			    (unsigned char)proxy_user[i];  /* AUTH     */
+	      }
+      }
+      packet[packetlen-1] = 0;                              /* END      */
+      printf("Sending \"%s\"\n", packet);
+      if (write(sock, packet, packetlen) == packetlen)
       {
          bzero(packet, sizeof(packet));
          /* Check response - return as SOCKS4 if its valid */
-         if (read(sock, packet, 9)>=4 && packet[1] == 90)
+         if (read(sock, packet, 9)>=4)
          {
-            return 0;
-         }
+	    if (packet[1] == 90)		 
+	            return 0;
+	    else if(packet[1] == 91)
+		    do_error_dialog(_("Socks 4 proxy rejected request for an unknown reason."),_ ("Proxy error"));
+	    else if(packet[1] == 92)
+		    do_error_dialog(_("Socks 4 proxy rejected request because it could not connect to our identd."),_ ("Proxy error"));	    
+	    else if(packet[1] == 93)
+		    do_error_dialog(_("Socks 4 proxy rejected request because identd returned a different userid."),_ ("Proxy error"));	    
+	    else {
+		    do_error_dialog(_("Socks 4 proxy rejected request with an RFC-uncompliant error code."),_ ("Proxy error"));	    
+		    printf("=>>%d\n",packet[1]);
+	    }		    
+         } else {
+		printf("short read %s\n",packet);
+	 }	
       }
       close(sock);
    }
