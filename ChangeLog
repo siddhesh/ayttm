@@ -1,3 +1,10 @@
+* Wed May  7 2003 14:32 GMT [edward]	0.3.0-155
+- src/help_menu.c
+  src/chat_window.c
+  modules/importers/importicq.c
+  modules/utility/autotrans.c
+Fix to compilation issues and to Help Menu for MINGW32
+
 * Wed May  7 2003 13:34 GMT [colin]	0.3.0-154
 - src/status.c
 Fix menu sensitivity not set when translated

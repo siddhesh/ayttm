@@ -26,6 +26,7 @@
 #include <string.h>
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
+#include <winsock2.h>
 #endif
 #include "plugin_api.h"
 #include "account.h"
@@ -55,8 +56,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"ICQ99 Contact List", 
 	"Imports your ICQ99 contact list into Ayttm", 
-	"$Revision: 1.6 $",
-	"$Date: 2003/05/06 17:04:48 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/07 14:25:12 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

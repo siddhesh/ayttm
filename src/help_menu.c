@@ -22,21 +22,22 @@
  *
  */ 
 
+#include "gtk_globals.h"
 #include "browser.h"
 
 /*
  * instead of including all the definitions in stdio.h, we just define
  * a specialised NULL here
  */
-#define NULL    (void *)0
+extern GtkWidget *statuswindow;
 
 void show_manual()
 {
-  open_url(NULL, "http://ayttm.sf.net/ayttm-manual/");
+  open_url(statuswindow->window, "http://ayttm.sf.net/ayttm-manual/");
 }
 
 void show_website()
 {
-  open_url(NULL, "http://ayttm.sf.net/");
+  open_url(statuswindow->window, "http://ayttm.sf.net/");
 }
 

@@ -23,6 +23,7 @@
  */
 #ifdef __MINGW32__
 #define __IN_PLUGIN__
+#include <winsock2.h>
 #endif
 
 #include "intl.h"
@@ -78,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.8 $",
-	"$Date: 2003/05/06 17:04:50 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/05/07 14:25:12 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
