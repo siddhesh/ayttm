@@ -239,7 +239,6 @@ fi
 
 
 ### Begin Optional Service related options ######################################
-enable_oscar=no
 
 AC_ARG_ENABLE(oscar,
 [  --enable-oscar          include oscar service])
@@ -262,7 +261,7 @@ AC_ARG_ENABLE(yahoo,
 
 OPTIONAL_PLUG_DIR=""
 DEBUG_LIBMSN=""
-if test $enable_oscar = yes; then
+if test "$enable_oscar" == yes; then
  	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aim-oscar"
 fi
 if test "$enable_msn" != no; then
@@ -295,10 +294,6 @@ if test "$enable_jabber" != no; then
 fi
 if test "$enable_broken_icq" == yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq"
-else
-  if test "$enable_icq" != no; then
-	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq-toc"	
-  fi
 fi
 
 ### End Optional Service  options ######################################
