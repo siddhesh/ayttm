@@ -177,7 +177,7 @@ int add_service(struct service *Service_Info)
 	eb_debug(DBG_CORE, "(%s: service_id %d)\n",Service_Info->name, Service_Info->protocol_id);
 	memcpy(&eb_services[Service_Info->protocol_id], Service_Info, sizeof(struct service));
 	reload_service_accounts(Service_Info->protocol_id);
-	refresh_service_contacts(i);
+	refresh_service_contacts(Service_Info->protocol_id);
 	ay_set_submenus();
 	eb_debug(DBG_CORE, "<Added new service \n");
 	return(Service_Info->protocol_id);
