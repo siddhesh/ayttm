@@ -1943,7 +1943,7 @@ void msn_connect(msnconn * conn, char * server, int port)
   {
     if (ext_async_socket(server, port, (void *)msn_connect_cb, conn) < 0) {
 	if(DEBUG) printf("immediate connect failure\n");    
-	ext_show_error(conn, "Could not connect to MSN server.");
+	ext_show_error(conn, "Could not connect to MSN SB server.");
 	ext_closing_connection(conn);
     }
     //conn->sock = ext_connect_socket(server,port);

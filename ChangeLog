@@ -1,3 +1,9 @@
+* Sun Apr 06 2003 09:55 GMT [colin]	0.2.3-40
+- modules/msn2
+implement cancel connect
+- src/activity_bar.C
+fix segfault
+
 * Sun Apr 06 2003 09:35 GMT [philip]	0.2.3-39
 - modules/yahoo2/libyahoo2.c
 avoid multiple calls to yahoo_close for the same connection

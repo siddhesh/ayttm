@@ -291,9 +291,10 @@ static void s_cancel_clicked(GtkButton * btn, gpointer data)
 	ay_activity_bar_pack *abp = (ay_activity_bar_pack *)data;
 
 	/* btn == NULL means owner closed it with bar_remove */
-	if(btn)
+	if(btn && abp)
 		abp->cancel();
-	delete abp;
+	if (abp)
+		delete abp;
 }
 
 static gint s_delete_event(GtkWidget *widget, GdkEvent *event, gpointer null)

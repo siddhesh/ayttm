@@ -164,8 +164,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.13 $",
-	"$Date: 2003/04/06 00:08:50 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/04/06 09:58:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -504,6 +504,7 @@ typedef struct _eb_msn_local_account_data
 	int status;			// the current status of the user
 	msnconn * mc;
 	int connect_tag;
+	int activity_tag;
 } eb_msn_local_account_data;
 
 static eb_local_account *msn_local_account;
@@ -594,6 +595,16 @@ static int checkconn(msnconn *conn) {
 	return 1;
 }
 
+static void ay_msn_cancel_connect(void *data)
+{
+	eb_local_account *ela = (eb_local_account *)data;
+	eb_msn_local_account_data * mlad;
+	mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	
+	ay_socket_cancel_async(mlad->connect_tag);
+	eb_msn_logout(ela);
+}
+
 static void eb_msn_login( eb_local_account * account )
 {
 	eb_msn_local_account_data * mlad;
@@ -610,7 +621,7 @@ static void eb_msn_login( eb_local_account * account )
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
 	char buff[1024];
 	snprintf(buff, sizeof(buff), _("Logging in to MSN account: %s"), account->handle);
-	mlad->connect_tag = ay_activity_bar_add(buff, NULL, NULL);
+	mlad->activity_tag = ay_activity_bar_add(buff, ay_msn_cancel_connect, account);
 
 	mlad->mc = new msnconn;
 	if(!mainconn)
@@ -638,7 +649,9 @@ static void eb_msn_connected(eb_local_account * account)
 	account->connecting = 0;
         eb_debug(DBG_MSN,"SETTTING STATE TO %d\n",mlad->status);
         eb_msn_set_current_state(account, mlad->status);
-	ay_activity_bar_remove(mlad->connect_tag);
+	ay_activity_bar_remove(mlad->activity_tag);
+	mlad->connect_tag = 0;
+	mlad->activity_tag = 0;
 }
 
 static void eb_msn_logout( eb_local_account * account )
@@ -649,8 +662,8 @@ static void eb_msn_logout( eb_local_account * account )
 	if(!account->connected && !account->connecting)
 		return;
 	
-	ay_activity_bar_remove(mlad->connect_tag);
-	
+	ay_activity_bar_remove(mlad->activity_tag);
+	mlad->activity_tag = mlad->connect_tag = 0;
 	eb_debug(DBG_MSN, "Logging out\n");
 	for (l = msn_contacts; l != NULL && l->data != NULL; l = l->next) {
 		eb_account * ea = (eb_account *)find_account_by_handle((char *)l->data, SERVICE_INFO.protocol_id);
@@ -2292,9 +2305,41 @@ void ext_changed_state(msnconn * conn, char * state)
   eb_debug(DBG_MSN, "Your state is now: %s\n", state);
 }
 
+static void ay_msn_connect_status(const char *msg, void *data)
+{
+  msnconn *conn = (msnconn *)data;
+  
+  if (conn->type == CONN_NS) {
+	  char *handle = ((authdata_NS *)conn->auth)->username;
+	  if (!handle) return;
+	  eb_local_account *ela = find_local_account_by_handle(handle, SERVICE_INFO.protocol_id);
+	  if (!ela) return;
+	  eb_msn_local_account_data *mlad =
+			(eb_msn_local_account_data *)ela->protocol_local_account_data;
+	  if (!mlad) return;
+	  ay_activity_bar_update_label(mlad->activity_tag, msg);
+  }
+}
+
 int ext_async_socket(char *host, int port, void *cb, void *data)
 {
-  return ay_socket_new_async(host, port, (ay_socket_callback)cb, data, NULL);
+  msnconn *conn = (msnconn *)data;
+  
+  int tag = ay_socket_new_async(host, port, (ay_socket_callback)cb, data, 
+		  ay_msn_connect_status);
+  
+  if (conn->type == CONN_NS) {
+	  char *handle = ((authdata_NS *)conn->auth)->username;
+	  if (!handle) return -1;
+	  eb_local_account *ela = find_local_account_by_handle(handle, SERVICE_INFO.protocol_id);
+	  if (!ela) return -1;
+	  eb_msn_local_account_data *mlad =
+			(eb_msn_local_account_data *)ela->protocol_local_account_data;
+	  if (!mlad) return -1;
+	  mlad->connect_tag = tag;
+  }
+  
+  return tag;
 }
 
 int ext_connect_socket(char * hostname, int port)
