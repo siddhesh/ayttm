@@ -1,3 +1,13 @@
+* Tue Apr 29 2003 11:45 GMT [andy]	0.3.0-56
+- src/plugin.[ch]
+Clean up interface
+Load and unload modules by full path
+- src/gtk/gtkutils.[ch]
+Add gtkut_create_label_button()
+- src/prefs.[ch]
+  src/gtk/prefs_window.C
+Add Load and Unload buttons to module preference panels
+
 * Tue Apr 29 2003 19:30 GMT [philip]	0.3.0-55
 - src/nomodule.c
 I'm stupid
