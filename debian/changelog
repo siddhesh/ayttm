@@ -1,3 +1,9 @@
+ayttm (0.4.5-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Chris Halls <halls@debian.org>  Wed,  3 Dec 2003 13:27:28 +0100
+
 ayttm (0.4.4+19-1) experimental; urgency=low
 
   * New upstream CVS snapshot.
