@@ -34,8 +34,9 @@
 #include "globals.h"
 #include "defaults.h"
 #include "libproxy/libproxy.h"
-#include "prefs_window.h"
 #include "plugin.h"
+
+#include "gtk/prefs_window.h"
 
 #ifdef __MINGW32__
 #define	snprintf	_snprintf
@@ -68,7 +69,7 @@ static int s_compare_ptr_key( const void *a, const void *b )
 
 static int	s_compare_plugin_name( const void *a, const void *b)
 {
-	const module_pref *pref = a;
+	const t_module_pref *pref = a;
 	
 	if ( pref->file_name && !strcmp( pref->file_name, (const char *)b) )
 		return( 0 );
@@ -139,6 +140,53 @@ static char	*s_strdup_pref( const char *inStr )
 		returnStr[0] = '\0';
 	else	
 		strncpy( returnStr, inStr, MAX_PREF_LEN );
+	
+	return( returnStr );
+}
+
+/** A quick hack to strip stuff from the beginning and end of a string.
+
+	@param	inFromBeginning	text to strip from beginning
+	@param	inFromEnd		text to strip from the end
+	@param	inStr			the string we're stripping from
+	
+	@return	newly allocated stripped string [caller responsible for freeing mem]
+*/
+static char	*s_strdup_strip( const char *inFromBeginning, const char *inFromEnd, const char *inStr )
+{
+	char		*returnStr = NULL;
+	const char	*startPtr = inStr;
+	const char	*endPtr = NULL;
+	int			totalLen = 0;
+	
+	
+	if ( inStr == NULL )
+		return( NULL );
+		
+	endPtr = inStr + strlen( inStr );
+	
+	if ( inFromBeginning != NULL )
+	{
+		const int	beginLen = strlen( inFromBeginning );
+		
+		if ( !strncmp( inFromBeginning, inStr, beginLen ) )
+			startPtr = inStr + beginLen;
+	}
+	
+	if ( inFromEnd != NULL )
+	{
+		const int	endLen = strlen( inFromEnd );
+		
+		if ( !strncmp( inFromEnd, endPtr - endLen, endLen ) )
+			endPtr = endPtr - endLen;
+	}
+	
+	totalLen = endPtr - startPtr;
+	assert( totalLen > 0 );
+	
+	returnStr = calloc( 1, totalLen + 1 );
+	memcpy( returnStr, startPtr, totalLen );
+	returnStr[totalLen] = '\0';
 	
 	return( returnStr );
 }
@@ -248,25 +296,29 @@ static LList	*s_create_module_prefs_list( void )
 	for ( ; plugins; plugins = plugins->next )
 	{
 		const eb_PLUGIN_INFO	*plugin_info = plugins->data;
-		module_pref				*pref_info = NULL;
+		t_module_pref			*pref_info = NULL;
 		
 		
 		if ( plugin_info == NULL )
 			continue;
 		
-		pref_info = calloc( 1, sizeof( module_pref ) );
+		pref_info = calloc( 1, sizeof( t_module_pref ) );
 
 		pref_info->module_type = PLUGIN_TYPE_TXT[plugin_info->pi.type-1];
 		pref_info->brief_desc = s_strdup_allow_null( plugin_info->pi.brief_desc );
 		pref_info->loaded_status = PLUGIN_STATUS_TXT[plugin_info->status];
-		pref_info->version = s_strdup_allow_null( plugin_info->pi.version );
-		pref_info->date = s_strdup_allow_null( plugin_info->pi.date );
+		/* In the following lines, the space between "$" and "Revision: " and
+			"$" and "Date: " is intentional.  We cannot simply put them together
+			otherwise cvs inserts the revison and date!
+		*/	
+		pref_info->version = s_strdup_strip( "$" "Revision: ", " $", plugin_info->pi.version );
+		pref_info->date = s_strdup_strip( "$" "Date: ", " $", plugin_info->pi.date );
 		pref_info->file_name = s_strdup_allow_null( plugin_info->name );
 		pref_info->status_desc = s_strdup_allow_null( plugin_info->status_desc );
 		pref_info->service_name = s_strdup_allow_null( plugin_info->service );
 		pref_info->pref_list = s_copy_input_list( plugin_info->pi.prefs );
 			
-		module_prefs_list = l_list_append( module_prefs_list, pref_info);
+		module_prefs_list = l_list_append( module_prefs_list, pref_info );
 	}
 	
 	return( l_list_nth( module_prefs_list, 0 ) );
@@ -276,7 +328,7 @@ static void	s_destroy_module_prefs_list( LList *io_module_prefs_list )
 {
 	for ( ; io_module_prefs_list != NULL; io_module_prefs_list = io_module_prefs_list->next )
 	{
-		module_pref		*pref_info = io_module_prefs_list->data;
+		t_module_pref		*pref_info = io_module_prefs_list->data;
 		
 		
 		if ( pref_info == NULL )
@@ -338,8 +390,8 @@ static void	s_write_module_prefs( void *inListItem, void *inData )
 
 static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 {
-	module_pref	*the_prefs = inListItem;
-	int			apply = (int)inData;
+	t_module_pref	*the_prefs = inListItem;
+	int				apply = (int)inData;
 	
 	
 	if ( apply )
@@ -489,7 +541,7 @@ void	ayttm_prefs_init( void )
 	fSetLocalPref( "SoundVolume", 0.0 );
 
 	/* advanced */
-	iSetLocalPref( "proxy_type", 0 );
+	iSetLocalPref( "proxy_type", PROXY_NONE );
 	cSetLocalPref( "proxy_host", "" );
 	iSetLocalPref( "proxy_port", 3128 );
 	iSetLocalPref( "do_proxy_auth", 0 );
@@ -831,10 +883,10 @@ void	ayttm_prefs_show_window( void )
 	/* modules */
 	prefs->module.module_info = s_create_module_prefs_list();
 	
-	ayttm_prefs_window_create( prefs );
+	ay_ui_prefs_window_create( prefs );
 }
 
-module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName )
+t_module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName )
 {
 	LList	*module_list = NULL;
 	LList 	*search_result =NULL;

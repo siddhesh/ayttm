@@ -25,13 +25,16 @@
 #ifndef __SOUND_H__
 #define __SOUND_H__
 
-enum {
-	BUDDY_ARRIVE,
-	BUDDY_LEAVE,
-	BUDDY_AWAY,
-	SEND,
-	RECEIVE,
-	FIRSTMSG
+enum eSoundID
+{
+	SOUND_BUDDY_ARRIVE = 0,
+	SOUND_BUDDY_LEAVE,
+	SOUND_BUDDY_AWAY,
+	SOUND_SEND,
+	SOUND_RECEIVE,
+	SOUND_FIRSTMSG,
+	
+	SOUND_MAX
 };
 
 #ifdef __cplusplus

@@ -113,7 +113,7 @@ static GtkTable	*sMakeDeveloperTable( int inNumDevelopers, const tDevInfo *inDev
 	return( table );
 }
 
-void show_about(void *useless, void *null)
+void	ay_ui_show_about(void *useless, void *null)
 {
 	GtkWidget	*logo = NULL;
 	GtkWidget	*ok = NULL;

@@ -27,7 +27,14 @@
 
 #include "prefs.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void	ayttm_prefs_window_create( struct prefs *inPrefs );
+void	ay_ui_prefs_window_create( struct prefs *inPrefs );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -62,6 +62,10 @@ typedef struct _input_list
 } input_list;
 		
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void eb_input_render(input_list * il, void * box); /* GtkWidget * box */
 void eb_input_cancel(input_list * il);
 void eb_input_accept(input_list * il);
@@ -70,6 +74,10 @@ LList *eb_input_to_value_pair(input_list * il);
 __declspec(dllimport) void eb_update_from_value_pair(input_list *il, LList *vp);
 #else
 extern void eb_update_from_value_pair(input_list *il, LList *vp);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

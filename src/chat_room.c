@@ -185,7 +185,7 @@ static void send_cr_message( GtkWidget * widget, gpointer data )
 	
 	g_free(text);
 	if(ecr->sound_enabled && ecr->send_enabled)
-		play_sound(SEND);
+		play_sound( SOUND_SEND );
 	gtk_editable_delete_text(GTK_EDITABLE (ecr->entry), 0, -1);
 }
 
@@ -844,7 +844,7 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 	&& strcmp(chat_room->local_user->handle, user))
 	{   
 		if (chat_room->receive_enabled)
-			play_sound(RECEIVE);
+			play_sound( SOUND_RECEIVE );
 	}	
 }
 

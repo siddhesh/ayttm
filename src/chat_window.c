@@ -561,7 +561,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	serv_touch_idle();
 
 	if(data->sound_enabled && data->send_enabled)
-		play_sound(SEND);
+		play_sound( SOUND_SEND );
 
 	if (iGetLocalPref("do_convo_timestamp")) {
 		time(&t);
@@ -1300,13 +1300,13 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 	if(remote_contact->chatwindow->sound_enabled) {
 		if (firstmsg) {
 			if (remote_contact->chatwindow->first_enabled)
-				play_sound(FIRSTMSG);
+				play_sound( SOUND_FIRSTMSG );
 			else
-				play_sound(RECEIVE);
+				play_sound( SOUND_RECEIVE );
 			firstmsg = FALSE; 
 		}
 		else if (remote_contact->chatwindow->receive_enabled)
-			play_sound(RECEIVE);
+			play_sound( SOUND_RECEIVE );
 	}
 
 	/*for grab the focus*/

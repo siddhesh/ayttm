@@ -34,7 +34,7 @@
 #include "util.h"
 #include "dialog.h"
 #include "value_pair.h"
-#include "prefs_window.h"
+#include "prefs.h"
 
 #include "pixmaps/ok.xpm"
 #include "pixmaps/cancel.xpm"

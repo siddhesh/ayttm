@@ -39,7 +39,7 @@ typedef long __off32_t;
 #include "nomodule.h"
 #include "value_pair.h"
 #include "dialog.h"
-#include "prefs_window.h"
+#include "prefs.h"
 #include "status.h"
 
 #ifdef __MINGW32__

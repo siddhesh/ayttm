@@ -27,6 +27,44 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void gtkut_set_pixmap_from_xpm(char **xpm, GtkPixmap *pixmap);
 void gtkut_widget_get_uposition(GtkWidget *widget, gint *px, gint *py);
+
+/** Create a radio button and add it to a group.
+
+	@param	ioGroup			the group to which we want to add this radio button
+	@param	inParentBox		the v-or-h-box in which the radio button is to be inserted
+	@param	inButtonText	the text of the button
+	@param	inIsSelected	is this radio button currently selected?
+	@param	inSignalFunc	the callback function to call when it is clicked
+	@param	inCallbackData	the callback data
+	
+	@returns	the list 'ioGroup' with the new radio ubtton added to it
+*/
+GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox,
+			const char *inButtonText, int inIsSelected,
+			GtkSignalFunc inSignalFunc, void *inCallbackData );
+
+/** Create a check button.
+
+	@param	inParentBox		the v-or-h-box in which the button is to be inserted
+	@param	inButtonText	the text of the button
+	@param	inIsSelected	is this button currently selected?
+	@param	inSignalFunc	the callback function to call when it is clicked
+	@param	inCallbackData	the callback data
+	
+	@returns	the new button
+*/
+GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText, int inIsSelected,
+	GtkSignalFunc inSignalFunc, void *inCallbackData );
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 #endif

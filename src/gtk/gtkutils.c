@@ -55,3 +55,49 @@ void gtkut_widget_get_uposition(GtkWidget *widget, gint *px, gint *py)
 	*px = x;
 	*py = y;
 }
+
+GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox,
+			const char *inButtonText, int inIsSelected,
+			GtkSignalFunc inSignalFunc, void *inCallbackData )
+{
+	GtkWidget	*radio = NULL;
+
+	
+	if ( inButtonText == NULL )
+		radio = gtk_radio_button_new( ioGroup );
+	else
+		radio = gtk_radio_button_new_with_label( ioGroup, inButtonText );
+	
+	gtk_widget_show( radio );
+
+	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(radio), inIsSelected );
+
+	gtk_box_pack_start( GTK_BOX(inParentBox), radio, FALSE, FALSE, 0 );
+
+	gtk_signal_connect( GTK_OBJECT(radio), "clicked", inSignalFunc, inCallbackData );
+
+	return( gtk_radio_button_group( GTK_RADIO_BUTTON(radio) ) );
+}
+
+
+GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText, int inIsSelected,
+	GtkSignalFunc inSignalFunc, void *inCallbackData )
+{
+	GtkWidget *button = NULL;
+
+		
+	if ( inButtonText == NULL )
+		button = gtk_check_button_new();
+	else
+		button = gtk_check_button_new_with_label( inButtonText );
+	
+	gtk_widget_show( button );
+	
+	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(button), inIsSelected );
+	
+	gtk_box_pack_start( GTK_BOX(inParentBox), button, FALSE, FALSE, 0 );
+	
+	gtk_signal_connect( GTK_OBJECT(button), "clicked", inSignalFunc, inCallbackData );
+	
+	return( button );
+}

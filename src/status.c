@@ -1391,7 +1391,7 @@ static void contact_login(struct contact * ec)
 		   only play the sound if the contact is not ignored. */
 		if (!iGetLocalPref("do_no_sound_for_ignore") ||
 		(strcasecmp(ec->group->name, _("Ignore")) != 0)) {
-			play_sound(BUDDY_ARRIVE);
+			play_sound( SOUND_BUDDY_ARRIVE );
 			last_sound_played = time(NULL);
 		}
 	}
@@ -1423,7 +1423,7 @@ static void contact_logoff(struct contact * ec)
 		   only play the sound if the contact is not ignored. */
 		if (!iGetLocalPref("do_no_sound_for_ignore") ||
 		(strcasecmp(ec->group->name, _("Ignore")) != 0)) {
-			play_sound(BUDDY_LEAVE);
+			play_sound( SOUND_BUDDY_LEAVE );
 			last_sound_played = time(NULL);
 		}
 	}
@@ -1773,7 +1773,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Help/_Web site..."),	NULL, show_website, 0, NULL },
 	{ N_("/Help/_Manual..."),	NULL, show_manual, 0, NULL },
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Help/_About Ayttm..."),NULL, show_about, 0, NULL }
+	{ N_("/Help/_About Ayttm..."),NULL, ay_ui_show_about, 0, NULL }
 };
 
 static GtkItemFactory *main_menu_factory = NULL;

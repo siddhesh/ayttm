@@ -621,22 +621,22 @@ void play_sound(int sound)
 		return;
 		
 	switch(sound)  {
-	case BUDDY_AWAY:
+	case SOUND_BUDDY_AWAY:
 		playsoundfile(cGetLocalPref("BuddyAwayFilename"));
 		break;
-	case BUDDY_ARRIVE:
+	case SOUND_BUDDY_ARRIVE:
 		playsoundfile(cGetLocalPref("BuddyArriveFilename"));
 		break;
-	case BUDDY_LEAVE:
+	case SOUND_BUDDY_LEAVE:
 		playsoundfile(cGetLocalPref("BuddyLeaveFilename"));
 		break;
-	case SEND:
+	case SOUND_SEND:
 		playsoundfile(cGetLocalPref("SendFilename"));
 		break;
-	case RECEIVE:
+	case SOUND_RECEIVE:
 		playsoundfile(cGetLocalPref("ReceiveFilename"));
 		break;
-	case FIRSTMSG:
+	case SOUND_FIRSTMSG:
 		playsoundfile(cGetLocalPref("FirstMsgFilename"));
 		break;
 	}

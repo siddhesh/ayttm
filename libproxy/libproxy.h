@@ -36,10 +36,15 @@
 #define extern __declspec(dllimport)
 #endif
 
-#define PROXY_NONE 0
-#define PROXY_HTTP 1
-#define PROXY_SOCKS4 2		
-#define PROXY_SOCKS5 3		
+enum eProxyType
+{
+	PROXY_NONE = 0,
+	PROXY_HTTP,
+	PROXY_SOCKS4,
+	PROXY_SOCKS5,
+	
+	PROXY_MAX
+};
 
 /* gethostbyname function */
 extern struct hostent * proxy_gethostbyname(char *host) ;

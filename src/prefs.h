@@ -48,11 +48,11 @@ typedef struct
 	const char		*service_name;
 	
 	input_list		*pref_list;
-} module_pref;
+} t_module_pref;
 
 struct prefs
 {
-	struct
+	struct general
 	{
 		int		do_ayttm_debug;
 		int		use_alternate_browser;
@@ -64,19 +64,19 @@ struct prefs
 		#endif
 	} general;
 	
-	struct
+	struct logging
 	{
 		int		do_logging;
 		int		do_restore_last_conv;
 	} logging;
 	
-	struct
+	struct layout
 	{
 		int		do_tabbed_chat;
 		int		do_tabbed_chat_orient;	/* Tab Orientation:  0 => bottom, 1 => top, 2=> left, 3 => right */
 	} layout;
 	
-	struct
+	struct chat
 	{
 		int		do_ignore_unknown;
 		int		font_size;
@@ -89,7 +89,7 @@ struct prefs
 		char	accel_next_tab[MAX_PREF_LEN];
 	} chat;
 	
-	struct
+	struct sound
 	{
 		int		do_no_sound_when_away;
 		int		do_no_sound_for_ignore;
@@ -108,7 +108,7 @@ struct prefs
 		double	SoundVolume;
 	} sound;
 	
-	struct
+	struct advanced
 	{
 		int		proxy_type;
 		char	proxy_host[MAX_PREF_LEN];
@@ -123,7 +123,7 @@ struct prefs
 		char	remote_encoding[MAX_PREF_LEN];
 	} advanced;
 	
-	struct
+	struct module
 	{
 		LList	*module_info;
 	} module;
@@ -140,10 +140,10 @@ __declspec(dllimport)
 #endif
 void	ayttm_prefs_write( void );
 
-void		ayttm_prefs_show_window( void );
-module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName );
-void		ayttm_prefs_apply( struct prefs *inPrefs );
-void		ayttm_prefs_cancel( struct prefs *inPrefs );
+void			ayttm_prefs_show_window( void );
+t_module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName );
+void			ayttm_prefs_apply( struct prefs *inPrefs );
+void			ayttm_prefs_cancel( struct prefs *inPrefs );
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 __declspec(dllimport) void *GetPref( const char *key );

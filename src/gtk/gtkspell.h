@@ -22,6 +22,10 @@
 /* PLEASE NOTE that this API is unstable and subject to change. */
 #define GTKSPELL_VERSION "0.3.1"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int gtkspell_start(char *path, char *args[]);
 /* Spawns the spell checking program.
  *
@@ -99,5 +103,9 @@ void gtkspell_uncheck_all(GtkText *gtktext);
  * Arguments:
  *  - "text" is the widget to check.
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __gtkspell_h__ */

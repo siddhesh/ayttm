@@ -1,3 +1,22 @@
+* Wed Apr 16 2003 10:40 GMT [andy]	0.2.3-109
+  libproxy/libproxy.h
+  src/Makefile.am
+  src/chat_room.c
+  src/chat_window.c
+  src/edit_local_accounts.c
+  src/input_list.h
+  src/plugin.c
+  src/prefs.[ch]
+  src/prefs_window.[ch]   ** REMOVED **
+  src/sound.[ch]
+  src/status.c
+  src/gtk/Makefile.am
+  src/gtk/about.[ch]
+  src/gtk/gtkspell.h
+  src/gtk/gtkutils.[ch]
+  src/gtk/prefs_window.[Ch]  ** NEW FILES **
+Merge in new prefs window from prefs_stage_2 branch
+
 * Wed Apr 16 2003 07:44 GMT [colin]	0.2.3-108
 - src/status.c
 Fix GDK warnings (should also fix "removal of restore position pref")
