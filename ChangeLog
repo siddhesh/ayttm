@@ -1,3 +1,9 @@
+* Wed Apr 16 2003 11:15 GMT [andy]	0.2.3-110
+-src/input_list.c
+Make labels line up better for module prefs
+- src/gtk/gtkutils.h
+Fix spelling mistake
+
 * Wed Apr 16 2003 10:40 GMT [andy]	0.2.3-109
   libproxy/libproxy.h
   src/Makefile.am

@@ -24,84 +24,81 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "input_list.h"
 #include "value_pair.h"
 #include "dialog.h"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
 
 
-void eb_input_render(input_list * il, void * box)
+void	eb_input_render( input_list * il, void * box )
 {
-	/* XXX: for backwards compatibility remove later */
-	char *item_label=NULL;
+	char	*item_label = NULL;
 
-	if(!il)
-	{
+	
+	if ( il == NULL )
 		return;
-	}
 
-	/* XXX: for backwards compatibility change later */
-	switch(il->type)
+	switch ( il->type )
 	{
 		case EB_INPUT_CHECKBOX:
-			if(il->widget.checkbox.label)
+			if ( il->widget.checkbox.label )
 				item_label = il->widget.checkbox.label;
 			else
 				item_label = il->widget.checkbox.name;
 
 			break;
+			
 		case EB_INPUT_ENTRY:
-			if(il->widget.entry.label)
+			if ( il->widget.entry.label )
 				item_label = il->widget.entry.label;
 			else
 				item_label = il->widget.entry.name;
 
 			break;
+		
+		default:
+			assert( FALSE );
+			break;
 	}
-	/* End b/w comp code */
 
-	switch(il->type)
+	switch ( il->type )
 	{
 		case EB_INPUT_CHECKBOX:
 			{
-				eb_button(item_label, /* XXX */
-						il->widget.checkbox.value,
-						box);
-				il->widget.checkbox.saved_value =
-					*(il->widget.checkbox.value);
+				eb_button( item_label, il->widget.checkbox.value, box );
+				il->widget.checkbox.saved_value = *(il->widget.checkbox.value);
 			}
 			break;
+			
 		case EB_INPUT_ENTRY:
 			{
-				GtkWidget * hbox = gtk_hbox_new(FALSE, 0);
-				GtkWidget * widget = gtk_label_new(item_label); /* XXX */
-				gtk_widget_set_usize(widget, 100, 15);
-				gtk_box_pack_start(GTK_BOX(hbox),
-						widget, FALSE, FALSE, 0);
-				gtk_widget_show(widget);
+				GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
+				GtkWidget	*widget = gtk_label_new( item_label );
+				gtk_widget_show( hbox );
+				gtk_widget_show( widget );
+				
+				gtk_misc_set_alignment( GTK_MISC( widget ), 0.0, 0.5 );
+				gtk_widget_set_usize( widget, 120, 15 );
+				gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
 
 				widget = gtk_entry_new();
+				gtk_widget_show( widget );
 				il->widget.entry.entry = widget;
-				gtk_entry_set_text(GTK_ENTRY(widget),
-						il->widget.entry.value);
-				gtk_box_pack_start(GTK_BOX(hbox),
-						widget, FALSE, FALSE, 0);
-				gtk_widget_show(widget);
+				gtk_entry_set_text( GTK_ENTRY(widget), il->widget.entry.value );
+				gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
 
-				gtk_box_pack_start(GTK_BOX(box), hbox,
-						FALSE, FALSE, 0);
-				gtk_widget_show(hbox);
-
-
+				gtk_box_pack_start( GTK_BOX(box), hbox, FALSE, FALSE, 0 );
 			}
 			break;
 	}
 
-	eb_input_render(il->next, box);
+	eb_input_render( il->next, box );
 }
 
 void eb_input_cancel(input_list * il)
