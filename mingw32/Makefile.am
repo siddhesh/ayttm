@@ -21,7 +21,7 @@ ayttm.exe: ayttmrc
 	cp /target/lib/libintl-1.dll /cygdrive/c/Program\ Files/ayttm
 	cp ../COPYING /cygdrive/c/Program\ Files/ayttm
 
-plugins: modules sound importers utilities aim-toc icq-toc irc yahoo2 jabber smtp smileys
+plugins: modules sound importers utilities aim-toc icq-toc irc msn2 yahoo2 jabber smtp smileys
 
 modules:
 	rm -f /cygdrive/c/Program\ Files/ayttm/modules/*.la
@@ -57,7 +57,7 @@ irc:
 	cp irc.la /cygdrive/c/Program\ Files/ayttm/modules
 
 msn2:
-	./makedll ../modules/msn2/msn c++ ../modules/msn2/libmsn2/*.o
+	./makedll ../modules/msn2/msn $(CXX) ../modules/msn2/libmsn2/*.o
 	cp ../modules/msn2/msn.dll /cygdrive/c/Program\ Files/ayttm/modules
 	cp msn2.la /cygdrive/c/Program\ Files/ayttm/modules
 
