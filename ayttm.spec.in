@@ -5,7 +5,7 @@ Release:	@RELEASE@
 Group: 		Applications/Internet
 License: 	GPL
 URL: 		http://ayttm.sourceforge.net
-Source: 	%{name}-%{version}.tar.gz
+Source: 	%{name}-%{version}.tar.bz2
 Buildroot: 	%{_tmppath}/%{name}-%{version}-%{release}-root
 Requires:	@REQUIRES@
 
