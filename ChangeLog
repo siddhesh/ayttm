@@ -1,3 +1,7 @@
+* Tue Jun 10 2003 07:42 GMT [colin]	0.3.1-30
+- src/status.c
+Reorder menus
+
 * Mon Jun  9 2003 07:42 GMT [philip]	0.3.1-29
 - src/account.h src/util.[ch] src/contact_parser.y
 add priority flag for accounts under a contact, and sort accounts

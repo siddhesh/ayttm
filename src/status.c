@@ -1851,30 +1851,38 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 
 static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/_File"),		NULL,       NULL, 0, "<Branch>" },
-	{ N_("/File/Set _status"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/File/Sign o_n all"),	"<control>A", eb_sign_on_all, 0, NULL },
-	{ N_("/File/Sign o_ff all"),	"<control>F", eb_sign_off_all, 0, NULL },
-	{ N_("/File/---"),		NULL,         NULL, 0, "<Separator>" },
 	{ N_("/File/_Import"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/File/_Smileys"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/File/Set _profile"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/File/---"),		NULL,         NULL, 0, "<Separator>" },
-	{ N_("/File/_Quit"),		"<control>Q", delete_event, 0, NULL },
-	{ N_("/_Tools"),		NULL, NULL, 0, "<Branch>" },
-	{ N_("/Tools/New group _chat..."),
-  				NULL, launch_group_chat, 0, NULL },
-	{ N_("/Tools/Set as _away..."),	NULL, show_away_choicewindow, 0, NULL },
-	{ N_("/Tools/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Tools/Add a con_tact account..."),		
-  				NULL, add_callback, 0, NULL },
-	{ N_("/Tools/Add a _group..."),
-  				NULL, add_group_callback, 0, NULL },
-	{ N_("/Tools/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Tools/_Edit accounts..."),
-  				NULL, eb_edit_accounts, 0, NULL },
-	{ N_("/Tools/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Tools/_Preferences..."),
+	{ N_("/File/---"),	NULL,         NULL, 0, "<Separator>" },
+	{ N_("/File/_Quit"),	"<control>Q", delete_event, 0, NULL },
+
+	{ N_("/_Edit"),		NULL,       NULL, 0, "<Branch>" },
+	{ N_("/Edit/_Preferences..."),
   				NULL, build_prefs_callback, 0, NULL },
+	{ N_("/Edit/_My accounts..."),
+  				NULL, eb_edit_accounts, 0, NULL },
+	{ N_("/Edit/---"),	NULL, NULL, 0, "<Separator>" },
+	{ N_("/Edit/Add a con_tact account..."),		
+  				NULL, add_callback, 0, NULL },
+	{ N_("/Edit/Add a _group..."),
+  				NULL, add_group_callback, 0, NULL },
+	{ N_("/Edit/---"),	NULL,         NULL, 0, "<Separator>" },
+	{ N_("/Edit/Set _profile"),	NULL, 	    NULL, 0, NULL },
+	
+	{ N_("/_Chat"),		NULL,       NULL, 0, "<Branch>" },
+	{ N_("/Chat/Set _status"),	
+				NULL, 	    NULL, 0, NULL },
+	{ N_("/Chat/Sign o_n all"),	
+				"<control>A", eb_sign_on_all, 0, NULL },
+	{ N_("/Chat/Sign o_ff all"),	
+				"<control>F", eb_sign_off_all, 0, NULL },
+	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
+	{ N_("/Chat/New group _chat..."),
+  				NULL, launch_group_chat, 0, NULL },
+	{ N_("/Chat/Set as _away..."),	
+				NULL, show_away_choicewindow, 0, NULL },
+	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
+	{ N_("/Chat/_Smileys"),	NULL, 	    NULL, 0, NULL },
+
 	{ N_("/_Help"),		NULL, NULL, 0, "<Branch>" },
 #ifndef __MINGW32__
 	{ N_("/Help/_Web site..."),	NULL, show_website, 0, NULL },
@@ -1912,10 +1920,10 @@ void set_menu_sensitivity(void)
 {
 	int online = connected_local_accounts();
 	
-	menu_set_sensitive(main_menu_factory, N_("/Tools/New group chat..."), online);
-	menu_set_sensitive(main_menu_factory, N_("/Tools/Set as away..."), online+1);
-	menu_set_sensitive(main_menu_factory, N_("/File/Sign off all"), online);
-	menu_set_sensitive(main_menu_factory, N_("/File/Sign on all"),
+	menu_set_sensitive(main_menu_factory, N_("/Chat/New group chat..."), online);
+	menu_set_sensitive(main_menu_factory, N_("/Chat/Set as away..."), online);
+	menu_set_sensitive(main_menu_factory, N_("/Chat/Sign off all"), online);
+	menu_set_sensitive(main_menu_factory, N_("/Chat/Sign on all"),
 				(online != l_list_length(accounts)));
 	
 }
@@ -1965,15 +1973,15 @@ void ay_set_submenus(void)
 	eb_import_window(submenuitem);
 	SetPref("widget::import_submenuitem", submenuitem);
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Smileys");
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Chat/Smileys");
 	eb_smiley_window(submenuitem);
 	SetPref("widget::smiley_submenuitem", submenuitem);
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set profile");
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Edit/Set profile");
 	eb_profile_window(submenuitem);
 	SetPref("widget::profile_submenuitem", submenuitem);
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/File/Set status");
+	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Chat/Set status");
 	eb_set_status_window(submenuitem);
 	SetPref("widget::set_status_submenuitem", submenuitem);
 }
