@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.20 $",
-	"$Date: 2003/04/27 12:30:38 $",
+	"$Revision: 1.21 $",
+	"$Date: 2003/04/28 10:43:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -439,6 +439,11 @@ static eb_account * eb_jabber_read_account_config( LList * config, struct contac
 	str = value_pair_get_value( config, "NAME");
 	strncpy(ea->handle, str, 255 );
 	free( str );
+	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
+	if (str) {
+		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
+		g_free(str);
+	}
 	
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = jad;

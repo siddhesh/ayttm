@@ -520,6 +520,8 @@ int main(int argc, char *argv[])
 
 	clean_up_dummies();
 
+	write_contact_list();
+	
 	unload_modules(); // Need to unload what we load
 	eb_debug(DBG_CORE, "Shutting sound down\n");
 	sound_shutdown();

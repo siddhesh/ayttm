@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.11 $",
-	"$Date: 2003/04/27 14:16:20 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/04/28 10:43:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1374,6 +1374,12 @@ static eb_account * irc_read_config(LList *config, struct contact *contact)
 		 strncpy(ea->handle, temp, 254);
 		 free( temp );
 		 temp = NULL;
+	}
+	
+	temp = value_pair_get_value(config, "LOCAL_ACCOUNT");
+	if (temp) {
+		ea->ela = find_local_account_by_handle(temp, SERVICE_INFO.protocol_id);
+		g_free(temp);
 	}
 
 	ia->idle = 0;

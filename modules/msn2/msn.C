@@ -150,8 +150,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.29 $",
-	"$Date: 2003/04/28 10:13:49 $",
+	"$Revision: 1.30 $",
+	"$Date: 2003/04/28 10:43:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -874,11 +874,18 @@ static eb_account * eb_msn_read_account_config( LList * config, struct contact *
 	mad->status = MSN_OFFLINE;
 	tmp = value_pair_get_value( config, "NAME");
 	strncpy(ea->handle, tmp, 255 );
-	g_free(tmp);
+	free(tmp);
 
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = mad;
 	ea->account_contact = contact;
+	
+	tmp = value_pair_get_value(config, "LOCAL_ACCOUNT");
+	if (tmp) {
+		ea->ela = find_local_account_by_handle(tmp, SERVICE_INFO.protocol_id);
+		free(tmp);
+	}
+	
 	ea->list_item = NULL;
 	ea->online = 0;
 	ea->status = NULL;

@@ -114,9 +114,13 @@ void write_contact_list()
 			
 			for(l3 = ((struct contact*)l2->data)->accounts; l3; l3=l3->next) {
 				eb_account * account = (eb_account*)l3->data;
-				fprintf( fp, "\t\t<ACCOUNT %s>\n\t\t\tNAME=\"%s\"\n\t\t</ACCOUNT>\n",
+				fprintf( fp, "\t\t<ACCOUNT %s>\n"
+						"\t\t\tNAME=\"%s\"\n"
+						"\t\t\tLOCAL_ACCOUNT=\"%s\"\n"
+					     "\t\t</ACCOUNT>\n",
 					 eb_services[account->service_id].name,
-					 account->handle );	 
+					 account->handle,
+					 account->ela ? account->ela->handle:"");	 
 
 			}
 			fprintf( fp, "\t</CONTACT>\n" );

@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.26 $",
-	"$Date: 2003/04/27 14:16:22 $",
+	"$Revision: 1.27 $",
+	"$Date: 2003/04/28 10:43:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1889,6 +1889,11 @@ static eb_account *eb_yahoo_read_account_config(LList * config, struct contact *
 	str = value_pair_get_value(config, "NAME");
 	strncpy(ea->handle, str, 255);
 	free( str );
+	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
+	if (str) {
+		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
+		g_free(str);
+	}
 
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = yad;

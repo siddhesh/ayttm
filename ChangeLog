@@ -1,3 +1,8 @@
+* Mon Apr 28 2003 10:40 GMT [colin]	0.3.0-9
+- src/contact_parser.y src/account.c
+  modules/*/*
+Save and restore eb_account->ela
+
 * Mon Apr 28 2003 10:12 GMT [colin]	0.3.0-8
 - modules/msn2
 First bunch of fixes for multiaccounting
