@@ -64,12 +64,10 @@ void open_url(void *w, char *url) {
 	char esc_url[1024];
 	int i=0,j=1;
 	
-	if (!strncmp("log://", url, 6)) {
+	if (!strncmp("log://", url, 6))
+	{
 		/*internal handling*/
-		log_window *lw = NULL;
-		lw = eb_log_window_new(NULL);
-		lw->filename = strdup(url+6);
-		eb_log_load_information(lw);
+		ay_log_window_file_create( url+6 );
 		return;
 	}
 

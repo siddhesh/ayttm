@@ -1,3 +1,16 @@
+* Sat May  3 2003 18:20 GMT [andy]	0.3.0-122
+- src/ui_log_window.h	** ADDED **
+  src/Makefile.am
+  src/browser.c
+  src/chat_room.h
+  src/chat_window.[ch]
+  src/contact.h
+  src/contact_actions.c
+  src/logs.[ch]
+  src/gtk/gtk_eb_html.[ch]
+  src/gtk/log_window.C
+Finish moving log windows into gtk dir
+
 * Sat May  3 2003 14:43 GMT [colin]	0.3.0-121
 - modules/smtp/smtp.c
 Let our contacts stay offline - this way we won't send

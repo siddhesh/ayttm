@@ -33,8 +33,19 @@
 #include "util.h"
 #include "prefs.h"
 #include "globals.h"
-#include "logs.h"
 
+#include "ui_log_window.h"
+
+
+t_log_window_id ay_log_window_contact_create( struct contact *inRemoteContact )
+{
+	return( ay_ui_log_window_contact_create( inRemoteContact ) );
+}
+
+t_log_window_id ay_log_window_file_create( const char *inFileName )
+{
+	return( ay_ui_log_window_file_create( inFileName ) );
+}
 
 log_file	*ay_log_file_create( const char *inFileName )
 {

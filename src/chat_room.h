@@ -27,6 +27,8 @@
 
 #include <time.h>
 
+#include <gtk/gtk.h>
+
 #include "account.h"
 #include "logs.h"
 

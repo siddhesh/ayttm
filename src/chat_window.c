@@ -1621,7 +1621,7 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 				free(temp);
 			} else {
-				log_parse_and_add(buff, cw->chat);
+				gtk_eb_html_log_parse_and_add( EXT_GTK_TEXT(cw->chat), buff );
 			}
 
 			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);

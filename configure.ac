@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=121
+RELEASE=122
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -35,7 +35,7 @@ AM_PROG_LIBTOOL
 case "$host" in
 *-darwin*)
         CFLAGS="$CFLAGS -no-cpp-precomp"
-        CXXFLAGS="CXXFLAGS -no-cpp-precomp"
+        CXXFLAGS="$CXXFLAGS -no-cpp-precomp"
         ;;
 esac
 

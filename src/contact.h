@@ -32,6 +32,7 @@
 
 #include "account.h"
 #include "trigger.h"
+#include "logs.h"
 
 
 struct contact {
@@ -46,7 +47,7 @@ struct contact {
 	int default_filetransb;
 	struct _grouplist * group;
 	struct _chat_window * chatwindow;
-	struct _log_window* logwindow;
+	t_log_window_id logwindow;
 
 	void * list_item; /* GtkWidget */
 	void * tree; /* GtkWidget */

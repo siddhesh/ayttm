@@ -28,6 +28,10 @@
 #include <stdio.h>
 
 
+struct contact;
+
+typedef void	*t_log_window_id;
+
 typedef struct _log_file
 {
   const char	*filename;
@@ -40,6 +44,23 @@ typedef struct _log_file
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** Create a log window and display logs for a given remote user.
+
+	@param	inRemoteContact		the remote contact
+	
+	@returns	the log window id
+*/
+t_log_window_id ay_log_window_contact_create( struct contact *inRemoteContact );
+
+/** Create a log window and display a file.
+
+	@param	inFileName		the name of the log file
+	
+	@returns	the log window id
+*/
+t_log_window_id ay_log_window_file_create( const char *inFileName );
+
 
 /** Create a struct used to operate on log files.
 
@@ -83,7 +104,6 @@ void		ay_log_file_close( log_file *ioLogFile );
 */
 void		ay_log_file_destroy( log_file **ioLogFile );
 
-
 /** Free all memory allocated for a log file and set it to NULL.
 	
 	@note This will not close the file
@@ -91,44 +111,6 @@ void		ay_log_file_destroy( log_file **ioLogFile );
 	@param	ioLogFile		the log file which we are destroying
 */
 void		ay_log_file_destroy_no_close( log_file **ioLogFile );
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
-
-/* Yet to be cleaned up... */
-
-#include <gtk/gtk.h>
-#include <glib.h>
-#include <stdio.h>
-
-struct contact;
-
-typedef struct _log_window
-{
-  GtkWidget* window;
-  GtkWidget* date_list;
-  GtkWidget* date_scroller;
-  GtkWidget* html_display;
-  GtkWidget* html_scroller;
-  GtkWidget* date_html_hbox;
-
-  GtkWidget* close_button;
-  struct contact* remote;
-  const char *filename;
-  GSList* entries;   /* list of gslists */
-  FILE *fp;
-  long filepos;
-} log_window;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-log_window*	eb_log_window_new( struct contact* rc );
-void		eb_log_load_information( log_window* lw );
-void		log_parse_and_add( const char *buff, void *text );
 
 #ifdef __cplusplus
 } /* extern "C" */

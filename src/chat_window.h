@@ -33,8 +33,9 @@
 
 #include <time.h>
 
+#include <gtk/gtk.h>
+
 #include "contact.h"
-#include "logs.h"
 
 
 typedef struct _chat_window
@@ -72,7 +73,7 @@ typedef struct _chat_window
 	time_t away_msg_sent;
 	time_t away_warn_displayed;
 	
-	log_window* lw;
+	t_log_window_id lw;
 
 	GtkWidget* notebook; /* when using tabbed chat, this is the same for all chat_window structs. */
 	GtkWidget* notebook_child; /* this part is different for each person we're talking to */

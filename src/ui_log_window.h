@@ -1,5 +1,5 @@
 /*
- * Ayttm 
+ * Ayttm
  *
  * Copyright (C) 2003, the Ayttm team
  * 
@@ -20,35 +20,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */
+ */ 
 
-#ifndef __GTK_EB_HTML_H__
-#define __GTK_EB_HTML_H__
+#ifndef __UI_LOG_WINDOW_H__
+#define __UI_LOG_WINDOW_H__
 
-#include "extgtktext.h"
-
-
-#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-#define extern __declspec(dllimport)
-#endif
+#include "logs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void gtk_eb_html_init(ExtGtkText* widget);
-
-extern void gtk_eb_html_add(ExtGtkText * widget, char * text,
-		int ignore_bgcolor, int ignore_fgcolor, int ignore_font );
-
-void	gtk_eb_html_log_parse_and_add( ExtGtkText *widget, const char *log );
+t_log_window_id		ay_ui_log_window_contact_create( struct contact *inRemoteContact );
+t_log_window_id		ay_ui_log_window_file_create( const char *inFileName );
 
 #ifdef __cplusplus
 } /* extern "C" */
-#endif
-
-#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-#define extern extern
 #endif
 
 #endif

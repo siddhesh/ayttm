@@ -26,7 +26,7 @@ noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	externs.h llist.h mem_util.h offline_queue_mgmt.h tcp_util.h \
 	image_window.h action.h about.h messages.h \
 	edit_local_accounts.h  platform_defs.h edit_list_window.h \
-	ui_about_window.h ui_file_selection_dlg.h ui_message_windows.h ui_prefs_window.h
+	ui_about_window.h ui_file_selection_dlg.h ui_log_window.h ui_message_windows.h ui_prefs_window.h
 
 EXTRA_DIST = 
 

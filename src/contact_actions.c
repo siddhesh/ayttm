@@ -70,6 +70,6 @@ void eb_view_log( struct contact *contact )
 	}
 
 	if ( contact->logwindow == NULL )
-		contact->logwindow = eb_log_window_new( contact );
+		contact->logwindow = ay_log_window_contact_create( contact );
 }
 
