@@ -68,7 +68,7 @@ void (*toc_user_info)(toc_conn  * conn, char * user, char * message );
 void (*toc_logged_in)(toc_conn *conn);
 
 void toc_callback( toc_conn * conn );
-void toc_signon( const char * username, const char * password,
+int toc_signon( const char * username, const char * password,
 		const char * server, short port, const char * info );
 void toc_send_keep_alive( toc_conn * conn );
 void toc_signoff( toc_conn * conn );

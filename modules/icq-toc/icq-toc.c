@@ -90,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/06 12:14:45 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/04/08 07:39:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -167,6 +167,7 @@ struct eb_icq_local_account_data {
 	int input;
 	int keep_alive;
 	int status;
+	int activity_tag;
 	int connect_tag;
 };
 
@@ -720,6 +721,16 @@ static void eb_icq_add_user( eb_account * account )
 	}
 }
 
+static void ay_icq_cancel_connect(void *data)
+{
+	eb_local_account *ela = (eb_local_account *)data;
+	struct eb_icq_local_account_data * alad;
+	alad = (struct eb_icq_local_account_data *)ela->protocol_local_account_data;
+	
+	ay_socket_cancel_async(alad->connect_tag);
+	alad->activity_tag=0;
+	eb_icq_logout(ela);
+}
 
 static void eb_icq_login( eb_local_account * account )
 {
@@ -730,9 +741,9 @@ static void eb_icq_login( eb_local_account * account )
 	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
 
 	snprintf(buff, sizeof(buff), _("Logging in to ICQ account: %s"), account->handle);
- 	alad->connect_tag = ay_activity_bar_add(buff, NULL, NULL);
+ 	alad->activity_tag = ay_activity_bar_add(buff, ay_icq_cancel_connect, account);
 
-	icqtoc_signon( account->handle, alad->password,
+	alad->connect_tag = icqtoc_signon( account->handle, alad->password,
 			      icq_server, atoi(icq_port), alad->icq_info);
 }
 
@@ -748,15 +759,9 @@ static void eb_icq_logged_in (toc_conn *conn)
  	alad = (struct eb_icq_local_account_data *)ela->protocol_local_account_data;
  	alad->conn = conn;
 	
- 	ay_activity_bar_remove(alad->connect_tag);
- 	
-	if(!alad->conn)
-	{
-		g_warning("FAILED TO CONNECT TO icq SERVER!!!!!!!!!!!!");
-		do_error_dialog(_("Cannot connect to ICQ due to network problem."), _("ICQ Error"));		
-		eb_icq_logout(ela);
-		return;
-	}
+ 	ay_activity_bar_remove(alad->activity_tag);
+	alad->activity_tag = 0;
+	 	
 	if(alad->conn->fd == -1 )
 	{
 		g_warning("eb_icq UNKNOWN CONNECTION PROBLEM");
@@ -801,15 +806,17 @@ static void eb_icq_logout( eb_local_account * account )
 	LList *l;
 	struct eb_icq_local_account_data * alad;
 	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
-	eb_debug(DBG_TOC, "eb_icq_logout %d %d\n", alad->conn->fd, alad->conn->seq_num );
 	eb_input_remove(alad->input);
 	eb_timeout_remove(alad->keep_alive);
+	alad->connect_tag = 0;
 	if(alad->conn)
 	{
+		eb_debug(DBG_TOC, "eb_icq_logout %d %d\n", alad->conn->fd, alad->conn->seq_num );
 		icqtoc_signoff(alad->conn);
 		g_free(alad->conn);
 		alad->conn = NULL;
-		ref_count--;
+		if (ref_count >0)
+			ref_count--;
 	}
 #if 0
 	if(account->status_menu)
@@ -817,7 +824,7 @@ static void eb_icq_logout( eb_local_account * account )
 #endif
 	alad->status=ICQ_OFFLINE;
 	
-	account->connected = 0;
+	account->connected = account->connecting = 0;
 
 	is_setting_state = 1;
 

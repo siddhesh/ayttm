@@ -136,8 +136,7 @@ static int connect_address(unsigned int addy, unsigned short port, void *cb, voi
 		}
 		return -1;
 	} else {
-		proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data);
-		return 1;
+		return proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data);
 	}
 }
 
@@ -1211,7 +1210,7 @@ static unsigned int generate_code(const char * username, const char * password)
 
 
 
-void icqtoc_signon( const char * username, const char * password,
+int icqtoc_signon( const char * username, const char * password,
 		    const char * server, short port, const char * tinfo )
 {
 	toc_conn * conn = g_new0(toc_conn, 1);
@@ -1227,7 +1226,7 @@ void icqtoc_signon( const char * username, const char * password,
 	conn->port = port;
 
 
-	connect_address(get_address(server), port,icqtoc_signon_cb, conn);
+	return connect_address(get_address(server), port,icqtoc_signon_cb, conn);
 	
 }
 

@@ -127,7 +127,6 @@ static int connect_address(unsigned int addy, unsigned short port, void *cb, voi
 
 		if (fd > -1) 
 		{
-			//quad_addr=strdup(inet_ntoa(sin.sin_addr));
 			if (proxy_connect(fd, (struct sockaddr *)&sin, sizeof(sin),NULL,NULL) > -1) 
 			{
 				return fd;
@@ -135,8 +134,7 @@ static int connect_address(unsigned int addy, unsigned short port, void *cb, voi
 		}
 		return -1;
 	} else {
-		proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data);
-		return 1;
+		return proxy_connect(-1, (struct sockaddr *)&sin, sizeof(sin), cb, data);
 	}
 }
 
@@ -1211,7 +1209,7 @@ static unsigned int generate_code(const char * username, const char * password)
 
 
 
-void toc_signon( const char * username, const char * password,
+int toc_signon( const char * username, const char * password,
 		    const char * server, short port, const char * tinfo )
 {
 	toc_conn * conn = g_new0(toc_conn, 1);
@@ -1227,7 +1225,7 @@ void toc_signon( const char * username, const char * password,
 	conn->port = port;
 
 
-	connect_address(get_address(server), port,toc_signon_cb, conn);
+	return connect_address(get_address(server), port,toc_signon_cb, conn);
 	
 }
 
