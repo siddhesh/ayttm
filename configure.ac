@@ -420,9 +420,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  sounds/Makefile
                  src/Makefile
 		 src/gtk/Makefile
-		 mingw32/Makefile
-		 mingw32/gdk/Makefile
-		 mingw32/gdk/win32/Makefile])
+		 mingw32/Makefile])
 
 if test "x$host_alias" = "xmingw32" ; then
 	echo "editing src/Makefile final time"
