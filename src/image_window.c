@@ -259,45 +259,36 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new)
 {
 	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);
+	unsigned char *jpg_buf;
 	GdkPixbuf *pixbuf;
 	GdkPixmap *gdkpixmap;
 	GdkBitmap *mask;
 
-	if(!aiw) {
+	if(!aiw || !buf) {
 		return 0;
 	}
 
-	if(new) {
-		if(aiw->loader_open)
-			gdk_pixbuf_loader_close(aiw->loader);
-		aiw->loader_open = 0;
-	}
-	if(!aiw->loader_open) {
-		aiw->loader = gdk_pixbuf_loader_new();
-		aiw->loader_open = 1;
-	}
-
-	if(buf) {
-		unsigned char *jpg_buf = image_2_jpg(buf, &count);
-		eb_debug(DBG_CORE, "jpg_buf is %p\n", jpg_buf);
-		gdk_pixbuf_loader_write(aiw->loader, jpg_buf, count);
-		aiw->loader_open = 1;
-		free(jpg_buf);
-	} else {
-		gdk_pixbuf_loader_close(aiw->loader);
-		aiw->loader_open = 0;
-	}
+	jpg_buf = image_2_jpg(buf, &count);
+	eb_debug(DBG_CORE, "jpg_buf is %p\n", jpg_buf);
+	aiw->loader = gdk_pixbuf_loader_new();
+	gdk_pixbuf_loader_write(aiw->loader, jpg_buf, count);
+	gdk_pixbuf_loader_close(aiw->loader);
+	free(jpg_buf);
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(aiw->loader);
+
 	if(!pixbuf) {
 		return 0;
 	}
 
 	gdk_pixbuf_render_pixmap_and_mask(pixbuf, &gdkpixmap, &mask, 0);
+	gdk_pixbuf_unref(pixbuf);
 
 	gtk_pixmap_set(GTK_PIXMAP(aiw->pixmap), gdkpixmap, mask);
+
 	gtk_widget_show(aiw->pixmap);
 
+	gdk_pixmap_unref(gdkpixmap);
 	return 1;
 }
 

@@ -1,3 +1,9 @@
+* Sun Jun 15 2003 11:10 GMT [philip]	0.3.1-38
+- src/image_window.c
+fix one memory leak - others exist, but prolly in the gdk/jasper libs
+Image viewing should be done through an external app, but we need one that
+we can prompt to reload the image
+
 * Sun Jun 15 2003 07:00 GMT [philip]	0.3.1-37
 - modules/msn/libmsn2/msn_core.C
 better error message for SIP
