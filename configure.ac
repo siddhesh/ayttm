@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.3, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=16
+RELEASE=17
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -286,6 +286,8 @@ AC_ARG_ENABLE(broken_icq, AC_HELP_STRING([--enable-broken-icq],
 		[include broken icq service instead of working one]))
 AC_ARG_ENABLE(smtp, AC_HELP_STRING([--enable-smtp],
 		[include smtp service]))
+AC_ARG_ENABLE(lj, AC_HELP_STRING([--enable-lj],
+		[include livejournal service]))
 AC_ARG_ENABLE(aycryption, AC_HELP_STRING([--disable-aycryption],
 		[exclude encryption utility]))
 AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
@@ -339,6 +341,9 @@ if test "$enable_broken_icq" = yes; then
 fi
 if test "$enable_smtp" = yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR smtp"
+fi
+if test "$enable_lj" = yes; then
+	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR livejournal"
 fi
 if test "$enable_aim_toc" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aim-toc"
@@ -411,6 +416,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  modules/importers/Makefile
                  modules/irc/Makefile
 		 modules/smtp/Makefile
+                 modules/livejournal/Makefile
                  modules/jabber/Makefile
                  modules/jabber/libjabber/Makefile
                  modules/jabber/libjabber/include/Makefile

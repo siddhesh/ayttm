@@ -1,3 +1,9 @@
+* Fri Aug  1 2003 09:46 GMT [philip]	0.3.3-17
+- modules/livejournal/
+Added module for LiveJournal Blog service
+Can add/remove friends, and will receive notification of updates
+from server
+
 * Thu Jul 31 2003 09:00 GMT [philip]	0.3.3-16
 - modules/smtp modules/jabber
 jabber and smtp also use new prefs
