@@ -53,7 +53,7 @@ static tDevInfo sAyttmDevTeam[AYTTM_TEAM_SIZE] =
 
 /* Everybuddy developers */
 
-#define	EVERYBUDDY_TEAM_SIZE	(9)
+#define	EVERYBUDDY_TEAM_SIZE	(10)
 
 static tDevInfo sEverybuddyDevTeam[EVERYBUDDY_TEAM_SIZE] =
 {
@@ -65,15 +65,15 @@ static tDevInfo sEverybuddyDevTeam[EVERYBUDDY_TEAM_SIZE] =
 	{"Meredydd", 		"<m_luff@mail.wincoll.ac.uk>", 	"MSN Devel"},
 	{"Erik Inge Bolso", 	"<knan@mo.himolde.no>", 	"IRC Devel"},
 	{"Colin Leroy", 	"<colin@colino.net>", 		"Various hacks, i18n, Ayttm fork"},
-	{"Philip Tellis", 	"<philip.tellis@iname.com>", 	"Yahoo Devel"}
+	{"Philip Tellis", 	"<philip.tellis@iname.com>", 	"Yahoo Devel"},
+	{"Toby A. Inkster", 	"<tobyink@goddamn.co.uk>", 	"Patches"}
 };
 
-#define	HELP_TEAM_SIZE	(4)
+#define	HELP_TEAM_SIZE	(3)
 
 static tDevInfo sHelpDevTeam[HELP_TEAM_SIZE] =
 {
 	{"Yann Marigo", 	"<yann@yannos.com>", 		"Art, Fr translation"},
-	{"Toby A. Inkster", 	"<tobyink@goddamn.co.uk>", 	"Patches"},
 	{"Ben Reser", 		"<ben@reser.org>", 		"Patches, MDK RPMs"},
 	{"Lee Leahu", 		"<penguin365@dyweni.com>", 	"Patches"}
 };
@@ -198,22 +198,6 @@ void	ay_ui_show_about(void *useless, void *null)
 	gtk_box_pack_start(vbox2, separator, TRUE, TRUE, 5);
 
 	/* text */
-	label = GTK_LABEL(gtk_label_new( _("Ayttm is based on Everybuddy 0.4.3 which was brought to you by:") ));
-	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
-	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-	gtk_widget_show( GTK_WIDGET(label) );
-	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
-
-	/* list of Everybuddy developers */
-	table = sMakeDeveloperTable( EVERYBUDDY_TEAM_SIZE, sEverybuddyDevTeam );
-	gtk_box_pack_start(vbox2, GTK_WIDGET(table), TRUE, TRUE, 5);
-
-	/* separator */
-	separator = gtk_hseparator_new();
-	gtk_widget_show( separator );
-	gtk_box_pack_start(vbox2, separator, TRUE, TRUE, 5);
-
-	/* text */
 	label = GTK_LABEL(gtk_label_new( _("\"With a little help from\":") ));
 	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
 	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
@@ -232,6 +216,22 @@ void	ay_ui_show_about(void *useless, void *null)
 	
 	gtk_box_pack_start(vbox, GTK_WIDGET(scroll), TRUE, TRUE, 5);
 	
+	/* separator */
+	separator = gtk_hseparator_new();
+	gtk_widget_show( separator );
+	gtk_box_pack_start(vbox2, separator, TRUE, TRUE, 5);
+
+	/* text */
+	label = GTK_LABEL(gtk_label_new( _("Ayttm is based on Everybuddy 0.4.3 which was brought to you by:") ));
+	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+	gtk_widget_show( GTK_WIDGET(label) );
+	gtk_box_pack_start(vbox2, GTK_WIDGET(label), TRUE, TRUE, 5);
+
+	/* list of Everybuddy developers */
+	table = sMakeDeveloperTable( EVERYBUDDY_TEAM_SIZE, sEverybuddyDevTeam );
+	gtk_box_pack_start(vbox2, GTK_WIDGET(table), TRUE, TRUE, 5);
+
 	/* separator */
 	separator = gtk_hseparator_new();
 	gtk_widget_show( separator );

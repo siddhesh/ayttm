@@ -1,3 +1,7 @@
+* Sun Apr 27 2003 00:36 GMT [colin]	0.3.0-pre31
+- src/gtk/about.c AUTHORS
+Reorder :-)
+
 * Sat Apr 26 2003 17:36 GMT [colin]	0.3.0-pre30
 - src/gtk/about.c AUTHORS
 Authors sync

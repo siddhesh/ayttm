@@ -5,6 +5,11 @@ Philip S. Tellis  <philip.tellis@iname.com>      Yahoo!
 Edward. L. Haletky<elh@astroarch.com>            Windows Port
 Tahir Hashmi      <code_martial@softhome.net>    Manual, Doc.
 
+"With a little help from":
+Yann Marigo       <yann@yannos.com>              Art, Fr translation
+Ben Reser         <ben@reser.org>                Patches, MKD RPMs
+Lee Leahu         <penguin365@dyweni.com>        Patches
+
 Ayttm is based on Everybuddy 0.4.3 which was brought to you by:
 Torrey Searle     <tsearle@uci.edu>	     	 Creator
 Ben Rigas         <ben@flygroup.org>         	 Web Design & GUI Devel 
@@ -17,12 +22,7 @@ Meredydd	  <m_luff@mail.wincoll.ac.uk>	 MSN Devel
 Erik Inge Bolsø   <knan@mo.himolde.no>	     	 IRC Devel
 Colin Leroy	  <colin@colino.net>		 Various hacks, Ayttm fork
 Philip Tellis	  <philip.tellis@iname.com>	 Yahoo Devel
-
-"With a little help from":
-Yann Marigo       <yann@yannos.com>              Art, Fr translation
 Toby A. Inkster   <tobyink@goddamn.co.uk>        Patches
-Ben Reser         <ben@reser.org>                Patches, MKD RPMs
-Lee Leahu         <penguin365@dyweni.com>        Patches
 
 And a special thanks to Mark Spencer, initial creator of GAIM, for all the 
 tremendous support he has given.
