@@ -1,3 +1,7 @@
+* Sat Nov 8 2003 10:20 GMT [colin]	0.4.4-16
+- src/edit_local_account.c pixmaps/Makefile.am pixmaps/help.xpm
+Add help about adding accounts
+
 * Fri Nov 7 2003 18:09 GMT [philip]	0.4.4-15
 Added Chris Halls' changes
 Ran gettextize

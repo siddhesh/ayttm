@@ -47,6 +47,7 @@
 #include "pixmaps/tb_preferences.xpm"
 #include "pixmaps/checkbox_on.xpm"
 #include "pixmaps/checkbox_off.xpm"
+#include "pixmaps/help.xpm"
 
 enum {
 	CONNECT,
@@ -232,6 +233,27 @@ static char *check_login_validity(char *text[])
 	}
 
 	return NULL;
+}
+
+static void help_callback(GtkWidget * widget, gpointer data)
+{
+	ay_do_info(_("Help"),
+		_("How to create and register accounts:\n"
+			"- for AIM, ICQ and Yahoo: Use your screenname. "
+			"You have to register your account via website.\n"
+			"- for MSN: Use your complete login (user@host.com). "
+			"You have to register your account via website.\n"
+			"- for IRC: Use \"login@server.com\" in order to "
+			"connect as login to server.com. You have to type "
+			"in a password if the account is reserved on the "
+			"server.\n"
+			"- for Jabber: Use \"login@server.com\" in order to "
+			"connect as login to server.com. If the account does "
+			"not exist, you'll be asked whether you want to "
+			"register.\n"
+			"- for SMTP: Use the email address you want as From "
+			"address. Set the server to use in prefs. Password "
+			"isn't supported yet."));
 }
 
 static void add_callback(GtkWidget * widget, gpointer data)
@@ -640,6 +662,25 @@ void	ay_edit_local_accounts( void )
 
 	/*Add Button */
 
+	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
+					 NULL, help_xpm);
+	iconwid = gtk_pixmap_new(icon, mask);
+	gtk_widget_show(iconwid);
+	toolitem = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
+					   _("Help"),
+					   _("Help"),
+					   _("Help"),
+					   iconwid,
+					   GTK_SIGNAL_FUNC(help_callback),
+					   NULL);
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+	separator = gtk_vseparator_new();
+	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);
+	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL,
+				  NULL);
+	gtk_widget_show(separator);
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+	
 	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
 					 NULL, tb_preferences_xpm);
 	iconwid = gtk_pixmap_new(icon, mask);
