@@ -1,3 +1,7 @@
+* Wed Jan 14 2004 04:48 GMT [philip]     0.4.6-pre8
+- modules/aycryption/aycryption.c
+use g_new0 instead of calloc for consistency
+
 * Fri Jan 09 2004 05:07 GMT [philip]     0.4.6-pre7
 - include ayttm_streamer_wrapper.sh in dist
 

@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.20 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.21 $",
+	"$Date: 2004/01/14 04:49:14 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -104,7 +104,7 @@ unsigned int module_version() {return CORE_VERSION;}
 
 static int aycryption_init()
 {
-	input_list *il = calloc(1, sizeof(input_list));
+	input_list *il = g_new0(input_list, 1);
 	plugin_info.prefs = il;
 
 	il->widget.checkbox.value = &store_passphrase;
