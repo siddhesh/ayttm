@@ -591,6 +591,9 @@ static void yahoo_packet_free(struct yahoo_packet *pkt)
 void yahoo_close(int id) 
 {
 	struct yahoo_data *yd = find_conn_by_id(id);
+	if(!yd)
+		return;
+
 	del_from_list(yd);
 
 	yahoo_free_data(yd);
