@@ -326,7 +326,7 @@ if test "$enable_icq_toc" != no; then
 fi
 if test "$enable_aycryption" == yes; then
 	GPGME_CFLAGS=`gpgme-config --cflags`
-	if [ $? != 0 ]; then
+	if test $? != 0 ; then
 	 enable_aycryption=no;
 	 echo "you have to install gpgme 0.3 to use encryption"
 	else
