@@ -2,13 +2,13 @@ Source: ayttm
 Section: net
 Priority: optional
 Maintainer: Chris Halls <halls@debian.org>
-Build-Depends: debhelper (>> 4.0.0), libaudiofile-dev, libesd0-dev | libesd-alsa0-dev, libglib1.2-dev, libgtk1.2-dev, libgdk-pixbuf-dev, xlibs-dev, flex, bison, libpspell-dev, libltdl3-dev, libgpgme-dev, libssl-dev, gettext
+Build-Depends: debhelper (>> 4.0.0), libaudiofile-dev, libesd0-dev | libesd-alsa0-dev, libglib1.2-dev, libgtk1.2-dev, libgdk-pixbuf-dev, xlibs-dev, flex, bison, libpspell-dev, libltdl3-dev, libgpgme-dev, libssl-dev, gettext, libjasper-1.701-dev
 Standards-Version: 3.6.1
 
 Package: ayttm
 Architecture: any
 Depends: ${shlibs:Depends}
-Suggests:
+Suggests: libjasper-1.701-1 (>= 1.701.0)
 Replaces: everybuddy, everybuddy-cvs
 Provides: everybuddy
 Description: Universal Instant Messaging Client

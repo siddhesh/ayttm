@@ -1,10 +1,20 @@
-ayttm (0.4.6+8-1) experimental; urgency=low
+ayttm (0.4.6+26-1) unstable; urgency=low
 
   * New upstream CVS snapshot:
-    - Fix compilation of new Yahoo code on 64 bit systems
-    - Fix several compiler warnings
+    - Fix yahoo auth after protocol change
+    - Fix problem with yahoo after disconnect/reconnect
+    - Add automake 1.8 support
+  * Build with libjasper-1.701-dev for Yahoo webcam support
+  * Fix typo simley->smiley in description (closes: #261689)
 
- -- Chris Halls <halls@debian.org>  Thu, 29 Jan 2004 11:20:31 +0100
+ -- Chris Halls <halls@debian.org>  Mon, 16 Aug 2004 14:21:39 +0200
+
+ayttm (0.4.6-2) unstable; urgency=low
+
+  * Backport yahoo2 changes from CVS by Ben and Philip to fix 
+    compilation on 64 bit platforms
+
+ -- Chris Halls <halls@debian.org>  Thu, 29 Jan 2004 10:49:42 +0100
 
 ayttm (0.4.6-1) unstable; urgency=low
 
@@ -17,7 +27,7 @@ ayttm (0.4.6-1) unstable; urgency=low
       pointer that is used (thanks Lamont)
   * Add gettext to Build-Depends
 
- -- Chris Halls <halls@debian.org>  Thu, 15 Jan 2004 08:06:09 +0100
+ -- Chris Halls <halls@debian.org>  Mon, 26 Jan 2004 08:26:53 +0100
 
 ayttm (0.4.5-2) unstable; urgency=low
 

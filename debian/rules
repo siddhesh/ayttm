@@ -107,7 +107,7 @@ binary-arch: build install
 	dh_compress
 	dh_fixperms
 	dh_installdeb
-	dh_shlibdeps
+	dh_shlibdeps -X img2jpc.so
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
