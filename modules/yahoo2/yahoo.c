@@ -109,7 +109,7 @@ static int do_prompt_save_file = 1;
 static int do_guess_away = 0;
 static int do_show_away_time = 0;
 
-static char pager_host[MAX_PREF_LEN]="scs.yahoo.com";
+static char pager_host[MAX_PREF_LEN]="scs.msg.yahoo.com";
 static char pager_port[MAX_PREF_LEN]="5050";
 static char filetransfer_host[MAX_PREF_LEN]="filetransfer.msg.yahoo.com";
 static char filetransfer_port[MAX_PREF_LEN]="80";
@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.63 $",
-	"$Date: 2003/09/20 08:55:15 $",
+	"$Revision: 1.64 $",
+	"$Date: 2003/09/24 15:26:33 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

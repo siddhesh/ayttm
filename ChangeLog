@@ -1,3 +1,7 @@
+* Wed Sep 24 2003 15:17 GMT [philip]	0.4.1-6
+- modules/yahoo2
+change host name to scs.msg.yahoo.com
+
 * Mon Sep 22 2003 04:38 GMT [philip]	0.4.1-5
 - src/status.c
 fix tooltips pref
