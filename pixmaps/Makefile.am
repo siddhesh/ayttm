@@ -23,7 +23,7 @@ EXTRA_DIST = penguin_talk.xpm ayttm.xpm ayttmlogo.xpm ok.xpm tb_yes.xpm \
 	tongue.xpm wink.xpm worried.xpm angry.xpm beer.xpm cry.xpm log.xpm \
 	no_such_smiley.xpm nomodule_online.xpm wine.xpm smiley_button.xpm \
 	workwizu_online.xpm workwizu_away.xpm \
-	warning.xpm question.xpm print.xpm \
+	warning.xpm question.xpm action.xpm print.xpm \
 	checkbox_on.xpm checkbox_off.xpm
 
 

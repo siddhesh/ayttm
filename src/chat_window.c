@@ -55,7 +55,7 @@
 #include "contact_actions.h"
 #include "smileys.h"
 #include "service.h"
-#include "print.h"
+#include "action.h"
 
 #ifdef HAVE_ISPELL
 #include "gtk/gtkspell.h"
@@ -70,7 +70,7 @@
 #include "pixmaps/tb_mail_send.xpm"
 #include "pixmaps/cancel.xpm"
 #include "pixmaps/smiley_button.xpm"
-#include "pixmaps/print.xpm"
+#include "pixmaps/action.xpm"
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -619,11 +619,11 @@ static void view_log_callback(GtkWidget *widget, gpointer d)
 	eb_view_log(data->contact);
 }
 
-static void print_callback(GtkWidget *widget, gpointer d)
+static void action_callback(GtkWidget *widget, gpointer d)
 {
 	chat_window* data = (chat_window*)d;
 	GET_CHAT_WINDOW(data);
-	print_conversation(data->loginfo, TRUE);
+	conversation_action(data->loginfo, TRUE);
 }
 
 /*This is the callback for ignoring a user*/
@@ -861,9 +861,9 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		gtk_menu_append(GTK_MENU(menu), button);
 		gtk_widget_show(button);
 
-		button = gtk_menu_item_new_with_label(_("Print..."));
+		button = gtk_menu_item_new_with_label(_("Actions..."));
 		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(print_callback), cw);
+				 GTK_SIGNAL_FUNC(action_callback), cw);
 		gtk_menu_append(GTK_MENU(menu), button);
 		gtk_widget_show(button);
 
@@ -2058,9 +2058,9 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 				   GTK_ACCEL_VISIBLE);
 	gtk_menu_append(GTK_MENU(menu), button);
 
-	button = gtk_menu_item_new_with_label(_("Print..."));
+	button = gtk_menu_item_new_with_label(_("Actions..."));
 	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(print_callback),
+			   GTK_SIGNAL_FUNC(action_callback),
 			   cw);
 
 	gtk_widget_add_accelerator(button, "activate", accel_group, 
@@ -2158,8 +2158,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	view_log_button = TOOLBAR_APPEND(_("View Log CTRL+L"), iconwid, view_log_callback, cw);
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
 
-	ICON_CREATE(icon, iconwid, print_xpm);
-	print_button = TOOLBAR_APPEND(_("Print CTRL+P"), iconwid, print_callback, cw);
+	ICON_CREATE(icon, iconwid, action_xpm);
+	print_button = TOOLBAR_APPEND(_("Actions..."), iconwid, action_callback, cw);
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
 
 	TOOLBAR_SEPARATOR();

@@ -33,7 +33,7 @@
 #include "smileys.h"
 #include "service.h"
 #include "add_contact_window.h"
-#include "print.h"
+#include "action.h"
 
 #ifdef HAVE_ISPELL
 #include "gtk/gtkspell.h"
@@ -44,7 +44,7 @@
 #include "pixmaps/ok.xpm"
 #include "pixmaps/tb_volume.xpm"
 #include "pixmaps/smiley_button.xpm"
-#include "pixmaps/print.xpm"
+#include "pixmaps/action.xpm"
 
 LList * chat_rooms = NULL;
 
@@ -865,10 +865,10 @@ static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 		g_free( data );
 }
 
-static void print_callback(GtkWidget *widget, gpointer d)
+static void action_callback(GtkWidget *widget, gpointer d)
 {
 	eb_chat_room * ecr = (eb_chat_room *)d;
-	print_conversation(ecr->loginfo, TRUE);
+	conversation_action(ecr->loginfo, TRUE);
 }
 
 static void _show_smileys_cb(GtkWidget * widget, smiley_callback_data *data)
@@ -1104,8 +1104,8 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
 
-	ICON_CREATE(icon, iconwid, print_xpm);
-	print_button = TOOLBAR_APPEND(_("Print"), iconwid, print_callback, chat_room);
+	ICON_CREATE(icon, iconwid, action_xpm);
+	print_button = TOOLBAR_APPEND(_("Actions..."), iconwid, action_callback, chat_room);
 
 	TOOLBAR_SEPARATOR();
 

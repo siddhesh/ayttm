@@ -41,10 +41,10 @@
 #include "log_window.h"
 #include "util.h"
 #include "prefs.h"
-#include "print.h"
+#include "action.h"
 
 #include "pixmaps/cancel.xpm"
-#include "pixmaps/print.xpm"
+#include "pixmaps/action.xpm"
 
 #ifdef __MINGW32__
 #define snprintf _snprintf
@@ -238,7 +238,7 @@ static void close_log_window_callback(GtkWidget* button, gpointer data)
   gtk_widget_destroy(lw->window);
 }
 
-static void print_callback(GtkWidget *widget, gpointer d)
+static void action_callback(GtkWidget *widget, gpointer d)
 {
 	log_window* lw = (log_window*)d;
 	log_info *li = g_new0(log_info, 1);
@@ -247,7 +247,7 @@ static void print_callback(GtkWidget *widget, gpointer d)
 	li->log_started = 0;
 	li->fp = lw->fp;
 	li->filepos = lw->filepos;
-	print_conversation(li, FALSE);
+	conversation_action(li, FALSE);
 }
 
 
@@ -474,8 +474,8 @@ log_window* eb_log_window_new(struct contact *rc)
 	
   gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
   
-  ICON_CREATE(icon0, iconwid0, print_xpm);
-  button = TOOLBAR_APPEND(_("Print"), iconwid0, print_callback, lw);
+  ICON_CREATE(icon0, iconwid0, action_xpm);
+  button = TOOLBAR_APPEND(_("Actions..."), iconwid0, action_callback, lw);
 
   TOOLBAR_SEPARATOR();
   ICON_CREATE(icon0, iconwid0, cancel_xpm);
