@@ -1,3 +1,7 @@
+* Fri Apr 06 2003 20:40 GMT [philip]	0.2.3-25
+- modules/msn2/msn.C
+close activity bar even on failure
+
 * Fri Apr 06 2003 19:30 GMT [philip]	0.2.3-24
 - src/activity_bar.[Ch]
 - modules/yahoo2, modules/msn2, modules/aim-toc, modules/icq-toc

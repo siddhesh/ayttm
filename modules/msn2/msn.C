@@ -174,8 +174,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.10 $",
-	"$Date: 2003/04/04 19:38:19 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/04/04 20:42:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -653,7 +653,7 @@ void eb_msn_logout( eb_local_account * account )
 	if(!account->connected && !account->connecting)
 		return;
 	
-	progress_window_close(mlad->connect_tag);
+	ay_activity_bar_remove(mlad->connect_tag);
 	
 	eb_debug(DBG_MSN, "Logging out\n");
 	for (l = msn_contacts; l != NULL && l->data != NULL; l = l->next) {
