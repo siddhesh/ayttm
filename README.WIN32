@@ -43,3 +43,4 @@ To Generate the program for WIN32 runtime once you have cygwin installed
 	./mingw
 
 
+To build a package we use the Inno Setup 3 tool.
