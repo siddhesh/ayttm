@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.39 $",
-	"$Date: 2003/05/22 19:18:36 $",
+	"$Revision: 1.40 $",
+	"$Date: 2003/06/02 09:52:24 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -655,6 +655,9 @@ static void eb_aim_accept_invite( eb_local_account * account, void * invitation 
 	struct eb_aim_local_account_data * alad = 
 						account->protocol_local_account_data;
 	
+	if(!chat_room)
+		return;
+
 	toc_conn * conn = alad->conn;
 
 	toc_chat_accept(conn, id);

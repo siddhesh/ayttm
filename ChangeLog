@@ -1,3 +1,7 @@
+* Mon Jun  2 2003 09:45 GMT [philip]	0.3.1-13
+- modules/aim-toc/aim-toc.c
+possibly fix segfault in eb_aim_accept_invite
+
 * Mon Jun  2 2003 08:45 GMT [philip]	0.3.1-12
 - src/gtk/prefs_window.C
 make prefs panel scrollable if window shrinks too much
