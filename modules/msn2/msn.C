@@ -171,8 +171,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.65 $",
-	"$Date: 2003/10/10 18:51:59 $",
+	"$Revision: 1.66 $",
+	"$Date: 2003/10/10 19:34:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -698,8 +698,9 @@ static void ay_msn_cancel_connect(void *data)
 	eb_msn_logout(ela);
 }
 
-static void eb_msn_finish_login(const char *password, eb_local_account *account)
+static void eb_msn_finish_login(const char *password, void *data)
 {
+	eb_local_account *account = (eb_local_account *)data;
 	int port=atoi(msn_port);
 	char buff[1024];
 	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
@@ -716,7 +717,7 @@ static void eb_msn_finish_login(const char *password, eb_local_account *account)
 
 	ref_count++;
 	
-	msn_init(mlad->mc, account->handle, password);
+	msn_init(mlad->mc, account->handle, (char *)password);
 	msn_connect(mlad->mc, msn_server, port);
 }
 
@@ -736,8 +737,7 @@ static void eb_msn_login( eb_local_account * account )
 	if (mlad->prompt_password) {
 		snprintf(buff, sizeof(buff), _("MSN password for: %s"), account->handle);
 		do_password_input_window(buff, "", 
-				(void(*)(const char*,gpointer))eb_msn_finish_login,
-			       	account);
+				eb_msn_finish_login, account);
 	} else {
 		eb_msn_finish_login(mlad->password, account);
 	}

@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.71 $",
-	"$Date: 2003/10/10 18:51:59 $",
+	"$Revision: 1.72 $",
+	"$Date: 2003/10/10 19:34:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1944,8 +1944,9 @@ static void ay_yahoo_cancel_connect(void *data)
 	is_setting_state = 0;
 }
 
-static void eb_yahoo_finish_login(const char *password, eb_local_account *ela)
+static void eb_yahoo_finish_login(const char *password, void *data)
 {
+	eb_local_account *ela = data;
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	char buff[1024];
 
@@ -1998,9 +1999,7 @@ static void eb_yahoo_login(eb_local_account * ela)
 
 	if(ylad->prompt_password) {
 		snprintf(buff, sizeof(buff), _("Yahoo! password for: %s"), ela->handle);
-		do_password_input_window(buff, "", 
-				(void(*)(const char*,gpointer))eb_yahoo_finish_login,
-			       	ela);
+		do_password_input_window(buff, "", eb_yahoo_finish_login, ela);
 	} else {
 		eb_yahoo_finish_login(ylad->password, ela);
 	}

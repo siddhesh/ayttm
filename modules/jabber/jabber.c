@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.40 $",
-	"$Date: 2003/10/10 18:51:59 $",
+	"$Revision: 1.41 $",
+	"$Date: 2003/10/10 19:34:41 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -292,7 +292,7 @@ static void ay_jabber_cancel_connect (void *data)
 	eb_jabber_logout(ela);
 }
 
-static void eb_jabber_finish_login( const char *password, gpointer data)
+static void eb_jabber_finish_login( const char *password, void *data)
 {
 	eb_local_account *account = data;
 	eb_jabber_local_account_data * jlad;

@@ -1,4 +1,8 @@
-* Fri Oct 10 2003 09:48 GMT [colin]	0.4.3-pre9
+* Fri Oct 10 2003 19:30 GMT [philip]	0.4.3-pre10
+- modules/yahoo2/yahoo.c modules/msn2/msn.C
+no need to typecast callback anymore
+
+* Fri Oct 10 2003 18:51 GMT [colin]	0.4.3-pre9
 - modules/msn2/msn.C
 password asking stuff
 
