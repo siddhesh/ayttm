@@ -31,8 +31,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.4 $",
-	"$Date: 2003/12/23 08:54:21 $",
+	"$Revision: 1.5 $",
+	"$Date: 2004/02/10 04:30:26 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -55,7 +55,7 @@ static int plugin_init()
 {
 	input_list *il = g_new0(input_list, 1);
 
-	eb_debug(DBG_MOD, "yahoo2\n");
+	eb_debug(DBG_MOD, "img2jpc\n");
 
 	plugin_info.prefs = il;
 	il->widget.checkbox.value = &do_jpc_encoding;

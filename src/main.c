@@ -462,9 +462,12 @@ int main(int argc, char *argv[])
 
 	accounts_success = load_accounts();
 	//if (accounts_success)
-		load_contacts();
+	load_contacts();
 
 	start_login(!accounts_success);
+
+/*	if(!iGetLocalPref("usercount_window_seen"))
+		show_wnd_usercount();*/
 
 	gtk_main();
 

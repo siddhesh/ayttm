@@ -15,7 +15,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	account.c info_window.c chat_window.c util.c add_contact_window.c \
 	edit_contact_window.c edit_account_window.c  sound.c dialog.c \
 	prefs.c away_window.c browser.c message_parse.c \
-	activity_bar.C spellcheck.C video.c \
+	activity_bar.C spellcheck.C video.c usercount.c \
 	chat_room.c value_pair.c edit_group_window.c logs.c \
 	trigger.c console_session.c input_list.c nomodule.c \
 	plugin_api.c plugin.c file_select.c contact_actions.c \

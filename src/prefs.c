@@ -732,6 +732,7 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "use_alternate_browser", 0 );
 	cSetLocalPref( "alternate_browser", "" );
 	iSetLocalPref( "do_version_check", 0);
+	iSetLocalPref( "usercount_window_seen", 0);
 	
 	/* advanced */
 	iSetLocalPref( "proxy_type", PROXY_NONE );
@@ -986,6 +987,7 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_ayttm_debug_html=%d\n", iGetLocalPref("do_ayttm_debug_html") );
 	fprintf( fp, "do_plugin_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
 	fprintf( fp, "do_version_check=%d\n", iGetLocalPref("do_version_check") );
+	fprintf( fp, "usercount_window_seen=%d\n", iGetLocalPref("usercount_window_seen") );
 	fprintf( fp, "length_contact_window=%d\n", iGetLocalPref("length_contact_window") );
 	fprintf( fp, "width_contact_window=%d\n", iGetLocalPref("width_contact_window") );
 	fprintf( fp, "do_noautoresize=%d\n", iGetLocalPref("do_noautoresize") ) ;

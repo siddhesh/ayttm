@@ -1,3 +1,7 @@
+* Tue Feb 10 2004 04:25 GMT [philip]	0.4.6-9
+- src/usercount.c src/Makefile.am src/prefs.[ch]
+add usercount window - not operational yet
+
 * Thu Jan 20 2004 08:16 GMT [chris]     0.4.6-8
  - src/account.c
  - src/chat_room.c

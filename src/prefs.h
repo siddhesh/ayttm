@@ -119,6 +119,7 @@ struct prefs
 		int		do_show_tooltips;
 		int		use_alternate_browser;
 		int		do_version_check;
+		int		usercount_window_seen;
 		char	alternate_browser[MAX_PREF_LEN];
 	} general;
 	
@@ -178,7 +179,7 @@ void	*GetPref( const char *key );
 void	*SetPref( const char *key, void *data );
 
 void	iSetLocalPref( const char *key, int data );
-int		iGetLocalPref( const char *key );
+int	iGetLocalPref( const char *key );
 
 void	fSetLocalPref( const char *key, float data );
 float	fGetLocalPref( const char *key);
