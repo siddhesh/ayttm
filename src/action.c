@@ -240,8 +240,8 @@ void conversation_action(log_info *li, int to_end)
 	fclose(output_fplain);
 	
 	files = ay_new(char *, 2);
-	files[0] = strdup(output_html);	/* free after callback */
-	files[1] = strdup(output_plain);
+	files[0] = output_html;	/* free after callback */
+	files[1] = output_plain;
 	
 	if (ftell(loginfo->fp) == loginfo->filepos) {
 		ay_do_error( _("Action Error"), _("No data available to use.") );
@@ -249,7 +249,6 @@ void conversation_action(log_info *li, int to_end)
 		char fname[255];
 		snprintf(fname, 255, "%sactions_list", config_dir);
 
-		/* Fixme help test */
 		show_data_choicewindow(fname, 
 					_("Action"), _("Execute"), 
 					_("Enter the command to run here:\n"
@@ -257,8 +256,6 @@ void conversation_action(log_info *li, int to_end)
 					  " %p = displayed conversation's file (as text)"), 
 					"ACTION", "COMMAND", action_do_action, files);
 	}
-	g_free(output_html);
-	g_free(output_plain);
 	fclose(loginfo->fp);
 #endif
 }

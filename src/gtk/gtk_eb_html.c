@@ -810,8 +810,8 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					char size[25];
 					parm += strlen("ptsize=");
 					_extract_parameter(parm, size, 25);
-					fs->font_size = atoi(size)/10;
-					fs->font_ptsize = atoi(size);
+					fs->font_size = atoi(size);
+					fs->font_ptsize = atoi(size)*10; /* html ptsize is less */
 					eb_debug(DBG_HTML, "got a ptsize of %d\n", fs->font_ptsize);
 				}
 				else if((parm = strstr(data, "absz=")) != NULL)

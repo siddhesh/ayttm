@@ -518,14 +518,20 @@ void log_parse_and_add(char *buff, void *text)
 	char *buff2 = NULL;
 	/* ME */
 	tmp = strdup(buff);
-	if (!strncmp(tmp,"<P> <FONT COLOR=\"#", strlen("<P> <FONT COLOR=\"#")) 
-	&& isdigit(tmp[strlen("<P> <FONT COLOR=\"#??????\"><B>1")])
+
+	if ( ((!strncmp(tmp,"<P> <FONT COLOR=\"#", strlen("<P> <FONT COLOR=\"#")) 
+		&& isdigit(tmp[strlen("<P> <FONT COLOR=\"#??????\"><B>")]))
+	|| ( !strncmp(tmp,"<P><FONT COLOR=\"#", strlen("<P><FONT COLOR=\"#")) 
+		&& isdigit(tmp[strlen("<P><FONT COLOR=\"#??????\"><B>")])))
 	&& strstr(tmp, "/FONT> ")) {
 		/* seems to be a beginning of line... */
 		buff2 = strstr(tmp, "/FONT> ")+strlen("/FONT>");
 		buff2[0] = '\0';
 		buff2++;
 		gtk_eb_html_add(EXT_GTK_TEXT(text), tmp,0,0,0);
+		printf("adding with %d%d%d\n",iGetLocalPref("do_ignore_back"),
+				iGetLocalPref("do_ignore_fore"),
+				iGetLocalPref("do_ignore_font"));
 		gtk_eb_html_add(EXT_GTK_TEXT(text), buff2,
 				iGetLocalPref("do_ignore_back"),
 				iGetLocalPref("do_ignore_fore"),
@@ -533,10 +539,10 @@ void log_parse_and_add(char *buff, void *text)
 	} /* OTHER */
 	else if (
 		(!strncmp(tmp,"<P> <B><FONT COLOR=\"#", strlen("<P> <B><FONT COLOR=\"#")) 
-		&& isdigit(tmp[strlen("<P> <B><FONT COLOR=\"#??????\">1")])
+		&& isdigit(tmp[strlen("<P> <B><FONT COLOR=\"#??????\">")])
 		&& strstr(tmp, "/FONT> </B> "))
 	|| 	(!strncmp(tmp,"<P><B><FONT COLOR=\"#", strlen("<P><B><FONT COLOR=\"#")) 
-		&& isdigit(tmp[strlen("<P><B><FONT COLOR=\"#??????\">1")])
+		&& isdigit(tmp[strlen("<P><B><FONT COLOR=\"#??????\">")])
 		&& strstr(tmp, "/FONT> </B> "))
 		) {
 		/* seems to be a beginning of line... */
@@ -544,11 +550,15 @@ void log_parse_and_add(char *buff, void *text)
 		buff2[0] = '\0';
 		buff2++;
 		gtk_eb_html_add(EXT_GTK_TEXT(text), tmp,0,0,0);
+		printf("adding with %d%d%d\n",iGetLocalPref("do_ignore_back"),
+				iGetLocalPref("do_ignore_fore"),
+				iGetLocalPref("do_ignore_font"));
 		gtk_eb_html_add(EXT_GTK_TEXT(text), buff2,
 				iGetLocalPref("do_ignore_back"),
 				iGetLocalPref("do_ignore_fore"),
 				iGetLocalPref("do_ignore_font"));
 	} else {
+		printf("adding with 000\n");
 		gtk_eb_html_add(EXT_GTK_TEXT(text), tmp,0,0,0);
 	}
 	free(tmp);
