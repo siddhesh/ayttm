@@ -195,8 +195,8 @@ static void add_command_cb(GtkWidget * w, void * a)
 {
 		do_text_input_window_multiline(
 			_("Enter command:\n"
-			  "(%s: current conversation's file (as HTML)\n"
-			  " %p: current conversation's file (as text)"), 
+			  " %s = displayed conversation's file (as HTML)\n"
+			  " %p = displayed conversation's file (as text)"), 
 			"", FALSE, action_do_action, NULL); 
 }
 
