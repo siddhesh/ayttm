@@ -14,7 +14,6 @@ EXTRA_DIST = penguin_talk.xpm ayttm.xpm ayttmlogo.xpm ok.xpm tb_yes.xpm \
 	aim_online.xpm aim_away.xpm \
 	msn_online.xpm msn_away.xpm tb_mail_send.xpm tb_search.xpm \
 	ayttm.png jabber_online.xpm jabber_away.xpm \
-	zephyr_online.xpm zephyr_hidden.xpm zephyr_offline.xpm \
 	nomodule_away.xpm note.xpm dude.xpm \
 	aol_icon.xpm free_icon.xpm dt_icon.xpm admin_icon.xpm \
 	biglaugh.xpm blankface.xpm blush.xpm confused.xpm cooldude.xpm \

@@ -16,7 +16,6 @@ modules/utility/notes.c
 modules/utility/rainbow.c
 modules/workwizu/workwizu.c
 modules/yahoo2/yahoo.c
-modules/zephyr/zephyr_mod.c
 src/action.c
 src/activity_bar.C
 src/add_contact_window.c
