@@ -1747,12 +1747,12 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 
 static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/_File"),		NULL,       NULL, 0, "<Branch>" },
-	{ N_("/File/_Import"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/File/Set _profile"),	NULL, 	    NULL, 0, NULL },
 	{ N_("/File/Set _status"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/File/---"),		NULL,         NULL, 0, "<Separator>" },
 	{ N_("/File/Sign o_n all"),	"<control>A", eb_sign_on_all, 0, NULL },
 	{ N_("/File/Sign o_ff all"),	"<control>F", eb_sign_off_all, 0, NULL },
+	{ N_("/File/---"),		NULL,         NULL, 0, "<Separator>" },
+	{ N_("/File/_Import"),	NULL, 	    NULL, 0, NULL },
+	{ N_("/File/Set _profile"),	NULL, 	    NULL, 0, NULL },
 	{ N_("/File/---"),		NULL,         NULL, 0, "<Separator>" },
 	{ N_("/File/_Quit"),		"<control>Q", delete_event, 0, NULL },
 	{ N_("/_Tools"),		NULL, NULL, 0, "<Branch>" },
