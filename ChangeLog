@@ -1,4 +1,8 @@
-* Sun Jun 29 2003 12:10 GMT [colin]	0.3.2-pre4
+* Thu Jul 03 2003 09:19 GMT [colin]	0.3.2-pre5
+- po/fr.po
+Update fr translation
+
+* Thu Jul 03 2003 07:10 GMT [colin]	0.3.2-pre4
 - modules/msn2/msn.C
 Add snail smiley
 
