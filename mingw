@@ -1,6 +1,5 @@
 #!/bin/sh
 
-ACLOCAL_FLAGS='-I /usr/local/share/aclocal'
 sh gen
 ./configure
 make

@@ -1,3 +1,9 @@
+* Thu Sep 11 2003 20:17 GMT [elh]	0.4.0-24
+- README.WIN32
+  mingw
+  mingw32/Makefile.am
+Updates for makefile. It now compiles and RUNS!
+
 * Thu Sep 11 2003 11:28 GMT [philip]	0.4.0-23
 - Up yahoo version number so we don't get blocked
 

@@ -14,10 +14,11 @@ all: ayttmrc
 install: ayttmrc
 	cp ayttmrc /c
 	cp ../src/ayttm.exe /c/Program\ Files/ayttm
-	cp /usr/local/lib/libg*.dll.a /c/Program\ Files/ayttm
-	cp /usr/local/lib/libiconv.dll.a /c/Program\ Files/ayttm
+	cp /usr/local/bin/libg*.dll /c/Program\ Files/ayttm
+	cp /usr/local/bin/libiconv*.dll /c/Program\ Files/ayttm
 	cp /usr/local/lib/libXpm-noX4.dll /c/Program\ Files/ayttm
-	cp /usr/local/lib/libintl.dll.a /c/Program\ Files/ayttm
+	cp /usr/local/bin/libintl*.dll /c/Program\ Files/ayttm
+	cp /usr/local/bin/libltdl*.dll /c/Program\ Files/ayttm
 	cp ../COPYING /c/Program\ Files/ayttm
 	cp ../sounds/*.au /c/Program\ Files/ayttm
 	mkdir -p /c/Program\ Files/ayttm/modules
@@ -31,6 +32,6 @@ install: ayttmrc
 	mkdir -p /c/Program\ Files/ayttm/smileys/console_smileys
 	mkdir -p /c/Program\ Files/ayttm/smileys/giles_smiles
 	cp ../modules/smileys/console_smileys/*.{xpm,rc} /c/Program\ Files/ayttm/smileys/console_smileys
-	cp ../modules/smileys/giles_smileys/*.{xpm,rc} /c/Program\ Files/ayttm/smileys/giles_smiles
+	cp ../modules/smileys/giles_smiles/*.{xpm,rc} /c/Program\ Files/ayttm/smileys/giles_smiles
 	cp ../modules/utility/.libs/*.{a,dll,la} /c/Program\ Files/ayttm/modules
 	cp ../modules/yahoo2/.libs/*.{a,dll,la} /c/Program\ Files/ayttm/modules
