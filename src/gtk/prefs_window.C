@@ -43,7 +43,10 @@
 #include "smileys.h"
 
 #include "gtkutils.h"
+
+#ifdef HAVE_LIBXFT
 #include "mem_util.h"
+#endif
 
 #ifdef HAVE_LIBPSPELL
 #include "spellcheck.h"
