@@ -71,6 +71,7 @@ struct prefs
 		int		do_ignore_fore;
 		int		do_ignore_back;
 		int		do_ignore_font;
+		int		do_auto_complete;
 		char	font_face[MAX_PREF_LEN];
 		
 		#ifdef HAVE_LIBPSPELL

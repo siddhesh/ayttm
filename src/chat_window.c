@@ -93,6 +93,8 @@
 	} \
 }
 
+LList *session_words = NULL;
+
 /* forward declaration */
 static void eb_update_window_title(chat_window * cw, gboolean new_message);
 static void eb_update_window_title_to_tab(int tab, gboolean new_message);
@@ -1056,6 +1058,164 @@ static void chat_warn_if_away(chat_window *cw)
 	
 }
 
+char * complete_word( LList * l, const char *begin, int *choice)
+{
+	char * complete = NULL;
+	LList *possible = NULL;
+	LList *cur = NULL;
+	int list_length = 0;
+	*choice = TRUE;
+	
+	if (begin == NULL)
+		return NULL;
+	
+	if (strlen(begin) == 0)
+		return NULL;
+	
+	for (cur = l; cur && cur->data; cur = cur->next) {
+		char * curnick = (char *) cur->data;
+		if (!strncasecmp(curnick, begin, strlen(begin))) {
+			possible = l_list_prepend(possible, curnick);
+		}
+		list_length++;
+	}
+	if (possible == NULL)
+		return NULL;
+	else if (l_list_length(possible) == 1) {
+		complete = strdup((char *)possible->data);
+		l_list_free(possible);
+		possible=NULL;
+		*choice = FALSE;
+		return complete;
+	} else {
+		int i = 0;
+		char *last_good = NULL;
+		for (i = 0; i < 255; i ++) {
+			int common = TRUE;
+			char * sub = malloc(i+1);
+			memset(sub,0,i+1);
+			strncpy(sub,(char*)possible->data, i);
+			cur = possible;
+			while (cur && cur->data) {
+				char * compareto = cur->data;
+				if (strncasecmp(compareto, sub, strlen(sub))) {
+					common = FALSE;
+					break;
+				} 
+				cur = cur->next;
+			}
+			if (common == TRUE) {
+				if (last_good) free(last_good);
+				last_good = sub;
+			} else {
+				l_list_free(possible);
+				free(sub);
+				return last_good;
+			}
+		}
+	}
+	if (possible)
+		l_list_free(possible);
+	return complete;
+}
+
+int auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
+{
+		int x = gtk_editable_get_position(GTK_EDITABLE (entry));
+		if (GTK_EDITABLE(entry)->selection_start_pos > 0
+		&& GTK_EDITABLE(entry)->selection_start_pos < x)
+			x=GTK_EDITABLE(entry)->selection_start_pos;
+		if (x > 0) {
+			char * word= gtk_editable_get_chars(GTK_EDITABLE (entry), 0, x);
+			char * last_word = strrchr(word, ' ');
+			char * comp_word = NULL;
+			char * nick = NULL;
+			int choice = TRUE;
+
+			if (last_word == NULL)
+				last_word = strrchr(word, '\n');
+			
+			if (last_word == NULL)
+				last_word = word;
+
+			if (last_word == NULL) {
+				return FALSE;
+			}
+			if (last_word != word) 
+				last_word++;
+
+			comp_word = malloc(strlen(last_word)+2);
+			sprintf(comp_word, "%s%c",last_word,event->keyval);
+			eb_debug(DBG_CORE, "word caught: %s\n",comp_word);
+			nick = complete_word(words, comp_word, &choice);
+
+			if (nick != NULL) {
+				int b = strlen(word) - strlen(last_word);
+				int inserted=b;
+				if (GTK_EDITABLE(entry)->selection_start_pos > 0)
+					gtk_editable_delete_selection(GTK_EDITABLE(entry));
+				gtk_editable_delete_text(GTK_EDITABLE (entry), b, x);
+				eb_debug(DBG_CORE, "insert %s at %d\n",nick, b);
+				gtk_editable_insert_text(GTK_EDITABLE (entry), nick, strlen(nick), &b);
+				if (!choice)
+					gtk_editable_insert_text(GTK_EDITABLE (entry), " ", strlen(" "), &b);
+				gtk_editable_set_position(GTK_EDITABLE (entry), b);
+				gtk_editable_select_region(GTK_EDITABLE (entry), x+1, b);
+				gtk_signal_emit_stop_by_name(GTK_OBJECT(entry), "key_press_event");
+				return TRUE;
+			}
+		}
+		return FALSE;
+	
+}
+
+void auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
+{
+	int x = gtk_editable_get_position(GTK_EDITABLE (entry));
+	if (GTK_EDITABLE(entry)->selection_start_pos > 0
+	&& GTK_EDITABLE(entry)->selection_start_pos < x)
+		x=GTK_EDITABLE(entry)->selection_start_pos;
+	if (x > 0) {
+		char * word= gtk_editable_get_chars(GTK_EDITABLE (entry), 0, x);
+		char * last_word = NULL;
+		char * nick = NULL;
+		int choice = TRUE;
+		LList *l = session_words;
+		int found=0;
+
+		/* trim last space */
+		if (strlen (word) && word[strlen(word)-1]==' ') {
+			word[strlen(word)-1]='\0';
+		}
+
+		last_word = strrchr(word, ' ');
+		if (last_word == NULL)
+			last_word = strrchr(word, '\n');
+
+		if (last_word == NULL)
+			last_word = word;
+
+		if (last_word == NULL) {
+			return;
+		}
+		if (last_word != word) 
+			last_word++;
+
+		while(l && l->data) {
+			if (!strcasecmp((char *)l->data, last_word)) {
+				found=1;
+				break;
+			}
+			l = l->next;
+		}
+		if (!found) {
+			eb_debug(DBG_CORE, "word inserted: %s\n",last_word);
+			session_words = l_list_prepend(session_words, last_word);
+		}
+	}
+	
+}
+
 static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
 {
 	chat_window				*cw = (chat_window *)data;
@@ -1154,14 +1314,31 @@ static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer 
 			gtk_adjustment_set_value(ga, ga->upper);
 			gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
 		}		
+	} 
+	else if ( iGetLocalPref("do_auto_complete") && 
+		((event->keyval >= GDK_a && event->keyval <= GDK_z)
+		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) ) {
+		
+		return auto_complete(cw->entry, session_words, event);
+	} else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab || event->keyval == GDK_Right)) {
+		int x = gtk_editable_get_position(GTK_EDITABLE (cw->entry));
+		if (x)
+			gtk_editable_select_region(GTK_EDITABLE (cw->entry), x, x);
+		gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+		return TRUE;
+	} else if (iGetLocalPref("do_auto_complete") && event->keyval == GDK_space) {
+		auto_complete_insert(cw->entry, event);
 	}
 	else if (cw->notebook != NULL)
 	{
 		// check tab changes if this is a tabbed chat window
 		if ( check_tab_accelerators( widget, cw, modifiers, event ) )
 			return( gtk_true() );
-	}
-
+	} else {
+	
+	return FALSE;
+  }
+	
 	if ( (cw->preferred != NULL) && (modifiers == 0) )
 		send_typing_status(cw);
 

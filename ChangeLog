@@ -1,3 +1,11 @@
+* Fri Oct 24 2003 17:25 GMT [colin]	0.4.3-14
+- src/chat_window.c
+  src/chat_room.c
+  src/prefs.[ch] src/gtk/prefs_window.C
+ease and generalize auto completion (with a pref).
+Words you type get registered and used as database for 
+future typings.
+
 * Wed Oct 22 2003 18:25 GMT [colin]	0.4.3-13
 - src/chat_room.c
 autocomplete usernames with tab

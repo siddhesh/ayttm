@@ -682,6 +682,7 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_ignore_fore", 1 );
 	iSetLocalPref( "do_ignore_back", 1 );
 	iSetLocalPref( "do_ignore_font", 1 );
+	iSetLocalPref( "do_auto_complete", 0 );
 	iSetLocalPref( "do_smiley", 1 );
 	iSetLocalPref( "do_spell_checking", 0 );
 	cSetLocalPref( "spell_dictionary", "" );
@@ -946,6 +947,7 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_ignore_fore=%d\n", iGetLocalPref("do_ignore_fore") );
 	fprintf( fp, "do_ignore_back=%d\n", iGetLocalPref("do_ignore_back") );
 	fprintf( fp, "do_ignore_font=%d\n", iGetLocalPref("do_ignore_font") );
+	fprintf( fp, "do_auto_complete=%d\n", iGetLocalPref("do_auto_complete") );
 	fprintf( fp, "do_smiley=%d\n", iGetLocalPref("do_smiley" ) );
 	fprintf( fp, "FontFace=%s\n", cGetLocalPref("FontFace") );
 #ifdef HAVE_LIBPSPELL
@@ -1038,6 +1040,7 @@ void	ayttm_prefs_show_window( int pagenum )
 	prefs->chat.do_ignore_fore        = iGetLocalPref("do_ignore_fore");
 	prefs->chat.do_ignore_back        = iGetLocalPref("do_ignore_back");
 	prefs->chat.do_ignore_font        = iGetLocalPref("do_ignore_font");
+	prefs->chat.do_auto_complete      = iGetLocalPref("do_auto_complete");
 	strncpy( prefs->chat.font_face, cGetLocalPref("FontFace"), MAX_PREF_LEN );
 
 #ifdef HAVE_LIBPSPELL
@@ -1196,6 +1199,7 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	iSetLocalPref( "do_ignore_fore", inPrefs->chat.do_ignore_fore );
 	iSetLocalPref( "do_ignore_back", inPrefs->chat.do_ignore_back );
 	iSetLocalPref( "do_ignore_font", inPrefs->chat.do_ignore_font );
+	iSetLocalPref( "do_auto_complete", inPrefs->chat.do_auto_complete );
 	cSetLocalPref( "FontFace", inPrefs->chat.font_face );
 	
 #ifdef HAVE_LIBPSPELL
