@@ -471,12 +471,12 @@ msgstr "Profiel voor account %s"
 
 #: modules/icq-toc/icq-toc.c:397
 #, c-format
-msgid "\n"
+msgid ""
 "icq user %s would like to\n"
 "send you the file\n"
 "%s\n"
-"do you want to accept?"
-msgstr "\n"
+"do you want to accept?\n"
+msgstr ""
 "ICQ-gebruiker %s wilt u het bestand\n"
 "%s\n"
 "toezenden. Accepteert u dit?\n"
