@@ -79,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/04/06 00:08:50 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/04/07 07:55:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -259,7 +259,8 @@ void JABBERNotConnected(void *data)
     jabber_local_account->connected=0;
     jabber_local_account->connecting=0;
 
-    ay_activity_bar_remove(jlad->activity);	
+    ay_activity_bar_remove(jlad->activity);
+    jlad->activity = 0;	
 }
 
 void JABBERConnected(void *data)
@@ -268,6 +269,8 @@ void JABBERConnected(void *data)
     jlad = (eb_jabber_local_account_data *)jabber_local_account->protocol_local_account_data;
 
     ay_activity_bar_remove(jlad->activity);
+    jlad->activity = 0;
+    
     jlad->JConn=data;
     is_setting_state = 1;
     if(!jlad->JConn)
@@ -998,6 +1001,7 @@ void JABBERLogout(void *data)
 	eb_set_active_menu_status(jabber_local_account->status_menu, JABBER_OFFLINE);
     }
     is_setting_state = 0;
+    JABBERNotConnected(NULL);
     eb_debug(DBG_JBR, "<\n");
 }
 
