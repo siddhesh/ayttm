@@ -1,3 +1,7 @@
+* Sun Sep 28 2003 12:19 GMT [philip]	0.4.1-12
+- modules/yahoo2/libyahoo2
+Yahoo works again thanks to the gaim team
+
 * Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-11
 - modules/jabber
 Fixes (ela fixes, auto account selection, chatroom)
