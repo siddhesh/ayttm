@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.20 $",
-	"$Date: 2003/04/15 18:09:19 $",
+	"$Revision: 1.21 $",
+	"$Date: 2003/04/17 10:11:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2483,7 +2483,7 @@ static int ext_yahoo_connect_async(int id, char *host, int port, yahoo_connect_c
 
 	ylad = ccd->ela->protocol_local_account_data;
 	ccd->tag = ylad->connect_tag = 
-		ay_socket_new_async(host, port, _yahoo_connected, ccd, ay_yahoo_connect_status);
+		proxy_connect_host(host, port, _yahoo_connected, ccd, ay_yahoo_connect_status);
 
 	conn = l_list_prepend(conn, ccd);
 
