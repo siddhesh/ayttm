@@ -51,6 +51,7 @@
 #include "contact_actions.h"
 #include "sound.h"
 #include "plugin.h"
+#include "plugin_api.h"
 #include "prefs.h"
 #include "offline_queue_mgmt.h"
 #include "about.h"
@@ -1657,13 +1658,12 @@ static GtkWidget* MakeStatusMenu(eb_local_account * ela)
 	return ela->status_button;
 }
 
-static void eb_import_function(GtkWidget *widget, gpointer callback) {
-	void (*callback_function)();
+static void eb_import_function(GtkWidget *widget, gpointer data) {
+	menu_item_data *mid = data;
 
-	assert(callback);
-	callback_function = callback;
+	assert(data);
 	fprintf(stderr, _("eb_import_function: calling callback\n"));
-	callback_function();
+	mid->callback(mid->user_data);
 	update_contact_list ();
 	write_contact_list();
 }
@@ -1733,7 +1733,7 @@ void eb_import_window(void *v_import_submenuitem)
 			label = gtk_menu_item_new_with_label(mid->label);
 			gtk_menu_append(GTK_MENU(import_menu), label);
 			gtk_signal_connect(GTK_OBJECT(label), "activate",
-					eb_import_function, mid->callback);
+					eb_import_function, mid);
 			gtk_widget_show(label);  
 		}
 	}

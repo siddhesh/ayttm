@@ -1,3 +1,8 @@
+* Thu May  8 2003 18:30 GMT [philip]	0.3.0-162
+- src/status.c
+fix a horrible bug with import menu handling
+callback prototype was overridden to something different
+
 * Thu May  8 2003 12:00 GMT [philip]	0.3.0-161
 - modules/yahoo2/yahoo.c
 show buddy's away time if user wants to see it
