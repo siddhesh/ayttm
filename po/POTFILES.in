@@ -2,6 +2,8 @@ libproxy/proxy.c
 src/activity_bar.C
 src/add_contact_window.c
 src/away_window.c
+src/about.c
+src/edit_list_window.c
 src/chat_room.c
 src/chat_window.c
 src/contact_actions.c
