@@ -100,8 +100,8 @@ class transfer_window : public llist_data
 
 typedef struct _eb_msn_local_account_data
 {
-	char login[255];
-	char password[255]; // account password
+	char login[MAX_PREF_LEN];
+	char password[MAX_PREF_LEN]; // account password
 	int fd;				// the file descriptor
 	int status;			// the current status of the user
 	msnconn * mc;
@@ -169,8 +169,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.60 $",
-	"$Date: 2003/07/30 12:33:40 $",
+	"$Revision: 1.61 $",
+	"$Date: 2003/07/30 12:39:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -465,7 +465,7 @@ static void msn_init_account_prefs(eb_local_account *ela)
 	input_list *il = g_new0(input_list, 1);
 	ela->prefs = il;
 	
-	il->widget.entry.value = mlad->login;
+	il->widget.entry.value = ela->handle;
 	il->widget.entry.name = "SCREEN_NAME";
 	il->widget.entry.label= _("_MSN Login:");
 	il->type = EB_INPUT_ENTRY;
@@ -892,33 +892,6 @@ static void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
         msn_new_SB(mlad->mc, NULL);
 }
 
-static void msn_init_account_prefs(eb_local_account * ela)
-{
-	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
-	input_list *il = g_new0(input_list, 1);
-
-	ela->prefs = il;
-
-	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= _("_MSN Passport:");
-	il->type = EB_INPUT_ENTRY;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.entry.value = mlad->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label= _("_Password:");
-	il->type = EB_INPUT_PASSWORD;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &ela->connect_at_startup;
-	il->widget.checkbox.name = "CONNECT";
-	il->widget.checkbox.label= _("_Connect at startup");
-	il->type = EB_INPUT_CHECKBOX;
-}
-
 static eb_local_account * eb_msn_read_local_account_config( LList * values )
 {
 	char buff[255];
@@ -943,6 +916,7 @@ static eb_local_account * eb_msn_read_local_account_config( LList * values )
 	eb_update_from_value_pair(ela->prefs, values);
 
 	/*the alias will be the persons login minus the @hotmail.com */
+	strncpy( mlad->login, ela->handle, sizeof(mlad->login));
 	strncpy( buff, ela->handle , sizeof(buff));
 	c = strtok( buff, "@" );
 	strncpy(ela->alias, buff , sizeof(ela->alias));
