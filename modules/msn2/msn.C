@@ -172,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.75 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.76 $",
+	"$Date: 2004/01/05 11:54:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1070,6 +1070,7 @@ static void eb_msn_terminate_chat(eb_account * account )
 typedef struct {
 	eb_local_account *ela;
 	char *username;
+	char *fname;
 } authorize_cb_data;
 
 static void eb_msn_authorize_callback( gpointer data, int response )
@@ -1092,7 +1093,7 @@ static void eb_msn_authorize_callback( gpointer data, int response )
   if(response) {
     if (ac == NULL) {
       ac = eb_msn_new_account(ela, username);
-      add_dummy_contact(username, ac);
+      add_dummy_contact(cb_data->fname, ac);
       msn_add_to_list(mlad->mc, "AL", username);
       edit_account_window_new(ac);
     }
@@ -1450,11 +1451,12 @@ static int eb_msn_authorize_user( eb_local_account *ela, char * username, char *
 	  eb_debug(DBG_MSN, "** %s (%s) has added you to their list.\n", friendlyname, username);
 	  snprintf(dialog_message, sizeof(dialog_message), _("%s, the MSN user %s (%s) would like to add you to their contact list.\n\nDo you want to allow them to see when you are online?"), 
 			  ela->handle, tmp, username);
-	  free(tmp);
   	  uname = msn_permstring(username);
 	  msn_add_to_llist(waiting_auth_callbacks, (llist_data *)uname);
 	  cbd->username = uname;
 	  cbd->ela = ela;
+	  cbd->fname = strdup(tmp);
+	  free(tmp);
 	  eb_do_dialog(dialog_message, _("Authorize MSN User"), eb_msn_authorize_callback, (gpointer)cbd );
 	  return 1;
   } else return 0;	 
