@@ -1828,10 +1828,10 @@ void set_menu_sensitivity(void)
 {
 	int online = connected_local_accounts();
 	
-	menu_set_sensitive(main_menu_factory, _("/Tools/New group chat..."), online);
-	menu_set_sensitive(main_menu_factory, _("/Tools/Set as away..."), online+1);
-	menu_set_sensitive(main_menu_factory, _("/File/Sign off all"), online);
-	menu_set_sensitive(main_menu_factory, _("/File/Sign on all"),
+	menu_set_sensitive(main_menu_factory, N_("/Tools/New group chat..."), online);
+	menu_set_sensitive(main_menu_factory, N_("/Tools/Set as away..."), online+1);
+	menu_set_sensitive(main_menu_factory, N_("/File/Sign off all"), online);
+	menu_set_sensitive(main_menu_factory, N_("/File/Sign on all"),
 				(online != l_list_length(accounts)));
 	
 }
