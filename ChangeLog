@@ -1,5 +1,6 @@
 * Fri Nov 7 2003 17:22 GMT [breser]	0.4.4-14
-- fix aspell detection
+- configure.ac
+fix aspell detection
 
 * Fri Nov 7 2003 11:30 GMT [colin]	0.4.4-13
 - modules/jabber
