@@ -1,3 +1,9 @@
+* Fri May  9 2003 06:36 GMT [philip]	0.3.0-168
+- modules/smileys/smiley-themer.c
+Unload module even if one of our themes is currently active
+gracefully fallback to default before unloading
+automatically takeover again after reloading
+
 * Fri May  9 2003 05:55 GMT [philip]	0.3.0-167
 - modules/importers modules/smileys
 move all smiley modules to modules/smileys

@@ -60,8 +60,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.4 $",
-	"$Date: 2003/05/08 20:23:14 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/05/09 06:43:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -75,6 +75,7 @@ unsigned int module_version() {return CORE_VERSION;}
 static void load_themes();
 static void unload_themes();
 static void enable_smileys(ebmCallbackData *data);
+static void reset_smileys(ebmCallbackData *data);
 static void activate_theme_by_name(const char *name);
 
 static int plugin_init()
@@ -139,13 +140,13 @@ static void unload_themes()
 {
 	while(themes) {
 		struct smiley_theme *theme = themes->data;
+		if(smileys == theme->smileys)
+			reset_smileys((ebmCallbackData *)theme);
+		
 		ay_remove_smiley_set(theme->name);
 		if(theme->menu_tag)
 			eb_remove_menu_item(EB_IMPORT_MENU, theme->menu_tag);
 
-		if(smileys == theme->smileys)
-			smileys = eb_smileys();
-		
 		while(theme->smileys) {
 			struct smiley_struct *smiley = theme->smileys->data;
 			XpmFree(smiley->pixmap);
