@@ -1,4 +1,7 @@
-* Sun Sep  8 2003 12:23 GMT [colin]       0.4.0-22
+* Thu Sep 11 2003 11:28 GMT [philip]	0.4.0-23
+- Up yahoo version number so we don't get blocked
+
+* Sun Sep  8 2003 12:23 GMT [colin]	0.4.0-22
 - modules/msn2/libmsn2/msn_core.C
 Fix file transfer with Mac (unsigned char problem found
 and patch by Nicolas Peninguy)
