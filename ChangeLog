@@ -1,3 +1,9 @@
+* Tue Jun 10 2003 15:07 GMT [edward]	0.3.1-33
+- src/chat_room.c
+  src/chat_window.c
+Fixed compile time issues. C code should not have definitions in the middle 
+of the scope like C++ can.
+
 * Tue Jun 10 2003 11:30 GMT [colin]	0.3.1-32
 - modules/msn2/msn.C
 Allow offline messenging (to chat with hidden people)

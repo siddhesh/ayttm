@@ -12,6 +12,7 @@ DefaultGroupName=AYTTM
 AllowNoIcons=yes
 LicenseFile=C:\Program Files\ayttm\COPYING
 InfoAfterFile=C:\cygwin\home\Haletky\ay\README.WIN32
+MinVersion=0,4.0.1381
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"

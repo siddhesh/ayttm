@@ -165,12 +165,15 @@ static void send_cr_message( GtkWidget * widget, gpointer data )
 {
 	eb_chat_room * ecr = (eb_chat_room *)data;
 	char *text = gtk_editable_get_chars(GTK_EDITABLE(ecr->entry), 0, -1);
+#ifdef __MINGW32__
+	char *recoded;
+#endif
 	
 	if (!text || strlen(text) == 0)
 		return;
 
 #ifdef __MINGW32__
-	char *recoded = ay_utf8_to_str(text);
+	recoded = ay_utf8_to_str(text);
 	g_free(text);
 	text = recoded;
 #endif
@@ -908,6 +911,9 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 {
 	gchar buff[2048];
 	gchar *temp_message, *link_message;
+#ifdef __MINGW32__
+	char *recoded;
+#endif
 
 	if (!message || strlen(message) == 0)
 		return;
@@ -980,7 +986,7 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 	g_free(temp_message);
 
 #ifdef __MINGW32__
-	char *recoded = ay_str_to_utf8(link_message);
+	recoded = ay_str_to_utf8(link_message);
 	g_free(link_message);
 	link_message = recoded;
 #endif

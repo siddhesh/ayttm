@@ -444,6 +444,9 @@ void send_message(GtkWidget *widget, gpointer d)
 	struct tm * cur_time;
 	time_t t;
 	LList * filter_walk;
+#ifdef __MINGW32__
+	char *recoded;
+#endif
 
 	GET_CHAT_WINDOW(data);
 
@@ -537,7 +540,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	text=o_text;
 
 #ifdef __MINGW32__
-	char *recoded = ay_utf8_to_str(text);
+	recoded = ay_utf8_to_str(text);
 	g_free(text);
 	text = recoded;
 #endif
@@ -1232,6 +1235,9 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 	gboolean firstmsg = FALSE; /* init to false so only play if
 			      * first msg is one received rather
 			      * than sent */
+#ifdef __MINGW32__
+	char *recoded;
+#endif
 
 	if (!o_message || strlen(o_message) == 0)
 		return;
@@ -1366,7 +1372,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		g_snprintf(buff2, BUF_SIZE, "%s", remote_contact->nick);
 
 #ifdef __MINGW32__
-	char *recoded = ay_str_to_utf8(message);
+	recoded = ay_str_to_utf8(message);
 	g_free(message);
 	message = recoded;
 #endif
