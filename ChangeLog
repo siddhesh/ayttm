@@ -1,3 +1,8 @@
+* Tue Jul 22 2003 08:55 GMT [philip]	0.3.3-9
+- src/edit_contact_window.c src/add_contact_window.c
+Use option_menu instead of combo box for local accounts/default service
+Add keyboard shortcuts for all widgets
+
 * Tue Jul 22 2003 08:24 GMT [philip]	0.3.3-8
 - src/edit_local_accounts.c
 Use option_menu instead of combo box - this means we can't have accounts 
