@@ -180,6 +180,18 @@ char * recode_if_needed(char * source_text, int direction)
 
 #endif	/* HAVE_ICONV_H */
 
+#ifdef __MINGW32__
+static void redraw_chat_window(GtkWidget *text)
+{
+	GdkRectangle update_rect;
+	update_rect.x = 0;
+	update_rect.y = 0;
+	update_rect.width = text->allocation.width;
+	update_rect.height = text->allocation.height;
+	gtk_widget_draw(text,&update_rect);
+}
+#endif
+
 static void set_tab_red(struct contact *ct)
 {
 	GtkStyle *style;
@@ -542,17 +554,6 @@ void send_message(GtkWidget *widget, gpointer d)
 	cw_put_message(data, link_message, iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
 	cw_put_message(data, "<br>", 0, 0, 0);
 
-#ifdef __MINGW32__
-        /* Force a redraw */
-        {
-              GdkRectangle update_rect;
-              update_rect.x = update_rect.y = 0;
-              update_rect.width = data->chat->allocation.width;
-              update_rect.height = data->chat->allocation.height;
-              gtk_widget_draw(data->chat,&update_rect);
-        }
-#endif
-
 	/* If an away message had been sent to this person, reset the away message tracker */
 	/* It's probably faster to just do the assignment all the time--the test
 	is there for code clarity. */
@@ -568,6 +569,9 @@ void send_message(GtkWidget *widget, gpointer d)
 	cw_reset_message(data);
 	g_free(link_message);
 	g_free(text);
+#ifdef __MINGW32__
+	redraw_chat_window(data->chat);
+#endif
 
 
 	/* if using tabs, then turn off the chat icon */
@@ -1086,6 +1090,9 @@ void eb_chat_window_display_error(eb_account * remote, gchar * message)
 			      _("<b>Error: </b>"), 0,0,0);
 		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), message, 0,0,0);
 		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), "<br>", 0,0,0);
+#ifdef __MINGW32__
+		redraw_chat_window(remote_contact->chatwindow->chat);
+#endif
 	}
 }
 
@@ -1263,6 +1270,9 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 	gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), message,
 	iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
 	gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), "<BR>",0,0,0);
+#ifdef __MINGW32__
+	redraw_chat_window(remote_contact->chatwindow->chat);
+#endif
 
 	/* Log the message */
 	if ( iGetLocalPref("do_logging") )
@@ -1297,6 +1307,9 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		
 		g_free(awaymsg);
 	}
+#ifdef __MINGW32__
+	redraw_chat_window(remote_contact->chatwindow->chat);
+#endif
 	free(message);
 }
 

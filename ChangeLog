@@ -1,3 +1,7 @@
+* Tue Apr 01 2003 01:30 GMT [edward]	0.2.3-pre70
+- src/chat_window.c
+Added Necessary redraws for MINGW32 port
+
 * Tue Apr 01 2003 20:50 GMT [colin]	0.2.3-pre69
 - modules/msn2/libmsn2/msn_bittybits.C
 Remove a scary printf()
