@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 18:08 GMT [philip]	0.3.0-52
+- modules/yahoo2/libyahoo2
+get idle time from server
+
 * Tue Apr 29 2003 17:36 GMT [philip]	0.3.0-51
 - src/account.c
 fix warnings

@@ -976,6 +976,7 @@ static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_pack
 	char *name = NULL;
 	int state = 0;
 	int away = 0;
+	int idle = 0;
 	char *msg = NULL;
 	
 	if(pkt->service == YAHOO_SERVICE_LOGOFF && pkt->status == -1) {
@@ -1013,6 +1014,9 @@ static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_pack
 		case 47: /* is it an away message or not */
 			away = atoi(pair->value);
 			break;
+		case 137: /* seconds idle */
+			idle = atoi(pair->value);
+			break;
 		case 11: /* what is this? */
 			NOTICE(("key %d:%s", pair->key, pair->value));
 			break;
@@ -1028,7 +1032,7 @@ static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_pack
 			} else if (state == YAHOO_STATUS_CUSTOM) {
 				YAHOO_CALLBACK(ext_yahoo_status_changed)(yd->client_id, name, state, msg, away);
 			} else {
-				YAHOO_CALLBACK(ext_yahoo_status_changed)(yd->client_id, name, state, NULL, 1);
+				YAHOO_CALLBACK(ext_yahoo_status_changed)(yd->client_id, name, state, NULL, idle);
 			}
 
 			break;

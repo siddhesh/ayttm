@@ -158,6 +158,7 @@ void YAHOO_CALLBACK_TYPE(ext_yahoo_got_cookies)(int id);
  * 	stat - status code (enum yahoo_status)
  * 	msg  - the message if stat == YAHOO_STATUS_CUSTOM
  * 	away - whether the contact is away or not (YAHOO_STATUS_CUSTOM)
+ * 	       for YAHOO_STATUS_IDLE, this is the number of seconds he is idle
  */
 void YAHOO_CALLBACK_TYPE(ext_yahoo_status_changed)(int id, char *who, int stat, char *msg, int away);
 
