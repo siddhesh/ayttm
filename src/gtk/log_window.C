@@ -26,17 +26,19 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <ctype.h>
 #include <time.h>
+#include <errno.h>
+#include <assert.h>
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "util.h"
 #include "globals.h"
-//#include "prefs.h"
 #include "action.h"
+#include "messages.h"
+
 #include "ui_log_window.h"
 
 #include "gtk_eb_html.h"
@@ -80,7 +82,10 @@ class ay_log_window
 		void	SetHTMLText( GSList* gl );
 		void	LoadInfo( void );
 
+		const char	*GetSearchBuffer( void );
 		
+		
+		bool		m_finished_construction;
 		GtkWidget	*m_window;
 		GtkWidget	*m_date_list;
 		GtkWidget	*m_date_scroller;
@@ -90,12 +95,16 @@ class ay_log_window
 
 		struct contact	*m_remote;
 		const char		*m_filename;
-		GSList			*m_entries;   /* list of gslists */
+		GSList			*m_entries;
 		FILE			*m_fp;
 		long			m_filepos;
 		
-		int		m_search_current_row;
-		int		m_search_last_pos;
+		int			m_num_logs;		///< total number of logs in the window
+		
+		const char	*m_search_buffer;			///< stores the text of the current log which is displayed
+		int			m_search_buffer_log_num;	///< number of the log being held in m_search_buffer
+		long		m_search_pos_in_buffer;		///< position in m_search_buffer to start the search from
+		int			m_search_current_log;		///< current log number for searching [indexed from 0]
 };
 
 
@@ -132,11 +141,7 @@ t_log_window_id ay_ui_log_window_file_create( const char *inFileName )
 
 ay_log_window::ay_log_window( struct contact *inRemoteContact )
 :	m_remote( inRemoteContact )
-{
-	m_filename = NULL;
-	m_fp = NULL;
-	m_filepos = 0;
-	
+{	
 	m_remote->logwindow = this;
 
 	char	name_buffer[NAME_MAX];
@@ -155,20 +160,29 @@ ay_log_window::ay_log_window( struct contact *inRemoteContact )
 ay_log_window::ay_log_window( const char *inFileName )
 :	m_remote( NULL )
 {
-	m_filename = strdup(inFileName);
-	m_fp = NULL;
-	m_filepos = 0;
+	m_filename = strdup( inFileName );
 	
 	Init( _("Past conversation") );
 }
 
 // Init
 void	ay_log_window::Init( const char *inTitle )
-{	
+{
+	m_finished_construction = false;
+	
+	m_fp = NULL;
+	m_filepos = 0;
+	m_entries = 0;
+	
 	m_html_display = NULL;
 	m_html_scroller = NULL;
-	m_search_current_row = -1;
-	m_search_last_pos = -1;
+	
+	m_num_logs = 0;
+	
+	m_search_buffer = NULL;
+	m_search_buffer_log_num = 0;
+	m_search_pos_in_buffer = 0;
+	m_search_current_log = 0;
 
 	m_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_widget_realize( GTK_WIDGET(m_window) );
@@ -189,7 +203,7 @@ void	ay_log_window::Init( const char *inTitle )
 	/* scroll window for the date list */
 	m_date_scroller = gtk_scrolled_window_new( NULL, NULL );
 	gtk_widget_show( GTK_WIDGET(m_date_scroller) );
-	gtk_widget_set_usize( m_date_scroller, 180, 150 );
+	gtk_widget_set_usize( m_date_scroller, 190, 200 );
 	gtk_container_add( GTK_CONTAINER(m_date_scroller), m_date_list );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(m_date_scroller), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
 	gtk_box_pack_start( GTK_BOX(m_date_html_hbox), m_date_scroller, TRUE, TRUE, 5 );
@@ -243,8 +257,10 @@ void	ay_log_window::Init( const char *inTitle )
 	
 	LoadInfo();  
 
+	m_finished_construction = true;
+	
 	gtk_widget_show(GTK_WIDGET(m_window));
-
+	
 	gtk_clist_select_row(GTK_CLIST(m_date_list), 0, 0);
 }
 
@@ -257,6 +273,9 @@ ay_log_window::~ay_log_window( void )
 
 	if ( m_filename )
 		free( (char *)m_filename );
+		
+	if ( m_search_buffer )
+		free( (char *)m_search_buffer );
 }
 
 // AddIconToToolbar
@@ -301,14 +320,14 @@ void	ay_log_window::SetHTMLText( GSList *gl )
 
 	ext_gtk_text_freeze( EXT_GTK_TEXT(m_html_display) );
 
-	GSList	*h = gl;  
+	GSList	*line = gl;  
 
-	while ( h != NULL )
+	while ( line != NULL )
 	{
-		if ( h->data != NULL ) 
-			gtk_eb_html_log_parse_and_add( EXT_GTK_TEXT(m_html_display), (char *)h->data );
+		if ( line->data != NULL ) 
+			gtk_eb_html_log_parse_and_add( EXT_GTK_TEXT(m_html_display), (char *)line->data );
 
-		h = g_slist_next( h );
+		line = g_slist_next( line );
 	}
 
 	ext_gtk_text_thaw( EXT_GTK_TEXT(m_html_display) );
@@ -319,7 +338,7 @@ void	ay_log_window::LoadInfo( void )
 {
 	assert( m_filename != NULL );
   
-	GSList	*gl = g_slist_alloc();
+	GSList	*gl = NULL;
 	char	*p3[1];
 	bool	is_empty = true;
 
@@ -348,11 +367,8 @@ void	ay_log_window::LoadInfo( void )
 			{
 				char	date_buffer[128];
 				
-				/* extract the date, I am not sure if this is portable (but it
-				works on my machine, so if someone wants to hack it, go ahead */
 				p1 += strlen( _("Conversation started on ") );
 
-				/* if html tags are in the buffer, gotta strip the last two tags */
 				const char	*p2 = strstr( read_buffer, "</B>" );
 				if ( p2 != NULL && p2 > p1 )
 				{
@@ -377,11 +393,12 @@ void	ay_log_window::LoadInfo( void )
 				idx = gtk_clist_append( GTK_CLIST(m_date_list), p3 );
 
 				/* add new gslist entry */
-				gl1 = g_slist_alloc();
 				snprintf( posbuf, sizeof(posbuf), "%lu", fpos );
+				gl1 = g_slist_append( NULL, strdup(posbuf) );
+				eb_debug( DBG_CORE, "ay_log_window::LoadInfo [%s] at [%s] in file\n", p3[0], posbuf );
+				
 				gl = g_slist_append( gl, gl1 );	
-				gl1 = g_slist_append( gl1, strdup(posbuf) );
-				eb_debug( DBG_CORE,"%s at %s\n", p3[0], posbuf );
+				m_num_logs++;
 
 				/* set the datapointer for the clist */
 				gtk_clist_set_row_data( GTK_CLIST(m_date_list), idx, gl1 );
@@ -389,7 +406,7 @@ void	ay_log_window::LoadInfo( void )
 			else if ( (p1 = strstr(read_buffer, _("Conversation ended on "))) == NULL )
 			{
 				if ( gl1 != NULL )
-				{
+				{					
 					gl1 = g_slist_append( gl1, strdup(read_buffer) );
 				}
 				else
@@ -403,9 +420,11 @@ void	ay_log_window::LoadInfo( void )
 					
 					/* add new gslist entry */
 					snprintf( posbuf, sizeof(posbuf), "%lu", ftell(m_fp) );
-					gl = g_slist_append( gl, gl1 );	
 					gl1 = g_slist_append( gl1, strdup(posbuf) );
-					eb_debug( DBG_CORE,"%s at %s\n", p3[0], posbuf );
+					eb_debug( DBG_CORE,"ay_log_window::LoadInfo [%s] at [%s] in file\n", p3[0], posbuf );
+					
+					gl = g_slist_append( gl, gl1 );
+					m_num_logs++;
 
 					/* set the datapointer for the clist */
 					gtk_clist_set_row_data( GTK_CLIST(m_date_list), idx, gl1 );
@@ -421,18 +440,42 @@ void	ay_log_window::LoadInfo( void )
 	}
 	else
 	{
-		perror( m_filename );
+		const int	buffer_len = 256;
+		char		buffer[buffer_len];
+		
+		snprintf( buffer, buffer_len, "%s [%s]\n", strerror( errno ), m_filename );
+		
+		eb_debug( DBG_CORE, buffer );
 	}
 
 	if ( is_empty )
 	{
-		p3[0] = _("No log available");
+		p3[0] = _("No logs available");
 		gtk_clist_append( GTK_CLIST(m_date_list), p3 );
 	}	  
 
 	m_entries = gl;
 
 	gtk_clist_thaw( GTK_CLIST(m_date_list) );
+}
+
+// GetSearchBuffer
+const char	*ay_log_window::GetSearchBuffer( void )
+{
+	if ( m_search_buffer != NULL )
+	{
+		if ( m_search_buffer_log_num == m_search_current_log )
+			return( m_search_buffer );
+	
+		free( (char *)m_search_buffer );
+	}
+		
+	m_search_buffer = gtk_editable_get_chars( GTK_EDITABLE(m_html_display), 0, -1 );
+	
+	m_search_buffer_log_num = m_search_current_log;
+	m_search_pos_in_buffer = 0;
+	
+	return( m_search_buffer );
 }
 
 ////
@@ -484,6 +527,9 @@ void	ay_log_window::s_select_date_callback( GtkCList *clist, int row, int column
 	
 	assert( lw != NULL );
 	
+	if ( !lw->m_finished_construction )
+		return;
+		
 	GSList	*string_list = (GSList*)gtk_clist_get_row_data( GTK_CLIST(clist), row );
 	
 	while ( string_list && !string_list->data )
@@ -495,165 +541,107 @@ void	ay_log_window::s_select_date_callback( GtkCList *clist, int row, int column
 	{
 		lw->m_filepos = atol( (char *)string_list->data );
 		
-		eb_debug( DBG_CORE,"m_filepos now %lu\n", lw->m_filepos );
+		eb_debug( DBG_CORE,"ay_log_window::s_select_date_callback - m_filepos now %lu\n", lw->m_filepos );
 		
 		string_list = g_slist_next(string_list);
 	}
 	else 
 	{
-		eb_debug( DBG_CORE, "string_list->data null\n" );
+		eb_debug( DBG_CORE, "ay_log_window::s_select_date_callback - string_list->data null\n" );
 	}
 
 	lw->SetHTMLText( string_list );
-	lw->m_search_current_row = row;
-	lw->m_search_last_pos = 0;
+	lw->m_search_current_log = row;
 }
 
 // s_search_callback
 gboolean ay_log_window::s_search_callback( GtkWidget *widget, GdkEventKey *event, gpointer data )
 {
 	ay_log_window	*lw = reinterpret_cast<ay_log_window *>( data );
-	
 	assert( lw != NULL );
 	
-	int cur_pos = 0;
-	int	cur_log = lw->m_search_current_row;
-
-	bool looped = false;
-	
-	/* if user wants to search */
+		
 	if ( event->keyval == GDK_Return )
 	{
-		char	*text = gtk_editable_get_chars( GTK_EDITABLE(widget), 0, -1 );
-		
-		strip_html( text );
-		if ( !text || strlen(text) == 0 )
+		char	*search_text = gtk_editable_get_chars( GTK_EDITABLE(widget), 0, -1 );
+
+		if ( search_text == NULL )
 			return( TRUE );
 
-		eb_debug( DBG_CORE,"search: begin at cur_log:%d\n", cur_log );
-
-		while ( !looped )
+		if ( search_text[0] == '\0' )
 		{
-			int		total_length = 0;
-			GSList	*c_slist = NULL;
-			GSList	*s_list = NULL;
-			
-			/* get the selected conversation's log */
-			s_list = (GSList*)gtk_clist_get_row_data( GTK_CLIST(lw->m_date_list), cur_log );
-			if ( s_list == NULL )
-			{
-				/* end of the conversation's list, back to the begining */
-				s_list = (GSList*)gtk_clist_get_row_data( GTK_CLIST(lw->m_date_list), 0 );
-				/* reset */
-				lw->m_search_current_row = 0;
-				lw->m_search_last_pos = 0;
-				cur_log = cur_pos = total_length = 0;
-				
-				eb_debug(DBG_CORE,"search:looped\n");
-				looped = true;
-			}
-			
-			if ( s_list == NULL )
-			{
-				eb_debug(DBG_CORE, "search: breaking\n");
-				break;
-			}
-
-			/* keep a pointer to the beginning of the conversation 
-			* as we'll move s_list pointer */
-			c_slist = s_list;
-			while ( s_list && cur_pos <= lw->m_search_last_pos )
-			{
-				s_list = s_list->next;
-				
-				if(s_list && s_list->data && cur_pos < lw->m_search_last_pos)
-				{
-					char	*list_text = (char *)s_list->data;
-					char	*no_html_text = NULL;
-					
-					if ( list_text != NULL ) 
-						no_html_text = strdup( list_text );
-						
-					if ( no_html_text )
-					{
-						strip_html( no_html_text );
-						total_length += strlen( (char*)no_html_text );
-						free( no_html_text );
-					}
-					
-					eb_debug( DBG_CORE,"search:adding to %d\n", total_length );
-				}
-				
-				if ( s_list )
-					cur_pos++;
-			}
-		
-			while ( s_list && s_list->data )
-			{
-				char	*list_text = (char *)s_list->data;
-				char	*no_html_text = NULL;
-				
-				if ( list_text ) 
-					no_html_text = strdup( list_text );
-					
-				if ( no_html_text ) 
-					strip_html( no_html_text );
-					
-				/* found string ? */
-				if ( no_html_text && strstr( no_html_text, text ) != NULL )
-				{
-					/* go to the the found conversation */
-					gtk_clist_select_row( GTK_CLIST(lw->m_date_list), cur_log, 0 );
-					gtk_clist_moveto( GTK_CLIST(lw->m_date_list), cur_log, 0, 0, 0 );
-								
-					/* update the conversation log */			     
-					lw->SetHTMLText( c_slist );
-					
-					GtkEditable	*editable = GTK_EDITABLE( lw->m_html_display );
-
-					lw->m_search_last_pos = cur_pos + 1;
-					lw->m_search_current_row = cur_log;
-					
-					/* select the matching substring */
-					eb_debug( DBG_CORE, "search: total2=%d (%d,%s)\n", total_length, cur_log, strstr(no_html_text,text) );
-					gtk_editable_set_position ( editable,
-									total_length+(int)(strstr(no_html_text,text)-no_html_text));
-					gtk_editable_select_region( editable,
-									total_length+(int)(strstr(no_html_text,text)-no_html_text),
-									total_length+(int)(strstr(no_html_text,text)-no_html_text)+strlen(text));
-					
-					total_length += strlen( no_html_text );
-					
-					if ( text != NULL )
-						free( text );
-						
-					return( TRUE );
-				}
-				else if ( no_html_text != NULL )
-				{
-					total_length += strlen( no_html_text );
-				}
-				
-				if ( no_html_text != NULL )
-					free( no_html_text );
-					
-				/* next line */
-				s_list = s_list->next;
-				cur_pos++; 
-				lw->m_search_last_pos = cur_pos;
-			}
-			
-			/* next conversation */
-			eb_debug( DBG_CORE,"search: next one\n" );
-			cur_log++;
-			cur_pos = 0;
-			lw->m_search_last_pos = 0;
-
-			lw->m_search_current_row = cur_log;
+			free( search_text );
+			return( TRUE );
 		}
 		
-		if ( text != NULL )
-			free( text );
+		const int	search_text_len = strlen( search_text );
+			
+		eb_debug( DBG_CORE, "log search - search for: [%s] - m_num_logs = [%d]\n", search_text, lw->m_num_logs );
+		eb_debug( DBG_CORE, "log search - begin at m_search_current_log: [%d] -  m_search_pos_in_buffer: [%ld]\n",
+			lw->m_search_current_log, lw->m_search_pos_in_buffer );
+
+		int		log_count = 0;
+		
+		while ( log_count < lw->m_num_logs )
+		{
+			const char	*text_to_search = lw->GetSearchBuffer();			
+			const char	*found_str = strstr( text_to_search + lw->m_search_pos_in_buffer, search_text );
+			
+			if ( found_str != NULL )
+			{
+				const long	found_pos = (found_str - text_to_search);
+				GtkEditable	*editable = GTK_EDITABLE(lw->m_html_display);
+
+				gtk_editable_set_position ( editable, found_pos );
+				gtk_editable_select_region( editable, found_pos, found_pos + search_text_len );
+				
+				lw->m_search_pos_in_buffer = (found_pos + search_text_len + 1);
+				
+				eb_debug( DBG_CORE, "log search - FOUND [%s] - m_search_pos_in_buffer: [%ld]\n",
+					search_text, lw->m_search_pos_in_buffer );
+				
+				return( TRUE );
+			}
+			else
+			{
+				lw->m_search_current_log++;
+				
+				if ( lw->m_search_current_log == lw->m_num_logs )
+				{
+					if ( lw->m_search_pos_in_buffer != 0 )
+						log_count--;	// we want to search the current log again if we are in the middle of it
+					
+					lw->m_search_current_log = 0;
+					lw->m_search_pos_in_buffer = 0;
+				
+					eb_debug( DBG_CORE,"log search - looped around logs\n" );
+				}
+				
+				gtk_clist_select_row( GTK_CLIST(lw->m_date_list), lw->m_search_current_log, 0 );
+				gtk_clist_moveto( GTK_CLIST(lw->m_date_list), lw->m_search_current_log, 0, 0, 0 );
+				
+				eb_debug( DBG_CORE, "log search - [%s] not found - m_search_current_log now: [%d]\n",
+					search_text, lw->m_search_current_log );
+			}
+			
+			log_count++;
+		}
+		
+		// we've searched all the logs and not found a match so
+		//	give the user an indication that the search was unsuccessful
+		
+		const int	buffer_len = 128;
+		char		buffer[buffer_len];
+		
+		buffer[0] = '\'';
+		buffer[1] = '\0';
+		strncat( buffer, search_text, buffer_len );
+		strncat( buffer, _("' not found in the logs"), buffer_len );
+		
+		ay_do_info( _("Log Search"), buffer );
+	
+		free( search_text );
 	}
+	
 	return( TRUE );
 }
