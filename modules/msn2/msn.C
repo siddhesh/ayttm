@@ -149,8 +149,7 @@ static int do_reconnect = 0;
 int do_msn_debug = 0;
 #define DBG_MSN do_msn_debug
 
-static int do_mail_notify = 1;
-static int do_mail_notify_show = 1;
+static int do_mail_notify = 0;
 static int do_mail_notify_folders = 0;
 static int do_mail_notify_run_script = 0;
 static int do_guess_away = 1;
@@ -165,8 +164,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.24 $",
-	"$Date: 2003/04/20 19:43:04 $",
+	"$Revision: 1.25 $",
+	"$Date: 2003/04/23 20:46:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -212,14 +211,7 @@ static int plugin_init()
 	il = il->next;
 	il->widget.checkbox.value = &do_mail_notify;
 	il->widget.checkbox.name = "do_mail_notify";
-	il->widget.checkbox.label = _("Tell me about new mail");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &do_mail_notify_show;
-	il->widget.checkbox.name = "do_mail_notify_show";
-	il->widget.checkbox.label = _("Show new mail dialogs when I have new mail");
+	il->widget.checkbox.label = _("Tell me about new Hotmail/MSN mail");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
@@ -2220,7 +2212,7 @@ void ext_initial_email(msnconn * conn, int unread_ibc, int unread_fold)
 {
   char buf[1024];
 
-  if(do_mail_notify == 0 || do_mail_notify_show ==0)
+  if(do_mail_notify == 0)
     return;
 
   if(unread_ibc==0 && (!do_mail_notify_folders || unread_fold==0)) { return; }
@@ -2241,7 +2233,7 @@ void ext_initial_email(msnconn * conn, int unread_ibc, int unread_fold)
 void ext_new_mail_arrived(msnconn * conn, char * from, char * subject) {
   char buf[1024];
 
-  if(!do_mail_notify || !do_mail_notify_show) { return; }
+  if(!do_mail_notify) { return; }
 
   snprintf(buf, 1024, "New mail from %s: \"%s\"", from, subject);
 

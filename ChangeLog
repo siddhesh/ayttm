@@ -1,3 +1,8 @@
+* Wed Apr 23 2003 20:45 GMT [colin]	0.3.0-pre21
+- modules/msn2/msn.C
+Fix MSN preferences clutter regarding mail settings
+Patch by Ben Reser again
+
 * Wed Apr 23 2003 20:40 GMT [colin]	0.3.0-pre20
 - src/prefs.c
 Preference loss if no /etc/ayttmrc fix - thanks to
