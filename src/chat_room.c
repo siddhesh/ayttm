@@ -1136,9 +1136,9 @@ static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 	if ( !data )
 		return;
 
-	if(scd->c_room->smiley_window ) {
-		gtk_widget_destroy(scd->c_room->smiley_window);
-		scd->c_room->smiley_window = NULL;
+	if(scd->c_window->smiley_window ) {
+		gtk_widget_destroy(scd->c_window->smiley_window);
+		scd->c_window->smiley_window = NULL;
 	}
 	
 	g_free( scd );
@@ -1318,8 +1318,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	/* smileys */
 	if ( iGetLocalPref("do_smiley") ) {
 		smiley_callback_data * scd = g_new0(smiley_callback_data,1);
-		scd->c_room = chat_room;
-		scd->c_window = NULL;
+		scd->c_window = chat_room;
 		ICON_CREATE(icon, iconwid, smiley_button_xpm);
 		chat_room->smiley_button = 
 			TOOLBAR_APPEND(_("Insert Smiley"), iconwid, _show_smileys_cb, scd);

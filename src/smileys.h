@@ -23,7 +23,6 @@
 #define __SMILEYS_H__
 
 #include "chat_window.h"
-#include "chat_room.h"
 
 
 struct protocol_smiley_struct
@@ -86,7 +85,6 @@ typedef struct _smiley_callback_data smiley_callback_data;
 
 struct _smiley_callback_data
 {
-	eb_chat_room   *c_room;
 	chat_window    *c_window;
 };
 

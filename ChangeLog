@@ -1,3 +1,8 @@
+* Tue Jul 08 2003 05:08 GMT [philip]	0.3.2-15
+- src/smileys.[ch] src/chat_room.c src/chat_window.c
+merge chat_room and chat_window in smileys code, and make
+smiley window a transient for its parent.
+
 * Tue Jul 08 2003 04:51 GMT [philip]	0.3.2-14
 - src/many files
 make some dialog windows transients for their parent windows

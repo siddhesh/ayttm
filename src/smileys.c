@@ -396,9 +396,7 @@ static void insert_smiley_cb (GtkWidget * widget, smiley_callback_data *data)
 {
 	GtkEditable *entry = NULL;
 	int pos;
-	if (data && data->c_room)
-		entry = GTK_EDITABLE(data->c_room->entry);
-	else if (data && data->c_window)
+	if (data && data->c_window)
 		entry = GTK_EDITABLE(data->c_window->entry);
 	else {
 		eb_debug(DBG_CORE, "smiley_callback_data has no chat* !\n");
@@ -419,10 +417,7 @@ static void insert_smiley_cb (GtkWidget * widget, smiley_callback_data *data)
 		}
 	}
 	
-	if (data->c_room && data->c_room->smiley_window) {
-		gtk_widget_destroy(data->c_room->smiley_window);
-		data->c_room->smiley_window = NULL;
-	} else if (data->c_window && data->c_window->smiley_window) {
+	if (data->c_window && data->c_window->smiley_window) {
 		gtk_widget_destroy(data->c_window->smiley_window);
 		data->c_window->smiley_window = NULL;		
 	}
@@ -449,19 +444,13 @@ void show_smileys_cb (smiley_callback_data *data) {
 	int rows, cols;
 	
 	/* close popup if open */
-	if (data->c_room && data->c_room->smiley_window) {
-		gtk_widget_destroy(data->c_room->smiley_window);
-		data->c_room->smiley_window = NULL;
-		return;
-	} else if (data->c_window && data->c_window->smiley_window) {
+	if (data->c_window && data->c_window->smiley_window) {
 		gtk_widget_destroy(data->c_window->smiley_window);
 		data->c_window->smiley_window = NULL;		
 		return;
 	}
 
-	if (data && data->c_room)
-		account = data->c_room->local_user;
-	else if (data && data->c_window)
+	if (data && data->c_window)
 		account = data->c_window->local_user;
 	else {
 		eb_debug(DBG_CORE, "no chat* in data !\n");
@@ -501,9 +490,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 		dsmile = get_smiley_by_name(msmiley->name);
 		if(dsmile != NULL) {
 			GtkWidget *parent = NULL;
-			if (data && data->c_room)
-				parent = data->c_room->window;
-			else if (data && data->c_window)
+			if (data && data->c_window)
 				parent = data->c_window->window;
 			icon = gdk_pixmap_create_from_xpm_d(parent->window, &mask, NULL, dsmile->pixmap);
 			iconwid = gtk_pixmap_new(icon, mask);
@@ -538,6 +525,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 	done = NULL;
 
 	smiley_window = gtk_window_new(GTK_WINDOW_DIALOG);
+	gtk_window_set_transient_for(GTK_WINDOW(smiley_window), GTK_WINDOW(data->c_window->window));
 	gtk_window_set_modal(GTK_WINDOW(smiley_window), FALSE);
 	gtk_window_set_wmclass(GTK_WINDOW(smiley_window), "ayttm-chat", "Ayttm");
 	gtk_window_set_title(GTK_WINDOW(smiley_window), "Smileys");
@@ -559,9 +547,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 	gtk_widget_set_uposition(smiley_window, win_x, win_y);
 /*	gtk_widget_set_usize(smiley_window, win_w, win_h);*/
 	
-	if (data && data->c_room)
-		data->c_room->smiley_window = smiley_window;
-	else if (data && data->c_window)
+	if (data && data->c_window)
 		data->c_window->smiley_window = smiley_window;
 
 }
