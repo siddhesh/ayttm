@@ -1,3 +1,8 @@
+* Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre13
+- modules/*toc/*toc.c
+don't linkify outgoing messages
+patch by Adam Butler (spacedoubtman@users.sf.net)
+
 * Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre12
 - src/dialog.c
 enable ENTER to validate input

@@ -171,8 +171,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.67 $",
-	"$Date: 2003/10/11 09:22:11 $",
+	"$Revision: 1.68 $",
+	"$Date: 2003/10/12 14:41:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -733,7 +733,7 @@ static void eb_msn_login( eb_local_account * account )
 	account->connecting = 1;
 	
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
-
+printf("%d %s\n",mlad->prompt_password, mlad->password);
 	if (mlad->prompt_password || !mlad->password || !strlen(mlad->password)) {
 		snprintf(buff, sizeof(buff), _("MSN password for: %s"), account->handle);
 		do_password_input_window(buff, "", 

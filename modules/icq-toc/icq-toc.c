@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.43 $",
-	"$Date: 2003/10/11 09:22:11 $",
+	"$Revision: 1.44 $",
+	"$Date: 2003/10/12 14:41:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -672,7 +672,7 @@ static void eb_icq_send_chat_room_message( eb_chat_room * room, char * message )
 {
 	struct eb_icq_local_account_data * alad = room->local_user->protocol_local_account_data;
 	toc_conn * conn = alad->conn;
-	char * message2 = linkify(message);
+	char * message2 = strdup(message);
 
 	icqtoc_chat_send(conn, room->id, message2 );
 	g_free(message2);
@@ -946,7 +946,7 @@ static void eb_icq_send_im( eb_local_account * account_from,
 				  char * message )
 {
 	struct eb_icq_local_account_data * plad = (struct eb_icq_local_account_data*)account_from->protocol_local_account_data;
-	char * message2 = linkify(message);
+	char * message2 = strdup(message);
 	if(strlen(message2) > 2000)
 	{
 		ay_do_warning( _("ICQ Warning"), _("Message Truncated") );

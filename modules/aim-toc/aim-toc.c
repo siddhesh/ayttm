@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.55 $",
-	"$Date: 2003/10/11 09:22:11 $",
+	"$Revision: 1.56 $",
+	"$Date: 2003/10/12 14:41:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -752,7 +752,7 @@ static void eb_aim_send_chat_room_message( eb_chat_room * room, char * message )
 {
 	struct eb_aim_local_account_data * alad = room->local_user->protocol_local_account_data;
 	toc_conn * conn = alad->conn;
-	char * message2 = linkify(message);
+	char * message2 = strdup(message);
 
 	toc_chat_send(conn, room->id, message2 );
 	g_free(message2);
@@ -1026,7 +1026,7 @@ static void eb_aim_send_im( eb_local_account * account_from,
 				  char * message )
 {
 	struct eb_aim_local_account_data * plad = (struct eb_aim_local_account_data*)account_from->protocol_local_account_data;
-	char * message2 = linkify(message);
+	char * message2 = strdup(message);
 	if(strlen(message2) > 2000)
 	{
 		ay_do_warning( _("AIM Error"), _("Message Truncated") );
