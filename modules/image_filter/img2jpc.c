@@ -31,8 +31,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.6 $",
-	"$Date: 2004/02/16 08:14:40 $",
+	"$Revision: 1.7 $",
+	"$Date: 2004/03/02 19:57:56 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -63,11 +63,13 @@ static int plugin_init()
 	il->label= _("Send JPEG2000 images (creates huge data transfers)");
 	il->type = EB_INPUT_CHECKBOX;
 
-	old_img_2_jpg = image_2_jpg;
-	image_2_jpg = img_2_jpg;
+	if(!jas_init()) {
+		old_img_2_jpg = image_2_jpg;
+		image_2_jpg = img_2_jpg;
 
-	old_img_2_jpc = image_2_jpc;
-	image_2_jpc = img_2_jpc;
+		old_img_2_jpc = image_2_jpc;
+		image_2_jpc = img_2_jpc;
+	}
 
 	return 0;
 }
@@ -167,5 +169,5 @@ static unsigned char * img_2_jpc(const unsigned char *in_img, long *size)
 		return ay_memdup(in_img, *size);
 	if(!outfmt)
 		outfmt = jas_image_strtofmt("jpc");
-	return img_2_img(in_img, size, outfmt, "jpc", "rate=0.0219");
+	return img_2_img(in_img, size, outfmt, "jpc", "rate=0.0219\nmode=real");
 }
