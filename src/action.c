@@ -294,7 +294,7 @@ static void create_action_menu(char *html_file, char *plain_file, int sens)
 	if (l_list_empty(commands)) {
 		/* create the print command so people will understand... */
 		
-		save_action("html2ps %s | lpr");
+		save_action("html2ps -U %s | lpr");
 		commands = load_actions();
 	}
 	
