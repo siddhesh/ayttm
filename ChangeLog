@@ -1,3 +1,7 @@
+* Sat Apr 05 2003 21:00 GMT [philip]	0.2.3-36
+- modules/yahoo2
+add more logging
+
 * Sat Apr 05 2003 18:25 GMT [andy]	0.2.3-35
 - */libtoc/libtoc.[ch]
 static/const/include fixes

@@ -109,6 +109,15 @@ int yahoo_connect(char * host, int port)
 	return YAHOO_CALLBACK(ext_yahoo_connect)(host, port);
 }
 
+enum yahoo_log_level log_level = YAHOO_LOG_NONE;
+
+int yahoo_set_log_level(enum yahoo_log_level level)
+{
+	enum yahoo_log_level l = log_level;
+	log_level = level;
+	return l;
+}
+
 extern char pager_host[];
 extern char pager_port[];
 static int fallback_ports[]={23, 25, 80, 5050, 0};
@@ -233,6 +242,7 @@ static struct yahoo_input_data * find_input_by_id(int id)
 static struct yahoo_input_data * find_input_by_id_and_type(int id, enum yahoo_connection_type type)
 {
 	YList *l;
+	LOG(("find_input_by_id_and_type"));
 	for(l = inputs; l; l = y_list_next(l)) {
 		struct yahoo_input_data *yid = l->data;
 		if(yid->type == type && yid->yd->client_id == id)
@@ -244,6 +254,7 @@ static struct yahoo_input_data * find_input_by_id_and_type(int id, enum yahoo_co
 static struct yahoo_input_data * find_input_by_id_and_fd(int id, int fd)
 {
 	YList *l;
+	LOG(("find_input_by_id_and_fd"));
 	for(l = inputs; l; l = y_list_next(l)) {
 		struct yahoo_input_data *yid = l->data;
 		if(yid->fd == fd && yid->yd->client_id == id)
@@ -256,25 +267,18 @@ static int count_inputs_with_id(int id)
 {
 	int c=0;
 	YList *l;
+	LOG(("counting %d", id));
 	for(l = inputs; l; l = y_list_next(l)) {
 		struct yahoo_input_data *yid = l->data;
 		if(yid->yd->client_id == id)
 			c++;
 	}
+	LOG(("%d", c));
 	return c;
 }
 
 
 extern char *yahoo_crypt(char *, char *);
-
-enum yahoo_log_level log_level = YAHOO_LOG_NONE;
-
-int yahoo_set_log_level(enum yahoo_log_level level)
-{
-	enum yahoo_log_level l = log_level;
-	log_level = level;
-	return l;
-}
 
 /* Free a buddy list */
 static void yahoo_free_buddies(YList * list)
@@ -603,8 +607,10 @@ static void yahoo_input_close(struct yahoo_input_data *yid)
 		close(yid->fd);
 	yid->fd = 0;
 	FREE(yid->rxqueue);
-	if(count_inputs_with_id(yid->yd->client_id) == 1)
+	if(count_inputs_with_id(yid->yd->client_id) == 0) {
+		LOG(("closing %d", yid->yd->client_id));
 		yahoo_close(yid->yd->client_id);
+	}
 	FREE(yid);
 }
 
@@ -2082,9 +2088,11 @@ void yahoo_logoff(int id)
 		}
 	}
 
+	/*
 	do {
 		yahoo_input_close(yid);
 	} while((yid = find_input_by_id(id)));
+	*/
 }
 
 void yahoo_get_list(int id)

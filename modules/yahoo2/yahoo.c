@@ -122,8 +122,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/05 15:02:02 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/05 19:55:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -412,6 +412,7 @@ static eb_account *eb_yahoo_new_account(const char * account);
 static int eb_yahoo_ping_timeout_callback(gpointer data)
 {
 	eb_yahoo_local_account_data *ylad = data;
+	LOG(("ping"));
 	yahoo_keepalive(ylad->id);
 	return 1;
 }
@@ -1588,6 +1589,7 @@ static void ay_yahoo_cancel_connect(void *data)
 		}
 	}
 		
+	yahoo_close(ylad->id);
 	ref_count--;
 	ela->connecting = 0;
 	ylad->connect_tag = 0;
@@ -1606,9 +1608,9 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
 	ela->connecting = 1;
 	ref_count++;
-	ylad->connect_progress_tag = ay_activity_bar_add(buff, ay_yahoo_cancel_connect, ela);
-
 	ylad->id = yahoo_init(ela->handle, ylad->password);
+
+	ylad->connect_progress_tag = ay_activity_bar_add(buff, ay_yahoo_cancel_connect, ela);
 
 	LOG(("eb_yahoo_login_with_state"));
 	yahoo_set_log_level(do_yahoo_debug?YAHOO_LOG_DEBUG:YAHOO_LOG_NONE);
