@@ -172,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.72 $",
-	"$Date: 2003/11/05 11:43:20 $",
+	"$Revision: 1.73 $",
+	"$Date: 2003/12/02 17:25:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2398,14 +2398,14 @@ void ext_start_netmeeting(char *ip)
 	char buf[1024];
 	int callto_supported = 0;
 	
-	test=popen("gnomemeeting --version 2>&1","r");
+	test=popen("gnomemeeting --version 2>/dev/null","r");
 	if (test==NULL) {
 		ay_do_warning( _("GnomeMeeting Error"), _("Cannot run gnomemeeting: presence test failed.") );
 		return;
 	}
 	fgets(buf, sizeof(buf), test);
 	pclose(test);
-	if(!strstr(buf,"GnomeMeeting")) {
+	if(!strstr(buf,"GnomeMeeting") && !strstr(buf,"gnomemeeting")) {
 		ay_do_warning( _("GnomeMeeting Error"), _("You do not have gnomemeeting installed or it isn't in your PATH.") );
 		return;
 	}	

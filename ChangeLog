@@ -1,3 +1,7 @@
+* Tue Dec 02 2003 17:00 GMT [colin]     0.4.5-pre2
+- modules/msn2/msn.C
+Fix gnomemeeting detection
+
 * Tue Dec 02 2003 12:00 GMT [colin]     0.4.5-pre1
 - util.c
 Display PID
