@@ -42,7 +42,7 @@
 %%
 
 start:
-	group_list { groups = $1; }
+	group_list { temp_groups = $1; }
 ;
 
 group_list:

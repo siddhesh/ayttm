@@ -180,7 +180,6 @@ int load_contacts_from_file(const char *file)
 	extern int contactparse();
 	extern FILE * contactin;
 	LList *cts = NULL;
-	LList *old_groups = groups;
 	
 	if(!(fp = fopen(file,"r")))
 		return 0;
@@ -193,49 +192,65 @@ int load_contacts_from_file(const char *file)
 	/* rename logs from old format (contact->nick) to new 
 	   (contact->nick "-" contact->group->name) */
 	
-	if (old_groups) {
-	while (old_groups) {
-		grouplist *grp = (grouplist *)old_groups->data;
+	if (temp_groups && groups) {
+	while (temp_groups) {
+		grouplist *grp = (grouplist *)temp_groups->data;
 		grouplist *oldgrp = NULL;
 		if ((oldgrp = find_grouplist_by_name(grp->name)) == NULL) {
+			eb_debug(DBG_CORE, "adding group %s\n",grp->name);
 			add_group(grp->name);
 			oldgrp = find_grouplist_by_name(grp->name);
 		} 
 		while (grp->members) {
-			struct contact * oldct = (struct contact *) grp->members->data;
-			if (!find_contact_in_group_by_nick(oldct->nick, oldgrp)) {
-				LList *w = oldct->accounts;
+			struct contact * con = (struct contact *) grp->members->data;
+			if (!find_contact_in_group_by_nick(con->nick, oldgrp)) {
+				LList *w = con->accounts;
+				int sid = 0;
 				while(w) {
 					eb_account *ea = (eb_account *)w->data;
 					if(find_account_by_handle(ea->handle, ea->service_id)) {
-						oldct->accounts = l_list_remove(oldct->accounts, ea);
-						w = oldct->accounts;
-					} else
+						con->accounts = l_list_remove(con->accounts, ea);
+						w = con->accounts;
+					} else {
+						sid = ea->service_id;
 						w = w->next;
-				}
-				if (!l_list_empty(oldct->accounts) && oldct->accounts->data)
-					oldgrp->members = l_list_append(oldgrp->members, 
-							oldct);	
-			} else {
-				struct contact * newct = find_contact_in_group_by_nick(oldct->nick, oldgrp);
-				while(oldct->accounts) {
-					eb_account *ea = (eb_account *)oldct->accounts->data;
-					if (!find_account_by_handle(ea->handle, ea->service_id)) {
-						newct->accounts = l_list_append(newct->accounts, 
-								ea);
 					}
-					oldct->accounts = oldct->accounts->next;
+				}
+				if (!l_list_empty(con->accounts) && con->accounts->data) {
+					eb_debug(DBG_CORE, " adding contact %s\n",con->nick);
+					add_new_contact(grp->name, con->nick, sid);
+					w = con->accounts;
+					while (w) {
+						add_account_silent(con->nick, (eb_account *)w->data);
+						eb_debug(DBG_CORE, "  adding account %s\n",((eb_account *)w->data)->handle);
+						w = w->next;
+					}
+				}
+			} else {
+				while(con->accounts) {
+					eb_account *ea = (eb_account *)con->accounts->data;
+					if (!find_account_by_handle(ea->handle, ea->service_id)) {
+						add_account_silent(con->nick, ea);
+						eb_debug(DBG_CORE, "  adding account to ex.ct %s\n", ea->handle);
+					}
+					con->accounts = con->accounts->next;
 				}
 			}
 			grp->members = grp->members->next;
 		}
 		
-		old_groups = old_groups->next;
+		temp_groups = temp_groups->next;
+	} 
+	} else if (temp_groups) {
+		eb_debug(DBG_CORE, "First pass\n");
+		groups = temp_groups;
 	}
-	reset_list();
-	update_contact_list();	
-	write_contact_list();
-	}	
+	
+	if (groups) {
+		update_contact_list();	
+		write_contact_list();
+	}
+			
 	cts = get_all_contacts();
 	for (; cts && cts->data; cts=cts->next) {
 		struct contact * c = (struct contact *)cts->data;
@@ -254,10 +269,12 @@ int load_contacts_from_file(const char *file)
 int load_contacts()
 {
 	char buff2[1024];
+	int result;
 	snprintf(buff2, 1024, "%scontacts",config_dir);
-	groups = NULL;
-	
-	return load_contacts_from_file(buff2);
+		
+	result=load_contacts_from_file(buff2);
+	if (!groups)
+		groups = temp_groups;
 }
 
 eb_account *dummy_account(char *handle, char *group, eb_local_account *ela)

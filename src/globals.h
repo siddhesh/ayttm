@@ -38,6 +38,7 @@
 #endif
 
 extern LList *groups;
+extern LList *temp_groups;
 extern LList *accounts;
 extern LList *chat_rooms;
 extern LList *away_messages;
