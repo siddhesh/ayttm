@@ -174,7 +174,12 @@ void msn_send_IM(msnconn * conn, char * rcpt, message * msg)
       list=list->next;
     }
     // otherwise, just connect
-    msn_request_SB(conn, rcpt, msg, NULL);
+    if (conn->status && !strcmp(conn->status, "HDN")) {
+	    msn_set_state(conn, "NLN");
+	    msn_request_SB(conn, rcpt, msg, NULL);
+	    msn_set_state(conn, "HDN");
+    } else 
+	    msn_request_SB(conn, rcpt, msg, NULL);
     return;
   }
 
@@ -2137,6 +2142,7 @@ void msn_set_state(msnconn * conn, char * state)
   snprintf(buf, sizeof(buf), "CHG %d %s\r\n", next_trid, state);
   write(conn->sock, buf, strlen(buf));
   next_trid++;
+  conn->status = state;
 }
 
 void msn_add_group(msnconn *conn, char *newgroup) {

@@ -1,3 +1,9 @@
+* Tue Jun 10 2003 11:30 GMT [colin]	0.3.1-32
+- modules/msn2/msn.C
+Allow offline messenging (to chat with hidden people)
+Switch online and back hidden if we try to message someone
+when hidden
+
 * Tue Jun 10 2003 05:00 GMT [philip]	0.3.1-31
 - modules/yahoo2/yahoo.c
 fix crash when identities called on unknown account

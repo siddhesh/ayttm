@@ -100,6 +100,7 @@ class msnconn : public llist_data
   int pos, numspaces;
   char readbuf[1250];
   void *ext_data;
+  char *status;
   
   msnconn() { 
 	users=NULL; 
@@ -108,6 +109,7 @@ class msnconn : public llist_data
   	invitations_in=NULL; 
 	pos=numspaces=0;
 	ext_data = NULL;
+	status = NULL;
 	memset(readbuf,0,sizeof(readbuf));
 	}
   ~msnconn()
