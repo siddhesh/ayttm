@@ -1,3 +1,8 @@
+* Wed Apr 02 2003 08:34 GMT [philip]	0.2.3-pre72
+- modules/msn2
+free memory allocated in double dimensional array
+
+
 * Wed Apr 02 2003 02:29 GMT [colin]	0.2.3-pre71
 - modules/msn2/libmsn2/msn_bittybits.C
 Try to use more normal allocation in msn_read_line()

@@ -9,6 +9,8 @@
           sock          The socket to use
           numargs       Gets set to the number of arguments
         Returns:        A NULL-terminated array of strings, or NULL on error
+
+IMPORTANT: Only free the array, and its zeroth element.
 */
 char ** msn_read_line(msnconn *conn, int * numargs);
 

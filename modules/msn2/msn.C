@@ -173,8 +173,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:53 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/02 08:40:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1636,6 +1636,8 @@ void eb_msn_incoming(void *data, int source, eb_input_condition condition)
 		  /* if args == NULL && nargs==-1 msn_handle_incoming will fail */ 
 	 	 msn_handle_incoming(conn, condition & EB_INPUT_READ, condition & EB_INPUT_WRITE,
 			  args, nargs);
+		 delete [] args[0];
+		 delete [] args;
 	 } else
 		  msn_handle_filetrans_incoming(conn, condition & EB_INPUT_READ, condition & EB_INPUT_WRITE);
         }

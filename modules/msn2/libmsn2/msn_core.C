@@ -617,14 +617,12 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
     }
 
     msn_connect(conn, args[3], port);
-    delete [] args;
     return;
   }
 
   if(!strcmp(args[0], "RNG"))
   {
     msn_handle_RNG(conn, args, numargs);
-    delete [] args;
     return;
   }
   
@@ -641,7 +639,6 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
       if(call->trid==trid)
       {
         (call->func)(conn, trid, args, numargs, call->data);
-        delete [] args;
         return;
       }
       list=list->next;
@@ -651,7 +648,6 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
 
   msn_handle_default(conn, args, numargs);
 
-  delete [] args;
 }
 
 void msn_handle_close(int sock)
@@ -1218,16 +1214,15 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
           ext_filetrans_failed(auth->inv, errno, strerror(errno));
           msn_del_from_llist(conn->invitations_in, auth->inv);
           msn_clean_up(conn);
-          delete [] args;
-          return;
-        }
-
-        write(conn->sock, "TFR\r\n", strlen("TFR\r\n"));
-      }
-      if (!strcmp(args[0], "CCL")) {
-	if(DEBUG) printf("got CCL\n");
+        } else {
+          write(conn->sock, "TFR\r\n", strlen("TFR\r\n"));
+	}
+      } else if (!strcmp(args[0], "CCL")) {
+        if(DEBUG)
+          printf("got CCL\n");
 	msn_clean_up(conn);      
       }
+      delete [] args[0];
       delete [] args;
       auth->num_ignore=3;
     }
@@ -1359,12 +1354,10 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
             ext_filetrans_failed(auth->inv, errno, strerror(errno));
             msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
             msn_clean_up(conn);
-	    delete [] args;
-            return;
-          }
-
-          snprintf(buf, sizeof(buf), "FIL %lu\r\n", auth->inv->filesize);
-          write(conn->sock, buf, strlen(buf));
+          } else {
+            snprintf(buf, sizeof(buf), "FIL %lu\r\n", auth->inv->filesize);
+            write(conn->sock, buf, strlen(buf));
+	  }
         }
 
         if(!strcmp(args[0], "TFR"))
@@ -1376,14 +1369,14 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
             ext_filetrans_failed(auth->inv, errno, "Could not open file for reading");
             msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
             msn_clean_up(conn);
-	    delete [] args;
-            return;
-          }
+          } else {
 
-          // OK, now we lose control, but the next round of the polling loop will
-          // say that the socket is writable, and then the fun starts...
-          ext_filetrans_progress(auth->inv, "Sending data", 0, 0);
+            // OK, now we lose control, but the next round of the polling loop
+            // will say that the socket is writable, and then the fun starts...
+            ext_filetrans_progress(auth->inv, "Sending data", 0, 0);
+	  }
         }
+	delete [] args[0];
 	delete [] args;
       } else {
 	      
@@ -1422,11 +1415,9 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
         		ext_filetrans_failed(auth->inv, 0, "Remote user cancelled");
         		msn_del_from_llist(auth->inv->conn->invitations_out, auth->inv);
 			msn_clean_up(conn);
-			delete [] args;
-			return;
 		}
+		delete [] args[0];
 		delete [] args;
-    
 	    }
 #endif
             int to_go=(auth->inv->filesize-auth->bytes_done>2045)?(2045):(auth->inv->filesize-auth->bytes_done);

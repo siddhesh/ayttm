@@ -69,26 +69,32 @@ char ** msn_read_line(msnconn *conn, int * numargs)
   
   if(conn->numspaces==0) { printf("What the..?\n"); *numargs=-1; return NULL; }
 
-  retval=new char * [conn->numspaces];
-  char *tmp=conn->readbuf;
-  int i;
-  for (i=0; i< conn->numspaces; i++) {
-	  int j=0;
-	  char *next = strstr(tmp," ");
-	  int length;
-	  if (next)
-		  length = (int)(next-tmp);
-	  else
-		  length = strlen(tmp);
+  int len = strlen(conn->readbuf);
 
-	  retval[i]= new char[length+1];
-	  for(j=0;j<length; j++) {
-		  retval[i][j]=(char)(tmp[j]);
-	  }
-	  retval[i][length]=0;
-	  tmp = next+1;
-  }	
+  retval=new char * [conn->numspaces];
+  retval[0]=new char[len+1];
+  strcpy(retval[0], conn->readbuf); /* long enough */
   *numargs=conn->numspaces;
+
+  // OK, take it as read (boom, boom!)
+  // Now we cruise through the string, changing all spaces to null 0's and setting
+  // a pointer at the beginning of each substring
+
+  conn->pos=0;
+  conn->numspaces=1; // pointer #0 is already set at the beginning
+  while(conn->pos <= len)
+  {
+	if(retval[0][conn->pos]==' ')
+	{
+		retval[0][conn->pos]='\0';
+		retval[conn->numspaces]=retval[0]+conn->pos+1;
+		conn->numspaces++;
+	} else if(retval[0][conn->pos]=='\0') {
+		break;
+	}
+
+	conn->pos++;
+  }
 
   conn->pos = conn->numspaces = 0;
   memset(conn->readbuf,0, sizeof(conn->readbuf));
