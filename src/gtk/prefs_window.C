@@ -381,6 +381,7 @@ class ay_module_panel : public ay_prefs_window_panel
 		ay_module_panel( const char *inTopFrameText, t_module_pref &inPrefs );
 		
 		virtual void	Build( GtkWidget *inParent );
+		virtual void	Apply( void );
 		
 	private:
 		static void		AddInfoRow( GtkWidget *inTable, int inRow, const char *inHeader, const char *inInfo );
@@ -1935,6 +1936,12 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		
 		g_string_free( labelText, TRUE );
 	}
+}
+
+// Apply
+void	ay_module_panel::Apply( void )
+{
+	eb_input_accept( m_prefs.pref_list );
 }
 
 // AddInfoRow

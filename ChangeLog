@@ -1,3 +1,7 @@
+* Thu Apr 17 2003 08:30 GMT [andy]	0.2.3-117
+- src/gtk/prefs_window.C
+Fix module pref text entries [it helps if you actually APPLY them] [Bug #722967]
+
 * Wed Apr 16 2003 21:56 GMT [colin]	0.2.3-116
 - libproxy
 add proxy_connect_host(host, port, cb, data) function
