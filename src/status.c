@@ -664,7 +664,7 @@ static void ay_compare_version (const char *version, int warn_again)
 		}
 	}
 	else if (warn_again) {
-		ay_do_info(_("No new release"), _("You have the last release of ayttm installed."));
+		ay_do_info(_("No new release"), _("You have the latest release of ayttm installed."));
 		cSetLocalPref("last_warned_version", (char *)version);
 		ayttm_prefs_write();
 	}
