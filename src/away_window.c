@@ -65,6 +65,7 @@ static gint away_open = 0;
 
 static void show_away(GtkWidget *w, gchar *a_message);
 static void write_away_messages();
+static void imaway (void);
 void select_msg_cb(GtkCList *clist, gint row, gint column,
                    GdkEventButton *event, gpointer user_data);
 
@@ -212,6 +213,13 @@ void select_msg_cb(GtkCList *clist, gint row, gint column,
 	}
 }
 
+static void clicked_msg_cb (GtkWidget *widget, GdkEventButton *event,
+			    gpointer d)
+{
+	if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
+		imaway();
+}
+
 void build_away_clist()
 {
 	LList * away_list = away_messages;
@@ -267,6 +275,8 @@ void build_away_clist()
 			   GTK_SIGNAL_FUNC(select_msg_cb), NULL);
 	gtk_signal_connect(GTK_OBJECT(away_clist), "unselect-row",
 			   GTK_SIGNAL_FUNC(deselect_msg_cb), NULL);
+	gtk_signal_connect(GTK_OBJECT(away_clist), "button_press_event",
+			   GTK_SIGNAL_FUNC(clicked_msg_cb), NULL);
 	gtk_widget_set_usize(away_clist, -1, 100);
 	gtk_clist_thaw(GTK_CLIST(away_clist));
 }
@@ -353,6 +363,11 @@ static void check_title( GtkWidget * widget, gpointer data)
 
 static void ok_callback( GtkWidget * widget, gpointer data)
 {
+	imaway();
+}
+
+static void imaway (void)
+{
 	GString * a_title = g_string_sized_new(1024);
 	GString * a_message = g_string_sized_new(1024);
 	gint save = GTK_TOGGLE_BUTTON(save_later)->active;
@@ -422,14 +437,13 @@ void show_away_choicewindow(void *w, void *data)
 		GtkWidget * button;
 		GtkWidget * scrollwindow;
 		
-		away_window = gtk_window_new(GTK_WINDOW_DIALOG);
+		away_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		gtk_window_set_policy(GTK_WINDOW(away_window), TRUE, TRUE, TRUE);
 		gtk_window_set_position(GTK_WINDOW(away_window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(away_window);
 
 		vbox = gtk_vbox_new(FALSE, 5);
 	
-		/* make the window not resizable */
-
 		table = gtk_table_new(2, 3, FALSE);
 
 		hbox = gtk_hbox_new(FALSE, 5);
@@ -538,9 +552,7 @@ void show_away_choicewindow(void *w, void *data)
 		gtk_widget_show(vbox);
 		
 		gtk_container_add(GTK_CONTAINER(away_window), vbox);
-		
-		gtk_window_set_policy(GTK_WINDOW(away_window), FALSE, FALSE, TRUE);		
-		
+				
 		gtk_widget_show(away_window);
 		gtk_widget_grab_focus(title);
 
