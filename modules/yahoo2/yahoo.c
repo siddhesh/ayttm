@@ -108,7 +108,8 @@ static int do_yahoo_debug = 0;
 static int login_invisible = 0;
 static int ignore_system = 0;
 static int do_prompt_save_file = 1;
-static int do_guess_away = 1;
+static int do_guess_away = 0;
+static int do_show_away_time = 0;
 
 /* Exported to libyahoo2 */
 char pager_host[MAX_PREF_LEN]="scs.yahoo.com";
@@ -126,8 +127,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.48 $",
-	"$Date: 2003/05/08 08:47:18 $",
+	"$Revision: 1.49 $",
+	"$Date: 2003/05/08 12:04:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -221,6 +222,13 @@ static int plugin_init()
 	il->widget.checkbox.value = &do_guess_away;
 	il->widget.checkbox.name = "do_guess_away";
 	il->widget.checkbox.label= _("Guess status from Away messages");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &do_show_away_time;
+	il->widget.checkbox.name = "do_show_away_time";
+	il->widget.checkbox.label= _("Show how long contact has been away");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
@@ -2096,8 +2104,6 @@ static eb_account *eb_yahoo_read_account_config(eb_account *ea, LList * config)
 
 	yad->status = YAHOO_STATUS_OFFLINE;
 	yad->away = 1;
-	yad->status_message = NULL;
-	yad->typing_timeout_tag = 0;
 
 	ea->protocol_account_data = yad;
 
@@ -2464,8 +2470,6 @@ static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * acco
 	ea->service_id = SERVICE_INFO.protocol_id;
 	yad->status = YAHOO_STATUS_OFFLINE;
 	yad->away = 1;
-	yad->status_message = NULL;
-	yad->typing_timeout_tag = 0;
 	ea->ela = ela;
 	return ea;
 }
@@ -2502,7 +2506,15 @@ static char *eb_yahoo_get_status_string(eb_account * ea)
 	}
 	for (i = 0; eb_yahoo_status_codes[i].label; i++) {
 		if (eb_yahoo_status_codes[i].id == yad->status) {
-			return eb_yahoo_status_codes[i].label;
+			if(yad->away > 100 && do_show_away_time) {
+				static char buff[1024];
+				snprintf(buff, sizeof(buff), _("%s for %d:%2d:%2d"), 
+						eb_yahoo_status_codes[i].label,
+						yad->away/3600, (yad->away/60)%60, yad->away%60);
+				return buff;
+			} else {
+				return eb_yahoo_status_codes[i].label;
+			}
 		}
 	}
 

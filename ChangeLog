@@ -1,3 +1,7 @@
+* Thu May  8 2003 12:00 GMT [philip]	0.3.0-161
+- modules/yahoo2/yahoo.c
+show buddy's away time if user wants to see it
+
 * Thu May  8 2003 08:40 GMT [philip]	0.3.0-160
 - modules/yahoo2/yahoo.c
 disconnect contacts when we get disconnected because of dup login
