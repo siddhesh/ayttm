@@ -19,8 +19,6 @@
  *
  */
 
-unsigned int module_version() {return CORE_VERSION;}
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -86,6 +84,8 @@ typedef unsigned long ulong;
 #define plugin_finish workwizu_LTX_plugin_finish
 #define module_version workwizu_LTX_module_version
 
+unsigned int module_version() {return CORE_VERSION;}
+
 
 int plugin_init();
 int plugin_finish();
@@ -113,8 +113,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.11 $",
-	"$Date: 2003/05/01 11:46:21 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/05/01 13:04:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

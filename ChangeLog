@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 12:59 GMT [yann]	0.3.0-80
+- modules/workwizu/workwizu.c
+Patch deprecated workwizu module
+
 * Thu May  1 2003 11:35 GMT [colin]	0.3.0-79
 - src/about.c
   src/main.c
