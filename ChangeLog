@@ -1,3 +1,8 @@
+* Wed Oct 22 2003 08:23 GMT [philip]	0.4.3-10
+- modules/yahoo2/yahoo.c modules/yahoo2/libyahoo2/yahoo2_types.h
+Detect failed login because of incorrect username
+and don't allow @domain part in username
+
 * Wed Oct 22 2003 05:23 GMT [philip]	0.4.3-9
 - src/account.c
 Fix password encoding algorithm which was broken for two specific

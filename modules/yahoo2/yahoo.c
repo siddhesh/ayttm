@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.73 $",
-	"$Date: 2003/10/11 09:22:11 $",
+	"$Revision: 1.74 $",
+	"$Date: 2003/10/22 08:30:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2032,9 +2032,12 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 
 		return;
 		
+	} else if(succ == YAHOO_LOGIN_UNAME) {
+
+		snprintf(buff, sizeof(buff), _("Could not log into Yahoo service - username not recognised.  Please verify that your username is correctly typed."));
 	} else if(succ == YAHOO_LOGIN_PASSWD) {
 
-		snprintf(buff, sizeof(buff), _("Could not log into Yahoo service.  Please verify that your username and password are correctly typed."));
+		snprintf(buff, sizeof(buff), _("Could not log into Yahoo service - incorrect password.  Please verify that your password is correctly typed."));
 
 	} else if(succ == YAHOO_LOGIN_LOCK) {
 		
@@ -2281,6 +2284,12 @@ static LList *eb_yahoo_get_states()
 
 static char * eb_yahoo_check_login(char * user, char * pass)
 {
+	char *s = strchr(user, '@');
+	if(s) {
+		char ret[1024];
+		snprintf(ret, sizeof(ret), _("Yahoo logins do NOT have the %s part."), s);
+		return strdup(ret);
+	}
 	return NULL;
 }
 
