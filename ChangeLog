@@ -1,3 +1,14 @@
+* Mon Apr 28 2003 18:20 GMT [andy]	0.3.0-24
+- libproxy/libproxy.h
+  modules/aim-toc/libtoc/libtoc.c
+  modules/icq-toc/libtoc/libtoc.c
+  modules/msn2/msn.C
+Clean up interface to libproxy
+- libproxy/proxy.c
+Remove dependence on glib.h
+Start to remove dependence on core headers
+Some const fixes
+
 * Mon Apr 28 2003 13:58 GMT [colin]	0.3.0-23
 - modules/*toc
 Segfaults fixes

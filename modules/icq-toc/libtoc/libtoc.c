@@ -19,17 +19,6 @@
  *
  */
 
-#include <sys/types.h>
-#ifdef __MINGW32__
-#define __IN_PLUGIN__
-#include <winsock2.h>
-#define O_NONBLOCK 0x4000
-#else
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
@@ -40,6 +29,18 @@
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+
+#ifdef __MINGW32__
+#define __IN_PLUGIN__
+#include <winsock2.h>
+#define O_NONBLOCK 0x4000
+#else
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#endif
 
 #include "libproxy/libproxy.h"
 #include "libtoc.h"

@@ -1,6 +1,9 @@
 /*
- * everybuddy
+ * Ayttm
  *
+ * Copyright (C) 2003, the Ayttm team
+ * 
+ * Ayttm is a derivative of Everybuddy
  * Copyright (C) 1998-1999, Torrey Searle
  * proxy featured by Seb C.
  *
@@ -30,35 +33,49 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <glib.h>
 #include <unistd.h>
 
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
 
 #include "libproxy.h"
 #include "tcp_util.h"
 #include "messages.h"
-#include "platform_defs.h"
 
 
-static int proxy_inited=0;
-int proxy_type = PROXY_NONE;
-char *proxy_host;
-int proxy_port = 3128;
-int proxy_auth_required = 0;
-char *proxy_user = NULL;
-char *proxy_password = NULL;
-static char *proxy_realhost = NULL;
-static char debug_buff[256];
-/* Stores the encoded proxy username and password */
-static char *proxy_auth = NULL;
+#ifdef __MINGW32__
+#define sleep(a)		Sleep(1000*a)
+
+#define bcopy(a,b,c)	memcpy(b,a,c)	 
+#define bzero(a,b)		memset(a,0,b)	 
+
+#define ECONNREFUSED	WSAECONNREFUSED	 
+#endif
+ 
+static int		proxy_inited = 0;
+static char		*proxy_realhost = NULL;
+static char		debug_buff[256];
+
+static int		proxy_type = PROXY_NONE;
+static char		*proxy_host = NULL;
+static int		proxy_port = 3128;
+
+static int		proxy_auth_required = 0;
+static char		*proxy_auth = NULL;
+static char		*proxy_user = NULL;
+static char		*proxy_password = NULL;
 
 /* Prototypes */
-static char *encode_proxy_auth_str(const char *user, const char *passwd);
+static char *encode_proxy_auth_str( const char *user, const char *passwd );
+
+static int ap_base64encode( char *encoded, const char *string, int len );
+
 
 #define debug_print printf
 
@@ -73,9 +90,9 @@ typedef struct _udp_connection
 	struct _udp_connection * next;
 } udp_connection;
 
-static udp_connection * server_list = NULL;
+static udp_connection	*server_list = NULL;
 
-static struct sockaddr * get_server( int fd )
+static struct sockaddr *get_server( int fd )
 {
 	udp_connection * node = NULL;
 	printf("looking for connection matching %d", fd);
@@ -91,9 +108,9 @@ static struct sockaddr * get_server( int fd )
 	return NULL;
 }
 
-static int connect_address(unsigned int addy, unsigned short port)
+static int connect_address( unsigned int addy, unsigned short port )
 {
-        int fd;
+    int fd;
     struct sockaddr_in sin;
 
     sin.sin_addr.s_addr = addy;
@@ -123,7 +140,8 @@ static int connect_address(unsigned int addy, unsigned short port)
 }
 
 /* Call this function if you want to free memory when leaving */
-void proxy_freemem() {
+static void proxy_freemem( void )
+{
     /* dummy function to avoid possibly memory leak */
     if (proxy_host != NULL)
         free(proxy_host);
@@ -138,7 +156,8 @@ void proxy_freemem() {
 /* this function is useless if you do use an external method to set 
    the proxy setting, but it does yet allow to test the code without 
    having to code the interface */
-static void proxy_autoinit() {
+static void proxy_autoinit( void )
+{
     if (getenv("HTTPPROXY") != NULL) {
         proxy_host=(char *)strdup(getenv("HTTPPROXY"));
         if (proxy_host != NULL) {
@@ -178,7 +197,8 @@ static void proxy_autoinit() {
 }
 
 /* external function to use to set the proxy settings */
-int proxy_set_proxy(int type,char *host,int port) {
+int proxy_set_proxy( int type, const char *host, int port )
+{
     proxy_type=type;
     if (type != PROXY_NONE) {
     proxy_port=0;
@@ -206,7 +226,7 @@ int proxy_set_proxy(int type,char *host,int port) {
 }
 
 /* external function to set the proxy user and proxy pasword */
-int proxy_set_auth(const int required, const char *user, const char *passwd )
+int proxy_set_auth( const int required, const char *user, const char *passwd )
 {
 	proxy_auth_required = required;
 	if (required)
@@ -230,14 +250,13 @@ int proxy_set_auth(const int required, const char *user, const char *passwd )
 	return 1;
 }
 
-char *proxy_get_auth()
+const char *proxy_get_auth( void )
 {
 	return proxy_auth;
 }
 
 /* this code is borrowed from cvs 1.10 */
-static int
-proxy_recv_line (int sock, char **resultp)
+static int	proxy_recv_line( int sock, char **resultp )
 {
     int c;
     char *result;
@@ -302,21 +321,21 @@ int proxy_recv( int s, void * buff, int len, unsigned int flags )
 	}
 	else
 	{
-		char * tmpbuff = g_new0(char, len+10);
-		int mylen;
-		mylen = recv(s, tmpbuff, len+10, flags);
+		const int	buff_len = len + 10;
+		char		*tmpbuff = calloc( buff_len, sizeof( char ) );
+		int			mylen = recv( s, tmpbuff, buff_len, flags );
+		
 		memcpy( buff, tmpbuff+10, len);
-		g_free(tmpbuff);
+		free( tmpbuff );
 
-		return mylen - 9;
+		return( mylen - 9 );
 	}
-	return 0;
+	return( 0 );
 }
 		
 
 
-int proxy_send(int  s,  const  void *msg, int len, unsigned int
-		       flags)
+int proxy_send( int s, const void *msg, int len, unsigned int flags )
 {
 #ifdef __MINGW32__
 	char type;
@@ -339,7 +358,8 @@ int proxy_send(int  s,  const  void *msg, int len, unsigned int
 	}
 	else
 	{
-		char * buff = g_new0(gchar, len+10);
+		const int	buff_len = len + 10;
+		char		*buff = calloc( buff_len, sizeof( char ) );
 		struct sockaddr * serv_addr = get_server( s );
 		int ret;
 
@@ -353,54 +373,51 @@ int proxy_send(int  s,  const  void *msg, int len, unsigned int
 		memcpy((buff+8), &(((struct sockaddr_in *)serv_addr)->sin_port), 2);
 		memcpy((buff+10), msg, len );
 
-
-		ret = send(s, buff, len+10, flags);
-		g_free(buff);
-		return ret;
-
+		ret = send( s, buff, buff_len, flags );
+		free( buff );
 		
+		return( ret );
 	}
-	return 0;
+	
+	return( 0 );
 }
 
-struct hostent *proxy_gethostbyname(char *host)
+struct hostent *proxy_gethostbyname( const char *host )
 {
-    if (!proxy_inited)
-	proxy_autoinit();
+	if ( !proxy_inited )
+		proxy_autoinit();
     
-    if (proxy_type == PROXY_NONE || proxy_type == PROXY_SOCKS5)
-	return (gethostbyname(host));
+	if ( proxy_type == PROXY_NONE || proxy_type == PROXY_SOCKS5 )
+		return( gethostbyname( host ) );
 
-    if (proxy_realhost != NULL)
-	g_free(proxy_realhost);
+    if ( proxy_realhost != NULL )
+		free( proxy_realhost );
 
     /* we keep the real host name for the Connect command */
-    proxy_realhost = (char *) strdup(host);
+    proxy_realhost = strdup( host );
         
-    return (gethostbyname(proxy_host));
-    
+    return( gethostbyname( proxy_host ) );
 }
 
-struct hostent *proxy_gethostbyname2(char *host,int type)
+struct hostent *proxy_gethostbyname2( const char *host, int type )
 {
-    if (!proxy_inited)
-	proxy_autoinit();
+	if ( !proxy_inited )
+		proxy_autoinit();
 
-    if (proxy_type == PROXY_NONE || proxy_type == PROXY_SOCKS5)
-	return (gethostbyname2(host,type));
+	if ( proxy_type == PROXY_NONE || proxy_type == PROXY_SOCKS5 )
+		return( gethostbyname2( host, type ) );
 
-    if (proxy_realhost != NULL)
-	g_free(proxy_realhost);
+	if ( proxy_realhost != NULL )
+		free( proxy_realhost );
 
-    /* we keep the real host name for the Connect command */
-    proxy_realhost = (char *) strdup(host);
+	/* we keep the real host name for the Connect command */
+	proxy_realhost = strdup( host );
 
-    return (gethostbyname2(proxy_host,type));
-
+	return( gethostbyname2( proxy_host, type ) );
 }
 
 /* http://archive.socks.permeo.com/protocol/socks4.protocol */
-int socks4_connect(int  sock, struct sockaddr *serv_addr, int addrlen )
+static int socks4_connect( int sock, struct sockaddr *serv_addr, int addrlen )
 {
    struct sockaddr_in sa;
    int i, packetlen;
@@ -476,7 +493,7 @@ int socks4_connect(int  sock, struct sockaddr *serv_addr, int addrlen )
 
 /* http://archive.socks.permeo.com/rfc/rfc1928.txt */
 /* http://archive.socks.permeo.com/rfc/rfc1929.txt */
-int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
+static int socks5_connect( int sockfd, struct sockaddr *serv_addr, int addrlen )
 {
    int i;
    int s =0;
@@ -665,8 +682,9 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
 	   printf("\n");
 	   if( type == SOCK_DGRAM )
 	   {
-		   udp_connection * conn = g_new0(udp_connection, 1);
-		   struct sockaddr * host = g_new0(struct sockaddr, 1);
+		   udp_connection	*conn = calloc( 1, sizeof(udp_connection) );
+		   struct sockaddr	*host = calloc( 1, sizeof(struct sockaddr) );
+		   
 		   memcpy(host, serv_addr, sizeof(struct sockaddr_in));
 		   conn->next = server_list;
 		   conn->fd = sockfd;
@@ -676,7 +694,6 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
 			   inet_ntoa((((struct sockaddr_in *)serv_addr)->sin_addr)),
 			   ntohs(((struct sockaddr_in *)serv_addr)->sin_port),
 			   sockfd );
-
 
 		   memcpy( &sin.sin_addr, buff+4, 4);
 		   memcpy( &sin.sin_port, buff+8, 2);
@@ -704,7 +721,7 @@ int socks5_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen )
    }
 }
 
-int http_tunnel_init(int sockfd, struct sockaddr *serv_addr, int addrlen )
+static int http_tunnel_init( int sockfd, struct sockaddr *serv_addr, int addrlen )
 {
 	/* step two : do  proxy tunneling init */
 	char cmd[200];
@@ -765,7 +782,7 @@ int http_tunnel_init(int sockfd, struct sockaddr *serv_addr, int addrlen )
 	return 0;
 }
 
-int http_connect(int sockfd, struct sockaddr *serv_addr, int addrlen )
+static int http_connect( int sockfd, struct sockaddr *serv_addr, int addrlen )
 {
 	/* do the  tunneling */
 	/* step one : connect to  proxy */
@@ -793,7 +810,7 @@ int http_connect(int sockfd, struct sockaddr *serv_addr, int addrlen )
    return (http_tunnel_init(sockfd, serv_addr, addrlen));       
 }
 
-int proxy_connect_host (char *host, int port, void *cb, void *data, void *scb)
+int proxy_connect_host( const char *host, int port, void *cb, void *data, void *scb )
 {
 	struct hostent *hp;
 	struct sockaddr_in sin;
@@ -811,7 +828,7 @@ int proxy_connect_host (char *host, int port, void *cb, void *data, void *scb)
 
 }
 
-static int conn_ok(int sockfd, void *cb, void *data)
+static int conn_ok( int sockfd, void *cb, void *data )
 {
 	ay_socket_callback callback = (ay_socket_callback)cb;
 	if (callback) {
@@ -822,7 +839,7 @@ static int conn_ok(int sockfd, void *cb, void *data)
 	}	
 }
 
-static int conn_nok(int sockfd, void *cb, void *data)
+static int conn_nok( int sockfd, void *cb, void *data )
 {
 	ay_socket_callback callback = (ay_socket_callback)cb;
 	if (callback) {
@@ -833,7 +850,7 @@ static int conn_nok(int sockfd, void *cb, void *data)
 	}	
 }
 
-int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data, void *scb)
+int proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data, void *scb )
 {
    int tmp;
    ay_socket_callback callback = (ay_socket_callback)cb;
@@ -885,10 +902,7 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
    return(-1);
 }
 
-int ap_base64encode(char *encoded, const char *string, int len);
-
-static char *
-encode_proxy_auth_str( const char *user, const char *passwd )
+static char *encode_proxy_auth_str( const char *user, const char *passwd )
 {
 	char buff[200];
 	char buff1[200];
@@ -968,9 +982,8 @@ encode_proxy_auth_str( const char *user, const char *passwd )
  * ugly 'len' functions, which is quite a nasty cost.
  */
 
-#include <string.h>
+/*#include <string.h>*/
 
-int ap_base64decode_binary(unsigned char *bufplain, const char *bufcoded);
 /* aaaack but it's fast and const should make it shared text page. */
 static const unsigned char pr2six[256] =
 {
@@ -1013,7 +1026,11 @@ static const unsigned char pr2six[256] =
 #endif /*CHARSET_EBCDIC*/
 };
 
-int ap_base64decode_len(const char *bufcoded)
+/* Ayttm - We don't use these but they are left in in case we want them later */
+#if 0
+static int ap_base64decode_binary(unsigned char *bufplain, const char *bufcoded);
+
+static int ap_base64decode_len(const char *bufcoded)
 {
     int nbytesdecoded;
     register const unsigned char *bufin;
@@ -1028,7 +1045,7 @@ int ap_base64decode_len(const char *bufcoded)
     return nbytesdecoded + 1;
 }
 
-int ap_base64decode(char *bufplain, const char *bufcoded)
+static int ap_base64decode(char *bufplain, const char *bufcoded)
 {
 #ifdef CHARSET_EBCDIC
     int i;
@@ -1047,7 +1064,7 @@ int ap_base64decode(char *bufplain, const char *bufcoded)
 /* This is the same as ap_base64udecode() except on EBCDIC machines, where
  * the conversion of the output to ebcdic is left out.
  */
-int ap_base64decode_binary(unsigned char *bufplain,
+static int ap_base64decode_binary(unsigned char *bufplain,
 				   const char *bufcoded)
 {
     int nbytesdecoded;
@@ -1091,19 +1108,23 @@ int ap_base64decode_binary(unsigned char *bufplain,
     nbytesdecoded -= (4 - nprbytes) & 3;
     return nbytesdecoded;
 }
+#endif
 
 static const char basis_64[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-int ap_base64encode_len(int len)
+/* Ayttm - We don't use these but they are left in in case we want them later */
+#if 0
+static int ap_base64encode_len(int len)
 {
     return ((len + 2) / 3 * 4) + 1;
 }
+#endif
 
 /* This is the same as ap_base64encode() except on EBCDIC machines, where
  * the conversion of the input to ascii is left out.
  */
-int ap_base64encode_binary(char *encoded,
+static int ap_base64encode_binary(char *encoded,
                                        const unsigned char *string, int len)
 {
     int i;
@@ -1136,7 +1157,7 @@ int ap_base64encode_binary(char *encoded,
     return p - encoded;
 }
 
-int ap_base64encode(char *encoded, const char *string, int len)
+static int ap_base64encode(char *encoded, const char *string, int len)
 {
 #ifndef CHARSET_EBCDIC
     return ap_base64encode_binary(encoded, (const unsigned char *) string, len);
