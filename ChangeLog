@@ -1,5 +1,9 @@
 * Wed Aug  6 2003 21:23 GMT [colin]	0.3.3-21
-- modules/livejournal/lj.c configure.ac
+- modules/msn2/msn.C
+Try to fix bug #780984
+
+* Wed Aug  6 2003 21:23 GMT [colin]	0.3.3-21
+- src/util.c
 Try to fix bugs #784344 and #783666
 
 * Mon Aug  4 2003 04:45 GMT [philip]	0.3.3-20

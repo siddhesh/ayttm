@@ -169,8 +169,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.61 $",
-	"$Date: 2003/07/30 12:39:11 $",
+	"$Revision: 1.62 $",
+	"$Date: 2003/08/06 21:32:12 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -613,9 +613,9 @@ static gboolean eb_msn_query_connected( eb_account * account )
 {
     eb_msn_account_data * mad = (eb_msn_account_data *)account->protocol_account_data;
     eb_debug(DBG_MSN,"msn ref_count=%d\n",ref_count);
-    if(ref_count <= 0 )
+    if(ref_count <= 0 && mad)
         mad->status = MSN_OFFLINE;
-    return mad->status != MSN_OFFLINE;
+    return (mad && mad->status != MSN_OFFLINE);
 }
 
 static int conncheck_handler = -1;
