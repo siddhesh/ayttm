@@ -193,6 +193,12 @@ void conversation_action( log_file *li, int to_end )
 				break;
 			}
 		}
+		while ( (smil = strstr(buf, "<body")) != NULL) {
+			strncpy(smil, "<p   ", 5);
+		}
+		while ( (smil = strstr(buf, "</body")) != NULL) {
+			strncpy(smil, "</p   ", 6);
+		}
 		while ( (smil = strstr(buf, "<smiley name=")) != NULL) {
 			char *alt = strstr(smil, "\" alt=\"");
 			

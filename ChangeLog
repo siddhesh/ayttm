@@ -1,3 +1,7 @@
+* Sat May  3 2003 13:01 GMT [colin]	0.3.0-114
+- src/action.c
+replace existing <body> tags by harmless <p   > tags 
+
 * Sat May  3 2003 13:01 GMT [colin]	0.3.0-113
 - src/logs.[ch] src/gtk/logwindow.C src/chat_window.c
 Fix some log bugs
