@@ -2,7 +2,7 @@ Source: ayttm
 Section: net
 Priority: optional
 Maintainer: Chris Halls <halls@debian.org>
-Build-Depends: debhelper (>> 4.0.0), libaudiofile-dev, libesd0-dev | libesd-alsa0-dev, libglib1.2-dev, libgtk1.2-dev, libgdk-pixbuf-dev, xlibs-dev, flex, bison, libpspell-dev, libltdl3-dev, libgpgme-dev, libssl-dev
+Build-Depends: debhelper (>> 4.0.0), libaudiofile-dev, libesd0-dev | libesd-alsa0-dev, libglib1.2-dev, libgtk1.2-dev, libgdk-pixbuf-dev, xlibs-dev, flex, bison, libpspell-dev, libltdl3-dev, libgpgme-dev, libssl-dev, gettext
 Standards-Version: 3.6.1
 
 Package: ayttm

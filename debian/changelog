@@ -5,8 +5,9 @@ ayttm (0.4.6-1) unstable; urgency=low
     - Yahoo webcam support, but only for non-official clients
       because of Jpeg2000 licensing problem
     - Statusbar size fix
+  * Add gettext to Build-Depends
 
- -- Chris Halls <halls@debian.org>  Wed,  7 Jan 2004 08:06:40 +0100
+ -- Chris Halls <halls@debian.org>  Wed,  7 Jan 2004 10:25:10 +0100
 
 ayttm (0.4.5-2) unstable; urgency=low
 
