@@ -1,3 +1,7 @@
+* Thu Apr 17 2003 14:56 GMT [colin]	0.2.3-129
+- modules/msn2/msn.C
+fix cast
+
 * Thu Apr 17 2003 14:56 GMT [colin]	0.2.3-128
 - libproxy
 HTTP proxying works (auth too)
