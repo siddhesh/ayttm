@@ -150,14 +150,14 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.33 $",
-	"$Date: 2003/04/28 13:03:22 $",
+	"$Revision: 1.34 $",
+	"$Date: 2003/04/28 13:22:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
 	NULL
 };
-struct service SERVICE_INFO = { "MSN", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER, NULL };
+struct service SERVICE_INFO = { "MSN", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER | SERVICE_CAN_MULTIACCOUNT, NULL };
 /* End Module Exports */
 
 static void *mi1 = NULL;
@@ -1887,7 +1887,8 @@ void ext_got_info(msnconn * conn, syncinfo * info)
   for( ; existing != NULL && existing->data != NULL; existing = existing->next) {
 	 char *cnt = (char*) existing->data;
 	 eb_account *ea = find_account_by_handle(cnt, SERVICE_INFO.protocol_id);
-	 if (ea && strcmp(ea->account_contact->group->name, _("Ignore"))) {
+	 if (ea && strcmp(ea->account_contact->group->name, _("Ignore"))
+	 && (ea->ela == ela || ea->ela == NULL)) {
 		 if (!is_on_list(cnt,info->al)) {
 			 eb_debug(DBG_MSN,"adding %s to al\n",cnt);
 		     msn_add_to_list(mlad->mc, "AL", cnt);

@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 12:17 GMT [colin]	0.3.0-19
+- modules/msn2/msn.C
+don't autoimport contacts already having a local_account
+
 * Mon Apr 28 2003 12:17 GMT [colin]	0.3.0-18
 - modules src
 service.h callback changes for group management (multiaccount)
