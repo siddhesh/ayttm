@@ -154,8 +154,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.38 $",
-	"$Date: 2003/04/29 12:13:37 $",
+	"$Revision: 1.39 $",
+	"$Date: 2003/04/29 12:46:25 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2011,17 +2011,6 @@ void ext_buddy_offline(msnconn * conn, char * buddy)
 		buddy_logoff(ea);
 		buddy_update_status(ea);
 	}
-	else
-	{
-        	ea = (eb_account *)malloc(sizeof(eb_account));
-        	mad = g_new0(eb_msn_account_data, 1);
-        	strncpy(ea->handle, buddy, sizeof(ea->handle));
-        	ea->service_id = SERVICE_INFO.protocol_id;
-        	mad->status = MSN_ONLINE;
-        	ea->protocol_account_data = mad;
-        	add_unknown(ea);
-		/* No need to logoff buddies we don't know about anyway */
-	}
 }
 
 void ext_got_SB(msnconn * conn, void * tag)
@@ -2216,7 +2205,7 @@ void ext_got_IM(msnconn * conn, char * username, char * friendlyname, message * 
         mad->status = MSN_ONLINE;
         ea->protocol_account_data = mad;
 
-        add_unknown(ea);
+        add_dummy_contact(friendlyname, ea);
         sender = ea;
     }
  

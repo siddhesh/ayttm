@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 12:42 GMT [philip]	0.3.0-41
+- modules/msn2/msn.C
+use dummy accounts
+
 * Tue Apr 29 2003 12:42 GMT [philip]	0.3.0-40
 - modules/*-toc/*-toc.c
 fix bug 729150
