@@ -2,7 +2,7 @@
 AC_INIT([src/main.c])
 AC_PREREQ(2.53)
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=43
+RELEASE=44
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -408,7 +408,9 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  sounds/Makefile
                  src/Makefile
 		 src/gtk/Makefile
-		 mingw32/Makefile])
+		 mingw32/Makefile
+		 mingw32/gdk/Makefile
+		 mingw32/gdk/win32/Makefile])
 
 if test "x$host_alias" = "xmingw32" ; then
 	echo "editing src/Makefile final time"

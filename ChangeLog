@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 12:52 GMT [edward]	0.3.0-44
+- configure.ac
+Changes to properly build mingw32 makefiles
+
 * Tue Apr 29 2003 12:52 GMT [colin]	0.3.0-43
 - src/status.c
 use ea->ela
