@@ -1,3 +1,7 @@
+* Tue May  6 2003 21:52 GMT [colin]	0.3.0-148
+- modules/acryption/aycryption.c
+Reword things
+
 * Tue May  6 2003 21:52 GMT [colin]	0.3.0-147
 - modules/acryption/aycryption.c
 Use a status window to show normal operations - nothing displayed

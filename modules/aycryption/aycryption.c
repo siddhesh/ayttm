@@ -90,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.10 $",
-	"$Date: 2003/05/06 21:57:47 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/05/06 22:40:28 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -440,40 +440,44 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	}
 	strcpy(s_sigstat, _("Got an "));
 	strcat(s_sigstat, was_crypted?_("encrypted"):_("uncrypted"));
-	strcat(s_sigstat, " message with signature: ");
 	switch(sigstat) {
 		case GPGME_SIG_STAT_NONE:
-			strcat(s_sigstat, _("Unsigned"));
+			strcat(s_sigstat, _(", unsigned message."));
 			break;
 		case GPGME_SIG_STAT_GOOD:
-			strcat(s_sigstat, _("Good signature from "));
+			strcat(s_sigstat, _(", correctly signed (by "));
 			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, ") message.");
 			break;
 		case GPGME_SIG_STAT_BAD:
-			strcat(s_sigstat, _("Bad signature from "));
+			strcat(s_sigstat, _(", badly signed (by "));
 			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, ") message.");
 			break;
 		case GPGME_SIG_STAT_NOKEY:
-			strcat(s_sigstat, _("No key"));
+			strcat(s_sigstat, _(" message with no key."));
 			break;
 		case GPGME_SIG_STAT_NOSIG:
-			strcat(s_sigstat, _("No signature"));
+			strcat(s_sigstat, _(" message with no signature."));
 			break;
 		case GPGME_SIG_STAT_ERROR:
-			strcat(s_sigstat, _("Error verifying signature"));
+			strcat(s_sigstat, _(" message ; error happened while checking signature."));
 			break;
 		case GPGME_SIG_STAT_DIFF:
-			strcat(s_sigstat, _("More than one signature, differing"));
+			strcat(s_sigstat, _(" message with more than one signature (their status differ)."));
 			break;
 		case GPGME_SIG_STAT_GOOD_EXP:
-			strcat(s_sigstat, _("Expired good signature from "));
+			strcat(s_sigstat, _(" correctly signed (by "));
 			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, ") message, but signature has expired.");
 			break;
 		case GPGME_SIG_STAT_GOOD_EXPKEY:
-			strcat(s_sigstat, _("Good signature with expired key from "));
+			strcat(s_sigstat, _(" correctly signed (by "));
+			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, ") message, but key has expired.");
 			break;
 		default:
-			strcat(s_sigstat, _("Unknown error"));
+			strcat(s_sigstat, _(" message - Unknown signature status (file a bugreport)!"));
 			break;
 	}
 	if (curloglevel == LOG_ERR) {
