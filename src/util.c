@@ -155,7 +155,10 @@ char * escape_string(const char * input)
 	GString * temp_result = g_string_sized_new(2048);
 	char * result;
 	int ipos = 0;
-	for(ipos=0;input[ipos];ipos++) {
+	if (!input)
+		g_string_append(temp_result, "");
+
+	for(ipos=0;input && input[ipos];ipos++) {
 		if(input[ipos] == '\n')
 			g_string_append(temp_result, "\\n");
 		else if(input[ipos] == '\r')

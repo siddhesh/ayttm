@@ -81,7 +81,10 @@ static void refresh_service_contacts(int type)
 				if(account->service_id == type) {
 					eb_debug(DBG_CORE, "Refreshing %s - %i\n", account->handle, type);
 					config = value_pair_add(NULL, "NAME", account->handle);
-					config = value_pair_add(config, "LOCAL_ACCOUNT", account->ela->handle);
+					if (account->ela)
+						config = value_pair_add(config, "LOCAL_ACCOUNT", account->ela->handle);
+					else
+						config = value_pair_add(config, "LOCAL_ACCOUNT", "");
 					if(RUN_SERVICE(account)->free_account_data)
 						RUN_SERVICE(account)->free_account_data(account);
 					account->protocol_account_data = NULL;

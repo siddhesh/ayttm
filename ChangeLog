@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 14:00 GMT [colin]	0.3.0-84
+- src/util.c
+Fix segfault
+
 * Wed Apr 30 2003 14:00 GMT [philip]	0.3.0-83
 - src/util.c
 compile before commit, not the other way around
