@@ -8,6 +8,7 @@
 #ifdef HAVE_LIBPSPELL
 
 #include <pspell/pspell.h>
+#include <stdlib.h>
 #include "prefs.h"
 #include "globals.h"	// for DBG_CORE
 #include "debug.h"
@@ -16,7 +17,7 @@ class AySpellChecker {
 	PspellConfig *spell_config;
 	PspellCanHaveError * possible_err;
 	PspellManager * spell_checker;
-	char * language;
+	const char * language;
 
 	public:
 
@@ -26,6 +27,30 @@ class AySpellChecker {
 	~AySpellChecker();
 };
 
+
+/*
+ * Returns the selected language from the first of the following that succeed:
+ *  - prefs file
+ *  - LC_LANG environment variable
+ *  - LC_ALL environment variable
+ *  - LANG environment variable
+ *  - en_GB
+ * Do not free this memory
+ */
+static const char * get_language()
+{
+	char * lang = cGetLocalPref("spell_dictionary");
+	char * env_lang[] = {"LC_LANG", "LC_ALL", "LANG", NULL};
+	int i=0;
+
+	while(env_lang[i] && !lang || !lang[0])
+		lang = getenv(env_lang[i++]);
+
+	if(!lang || !lang[0])
+		lang = "en_GB";
+
+	return lang;
+}
 
 AySpellChecker::AySpellChecker()
 {
@@ -38,7 +63,7 @@ void AySpellChecker::reload()
 	if(!spell_config)
 		spell_config = new_pspell_config();
 
-	language = cGetLocalPref("spell_dictionary");
+	language = get_language();
 	pspell_config_replace(spell_config, "language-tag", language);
 	possible_err = new_pspell_manager(spell_config);
 	spell_checker=NULL;
