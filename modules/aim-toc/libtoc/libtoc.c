@@ -788,7 +788,7 @@ if(DEBUG)
 			}
 			else if(*d == 'b')
 			{
-				toc_new_user(group, d+2);
+				toc_new_user(conn, group, d+2);
 			}
 			d = strtok(NULL, "\n");
 		}

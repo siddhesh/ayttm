@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.24 $",
-	"$Date: 2003/04/28 13:03:21 $",
+	"$Revision: 1.25 $",
+	"$Date: 2003/04/28 14:05:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -173,6 +173,9 @@ struct eb_icq_local_account_data {
 	int status;
 	int activity_tag;
 	int connect_tag;
+	LList * icq_buddies;
+	int is_setting_state;
+	
 };
 
 enum
@@ -195,8 +198,6 @@ typedef struct _eb_icq_file_request
 
 /* here is the list of locally stored buddies */
 
-static LList * icq_buddies;
-
 /*	There are no prefs for icq-TOC at the moment.
 static input_list * icq_prefs = NULL;
 */
@@ -218,9 +219,6 @@ static char * eb_icq_check_login(char * user, char * pass)
 {
 	return NULL;
 }
-
-
-static int is_setting_state = 0;
 
 static eb_local_account * icq_find_local_account_by_conn(toc_conn * conn)
 {
@@ -426,12 +424,13 @@ static void eb_icq_oncoming_buddy(char * user, int online, time_t idle, int evil
 {
 	eb_account * ea = find_account_by_handle( user, SERVICE_INFO.protocol_id);
 	struct eb_icq_account_data * aad ;
+	struct eb_icq_local_account_data *alad = (struct eb_icq_local_account_data *)ea->ela->protocol_local_account_data;
 	
 	if(ea)
 	{
 		aad = ea->protocol_account_data;
-		if (!l_list_find(icq_buddies, ea->handle))
-			icq_buddies = l_list_append(icq_buddies, ea->handle);
+		if (!l_list_find(alad->icq_buddies, ea->handle))
+			alad->icq_buddies = l_list_append(alad->icq_buddies, ea->handle);
 	}
 	else
 	{
@@ -528,11 +527,18 @@ static void eb_icq_new_group(char * group)
 	}
 }
 
-static void eb_icq_new_user(char * group, char * f_handle)
+static void eb_icq_new_user(toc_conn *conn, char * group, char * f_handle)
 {
 	eb_account * ea = NULL;
+  	eb_local_account * ela = NULL;
+	struct eb_icq_local_account_data * alad = NULL;
 	char *handle = strdup(f_handle);
 	char *fname = NULL;
+	
+	if (conn)
+		ela = icq_find_local_account_by_conn(conn);
+	if (ela)
+		alad = ela->protocol_local_account_data;
 	
 	if (strchr(handle,':')) {
 		fname = strchr(handle,':') + 1;
@@ -547,7 +553,7 @@ static void eb_icq_new_user(char * group, char * f_handle)
 	{
 		grouplist * gl = find_grouplist_by_name(group);
 		struct contact * c = find_contact_by_nick(fname);
-		ea = eb_icq_new_account(NULL, handle);
+		ea = eb_icq_new_account(ela, handle);
 	
 
 		if(!gl && !c)
@@ -566,7 +572,8 @@ static void eb_icq_new_user(char * group, char * f_handle)
 		ea->icon_handler = -1;
 		ea->status_handler = -1;
 	
-		icq_buddies = l_list_append(icq_buddies, handle);
+		if (alad)
+			alad->icq_buddies = l_list_append(alad->icq_buddies, handle);
 		c->accounts = l_list_append(c->accounts, ea);
 		ea->account_contact = c;
 
@@ -734,8 +741,10 @@ static void eb_icq_add_user( eb_account * account )
 {
 	LList * node;
 
-	assert( eb_services[account->service_id].protocol_id == SERVICE_INFO.protocol_id );
-	icq_buddies = l_list_append(icq_buddies, account->handle);
+	struct eb_icq_local_account_data *alad = (struct eb_icq_local_account_data *)account->ela->protocol_local_account_data;
+	
+ 	assert( eb_services[account->service_id].protocol_id == SERVICE_INFO.protocol_id );
+	alad->icq_buddies = l_list_append(alad->icq_buddies, account->handle);
 
 	for( node = accounts; node; node=node->next )
 	{
@@ -819,18 +828,18 @@ static void eb_icq_logged_in (toc_conn *conn)
 		
 	alad->keep_alive = eb_timeout_add((guint32)60000, eb_icq_keep_alive, (gpointer)alad );
 
-	is_setting_state = 1;
+	alad->is_setting_state = 1;
 	
 	if(ela->status_menu)
 		eb_set_active_menu_status(ela->status_menu, ICQ_ONLINE);
 
-	is_setting_state = 0;
+	alad->is_setting_state = 0;
 	ela->connecting = 0;
 	ela->connected = 1;
 	
 	icqtoc_add_buddy(alad->conn,ela->handle,
 			"Unknown");
-	icq_buddies = l_list_append(icq_buddies, ela->handle);
+	alad->icq_buddies = l_list_append(alad->icq_buddies, ela->handle);
 								  
 }
 
@@ -868,15 +877,15 @@ static void eb_icq_logout( eb_local_account * account )
 	
 	account->connected = account->connecting = 0;
 
-	is_setting_state = 1;
+	alad->is_setting_state = 1;
 
 	if(account->status_menu)
 		eb_set_active_menu_status(account->status_menu, ICQ_OFFLINE);
 
-	is_setting_state = 0;
+	alad->is_setting_state = 0;
 	
 	/* Make sure each icq buddy gets logged off from the status window */
-	for(l = icq_buddies; l; l=l->next)
+	for(l = alad->icq_buddies; l; l=l->next)
 	{
 		eb_icq_oncoming_buddy(l->data, FALSE, 0, 0, FALSE);
 	}
@@ -1024,7 +1033,7 @@ static void eb_icq_set_current_state( eb_local_account * account, int state )
 	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
 
 	/* stop the recursion */
-	if( is_setting_state )
+	if( alad->is_setting_state )
 		return;
 
 	eb_debug(DBG_TOC, "eb_set_current_state %d\n", state );
@@ -1187,7 +1196,8 @@ static void eb_icq_rename_group(eb_local_account *ela, const char *old_group, co
 {
 	LList *l;
 	
-	for(l = icq_buddies; l; l=l->next)
+	struct eb_icq_local_account_data *alad = (struct eb_icq_local_account_data *)ela->protocol_local_account_data;	
+	for(l = alad->icq_buddies; l; l=l->next)
 	{
 		eb_account *ea = find_account_by_handle(l->data, SERVICE_INFO.protocol_id);
 		if (ea) 

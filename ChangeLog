@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 13:58 GMT [colin]	0.3.0-21
+- modules/*toc
+begin fixes for multiaccount
+
 * Mon Apr 28 2003 13:55 GMT [philip]	0.3.0-20
 - src/spellcheck.C src/gtk/gtkspell.c
 context menu for spelling errors

@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.26 $",
-	"$Date: 2003/04/28 13:03:20 $",
+	"$Revision: 1.27 $",
+	"$Date: 2003/04/28 14:05:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -173,6 +173,9 @@ struct eb_aim_local_account_data {
 	int status;
 	int activity_tag;
 	int connect_tag;
+	LList * aim_buddies;
+	int is_setting_state;
+
 };
 
 enum
@@ -195,8 +198,6 @@ typedef struct _eb_aim_file_request
 
 /* here is the list of locally stored buddies */
 
-static LList * aim_buddies;
-
 /*	There are no prefs for AIM-TOC at the moment.
 static input_list * aim_prefs = NULL;
 */
@@ -218,9 +219,6 @@ static char * eb_aim_check_login(char * user, char * pass)
 {
 	return NULL;
 }
-
-
-static int is_setting_state = 0;
 
 static eb_local_account * aim_find_local_account_by_conn(toc_conn * conn)
 {
@@ -426,12 +424,12 @@ static void eb_aim_oncoming_buddy(char * user, int online, time_t idle, int evil
 {
 	eb_account * ea = find_account_by_handle( user, SERVICE_INFO.protocol_id);
 	struct eb_aim_account_data * aad ;
-	
+	struct eb_aim_local_account_data *alad = (struct eb_aim_local_account_data *)ea->ela->protocol_local_account_data;
 	if(ea)
 	{
 		aad = ea->protocol_account_data;
-		if (!l_list_find(aim_buddies, ea->handle))
-			aim_buddies = l_list_append(aim_buddies, ea->handle);
+		if (!l_list_find(alad->aim_buddies, ea->handle))
+			alad->aim_buddies = l_list_append(alad->aim_buddies, ea->handle);
 	}
 	else
 	{
@@ -526,11 +524,18 @@ static void eb_aim_new_group(char * group)
 	}
 }
 
-static void eb_aim_new_user(char * group, char * f_handle)
+static void eb_aim_new_user(toc_conn *conn, char * group, char * f_handle)
 {
 	eb_account * ea = NULL;
+  	eb_local_account * ela = NULL;
+	struct eb_aim_local_account_data * alad = NULL;
 	char *handle = strdup(f_handle);
 	char *fname = NULL;
+	
+	if (conn)
+		ela = aim_find_local_account_by_conn(conn);
+	if (ela)
+		alad = ela->protocol_local_account_data;
 	
 	if (strchr(handle,':')) {
 		fname = strchr(handle,':') + 1;
@@ -545,7 +550,7 @@ static void eb_aim_new_user(char * group, char * f_handle)
 	{
 		grouplist * gl = find_grouplist_by_name(group);
 		struct contact * c = find_contact_by_nick(handle);
-		ea = eb_aim_new_account(NULL,handle);
+		ea = eb_aim_new_account(ela, handle);
 	
 
 		if(!gl && !c)
@@ -564,7 +569,8 @@ static void eb_aim_new_user(char * group, char * f_handle)
 		ea->icon_handler = -1;
 		ea->status_handler = -1;
 	
-		aim_buddies = l_list_append(aim_buddies, handle);
+		if (alad)
+			alad->aim_buddies = l_list_append(alad->aim_buddies, handle);
 		c->accounts = l_list_append(c->accounts, ea);
 		ea->account_contact = c;
 #if 0
@@ -732,9 +738,10 @@ static void eb_aim_del_user( eb_account * account )
 static void eb_aim_add_user( eb_account * account )
 {
 	LList * node;
-
+	struct eb_aim_local_account_data *alad = (struct eb_aim_local_account_data *)account->ela->protocol_local_account_data;
+	
 	assert( eb_services[account->service_id].protocol_id == SERVICE_INFO.protocol_id );
-	aim_buddies = l_list_append(aim_buddies, account->handle);
+	alad->aim_buddies = l_list_append(alad->aim_buddies, account->handle);
 
 	for( node = accounts; node; node=node->next )
 	{
@@ -821,18 +828,18 @@ static void eb_aim_logged_in (toc_conn *conn)
 		
 	alad->keep_alive = eb_timeout_add((guint32)60000, eb_aim_keep_alive, (gpointer)alad );
 
-	is_setting_state = 1;
+	alad->is_setting_state = 1;
 	
 	if(ela->status_menu)
 		eb_set_active_menu_status(ela->status_menu, AIM_ONLINE);
 
-	is_setting_state = 0;
+	alad->is_setting_state = 0;
 	ela->connecting = 0;
 	ela->connected = 1;
 	
 	toc_add_buddy(alad->conn,ela->handle,
 			"Unknown");
-	aim_buddies = l_list_append(aim_buddies, ela->handle);
+	alad->aim_buddies = l_list_append(alad->aim_buddies, ela->handle);
 								  
 }
 
@@ -868,15 +875,15 @@ static void eb_aim_logout( eb_local_account * account )
 	alad->status=AIM_OFFLINE;
 	account->connected = account->connecting = 0;
 
-	is_setting_state = 1;
+	alad->is_setting_state = 1;
 
 	if(account->status_menu)
 		eb_set_active_menu_status(account->status_menu, AIM_OFFLINE);
 
-	is_setting_state = 0;
+	alad->is_setting_state = 0;
 	
 	/* Make sure each AIM buddy gets logged off from the status window */
-	for(l = aim_buddies; l; l=l->next)
+	for(l = alad->aim_buddies; l; l=l->next)
 	{
 		eb_aim_oncoming_buddy(l->data, FALSE, 0, 0, FALSE);
 	}
@@ -1025,7 +1032,7 @@ static void eb_aim_set_current_state( eb_local_account * account, int state )
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
 	/* stop the recursion */
-	if( is_setting_state )
+	if( alad->is_setting_state )
 		return;
 
 	eb_debug(DBG_TOC, "eb_set_current_state %d\n", state );
@@ -1187,8 +1194,8 @@ static void eb_aim_add_group(eb_local_account *ela, const char *group)
 static void eb_aim_rename_group(eb_local_account *ela, const char *old_group, const char *new_group)
 {
 	LList *l;
-	
-	for(l = aim_buddies; l; l=l->next)
+	struct eb_aim_local_account_data *alad = (struct eb_aim_local_account_data *)ela->protocol_local_account_data;	
+	for(l = alad->aim_buddies; l; l=l->next)
 	{
 		eb_account *ea = find_account_by_handle(l->data, SERVICE_INFO.protocol_id);
 		if (ea) 
@@ -1233,7 +1240,7 @@ static int eb_aim_handle_url(const char *url)
 				message += strlen("message=");
 			
 			if(!find_account_by_handle(screenname, SERVICE_INFO.protocol_id))
-				eb_aim_new_user(_("Unknown"), screenname);
+				eb_aim_new_user(NULL, _("Unknown"), screenname);
 			
 			if(eb_send_message(screenname, message, SERVICE_INFO.protocol_id))
 				goto ok;
@@ -1257,9 +1264,9 @@ static int eb_aim_handle_url(const char *url)
 				groupname += strlen("groupname=");
 			
 			if (groupname) {
-				eb_aim_new_user(groupname, screenname);
+				eb_aim_new_user(NULL, groupname, screenname);
 			} else {
-				eb_aim_new_user(_("Buddies"), screenname);
+				eb_aim_new_user(NULL, _("Buddies"), screenname);
 			}
 			goto ok;
 		}

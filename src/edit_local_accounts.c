@@ -305,7 +305,8 @@ static void modify_callback(GtkWidget * widget, gpointer data)
 	for (i = 0; i < num_accounts; i++) {
 		char *service;
 		gtk_clist_get_text(GTK_CLIST(account_list), i, SERVICE_TYPE, &service);
-		if (i != selected_row && !strcmp(service, text[SERVICE_TYPE])) {
+		if (i != selected_row && !strcmp(service, text[SERVICE_TYPE])
+		&& !can_multiaccount(eb_services[ get_service_id( text[SERVICE_TYPE] ) ] )) {
 			char *buf = g_strdup_printf(_("You already have an account for %s service. \n\n"
 						    "Multiple accounts per service aren't supported yet."), 
 					    text[SERVICE_TYPE]);

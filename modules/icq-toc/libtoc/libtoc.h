@@ -47,7 +47,7 @@ typedef struct _toc_file_conn
 	int  progress;
 } toc_file_conn;
 
-void (*icqtoc_new_user)(char * group, char * handle);
+void (*icqtoc_new_user)(toc_conn *conn, char * group, char * handle);
 void (*icqtoc_new_group)(char * group);
 int  (*icqtoc_begin_file_recieve)( const char * filename, unsigned long size );
 void (*icqtoc_update_file_status)( int tag, unsigned long progress );
