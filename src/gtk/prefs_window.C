@@ -1520,7 +1520,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 
 	GtkWidget *hbox = gtk_hbox_new( FALSE, 0 );
 
-	GtkWidget *label = gtk_label_new( _("Font face: ") );
+	GtkWidget *label = gtk_label_new( _("Font: ") );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label );
 
