@@ -1,3 +1,7 @@
+* Sat Jun 14 2003 11:18 GMT [colin]	0.3.1-35
+- modules/aim-toc/libtoc/libtoc.c
+always strip spaces from usernames
+
 * Tue Jun 10 2003 11:30 GMT [colin]	0.3.1-34
 - src/status.c
 Slight menu changes

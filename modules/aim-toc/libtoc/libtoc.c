@@ -789,7 +789,9 @@ if(DEBUG)
 			}
 			else if(*d == 'b')
 			{
-				toc_new_user(conn, group, d+2);
+				char *user = strdup(d+2);
+				toc_new_user(conn, group, aim_normalize(user));
+				free(user);
 			}
 			d = strtok(NULL, "\n");
 		}
@@ -805,9 +807,12 @@ if(DEBUG)
 		char user[255];
 		char message[2048];
 
-		for( j = 0; buff[i] != ':' ; j++, i++ )
+		for( j = 0; buff[i] != ':' ; i++ )
 		{
-			user[j] = buff[i];
+			if (buff[i] != ' ') {
+				user[j] = buff[i];
+				j++;
+			}
 		}
 		user[j] = 0;
 		i++;
@@ -837,9 +842,12 @@ if(DEBUG)
 		int online;
 
 		/* get username */
-		for( j = 0; buff[i] != ':'; j++, i++ )
+		for( j = 0; buff[i] != ':' ; i++ )
 		{
-			user[j] = buff[i];
+			if (buff[i] != ' ') {
+				user[j] = buff[i];
+				j++;
+			}
 		}
 		user[j] = 0;
 		i++;
@@ -906,9 +914,12 @@ if(DEBUG)
 		while( i < strlen(buff) )
 		{
 			char user[255];
-			for( j = 0; buff[i] != ':' && buff[i] != '\0'; j++, i++ )
+			for( j = 0; buff[i] != ':' && buff[i] != '\0'; i++ )
 			{
-				user[j] = buff[i];
+				if (buff[i] != ' ') {
+					user[j] = buff[i];
+					j++;
+				}
 			}
 			user[j] = 0;
 			i++;
@@ -936,9 +947,12 @@ if(DEBUG)
 		id[j] = 0;
 		i++;
 
-		for( j = 0; buff[i] != ':'; j++, i++ )
+		for( j = 0; buff[i] != ':' ; i++ )
 		{
-			user[j] = buff[i];
+			if (buff[i] != ' ') {
+				user[j] = buff[i];
+				j++;
+			}
 		}
 		user[j] = 0;
 		i++;
@@ -974,9 +988,12 @@ if(DEBUG)
 		id[j] = 0;
 		i++;
 		
-		for( j = 0; buff[i] != ':'; j++, i++ )
+		for( j = 0; buff[i] != ':' ; i++ )
 		{
-			user[j] = buff[i];
+			if (buff[i] != ' ') {
+				user[j] = buff[i];
+				j++;
+			}
 		}
 		user[j] = 0;
 		i++;
@@ -1022,9 +1039,12 @@ if(DEBUG)
 		char filename[255];
 
 		
-		for(j=0; buff[i] != ':'; i++, j++ )
+		for( j = 0; buff[i] != ':' ; i++ )
 		{
-			nick[j] = buff[i];
+			if (buff[i] != ' ') {
+				nick[j] = buff[i];
+				j++;
+			}
 		}
 		nick[j] = '\0';
 		i++;
@@ -1150,9 +1170,12 @@ if(DEBUG)
 		char result[20];
 		char message[1024];
 		
-		for(j=0; buff[i] != ':' && j < 200; i++, j++ )
+		for(j=0; buff[i] != ':' && j < 200; i++ )
 		{
-			nick[j] = buff[i];
+			if (buff[i] != ' ') {
+				nick[j] = buff[i];
+				j++;
+			}
 		}
 		nick[j] = '\0';
 		i++;
@@ -1175,9 +1198,12 @@ if(DEBUG)
 	else if (!strcmp(c,"YOU_WERE_ADDED2"))
 	{
 		char nick[200];
-		for(j=0; buff[i] != ':' && j < 200; i++, j++ )
+		for(j=0; buff[i] != ':' && j < 200; i++ )
 		{
-			nick[j] = buff[i];
+			if (buff[i] != ' ') {
+				nick[j] = buff[i];
+				j++;
+			}
 		}
 		nick[j] = '\0';
 		i++;
