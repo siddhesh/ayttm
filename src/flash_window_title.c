@@ -1,3 +1,4 @@
+#include <gdk/gdk.h>
 #ifndef __MINGW32__
 void flash_title(GdkWindow *window)
 {
