@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Aycryption",
 	"Encrypts messages with GPG",
-	"$Revision: 1.6 $",
-	"$Date: 2003/05/05 09:03:11 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/05/05 10:27:58 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -166,6 +166,7 @@ static void set_gpg_key(ebmCallbackData *data)
 	ebmContactData *ecd=NULL;
 	struct contact *ct = NULL;
 	struct select_keys_s keys;
+	GSList *recp_names = NULL;
 	if(IS_ebmContactData(data))
 		ecd=(ebmContactData *)data;
 	
@@ -176,8 +177,10 @@ static void set_gpg_key(ebmCallbackData *data)
 		eb_debug(DBG_CRYPT, "contact is null !\n");
 		return;
 	}
-	
-	keys = gpgmegtk_recipient_selection(ecd->contact, ct->gpg_do_encryption, ct->gpg_do_signature);
+	recp_names = g_slist_append(recp_names, strdup(ct->nick));
+	if (ct->gpg_key && ct->gpg_key[0]);
+		recp_names = g_slist_append(recp_names, strdup(ct->gpg_key));
+	keys = gpgmegtk_recipient_selection(recp_names, ct->gpg_do_encryption, ct->gpg_do_signature);
 	if (keys.rset && keys.key) {
 		eb_debug(DBG_CRYPT,"got key %s\n", keys.key);
 		strncpy(ct->gpg_key, keys.key, 48);

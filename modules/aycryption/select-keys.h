@@ -40,7 +40,7 @@ struct select_keys_s {
 extern char *aycrypt_last_pass;
 extern int aycrypt_pass_ack;
 
-struct select_keys_s gpgmegtk_recipient_selection (char *name, int crypt, int sign);
+struct select_keys_s gpgmegtk_recipient_selection (GSList *recp_names, int crypt, int sign);
 const char *passphrase_mbox (const char *desc);
 
 #endif /* GPGMEGTK_SELECT_KEYS_H */

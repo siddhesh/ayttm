@@ -93,17 +93,13 @@ update_progress (struct select_keys_s *sk, int running, const char *pattern)
  * Return value: NULL on error or a list of list of recipients.
  **/
 struct select_keys_s
-gpgmegtk_recipient_selection (char *name, int crypt, int sign)
+gpgmegtk_recipient_selection (GSList *recp_names, int crypt, int sign)
 {
     struct select_keys_s sk;
     GpgmeError err;
-    GSList *recp_names = NULL;
+    GSList *recp_walk = recp_names;
     memset (&sk, 0, sizeof sk);
 
-    if(name) {
-    	recp_names = g_slist_append(recp_names, name);
-    }
-    
     err = gpgme_recipients_new (&sk.rset);
     if (err) {
         g_warning ("failed to allocate recipients set: %s",
@@ -116,16 +112,17 @@ gpgmegtk_recipient_selection (char *name, int crypt, int sign)
     sk.do_sign = sign;
     open_dialog (&sk);
 
-    gtk_main ();
+    gtk_clist_clear (sk.clist);
     do {
-        sk.pattern = recp_names? recp_names->data:NULL;
-        gtk_clist_clear (sk.clist);
+        sk.pattern = recp_walk? recp_walk->data:NULL;
+	printf("sk.pattern = %s\n",sk.pattern);
         fill_clist (&sk, sk.pattern);
-        update_progress (&sk, 0, sk.pattern);
+        update_progress (&sk, 0, recp_names?recp_names->data:NULL);
         
-        if (recp_names)
-            recp_names = recp_names->next;
-    } while (sk.okay && recp_names);
+        if (recp_walk)
+            recp_walk = recp_walk->next;
+    } while (recp_walk);
+    gtk_main ();
 
     close_dialog (&sk);
 
@@ -149,8 +146,15 @@ set_row (GtkCList *clist, GpgmeKey key)
     const char *s;
     const char *text[N_COL_TITLES];
     char *algo_buf;
-    int row;
-
+    int row = 0;
+    GpgmeKey temp;
+    
+    while ((temp = gtk_clist_get_row_data(clist, row)) != NULL) {
+	if (!strcmp(gpgme_key_get_string_attr (key,  GPGME_ATTR_KEYID, NULL, 0),
+		    gpgme_key_get_string_attr (temp, GPGME_ATTR_KEYID, NULL, 0)))
+		return; /* already found */
+	row++;    
+    }
     /* first check whether the key is capable of encryption which is not
      * the case for revoked, expired or sign-only keys */
     if ( !gpgme_key_get_ulong_attr (key, GPGME_ATTR_CAN_ENCRYPT, NULL, 0 ) )
