@@ -295,8 +295,13 @@ int JABBER_SendChatRoomMessage(JABBER_Conn *JConn, char *room_name, char *messag
 		return(-1);
 	}
 
-	sprintf(to, "%s@%s", room_name, agent->alias);
-	sprintf(from, "%s@%s/%s", room_name, agent->alias, nick);
+	if (strstr(room_name, "@")) {
+		sprintf(to, "%s", room_name);
+		sprintf(from, "%s/%s", room_name, nick);		
+	} else {
+		sprintf(to, "%s@%s", room_name, agent->alias);
+		sprintf(from, "%s@%s/%s", room_name, agent->alias, nick);
+	}
 	x = jutil_msgnew(TMSG_GROUPCHAT, to, NULL, message);
 	xmlnode_put_attrib (x, "from", from);
 	jab_send(JConn->conn, x);
@@ -517,7 +522,10 @@ int JABBER_LeaveChatRoom(JABBER_Conn *JConn, char *room_name, char *nick)
 		eb_debug(DBG_JBR, "No groupchat agent found!\n");
 		return(-1);
 	}
-	sprintf(buffer, "%s@%s/%s", room_name, agent->alias, nick);
+	if (strstr(room_name,"@"))
+		sprintf(buffer, "%s/%s", room_name, nick);
+	else
+		sprintf(buffer, "%s@%s/%s", room_name, agent->alias, nick);
 	z = jutil_presnew (JPACKET__UNAVAILABLE, buffer, "Online");
 	jab_send(JConn->conn, z);
 	xmlnode_free(z);
@@ -607,7 +615,12 @@ int JABBER_JoinChatRoom(JABBER_Conn *JConn, char *room_name, char *nick)
 	jab_send (JConn->conn, z);
 	xmlnode_free(z);
 	*/
-	sprintf(buffer, "%s@%s/%s", room_name, agent->alias, nick);
+			
+	if (!strstr(room_name, "@"))
+		sprintf(buffer, "%s@%s/%s", room_name, agent->alias, nick);
+	else
+		sprintf(buffer, "%s/%s", room_name, nick);
+	
 	z = jutil_presnew (JPACKET__GROUPCHAT, buffer, "Online");
 	xmlnode_put_attrib(z, "id", "GroupChat");
 	jab_send(JConn->conn, z);
@@ -746,13 +759,17 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		if(type && !strcmp(type, "groupchat"))
 		{
 			user=strchr(from, '/');
-			room=strtok(from, "@");
+			//room=strtok(from, "@");
+			room=from;
 			if(!user) {
 				user=room;
-				user+=strlen(room)+1;
+				//user+=strlen(room)+1;
 			}
-			else
+			else {
+				*user = 0;
 				user++;
+			}
+			eb_debug(DBG_JBR,"chatroom: %s %s %s\n",room,user,buff);
 			JABBERChatRoomMessage(room, user, buff);
 		}
 		else
@@ -1001,13 +1018,16 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		{
 			eb_debug(DBG_JBR, "Presence received from a conference room\n");
 			user=strchr(from, '/');
-			room=strtok(from, "@");
+			//room=strtok(from, "@");
+			room=from;
 			if(!user) {
 				user=room;
 				user+=strlen(room)+1;
 			}
-			else
+			else {
+				*user = 0;
 				user++;
+			}
 			JABBERChatRoomBuddyStatus(room, user, status);
 		}
 		else

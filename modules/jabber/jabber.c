@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.42 $",
-	"$Date: 2003/10/11 09:22:11 $",
+	"$Revision: 1.43 $",
+	"$Date: 2003/11/07 11:43:27 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -919,7 +919,14 @@ struct service_callbacks * query_callbacks()
 void JABBERChatRoomBuddyStatus(char *id, char *user, int offline)
 {
 	eb_chat_room *ecr=find_chat_room_by_id(id);
-
+	char *id2 = strdup(id);
+	
+	if (!ecr) {
+		if (strstr(id2,"@"))
+			*strstr(id2,"@") = 0;
+		ecr = find_chat_room_by_id(id2);
+		free(id2);
+	}
 	if(!ecr)
 	{
 		g_warning("Chat room does not exist: %s", id);
@@ -946,9 +953,15 @@ void JABBERChatRoomMessage(char *id, char *user, char *message)
 {
 	eb_chat_room *ecr=find_chat_room_by_id(id);
 	eb_account *ea=NULL;
-	
+	char *id2 = strdup(id);
 	char *message2 = linkify(message);
-
+	
+	if (!ecr) {
+		if (strstr(id2,"@"))
+			*strstr(id2,"@") = 0;
+		ecr = find_chat_room_by_id(id2);
+		free(id2);
+	}
 	if(!ecr)
 	{
 		g_warning("Chat room does not exist: %s", id);
@@ -957,6 +970,20 @@ void JABBERChatRoomMessage(char *id, char *user, char *message)
 	}
 	
 	ea = find_account_with_ela(user, ecr->local_user);
+	
+	if (!strcmp(id, user)) {
+		//system message
+		char *muser = strdup(message);
+		if (strchr(muser,' '))
+			*strchr(muser,' ') = 0;
+		if (strstr(message," has joined")) {
+			eb_chat_room_buddy_arrive(ecr, muser, muser);			
+		} else if (strstr(message, " has left")) {
+			eb_chat_room_buddy_leave(ecr, muser);
+		}
+		free(muser);
+		return;
+	}
 	
 	if(ea)
 	{
