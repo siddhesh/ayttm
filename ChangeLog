@@ -1,3 +1,7 @@
+* Mon Jul 07 2003 14:37 GMT [edward]	0.3.2-11
+- mingw32/Makefile.am
+Missing some .la files from source distribution
+
 * Mon Jul 07 2003 10:36 GMT [colin]	0.3.2-10
 - pixmaps/invite_btn.xpm
 Cleaner button
