@@ -35,11 +35,15 @@ char ** msn_read_line(msnconn *conn, int * numargs)
 
   while(select(sock+1, &inp, NULL, NULL, &tv)>0)
   {
-    
+    	int result=0;
 	if(FD_ISSET(sock, &inp)) {
-		if(read(sock, &c, 1)<1) {
-			if (errno == EAGAIN) {
-				continue;
+		if((result=read(sock, &c, 1))<1) {
+			if (result == 0) {
+				*numargs=-1;
+				return NULL;
+			}
+			else if (errno == EAGAIN) {
+				goto continued;
 			} else if (errno) {
 				printf("error %d %s\n",errno, strerror(errno));
 			        printf("What the.. (%d) (%s)?!\n", sock, conn->readbuf); //DEBUG
@@ -49,8 +53,8 @@ char ** msn_read_line(msnconn *conn, int * numargs)
 				conn->numspaces++; conn->readbuf[conn->pos]='\0'; finished=1; break;
 			}
 		}
-		if(conn->pos == 1249) {conn->readbuf[conn->pos]='\0'; continue; }
-		if(c=='\r' || conn->pos > 1249) { continue; }
+		if(conn->pos == 1249) {conn->readbuf[conn->pos]='\0'; goto continued; }
+		if(c=='\r' || conn->pos > 1249) { goto continued; }
 		if(c=='\n') { conn->numspaces++; conn->readbuf[conn->pos]='\0'; finished=1; break; }
 		if(c==' ') { conn->numspaces++; }
 		conn->readbuf[conn->pos]=c;
@@ -58,7 +62,7 @@ char ** msn_read_line(msnconn *conn, int * numargs)
 	} else {
 		break;
 	}
-
+continued:
   	FD_ZERO(&inp);
 	FD_SET(sock, &inp);
   }

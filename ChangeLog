@@ -1,6 +1,10 @@
 * Thu Apr 03 2003 08:30 GMT [colin]	0.2.3-1
 Release
 
+* Thu Apr 03 2003 10:39 GMT [colin]	0.2.3-pre76
+-modules/msn2/libmsn2/msn_bittybits.C
+fix closed socket
+
 * Thu Apr 03 2003 07:02 GMT [colin]	0.2.3-pre75
 - modules/msn2/msn.C
 fix crash
