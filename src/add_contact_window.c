@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 #include "service.h"
+#include "globals.h"
 #include "status.h"
 #include "util.h"
 #include "add_contact_window.h"
@@ -192,10 +193,16 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	struct contact *con;
 	gchar *service = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(service_list)->entry));
 	gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
+	gint service_id = -1;
+	gchar *local_acc = strstr(service, " ") +1;
+	eb_account *ea = NULL;
+	*(strstr(service, "]")) = '\0';
 	
-	gint service_id = get_service_id( service );
-			
-	eb_account *ea = eb_services[service_id].sc->new_account(find_suitable_local_account(NULL, service_id), account);
+	service = strstr(service,"[")+1;
+	service_id = get_service_id( service );
+	printf("for %s (%s %d)\n", local_acc, service, service_id);
+	
+	ea = eb_services[service_id].sc->new_account(find_local_account_by_handle(local_acc, service_id), account);
 	ea->service_id = service_id;
 
 	if (eb_services[service_id].sc->check_login) {
@@ -249,6 +256,7 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 		GtkWidget *frame;
 		GtkWidget *separator;
 		GList *list;
+		LList *walk;
 
 		add_contact_window = gtk_window_new(GTK_WINDOW_DIALOG);
 		gtk_window_set_position(GTK_WINDOW(add_contact_window), GTK_WIN_POS_MOUSE);
@@ -281,7 +289,7 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 	      
 		hbox = gtk_hbox_new(FALSE, 0);
 
-		label = gtk_label_new(_("Protocol: "));
+		label = gtk_label_new(_("Local account: "));
 		gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 		gtk_widget_show(label);
 		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
@@ -290,7 +298,15 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 		/*List of Protocols*/
 
 		service_list = gtk_combo_new();
-		list = llist_to_glist(get_service_list(), 1);
+		list = NULL;
+		for (walk = accounts; walk; walk = walk->next) {
+			eb_local_account *ela = (eb_local_account *)walk->data;
+			printf("ela %x\n",ela);
+			if (ela) {
+				char *str = g_strdup_printf("[%s] %s", get_service_name(ela->service_id), ela->handle);
+				list = g_list_append(list, str);
+			}
+		}
 		gtk_combo_set_popdown_strings(GTK_COMBO(service_list), list );
 		g_list_free(list);
 		gtk_table_attach(GTK_TABLE(table), service_list, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);

@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 12:10 GMT [colin]	0.3.0-14
+- src/add_contact_window.c
+initialize ea->ela
+
 * Mon Apr 28 2003 11:50 GMT [philip]	0.3.0-13
 - src/spellcheck.[Ch]
 spell checking through pspell
