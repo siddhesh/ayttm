@@ -13,6 +13,7 @@ TODO later
 - Non-blocking connection in IRC
 - use our own linked list routines - partially done
 - Yahoo voice support ? 
+- GPG encryption utility
 
 eternal TODO
 - Make ayttm fully stable in stable releases. 
