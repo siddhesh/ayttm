@@ -1,0 +1,118 @@
+ayttm (0.4.4+19-1) experimental; urgency=low
+
+  * New upstream CVS snapshot.
+    - Includes help button in Account Editor window
+      Closes: #194120: Server account creation documentation missing
+  * Patches incorporated upstream:
+    - Replaced '#define accountwrap() 1' with '%option noyywrap'
+  * Debian patches no longer needed:
+    - gettext infrastructure regenerated; MKINSTALLDIRS workaround
+      no longer needed
+    - ayttm_debian.xpm added upstream as ayttm_32x32.xpm
+  * debian directory is now maintained in ayttm CVS repository
+  * Remove empty prerm, preinst, postrm scripts
+
+ -- Chris Halls <halls@debian.org>  Fri, 14 Nov 2003 13:49:38 +0100
+
+ayttm (0.4.4-1) unstable; urgency=low
+
+  * New upstream release
+    - Closes: #213308: Yahoo broken, new upstream available
+  * New maintainer, with permission.  Thanks Michael for EB and
+    Ayttm!
+  * Update description from web site, and add upstream URL
+  * Updated Build-Depends:
+    - Enable GPG signing/encription plugin: add libgpgme-dev
+    - Ensure MSN plugin will be built: add libssl-dev
+    - Remove sed - no longer needed due to work around flex problems
+  * Enable spellcheck support by fixing libpspell detection
+    in configure script
+  * Automake/conf infrastructure changes:
+    - Remove automake1.6 and libtool from build depends, and run
+      ./gen before generating the source package
+    - Add AM_MAINTAINER_MODE to configue.ac
+    - Remove '../' in MKINSTALLDIRS in po/Makefile.in.in
+      - Closes: #213877: FTBFS: Cannot find mkinstalldirs
+  * Move ayttmrc from /usr/etc to /etc
+  * add debian/compat
+  * Standards-Version: 3.6.1 (no changes necessary)
+  * Remove empty /usr/share/doc/ayttm/NEWS
+    - Closes: #195523: NEWS probably shouldn't be gzipped
+  * Update upstream source location in copyright
+  * In postinst, only print warning about module location path change
+    if upgrading from < 0.3.0
+  * Replace '#define accountwrap() 1' with '%option noyywrap' in
+    account_scanner.l/contact_scanner.l, and remove extra
+    workarounds in debian/rules
+
+ -- Chris Halls <halls@debian.org>  Thu,  6 Nov 2003 12:56:42 +0100
+
+ayttm (0.3.1.20030527-1) unstable; urgency=low
+
+  * New CVS release
+
+ -- Michael D. Ivey <ivey@debian.org>  Tue, 27 May 2003 13:50:12 +0000
+
+ayttm (0.3.0.20030512-1) unstable; urgency=low
+
+  * New CVS release (-128)
+  * Fixed to build with latest flex (Closes: #193071)
+  * Note: Modules path has changed, it is now /usr/lib/ayttm instead of
+    /usr/share/ayttm/modules. So if upgrading, you have to change your
+    ~/.ayttm/prefs file by replacing "share/ayttm/modules" by "lib/ayttm"
+
+ -- Michael D. Ivey <ivey@debian.org>  Mon, 12 May 2003 21:01:49 +0000
+
+ayttm (0.2.3.20030409-1) unstable; urgency=low
+
+  * New CVS release
+  * Should have a fix for AIM TOC connection problems on slow connections
+
+ -- Michael D. Ivey <ivey@debian.org>  Wed,  9 Apr 2003 13:28:37 +0000
+
+ayttm (0.2.3.20030408-1) unstable; urgency=low
+
+  * New CVS release, really should fix segfault problem (#187916)
+
+ -- Michael D. Ivey <ivey@debian.org>  Tue,  8 Apr 2003 00:13:38 +0000
+
+ayttm (0.2.3.20030407-1) unstable; urgency=low
+
+  * New CVS release, should fix segfault problem (Closes: #187916)
+
+ -- Michael D. Ivey <ivey@debian.org>  Mon,  7 Apr 2003 02:10:45 +0000
+
+ayttm (0.2.3.20030406-1) unstable; urgency=low
+
+  * New CVS release
+
+ -- Michael D. Ivey <ivey@debian.org>  Sun,  6 Apr 2003 00:03:37 +0000
+
+ayttm (0.2.3.20030404-1) unstable; urgency=low
+
+  * New CVS release (post 0.2.3 release)
+
+ -- Michael D. Ivey <ivey@debian.org>  Fri,  4 Apr 2003 03:21:39 +0000
+
+ayttm (0.2.2.20030402-1) unstable; urgency=low
+
+  * New CVS release
+  * Added build-depends on libgdk-pixbuf-dev (Closes: #187085)
+  * Bumped version number to reflect last released version before the CVS
+    snapshot
+
+ -- Michael D. Ivey <ivey@debian.org>  Wed,  2 Apr 2003 14:56:38 +0000
+
+ayttm (0.0.20030331-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Michael D. Ivey <ivey@debian.org>  Mon, 31 Mar 2003 13:43:11 +0000
+
+ayttm (0.0.20030323-1) unstable; urgency=low
+
+  * Initial Release.
+  * Replaces the everybuddy and everybuddy-cvs packages
+
+ -- Michael D. Ivey <ivey@debian.org>  Sun, 23 Mar 2003 23:49:12 +0000
+

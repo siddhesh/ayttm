@@ -1,0 +1,35 @@
+This package was originally debianized by Michael D. Ivey <ivey@debian.org>
+
+Maintained in Debian by Chris Halls <halls@debian.org>
+
+It was downloaded from
+  http://sourceforge.net/project/showfiles.php?group_id=77614
+
+Upstream Authors:
+  Colin Leroy       <colin@colino.net>             Lead Developer
+  Andy S. Maloney   <a_s_maloney@yahoo.com>        Code Monkey
+  Philip S. Tellis  <philip.tellis@iname.com>      Yahoo!
+  Edward. L. Haletky<elh@astroarch.com>            Windows Port
+  Tahir Hashmi      <code_martial@softhome.net>    Manual, Doc.
+
+  (see /usr/share/doc/ayttm/AUTHORS for additional contributors)
+
+Copyright:
+
+   This package is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; version 2 dated June, 1991.
+
+   This package is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this package; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.
+
+On Debian GNU/Linux systems, the complete text of the GNU General
+Public License can be found in `/usr/share/common-licenses/GPL'.
+

@@ -1,0 +1,3 @@
+?package(ayttm):needs=X11 section=Apps/Net\
+  title="Ayttm" longtitle="Ayttm: Unified Instant Messaging Client" \
+  command="/usr/bin/ayttm" icon="ayttm.xpm"

@@ -1,0 +1,89 @@
+#!/usr/bin/make -f
+# Based on sample debian/rules 
+# GNU copyright 1997 to 1999 by Joey Hess.
+
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	@if ! test -f ./configure; then \
+	  echo "configure not found - please run './gen'" ;\
+	  echo "(you need to install autoconf and automake packages first)" ;\
+	  exit 1 ;\
+	fi
+	#./gen
+	./configure \
+	  --prefix=/usr \
+	  --sysconfdir=/etc \
+	  --mandir=/usr/share/man \
+	  --disable-arts
+
+	touch configure-stamp
+
+
+build: build-stamp
+
+build-stamp: configure-stamp 
+	dh_testdir
+	$(MAKE)
+	#/usr/bin/docbook-to-man debian/ayttm.sgml > ayttm.1
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	-$(MAKE) distclean
+	rm -f po/*.gmo 
+
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/ayttm/usr/share/ayttm/smileys/Console\ Smileys
+	mkdir -p $(CURDIR)/debian/ayttm/usr/share/ayttm/smileys/Giles\ Smileys
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/ayttm
+	mkdir -p $(CURDIR)/debian/ayttm/usr/X11R6/include/X11/pixmaps
+	cp pixmaps/ayttm_32x32.xpm $(CURDIR)/debian/ayttm/usr/X11R6/include/X11/pixmaps/ayttm.xpm
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installdocs
+	dh_installexamples
+	dh_installmenu
+	dh_installcron
+	dh_installman
+	dh_installinfo
+	dh_installchangelogs ChangeLog
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

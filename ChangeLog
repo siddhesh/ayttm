@@ -1,3 +1,14 @@
+* Fri Nov 14 2003 12:17 GMT [chris]     0.4.4-19
+- debian/changelog debian/compat debian/control
+  debian/copyright debian/dirs debian/docs
+  debian/menu debian/postinst debian/README.Debian
+  debian/rules
+Add debian packaging
+- pixmaps/ayttm_32x32.xpm
+Added 32x32 icon, needed for Debian menu system
+- Makefile.am
+Add ayttmrc to clean target
+
 * Fri Nov 14 2003 11:30 GMT [philip]	0.4.4-18
 - modules/yahoo2/yahoo.c
 We can now request to see other peoples' webcams

@@ -14,7 +14,7 @@ sysconf_DATA = @PACKAGE@rc
 
 # most of these are for building on windows
 EXTRA_DIST = config.rpath  ayttm.spec.in ayttm.spec gen README.WIN32 mingw mingw32
-CLEANFILES = $(Utilities_DATA) $(gnome_DATA)
+CLEANFILES = $(Utilities_DATA) $(gnome_DATA) $(sysconf_DATA)
 
 @PACKAGE@.desktop: Makefile
 	@rm -f @PACKAGE@.desktop >/dev/null 2>&1;
