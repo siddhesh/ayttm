@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.37 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.38 $",
+	"$Date: 2004/12/29 21:04:21 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1388,7 +1388,6 @@ static eb_local_account * irc_read_local_config(LList * pairs)
 
 	char *temp = NULL;
 	char *temp2 = NULL;
-	char *str = NULL;
 	ela->protocol_local_account_data = ila;
 	ila->status = IRC_OFFLINE;
 
@@ -1849,7 +1848,10 @@ static void irc_send_chat_room_message(eb_chat_room *room, char *message)
 
 	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
 
-	g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", room->room_name, message);
+   if(strncmp(message, "/me ", 4) == 0 && strlen(message) > 4)
+      g_snprintf(buff, BUF_LEN, "PRIVMSG %s :\1ACTION %s\1\n", room->room_name, message+4);
+   else
+   	g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", room->room_name, message);
 			
 	ret = sendall(ila->fd, buff, strlen(buff));
 	if (ret == -1) irc_logout(room->local_user);
