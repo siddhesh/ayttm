@@ -120,8 +120,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.31 $",
-	"$Date: 2003/04/28 15:04:53 $",
+	"$Revision: 1.32 $",
+	"$Date: 2003/04/28 18:22:34 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -430,9 +430,13 @@ static struct yahoo_buddy * yahoo_find_buddy_by_handle(int id, char * handle)
 	return NULL;
 }
 
-static eb_local_account * eb_yahoo_find_active_local_account()
+static eb_local_account * eb_yahoo_find_active_local_account(eb_account * ea)
 {
 	LList * node;
+
+	if(ea->ela)
+		return ea->ela;
+
 	for (node = accounts; node; node = node->next) {
 		eb_local_account *ela = node->data;
 		if (ela->connected && ela->service_id == SERVICE_INFO.protocol_id)
@@ -698,8 +702,7 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 			changed = 1;
 			con=add_new_contact(bud->group, contact_name, SERVICE_INFO.protocol_id);
 		}
-		/* FIXME use ela */
-		ea = eb_yahoo_new_account(NULL, bud->id);
+		ea = eb_yahoo_new_account(ela, bud->id);
 		add_account(con->nick, ea);
 	}
 
@@ -720,6 +723,7 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 static void ext_yahoo_got_ignore(int id, YList * ign)
 {
 	eb_account *ea = NULL;
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	int changed = 0;
 
 	for(; ign; ign = ign->next) {
@@ -756,8 +760,7 @@ static void ext_yahoo_got_ignore(int id, YList * ign)
 			}
 			con=add_new_contact(bud->group, contact_name, SERVICE_INFO.protocol_id);
 		}
-		/* FIXME use ela */
-		ea = eb_yahoo_new_account(NULL, bud->id);
+		ea = eb_yahoo_new_account(ela, bud->id);
 		add_account(con->nick, ea);
 	}
 
@@ -789,12 +792,11 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 			umsg = y_utf8_to_str(msg);
 
 		sender = find_account_by_handle(who, SERVICE_INFO.protocol_id);
+		receiver = yahoo_find_local_account_by_id(id);
 		if (sender == NULL) {
-			/* FIXME use ela */
-			sender = eb_yahoo_new_account(NULL, who);
+			sender = eb_yahoo_new_account(receiver, who);
 			add_dummy_contact(who, sender);
 		}
-		receiver = yahoo_find_local_account_by_id(id);
 
 		if(tm) {
 			char newmessage[2048];
@@ -803,7 +805,9 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 			strncpy(timestr, ctime(&tm), sizeof(timestr));
 			timestr[strlen(timestr) - 1] = '\0';
 
-			snprintf(newmessage, sizeof(newmessage), _("<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"), timestr, umsg);
+			snprintf(newmessage, sizeof(newmessage), 
+					_("<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"),
+					timestr, umsg);
 
 			LOG(("<incoming offline message: %s: %s>", who, umsg));
 			eb_yahoo_decode_yahoo_colors(buff, newmessage);
@@ -824,8 +828,7 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 /*************************************
  * File transfer code starts here
  */
-static void eb_yahoo_save_file_callback(gpointer data, int fd, 
-		eb_input_condition cond)
+static void eb_yahoo_save_file_callback(gpointer data, int fd, eb_input_condition cond)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	int file = yftd->file;
@@ -1427,11 +1430,11 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela)
 static void eb_yahoo_authorize_callback(gpointer data, int result)
 {
 	struct yahoo_authorize_data *ay = data;
+	eb_local_account *ela = yahoo_find_local_account_by_id(ay->id);
 
 	if(result) {
 		if(!find_account_by_handle(ay->who, SERVICE_INFO.protocol_id)) {
-			/* FIXME use ela */
-			eb_account *ea = eb_yahoo_new_account(NULL, ay->who);
+			eb_account *ea = eb_yahoo_new_account(ela, ay->who);
 			add_unknown_account_window_new(ea);
 		}
 	} else {
@@ -1534,24 +1537,28 @@ static void ext_yahoo_game_notify(int id, char *who, int stat)
 
 static void ext_yahoo_mail_notify(int id, char *from, char *subj, int cnt)
 {
-	char buff[1024] = {0};
+	eb_local_account * ela = yahoo_find_local_account_by_id(id);
+	char buff[1024] = {0}, buff2[200] = {0};
+
+	snprintf(buff, sizeof(buff), "%s: ", ela->handle);
 	
 	if(!do_mail_notify)
 		return;
 
-	if(from && *from && subj && *subj)
-		snprintf(buff, sizeof(buff), 
+	if(from && *from && subj && *subj) {
+		snprintf(buff2, sizeof(buff2), 
 				_("You have new mail from %s about %s\n"), 
 				from, subj);
+		strncat(buff, buff2, sizeof(buff)-strlen(buff));
+	}
 	if(cnt) {
-		char buff2[100];
 		snprintf(buff2, sizeof(buff2), 
 				_("You have %d message%s\n"), 
 				cnt, cnt==1?"":"s");
-		strcat(buff, buff2);
+		strncat(buff, buff2, sizeof(buff)-strlen(buff));
 	}
 
-	if(buff[0])
+	if(buff2[0])
 		ay_do_info( _("Yahoo Mail"), buff );
 }
 
@@ -2050,18 +2057,18 @@ static void eb_yahoo_set_buddy_nick(eb_yahoo_local_account_data *ylad,
 	free(yab);
 }
 
-static void eb_yahoo_change_user_name(eb_account * account, const char * name)
+static void eb_yahoo_change_user_name(eb_account * ea, const char * name)
 {
 	eb_local_account * ela;
 	eb_yahoo_local_account_data *ylad;
 
-	if(!(ela = eb_yahoo_find_active_local_account()))
+	if(!(ela = eb_yahoo_find_active_local_account(ea)))
 		return;
 
 	ylad = ela->protocol_local_account_data;
 
 	eb_yahoo_set_buddy_nick(ylad, 
-			yahoo_find_buddy_by_handle(ylad->id, account->handle), 
+			yahoo_find_buddy_by_handle(ylad->id, ea->handle), 
 			name);
 }
 
@@ -2081,8 +2088,7 @@ static void eb_yahoo_add_user(eb_account * ea)
 		return;
 	}
 
-	/* FIXME use ea->ela if avail */
-	if(!(ela = eb_yahoo_find_active_local_account()))
+	if(!(ela = eb_yahoo_find_active_local_account(ea)))
 		return;
 
 	ylad = ela->protocol_local_account_data;
@@ -2135,7 +2141,7 @@ static void eb_yahoo_del_user(eb_account * ea)
 
 	free_yahoo_account(ea->protocol_account_data);
 	
-	if(!(ela = eb_yahoo_find_active_local_account()))
+	if(!(ela = eb_yahoo_find_active_local_account(ea)))
 		return;
 
 	ylad = ela->protocol_local_account_data;
@@ -2175,7 +2181,7 @@ static void eb_yahoo_ignore_user(eb_account * ea)
 
 	LOG(("eb_yahoo_ignore_user: %s", ea->handle));
 
-	if(!(ela = eb_yahoo_find_active_local_account()))
+	if(!(ela = eb_yahoo_find_active_local_account(ea)))
 		return;
 
 	ylad = ela->protocol_local_account_data;
@@ -2208,7 +2214,7 @@ static void eb_yahoo_unignore_user(eb_account * ea, const char *new_group)
 
 	LOG(("eb_yahoo_unignore_user: %s", ea->handle));
 
-	if(!(ela = eb_yahoo_find_active_local_account()))
+	if(!(ela = eb_yahoo_find_active_local_account(ea)))
 		return;
 
 	ylad = ela->protocol_local_account_data;
@@ -2261,20 +2267,20 @@ static void eb_yahoo_rename_group(eb_local_account *ela, const char *old_group, 
 
 static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * account)
 {
-	eb_account *acct = g_new0(eb_account, 1);
+	eb_account *ea = g_new0(eb_account, 1);
 	eb_yahoo_account_data *yad = g_new0(eb_yahoo_account_data, 1);
 
 	LOG(("eb_yahoo_new_account"));
 
-	acct->protocol_account_data = yad;
-	strncpy(acct->handle, account, 255);
-	acct->service_id = SERVICE_INFO.protocol_id;
+	ea->protocol_account_data = yad;
+	strncpy(ea->handle, account, 255);
+	ea->service_id = SERVICE_INFO.protocol_id;
 	yad->status = YAHOO_STATUS_OFFLINE;
 	yad->away = 1;
 	yad->status_message = NULL;
 	yad->typing_timeout_tag = 0;
-	acct->ela = ela;
-	return acct;
+	ea->ela = ela;
+	return ea;
 }
 
 static char **eb_yahoo_get_status_pixmap(eb_account * ea)
