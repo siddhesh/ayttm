@@ -22,18 +22,12 @@
  *
  */
  
-#include "intl.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
-#include <assert.h>
-#include <ctype.h>
-#include <time.h>
+#ifndef __PRINT_H__
+#define __PRINT_H__
 
-#include "globals.h"
-#include "gtk/gtk_eb_html.h"
 #include "log_window.h"
 
+
 void print_conversation(log_info *loginfo);
+
+#endif

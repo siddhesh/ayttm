@@ -22,13 +22,20 @@
  *
  */
 
+#include "intl.h"
+ 
+#include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+
+#include "globals.h"
 #include "print.h"
 #include "dialog.h"
-#include "prefs_window.h"
+#include "prefs.h"
 
-void print_do_print(char * value, void * data)
+
+static void print_do_print(char * value, void * data)
 {
 	char filename[255];
 	char *begin = NULL, *end = NULL, *cmd = NULL;
