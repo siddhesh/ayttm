@@ -1,3 +1,9 @@
+* Fri Jul 11 2003 10:00 GMT [colin]	0.3.2-26
+- src/chat_window.c
+Fix colors without timestamping
+- src/util.c
+Fix fallback failing
+
 * Thu Jul 10 2003 12:57 GMT [colin]	0.3.2-25
 - src/chat_window.[ch] src/chat_room.c
 Tab accelerators for chatrooms

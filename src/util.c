@@ -531,21 +531,27 @@ eb_account * find_suitable_remote_account( eb_account * first, struct contact * 
 	LList * node;
 	eb_account * possibility = NULL;
 
-	if( first && (can_offline_msg(eb_services[first->service_id]) || 
-			 RUN_SERVICE(first)->query_connected(first)) )
+	if (first && RUN_SERVICE(first)->query_connected(first)
+		&& first->ela->connected)
 		return first;
 	
 	for(node = rest->accounts; node; node=node->next) {
 		eb_account * ea = node->data;
 		
-		if( RUN_SERVICE(ea)->query_connected(ea) ) {
+		if( RUN_SERVICE(ea)->query_connected(ea) && ea->ela->connected) {
 			if(ea->service_id == rest->default_chatb ) 
 				return ea;
 			else
 				possibility = ea;
 		}
 	}
-	return possibility;
+	if (possibility)
+		return possibility;
+	
+	if( first && first->ela->connected && (can_offline_msg(eb_services[first->service_id]) || 
+			 RUN_SERVICE(first)->query_connected(first)) )
+		return first;
+	
 }
 	
 eb_account * find_suitable_file_transfer_account( eb_account * first, struct contact * rest )

@@ -974,7 +974,6 @@ static void send_typing_status(chat_window *cw)
 
 gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *inCW, GdkModifierType inModifiers, const GdkEventKey *inEvent )
 {
-	eb_debug(DBG_CORE,"checking acc\n");
 	if ( inCW->notebook != NULL )  /* only change tabs if this window is tabbed */
 	{
 		GdkDeviceKey 	accel_prev_tab;
@@ -993,14 +992,12 @@ gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *i
 		{
 			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
 			gtk_notebook_prev_page( GTK_NOTEBOOK(inCW->notebook) );
-	eb_debug(DBG_CORE,"prev\n");
 			return( gtk_true() );
 		}
 		else if ((inModifiers == accel_next_tab.modifiers) && (inEvent->keyval == accel_next_tab.keyval))
 		{
 			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
 			gtk_notebook_next_page( GTK_NOTEBOOK(inCW->notebook) );
-	eb_debug(DBG_CORE,"next\n");
 			return( gtk_true() );
 		}
 	}
@@ -1251,7 +1248,7 @@ void eb_chat_window_do_timestamp(struct contact * c, gboolean online)
 	if(!c || !c->chatwindow)
 		return;
 
-	if( !iGetLocalPref("do_timestamp") )
+	if( !iGetLocalPref("do_convo_timestamp") )
 		return;
 	
 	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#F9E589 width=*><b> %s is logged %s @ %s.\n</b></body>"),
@@ -1409,7 +1406,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 			 cur_time->tm_sec, color, remote_contact->nick);
 	}
 	else
-		g_snprintf(buff2, BUF_SIZE, "%s", remote_contact->nick);
+		g_snprintf(buff2, BUF_SIZE, "<FONT COLOR=\"%s\">%s:</FONT>", RUN_SERVICE(account)->get_color(), remote_contact->nick);
 
 #ifdef __MINGW32__
 	recoded = ay_str_to_utf8(message);
@@ -1498,7 +1495,10 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 			gdk_window_raise(remote_contact->chatwindow->window->window);
 			/*ENTRY_FOCUS(remote_contact->chatwindow);*/
 		}
-
+		/* init preferred if no choice */
+		if (l_list_length(remote_contact->accounts) == 1 && remote_account) {
+			remote_contact->chatwindow->preferred = remote_account;
+		}
 	} else {
 		gdk_window_raise(remote_contact->chatwindow->window->window);
 		/*ENTRY_FOCUS(remote_contact->chatwindow);*/
