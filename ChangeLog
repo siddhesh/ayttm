@@ -1,3 +1,8 @@
+* Mon Apr 14 2003 08:46 GMT [colin]	0.2.3-98
+- src/action.[ch] pixmaps/action.xpm
+  src/Makefile.am pixmaps/Makefile.am
+Extend print system 
+
 * Sun Apr 13 2003 16:51 GMT [colin]	0.2.3-97
 - src/chat_room.c
 Default names don't get # in names as it is not legal 
