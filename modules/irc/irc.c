@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.24 $",
-	"$Date: 2003/06/27 12:06:18 $",
+	"$Revision: 1.25 $",
+	"$Date: 2003/06/27 12:21:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -820,7 +820,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		char nick[256];
 		char tempstring[BUF_LEN];
 		char *alpha;
-
+		printf("got invite %s\n",buff);
 		g_strchomp(buff);
 		buff2 = g_strsplit(buff, " ", 4);
 		strncpy(tempstring, buff2[3]+1, BUF_LEN);
@@ -1833,17 +1833,23 @@ static void irc_send_invite( eb_local_account * account, eb_chat_room * room,
 {
 	char buff[BUF_LEN];
 	signed int ret;
+	char *simple_user = strdup(user);
 	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
 
+	if (strstr(simple_user, "@"))
+		*(strstr(simple_user, "@")) = '\0';
+
 	if (*message) {
-		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", user, message);
+		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", simple_user, message);
 			
 		ret = sendall(ila->fd, buff, strlen(buff));
 		if (ret == -1) irc_logout(room->local_user);
 	}
 
-	g_snprintf(buff, BUF_LEN, "INVITE %s :%s\n", user, room->room_name);
+	g_snprintf(buff, BUF_LEN, "INVITE %s :%s\n", simple_user, room->room_name);
 			
+	free(simple_user);
+	
 	ret = sendall(ila->fd, buff, strlen(buff));
 	if (ret == -1) irc_logout(room->local_user);
 		
