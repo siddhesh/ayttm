@@ -1,3 +1,9 @@
+* Wed Apr 09 2003 18:31 GMT [colin]	0.2.3-85
+- src/plugin.c
+Don't display error if ref_count < 0
+- modules/jabber.c
+Fix ref_count going < 0
+
 * Wed Apr 09 2003 18:31 GMT [colin]	0.2.3-84
 - modules/yahoo2/yahoo.c
 Smiley fixes (according to http://www.tiglath.org/yahoo/smiles.htm 

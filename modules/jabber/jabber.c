@@ -80,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.13 $",
-	"$Date: 2003/04/09 12:24:20 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/04/09 19:05:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -231,8 +231,10 @@ static int eb_jabber_query_connected( eb_account * account )
     eb_jabber_account_data * jad = account->protocol_account_data;
 
     eb_debug(DBG_JBR, ">\n");
-    if(ref_count <= 0 )
+    if(ref_count <= 0 ) {
         jad->status = JABBER_OFFLINE;
+	ref_count = 0;
+    }
     eb_debug(DBG_JBR, "<, returning: %i\n", jad->status != JABBER_OFFLINE);
     return jad->status != JABBER_OFFLINE;
 
@@ -343,7 +345,6 @@ static void eb_jabber_logout( eb_local_account * account )
 	JABBER_Logout(jlad->JConn);
 	jlad->JConn=NULL;
 	jlad->status=JABBER_OFFLINE;
-	ref_count--;
 	eb_debug(DBG_JBR, "<\n");
 }
 

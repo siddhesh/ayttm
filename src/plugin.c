@@ -166,7 +166,7 @@ int unload_module(eb_PLUGIN_INFO *epi)
 	if(epi->pi.finish) {
 		eb_debug(DBG_CORE, "Calling plugins finish function\n");
 		error=epi->pi.finish();
-		if(error) {
+		if(error > 0) {
 			snprintf(buf, sizeof(buf), _("Unable to unload plugin %s; maybe it is still in use?"), epi->name);
 			do_error_dialog(buf, _("Error"));
 			eb_debug(DBG_CORE, "<Plugin failed to unload\n");
