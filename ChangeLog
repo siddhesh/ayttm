@@ -1,3 +1,7 @@
+* Thu Apr 03 2003 12:15 GMT [colin]	0.2.3-5
+- src/print.[ch]
+Remove useless things
+
 * Thu Apr 03 2003 12:09 GMT [colin]	0.2.3-4
 - src/print.[ch]
 copyright and printf stuff

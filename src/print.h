@@ -36,9 +36,4 @@
 #include "gtk/gtk_eb_html.h"
 #include "log_window.h"
 
-typedef struct _print_window {
-	log_info *loginfo;
-	long oldpos;
-} print_window;
-
 void print_conversation(log_info *loginfo);

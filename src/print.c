@@ -60,26 +60,29 @@ void print_conversation(log_info *li)
 {
 	char buf[4096], output_fname[255];
 	int firstline = 1;
-	print_window *pw = g_new0(print_window, 1);
+	log_info *loginfo = g_new0(log_info, 1);
 	FILE *output_file;
 
 	if (!li || !li->filename)
 		return;
-	pw->loginfo = g_new0(log_info, 1);
-	pw->loginfo->filename = strdup(li->filename);
-	pw->loginfo->log_started = li->log_started;
-	pw->loginfo->filepos = li->filepos;
+	loginfo = g_new0(log_info, 1);
+	loginfo->filename = strdup(li->filename);
+	loginfo->log_started = li->log_started;
+	loginfo->filepos = li->filepos;
 	
 	eb_debug(DBG_CORE,"printing %s (starting from %lu)\n", 
-			pw->loginfo->filename, 
-			pw->loginfo->filepos); 
+			loginfo->filename, 
+			loginfo->filepos); 
 	
-	pw->loginfo->fp = fopen(pw->loginfo->filename, "r");
-	if (!pw->loginfo->fp) {
+	loginfo->fp = fopen(loginfo->filename, "r");
+	
+	free (loginfo->filename);
+	
+	if (!loginfo->fp) {
 		do_error_dialog(_("Cannot print log: no data available."),_("Print error"));
 		return;
 	}
-	if (fseek(pw->loginfo->fp, pw->loginfo->filepos, SEEK_SET) < 0) {
+	if (fseek(loginfo->fp, loginfo->filepos, SEEK_SET) < 0) {
 		do_error_dialog(_("Cannot print log: no data available."),_("Print error"));
 		return;
 	}
@@ -89,12 +92,12 @@ void print_conversation(log_info *li)
 	if (output_file == NULL) {
 		perror("fopen");
 		do_error_dialog(_("Cannot print log: Impossible to create temporary file."),_("Print error"));
-		fclose(pw->loginfo->fp);
+		fclose(loginfo->fp);
 		return;
 	}
 	
 	fprintf(output_file, "<html><head><title>Ayttm conversation</title></head><body>\n");
-	while (fgets(buf, sizeof(buf), pw->loginfo->fp)) {
+	while (fgets(buf, sizeof(buf), loginfo->fp)) {
 		if (strstr(buf, _("Conversation ended on ")) != NULL)
 			break;
 		if (strstr(buf, _("Conversation started on ")) != NULL) {
@@ -112,7 +115,7 @@ void print_conversation(log_info *li)
 	
 	if (errno) {
 		do_error_dialog(strerror(errno), _("Print error"));
-		fclose(pw->loginfo->fp);
+		fclose(loginfo->fp);
 		fclose(output_file);
 		unlink(output_fname);
 		return;
@@ -120,12 +123,12 @@ void print_conversation(log_info *li)
 	
 	fprintf(output_file, "</body></html>\n");
 	fclose(output_file);
-	if (ftell(pw->loginfo->fp) == pw->loginfo->filepos) {
+	if (ftell(loginfo->fp) == loginfo->filepos) {
 		do_error_dialog(_("Cannot print log: no data available."),_("Print error"));
 		fclose(output_file);
 		unlink(output_fname);
 	} else	
 		do_text_input_window_multiline(_("Enter print command:\n(%s will be the current conversation's temporary file)"), 
 			     cGetLocalPref("print_cmd"), FALSE, print_do_print, NULL); 
-	fclose(pw->loginfo->fp);
+	fclose(loginfo->fp);
 }
