@@ -1,3 +1,10 @@
+* Tue Jul 22 2003 08:24 GMT [philip]	0.3.3-8
+- src/edit_local_accounts.c
+Use option_menu instead of combo box - this means we can't have accounts 
+for services that aren't loaded.
+- src/status.c
+Menu shortcut keys
+
 * Tue Jul 22 2003 05:24 GMT [philip]	0.3.3-7
 - src/account_parser.y
 sort local account list on name-service

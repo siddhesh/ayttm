@@ -182,8 +182,19 @@ static void selection_made(GtkWidget * clist,
 
 	gtk_entry_set_text(GTK_ENTRY(username), entry_name);
 	gtk_entry_set_text(GTK_ENTRY(password), entry_pass);
-	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(service_type)->entry),
-			   entry_service);
+	{
+		int i;
+		LList *l, *list = get_service_list();
+		for(l=list, i=0; l; l=l_list_next(l), i++) {
+			char *name = l->data;
+			if(!strcmp(name, entry_service)) {
+				gtk_option_menu_set_history(GTK_OPTION_MENU(service_type), i);
+				break;
+			}
+		}
+		l_list_free(list);
+
+	}
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup),
 				     (pix == checkboxonxpm));
 
@@ -232,7 +243,7 @@ static void add_callback(GtkWidget * widget, gpointer data)
 	text[CONNECT] = "";
 	text[USER_NAME] = gtk_entry_get_text(GTK_ENTRY(username));
 	text[PASSWORD] = gtk_entry_get_text(GTK_ENTRY(password));
-	text[SERVICE_TYPE] = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(service_type)->entry));
+	text[SERVICE_TYPE] = gtk_widget_get_name(gtk_menu_get_active(GTK_MENU(gtk_option_menu_get_menu(GTK_OPTION_MENU(service_type)))));
 
 	error_message = check_login_validity(text);
 	if (error_message) {
@@ -285,7 +296,7 @@ static void modify_callback(GtkWidget * widget, gpointer data)
 	text[CONNECT] = "";
 	text[USER_NAME] = gtk_entry_get_text(GTK_ENTRY(username));
 	text[PASSWORD] = gtk_entry_get_text(GTK_ENTRY(password));
-	text[SERVICE_TYPE] = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(service_type)->entry));
+	text[SERVICE_TYPE] = gtk_widget_get_name(gtk_menu_get_active(GTK_MENU(gtk_option_menu_get_menu(GTK_OPTION_MENU(service_type)))));
 
 	error_message = check_login_validity(text);
 	if (error_message) {
@@ -503,7 +514,7 @@ void	ay_edit_local_accounts( void )
 	GtkWidget *toolbar;
 	GtkWidget *toolitem;
 	GtkWidget *separator;
-	GList *list;
+	LList *list;
 	GdkPixmap *icon;
 	GdkBitmap *mask;
 	GtkAccelGroup *accel_group;
@@ -567,15 +578,27 @@ void	ay_edit_local_accounts( void )
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
-	service_type = gtk_combo_new();
-	list = llist_to_glist(get_service_list(), 1);
-	gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(service_type)->entry),
-			       FALSE);
-	gtk_combo_set_popdown_strings(GTK_COMBO(service_type), list);
-	g_list_free(list);
+	{
+		GtkWidget *widget = gtk_menu_new();
+		LList *l;
+		service_type = gtk_option_menu_new();
+		gtk_widget_show(widget);
+		list = get_service_list();
+		for(l=list; l; l=l_list_next(l)) {
+			char *label = l->data;
+			GtkWidget *w = gtk_menu_item_new_with_label(label);
+			gtk_widget_show(w);
+			gtk_widget_set_name(w, label);
+			gtk_menu_append(GTK_MENU(widget), w);
+		}
+		l_list_free(list);
+
+		gtk_option_menu_set_menu(GTK_OPTION_MENU(service_type), widget);
+		gtk_option_menu_set_history(GTK_OPTION_MENU(service_type), 0);
+	}
 	gtk_widget_show(service_type);
 	gtk_box_pack_start(GTK_BOX(box), service_type, FALSE, FALSE, 2);
-	gtk_widget_add_accelerator(GTK_COMBO(service_type)->entry, "grab_focus", accel_group,
+	gtk_widget_add_accelerator(service_type, "grab_focus", accel_group,
 			label_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 
 	/*Connect at startup Section */

@@ -1918,7 +1918,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Chat/Sign o_ff all"),	
 				"<control>F", eb_sign_off_all, 0, NULL },
 	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
-	{ N_("/Chat/New group _chat..."),
+	{ N_("/Chat/New _group chat..."),
   				NULL, launch_group_chat, 0, NULL },
 	{ N_("/Chat/Set as _away..."),	
 				NULL, show_away_choicewindow, 0, NULL },
@@ -1930,16 +1930,16 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/_Edit"),		NULL,       NULL, 0, "<Branch>" },
 	{ N_("/Edit/_Preferences..."),
   				NULL, build_prefs_callback, 0, NULL },
-	{ N_("/Edit/_My accounts..."),
+	{ N_("/Edit/My _accounts..."),
   				NULL, eb_edit_accounts, 0, NULL },
 	{ N_("/Edit/---"),	NULL, NULL, 0, "<Separator>" },
-	{ N_("/Edit/Add a con_tact account..."),		
+	{ N_("/Edit/Add a _contact account..."),		
   				NULL, add_callback, 0, NULL },
 	{ N_("/Edit/Add a _group..."),
   				NULL, add_group_callback, 0, NULL },
 	{ N_("/Edit/---"),	NULL,         NULL, 0, "<Separator>" },
 	{ N_("/Edit/_Import"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/Edit/Set _profile"),	NULL, 	    NULL, 0, NULL },
+	{ N_("/Edit/Set profi_le"),	NULL, 	    NULL, 0, NULL },
 	
 	{ N_("/_Help"),		NULL, NULL, 0, "<Branch>" },
 #ifndef __MINGW32__
@@ -1949,7 +1949,7 @@ static GtkItemFactoryEntry menu_items[] = {
 #endif
 	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL },
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Help/_Check for new release"),NULL, ay_check_release, 0, GINT_TO_POINTER(0) }
+	{ N_("/Help/Check for new _release"),NULL, ay_check_release, 0, GINT_TO_POINTER(0) }
 #if ADD_DEBUG_TO_MENU
 	,
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
