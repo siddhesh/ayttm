@@ -22,7 +22,7 @@ src/away_window.c
 src/chat_room.c
 src/chat_window.c
 src/contact_actions.c
-src/contact_util.c
+src/contact_util.C
 src/crash.c
 src/dialog.c
 src/edit_account_window.c
