@@ -236,8 +236,9 @@ struct contact * find_contact_by_handle( char * handle )
 }
 
 /**
- * Return an account given its handle
+ * Return an account given its handle and associated local account
  * @param	handle	the handle of the account
+ * @param	ela	the local account associated with this account
  *
  * @return	the account or NULL if not found
  */
@@ -245,6 +246,31 @@ eb_account * find_account_by_handle(const char *handle, const eb_local_account *
 {
 
 	return hash.find(handle, ela);
+	/*
+	LList *l1, *l2, *l3;
+
+	for(l1 = groups; l1; l1=l_list_next(l1))
+		for(l2 = ((grouplist *)l1->data)->members; l2; l2=l_list_next(l2))
+			for(l3 = ((struct contact *)l2->data)->accounts; l3; l3=l_list_next(l3)) {
+				eb_account * ea = l3->data;
+				if(ea->ela == ela && !strcmp(ea->handle, handle))
+					return ea;
+			}
+	return NULL;
+	*/
+}
+
+/**
+ * Return an account given its handle and service id
+ * @param	handle		the handle of the account
+ * @param	service_id	the service_id of the account
+ *
+ * @return	the account or NULL if not found
+ */
+eb_account * find_account_by_handle(const char *handle, int service_id)
+{
+
+	return hash.find(handle, service_id);
 	/*
 	LList *l1, *l2, *l3;
 
