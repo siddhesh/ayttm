@@ -1,3 +1,7 @@
+* Sun May 11 2003 10:00 GMT [philip]	0.3.0-179
+- src/image_window.c modules/yahoo2/yahoo.c
+Yahoo webcam works - really!
+
 * Sat May 10 2003 19:15 GMT [philip]	0.3.0-178
 - src/status.c modules/smileys/smiley-themer.c
 theme memory works again - I hate gtk radio menus

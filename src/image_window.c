@@ -71,6 +71,17 @@ static unsigned char * image_2_jpg(const unsigned char * in_img, long *size)
 	static int outfmt;
 	static int init;
 
+	/*
+	static int ctr;
+	char fn[100];
+	FILE *fp;
+	snprintf(fn, sizeof(fn), "ayttm-img-%03d.jpc", ctr++);
+	fp = fopen(fn, "wb");
+	if(fp) {
+		fwrite(in_img, 1, *size, fp);
+		fclose(fp);
+	}
+	*/
 	if(!init) {
 		if(jas_init()) {
 			eb_debug(DBG_CORE, "Could not init jasper\n");
@@ -86,6 +97,9 @@ static unsigned char * image_2_jpg(const unsigned char * in_img, long *size)
 	}
 	infmt = jas_image_getfmt(in);
 	eb_debug(DBG_CORE, "Got input image format: %d %s\n", infmt, jas_image_fmttostr(infmt));
+	if(infmt <= 0)
+		return ay_memdup(in_img, *size);
+
 	if(!strcmp(jas_image_fmttostr(infmt), "jpg")) {
 		/* image is already jpeg */
 		jas_stream_close(in);

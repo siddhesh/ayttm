@@ -127,8 +127,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.51 $",
-	"$Date: 2003/05/10 17:56:37 $",
+	"$Revision: 1.52 $",
+	"$Date: 2003/05/11 10:03:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1577,6 +1577,8 @@ static void ext_yahoo_got_webcam_image(int id, const char *who,
 
 	if(wf->image_size != image_size || wf->recd_size==0) {
 		FREE(wf->buff);
+		wf->image_size = image_size;
+		wf->timestamp = timestamp;
 		wf->recd_size=0;
 		wf->buff = malloc(image_size);
 	}
@@ -1585,13 +1587,11 @@ static void ext_yahoo_got_webcam_image(int id, const char *who,
 	wf->recd_size += real_size;
 
 	if(wf->recd_size == wf->image_size) {
-		ay_image_window_add_data(wf->image_window_tag, image, wf->image_size, 1);
+		ay_image_window_add_data(wf->image_window_tag, wf->buff, wf->image_size, 1);
 		ay_image_window_add_data(wf->image_window_tag, NULL, 0, 0);
 		FREE(wf->buff);
 		wf->recd_size=0;
 	}
-
-	wf->image_size = image_size;
 
 }
 
