@@ -25,10 +25,7 @@
 #include "intl.h"
 
 #include <gdk/gdkprivate.h>
-#ifndef __MINGW32__
-#include <gdk/gdkx.h>
-#include <X11/Xlib.h>
-#endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -43,16 +40,17 @@
 #include "messages.h"
 #include "status.h"
 
-#ifdef HAVE_MIT_SAVER_EXTENSION
+#ifdef HAVE_XSS
+#include <X11/Xlib.h>
 #include <X11/extensions/scrnsaver.h>
-#endif /* HAVE_MIT_SAVER_EXTENSION */
+#endif
 
 
 static guint idle_timer;
 static time_t lastsent = 0;
 static int is_idle = 0;
 
-#ifdef HAVE_MIT_SAVER_EXTENSION
+#ifdef HAVE_XSS
 static int scrnsaver_ext = 0;
 #endif
 
@@ -264,7 +262,7 @@ static int check_idle()
 	int		idle_reporter = -1;
 	const int	sendIdleTime = iGetLocalPref("do_send_idle_time");
 
-#ifdef HAVE_MIT_SAVER_EXTENSION
+#ifdef HAVE_XSS
 	if (scrnsaver_ext) {
 		static XScreenSaverInfo * mit_info = NULL;
 		mit_info = XScreenSaverAllocInfo();
@@ -307,7 +305,7 @@ void add_idle_check()
 {
 	idle_timer = eb_timeout_add(5000, (GtkFunction)check_idle, NULL);
 	serv_touch_idle();
-#ifdef HAVE_MIT_SAVER_EXTENSION
+#ifdef HAVE_XSS
 	{
 		int	eventnum;
 		int	errornum;

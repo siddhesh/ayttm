@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=76
+RELEASE=77
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -177,43 +177,41 @@ fi
 
 
 ###############################################################################
-#
-#       Check for the MIT-SCREEN-SAVER server extension.
-#  
+#  Check for the X screensaver extension
 ###############################################################################
 
-have_mit=no
-with_mit_req=unspecified
-      
-AC_CHECK_HEADER(X11/extensions/scrnsaver.h, [have_mit=yes])
-      
-# Now check to see if it's really in the library; XF86Free-3.3 ships  
-# scrnsaver.h, but doesn't include the code in libXext.a, the idiots!
-#
-if test "$have_mit" = yes; then
-  AC_CHECK_LIB(Xext, XScreenSaverRegister, [true], [have_mit=no], -L/usr/X11R6/lib -lX11)
+AC_CHECK_HEADERS(X11/Xlib.h)
+AC_CHECK_HEADER(X11/extensions/scrnsaver.h, [have_xss=yes], [have_xss=no],
+	[#if HAVE_X11_XLIB_H
+	 #include <X11/Xlib.h>
+	 #endif
+	])
 
-  if test "$have_mit" = no; then
-    # Looks like XF86Free-3.3 actually puts it in XExExt instead
-    # of in Xext.
-    AC_CHECK_LIB(XExExt, XScreenSaverRegister,
-                   [have_mit=yes; EB_LIBS="$EB_LIBS -lXExExt"],
-                   [true], -L/usr/X11R6/lib -lX11 -lXext)
-  fi
+if test "$have_xss" = yes; then
+	# Let's figure out what library it's in...
+	
+	# First check for it in Xss
+	AC_CHECK_LIB(Xss, XScreenSaverRegister,
+					[have_xss=yes; EB_LIBS="$EB_LIBS -lXss"],
+					[have_xss=no], -L/usr/X11R6/lib -lX11 -lXext)
 
-  if test "$have_mit" = no; then
-    # Looks like some versions of XFree86 (whichever version
-    # it is that comes with RedHat Linux 2.0 -- I can't find a version
-    # number) put this garbage in Xss instead of Xext.
-    AC_CHECK_LIB(Xss, XScreenSaverRegister,
-                   [have_mit=yes; EB_LIBS="$EB_LIBS -lXss"],
-                   [true], -L/usr/X11R6/lib -lX11 -lXext)
-  fi
-      
-  if test "$have_mit" = yes; then
-    AC_DEFINE(HAVE_MIT_SAVER_EXTENSION, , Define if we have mit screensaver server extensions)
-  fi
-      
+	if test "$have_xss" = no; then
+		# Some versions of XFree86 put this in Xext instead of Xss
+		AC_CHECK_LIB(Xext, XScreenSaverRegister,
+					[have_xss=yes; EB_LIBS="$EB_LIBS -lXext"],
+					[have_xss=no], -L/usr/X11R6/lib -lX11)
+	fi
+
+	if test "$have_xss" = no; then
+		# And others put it in XExExt instead of in Xext
+		AC_CHECK_LIB(XExExt, XScreenSaverRegister,
+					[have_xss=yes; EB_LIBS="$EB_LIBS -lXExExt"],
+					[have_xss=no], -L/usr/X11R6/lib -lX11 -lXext)
+	fi
+
+	if test "$have_xss" = yes; then
+		AC_DEFINE(HAVE_XSS, , Define if we have the X screensaver extension)
+	fi
 fi
 
 

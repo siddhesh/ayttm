@@ -1,3 +1,8 @@
+* Thu May  1 2003 12:17 GMT [andy]	0.3.0-77
+- configure.ac
+  src/service.c
+Clean up check for X screensaver and elminate annoying config warning
+
 * Thu May  1 2003 10:26 GMT [colin]	0.3.0-76
 - src/status.c
 Fix gtk warnings
