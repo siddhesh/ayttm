@@ -301,7 +301,6 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 		list = NULL;
 		for (walk = accounts; walk; walk = walk->next) {
 			eb_local_account *ela = (eb_local_account *)walk->data;
-			printf("ela %x\n",ela);
 			if (ela) {
 				char *str = g_strdup_printf("[%s] %s", get_service_name(ela->service_id), ela->handle);
 				list = g_list_append(list, str);
