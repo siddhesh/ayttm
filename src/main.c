@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
 		RegQueryValueEx(appKey, "AppData", NULL, &dwType, 
 			&appDir[0], &dwSize);
 		RegCloseKey(appKey);
-		g_snprintf(config_dir, 1024, "%s\\AYTTM\\", appDir);
+		g_snprintf(config_dir, 1024, "%s\\Ayttm\\", appDir);
 	}
 #else
 	gtk_set_locale ();

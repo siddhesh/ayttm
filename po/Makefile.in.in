@@ -66,10 +66,15 @@ CATALOGS = @CATALOGS@
 .po.mo:
 	$(MSGFMT) -o $@ $<
 
-.po.gmo:
-	file=$(srcdir)/`echo $* | sed 's,.*/,,'`.gmo \
-	  && rm -f $$file && $(GMSGFMT) --statistics -o $$file $<
+@MINGW32_FALSE@.po.gmo:
+@MINGW32_FALSE@	file=$(srcdir)/`echo $* | sed 's,.*/,,'`.gmo \
+@MINGW32_FALSE@	  && rm -f $$file && $(GMSGFMT) --statistics -o $$file $<
 
+@MINGW32_TRUE@.po.gmo:
+@MINGW32_TRUE@	file=$(srcdir)/`echo $* | sed 's,.*/,,'`.gmo \
+@MINGW32_TRUE@	  && rm -f $$file && iconv -t UTF-8 < $< > tmp.po \
+@MINGW32_TRUE@	  && $(GMSGFMT) --statistics -o $$file tmp.po \
+@MINGW32_TRUE@	  && rm -f tmp.po
 
 all: all-@USE_NLS@
 

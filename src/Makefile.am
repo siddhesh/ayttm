@@ -67,13 +67,8 @@ defaults.h: Makefile
 	@echo "#ifndef __DEFAULTS_H__" >> defaults.h;
 	@echo "#define __DEFAULTS_H__" >> defaults.h;
 	@echo "#ifdef __MINGW32__" >> defaults.h;
-	@echo \#define BuddyArriveDefault \"BuddyArrive.au\" >> defaults.h;
-	@echo \#define BuddyLeaveDefault \"BuddyLeave.au\" >> defaults.h;
-	@echo \#define SendDefault \"Send.au\" >> defaults.h;
-	@echo \#define ReceiveDefault \"Receive.au\" >> defaults.h;
-	@echo \#define SpeechProgramDefault \"\" >> defaults.h;
 	@echo \#define MODULE_DIR \"modules\" >> defaults.h;
-	@echo \#define AYTTMRC  \"\\\\@PACKAGE@rc\" >> defaults.h;
+	@echo \#define AYTTMRC  \"etc\\\\@PACKAGE@rc\" >> defaults.h;
 	@echo "#else" >> defaults.h;
 	@echo \#define MODULE_DIR \"${libdir}/@PACKAGE@\" >> defaults.h;
 	@echo \#define AYTTMRC  \"${sysconfdir}/@PACKAGE@rc\" >> defaults.h;

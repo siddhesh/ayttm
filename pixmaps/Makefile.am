@@ -23,7 +23,7 @@ EXTRA_DIST = penguin_talk.xpm ayttm.xpm ayttmlogo.xpm ok.xpm tb_yes.xpm \
 	workwizu_online.xpm workwizu_away.xpm \
 	warning.xpm question.xpm action.xpm print.xpm \
 	checkbox_on.xpm checkbox_off.xpm info.xpm error.xpm \
-	invite_btn.xpm
+	invite_btn.xpm ayttm.ico
 
 
 Utilitiesdir = $(datadir)/pixmaps
