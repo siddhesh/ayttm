@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.53 $",
-	"$Date: 2003/06/10 11:31:43 $",
+	"$Revision: 1.54 $",
+	"$Date: 2003/06/28 06:49:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -385,6 +385,57 @@ static int plugin_init()
 
         psmileys=add_protocol_smiley(psmileys, "(R)", "rainbow");
         psmileys=add_protocol_smiley(psmileys, "(r)", "rainbow");
+
+        psmileys=add_protocol_smiley(psmileys, "8o|", "furious");
+
+        psmileys=add_protocol_smiley(psmileys, "8-|", "nerd");
+
+        psmileys=add_protocol_smiley(psmileys, "+o(", "sick");
+
+        psmileys=add_protocol_smiley(psmileys, "<:o)", "party");
+
+        psmileys=add_protocol_smiley(psmileys, "|-)", "sleepy");
+
+        psmileys=add_protocol_smiley(psmileys, "*-)", "thinking");
+
+        psmileys=add_protocol_smiley(psmileys, ":-#", "secret");
+
+        psmileys=add_protocol_smiley(psmileys, ":-*", "whisper");
+
+        psmileys=add_protocol_smiley(psmileys, "^o)", "sarcastic");
+
+        psmileys=add_protocol_smiley(psmileys, "8-)", "eyeroll");
+
+        psmileys=add_protocol_smiley(psmileys, "(bah)", "sheep");
+        psmileys=add_protocol_smiley(psmileys, "(BAH)", "sheep");
+
+        psmileys=add_protocol_smiley(psmileys, "(mp)", "mobile");
+        psmileys=add_protocol_smiley(psmileys, "(MP)", "mobile");
+
+        psmileys=add_protocol_smiley(psmileys, "(au)", "auto");
+        psmileys=add_protocol_smiley(psmileys, "(AU)", "auto");
+
+        psmileys=add_protocol_smiley(psmileys, "(ap)", "plane");
+        psmileys=add_protocol_smiley(psmileys, "(AP)", "plane");
+
+        psmileys=add_protocol_smiley(psmileys, "(co)", "computer");
+        psmileys=add_protocol_smiley(psmileys, "(CO)", "computer");
+
+        psmileys=add_protocol_smiley(psmileys, "(mo)", "money");
+        psmileys=add_protocol_smiley(psmileys, "(MO)", "money");
+
+        psmileys=add_protocol_smiley(psmileys, "(pi)", "pizza");
+        psmileys=add_protocol_smiley(psmileys, "(PI)", "pizza");
+
+        psmileys=add_protocol_smiley(psmileys, "(so)", "soccer");
+        psmileys=add_protocol_smiley(psmileys, "(SO)", "soccer");
+
+        psmileys=add_protocol_smiley(psmileys, "(ip)", "island");
+        psmileys=add_protocol_smiley(psmileys, "(IP)", "island");
+
+        psmileys=add_protocol_smiley(psmileys, "(um)", "umbrella");
+        psmileys=add_protocol_smiley(psmileys, "(UM)", "umbrella");
+
 
 #ifndef __MINGW32__
 	if ((mi1 = eb_add_menu_item(_("Invite to Gnomemeeting"), EB_CHAT_WINDOW_MENU,
