@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.20 $",
-	"$Date: 2004/01/03 14:30:49 $",
+	"$Revision: 1.21 $",
+	"$Date: 2005/02/13 13:31:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1933,7 +1933,7 @@ ay_aim_del_user (eb_account *account)
 }
 
 static void
-ay_oscar_set_away (eb_local_account * account, gchar * message)
+ay_oscar_set_away (eb_local_account * account, gchar * message, int away)
 {
 	struct eb_aim_local_account_data * alad;
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;

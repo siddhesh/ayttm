@@ -70,8 +70,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP",
 	"Provides Simple Mail Transfer Protocol (SMTP) support",
-	"$Revision: 1.20 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.21 $",
+	"$Date: 2005/02/13 13:36:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -353,7 +353,7 @@ static void eb_smtp_set_idle(eb_local_account * account, int idle)
 {
 }
 
-static void eb_smtp_set_away(eb_local_account * account, char * message)
+static void eb_smtp_set_away(eb_local_account * account, char * message, int away)
 {
 }
 

@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.92 $",
-	"$Date: 2004/06/16 08:24:29 $",
+	"$Revision: 1.93 $",
+	"$Date: 2005/02/13 13:39:32 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2985,7 +2985,7 @@ static void eb_yahoo_set_idle(eb_local_account * ela, int idle)
 	}
 }
 
-static void eb_yahoo_set_away(eb_local_account * ela, char * message)
+static void eb_yahoo_set_away(eb_local_account * ela, char * message, int away)
 {
 	eb_yahoo_local_account_data *ylad;
 
@@ -3032,17 +3032,19 @@ static void eb_yahoo_set_away(eb_local_account * ela, char * message)
 				state=EB_DISPLAY_YAHOO_NOTATHOME;
 
 			FREE(lmsg);
-			ylad->away = 1;
+			ylad->away = away;
 		}
 
 		if(state == EB_DISPLAY_YAHOO_CUSTOM) {
 			LOG(("Custom away message"));
 			FREE(ylad->status_message);
 			ylad->status_message = strdup(message);
-			ylad->away = 1;
+			ylad->away = away;
 		} 
 		
-		if (ela->status_menu)
+		if(state == EB_DISPLAY_YAHOO_CUSTOM && ylad->status == YAHOO_STATUS_CUSTOM)
+			yahoo_set_away(ylad->id, YAHOO_STATUS_CUSTOM, ylad->status_message, ylad->away);
+		else if (ela->status_menu)
 			eb_set_active_menu_status(ela->status_menu, state);
 	}
 }
@@ -3306,6 +3308,7 @@ static void yahoo_init_smileys()
 	psmileys=add_protocol_smiley(psmileys, ";-)", "wink");
 
 	psmileys=add_protocol_smiley(psmileys, "\\:d/", "dancing");
+	psmileys=add_protocol_smiley(psmileys, "\\:D/", "dancing");
 
 	psmileys=add_protocol_smiley(psmileys, ":D", "grin");	
 	psmileys=add_protocol_smiley(psmileys, ":-D", "grin");
