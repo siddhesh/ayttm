@@ -1621,7 +1621,7 @@ static void yahoo_process_buddydel(struct yahoo_input_data *yid, struct yahoo_pa
 			DEBUG_MSG(("unknown key: %d = %s", pair->key, pair->value));
 	}
 
-	if(!who)
+	if(!who || !where)
 		return;
 	
 	bud = y_new0(struct yahoo_buddy, 1);

@@ -1,4 +1,8 @@
-* Wed Aug  6 2003 21:23 GMT [colin]	0.3.3-21
+* Wed Aug  6 2003 21:23 GMT [colin]	0.3.3-23
+- modules/yahoo2/libyahoo2/libyahoo2.c
+Try to fix bug #773849
+
+* Wed Aug  6 2003 21:23 GMT [colin]	0.3.3-22
 - modules/msn2/msn.C
 Try to fix bug #780984
 
