@@ -1,3 +1,11 @@
+* Wed May  7 2003 13:34 GMT [colin]	0.3.0-153
+- src/chat_window.c
+Hide Actions from windows users as action.c is empty on windows
+- src/status.c
+Hide website and manual menu items from windows
+- modules/msn2/msn.C
+Hide Gnomemeeting from windows as it won't work
+
 * Wed May  7 2003 11:46 GMT [philip]	0.3.0-152
 - src/chat_window.c
 Try to fix bug 733808 and maybe 733237.  let destroy be the last

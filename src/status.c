@@ -1792,9 +1792,11 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Tools/_Edit accounts..."),
   				NULL, eb_edit_accounts, 0, NULL },
 	{ N_("/_Help"),		NULL, NULL, 0, "<Branch>" },
+#ifndef __MINGW32__
 	{ N_("/Help/_Web site..."),	NULL, show_website, 0, NULL },
 	{ N_("/Help/_Manual..."),	NULL, show_manual, 0, NULL },
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
+#endif
 	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL }
 #if 0
 	,

@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.48 $",
-	"$Date: 2003/05/06 17:04:49 $",
+	"$Revision: 1.49 $",
+	"$Date: 2003/05/07 13:40:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -386,6 +386,7 @@ static int plugin_init()
         psmileys=add_protocol_smiley(psmileys, "(R)", "rainbow");
         psmileys=add_protocol_smiley(psmileys, "(r)", "rainbow");
 
+#ifndef __MINGW32__
 	if ((mi1 = eb_add_menu_item(_("Invite to Gnomemeeting"), EB_CHAT_WINDOW_MENU,
 			      invite_gnomemeeting, ebmCONTACTDATA, NULL)) == NULL) {
 		return (-1);
@@ -399,7 +400,8 @@ static int plugin_init()
 	}
 	eb_menu_item_set_protocol(mi1, "MSN");
 	eb_menu_item_set_protocol(mi2, "MSN");
-
+#endif
+	
         return(0);
 }
 

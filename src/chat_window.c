@@ -859,11 +859,13 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		gtk_menu_append(GTK_MENU(menu), button);
 		gtk_widget_show(button);
 
+#ifndef __MINGW32__
 		button = gtk_menu_item_new_with_label(_("Actions..."));
 		gtk_signal_connect(GTK_OBJECT(button), "activate",
 				 GTK_SIGNAL_FUNC(action_callback), cw);
 		gtk_menu_append(GTK_MENU(menu), button);
 		gtk_widget_show(button);
+#endif
 
 		gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 
@@ -2104,6 +2106,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 				   GTK_ACCEL_VISIBLE);
 	gtk_menu_append(GTK_MENU(menu), button);
 
+#ifndef __MINGW32__
 	button = gtk_menu_item_new_with_label(_("Actions..."));
 	gtk_signal_connect(GTK_OBJECT(button), "activate",
 			   GTK_SIGNAL_FUNC(action_callback),
@@ -2113,7 +2116,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 				   GDK_p, GDK_CONTROL_MASK,
 				   GTK_ACCEL_VISIBLE);
 	gtk_menu_append(GTK_MENU(menu), button);
-
+#endif
+	
 	/*Close Selection*/
 
 	button = gtk_menu_item_new_with_label(_("Close"));
@@ -2205,10 +2209,12 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	view_log_button = TOOLBAR_APPEND(_("View Log CTRL+L"), iconwid, view_log_callback, cw);
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
 
+#ifndef __MINGW32__
 	ICON_CREATE(icon, iconwid, action_xpm);
 	print_button = TOOLBAR_APPEND(_("Actions..."), iconwid, action_callback, cw);
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
-
+#endif
+	
 	TOOLBAR_SEPARATOR();
 
 	/*This is the send file button*/
