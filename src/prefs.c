@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #endif
 
+#include "util.h"
 #include "account.h"
 #include "service.h"
 #include "value_pair.h"
@@ -43,7 +44,6 @@
 #include "prefs.h"
 #include "messages.h"
 #include "status.h"
-#include "util.h"
 
 #include "ui_prefs_window.h"
 

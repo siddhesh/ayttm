@@ -1,3 +1,7 @@
+* Sat Aug 30 2003 01:38 GMT [elh]	0.4.0-9
+- src/prefs.c
+moved util.h include to fix MINGW32 compilation issue
+
 * Fri Aug 29 2003 12:41 GMT [colin]	0.4.0-8
 - modules/msn2/msn.C
 Ack! a null pointer bug was here since three minor versions!
