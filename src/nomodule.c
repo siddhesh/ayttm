@@ -47,7 +47,7 @@
 
 #define SERVICE_INFO nomodule_SERVICE_INFO
 /* This will end up being an array, one for each protocol we know about */
-struct service SERVICE_INFO = { NULL, -1, FALSE, FALSE, FALSE, FALSE, NULL };
+struct service SERVICE_INFO = { NULL, -1, SERVICE_CAN_NOTHING, NULL };
 
 struct eb_nomodule_account_data {
 	int status;

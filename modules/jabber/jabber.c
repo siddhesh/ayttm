@@ -82,14 +82,15 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.18 $",
-	"$Date: 2003/04/18 08:46:08 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/04/27 11:29:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
 	NULL
 };
-struct service SERVICE_INFO = { "Jabber", -1,  TRUE, TRUE, FALSE, TRUE, NULL };
+struct service SERVICE_INFO = { "Jabber", -1, 
+	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
 /* End Module Exports */
 
 static char *eb_jabber_get_color(void) { static char color[]="#88aa00"; return color; }

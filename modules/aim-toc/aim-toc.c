@@ -94,13 +94,13 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.20 $",
-	"$Date: 2003/04/22 08:47:38 $",
+	"$Revision: 1.21 $",
+	"$Date: 2003/04/27 11:29:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
 };
-struct service SERVICE_INFO = { "AIM", -1, FALSE, TRUE, FALSE, TRUE, NULL };
+struct service SERVICE_INFO = { "AIM", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
 /* End Module Exports */
 
 static char *eb_toc_get_color(void) { static char color[]="#000088"; return color; }

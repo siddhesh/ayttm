@@ -317,11 +317,9 @@ static GList * chat_service_list()
 {
 	GList * list = NULL;
 	int i;
-	for(i = 0; i < NUM_SERVICES; i++ )
-	{
-		if(eb_services[i].group_chat
-		&& find_suitable_local_account(NULL,i))
-		{
+	for(i = 0; i < NUM_SERVICES; i++ ) {
+		if(can_group_chat(eb_services[i]) 
+				&& find_suitable_local_account(NULL,i)) {
 			list = g_list_append(list, eb_services[i].name);
 		}
 	}

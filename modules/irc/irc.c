@@ -87,13 +87,13 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC Service",
 	"Internet Relay Chat support",
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/18 08:46:07 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/27 11:29:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
 };
-struct service SERVICE_INFO = { "IRC", -1, FALSE, TRUE, FALSE, TRUE, NULL };
+struct service SERVICE_INFO = { "IRC", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
 /* End Module Exports */
 
 static char *eb_irc_get_color(void) { static char color[]="#880088"; return color; }

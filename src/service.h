@@ -222,16 +222,28 @@ struct service_callbacks {
   the server, port, the type of protocall used by the service, and a pointer
   to the service specific callbacks.
   */
+enum service_capabilities {
+	SERVICE_CAN_NOTHING      = 0,
+	SERVICE_CAN_OFFLINEMSG   = 1 << 0,
+	SERVICE_CAN_GROUPCHAT    = 1 << 1,
+	SERVICE_CAN_FILETRANSFER = 1 << 2,
+	SERVICE_CAN_ICONVERT     = 1 << 3,
+	SERVICE_CAN_MULTIACCOUNT = 1 << 4,
+	SERVICE_CAN_EVERYTHING   = ~0
+};
+
 struct service {
 	char *name;
 	int protocol_id;
-	int offline_messaging;
-	int group_chat;
-	int file_transfer;
-	int can_iconvert;
+	int capabilities;
 	struct service_callbacks *sc;
 };
 
+#define can_offline_msg(x)	(x.capabilities & SERVICE_CAN_OFFLINEMSG)
+#define can_group_chat(x)	(x.capabilities & SERVICE_CAN_GROUPCHAT)
+#define can_file_transfer(x)	(x.capabilities & SERVICE_CAN_FILETRANSFER)
+#define can_iconvert(x)		(x.capabilities & SERVICE_CAN_ICONVERT)
+#define can_multiaccount(x)	(x.capabilities & SERVICE_CAN_MULTIACCOUNT)
 
 #ifdef __cplusplus
 extern "C" {

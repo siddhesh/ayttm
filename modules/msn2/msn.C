@@ -164,14 +164,14 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.25 $",
-	"$Date: 2003/04/23 20:46:30 $",
+	"$Revision: 1.26 $",
+	"$Date: 2003/04/27 11:29:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
 	NULL
 };
-struct service SERVICE_INFO = { "MSN", -1, FALSE, TRUE, TRUE, FALSE, NULL };
+struct service SERVICE_INFO = { "MSN", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER, NULL };
 /* End Module Exports */
 
 static void *mi1 = NULL;

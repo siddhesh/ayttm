@@ -1,3 +1,7 @@
+* Sun Apr 27 2003 09:45 GMT [philip]	0.3.0-3
+- src/service.h, modules/{all service modules}
+change service capabilities structure to be more flexible
+
 * Sun Apr 27 2003 09:45 GMT [philip]	0.3.0-pre32
 - src/actions.c
 bugfix

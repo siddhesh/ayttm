@@ -180,7 +180,7 @@ int unload_module(eb_PLUGIN_INFO *epi)
 		}
 	}
 	if(epi->service) {
-		struct service SERVICE_INFO = { strdup(epi->service), -1, FALSE, FALSE, FALSE, FALSE, NULL };
+		struct service SERVICE_INFO = { strdup(epi->service), -1, SERVICE_CAN_NOTHING, NULL };
 
 		SERVICE_INFO.sc=eb_nomodule_query_callbacks();
 		add_service(&SERVICE_INFO);

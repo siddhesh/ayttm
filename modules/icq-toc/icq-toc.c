@@ -95,13 +95,13 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.18 $",
-	"$Date: 2003/04/27 09:52:40 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/04/27 11:29:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
 };
-struct service SERVICE_INFO = { "ICQ", -1, FALSE, TRUE, FALSE, TRUE, NULL };
+struct service SERVICE_INFO = { "ICQ", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
 /* End Module Exports */
 
 static char *eb_toc_get_color(void) { static char color[]="#000088"; return color; }

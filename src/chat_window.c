@@ -537,7 +537,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	text=o_text;
 
 #ifdef HAVE_ICONV_H
-	if(!eb_services[data->preferred->service_id].can_iconvert) {
+	if(!can_iconvert(eb_services[data->preferred->service_id])) {
 		RUN_SERVICE(data->local_user)->send_im(
 							data->local_user,
 							data->preferred,

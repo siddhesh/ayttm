@@ -495,7 +495,7 @@ eb_account * can_offline_message( struct contact * con )
 	for(node = con->accounts; node; node=node->next) {
 		eb_account * ea = node->data;
 		
-		if( eb_services[ea->service_id].offline_messaging )
+		if( can_offline_msg(eb_services[ea->service_id]) )
 			return ea;
 	}
 	return NULL;
@@ -506,7 +506,7 @@ eb_account * find_suitable_remote_account( eb_account * first, struct contact * 
 	LList * node;
 	eb_account * possibility = NULL;
 
-	if( first && (eb_services[first->service_id].offline_messaging || 
+	if( first && (can_offline_msg(eb_services[first->service_id]) || 
 			 RUN_SERVICE(first)->query_connected(first)) )
 		return first;
 	
@@ -532,14 +532,14 @@ eb_account * find_suitable_file_transfer_account( eb_account * first, struct con
 		return NULL;
 
 	if( first && RUN_SERVICE(first)->query_connected(first)
-			&& eb_services[first->service_id].file_transfer )
+			&& can_file_transfer(eb_services[first->service_id]) )
 		return first;
 	
 	for(node = rest->accounts; node; node=node->next) {
 		eb_account * ea = node->data;
 		
 		if( RUN_SERVICE(ea)->query_connected(ea)
-				&& eb_services[first->service_id].file_transfer ) {
+				&& can_file_transfer(eb_services[first->service_id]) ) {
 			if(ea->service_id == rest->default_chatb )
 				return ea;
 			else
