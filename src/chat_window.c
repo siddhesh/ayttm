@@ -1759,8 +1759,11 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 void eb_chat_window_display_status(eb_account * remote,
 				   gchar * message)
 {
-	struct contact * remote_contact = find_contact_by_handle(remote->handle);
+	struct contact * remote_contact = remote->account_contact;
 	char * tmp = NULL;
+
+	if(remote_contact == NULL)
+		remote_contact = find_contact_by_handle(remote->handle);
 
 	/* trim @.* part for User is typing */
 	if (remote_contact == NULL || remote_contact->chatwindow == NULL) {

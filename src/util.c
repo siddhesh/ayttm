@@ -1126,6 +1126,7 @@ struct contact * add_dummy_contact(char * con, eb_account * ea)
 
 	dummy_group->members = l_list_prepend(dummy_group->members, c);
 	c->group = dummy_group;
+	c->online = 1;
 	return c;
 }
 
