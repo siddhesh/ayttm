@@ -1544,9 +1544,13 @@ gboolean	ay_tabs_panel::s_newkey_callback( GtkWidget *keybutton, GdkEventKey *ev
 			case GDK_Super_R:
 			case GDK_Hyper_L:
 			case GDK_Hyper_R:
-					/* don't let the user set a modifier as a hotkey */
-					break;
+				// don't let the user set a modifier as a hotkey
+				break;
 
+			case GDK_Return:
+				// don't let the user set Return as a hotkey
+				break;
+				
 			default:
 				{
 					t_cb_data	*cb_data = reinterpret_cast<t_cb_data *>(data);
