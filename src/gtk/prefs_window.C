@@ -41,6 +41,7 @@
 #include "plugin.h"
 #include "file_select.h"
 #include "gtkutils.h"
+#include "mem_util.h"
 
 #ifdef HAVE_LIBPSPELL
 #include "spellcheck.h"
@@ -257,12 +258,16 @@ class ay_chat_panel : public ay_prefs_window_panel
 		
 		virtual void	Build( GtkWidget *inParent );
 		virtual void	Apply( void );		
-		
+	
+	private:
+		static void	s_browse_font( GtkWidget *widget, void *data );
+		static void	s_font_selection_ok(GtkButton *button, void *data);
 	private:
 		struct prefs::chat &m_prefs;
 		
-		GtkWidget		*m_font_size_entry;
 		GtkWidget		*m_font_face_entry;
+		GtkWidget		*m_font_sel_win;
+		int			 m_font_sel_conn_id;
 };
 
 /// Chat:Tabs prefs panel
@@ -1404,9 +1409,103 @@ void	ay_sound_files_panel::s_soundvolume_changed( GtkAdjustment *adjust, void *d
 ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &inPrefs )
 :	ay_prefs_window_panel( inTopFrameText ),
 	m_prefs( inPrefs ),
-	m_font_size_entry( NULL ),
-	m_font_face_entry( NULL )
+	m_font_face_entry( NULL ),
+	m_font_sel_win( NULL )
 {
+}
+
+void ay_chat_panel::s_font_selection_ok(GtkButton *button, void *data)
+{
+	gchar *fontname;
+	ay_chat_panel	*the_panel = reinterpret_cast<ay_chat_panel *>( data );
+
+	fontname = gtk_font_selection_dialog_get_font_name
+		(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win));
+
+	if (fontname) {
+#ifdef HAVE_LIBXFT
+		/* convert to XFT fontname */
+		/*-bitstream-charter-medium-r-normal-*-13-160-*-*-p-*-iso8859-1*/
+		/*1         2       3      4 5      6 7  8   9 0 1 2 3      (4)*/
+		/*charter-13:bold:slant=italic,oblique*/
+		char **tokens = ay_strsplit(fontname, "-", -1);
+		char result[1024];
+		strcpy(result, tokens[2]);
+		strcat(result, "-");
+
+		if (strcmp(tokens[8], "*")) {
+			int i = atoi(tokens[8]);
+			char b[10];
+			snprintf(b, 10, "%d", i/10);
+			
+			strcat(result, b);
+		} else if (strcmp(tokens[7], "*"))
+			strcat(result, tokens[7]);
+		else
+			strcat(result, "12");
+		
+		if (!strcmp(tokens[3], "bold"))
+			strcat(result, ":bold");
+		
+		if (!strcmp(tokens[4], "i") || !strcmp(tokens[4], "o"))
+			strcat(result, ":slant=italic,oblique");
+
+		ay_strfreev(tokens);
+		gtk_entry_set_text(GTK_ENTRY(the_panel->m_font_face_entry), 
+				   result);
+		
+#else
+		gtk_entry_set_text(GTK_ENTRY(the_panel->m_font_face_entry), 
+				   fontname);
+#endif
+		g_free(fontname);
+	}
+
+	gtk_widget_hide(the_panel->m_font_sel_win);
+}
+
+void	ay_chat_panel::s_browse_font( GtkWidget *widget, void *data )
+{
+	ay_chat_panel	*the_panel = reinterpret_cast<ay_chat_panel *>( data );
+	assert( the_panel != NULL );
+ 
+	gchar *font_name;
+	
+	g_return_if_fail(the_panel->m_font_face_entry != NULL);
+	
+	if (!the_panel->m_font_sel_win) {
+		the_panel->m_font_sel_win = gtk_font_selection_dialog_new
+			(_("Font selection"));
+		gtk_window_position(GTK_WINDOW(the_panel->m_font_sel_win),
+				    GTK_WIN_POS_CENTER);
+		gtk_signal_connect(GTK_OBJECT(the_panel->m_font_sel_win), "delete_event",
+				   GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete),
+				   NULL);
+		gtk_signal_connect_object
+			(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->cancel_button),
+			 "clicked",
+			 GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete),
+			 GTK_OBJECT(the_panel->m_font_sel_win));
+	}
+
+	if(the_panel->m_font_sel_conn_id) {
+		gtk_signal_disconnect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(
+				the_panel->m_font_sel_win)->ok_button), the_panel->m_font_sel_conn_id);
+	}
+	the_panel->m_font_sel_conn_id = gtk_signal_connect
+		(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button),
+	         "clicked",
+		 GTK_SIGNAL_FUNC(s_font_selection_ok),
+		 (GtkObject *)the_panel);
+
+	font_name = gtk_editable_get_chars(GTK_EDITABLE(the_panel->m_font_face_entry), 0, -1);
+	gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(
+			the_panel->m_font_sel_win), font_name);
+	g_free(font_name);
+	gtk_window_set_modal(GTK_WINDOW(the_panel->m_font_sel_win), TRUE);
+	gtk_widget_grab_focus
+		(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button);
+	gtk_widget_show(the_panel->m_font_sel_win);
 }
 
 // Build
@@ -1419,38 +1518,28 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtkut_button( _("Ignore background Colours"), &m_prefs.do_ignore_back, m_top_vbox );
 	gtkut_button( _("Ignore fonts"), &m_prefs.do_ignore_font, m_top_vbox );
 
-	GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
+	GtkWidget *hbox = gtk_hbox_new( FALSE, 0 );
 
-	GtkWidget	*label = gtk_label_new( _("Font size: ") );
+	GtkWidget *label = gtk_label_new( _("Font face: ") );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label );
 
-	const int	buff_len = MAX_PREF_LEN;
-	char		buff[buff_len];
-	
-	m_font_size_entry = gtk_entry_new();
-	gtk_widget_set_usize( m_font_size_entry, 60, -1 );
-	g_snprintf( buff, buff_len, "%d", m_prefs.font_size );
-
-	gtk_entry_set_text( GTK_ENTRY(m_font_size_entry), buff );
-	gtk_box_pack_start( GTK_BOX(hbox), m_font_size_entry, FALSE, FALSE, 0 );
-	gtk_widget_show( m_font_size_entry );
-	gtk_widget_show( hbox );
-	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
-	
-	hbox = gtk_hbox_new( FALSE, 0 );
-
-	label = gtk_label_new( _("Font face: ") );
-	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
-	gtk_widget_show( label );
-
+	char buff [1024];
 	m_font_face_entry = gtk_entry_new();
-	gtk_widget_set_usize( m_font_face_entry, 200, -1 );
-	g_snprintf( buff, buff_len, "%s", m_prefs.font_face );
+	gtk_widget_set_usize( m_font_face_entry, 300, -1 );
+	g_snprintf( buff, 1024, "%s", m_prefs.font_face );
 
+	GtkWidget *button = gtk_button_new_with_label("...");
+	gtk_signal_connect (GTK_OBJECT(button), "clicked",
+			    GTK_SIGNAL_FUNC(s_browse_font), this); 
+		
 	gtk_entry_set_text( GTK_ENTRY(m_font_face_entry), buff );
 	gtk_box_pack_start( GTK_BOX(hbox), m_font_face_entry, FALSE, FALSE, 0 );
 	gtk_widget_show( m_font_face_entry );
+
+	gtk_box_pack_start( GTK_BOX(hbox), button, FALSE, FALSE, 0 );
+	gtk_widget_show( button );
+
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 }
@@ -1458,12 +1547,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 // Apply
 void	ay_chat_panel::Apply( void )
 {
-	char	*ptr = gtk_entry_get_text( GTK_ENTRY(m_font_size_entry) );
-	
-	if ( ptr != NULL )
-		m_prefs.font_size = atoi( ptr );
-	
-	ptr = gtk_entry_get_text( GTK_ENTRY(m_font_face_entry) );
+	char	*ptr = gtk_entry_get_text( GTK_ENTRY(m_font_face_entry) );
 	
 	if ( ptr != NULL )
 		strncpy(m_prefs.font_face, ptr, MAX_PREF_LEN );

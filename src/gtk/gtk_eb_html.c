@@ -40,6 +40,7 @@
 #include "smileys.h"
 #include "prefs.h"
 #include "browser.h"
+#include "mem_util.h"
 
 #include "pixmaps/aol_icon.xpm"
 #include "pixmaps/free_icon.xpm"
@@ -59,12 +60,6 @@ static gboolean cache_init = FALSE;
 
 static int _adjust_font_metrics(int size)
 {
-#ifndef HAVE_LIBXFT
-	size = iGetLocalPref("FontSize") + 2 + (size*2);
-#else
-	size = iGetLocalPref("FontSize") + 2 + (size*2);
-#endif
-
 	if (size > 60)
 	{
 		size = 60;
@@ -124,9 +119,11 @@ static char * _unescape_string(char * input)
 
 
 #ifndef HAVE_LIBXFT
+static int tries=0;
 static GdkFont * _getfont(char * font, int bold, int italic, int size, int ptsize)
 {
     gchar font_name[1024] = "-*-";
+    char *tmp = NULL;
     GdkFont * my_font;
 
 	if(!cache_init)
@@ -136,86 +133,162 @@ static GdkFont * _getfont(char * font, int bold, int italic, int size, int ptsiz
 	}
 
 
-
-    if(strlen(font))
-    {
-        strncat( font_name, font, 
-		(size_t)(sizeof(font_name)-strlen(font_name)));
-    }
-    else
-    {
-    	strncat( font_name, "*", 
-		(size_t)(sizeof(font_name)-strlen(font_name)) );
-    }
-    strncat( font_name, "-", 
-		(size_t)(sizeof(font_name)-strlen(font_name)) );
-
-    if(bold)
-    {
-        strncat( font_name, "bold", 
-		(size_t)(sizeof(font_name)-strlen(font_name)));
-    }
-    else
-    {
-        strncat( font_name, "medium", 
-		(size_t)(sizeof(font_name)-strlen(font_name)));
-    }
-    strncat( font_name, "-", 
-		(size_t)(sizeof(font_name)-strlen(font_name)) );
-
-    /*
-     * here is the deal, some fonts have oblique but not italics
-     * other fonts have italics but not oblique
-     * so we are going to try both
-     */
-
-    if( italic == 1 )
-    {
-        strncat( font_name, "i", 
-		(size_t)(sizeof(font_name)-strlen(font_name)));
-    }
-    else if( italic == 2 )
-    {
-        strncat( font_name, "o", 
-		(size_t)(sizeof(font_name)-strlen(font_name)) );
-    }
-    else
-    {
-        strncat( font_name, "r", 
-		(size_t)(sizeof(font_name)-strlen(font_name)));
-    }
-    strncat( font_name, "-*-*-", 
-		(size_t)(sizeof(font_name)-strlen(font_name)));
-    {
-        char buff[256];
-		if(size != -1)
-		{
-			int size2 = 0;
-			size2 = _adjust_font_metrics(size);
-        		snprintf(buff, sizeof(buff), "%d-*-*-*-*-*-*-*", size2);
-		}
+    if ((tmp = cGetLocalPref("FontFace")) != NULL) {
+	if (strstr(tmp, "-*-")) {
+		/* new pref format */
+		char mfont[1024] = "";
+		char **tokens = ay_strsplit(tmp, "-", -1);
+		int i;
+		/*-bitstream-charter-medium-r-normal-*-13-160-*-*-p-*-iso8859-1*/
+		/*1         2       3      4 5      6 7  8   9 0 1 2 3      (4)*/
+		/* set size */
+		
+		i = 0;
+		/* tokens[0] is empty as the string start with the delimiter */
+		strcpy(mfont, "-");
+		if (strcmp(font, tmp)) /* specified */
+			strcat(mfont, "*");
 		else
-		{
-        		snprintf(buff, sizeof(buff), "*-%d-*-*-*-*-*-*", (ptsize+ iGetLocalPref("FontSize") -6)*10);
+			strcat(mfont, tokens[1]);
+		strcat(mfont, "-");
+		if (strcmp(font, tmp)) /* specified */
+			strcat(mfont, font);
+		else
+			strcat(mfont, tokens[2]);
+		strcat(mfont, "-");
+		if (bold)
+			strcat(mfont, "bold");
+		else	
+			strcat(mfont, tokens[3]);
+		strcat(mfont, "-");
+		if (italic == 1)
+			strcat(mfont, "i");
+		else if (italic == 2)
+			strcat(mfont, "o");
+		else
+			strcat(mfont, tokens[4]);
+		strcat(mfont, "-");
+		if (strcmp(font, tmp)) /* specified */
+			strcat(mfont, "*");
+		else
+			strcat(mfont, tokens[5]);
+		strcat(mfont, "-");
+		strcat(mfont, tokens[6]);
+		strcat(mfont, "-");
+		
+		if (size != -1 && strcmp(tokens[7], "*")) { 
+			/* if token 7 contains * we want to keep it */
+			char buf[10];
+			snprintf(buf, 10, "%d", size);
+			strcat(mfont, buf);
+		} else
+			strcat(mfont, tokens[7]);
+		strcat(mfont, "-");
+		
+		if (ptsize != -1 && strcmp(tokens[8], "*")) {
+			/* if token 8 contains * we want to keep it */
+			char buf[10];
+			snprintf(buf, 10, "%d", ptsize);
+			strcat(mfont, buf);
+		} else
+			strcat(mfont, tokens[8]);
+		i = 9;
+		while (tokens[i]) {
+			strcat(mfont, "-");
+			strcat(mfont, tokens[i]);
+			i++;
 		}
-
-        strncat( font_name, buff, 
-		(size_t)(sizeof(font_name)-strlen(font_name)) );
+		strcpy(font_name, mfont);
+		ay_strfreev(tokens);
+	}
     }
+	
+    if (!strcmp(font_name, "-*-")) /* not new format or no pref */ {    
+	    if(strlen(font))
+	    {
+        	strncat( font_name, font, 
+			(size_t)(sizeof(font_name)-strlen(font_name)));
+	    }
+	    else
+	    {
+    		strncat( font_name, "*", 
+			(size_t)(sizeof(font_name)-strlen(font_name)) );
+	    }
+	    strncat( font_name, "-", 
+			(size_t)(sizeof(font_name)-strlen(font_name)) );
 
-	eb_debug(DBG_HTML, "Wanting font %s\n", font_name);
+	    if(bold)
+	    {
+        	strncat( font_name, "bold", 
+			(size_t)(sizeof(font_name)-strlen(font_name)));
+	    }
+	    else
+	    {
+        	strncat( font_name, "medium", 
+			(size_t)(sizeof(font_name)-strlen(font_name)));
+	    }
+	    strncat( font_name, "-", 
+			(size_t)(sizeof(font_name)-strlen(font_name)) );
 
-    g_strdown(font_name);
+	    /*
+	     * here is the deal, some fonts have oblique but not italics
+	     * other fonts have italics but not oblique
+	     * so we are going to try both
+	     */
+
+	    if( italic == 1 )
+	    {
+        	strncat( font_name, "i", 
+			(size_t)(sizeof(font_name)-strlen(font_name)));
+	    }
+	    else if( italic == 2 )
+	    {
+        	strncat( font_name, "o", 
+			(size_t)(sizeof(font_name)-strlen(font_name)) );
+	    }
+	    else
+	    {
+        	strncat( font_name, "r", 
+			(size_t)(sizeof(font_name)-strlen(font_name)));
+	    }
+	    strncat( font_name, "-*-*-", 
+			(size_t)(sizeof(font_name)-strlen(font_name)));
+	    {
+        	char buff[256];
+			if(size != -1)
+			{
+				int size2 = 0;
+				size2 = _adjust_font_metrics(size);
+        			snprintf(buff, sizeof(buff), "%d-*-*-*-*-*-*-*", size2);
+			}
+			else
+			{
+        			snprintf(buff, sizeof(buff), "*-%d-*-*-*-*-*-*", (ptsize+ 5 -6)*10);
+			}
+
+        	strncat( font_name, buff, 
+			(size_t)(sizeof(font_name)-strlen(font_name)) );
+	    }
+
+		eb_debug(DBG_HTML, "Wanting font %s\n", font_name);
+
+	    g_strdown(font_name);
+
+    }
 
     if(( my_font =
             g_datalist_id_get_data(&font_cache, g_quark_from_string(font_name)) ))
     {
+        tries = 0;
         return my_font;
     }
     my_font = gdk_font_load(font_name);
     if( !my_font )
-    {
-        if( italic == 1 )
+    {   tries++;
+        if(tries > 3) {
+		my_font = _getfont("helvetica", 0, 0, size, ptsize);
+	}
+        else if( italic == 1 )
         {
             my_font = _getfont(font, bold, 2, size, ptsize );
         }
@@ -227,7 +300,7 @@ static GdkFont * _getfont(char * font, int bold, int italic, int size, int ptsiz
 	{
             my_font = _getfont("fixed", bold, italic, size, ptsize );
 	}
-    }
+    } else tries = 0;
     g_datalist_id_set_data( &font_cache,
                             g_quark_from_string(font_name),
                             my_font );
@@ -239,53 +312,121 @@ static XftFont * _getfont(char * font, int bold, int italic, int size, int ptsiz
 	XftFont * xftfont;
 	XftPattern * pattern;
 	gchar font_name[1024] = "";
-
+	char *tmp = NULL;
+	
 	if(!cache_init)
 	{
 		g_datalist_init(&font_cache);
 		cache_init = TRUE;
 	}
 
+	if ((tmp = cGetLocalPref("FontFace")) != NULL) {
+		if (strstr(tmp, "-")) {
+			/* new pref format */
+			char **tokens = ay_strsplit(tmp,"-",-1);
+			char **etokens = ay_strsplit(tmp,":",-1);
+			char mfont[1024];
+			char *endsize = NULL;
+			int attributespos = 1;
+			int mysize = 0;
+			int i = 0;
+			
+			if (strcmp(tmp, font)) {
+				/* font specified */
+				strcpy(mfont, font);
+			} else
+				strcpy(mfont, tokens[0]);
+			
+			if (tokens[1] && !strstr(tokens[1], ":")) {
+				mysize = atoi(tokens[1]);
+			} else if (tokens[1]) {
+				char *buf = strdup(tokens[1]);
+				*strstr(buf, ":") = '\0';
+				mysize = atoi(buf);
+				free(buf);
+			}
+			
+			if (size != -1) {
+				char buf[10];
+				snprintf(buf, 10, "%d", size);
+				strcat(mfont, "-");
+				strcat(mfont, buf);
+			} else if (ptsize != -1) {
+				char buf[10];
+				snprintf(buf, 10, "%d", ptsize/10);
+				strcat(mfont, "-");
+				strcat(mfont, buf);
+			} else if (mysize) {
+				char buf[10];
+				snprintf(buf, 10, "%d", mysize);
+				strcat(mfont, "-");
+				strcat(mfont, buf);
+			}
+			
+			if (bold) {
+				strcat(mfont, ":");
+				strcat(mfont, "bold");
+			} else if(etokens[1]) {
+				strcat(mfont, ":");
+				strcat(mfont, etokens[1]);
+				attributespos++;
+			}
+			if (italic)
+				strcat(mfont, ":slant=italic,oblique");
+			else if(etokens[1] && etokens[2]) {
+				strcat(mfont, ":");
+				strcat(mfont, etokens[2]);
+				attributespos++;
+			}
+			
+			ay_strfreev(tokens);
+			ay_strfreev(etokens);
+			strcpy(font_name, mfont);
+		}
+	}
 
-	snprintf(font_name, sizeof(font_name), "%s,helvetica,arial", font);
-	if(size != -1)
-	{
-		int size2 = 0;
-		char buff[256] = "";
-		
-		eb_debug(DBG_HTML, "Size param = %d\n", size);
-		eb_debug(DBG_HTML, "fontsize adjust = %d\n", iGetLocalPref("FontSize"));
-		size2 = _adjust_font_metrics(size);
-		snprintf(buff, sizeof(buff), "-%d", size2);
-		strncat(font_name, buff, 
-			(size_t)(sizeof(font_name)-strlen(font_name)));
-	}
-	else
-	{
-		int size2 = ptsize+(iGetLocalPref("FontSize")-3);
-		char buff[256] = "";
-		snprintf(buff, sizeof(buff), "-%d", size2);
-		strncat(font_name, buff, 
-			(size_t)(sizeof(font_name)-strlen(font_name)));
-	}
-	if(bold)
-	{
-		strncat(font_name, ":bold", 
-			(size_t)(sizeof(font_name)-strlen(font_name)));
-	}
-	if(italic)
-	{
-		strncat(font_name, ":slant=italic,oblique", 
-			(size_t)(sizeof(font_name)-strlen(font_name)));
-	}
-    	if(( xftfont =
-	    g_datalist_id_get_data(&font_cache, g_quark_from_string(font_name)) ))
-    	{
-		return xftfont;
-    	}
+	if (!strcmp(font_name, "")) /* not new format */ {    
 
-	eb_debug(DBG_HTML, "Wanting font %s\n", font_name);
+		snprintf(font_name, sizeof(font_name), "%s,helvetica,arial", font);
+		if(size != -1)
+		{
+			int size2 = 0;
+			char buff[256] = "";
 
+			eb_debug(DBG_HTML, "Size param = %d\n", size);
+			eb_debug(DBG_HTML, "fontsize adjust = %d\n", 5);
+			size2 = _adjust_font_metrics(size);
+			snprintf(buff, sizeof(buff), "-%d", size2);
+			strncat(font_name, buff, 
+				(size_t)(sizeof(font_name)-strlen(font_name)));
+		}
+		else
+		{
+			int size2 = ptsize+(5-3);
+			char buff[256] = "";
+			snprintf(buff, sizeof(buff), "-%d", size2);
+			strncat(font_name, buff, 
+				(size_t)(sizeof(font_name)-strlen(font_name)));
+		}
+		if(bold)
+		{
+			strncat(font_name, ":bold", 
+				(size_t)(sizeof(font_name)-strlen(font_name)));
+		}
+		if(italic)
+		{
+			strncat(font_name, ":slant=italic,oblique", 
+				(size_t)(sizeof(font_name)-strlen(font_name)));
+		}
+    		if(( xftfont =
+		    g_datalist_id_get_data(&font_cache, g_quark_from_string(font_name)) ))
+    		{
+			return xftfont;
+    		}
+
+		eb_debug(DBG_HTML, "Wanting font %s\n", font_name);
+	}
+	
 	pattern = XftNameParse(font_name);
 	xftfont = XftFontOpenName(gdk_display, DefaultScreen(gdk_display), font_name);
 
@@ -357,10 +498,53 @@ typedef struct _font_stack
 static font_stack * _font_stack_init()
 {
 	font_stack * fs = g_new0(font_stack, 1);
-
-	fs->font_size = 3;
-	fs->font_ptsize = iGetLocalPref("FontSize") + 5;
-
+	char *str = cGetLocalPref("FontFace");
+	
+#ifndef HAVE_LIBXFT	
+	if (str && strstr(str,"-*-")) {
+		char *iwalk = strdup(str);
+		char *walk;
+		char *size;
+		char *ptsize;
+		int i;
+		
+		walk = iwalk;
+		for (i = 0; i < 6; i++)
+			walk = strstr(walk+sizeof(char),"-");
+		size = walk+sizeof(char);
+		walk = strstr(walk+sizeof(char),"-");
+		*walk = 0;
+		ptsize = walk+sizeof(char);
+		walk = strstr(walk+sizeof(char),"-");
+		*walk = 0;
+		if (strcmp(size,"*")) {
+			fs->font_size = atoi(size);
+			fs->font_ptsize = atoi(size)*10;
+		}
+		else if (strcmp(ptsize,"*")) {
+			fs->font_ptsize = atoi(ptsize);
+			fs->font_size = fs->font_ptsize/10;
+		} else {
+			fs->font_size = 12;
+			fs->font_ptsize = 120;
+		}
+		free(iwalk);
+#else
+	if (str && strstr(str,"-")) {
+		char *tmp = strdup(strstr(str,"-")+1);
+		if (strstr(tmp,":"))
+			*strstr(tmp,":") = '\0';
+			
+		fs->font_size = atoi(tmp);
+		fs->font_ptsize = atoi(tmp)*10;
+		
+		free(tmp);
+#endif
+	} else {
+		fs->font_size = 12;
+		fs->font_ptsize = 120;
+	}
+	
 	strcpy(fs->font_name, cGetLocalPref("FontFace"));
 	return fs;
 }
@@ -625,7 +809,7 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					char size[25];
 					parm += strlen("ptsize=");
 					_extract_parameter(parm, size, 25);
-					fs->font_size = -1;
+					fs->font_size = atoi(size)/10;
 					fs->font_ptsize = atoi(size);
 					eb_debug(DBG_HTML, "got a ptsize of %d\n", fs->font_ptsize);
 				}
@@ -634,7 +818,7 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					char size[25];
 					parm += strlen("absz=");
 					_extract_parameter(parm, size, 25);
-					fs->font_size = -1;
+					fs->font_size = atoi(size)/10;
 					fs->font_ptsize = atoi(size);
 					eb_debug(DBG_HTML, "got a ptsize of %d\n", fs->font_ptsize);
 				}
@@ -647,14 +831,17 @@ void gtk_eb_html_add(ExtGtkText* widget, char * text,
 					if(*size == '+')
 					{
 						fs->font_size += atoi(size+1);
+						fs->font_ptsize += 10*atoi(size+1);
 					}
 					else if(*size == '-')
 					{
 						fs->font_size -= atoi(size+1);
+						fs->font_ptsize -= 10*atoi(size+1);
 					}
 					else
 					{
-						fs->font_size = atoi(size);
+						fs->font_size += atoi(size);
+						fs->font_ptsize += 10*(atoi(size));
 					}
 				}
 				if((parm = strstr(data, "color=")) != NULL)

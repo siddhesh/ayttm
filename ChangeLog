@@ -1,4 +1,10 @@
-* Fri May  2 2003 14:04 GMT [colin]	0.3.0-99
+* Fri May  2 2003 21:00 GMT [colin]	0.3.0-101
+- src/prefs.[ch] 
+  src/gtk/gtk_eb_html.c
+  src/gtk/prefs_window.C
+New font pref 
+
+* Fri May  2 2003 14:04 GMT [colin]	0.3.0-100
 - src/chat_room.c
 Display c->nick with a->handle
 

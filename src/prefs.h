@@ -75,7 +75,6 @@ struct prefs
 	struct chat
 	{
 		int		do_ignore_unknown;
-		int		font_size;
 		char		font_face[MAX_PREF_LEN];
 		int		do_raise_window;
 		int		do_send_idle_time;
