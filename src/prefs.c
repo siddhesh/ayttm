@@ -729,7 +729,7 @@ void	ayttm_prefs_write( void )
     fprintf( fp, "do_plugin_debug=%d\n", iGetLocalPref("do_ayttm_debug") );
     fprintf( fp, "length_contact_window=%d\n", iGetLocalPref("length_contact_window") );
     fprintf( fp, "width_contact_window=%d\n", iGetLocalPref("width_contact_window") );
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
     fprintf( fp, "do_spell_checking=%d\n", iGetLocalPref("do_spell_checking") );
 	fprintf( fp, "spell_dictionary=%s\n", cGetLocalPref("spell_dictionary") );
 #endif
@@ -821,7 +821,7 @@ void	ayttm_prefs_show_window( void )
 	prefs->general.use_alternate_browser = iGetLocalPref("use_alternate_browser");
 	strncpy( prefs->general.alternate_browser, cGetLocalPref("alternate_browser"), MAX_PREF_LEN );
 
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 	prefs->general.do_spell_checking     = iGetLocalPref("do_spell_checking");
 	strncpy( prefs->general.spell_dictionary, cGetLocalPref("spell_dictionary"), MAX_PREF_LEN );
 #endif
@@ -913,7 +913,7 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	iSetLocalPref( "use_alternate_browser", inPrefs->general.use_alternate_browser );
 	cSetLocalPref( "alternate_browser", inPrefs->general.alternate_browser );
 	
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 	iSetLocalPref( "do_spell_checking", inPrefs->general.do_spell_checking );
 	cSetLocalPref( "spell_dictionary", inPrefs->general.spell_dictionary );
 #endif

@@ -37,7 +37,7 @@
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
 
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 #include "gtk/gtkspell.h"
 #endif
 
@@ -939,25 +939,10 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		gtk_text_set_word_wrap(GTK_TEXT(chat_room->entry), TRUE);
 		gtk_text_set_line_wrap(GTK_TEXT(chat_room->entry), TRUE);
 
-		#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 		if( iGetLocalPref("do_spell_checking") )
-		{
-		  if(!gtkspell_running())
-		    {
-		       if (cGetLocalPref("spell_dictionary") && strlen(cGetLocalPref("spell_dictionary"))) { 
-			 gchar *ispell_cmd[] = { "ispell", "-a", "-d", "francais", NULL };
-			 ispell_cmd[3]=cGetLocalPref("spell_dictionary");
-			 eb_debug(DBG_CORE, "Starting ispell with dict %s\n", ispell_cmd[3]);
-			 gtkspell_start(NULL, ispell_cmd);
-        	       } else {
-			 gchar *ispell_cmd[] = { "ispell", "-a", NULL };
-			 eb_debug(DBG_CORE, "Starting ispell with default dict\n");
-			 gtkspell_start(NULL, ispell_cmd);
-		       }
-		    }
-		  gtkspell_attach(GTK_TEXT(chat_room->entry));
-		}
-		#endif
+			gtkspell_attach(GTK_TEXT(chat_room->entry));
+#endif
 
 		gtk_container_add(GTK_CONTAINER(scrollwindow2),chat_room->entry);
 		gtk_widget_show(scrollwindow2);

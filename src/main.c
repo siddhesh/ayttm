@@ -62,8 +62,7 @@ int WinVer;
 #include "prefs.h"
 #include "messages.h"
 #include "edit_local_accounts.h"
-
-#define PACKAGE "ayttm"
+#include "spellcheck.h"
 
 /* globals */
 char geometry[256];
@@ -504,6 +503,7 @@ int main(int argc, char *argv[])
 	ayttm_prefs_init();
 
 	ayttm_prefs_read();
+	ay_spell_check_reload();
 
 	/* Load all the modules in the module_path preference, details can be found in the preferences module tab */
 	load_modules();

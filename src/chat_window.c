@@ -59,7 +59,7 @@
 #include "gtk/gtk_eb_html.h"
 #include "gtk/gtkutils.h"
 
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 #include "gtk/gtkspell.h"
 #endif
 
@@ -1917,23 +1917,11 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 		gtk_text_set_word_wrap(GTK_TEXT(cw->entry), TRUE);
 		gtk_text_set_line_wrap(GTK_TEXT(cw->entry), TRUE);
 
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 		if( iGetLocalPref("do_spell_checking") ) {
-			if(!gtkspell_running()) {
-				if (cGetLocalPref("spell_dictionary") && strlen(cGetLocalPref("spell_dictionary"))) { 
-					gchar *ispell_cmd[] = { "ispell", "-a", "-d", "francais", NULL };
-					ispell_cmd[3]=cGetLocalPref("spell_dictionary");
-					eb_debug(DBG_CORE, "Starting ispell with dict %s\n", ispell_cmd[3]);
-					gtkspell_start(NULL, ispell_cmd);
-				} else {
-					gchar *ispell_cmd[] = { "ispell", "-a", NULL };
-					eb_debug(DBG_CORE, "Starting ispell with default dict\n");
-					gtkspell_start(NULL, ispell_cmd);
-				}
-			}
 			gtkspell_attach(GTK_TEXT(cw->entry));
 		}
-		#endif
+#endif
 
 		gtk_signal_connect(GTK_OBJECT(cw->entry), "key_press_event",
 		GTK_SIGNAL_FUNC(chat_key_press), cw);

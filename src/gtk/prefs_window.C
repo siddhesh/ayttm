@@ -42,8 +42,8 @@
 #include "file_select.h"
 #include "gtkutils.h"
 
-#ifdef HAVE_ISPELL
-#include "gtkspell.h"
+#ifdef HAVE_LIBPSPELL
+#include "spellcheck.h"
 #endif
 
 #include "pixmaps/ok.xpm"
@@ -594,11 +594,6 @@ ay_prefs_window::~ay_prefs_window( void )
 	}
 	g_list_free( m_panels );
 
-#ifdef HAVE_ISPELL
-	if ((!iGetLocalPref("do_spell_checking")) && (gtkspell_running()))
-		gtkspell_stop();
-#endif
-	
 	gtk_widget_destroy( m_prefs_window_widget );
 		
 	s_only_prefs_window = NULL;
@@ -940,7 +935,7 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 	GtkWidget	*spacer = NULL;
 	GtkWidget	*label = NULL;
 
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
@@ -1004,16 +999,19 @@ void	ay_general_panel::Build( GtkWidget *inParent )
 // Apply
 void	ay_general_panel::Apply( void )
 {
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
+	int needs_reload=0;
 	if ( m_prefs.do_spell_checking )
 	{
 		const char	*new_dict = gtk_entry_get_text( GTK_ENTRY(m_dictionary_entry) );
 
 		if ( (new_dict != NULL) && strncmp( new_dict, m_prefs.spell_dictionary, MAX_PREF_LEN ) )
-			gtkspell_stop();
+			needs_reload=1;
 	}
-	
 	strncpy( m_prefs.spell_dictionary, gtk_entry_get_text(GTK_ENTRY(m_dictionary_entry)), MAX_PREF_LEN );
+	if(needs_reload)
+		ay_spell_check_reload();
+
 #endif
 
 	char	alt_browser_command[MAX_PREF_LEN];
@@ -1032,7 +1030,7 @@ void	ay_general_panel::SetActiveWidgets( void )
 {
 	gtk_widget_set_sensitive( m_alternate_browser_entry, m_prefs.use_alternate_browser );
 	gtk_widget_set_sensitive( m_browser_browse_button, m_prefs.use_alternate_browser );
-#ifdef HAVE_ISPELL
+#ifdef HAVE_LIBPSPELL
 	gtk_widget_set_sensitive( m_dictionary_entry, m_prefs.do_spell_checking );
 #endif
 }

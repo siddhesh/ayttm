@@ -1,5 +1,6 @@
 /* gtkspell - a spell-checking addon for GtkText
  * Copyright (c) 2000 Evan Martin.
+ * Modified to use pspell by Philip S Tellis 2003/04/28
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,28 +22,13 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <sys/types.h>
-#include <unistd.h>   
-#include <stdio.h>    
-#include <signal.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
 
-#ifndef __MINGW32__
-#include <sys/wait.h>
-#if HAVE_POLL_H
-#include <sys/poll.h>
-#endif
-#endif
-
-#include "messages.h"
+#include "spellcheck.h"
 #include "platform_defs.h"
 
-
-/* TODO:
- * asynchronous lookups
- */
 
 /* size of the text buffer used in various word-processing routines. */
 #define BUFSIZE 1024
@@ -53,259 +39,44 @@
 /* because we keep only one copy of the spell program running, 
  * all ispell-related variables can be static.  
  */
-static pid_t spell_pid = -1;
-static int fd_write[2], fd_read[2];
-static int signal_set_up = 0;
 
 /* FIXME? */
 static GdkColor highlight = { 0, 255*256, 0, 0 };
 
-static void entry_insert_cb(GtkText *gtktext, 
-		gchar *newtext, guint len, guint *ppos, gpointer d);
-static void set_up_signal();
+static void entry_insert_cb(GtkText *gtktext, gchar *newtext, guint len, guint *ppos, gpointer d);
 
-int gtkspell_running() {
-	return (spell_pid > 0);
-}
-
-static void error_print(const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	fprintf(stderr, "gtkspell: ");
-	vfprintf(stderr, fmt, ap);
-	va_end(ap);
-}
-
-/* functions to interface with pipe */
-static void writetext(char *text) {
-	write(fd_write[1], text, strlen(text));
-}
-static int readpipe(char *buf, int bufsize) {
-	int len;
-	len = read(fd_read[0], buf, bufsize-1);
-	if (len < 0) {
-		error_print("read: %s\n", strerror(errno));
-		return -1;
-	} else if (len == 0) {
-		error_print("pipe closed.\n");
-		return -1;
-	} else if (len == bufsize-1) {
-		error_print("buffer overflowed?\n");
-	}
-
-	buf[len] = 0;
-	return len;
-}
-static int readline(char *buf) {
-	return readpipe(buf, BUFSIZE);
-}
-
-static int readresponse(char *buf) {
-	int len;
-	len = readpipe(buf, BUFSIZE);
-
-	/* all ispell responses of any reasonable length should end in \n\n.
-	 * depending on the speed of the spell checker, this may require more
-	 * reading. */
-	if (len >= 2 && (buf[len-1] != '\n' || buf[len-2] != '\n')) {
-		len += readpipe(buf+len, BUFSIZE-len);
-	}
-
-	/* now we can remove all of the the trailing newlines. */
-	while (len > 0 && buf[len-1] == '\n')
-		buf[--len] = 0;
-
-	return len;
-}
-
-
-void gtkspell_stop() {
-#ifndef __MINGW32__
-	if (gtkspell_running()) {
-		kill(spell_pid, SIGQUIT); /* FIXME: is this the correct signal? */
-		spell_pid = -1;
-	}
-#endif
-}
-
-int gtkspell_start(char *path, char * args[]) {
-#ifndef __MINGW32__
-	int fd_error[2];
-	char buf[BUFSIZE];
-
-	if (gtkspell_running()) {
-		error_print("gtkspell_start called while already running.\n");
-		gtkspell_stop();
-	}
-
-	if (!signal_set_up) {
-		set_up_signal();
-		signal_set_up = 1;
-	}
-
-	pipe(fd_write);
-	pipe(fd_read);
-	pipe(fd_error);
-
-	spell_pid = fork();
-	if (spell_pid < 0) {
-		error_print("fork: %s\n", strerror(errno));
-		return -1;
-	} else if (spell_pid == 0) {
-		dup2(fd_write[0], 0);
-		dup2(fd_read[1], 1);
-		dup2(fd_error[1], 2);
-		close(fd_read[0]);
-		close(fd_error[0]);
-		close(fd_write[1]);
-
-		if (path == NULL) {
-			if (execvp(args[0], args) < 0) 
-				error_print("execvp('%s'): %s\n", args[0], strerror(errno));
-		} else {
-			if (execv(path, args) < 0) 
-				error_print("execv('%s'): %s\n", path, strerror(errno));
-		}
-		/* if we get here, we failed.
-		 * send some text on the pipe to indicate status.
-		 */
-		write(fd_read[1], "!", 1);
-
-		_exit(0);
-	} else {
-		/* there are at least two ways to fail:
-		 * - the exec() can fail
-		 * - the exec() can succeed, but the program can dump the help screen
-		 * we must check for both.
-		 */
-
-		#if HAVE_POLL_H
-		struct pollfd fds[2];
-
-		fds[0].fd = fd_error[0];
-		fds[0].events = POLLIN | POLLERR;
-		fds[1].fd = fd_read[0];
-		fds[1].events = POLLIN | POLLERR;
-		if (poll(fds, 2, 2000) <= 0) {
-			/* FIXME: is this needed? */
-			error_print("Timed out waiting for spell command.\n");
-			gtkspell_stop();
-			return -1;
-		}
-		
-
-		if (fds[0].revents) { /* stderr readable? */
-			error_print("Spell command printed on stderr -- probably failed.\n");
-			gtkspell_stop();
-			return -1;
-		}
-		
-		#endif
-		
-		readline(buf);
-		/* ispell should print something like this:
-		 * @(#) International Ispell Version 3.1.20 10/10/95
-		 * if it doesn't, it's an error. */
-		if (buf[0] != '@') {
-			gtkspell_stop();
-			ay_do_error( _("Ispell Error"), _("Ispell exited abnormally.\n You probably specified a invalid dictionary.") );
-
-			return -1;
-		}
-	}
-
-	/* put ispell into terse mode.  
-	 * this makes it not respond on correctly spelled words. */
-	snprintf(buf, sizeof(buf), "!\n");
-	writetext(buf);
-#endif
-	return 0;
-}
-
-static GList* misspelled_suggest(char *word) {
-	char buf[BUFSIZE];
-	char *newword;
+static GList* misspelled_suggest(char *word) 
+{
 	GList *l = NULL;
-	int count;
 
-	snprintf(buf, sizeof(buf), "^%s\n", word); /* guard against ispell control chars */
-	writetext(buf);
-	readresponse(buf);
+	/*
+	 * TODO: Populate l with a list of suggestions
+	 */
 
-	switch (buf[0]) { /* first char is ispell command. */
-		case 0: /* no response: word is ok. */
-			return NULL;
-		case '&': /* misspelled, with suggestions */
-			/* & <orig> <count> <ofs>: <miss>, <miss>, <guess>, ... */
-			strtok(buf, " "); /* & */
-			newword = strtok(NULL, " "); /* orig */
-			l = g_list_append(l, g_strdup(newword));
-			newword = strtok(NULL, " "); /* count */
-			count = atoi(newword);
-			strtok(NULL, " "); /* ofs: */
-
-			while ((newword = strtok(NULL, ",")) != NULL) {
-				int len = strlen(newword);
-				if (newword[len-1] == ' ' || newword[len-1] == '\n') 
-					newword[len-1] = 0;
-				if (count == 0) {
-					g_list_append(l, NULL); /* signal the "suggestions" */
-				}
-				/* add it to the list, skipping the initial space. */
-				l = g_list_append(l, 
-						g_strdup(newword[0] == ' ' ? newword+1 : newword));
-
-				count--;
-			}
-			return l;
-
-		case '#': /* misspelled, no suggestions */
-			/* # <orig> <ofs> */
-			strtok(buf, " "); /* & */
-			newword = strtok(NULL, " "); /* orig */
-			l = g_list_append(l, g_strdup(newword));
-			return l;
-		default:
-			error_print("Unsupported spell command '%c'.\n"
-					"This is a bug; mail " BUGEMAIL " about it.\n", buf[0]);
-	}
-	return NULL;
+	return l;
 }
 
-static int misspelled_test(char *word) {
-	char buf[BUFSIZE];
-	snprintf(buf, sizeof(buf), "^%s\n", word); /* guard against ispell control chars */
-	writetext(buf);
-	readresponse(buf);
-
-	if (buf[0] == 0) {
-		return 0;
-	} else if (buf[0] == '&' || buf[0] == '#') {
-		return 1;
-	}
-	
-	error_print("Unsupported spell command '%c'.\n"
-			"This is a bug; mail " BUGEMAIL " about it.\n", buf[0]);
-	return -1;
-}
-
-static gboolean iswordsep(char c) {
+static gboolean iswordsep(char c) 
+{
 	return !isalpha(c) && c != '\'';
 }
 
-static gboolean get_word_from_pos(GtkText* gtktext, int pos, char* buf, 
-		int *pstart, int *pend) {
-	gint start, end;
+static gboolean get_word_from_pos(GtkText* gtktext, int pos, char* buf, int *pstart, int *pend) 
+{
+	int start, end;
 
-	if (iswordsep(GTK_TEXT_INDEX(gtktext, pos))) return FALSE;
+	if (iswordsep(GTK_TEXT_INDEX(gtktext, pos)))
+		return FALSE;
 
 	for (start = pos; start >= 0; --start) {
-		if (iswordsep(GTK_TEXT_INDEX(gtktext, start))) break;
+		if (iswordsep(GTK_TEXT_INDEX(gtktext, start)))
+			break;
 	}
 	start++;
 
 	for (end = pos; end <= gtk_text_get_length(gtktext); end++) {
-		if (iswordsep(GTK_TEXT_INDEX(gtktext, end))) break;
+		if (iswordsep(GTK_TEXT_INDEX(gtktext, end)))
+			break;
 	}
 
 	if (buf) {
@@ -314,20 +85,22 @@ static gboolean get_word_from_pos(GtkText* gtktext, int pos, char* buf,
 		buf[pos-start] = 0;
 	}
 
-	if (pstart) *pstart = start;
-	if (pend) *pend = end;
+	if (pstart)
+		*pstart = start;
+	if (pend)
+		*pend = end;
 
 	return TRUE;
 }
 
-static gboolean get_curword(GtkText* gtktext, char* buf, 
-		int *pstart, int *pend) {
+static gboolean get_curword(GtkText* gtktext, char* buf, int *pstart, int *pend) 
+{
 	int pos = gtk_editable_get_position(GTK_EDITABLE(gtktext));
 	return get_word_from_pos(gtktext, pos, buf, pstart, pend);
 }
 
-static void change_color(GtkText *gtktext, 
-		int start, int end, GdkColor *color) {
+static void change_color(GtkText *gtktext, int start, int end, GdkColor *color) 
+{
 	char *newtext = gtk_editable_get_chars(GTK_EDITABLE(gtktext), start, end);
 	gtk_text_freeze(gtktext);
 	gtk_signal_handler_block_by_func(GTK_OBJECT(gtktext), 
@@ -347,7 +120,8 @@ static void change_color(GtkText *gtktext,
 	g_free(newtext);
 }
 
-static gboolean check_at(GtkText *gtktext, int from_pos) {
+static gboolean check_at(GtkText *gtktext, int from_pos) 
+{
 	int start, end;
 	char buf[BUFSIZE];
 
@@ -355,7 +129,10 @@ static gboolean check_at(GtkText *gtktext, int from_pos) {
 		return FALSE;
 	}
 
-	if (misspelled_test(buf)) {
+	if (ay_spell_check(buf)) {
+		change_color(gtktext, start, end, &(GTK_WIDGET(gtktext)->style->fg[0]));
+		return FALSE;
+	} else { 
 		if (highlight.pixel == 0) {
 			/* add an entry for the highlight in the color map. */
 			GdkColormap *gc = gtk_widget_get_colormap(GTK_WIDGET(gtktext));
@@ -363,20 +140,15 @@ static gboolean check_at(GtkText *gtktext, int from_pos) {
 		}
 		change_color(gtktext, start, end, &highlight);
 		return TRUE;
-	} else { 
-		change_color(gtktext, start, end, 
-				&(GTK_WIDGET(gtktext)->style->fg[0]));
-		return FALSE;
 	}
 }
 
-void gtkspell_check_all(GtkText *gtktext) {
+void gtkspell_check_all(GtkText *gtktext) 
+{
 	guint origpos;
 	guint pos = 0;
 	guint len;
 	float adj_value;
-	
-	if (!gtkspell_running()) return;
 	
 	len = gtk_text_get_length(gtktext);
 
@@ -395,11 +167,9 @@ void gtkspell_check_all(GtkText *gtktext) {
 	gtk_editable_set_position(GTK_EDITABLE(gtktext), origpos);
 }
 
-static void entry_insert_cb(GtkText *gtktext, 
-		gchar *newtext, guint len, guint *ppos, gpointer d) {
+static void entry_insert_cb(GtkText *gtktext, gchar *newtext, guint len, guint *ppos, gpointer d) 
+{
 	int origpos;
-
-	if (!gtkspell_running()) return;
 
 	gtk_signal_handler_block_by_func(GTK_OBJECT(gtktext),
 					 GTK_SIGNAL_FUNC(entry_insert_cb),
@@ -416,7 +186,8 @@ static void entry_insert_cb(GtkText *gtktext,
 
 	if (iswordsep(newtext[0])) {
 		/* did we just end a word? */
-		if (*ppos >= 2) check_at(gtktext, *ppos-2);
+		if (*ppos >= 2)
+			check_at(gtktext, *ppos-2);
 
 		/* did we just split a word? */
 		if (*ppos < gtk_text_get_length(gtktext))
@@ -433,11 +204,9 @@ static void entry_insert_cb(GtkText *gtktext,
 	gtk_editable_set_position(GTK_EDITABLE(gtktext), origpos);
 }
 
-static void entry_delete_cb(GtkText *gtktext,
-		gint start, gint end, gpointer d) {
+static void entry_delete_cb(GtkText *gtktext, gint start, gint end, gpointer d) 
+{
 	int origpos;
-
-	if (!gtkspell_running()) return;
 
 	origpos = gtk_editable_get_position(GTK_EDITABLE(gtktext));
 	check_at(gtktext, start-1);
@@ -447,7 +216,8 @@ static void entry_delete_cb(GtkText *gtktext,
 	 * while hitting backspace. */
 }
 
-static void replace_word(GtkWidget *w, gpointer d) {
+static void replace_word(GtkWidget *w, gpointer d) 
+{
 	int start, end, newword_len;
 	char *newword;
 	char buf[BUFSIZE];
@@ -471,10 +241,12 @@ static void replace_word(GtkWidget *w, gpointer d) {
 	gtk_editable_set_position(GTK_EDITABLE(d), start+newword_len);
 }
 
-static GtkMenu *make_menu(GList *l, GtkText *gtktext) {
+static GtkMenu *make_menu(GList *l, GtkText *gtktext) 
+{
 	GtkWidget *menu, *item;
 	char *caption;
-	menu = gtk_menu_new(); {
+	menu = gtk_menu_new(); 
+	{
 		caption = g_strdup_printf(_("Not in dictionary: %s"), (char*)l->data);
 		item = gtk_menu_item_new_with_label(caption);
 		/* I'd like to make it so this item is never selectable, like
@@ -524,19 +296,22 @@ static GtkMenu *make_menu(GList *l, GtkText *gtktext) {
 	return GTK_MENU(menu);
 }
 
-static void popup_menu(GtkText *gtktext, GdkEventButton *eb) {
+static void popup_menu(GtkText *gtktext, GdkEventButton *eb) 
+{
 	char buf[BUFSIZE];
-	GList *list, *l;
+	GList *list;
 
 	get_curword(gtktext, buf, NULL, NULL);
 
 	list = misspelled_suggest(buf);
 	if (list != NULL) {
-		gtk_menu_popup(make_menu(list, gtktext), NULL, NULL, NULL, NULL,
-				eb->button, eb->time);
-		for (l = list; l != NULL; l = l->next)
-			g_free(l->data);
-		g_list_free(list);
+		gtk_menu_popup(make_menu(list, gtktext), NULL, NULL, NULL, NULL, eb->button, eb->time);
+		while (list) {
+			GList * l = g_list_next(list);
+			g_free(list->data);
+			g_list_free_1(list);
+			list = l;
+		}
 	}
 }
 
@@ -551,8 +326,6 @@ static void popup_menu(GtkText *gtktext, GdkEventButton *eb) {
 static gint button_press_intercept_cb(GtkText *gtktext, GdkEvent *e, gpointer d) {
 	GdkEventButton *eb;
 	gboolean retval;
-
-	if (!gtkspell_running()) return FALSE;
 
 	if (e->type != GDK_BUTTON_PRESS) return FALSE;
 	eb = (GdkEventButton*) e;
@@ -575,7 +348,8 @@ static gint button_press_intercept_cb(GtkText *gtktext, GdkEvent *e, gpointer d)
 	return TRUE;
 }
 
-void gtkspell_uncheck_all(GtkText *gtktext) {
+void gtkspell_uncheck_all(GtkText *gtktext) 
+{
 	int origpos;
 	char *text;
 	float adj_value;
@@ -593,7 +367,8 @@ void gtkspell_uncheck_all(GtkText *gtktext) {
 	gtk_adjustment_set_value(gtktext->vadj, adj_value);
 }
 
-void gtkspell_attach(GtkText *gtktext) {
+void gtkspell_attach(GtkText *gtktext) 
+{
 	gtk_signal_connect(GTK_OBJECT(gtktext), "insert-text",
 		GTK_SIGNAL_FUNC(entry_insert_cb), NULL);
 	gtk_signal_connect_after(GTK_OBJECT(gtktext), "delete-text",
@@ -602,7 +377,8 @@ void gtkspell_attach(GtkText *gtktext) {
 			GTK_SIGNAL_FUNC(button_press_intercept_cb), NULL);
 }
 
-void gtkspell_detach(GtkText *gtktext) {
+void gtkspell_detach(GtkText *gtktext) 
+{
 	gtk_signal_disconnect_by_func(GTK_OBJECT(gtktext),
 		GTK_SIGNAL_FUNC(entry_insert_cb), NULL);
 	gtk_signal_disconnect_by_func(GTK_OBJECT(gtktext),
@@ -613,25 +389,3 @@ void gtkspell_detach(GtkText *gtktext) {
 	gtkspell_uncheck_all(gtktext);
 }
 
-static void sigchld(int param) {
-#ifndef __MINGW32__
-	if (gtkspell_running() &&
-		(waitpid(spell_pid, NULL, WNOHANG) == spell_pid)) {
-		spell_pid = 0;
-	} else {
-		/* a default SIGCHLD handler.
-		 * what else to do here? */
-		waitpid(-1, NULL, WNOHANG);
-	}
-#endif
-}
-
-static void set_up_signal() {
-#ifndef __MINGW32__
-	struct sigaction sigact;
-	memset(&sigact, 0, sizeof(struct sigaction));
-
-	sigact.sa_handler = sigchld;
-	sigaction(SIGCHLD, &sigact, NULL);
-#endif
-}

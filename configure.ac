@@ -2,7 +2,7 @@
 AC_INIT([src/main.c])
 AC_PREREQ(2.53)
 AM_INIT_AUTOMAKE(ayttm, 0.3.0)
-RELEASE=12
+RELEASE=13
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -38,6 +38,7 @@ esac
 # Checks for libraries.
 AC_CHECK_LIB([audiofile], [_af_ulaw2linear])
 AC_CHECK_LIB([ltdl], [lt_dlopen])
+AC_CHECK_LIB([pspell], [pspell_manager_check])
 
 # Checks for header files.
 AC_PATH_XTRA
@@ -45,7 +46,7 @@ AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
-AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h])
+AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h pspell/pspell.h])
 if test "x$host_alias" != "xmingw32"; then
 AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
 else
@@ -105,11 +106,6 @@ if test "$have_l_pthread" = no; then
 fi
 
 AC_SEARCH_LIBS(libiconv_open, iconv)
-
-AC_CHECK_PROG(have_ispell, ispell, yes, no)
-if test $have_ispell = yes; then
-  AC_DEFINE(HAVE_ISPELL, , Define if we have ispell)
-fi
 
 AC_ARG_ENABLE(esd, AC_HELP_STRING([--disable-esd],
 		[compile without ESD soundserver]))

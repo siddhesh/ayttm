@@ -438,8 +438,8 @@ static const gchar *get_compiled_in_features(void)
 #ifdef HAVE_ICONV
 		   " iconv"
 #endif
-#ifdef HAVE_ISPELL
-		   " ispell"
+#ifdef HAVE_LIBPSPELL
+		   " pspell"
 #endif
 #ifdef HAVE_LIBXFT
 		   " Xft"

@@ -26,47 +26,6 @@
 extern "C" {
 #endif
 
-extern int gtkspell_start(char *path, char *args[]);
-/* Spawns the spell checking program.
- *
- * Arguments:
- *  - "path" should be the full path to the spell checking program, or NULL
- *    if you want to search the PATH for args[0].
- *  - "args" should be a array of arguments to the spell checking program.
- *    The first element should be the name of the program.
- *    You should give the argument to run the spell checking program in the
- *    "embedded" mode.  for ispell, this is "-a".
- *    The last element should be NULL.
- * Return:
- *  0 on success, and -1 on error.
- *
- * Example:
- *  char *args[] = { "ispell", "-a", NULL };
- *  if (gtkspell_start(NULL, args) < 0) {
- *  	fprintf(stderr, "Unable to start GtkSpell.\n");
- *  	return -1;
- *  }
- *
- */
-
-
-extern void gtkspell_stop();
-/* Stop the spellchecking program.
- * This kills the spell checker's process and frees memory.
- */
-
-extern int gtkspell_running();
-/* Is gtkspell running?
- *
- * Returns:
- * 	nonzero if it running
- * 	zero if is not running
- *
- * Example:
- *  if (gtkspell_running())
- *  	printf("gtkspell is running.\n");
- */
-
 extern void gtkspell_attach(GtkText *text);
 /* Attach GtkSpell to a GtkText Widget.
  * This enables checking as you type and the popup menu.

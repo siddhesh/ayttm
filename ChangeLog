@@ -1,3 +1,10 @@
+* Mon Apr 28 2003 11:50 GMT [philip]	0.3.0-13
+- src/spellcheck.[Ch]
+spell checking through pspell
+- src/chat_window.c src/chat_room.c src/gtk/prefs_window.C
+src/gtk/gtkspell.c
+use pspell instead of ispell
+
 * Mon Apr 28 2003 11:00 GMT [colin]	0.3.0-12
 - src modules
 Change new_account service callback to take an ela

@@ -58,7 +58,7 @@ struct prefs
 		int		use_alternate_browser;
 		char	alternate_browser[MAX_PREF_LEN];
 
-		#ifdef HAVE_ISPELL
+		#ifdef HAVE_LIBPSPELL
 			int		do_spell_checking;
 			char	spell_dictionary[MAX_PREF_LEN];
 		#endif
