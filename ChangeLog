@@ -1,3 +1,7 @@
+* Mon Oct 14 2003 00:36 GMT [elh]	0.4.3-pre16
+- src/smileys.c
+Fix a bug where smileys appear in http strings
+
 * Mon Oct 13 2003 22:49 GMT [nicolas]	0.4.3-pre15
 - modules/aim-oscar/aim-oscar.c
 Fix a bug preventing from login if a previous login failed,

@@ -300,6 +300,10 @@ gchar * eb_smilify( const char *text, LList *protocol_smileys, const char *servi
       if( !strncmp( text + ipos, no_smileys[i], len ) ) {
         g_string_append(newstr, no_smileys[i]);
 	ipos += len;
+        while(text[ipos] && (text[ipos] != ' '|| text[ipos] != '<')) {
+	  if (ipos < strlen(text))
+        	g_string_append_c(newstr, text[ipos++]);
+        }
       }
     }
 
