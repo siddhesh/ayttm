@@ -5,3 +5,5 @@ smiley_DATA = aysmile.rc \
 	grin.xpm heyy.xpm kiss.xpm laugh.xpm \
 	oh.xpm sad.xpm smile.xpm sob.xpm \
 	tongue.xpm wink.xpm worried.xpm
+
+EXTRA_DIST = $(smiley_DATA)
