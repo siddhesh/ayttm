@@ -34,7 +34,8 @@
 #include <time.h>
 
 #include "contact.h"
-#include "log_window.h"
+#include "logs.h"
+
 
 typedef struct _chat_window
 {
@@ -58,7 +59,7 @@ typedef struct _chat_window
 	LList * history;
 	LList * hist_pos;
 	int this_msg_in_history;
-	log_info *loginfo;
+	log_file	*logfile;
 
 	/* begin chat window specific stuff */
 

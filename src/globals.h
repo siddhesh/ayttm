@@ -50,10 +50,19 @@ extern char geometry[256];
 /* The location of our config files */
 extern char config_dir[];
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* debug messages */
 extern int	iGetLocalPref( const char *key );
 #define DBG_HTML iGetLocalPref( "do_ayttm_debug_html" )
 #define DBG_CORE iGetLocalPref( "do_ayttm_debug" )
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 #define extern extern

@@ -28,7 +28,8 @@
 #include <time.h>
 
 #include "account.h"
-#include "log_window.h"
+#include "logs.h"
+
 
 typedef struct _eb_chat_room_buddy
 {
@@ -59,7 +60,7 @@ typedef struct _eb_chat_room
 	LList * history;
 	LList * hist_pos;
 	int this_msg_in_history;
-	log_info *loginfo;
+	log_file	*logfile;
 
 	/* begin chat room specific stuff */
 	

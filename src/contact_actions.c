@@ -29,7 +29,6 @@
 #include "service.h"
 #include "intl.h"
 #include "message_parse.h"
-#include "log_window.h"
 #include "file_select.h"
 
 

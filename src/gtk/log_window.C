@@ -22,10 +22,6 @@
  *
  */
 
-/*
- * log_window.c
- */
-
 #include "intl.h"
 
 #include <stdlib.h>
@@ -40,8 +36,9 @@
 #include "globals.h"
 #include "prefs.h"
 #include "action.h"
+#include "logs.h"
 
-#include "gtk/gtk_eb_html.h"
+#include "gtk_eb_html.h"
 
 #include "pixmaps/cancel.xpm"
 #include "pixmaps/action.xpm"
@@ -101,7 +98,7 @@ static void set_html_text(GSList* gl, log_window* lw)
   h = gl;  
   while (h != NULL) {
     if (h->data != NULL) 
-	    log_parse_and_add(h->data, lw->html_display);
+	    log_parse_and_add((char *)h->data, lw->html_display);
     h = g_slist_next(h);
   }
 
@@ -221,11 +218,11 @@ static void destroy_event(GtkWidget* widget, gpointer data)
   
   g_slist_foreach(lw->entries, (GFunc)free_gs_list, NULL);
 
-  if (lw->remote)
+  if ( lw->remote )
 	  lw->remote->logwindow = NULL;
   
-  if (lw->filename)
-	  free(lw->filename);
+  if ( lw->filename )
+	  free( (char *)lw->filename );
   
   lw->window = NULL;
   g_free(lw);
@@ -237,18 +234,18 @@ static void close_log_window_callback(GtkWidget* button, gpointer data)
   gtk_widget_destroy(lw->window);
 }
 
-static void action_callback(GtkWidget *widget, gpointer d)
+static void action_callback( GtkWidget *widget, void *d )
 {
-	log_window* lw = (log_window*)d;
-	log_info *li = g_new0(log_info, 1);
+	log_window	*lw = reinterpret_cast<log_window *>( d );
 	
-	li->filename = strdup(lw->filename);
-	li->log_started = 0;
-	li->fp = lw->fp;
-	li->filepos = lw->filepos;
-	conversation_action(li, FALSE);
-	free(li->filename);
-	g_free(li);
+	log_file	*logfile = ay_log_file_create( lw->filename );
+	
+	logfile->fp = lw->fp;
+	logfile->filepos = lw->filepos;
+	
+	conversation_action( logfile, FALSE );
+	
+	ay_log_file_destroy( &logfile );
 }
 
 
@@ -514,10 +511,11 @@ static void eb_log_show(log_window *lw) {
   gtk_clist_select_row(GTK_CLIST(lw->date_list), 0, 0);
 }
 
-void log_parse_and_add(char *buff, void *text) 
+void log_parse_and_add( const char *buff, void *text ) 
 {
 	char *tmp = NULL;
 	char *buff2 = NULL;
+	
 	/* ME */
 	tmp = strdup(buff);
 
@@ -531,9 +529,7 @@ void log_parse_and_add(char *buff, void *text)
 		buff2[0] = '\0';
 		buff2++;
 		gtk_eb_html_add(EXT_GTK_TEXT(text), tmp,0,0,0);
-		printf("adding with %d%d%d\n",iGetLocalPref("do_ignore_back"),
-				iGetLocalPref("do_ignore_fore"),
-				iGetLocalPref("do_ignore_font"));
+		
 		gtk_eb_html_add(EXT_GTK_TEXT(text), buff2,
 				iGetLocalPref("do_ignore_back"),
 				iGetLocalPref("do_ignore_fore"),
@@ -546,82 +542,23 @@ void log_parse_and_add(char *buff, void *text)
 	|| 	(!strncmp(tmp,"<P><B><FONT COLOR=\"#", strlen("<P><B><FONT COLOR=\"#")) 
 		&& isdigit(tmp[strlen("<P><B><FONT COLOR=\"#??????\">")])
 		&& strstr(tmp, "/FONT> </B> "))
-		) {
+		)
+	{
 		/* seems to be a beginning of line... */
 		buff2 = strstr(tmp, "/FONT> </B> ")+strlen("/FONT> </B>");
 		buff2[0] = '\0';
 		buff2++;
 		gtk_eb_html_add(EXT_GTK_TEXT(text), tmp,0,0,0);
-		printf("adding with %d%d%d\n",iGetLocalPref("do_ignore_back"),
-				iGetLocalPref("do_ignore_fore"),
-				iGetLocalPref("do_ignore_font"));
+		
 		gtk_eb_html_add(EXT_GTK_TEXT(text), buff2,
 				iGetLocalPref("do_ignore_back"),
 				iGetLocalPref("do_ignore_fore"),
 				iGetLocalPref("do_ignore_font"));
-	} else {
-		printf("adding with 000\n");
+	}
+	else
+	{
 		gtk_eb_html_add(EXT_GTK_TEXT(text), tmp,0,0,0);
 	}
-	free(tmp);
-}
-
-void eb_log_message(log_info *loginfo, gchar buff[], gchar *message)
-{
-	gchar * my_name = strdup(buff);
-	gchar * my_message = strdup(message);
-	const int stripHTML = iGetLocalPref("do_strip_html");
-
-	if (!loginfo || !loginfo->fp) {
-		free(my_message);
-		free(my_name);
-		return;
-	}
 	
-	if (stripHTML) {
-		strip_html(my_name);
-		strip_html(my_message);
-	}
-
-	if(!loginfo->log_started) {
-		time_t my_time = time(NULL);
-		fprintf(loginfo->fp, _("%sConversation started on %s %s\n"),
-		      (stripHTML ? "" : "<HR WIDTH=\"100%\"><B>"),
-		      g_strchomp(asctime(localtime(&my_time))), (stripHTML?"":"</B>"));
-		fflush(loginfo->fp);
-		loginfo->log_started = 1;
-	}
-	fprintf(loginfo->fp, "%s%s %s%s\n",
-	  (stripHTML ? "" : "<P>"), my_name, my_message, (stripHTML ? "" : "</P>"));
-	fflush(loginfo->fp);
-
-	free(my_message);
-	free(my_name);
-}
-
-void eb_log_close(log_info *loginfo)
-{
-	if(loginfo && loginfo->fp && loginfo->log_started) {
-		if ( iGetLocalPref("do_logging") ) {
-			time_t		my_time = time(NULL);
-			const int	stripHTML = iGetLocalPref("do_strip_html");
-			fprintf(loginfo->fp, _("%sConversation ended on %s %s\n"),
-			(stripHTML ? "" : "<B>"),
-			g_strchomp(asctime(localtime(&my_time))),
-			(stripHTML ? "" : "</B>"));
-		}
-	}
-	/*
-	* close the log file
-	*/
-
-	if (loginfo && loginfo->fp != NULL ) {
-		fclose(loginfo->fp);
-		loginfo->fp = NULL;
-	}
-	
-	if (loginfo && loginfo->filename != NULL ) {
-		free(loginfo->filename);
-		loginfo->filename = NULL;
-	}
+	free( tmp );
 }

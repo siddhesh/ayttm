@@ -1,3 +1,23 @@
+* Sat May  3 2003 13:00 GMT [andy]	0.3.0-111
+- src/about.c
+Fix KUDOS_SIZE
+- src/logs.c			** ADDED **
+  src/logs.h			** ADDED **
+  src/gtk/log_window.C	** ADDED **
+  src/log_window.[ch]	** REMOVED **
+  src/Makefile.am
+  src/action.[ch]
+  src/browser.c
+  src/chat_room.[ch]
+  src/chat_window.[ch]
+  src/contact_actions.c
+  src/globals.h
+  src/gtk/Makefile.am
+  src/gtk/gtk_eb_html.h
+Change log_info struct to log_file
+Clean up interface to the log_file struct
+Start moving log window stuff to gtk dir
+
 * Sat May  3 2003 10:32 GMT [colin]	0.3.0-110
 - src/service.c
 get_service_list() sorts alphabetically

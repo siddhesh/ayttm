@@ -52,7 +52,7 @@
 #include "globals.h"
 
 
-#include "log_window.h"
+#include "logs.h"
 
 #ifndef _WIN32
 	

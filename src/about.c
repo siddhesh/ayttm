@@ -44,7 +44,7 @@ static tDeveloperInfo sAyttmDevTeam[AYTTM_TEAM_SIZE] =
 
 /* Kudos */
 
-#define	KUDOS_SIZE	(4)
+#define	KUDOS_SIZE	(5)
 
 static tDeveloperInfo sKudosPeople[KUDOS_SIZE] =
 {

@@ -21,8 +21,10 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <gdk/gdkkeysyms.h>
 #include <time.h>
+#include <assert.h>
+
+#include <gdk/gdkkeysyms.h>
 
 #include "util.h"
 #include "globals.h"
@@ -54,8 +56,8 @@ static LList * get_contacts( eb_chat_room * room );
 static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
 static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_message);
 
-static void init_loginfo(eb_chat_room *chat_room);
-static void	destroy_loginfo( eb_chat_room *chat_room );
+static void init_chat_room_log_file(eb_chat_room *chat_room);
+static void	destroy_chat_room_log_file( eb_chat_room *chat_room );
 
 static char *last_clicked_fellow = NULL;
 static guint32 last_time_clicked = 0;
@@ -86,7 +88,7 @@ static void	free_chat_room( eb_chat_room *chat_room )
 		 
 	chat_rooms = l_list_remove( chat_rooms, chat_room );
 
-	destroy_loginfo( chat_room );
+	destroy_chat_room_log_file( chat_room );
 	
 	history = chat_room->history;
 
@@ -670,31 +672,38 @@ static void eb_chat_room_private_log_reference(eb_chat_room *room, char *alias, 
 	struct contact	*con = find_contact_by_handle(handle);
 	const int		buff_size = 1024;
 	char			buff[buff_size];
-	log_info		*li = NULL;
+	log_file		*log = NULL;
+	int				err = 0;
 	
-	if (con == NULL)
+	
+	if ( con == NULL )
 		return;
 	
-	if (!strcmp(handle, room->local_user->handle))
+	if ( !strcmp( handle, room->local_user->handle ) )
 		return;
+
+	make_safe_filename( buff, con->nick, con->group->name );
+	log = ay_log_file_create( buff );
+
+	err = ay_log_file_open( log, "a" );
+		
+	if ( err != 0 )
+	{
+		eb_debug( DBG_CORE,"eb_chat_room_private_log_reference: could not open log file [%s]\n", buff );
+		ay_log_file_destroy( &log );
+		return;
+	}
+		
+	memset( &buff, 0, buff_size );
+	if ( room->logfile == NULL )
+		init_chat_room_log_file( room );
 	
-	li = g_new0(log_info, 1);
+	g_snprintf( buff, buff_size, "You had a <a href=\"log://%s\">group chat with %s (%s)</a>.\n",
+			room->logfile->filename,
+			alias, handle );
 	
-	make_safe_filename(buff, con->nick, con->group->name);
-	li->log_started = 0;
-	li->fp = fopen(buff, "a");
-	li->filename = NULL; /* don't care */
-	
-	memset(&buff, 0, buff_size);
-	if (!room->loginfo)
-		init_loginfo(room);
-	
-	g_snprintf(buff, buff_size, "You had a <a href=\"log://%s\">group chat with %s (%s)</a>.\n",
-			room->loginfo->filename,
-			alias, handle);
-	
-	eb_log_message(li, "", buff);
-	eb_log_close(li);
+	ay_log_file_message( log, "", buff );
+	ay_log_file_destroy( &log );
 }
 
 void eb_chat_room_buddy_arrive( eb_chat_room * room, gchar * alias, gchar * handle )
@@ -788,7 +797,7 @@ void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, gchar * message)
 {
 	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), message,0,0,0 );
 	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), "\n",0,0,0 );
-	eb_log_message(chat_room->loginfo, "", message);
+	ay_log_file_message( chat_room->logfile, "", message );
 }
 
 void eb_chat_room_show_message( eb_chat_room * chat_room,
@@ -872,7 +881,7 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 		iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
 	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), "\n",0,0,0 );
 	
-	eb_log_message(chat_room->loginfo, buff, link_message);
+	ay_log_file_message( chat_room->logfile, buff, link_message );
 	
 	g_free(link_message);
 	
@@ -904,7 +913,7 @@ static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 static void action_callback(GtkWidget *widget, gpointer d)
 {
 	eb_chat_room * ecr = (eb_chat_room *)d;
-	conversation_action(ecr->loginfo, TRUE);
+	conversation_action( ecr->logfile, TRUE );
 }
 
 static void _show_smileys_cb(GtkWidget * widget, smiley_callback_data *data)
@@ -1182,41 +1191,36 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		return;
 	}
 		
-	init_loginfo(chat_room);
+	init_chat_room_log_file(chat_room);
 	RUN_SERVICE(chat_room->local_user)->join_chat_room(chat_room);
 	gtk_widget_grab_focus(chat_room->entry);
 }
 
-static void init_loginfo(eb_chat_room *chat_room)
+static void init_chat_room_log_file( eb_chat_room *chat_room )
 {
-	time_t      mytime = time(NULL);
-	char        buff[2048];
-	char	    tmpnam[128];
-
-	if (!chat_room->loginfo) {
-		g_snprintf(tmpnam, 128, "cr_log%lu%d", mytime, total_rooms);
-		make_safe_filename(buff, tmpnam, NULL);
-		chat_room->loginfo = g_new0(log_info, 1);
-		chat_room->loginfo->filename = strdup(buff);
-		chat_room->loginfo->log_started = 0;
-		if ((chat_room->loginfo->fp = fopen(buff, "a")) == NULL)
-			perror(buff);
-		chat_room->loginfo->filepos=0;
+	assert( chat_room != NULL );
+	
+	if ( chat_room->logfile == NULL )
+	{
+		time_t      mytime = time(NULL);
+		char        buff[2048];
+		char	    tmpnam[128];
+		
+		g_snprintf( tmpnam, 128, "cr_log%lu%d", mytime, total_rooms );
+		make_safe_filename( buff, tmpnam, NULL );
+		
+		chat_room->logfile = ay_log_file_create( buff );
+		
+		ay_log_file_open( chat_room->logfile, "a" );
 	}
 }
 
-static void	destroy_loginfo( eb_chat_room *chat_room )
+static void	destroy_chat_room_log_file( eb_chat_room *chat_room )
 {
-	if ( (chat_room == NULL) || (chat_room->loginfo == NULL) )
+	if ( (chat_room == NULL) || (chat_room->logfile == NULL) )
 		return;
-			
-	free( chat_room->loginfo->filename );
-	
-	if ( chat_room->loginfo->fp != NULL )
-		fclose( chat_room->loginfo->fp );
-		
-	memset( chat_room->loginfo, 0, sizeof( log_info ) );
-	g_free( chat_room->loginfo );
+
+	ay_log_file_destroy( &(chat_room->logfile) );
 }
 
 static LList * get_group_contacts(gchar *group, eb_chat_room * room)

@@ -34,7 +34,6 @@
 #include "prefs.h"
 #include "mem_util.h"
 #include "messages.h"
-#include "dialog.h"
 #include "edit_list_window.h"
 
 #include "gtk/gtkutils.h"
@@ -99,41 +98,47 @@ static void action_do_action(char * value, void * data)
 #endif
 }
 
-void conversation_action(log_info *li, int to_end)
+void conversation_action( log_file *li, int to_end )
 {
 #ifndef __MINGW32__
-	char buf[4096], *output_html, *output_plain;
-	int firstline = 1;
-	char *tempdir = NULL;
-	char **files;
-	log_info *loginfo = NULL;
-	FILE *output_fhtml;
-	FILE *output_fplain;
+	char		buf[4096];
+	char		*output_html = NULL;
+	char		*output_plain = NULL;
+	int			firstline = 1;
+	char		*tempdir = NULL;
+	char		**files = NULL;
+	log_file	*logfile = NULL;
+	FILE 		*output_fhtml = NULL;
+	FILE 		*output_fplain = NULL;
+	int			err = 0;
 
-	if (!li || !li->filename)
+	
+	if ( !li || !li->filename )
 		return;
-		
-	loginfo = g_new0(log_info, 1);
-	loginfo->filename = strdup(li->filename);
-	loginfo->log_started = li->log_started;
-	loginfo->filepos = li->filepos;
 	
-	eb_debug(DBG_CORE,"printing %s (starting from %lu)\n", 
-			loginfo->filename, 
-			loginfo->filepos); 
+	logfile = ay_log_file_create( li->filename );
+	logfile->log_started = li->log_started;
+	logfile->filepos = li->filepos;
 	
-	loginfo->fp = fopen(loginfo->filename, "r");
+	err = ay_log_file_open( logfile, "r" );
 	
-	free (loginfo->filename);
-	
-	if (!loginfo->fp) {
+	if ( err != 0 )
+	{
 		ay_do_error( _("Action Error"), _("Cannot use log: no logfile available.") );
-		g_free(loginfo);
+		ay_log_file_destroy( &logfile );
 		return;
 	}
-	if (fseek(loginfo->fp, loginfo->filepos, SEEK_SET) < 0) {
+	
+	eb_debug(DBG_CORE,"printing %s (trying to start from %lu)\n", 
+			logfile->filename, 
+			logfile->filepos); 
+	
+	logfile->filepos = fseek( logfile->fp, logfile->filepos, SEEK_SET );
+	
+	if ( logfile->filepos < 0 )
+	{
 		ay_do_error( _("Action Error"), _("Cannot use log: logfile too short (!?).") );
-		g_free(loginfo);
+		ay_log_file_destroy( &logfile );
 		return;
 	}
 	
@@ -165,14 +170,13 @@ void conversation_action(log_info *li, int to_end)
 		perror("fopen");
 		printf(" %s %s\n", output_html, output_plain);
 		ay_do_error( _("Action Error"), _("Cannot use log: Impossible to create temporary file.") );
-		fclose(loginfo->fp);
-		g_free(loginfo);
+		ay_log_file_destroy( &logfile );
 		return;
 	}
 	
 	fprintf(output_fhtml, "<html><head><title>Ayttm conversation</title></head><body>\n");
 	
-	while (fgets(buf, sizeof(buf), loginfo->fp)) {
+	while (fgets(buf, sizeof(buf), logfile->fp)) {
 		char *smil = NULL;
 		/* smiley tags won't be so long */
 		char *bhide = "<!--", *ehide = "-->";
@@ -233,10 +237,9 @@ void conversation_action(log_info *li, int to_end)
 	
 	if (errno) {
 		ay_do_error( _("Action Error"), strerror(errno) );
-		fclose(loginfo->fp);
+		ay_log_file_destroy( &logfile );
 		fclose(output_fhtml);
 		fclose(output_fplain);
-		g_free(loginfo);
 		return;
 	}
 	
@@ -248,7 +251,7 @@ void conversation_action(log_info *li, int to_end)
 	files[0] = output_html;	/* free after callback */
 	files[1] = output_plain;
 	
-	if (ftell(loginfo->fp) == loginfo->filepos) {
+	if (ftell(logfile->fp) == logfile->filepos) {
 		ay_do_error( _("Action Error"), _("No data available to use.") );
 	} else	{
 		char fname[255];
@@ -261,7 +264,7 @@ void conversation_action(log_info *li, int to_end)
 					  " %p = displayed conversation's file (as text)"), 
 					"ACTION", "COMMAND", action_do_action, files);
 	}
-	fclose(loginfo->fp);
-	g_free(loginfo);
+	
+	ay_log_file_destroy( &logfile );
 #endif
 }

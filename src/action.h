@@ -25,8 +25,17 @@
 #ifndef __ACTION_H__
 #define __ACTION_H__
 
-#include "log_window.h"
+#include "logs.h"
 
-void conversation_action(log_info *loginfo, int to_end);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void conversation_action( log_file *logfile, int to_end );
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif

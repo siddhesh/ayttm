@@ -310,7 +310,7 @@ static void end_conversation(chat_window* cw)
 	* has ended
 	*/
 
-	eb_log_close(cw->loginfo);
+	ay_log_file_close( cw->logfile );
 	
 	/*
 	* and free the memory we allocated to the chat window
@@ -581,7 +581,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	/* Log the message */
 
 	if ( iGetLocalPref("do_logging") ) 
-		eb_log_message(data->loginfo, buff, link_message);
+		ay_log_file_message( data->logfile, buff, link_message );
 
 	cw_reset_message(data);
 	g_free(link_message);
@@ -616,7 +616,7 @@ static void action_callback(GtkWidget *widget, gpointer d)
 {
 	chat_window* data = (chat_window*)d;
 	GET_CHAT_WINDOW(data);
-	conversation_action(data->loginfo, TRUE);
+	conversation_action( data->logfile, TRUE );
 }
 
 /*This is the callback for ignoring a user*/
@@ -1368,7 +1368,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 
 	/* Log the message */
 	if ( iGetLocalPref("do_logging") )
-		eb_log_message(remote_contact->chatwindow->loginfo, buff, message);
+		ay_log_file_message( remote_contact->chatwindow->logfile, buff, message );
 
 	/* If user's away and hasn't yet sent the away message in the last 5 minutes,
 	send, display, & log his away message.
@@ -1395,7 +1395,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		/* Log it */
 
 		if ( iGetLocalPref("do_logging") )
-			eb_log_message(remote_contact->chatwindow->loginfo, buff, awaymsg);
+			ay_log_file_message( remote_contact->chatwindow->logfile, buff, awaymsg );
 		
 		g_free(awaymsg);
 	}
@@ -1507,14 +1507,14 @@ void eb_log_status_changed(eb_account *ea, gchar *status)
 	
 	if(ea == NULL || ea->account_contact == NULL || 
 			ea->account_contact->chatwindow == NULL ||
-			ea->account_contact->chatwindow->loginfo == NULL)
+			ea->account_contact->chatwindow->logfile == NULL)
 		return;
 	
 	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#e0c96d width=*><b> %s changed status to %s @ %s.</b></body>"),
 		   ea->account_contact->nick, ((status && status[0])?status:_("(Online)")), 
 		   g_strchomp(asctime(localtime(&my_time))));
 
-	eb_log_message(ea->account_contact->chatwindow->loginfo, buff,"");
+	ay_log_file_message( ea->account_contact->chatwindow->logfile, buff, "" );
 }
 
 void eb_restore_last_conv(gchar *file_name, chat_window* cw)
@@ -1559,9 +1559,9 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 	
 	fseek(fp,lastlocation, SEEK_SET);
 
-	if (cw->loginfo) {
-		cw->loginfo->filepos = lastlocation;
-		eb_debug(DBG_CORE,"set cw->loginfo->filepos to %lu\n",cw->loginfo->filepos);
+	if ( cw->logfile ) {
+		cw->logfile->filepos = lastlocation;
+		eb_debug(DBG_CORE,"set cw->logfile->filepos to %lu\n",cw->logfile->filepos);
 	} 
 	
 	/* now we display the log */
@@ -1579,23 +1579,23 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 
 			if(!strncmp(buff,"<HR WIDTH=\"100%\">", strlen("<HR WIDTH=\"100%\">"))) {
 				char buff2[1024];
-				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						buff+strlen("<HR WIDTH=\"100%\">"));
 				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 			} else if(!strncmp(buff,"<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">", strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">"))) {
 				char buff2[1024];
-				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						buff+strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">"));
 				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 			} else if(!strncmp(buff,"<P ALIGN=\"CENTER\">", strlen("<P ALIGN=\"CENTER\">"))) {
 				char buff2[1024];
-				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						buff+strlen("<P ALIGN=\"CENTER\">"));
 				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 			} else if(strlen(buff) > strlen(_("<B>Conversation ")) 
 			     && !strncmp(buff+strlen(_("<B>Conversation ")),_("ended on"),8)) {
 				char buff2[1024];
-				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>\n"), 
+				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"), 
 						buff);
 				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 				endreached = TRUE;	
@@ -1603,7 +1603,7 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 			} else if(strlen(buff) > strlen(_("<P ALIGN=\"CENTER\"><B>Conversation "))
 			     && !strncmp(buff+strlen(_("<P ALIGN=\"CENTER\"><B>Conversation ")),_("ended on"),8) ) {
 				char buff2[1024];
-				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>\n"), 
+				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"), 
 						buff+strlen("<P ALIGN=\"CENTER\">"));
 				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 				endreached = TRUE;	
@@ -1616,7 +1616,7 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 				char *itemp = temp;
 				itemp += strlen(_("<P><hr><b>"));
 				*strstr(itemp, "<hr>") = '\0';
-				snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), 
+				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						itemp);
 				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 				free(temp);
@@ -1627,12 +1627,12 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);
 		} else if(!strncmp(buff,_("Conversation started"),strlen(_("Conversation started")))) {
 			char buff2[1024];
-			snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), buff);
+			snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), buff);
 			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 
 		} else if(!strncmp(buff,_("Conversation ended"),strlen(_("Conversation ended")))) {
 			char buff2[1024];
-			snprintf(buff2, 1024, _("<body bgcolor=#e0c96d width=*><b> %s</b></body>"), buff);
+			snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), buff);
 			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
 			endreached = TRUE;	    
 			break;
@@ -1697,7 +1697,7 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
    		}
 	}
 	if (!endreached) {
-		char *endbuf = g_strdup_printf(_("<body bgcolor=#e0c96d width=*>%sConversation ended%s</body>\n"),
+		char *endbuf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*>%sConversation ended%s</body>\n"),
 			(iGetLocalPref("do_strip_html") ? "" : "<B>"),
 			(iGetLocalPref("do_strip_html") ? "" : "</B>")); 
 		gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), endbuf,0,0,0);
@@ -1707,7 +1707,6 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 	gtk_editable_set_position(GTK_EDITABLE(cw->chat), 
 		  ext_gtk_text_get_length(EXT_GTK_TEXT(cw->chat)));
 	fclose(fp);
-
 }
 
 void eb_chat_window_display_status(eb_account * remote,
@@ -2250,16 +2249,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	make_safe_filename(buff, remote->nick, remote->group->name);
 
-	cw->loginfo = g_new0(log_info, 1);
-	cw->loginfo->filename = strdup(buff);
-	cw->loginfo->log_started = 0;
-	if ((cw->loginfo->fp = fopen(buff, "a")) == NULL) {
-		perror(buff);
-		cw->loginfo->filepos=0;
-	} else {
-		cw->loginfo->filepos=ftell(cw->loginfo->fp);
-		eb_debug(DBG_CORE,"init set filepos to %lu\n",cw->loginfo->filepos);
-	}
+	cw->logfile = ay_log_file_create( buff );
+	ay_log_file_open( cw->logfile, "a" );
 	
 	gtk_widget_show(cw->chat);
 	gtk_widget_show(cw->entry);

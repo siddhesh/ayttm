@@ -27,13 +27,26 @@
 
 #include "extgtktext.h"
 
-void gtk_eb_html_init(ExtGtkText* widget);
+
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-__declspec(dllimport) void gtk_eb_html_add(ExtGtkText * widget, char * text,
-		int ignore_bgcolor, int ignore_fgcolor, int ignore_font );
-#else
+#define extern __declspec(dllimport)
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void gtk_eb_html_init(ExtGtkText* widget);
+
 extern void gtk_eb_html_add(ExtGtkText * widget, char * text,
 		int ignore_bgcolor, int ignore_fgcolor, int ignore_font );
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
+#define extern extern
 #endif
 
 #endif
