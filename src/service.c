@@ -164,6 +164,7 @@ int add_service(struct service *Service_Info)
 				memcpy(&eb_services[i], Service_Info, sizeof(struct service));
 				reload_service_accounts(i);
 				refresh_service_contacts(i);
+				ay_set_submenus();
 				eb_debug(DBG_CORE, "<Replaced existing service\n");
 				return(i);
 		}
@@ -174,6 +175,7 @@ int add_service(struct service *Service_Info)
 	memcpy(&eb_services[Service_Info->protocol_id], Service_Info, sizeof(struct service));
 	reload_service_accounts(Service_Info->protocol_id);
 	refresh_service_contacts(i);
+	ay_set_submenus();
 	eb_debug(DBG_CORE, "<Added new service \n");
 	return(Service_Info->protocol_id);
 }
