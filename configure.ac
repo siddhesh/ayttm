@@ -5,7 +5,7 @@ AM_INIT_AUTOMAKE(ayttm, 0.3.0)
 RELEASE=3
 #This is to check modules/core binary compat
 #Bump it up when necessary only (query_callbacks change, struct change etc)
-CORE_VERSION=1
+CORE_VERSION=2
 
 AM_CONFIG_HEADER(config.h)
 
