@@ -78,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.3 $",
-	"$Date: 2003/04/04 09:15:44 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/04/05 10:00:33 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -164,6 +164,7 @@ typedef struct _eb_jabber_local_account_data
 	int fd;				// the file descriptor
 	int status;			// the current status of the user
 	JABBER_Conn	*JConn;
+	int activity;
 } eb_jabber_local_account_data;
 
 static eb_local_account *jabber_local_account;
@@ -232,18 +233,36 @@ static int eb_jabber_query_connected( eb_account * account )
 static void eb_jabber_login( eb_local_account * account )
 {
     eb_jabber_local_account_data * jlad;
-
+    char buff[1024];
+    
     eb_debug(DBG_JBR, ">\n");
 
     jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
     jabber_local_account = account;
-    account->connected = 1; 
-	
-	jlad->JConn=JABBER_Login(account->handle, jlad->password, 
+    
+    if (account->connected || account->connecting) 
+	    return;
+    
+    account->connected = 0;
+    account->connecting = 1;
+    snprintf(buff, sizeof(buff), _("Logging in to Jabber account: %s"), account->handle);
+    jlad->activity = ay_activity_bar_add(buff, NULL, NULL);
+    JABBER_Login(account->handle, jlad->password, 
 			    jabber_server,  atoi(jabber_port));
-	if(!jlad->JConn)
+}
+
+void JABBERConnected(void *data)
+{
+    eb_jabber_local_account_data * jlad;
+    jlad = (eb_jabber_local_account_data *)jabber_local_account->protocol_local_account_data;
+
+    ay_activity_bar_remove(jlad->activity);
+    jlad->JConn=data;
+    is_setting_state = 1;
+    if(!jlad->JConn)
     {
-        account->connected = 0;
+        jabber_local_account->connected = 0;
+        jabber_local_account->connecting = 0;
     	jlad->status=JABBER_OFFLINE;
     }
     else
@@ -251,15 +270,16 @@ static void eb_jabber_login( eb_local_account * account )
         jlad->status=JABBER_ONLINE;
         ref_count++;
         is_setting_state = 1;
-	//FIXME: Don't set online here, we don't know if we've logged in successfully
-    	if(account->status_menu)
+        jabber_local_account->connected = 1;
+        jabber_local_account->connecting = 0;
+
+    	if(jabber_local_account->status_menu)
     	{
         	eb_debug(DBG_JBR, "eb_jabber_login: status - %i\n", jlad->status);
-		eb_set_active_menu_status(account->status_menu, jlad->status);
+		eb_set_active_menu_status(jabber_local_account->status_menu, jlad->status);
     	}
     }
     is_setting_state = 0;
-    eb_debug(DBG_JBR, "<\n");
 }
 
 static void eb_jabber_logout( eb_local_account * account )

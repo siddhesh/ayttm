@@ -18,6 +18,7 @@
  */
 
 #include "jabber/jabber.h"
+#include "tcp_util.h"
 
 /* local macros for launching event handlers */
 #define STATE_EVT(arg) if(j->on_state) { (j->on_state)(j, (arg) ); }
@@ -26,6 +27,7 @@
 static void startElement(void *userdata, const char *name, const char **attribs);
 static void endElement(void *userdata, const char *name);
 static void charData(void *userdata, const char *s, int slen);
+void jab_continue (int fd, int error, void *data);
 
 /*
  *  jab_new -- initialize a new jabber connection
@@ -114,9 +116,6 @@ void jab_packet_handler(jconn j, jconn_packet_h h)
  */
 void jab_start(jconn j)
 {
-    xmlnode x;
-    char *t,*t2;
-
     if(!j || j->state != JCONN_STATE_OFF) return;
 
     j->parser = XML_ParserCreate(NULL);
@@ -124,8 +123,22 @@ void jab_start(jconn j)
     XML_SetElementHandler(j->parser, startElement, endElement);
     XML_SetCharacterDataHandler(j->parser, charData);
 
-    j->fd = make_netsocket(5222, j->user->server, NETSOCKET_CLIENT);
-    if(j->fd < 0) {
+    //j->fd = make_netsocket(5222, j->user->server, NETSOCKET_CLIENT);
+    if (ay_socket_new_async(j->user->server, 5222, 
+		    	    (ay_socket_callback)jab_continue, j, NULL) < 0) {
+	    STATE_EVT(JCONN_STATE_OFF);
+	    return;
+    }	  
+    
+}
+void jab_continue (int fd, int error, void *data)
+{	
+    jconn j = (jconn)data;	
+    xmlnode x;
+    char *t,*t2;
+
+    j->fd = fd;
+    if(j->fd < 0 || error) {
         STATE_EVT(JCONN_STATE_OFF)
         return;
     }

@@ -1,3 +1,7 @@
+* Sat Apr 05 2003 09:56 GMT [colin]	0.2.3-28
+- modules/jabber
+Async connect and activity bar
+
 * Sat Apr 05 2003 08:53 GMT [colin]	0.2.3-27
 - src/activity_bar.C
 fix infinite loop

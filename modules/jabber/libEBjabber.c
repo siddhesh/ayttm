@@ -44,6 +44,7 @@ extern void JABBERLogout(void *data);
 extern void JABBERChatRoomMessage(char *id, char *user, char *message);
 extern void JABBERChatRoomBuddyStatus(char *id, char *user, int offline);
 extern void JABBERDelBuddy(void *data);
+extern void JABBERConnected(void *data);
 
 void j_on_state_handler(jconn conn, int state);
 void j_on_packet_handler(jconn conn, jpacket packet);
@@ -206,7 +207,6 @@ void jabber_callback_handler(void *data, int source, eb_input_condition cond)
 
 JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	/* At this point, we don't care about host and port */
-	int  lID;
 	char jid[256+1];
 	char buff[4096];
 	char server[256], *ptr=NULL;
@@ -253,19 +253,8 @@ JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	jab_packet_handler(JConn->conn, j_on_packet_handler);
 	jab_state_handler(JConn->conn, j_on_state_handler);
 	jab_start(JConn->conn);
-	if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
-		snprintf(buff, 4096, "Connection to the jabber server: %s failed!", host);
-		JABBERError(buff, "Jabber server not responding");
-		jab_delete(JConn->conn);
-		JConn->conn=NULL;
-		return(NULL);
-	}
-	JConn->id = atoi (jab_auth(JConn->conn));
-    	lID = eb_input_add(JConn->conn->fd, EB_INPUT_READ,
-                        jabber_callback_handler, JConn);
-	JConn->listenerID = lID;
-	eb_debug(DBG_JBR,  "*** ListenerID: %i FD: %i\n", lID, JConn->conn->fd);
-	return(JConn);
+
+	return NULL;
 }
 
 int JABBER_AuthorizeContact(JABBER_Conn *conn, char *handle) {
@@ -887,7 +876,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				name = xmlnode_get_tag_data(packet->iq, "username");
 				jabber_id = jab_getjid(conn);
 				JD->heading="Register? You're not authorized";
-				sprintf(buff, "Do you want to try to create %s on the jabber server %s?", jabber_id->user, jabber_id->server );
+				sprintf(buff, "Do you want to try to create the account \"%s\" on the jabber server %s?", jabber_id->user, jabber_id->server );
 				JD->message=strdup(buff);
 				JD->callback=j_on_create_account;
 				JD->JConn=JConn;
@@ -972,7 +961,8 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		if (type) {
 			JD=calloc(sizeof(JABBER_Dialog), 1);
 			if (strcmp (type, "subscribe") == 0) {
-				sprintf(buff, "%s wants to subscribe you", from);
+				sprintf(buff, "%s wants to add you to his friends' list.\n\nDo you want to accept?", 
+						from);
 				JD->message=strdup(buff);
 				JD->heading="Subscribe Request";
 				JD->callback=j_allow_subscribe;
@@ -987,7 +977,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				x = jutil_presnew (JPACKET__UNSUBSCRIBED, from, NULL);
 				jab_send (conn, x);
 				xmlnode_free(x);
-				sprintf(buff, "%s unsubscribed you, do you want to unsubscribe them?", from);
+				sprintf(buff, "%s removed you from his list.\n\nDo you want to remove him?", from);
 				JD->message=strdup(buff);
 				JD->heading="Remove User";
 				JD->callback=j_unsubscribe;
@@ -1032,6 +1022,12 @@ void j_on_state_handler(jconn conn, int state) {
 			JConn->conn=NULL;
 			JABBERLogout(NULL);
 		}
+		else if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
+			snprintf(buff, 4096, "Connection to the jabber server: %s failed!", conn->user->server);
+			JABBERError(buff, "Jabber server not responding");
+			jab_delete(JConn->conn);
+			JConn->conn=NULL;
+		}
 		break;
 	case JCONN_STATE_CONNECTED:
 		eb_debug(DBG_JBR,  "JCONN_STATE_CONNECTED\n");
@@ -1041,6 +1037,13 @@ void j_on_state_handler(jconn conn, int state) {
 		break;
 	case JCONN_STATE_ON:
 		eb_debug(DBG_JBR,  "JCONN_STATE_ON\n");
+		if (previous_state == JCONN_STATE_CONNECTED) {
+			JConn->id = atoi (jab_auth(JConn->conn));
+			JConn->listenerID = eb_input_add(JConn->conn->fd, EB_INPUT_READ,
+	                        	jabber_callback_handler, JConn);
+			eb_debug(DBG_JBR,  "*** ListenerID: %i FD: %i\n", JConn->listenerID, JConn->conn->fd);
+			JABBERConnected(JConn);
+		}
 		break;
 	default:
 		eb_debug(DBG_JBR,  "UNKNOWN state: %i\n", state);
