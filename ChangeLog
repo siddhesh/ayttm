@@ -1,3 +1,13 @@
+* Fri Apr 11 2003 16:45 GMT [andy]	0.2.3-94
+- configure.in
+'--enable-all-warnings' should apply to C++ too
+- modules/icq-toc/libtoc/libtoc.c
+  modules/msn2/msn.C
+  modules/yahoo2/libyahoo2/libyahoo2.c
+  src/message_parse.c
+  src/status.c
+Fix warnings
+
 * Thu Apr 11 2003 05:22 GMT [philip]	0.2.3-93
 - modules/yahoo2/yahoo.c
 Typo
