@@ -93,7 +93,7 @@ void edit_contact_window_new( struct contact * c )
 		
 		/* Contact */
 		
-		label = gtk_label_new(_("Contact Name: "));
+		label = gtk_label_new(_("Contact: "));
 		gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 		gtk_widget_show(label);
 		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1, GTK_FILL,
@@ -111,7 +111,7 @@ void edit_contact_window_new( struct contact * c )
 
 		/* Group */
 		
-		label = gtk_label_new(_("Group Name: "));
+		label = gtk_label_new(_("Group: "));
 		gtk_box_pack_end(GTK_BOX(hbox),label, FALSE, FALSE, 5);
 		gtk_widget_show(label);
 

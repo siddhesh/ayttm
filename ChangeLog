@@ -1,3 +1,7 @@
+* Thu Jun 26 2003 03:37 GMT [philip]	0.3.1-41
+- src/util.[ch]
+Sort get_groups()
+
 * Wed Jun 25 2003 04:49 GMT [philip]	0.3.1-40
 - src/Makefile.am configure.ac
 always use -export-dynamic libtool flag, not just for MINGW

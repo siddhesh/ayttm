@@ -467,6 +467,7 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 	mservice = strstr(service,"[")+1;
 	
 	service_id = get_service_id( mservice );
+	eb_debug(DBG_CORE, "local_acc: %s, service_id: %d, mservice: %s\n", local_acc, service_id, mservice);
 	ela = find_local_account_by_handle(local_acc, service_id);
 	
 	g_free(service);
@@ -528,6 +529,7 @@ static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
 	int has_public = 0;
 	LList *list = NULL;
 	eb_local_account *ela = NULL;
+	
 	if (!strstr(service, "]") || !strstr(service," ")) {
 		g_free(service);
 		return;
@@ -539,6 +541,7 @@ static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
 	
 	service_id = get_service_id( mservice );
 	ela = find_local_account_by_handle(local_acc, service_id);
+	eb_debug(DBG_CORE, "local_acc: %s, service_id: %d, mservice: %s\n", local_acc, service_id, mservice);
 	
 	g_free(service);
 	
@@ -550,7 +553,7 @@ static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
 	list = RUN_SERVICE(ela)->get_public_chatrooms(ela);
 	
 	if (!list) {
-		ay_do_error(_("Cannot list chatrooms"), _("The local account doesn't exist."));
+		ay_do_error(_("Cannot list chatrooms"), _("No list available."));
 		return;			
 	}
 

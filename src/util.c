@@ -999,6 +999,12 @@ int contact_cmp(const void * a, const void * b)
 	return strcasecmp(ca->nick, cb->nick);
 }
 
+int group_cmp(const void *a, const void *b)
+{
+	const grouplist *ga=a, *gb=b;
+	return strcasecmp(ga->name, gb->name);
+}
+
 struct relocate_account_data {
 	eb_account * account;
 	struct contact * contact;
@@ -1515,7 +1521,8 @@ LList * get_groups()
   	LList * newlist = NULL;
 	
 	for(node=groups; node; node = l_list_next(node))
-		newlist=l_list_prepend(newlist, ((grouplist *)node->data)->name);
+		newlist=l_list_insert_sorted(newlist, ((grouplist *)node->data)->name,
+				strcasecmp);
 	
 	return newlist;
 }
