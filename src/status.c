@@ -1669,7 +1669,7 @@ static GtkWidget* MakeContactList()
 	  (GTK_SCROLLED_WINDOW(contact_window),
 	   contact_list);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contact_window),
-		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	update_contact_window_length ();
 	return (contact_window);
 }

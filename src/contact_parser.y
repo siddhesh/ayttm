@@ -70,7 +70,12 @@ group:
 
 contact_list:
 	COMMENT contact_list { $$ = $2; }
-|	contact contact_list { $$ = l_list_insert_sorted( $2, $1, contact_cmp ); }
+|	contact contact_list { 
+		if($1)
+			$$ = l_list_insert_sorted( $2, $1, contact_cmp ); 
+		else
+			$$ = $2;
+	}
 |	EPSILON { $$ = 0; }
 ;
 
@@ -133,16 +138,25 @@ contact:
 	account_list END_CONTACT 
 	{
 		cur_contact->accounts = $4;
-		$$=cur_contact;
+		if(cur_contact->accounts)
+			$$=cur_contact;
+		else {
+			$$=0;
+			free(cur_contact);
+		}
 	}
 ;	
 
 account_list:
 	COMMENT account_list { $$=$2; }
 | 	account account_list { 
-		$$ = l_list_insert_sorted( $2, $1, account_cmp); 
-		if(cur_contact->default_chatb == -1)
-			cur_contact->default_filetransb = cur_contact->default_chatb = $1->service_id;
+		if($1 != NULL && !l_list_find_custom($2, $1, account_cmp)) {
+			$$ = l_list_insert_sorted( $2, $1, account_cmp); 
+			if(cur_contact->default_chatb == -1)
+				cur_contact->default_filetransb = cur_contact->default_chatb = $1->service_id;
+		} else {
+			$$ = $2;
+		}
 	}
 |	EPSILON { $$ = 0; }
 
@@ -153,29 +167,37 @@ account:
 	{
 		{
 			int id = get_service_id($3);
+			char *handle, *local_handle;
+			eb_local_account *ela=0;
+			handle = value_pair_get_value( $5, "NAME" );
+			local_handle = value_pair_get_value( $5, "LOCAL_ACCOUNT");
+			if(local_handle) {
+				ela = find_local_account_by_handle(local_handle, id);
+				free(local_handle);
+			}
 
-			$$ = calloc(1, sizeof(eb_account));
-			if($$) {
-				char *c;
-				$$->service_id = id;
-				$$->account_contact = cur_contact;
-				c = value_pair_get_value( $5, "NAME" );
-				strncpy($$->handle, c, sizeof($$->handle)-1);
-				free(c);
-				c = value_pair_get_value( $5, "LOCAL_ACCOUNT");
-				if(c && strcmp(c, "")) {
-					$$->ela = find_local_account_by_handle(c, id);
-					free(c);
-				} else {
-					$$->ela = find_local_account_for_remote($$, 0);
+			$$=0;
+			if(handle && !find_account_with_ela(handle, ela)) {
+				$$ = calloc(1, sizeof(eb_account));
+				if($$) {
+					char *c;
+					$$->service_id = id;
+					$$->account_contact = cur_contact;
+					strncpy($$->handle, handle, sizeof($$->handle)-1);
+					if(ela)
+						$$->ela = ela;
+					else
+						$$->ela = find_local_account_for_remote($$, 0);
+
+					c = value_pair_get_value( $5, "PRIORITY" );
+					if(c) {
+						$$->priority=atoi(c);
+						free(c);
+					}
+					$$->icon_handler = $$->status_handler = -1;
+					$$ = eb_services[id].sc->read_account_config($$, $5);
 				}
-				c = value_pair_get_value( $5, "PRIORITY" );
-				if(c) {
-					$$->priority=atoi(c);
-					free(c);
-				}
-				$$->icon_handler = $$->status_handler = -1;
-				$$ = eb_services[id].sc->read_account_config($$, $5);
+				free(handle);
 			}
 
 			value_pair_free($5);

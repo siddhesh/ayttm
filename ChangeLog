@@ -1,4 +1,8 @@
-* Mon Oct 14 2003 00:36 GMT [elh]	0.4.3-pre16
+* Wed Oct 15 2003 07:09 GMT [philip]	0.4.3-pre17
+- src/util.c src/contact_parser.y
+Don't allow duplicate contact accounts
+
+* Tue Oct 14 2003 00:36 GMT [elh]	0.4.3-pre16
 - src/smileys.c
 Fix a bug where smileys appear in http strings
 

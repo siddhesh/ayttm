@@ -737,8 +737,7 @@ static eb_account * find_account_with_id_or_ela( const char * handle, int servic
 			for(l3 = ((struct contact*)l2->data)->accounts; l3; l3=l3->next) {
 				eb_account * ea = l3->data;
 
-				if( ((ela && ea->ela == ela) || 
-						(!ela && ea->service_id == service_id))
+				if( ((ela && ea->ela == ela) || (!ela && ea->service_id == service_id))
 					&& !strcasecmp(handle, ea->handle))
 					return ea;
 			}
@@ -1007,10 +1006,16 @@ void rename_group( grouplist *current_group, char * new_name )
 int account_cmp(const void * a, const void * b)
 {
 	eb_account *ca=(eb_account *)a, *cb=(eb_account *)b;
-	if(ca->priority == cb->priority)
-		return strcasecmp(ca->handle, cb->handle);
-	else
-		return ca->priority - cb->priority;
+	int cmp = 0;
+	cmp = ca->priority - cb->priority;
+	if(cmp == 0)
+		cmp = strcasecmp(ca->handle, cb->handle);
+	if(cmp == 0)
+		cmp = strcasecmp(get_service_name(ca->service_id), get_service_name(cb->service_id));
+	if(cmp == 0)
+		cmp = strcasecmp(ca->ela->handle, cb->ela->handle);
+
+	return cmp;
 }
 	
 /* compares two contact names */
