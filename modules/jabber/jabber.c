@@ -79,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/07 07:55:09 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/07 10:35:42 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -165,7 +165,8 @@ typedef struct _eb_jabber_local_account_data
 	int fd;				// the file descriptor
 	int status;			// the current status of the user
 	JABBER_Conn	*JConn;
-	int activity;
+	int activity_tag;
+	int connect_tag;
 } eb_jabber_local_account_data;
 
 static eb_local_account *jabber_local_account;
@@ -231,6 +232,18 @@ static int eb_jabber_query_connected( eb_account * account )
 
 }
 
+static void ay_jabber_cancel_connect (void *data) 
+{
+	eb_local_account *ela = (eb_local_account *)data;
+	eb_jabber_local_account_data * jlad;
+	jlad = (eb_jabber_local_account_data *)ela->protocol_local_account_data;
+	
+	ay_socket_cancel_async(jlad->connect_tag);
+	jlad->activity_tag=0;
+	jlad->connect_tag = 0;
+	eb_jabber_logout(ela);
+}
+
 static void eb_jabber_login( eb_local_account * account )
 {
     eb_jabber_local_account_data * jlad;
@@ -247,8 +260,8 @@ static void eb_jabber_login( eb_local_account * account )
     account->connected = 0;
     account->connecting = 1;
     snprintf(buff, sizeof(buff), _("Logging in to Jabber account: %s"), account->handle);
-    jlad->activity = ay_activity_bar_add(buff, NULL, NULL);
-    JABBER_Login(account->handle, jlad->password, 
+    jlad->activity_tag = ay_activity_bar_add(buff, ay_jabber_cancel_connect, account);
+    jlad->connect_tag = JABBER_Login(account->handle, jlad->password, 
 			    jabber_server,  atoi(jabber_port));
 }
 
@@ -259,8 +272,8 @@ void JABBERNotConnected(void *data)
     jabber_local_account->connected=0;
     jabber_local_account->connecting=0;
 
-    ay_activity_bar_remove(jlad->activity);
-    jlad->activity = 0;	
+    ay_activity_bar_remove(jlad->activity_tag);
+    jlad->activity_tag = 0;	
 }
 
 void JABBERConnected(void *data)
@@ -268,8 +281,8 @@ void JABBERConnected(void *data)
     eb_jabber_local_account_data * jlad;
     jlad = (eb_jabber_local_account_data *)jabber_local_account->protocol_local_account_data;
 
-    ay_activity_bar_remove(jlad->activity);
-    jlad->activity = 0;
+    ay_activity_bar_remove(jlad->activity_tag);
+    jlad->activity_tag = 0;
     
     jlad->JConn=data;
     is_setting_state = 1;
@@ -323,6 +336,7 @@ static void eb_jabber_logout( eb_local_account * account )
 	jlad->JConn=NULL;
 	jlad->status=JABBER_OFFLINE;
 	account->connected = 0;
+	account->connecting = 0;
 	ref_count--;
 	eb_debug(DBG_JBR, "<\n");
 }

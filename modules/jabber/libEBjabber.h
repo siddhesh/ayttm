@@ -116,7 +116,7 @@ int JABBER_AuthorizeContact(JABBER_Conn *conn, char *handle);
 ** Output:  0 on success, -1 on failure
 */
 
-JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port);
+int JABBER_Login(char *handle, char *passwd, char *host, int port);
 
 /*
 ** Name:    JABBER_SendMessage

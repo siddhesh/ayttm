@@ -207,9 +207,10 @@ void jabber_callback_handler(void *data, int source, eb_input_condition cond)
 
 /* Functions called from the ayttm jabber.c file */
 
-JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
+int JABBER_Login(char *handle, char *passwd, char *host, int port) {
 	/* At this point, we don't care about host and port */
 	char jid[256+1];
+	int tag;
 	char buff[4096];
 	char server[256], *ptr=NULL;
 	JABBER_Conn *JConn=NULL;
@@ -225,7 +226,7 @@ JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 		/* A host must be specified in the config file */
 		if(!host) {
 			JABBERError("No jabber server specified!", "Cannot login");
-			return(NULL);
+			return(0);
 		}
 		snprintf(jid, 256, "%s@%s/ayttm", handle, host);
 	}
@@ -251,13 +252,13 @@ JABBER_Conn *JABBER_Login(char *handle, char *passwd, char *host, int port) {
 		JABBERError(buff, "Jabber server not responding");
 		JABBERNotConnected(NULL);
 		free(JConn);
-		return(NULL);
+		return(0);
 	}
 	jab_packet_handler(JConn->conn, j_on_packet_handler);
 	jab_state_handler(JConn->conn, j_on_state_handler);
-	jab_start(JConn->conn, port);
+	tag = jab_start(JConn->conn, port);
 
-	return NULL;
+	return tag;
 }
 
 int JABBER_AuthorizeContact(JABBER_Conn *conn, char *handle) {

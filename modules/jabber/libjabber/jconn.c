@@ -114,20 +114,22 @@ void jab_packet_handler(jconn j, jconn_packet_h h)
  *      j -- connection
  *
  */
-void jab_start(jconn j, int port)
+int jab_start(jconn j, int port)
 {
-    if(!j || j->state != JCONN_STATE_OFF) return;
+    int tag = 0;
+    if(!j || j->state != JCONN_STATE_OFF) return 0;
 
     j->parser = XML_ParserCreate(NULL);
     XML_SetUserData(j->parser, (void *)j);
     XML_SetElementHandler(j->parser, startElement, endElement);
     XML_SetCharacterDataHandler(j->parser, charData);
 
-    if (ay_socket_new_async(j->user->server, port, 
-		    	    (ay_socket_callback)jab_continue, j, NULL) < 0) {
+    if ((tag = ay_socket_new_async(j->user->server, port, 
+		    	    (ay_socket_callback)jab_continue, j, NULL)) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
-	    return;
-    }	  
+	    return 0;
+    }	 
+    return tag; 
     
 }
 void jab_continue (int fd, int error, void *data)
