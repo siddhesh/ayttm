@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-12-02 16:34+0100\n"
+"POT-Creation-Date: 2003-12-03 15:42+0100\n"
 "PO-Revision-Date: 2003-12-02 17:22+0100\n"
 "Last-Translator: Ricardo Mones <mones@aic.uniovi.es>\n"
 "Language-Team: Ricardo Mones <mones@aic.uniovi.es>\n"
@@ -1249,7 +1249,8 @@ msgstr "Webcam de %s"
 
 #: modules/yahoo2/yahoo.c:1661
 msgid "Cannot find a valid local account to view user's webcam."
-msgstr "No puedo encontrar una cuenta local válida para ver la webcam del usuario."
+msgstr ""
+"No puedo encontrar una cuenta local válida para ver la webcam del usuario."
 
 #: modules/yahoo2/yahoo.c:1676
 #, c-format
@@ -2149,15 +2150,16 @@ msgstr ""
 "Como crear y registrar cuentas:\n"
 "- para AIM, ICQ y Yahoo: Utilice su identificador. Ha de registrar la cuenta "
 "a través de la página web.\n"
-"- para MSN: Utilice el nombre completo (usuario@dominio.com). Ha de registrar "
-"la cuenta a través de la página web.\n"
+"- para MSN: Utilice el nombre completo (usuario@dominio.com). Ha de "
+"registrar la cuenta a través de la página web.\n"
 "- para IRC. Utilice \"alias@servidor.com\" para conectar como alias a "
 "servidor.com. Deberá teclear la contraseña si la cuenta esta reservada en el "
 "servidor.\n"
 "- para Jabber: Utilice \"alias@servidor.com\" para conectar como alias a "
 "servidor.com. Si la cuenta no existe se le preguntará si desea registrarse.\n"
-"- para SMTP: Utilice la dirección de correo que desee como remitente. Indique "
-"el servidor a usar en las preferencias. Aún no hay soporte para contraseñas."
+"- para SMTP: Utilice la dirección de correo que desee como remitente. "
+"Indique el servidor a usar en las preferencias. Aún no hay soporte para "
+"contraseñas."
 
 #: src/edit_local_accounts.c:285 src/edit_local_accounts.c:338
 #, c-format
@@ -3308,4 +3310,3 @@ msgstr "No puedo conectar"
 #: src/util.c:1924
 msgid "Connection to the server failed."
 msgstr "Conexión con el servidor fallida."
-

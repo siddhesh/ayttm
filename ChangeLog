@@ -1,3 +1,7 @@
+* Sat Dec 13 2003 09:56 GMT [colin]	0.4.5-9
+- modules/jabber/libEBJabber.c
+Apply patch 856271 from Wes Hardaker (fixes presence)
+
 * Fri Dec 12 2003 19:56 GMT [philip]	0.4.5-8
 - modules/yahoo2/yahoo.c
 fix get_time to work on windows - plasmoida (bug 859107)

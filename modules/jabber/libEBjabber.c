@@ -584,8 +584,7 @@ int JABBER_IsChatRoom(char *from)
 		ptr=buffer;
 	eb_debug(DBG_JBR, "Looking for %s\n", ptr);
 	agent = j_find_agent_by_alias(ptr);
-	if(agent && (!strcmp(agent->type, "groupchat") 
-			|| !strncmp(agent->alias, "conference.",strlen("conference.")))) {
+	if(agent && (!strcmp(agent->type, "groupchat"))) {
 		eb_debug(DBG_JBR, "Returning True\n");
 		return(1);
 	} else if (find_chat_room_by_id(ptr) != NULL) {
@@ -1034,7 +1033,8 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		if (type) {
 			if (strcmp (type, "unavailable") == 0) status = JABBER_OFFLINE;
 		}
-		if(JABBER_IsChatRoom(from))
+		if(strncmp(packet->from->server,
+                           "conference.",strlen("conference.")) == 0)
 		{
 			eb_debug(DBG_JBR, "Presence received from a conference room\n");
 			user=strchr(from, '/');
