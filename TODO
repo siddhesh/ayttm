@@ -25,5 +25,9 @@ TODO later
 * GPG encryption utility
 * 1-to-1 conversation -> group chat by inviting a user
 
+eyecandy
+* emoticons in contact names and status
+* allow contact names to have non-ascii characters
+
 eternal TODO
 * Make ayttm fully stable in stable releases. 
