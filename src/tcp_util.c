@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "globals.h"
 #include "plugin_api.h"
@@ -205,6 +206,7 @@ struct connect_callback_data {
 
 	int ebi_tag;
 	int tag;
+	int sock;
 };
 
 static LList * pending_connects=NULL;
@@ -253,6 +255,7 @@ void ay_socket_cancel_async(int tag)
 		struct connect_callback_data * ccd = l->data;
 		if(ccd->tag == tag) {
 			pending_connects = l_list_remove_link(pending_connects, l);
+			close(ccd->sock);
 			destroy_pending_connect(ccd);
 			free(l);
 			return;
@@ -274,7 +277,7 @@ void ay_socket_cancel_async(int tag)
  * to be cancelled.
  *
  * Returns:  0 if connect succeeded immediately (callback is already called);
- * -1 if connect failed immediately (callback is already called with errno);
+ * -1 if connect failed immediately (callback is not called);
  * a tag that identifies the pending connect and can be used to cancel it.
  **/
 #define update_status(x) if(status_callback) status_callback(x, callback_data)
@@ -285,15 +288,17 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 	int servfd;
 	struct connect_callback_data * ccd;
 	int error,err;
+	char buff[1024];
 
 	if(tag_pool >= INT_MAX)
 		return -1;
 
-	update_status(_("Looking for remote host..."));
+	snprintf(buff, sizeof(buff), _("Looking for %s..."), host);
+	update_status(buff);
 	if(!(server = gethostbyname(host))) {
 		errno=h_errno;
 		eb_debug(DBG_CORE, "failed to look up server (%s:%d)\n%d: %s", 
-					host, port, errno, strerror(errno));
+					host, port, errno, hstrerror(errno));
 		return -1;
 	}
 	update_status("");
@@ -307,7 +312,8 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 	fcntl(servfd, F_SETFL, O_NONBLOCK);
 #endif
 	
-	update_status(_("Connecting to remote host..."));
+	snprintf(buff, sizeof(buff), _("Connecting to %s:%d..."), host, port);
+	update_status(buff);
 	eb_debug(DBG_CORE, "connecting to %s:%d\n", host, port);
 
 	memset(&serv_addr, 0, sizeof(serv_addr));
@@ -324,6 +330,8 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 #endif
 
 	if(!error) {
+		snprintf(buff, sizeof(buff), _("Connected to %s:%d..."), host, port);
+		update_status(buff);
 		callback(servfd, 0, callback_data);
 		return 0;
 	} else if(error == -1 && err == EINPROGRESS) {
@@ -332,13 +340,13 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 		ccd->status_callback = status_callback;
 		ccd->callback_data = callback_data;
 		ccd->tag = ++tag_pool;
+		ccd->sock = servfd;
 
 		pending_connects = l_list_append(pending_connects, ccd);
 		ccd->ebi_tag = eb_input_add(servfd, EB_INPUT_WRITE, connect_complete, ccd);
 		return ccd->tag;
 	} else {
 		close(servfd);
-		callback(-1, errno, callback_data);
 		return -1;
 	}
 }

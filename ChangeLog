@@ -1,3 +1,7 @@
+* Sat Apr 05 2003 13:28 GMT [philip]	0.2.3-32
+- src/tcp_util.c
+connect_async should agree with what it says it will do
+
 * Sat Apr 05 2003 11:44 GMT [colin]	0.2.3-31
 - modules/jabber
 Obey Port preference
