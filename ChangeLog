@@ -1,3 +1,9 @@
+* Wed Jun 16 3004 19:28 GMT [tnhashmi]  0.4.6-16
+- modules/yahoo2/yahoo.c
+added new yahoo smileys
+- configure.ac
+added new yahoo smileys
+
 * Tue May 18 2004 18:54 GMT [colin]	0.4.6-15
 - src/crash.c
 eat SIGPIPE
