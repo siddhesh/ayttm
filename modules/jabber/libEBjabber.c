@@ -47,7 +47,7 @@ extern void	JABBERError( char *message, char *title );
 extern void JABBERLogout(void *data);
 extern void JABBERChatRoomMessage(char *id, char *user, char *message);
 extern void JABBERChatRoomBuddyStatus(char *id, char *user, int offline);
-extern void JABBERDelBuddy(void *data);
+extern void JABBERDelBuddy(JABBER_Conn *JConn, void *data);
 extern void JABBERConnected(void *data);
 extern void JABBERNotConnected(void *data);
 
@@ -708,6 +708,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		{
 			/* For now, ayttm does not understand resources */
 			JIM.msg=buff;
+			JIM.JConn = JConn;
 			eb_debug(DBG_JBR,  "JIM.msg: %s\n", JIM.msg);
 			eb_debug(DBG_JBR,  "Rendering message\n");
 			JIM.sender=strtok(from, "/");
@@ -856,10 +857,6 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				if (sub) {
 					if (strcmp (sub, "remove") == 0) {
 						eb_debug(DBG_JBR,  "Need to remove a buddy: %s\n", alias);
-/*						buddy_remove_from_clist (bud);
-						buddy_remove (bud);
-*/
-						break;
 					}
 				}
 /*
@@ -933,7 +930,6 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		x = xmlnode_get_tag (packet->x, "show");
 		if (x) {
 			show = xmlnode_get_data (x);
-			printf ("show: %s\n", show);
 			if(show) {
 				if (strcmp (show, "away") == 0) status = JABBER_AWAY;
 				else if (strcmp (show, "dnd") == 0) status = JABBER_DND;
@@ -993,17 +989,6 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			}
 			else
 			if (strcmp (type, "unsubscribe") == 0) {
-				x = jutil_presnew (JPACKET__UNSUBSCRIBED, from, NULL);
-				jab_send (conn, x);
-				xmlnode_free(x);
-				sprintf(buff, _("%s removed you from his list.\n\nDo you want to remove him?"), from);
-				JD->message=strdup(buff);
-				JD->heading="Remove User";
-				JD->callback=j_unsubscribe;
-				JD->requestor=strdup(from);
-				JD->JConn=JConn;
-				JABBERDialog(JD);
-				eb_debug (DBG_JBR, "<Initiated dialog to unsubscribe\n");
 				return;
 			}
 		}
@@ -1114,7 +1099,7 @@ void j_unsubscribe(void *data) {
 	JABBER_Dialog_PTR jd;
 
 	jd=(JABBER_Dialog_PTR)data;
-	JABBERDelBuddy(jd->requestor);
+	JABBERDelBuddy(jd->JConn, jd->requestor);
 }
 
 void j_on_pick_account(void *data) {

@@ -33,18 +33,6 @@ typedef struct {
 	char type[256];
 } Agent;
 
-
-typedef struct INSTANT_MESSAGE {
-    int year;                    /* six fields used for time stamping */
-    int month;                   
-    int day;                 
-    int hour;
-    int minute;
-    int sec;            
-    char *msg;                   /* message itself             */
-    char *sender;                /* sender of the message      */
-} JABBER_InstantMessage, *JABBER_InstantMessage_PTR;
-
 /* 
 ** The following structure holds the connection information.
 ** I included the cookie and the common name, because both those things 
@@ -61,6 +49,18 @@ typedef struct JABBERCONN {
     int    reg_flag;		/* Indicates whether we have registered successfully with the jabber server */
     struct JABBERCONN *next;
 } JABBER_Conn;
+
+typedef struct INSTANT_MESSAGE {
+    int year;                    /* six fields used for time stamping */
+    int month;                   
+    int day;                 
+    int hour;
+    int minute;
+    int sec;            
+    char *msg;                   /* message itself             */
+    char *sender;                /* sender of the message      */
+    JABBER_Conn *JConn;
+} JABBER_InstantMessage, *JABBER_InstantMessage_PTR;
 
 struct jabber_buddy
 {

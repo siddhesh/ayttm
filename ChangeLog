@@ -1,3 +1,7 @@
+* Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-11
+- modules/jabber
+Fixes (ela fixes, auto account selection, chatroom)
+
 * Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-10
 - modules/yahoo2/yahoo.c
 Test a possibly null pointer (may fix 812252)

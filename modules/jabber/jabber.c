@@ -83,15 +83,15 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.33 $",
-	"$Date: 2003/07/31 09:02:11 $",
+	"$Revision: 1.34 $",
+	"$Date: 2003/09/27 12:00:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
 	NULL
 };
 struct service SERVICE_INFO = { "Jabber", -1, 
-	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
+	SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
 /* End Module Exports */
 
 static char *eb_jabber_get_color(void) { static char color[]="#88aa00"; return color; }
@@ -199,6 +199,24 @@ void JABBERDialog(void *data);
 void JABBERListDialog(const char **list, void *data);
 void JABBERLogout(void *data);
 void JABBERError( char *message, char *title );
+
+static eb_local_account *find_local_account_by_conn(JABBER_Conn *JConn)
+{
+	LList *acc;
+	for (acc = accounts; acc && acc->data; acc=acc->next) {
+		if ( ((eb_local_account *)(acc->data))->service_id == SERVICE_INFO.protocol_id) {
+			eb_jabber_local_account_data *jlad = ((eb_local_account *)(acc->data))->protocol_local_account_data;
+			JABBER_Conn *cconn = JConn;
+			if (jlad->JConn && jlad->JConn == JConn) {
+				eb_debug(DBG_JBR, "found (%s) !\n", ((eb_local_account *)(acc->data))->handle);
+				return (eb_local_account *)(acc->data);
+			} else 
+				eb_debug(DBG_JBR, "JConns: %p %p didn't match\n",
+						JConn, jlad->JConn);
+		}
+	}
+	return NULL;
+}
 
 static void jabber_dialog_callback( gpointer data, int response )
 {
@@ -332,7 +350,7 @@ static void eb_jabber_logout( eb_local_account * account )
 	eb_debug(DBG_JBR, ">\n");
 	jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
 	for (l = jabber_contacts; l; l = l->next) {
-		eb_account * ea = find_account_by_handle(l->data, SERVICE_INFO.protocol_id);
+		eb_account * ea = find_account_with_ela(l->data, account);
 		if(!ea)
 			fprintf(stderr, "Unable to find account for user: %s\n", (char *)l->data);
 		else {
@@ -504,10 +522,16 @@ static void eb_jabber_terminate_chat(eb_account * account )
 
 static void eb_jabber_add_user(eb_account * account )
 {
-	eb_jabber_account_data *jad=account->protocol_account_data;
-
+    eb_jabber_account_data *jad=account->protocol_account_data;
+    JABBER_Conn *conn = NULL;
+    if (account->ela) {
+	eb_jabber_local_account_data *jlad = (eb_jabber_local_account_data *)(account->ela->protocol_local_account_data);
+	conn = jlad->JConn;
+    } else {
+	conn = jad->JConn;
+    }
     jabber_contacts = l_list_append(jabber_contacts, account->handle);
-    if (jad) JABBER_AddContact(jad->JConn, account->handle);
+    if (jad) JABBER_AddContact(conn, account->handle);
 }
 
 static void eb_jabber_del_user(eb_account * account )
@@ -515,6 +539,11 @@ static void eb_jabber_del_user(eb_account * account )
     JABBER_Conn *conn = NULL;
     if (account->ela)
 	    conn = ((eb_jabber_local_account_data *)(account->ela->protocol_local_account_data))->JConn;
+    else {
+	eb_jabber_account_data *jad = (eb_jabber_account_data *)(account->protocol_account_data);
+	if (jad) 
+		conn = jad->JConn;    
+    }
     if(JABBER_RemoveContact(conn, account->handle)==0)
     	jabber_contacts = l_list_remove(jabber_contacts, account->handle);
 }
@@ -625,14 +654,20 @@ static eb_chat_room * eb_jabber_make_chat_room( char * name, eb_local_account * 
 
 	eb_debug(DBG_JBR, ">\n");
 	j_list_agents();
-	strcpy( ecr->room_name, name );
-	strcpy( ecr->id, name);
-	ptr=ecr->id;
-	/* Convert the id to lowercase */
+	while (strstr(name, " "))
+		*(strstr(name, " ")) = '_';
+	
+	ptr=name;
+	/* Convert the name to lowercase */
 	while(*ptr) {
 		*ptr=tolower(*ptr);
 		ptr++;
 	}
+	
+	strcpy( ecr->room_name, name );
+
+	strcpy( ecr->id, name);
+	
 	ecr->fellows = NULL;
 	ecr->connected = FALSE;
 	ecr->local_user = account;
@@ -795,7 +830,7 @@ void JABBERChatRoomBuddyStatus(char *id, char *user, int offline)
 	}
 	if(!offline)
 	{
-		eb_account *ea=find_account_by_handle(user, SERVICE_INFO.protocol_id);
+		eb_account *ea=find_account_with_ela(user, ecr->local_user);
 		if(ea)
 		{
 			eb_chat_room_buddy_arrive(ecr, ea->account_contact->nick, user);
@@ -813,7 +848,8 @@ void JABBERChatRoomBuddyStatus(char *id, char *user, int offline)
 void JABBERChatRoomMessage(char *id, char *user, char *message)
 {
 	eb_chat_room *ecr=find_chat_room_by_id(id);
-	eb_account *ea=find_account_by_handle(user, SERVICE_INFO.protocol_id);
+	eb_account *ea=NULL;
+	
 	char *message2 = linkify(message);
 
 	if(!ecr)
@@ -822,6 +858,9 @@ void JABBERChatRoomMessage(char *id, char *user, char *message)
 		g_free(message2);
 		return;
 	}
+	
+	ea = find_account_with_ela(user, ecr->local_user);
+	
 	if(ea)
 	{
 		eb_chat_room_show_message(ecr, ea->account_contact->nick, message2);
@@ -834,17 +873,18 @@ void JABBERChatRoomMessage(char *id, char *user, char *message)
 }
 
 
-void JABBERDelBuddy(void *data)
+void JABBERDelBuddy(JABBER_Conn *JConn, void *data)
 {
 	eb_account *ea;
 	char *jid=data;
+	eb_local_account *ela = find_local_account_by_conn(JConn);
 
 	if(!data) {
 		eb_debug(DBG_JBR, "called null argument\n");
 		return;
 	}
 
-	ea = find_account_by_handle(jid, SERVICE_INFO.protocol_id);
+	ea = find_account_with_ela(jid, ela);
 	if(!ea) {
 		eb_debug(DBG_JBR, "Unable to find %s to remove\n", jid);
 		return;
@@ -862,18 +902,24 @@ void JABBERDelBuddy(void *data)
 
 void JABBERAddBuddy(void *data)
 {
-    struct jabber_buddy *jb;
+    struct jabber_buddy *jb = (struct jabber_buddy *)data;
     eb_account *ea;
-	eb_jabber_account_data *jad;
-
+    eb_jabber_account_data *jad;
+    eb_local_account *ela = find_local_account_by_conn(jb->JConn);
+    
     if(!data)
         return;
-    jb = (struct jabber_buddy *)data;
+    
+    if (!ela) {
+	    eb_debug(DBG_JBR, "can't find ela\n");
+	    return;
+    }
+    
     eb_debug(DBG_JBR, "> - %s\n", jb->jid);
 
-    ea = find_account_by_handle(jb->jid, SERVICE_INFO.protocol_id);
+    ea = find_account_with_ela(jb->jid, ela);
     if (!ea) {	/* Add an unknown account */
-	ea = eb_jabber_new_account(NULL, jb->jid);
+	ea = eb_jabber_new_account(ela, jb->jid);
         if ( !find_grouplist_by_name("Unknown" )) {
           add_group("Unknown");
         }
@@ -895,15 +941,27 @@ void JABBERAddBuddy(void *data)
 
 void JABBERInstantMessage(void *data)
 {
-    JABBER_InstantMessage_PTR im;
+    JABBER_InstantMessage_PTR im = (JABBER_InstantMessage_PTR)data;
     eb_account *sender = NULL;
     eb_account *ea;
-
+    eb_local_account *ela = find_local_account_by_conn(im->JConn);
+    
+    if (!ela) {
+	    eb_debug(DBG_JBR, "no ela\n");
+	    sender = find_account_by_handle(im->sender, SERVICE_INFO.protocol_id);
+	    if (sender)
+		    ela = sender->ela;
+	    if (!ela) {
+		    eb_debug(DBG_JBR, "still no ela !\n");
+	    	    return;
+	    }
+    }
+    
     eb_debug(DBG_JBR, ">\n");
-    im = (JABBER_InstantMessage_PTR)data;
-    sender = find_account_by_handle(im->sender, SERVICE_INFO.protocol_id);
+    sender = find_account_with_ela(im->sender, ela);
+
     if (sender == NULL) {
-	ea = eb_jabber_new_account(NULL, im->sender);
+	ea = eb_jabber_new_account(ela, im->sender);
 
         add_unknown(ea);
         sender = ea;
@@ -926,15 +984,21 @@ void JABBERStatusChange(void *data)
     struct jabber_buddy *jb;
     eb_account *ea;
     eb_jabber_account_data *jad;
-
+    eb_local_account *ela = NULL;
+    
     if(!data)
         return;
     eb_debug(DBG_JBR, ">\n");
     jb = (struct jabber_buddy *)data;
 
-    ea = find_account_by_handle(jb->jid, SERVICE_INFO.protocol_id);
+    ela = find_local_account_by_conn(jb->JConn);
+    if (!ela) {
+	    eb_debug(DBG_JBR, "no ela!\n");
+	    return;
+    }
+    ea = find_account_with_ela(jb->jid, ela);
     if (!ea) {	/* Add an unknown account */
-	ea = eb_jabber_new_account(NULL, jb->jid);
+	ea = eb_jabber_new_account(ela, jb->jid);
         if ( !find_grouplist_by_name("Unknown" )) {
           add_group("Unknown");
         }
