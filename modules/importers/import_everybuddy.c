@@ -60,8 +60,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Import Everybuddy Settings", 
 	"Import the Everybuddy Settings", 
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/29 07:05:21 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/29 07:15:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -110,22 +110,25 @@ static int eb_imp_window_open = 0;
 static void ok_callback(GtkWidget * widget, gpointer data) {
 	
 	char buff[1024];
-		
+	int a=0,c=0,p=0,m=0;
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(accountsbutton))) {
 		snprintf(buff, 1024, "%s/.everybuddy/accounts", getenv("HOME"));
 		if (!load_accounts_from_file(buff)) {
 			ay_do_error(_("Import error"), _("Cannot import accounts.\nCheck that ~/.everybuddy/accounts exists and is readable."));
-		}
+		} else
+			a=1;
 	}
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(contactsbutton))) {
 		snprintf(buff, 1024, "%s/.everybuddy/contacts", getenv("HOME"));
 		if (!load_contacts_from_file(buff)) {
 			ay_do_error(_("Import error"), _("Cannot import contacts.\nCheck that ~/.everybuddy/contacts exists and is readable."));
-		}		
+		} else
+			c=1;	
 	}
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(prefsbutton))) {
 		/* prefs we want to save */
 		char saved[7][MAX_PREF_LEN];
+		p=1;
 		strncpy( saved[0], cGetLocalPref("BuddyArriveFilename"), MAX_PREF_LEN );
 		strncpy( saved[1], cGetLocalPref("BuddyAwayFilename"), MAX_PREF_LEN );
 		strncpy( saved[2], cGetLocalPref("BuddyLeaveFilename"), MAX_PREF_LEN );
@@ -159,13 +162,29 @@ static void ok_callback(GtkWidget * widget, gpointer data) {
 			} else {
 				while (fgets(buff, 1024, in) != NULL)
 					fputs(buff, out);
-
 				fclose(out);
+				m=1;
 			}
 			fclose(in);
 		} else {
 			ay_do_error(_("Import error"), _("Cannot import away messages.\nCheck that ~/.everybuddy/away_messages exists and is readable."));			
 		}
+	}
+	
+	if (!a && !c && !p && !m) {
+		return;
+	} else {
+		char message[1024];
+		snprintf(message, 1024, "Successfully imported %s%s%s%s%s%s%s from Everybuddy.",
+				a?"accounts":"",
+				(a && (c||p||m))?", ":"",
+				c?"contacts":"",
+				(c && (p||m))?", ":"",
+				p?"preferences":"",
+				(p && m)?", ":"",
+				m?"away messages":""
+				);
+		ay_do_info(_("Import success"), message);
 	}
 	gtk_widget_destroy(window);
 }

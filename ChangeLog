@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 07:14 GMT [colin]	0.3.0-33
+- modules/importers/import_everybuddy.c 
+more feedback
+
 * Tue Apr 29 2003 06:29 GMT [colin]	0.3.0-32
 - modules/importers/Makefile.am
   modules/importers/import_everybuddy.c ** ADDED **
