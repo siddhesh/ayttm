@@ -1850,7 +1850,7 @@ void eb_status_window()
 	gtk_window_add_accel_group( GTK_WINDOW(statuswindow),accel );
 	/* The next line allows you to make the window smaller than the orig. size */
 	gtk_window_set_policy(GTK_WINDOW(statuswindow), TRUE, TRUE, FALSE);
-	gtk_widget_realize(statuswindow);
+	gtk_window_set_wmclass(GTK_WINDOW(statuswindow), "main_window", "Ayttm");
 
 	status_show = iGetLocalPref("status_show_level");
 
@@ -1972,7 +1972,7 @@ void eb_status_window()
 		
         gtk_box_pack_start(GTK_BOX(statusbox), hbox ,FALSE, FALSE,0);
         gtk_window_set_title(GTK_WINDOW(statuswindow), _("Ayttm "VERSION"-"RELEASE));
-	eb_icon(statuswindow->window);
+	
 	gtk_widget_show(statusbox);
 
 	gtk_container_add(GTK_CONTAINER(statuswindow), statusbox );
@@ -1980,7 +1980,6 @@ void eb_status_window()
 	gtk_signal_connect (GTK_OBJECT (statuswindow), "delete_event",
 			    GTK_SIGNAL_FUNC (delete_event), NULL);
 
-	gtk_widget_show( statuswindow);
 
         {
                 int do_x = iGetLocalPref("x_contact_window");
@@ -1988,7 +1987,11 @@ void eb_status_window()
 		if ( do_x>0 && do_y >0)
 	                gdk_window_move(statuswindow->window, do_x, do_y);
         }
-
+	gtk_widget_show(statuswindow);
+	gtk_widget_realize(statuswindow);
+	
+	eb_icon(statuswindow->window);
+	
 	update_contact_list ();
 
 	gtk_signal_connect(GTK_OBJECT(radioonline), "clicked",
@@ -2004,7 +2007,7 @@ void eb_status_window()
 			eb_save_size,NULL);
 	
 	set_menu_sensitivity();
-		
+
 }
 
 

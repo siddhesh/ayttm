@@ -1,3 +1,8 @@
+* Wed Apr 09 2003 23:35 GMT [colin]	0.2.3-88
+- src/status.c
+Metacity fixes : show window after moving it, set icon
+after having showed window
+
 * Wed Apr 09 2003 21:38 GMT [colin]	0.2.3-87
 - src/main.c src/status.c src/prefs.c
 Add debug
