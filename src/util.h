@@ -148,3 +148,6 @@ void ay_restore_account_information(LList *saved);
 #endif
 
 #endif
+
+void ay_dump_cts(void);
+void ay_dump_elas(void);

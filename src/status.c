@@ -611,6 +611,12 @@ static void launch_group_chat( GtkWidget * widget, gpointer userdata )
 	open_join_chat_window();
 }
 
+static void ay_dump_structures_cb ( GtkWidget * widget, gpointer userdata )
+{
+	ay_dump_cts();	
+	ay_dump_elas();	
+}
+
 /* Be sure to free the menu items in the status menu */
 static void eb_status_remove(GtkContainer *container,  GtkWidget * widget, gpointer stats )
 {
@@ -1790,6 +1796,11 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/Help/_Manual..."),	NULL, show_manual, 0, NULL },
 	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
 	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL }
+#if 0
+	,
+	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
+	{ N_("/Help/Dump structures"),NULL, ay_dump_structures_cb, 0, NULL }
+#endif	
 };
 
 static GtkItemFactory *main_menu_factory = NULL;

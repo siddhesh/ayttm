@@ -1,3 +1,8 @@
+* Sat May  3 2003 13:01 GMT [colin]	0.3.0-112
+- src/util.[ch]
+  src/status.c
+Add hardcore debug functions ;-)
+
 * Sat May  3 2003 13:00 GMT [andy]	0.3.0-111
 - src/about.c
 Fix KUDOS_SIZE

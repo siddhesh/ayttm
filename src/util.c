@@ -453,6 +453,7 @@ int connected_local_accounts(void)
 {
 	int n = 0;
 	LList *node = NULL;
+
 	for( node = accounts; node; node = node->next ) {
 		eb_local_account * ela = node->data;
 		if (ela->connected || ela->connecting) {
@@ -1642,4 +1643,136 @@ void ay_restore_account_information(LList *saved)
 					ai->local_acc, ea->ela?ea->ela->handle:"NULL");
 		free(ai->local_acc);
 	}
+}
+
+void ay_dump_cts (void) 
+{
+	LList *g = NULL, *c = NULL, *a = NULL;
+	for (g = groups; g; g = g->next) {
+		grouplist *gl = (grouplist *)g->data;
+		printf("grouplist %p:\n"
+				" name %s\n"
+				" list_item %p\n"
+				" tree %p\n"
+				" label %p\n"
+				" contacts_online %d\n"
+				" contacts_shown %d\n"
+				" members %p%s\n",
+				gl,
+				gl->name,
+				gl->list_item,
+				gl->tree,
+				gl->label,
+				gl->contacts_online,
+				gl->contacts_shown,
+				gl->members,
+				gl->members?":":"");
+			
+		for (c = gl->members; c; c = c->next) {
+			struct contact *ct = (struct contact *)c->data;
+			printf("  contact %p:\n"
+					"   nick %s\n"
+					"   language %s\n"
+					"   trigger %p {%d, %d, %s}\n"
+					"   expanded %d\n"
+					"   online %d\n"
+					"   send_offline %d\n"
+					"   default_chatb %d\n"
+					"   default_filetransb %d\n"
+					"   group %p\n"
+					"   chatwindow %p\n"
+					"   logwindow %p\n"
+					"   list_item %p\n"
+					"   tree %p\n"
+					"   pix %p\n"
+					"   status %p\n"
+					"   label %p\n"
+					"   icon_handler %d\n"
+					"   last_status %s\n"
+					"   last_status_change %ld\n"
+					"   accounts %p%s\n",
+					ct,
+					ct->nick,
+					ct->language,
+					ct->trigger,
+					ct->trigger.type,
+					ct->trigger.action,
+					ct->trigger.param,
+					ct->expanded,
+					ct->online,
+					ct->send_offline,
+					ct->default_chatb,
+					ct->default_filetransb,
+					ct->group,
+					ct->chatwindow,
+					ct->logwindow,
+					ct->list_item,
+					ct->tree,
+					ct->pix,
+					ct->status,
+					ct->label,
+					ct->icon_handler,
+					ct->last_status,
+					ct->last_status_change,
+					ct->accounts,
+					ct->accounts?":":"");
+			for (a = ct->accounts; a; a = a->next) {
+				eb_account *ea = (eb_account *)a->data;
+				printf("    eb_account %p:\n"
+						"     service_id %d\n"
+						"     ela %p\n"
+						"     handle %s\n"
+						"     account_contact %p\n"
+						"     protocol_account_data %p\n"
+						"     list_item %p\n"
+						"     status %p\n"
+						"     pix %p\n"
+						"     icon_handler %d\n"
+						"     online %d\n"
+						"     status_handler %d\n"
+						"     info_window %p\n",
+						ea,
+						ea->service_id,
+						ea->ela,
+						ea->handle,
+						ea->account_contact,
+						ea->protocol_account_data,
+						ea->list_item,
+						ea->status,
+						ea->pix,
+						ea->icon_handler,
+						ea->online,
+						ea->status_handler,
+						ea->infowindow);
+			}	
+		}
+	}
+}
+
+void ay_dump_elas() 
+{
+	LList *la = NULL;
+	for (la = accounts; la; la = la->next) {
+		eb_local_account *ela = (eb_local_account *)la->data;
+		printf("eb_local_account %p:\n"
+				" service_id %d\n"
+				" handle %s\n"
+				" connected %d\n"
+				" connecting %d\n"
+				" status_button %p\n"
+				" status_menu %p\n"
+				" protocol_local_account_data %p\n"
+				" mgmt_flush_tag %d\n"
+				" connect_at_startup %d\n",
+				ela,
+				ela->service_id,
+				ela->handle,
+				ela->connected,
+				ela->connecting,
+				ela->status_button,
+				ela->status_menu,
+				ela->protocol_local_account_data,
+				ela->mgmt_flush_tag,
+				ela->connect_at_startup);
+	}	
 }
