@@ -3,17 +3,17 @@
 fix jasper handling, and maybe the webcam stuff works now...
 darn.. where are my friends when I need them most... lol
 
-* Fri May 10 2003 23:35 GMT [edward]	0.3.0-175
+* Fri May 10 2003 14:48 GMT [edward]	0.3.0-175
 - mingw
 fix to CC usage
 
-* Fri May  9 2003 23:35 GMT [edward]	0.3.0-174
+* Fri May 10 2003 14:35 GMT [edward]	0.3.0-174
 - added mingw32/smiley-themer.la
 - modules/smileys/smiley-themer.c
 - README.WIN32
 MINGW32 Build for smiley-themer first pass
 
-* Fri May  9 2003 23:26 GMT [edward]	0.3.0-173
+* Fri May 10 2003 14:26 GMT [edward]	0.3.0-173
 - README.WIN32
 - configure.ac
 - remove makedll
