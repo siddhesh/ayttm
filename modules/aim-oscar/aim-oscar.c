@@ -2,7 +2,6 @@
  * Ayttm
  *
  * Copyright (C) 2003, the Ayttm team
- * Modified by Nicolas Peninguy <ayttm@free-anatole.net>
  * 
  * Ayttm is derivative of Everybuddy
  * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
@@ -64,6 +63,8 @@ typedef unsigned long ulong;
 #include "config.h"
 #include "dialog.h"
 
+#include "libproxy/libproxy.h"
+
 #include "pixmaps/aim_online.xpm"
 #include "pixmaps/aim_away.xpm"
 
@@ -92,8 +93,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.17 $",
-	"$Date: 2003/10/19 07:12:49 $",
+	"$Revision: 1.18 $",
+	"$Date: 2003/10/26 15:04:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -101,7 +102,7 @@ PLUGIN_INFO plugin_info =
 	NULL
 };
 
-struct service SERVICE_INFO = { "AIM-oscar", -1, SERVICE_CAN_MULTIACCOUNT, NULL };
+struct service SERVICE_INFO = { "AIM-oscar", -1, SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_GROUPCHAT , NULL };
 /* End Module Exports */
 
 static char *ay_aim_get_color(void) { static char color[]="#000088"; return color; }
@@ -167,6 +168,22 @@ struct eb_aim_account_data
 	gint on_server;
 };
 
+struct oscar_chat_room_data {
+	char *name;
+	gint exchange;
+	eb_chat_room *ecr;
+};
+
+struct oscar_chat_room {
+	char *name;
+	char *show;
+	fu16_t exchange;
+	fu16_t instance;
+
+	int input;
+	aim_conn_t *conn;
+};
+
 struct eb_aim_local_account_data
 {
 	char password[255];
@@ -176,12 +193,16 @@ struct eb_aim_local_account_data
 	gint perm_deny;
 	
 	LList *buddies;
+	LList *pending_rooms;
+	LList *rooms;
 	
 	int fd;
 	aim_conn_t *conn;
+	aim_conn_t *conn_chatnav;
 	aim_session_t aimsess;
 	
 	int input;
+	int input_chatnav;
 	int login_activity_bar;
 
 	int prompt_password;
@@ -200,14 +221,48 @@ enum
 	AIM_OFFLINE=2
 };
 
+static int caps_aim = AIM_CAPS_CHAT; /*| AIM_CAPS_BUDDYICON | AIM_CAPS_DIRECTIM | AIM_CAPS_SENDFILE | AIM_CAPS_INTEROPERATE;*/
 static fu8_t features_aim[] = {0x01, 0x01, 0x01, 0x02};
 
-static char * profile = "Visit the Ayttm website at <A HREF=\"http://ayttm.sf.net\">http://http://ayttm.sf.net/</A>.";
+static char * profile = "Visit the Ayttm website at <A HREF=\"http://ayttm.sf.net\">http://ayttm.sf.net/</A>.";
+
+static char *msgerrreason[] = {
+	"Invalid error",
+	"Invalid SNAC",
+	"Rate to host",
+	"Rate to client",
+	"Not logged in",
+	"Service unavailable",
+	"Service not defined",
+	"Obsolete SNAC",
+	"Not supported by host",
+	"Not supported by client",
+	"Refused by client",
+	"Reply too big",
+	"Responses lost",
+	"Request denied",
+	"Busted SNAC payload",
+	"Insufficient rights",
+	"In local permit/deny",
+	"Too evil (sender)",
+	"Too evil (receiver)",
+	"User temporarily unavailable",
+	"No match",
+	"List overflow",
+	"Request ambiguous",
+	"Queue full",
+	"Not while on AOL"
+};
+static int msgerrreasonlen = 25;
 
 /* misc */
 static const char *aim_normalize (const char *s);
+static char *extract_name (const char *name);
 static void connect_error (struct eb_aim_local_account_data *alad, char *msg); /* FIXME find a better name */
 static eb_account *oscar_find_account_with_ela (const char *handle, eb_local_account *ela, gint should_update);
+static eb_chat_room *oscar_find_chat_room_by_conn (struct eb_aim_local_account_data *alad, aim_conn_t *conn);
+static eb_chat_room *oscar_find_chat_room_by_name (struct eb_aim_local_account_data *alad, const char *name);
+static aim_conn_t *oscar_find_chat_conn_by_source (struct eb_aim_local_account_data *alad, int fd);
 
 /* ayttm callbacks forward declaration */
 static void ay_aim_login  (eb_local_account *account);
@@ -220,6 +275,7 @@ static void ay_aim_callback (void *data, int source, eb_input_condition conditio
 static int faim_cb_parse_login        (aim_session_t *sess, aim_frame_t *fr, ...);
 static int faim_cb_parse_authresp     (aim_session_t *sess, aim_frame_t *fr, ...);
 static int faim_cb_connerr            (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_parse_genericerr   (aim_session_t *sess, aim_frame_t *fr, ...);
 
 static int faim_cb_conninitdone_bos   (aim_session_t *sess, aim_frame_t *fr, ...);
 static int faim_cb_parse_motd         (aim_session_t *sess, aim_frame_t *fr, ...);
@@ -229,18 +285,34 @@ static int faim_cb_ssi_parserights    (aim_session_t *sess, aim_frame_t *fr, ...
 static int faim_cb_ssi_parselist      (aim_session_t *sess, aim_frame_t *fr, ...);
 static int faim_cb_ssi_parseack       (aim_session_t *sess, aim_frame_t *fr, ...);
 
-static int faim_cb_parse_locaterights (aim_session_t *sess, aim_frame_t *fr, ...);
-static int faim_cb_parse_buddyrights  (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_parse_locaterights   (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_parse_buddyrights    (aim_session_t *sess, aim_frame_t *fr, ...);
 
-static int faim_cb_icbmparaminfo      (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_icbmparaminfo        (aim_session_t *sess, aim_frame_t *fr, ...);
 
-static int faim_cb_memrequest         (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_memrequest           (aim_session_t *sess, aim_frame_t *fr, ...);
 
-static int faim_cb_parse_oncoming     (aim_session_t *sess, aim_frame_t *fr, ...);
-static int faim_cb_parse_offgoing     (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_parse_oncoming       (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_parse_offgoing       (aim_session_t *sess, aim_frame_t *fr, ...);
 
-static int faim_cb_parse_incoming_im  (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_parse_incoming_im    (aim_session_t *sess, aim_frame_t *fr, ...);
 
+static int faim_cb_handle_redirect      (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_conninitdone_chatnav (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_chatnav_info         (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_conninitdone_chat    (aim_session_t *sess, aim_frame_t *fr, ...);
+
+static int faim_cb_chat_join            (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_chat_leave           (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_chat_info_update     (aim_session_t *sess, aim_frame_t *fr, ...);
+static int faim_cb_chat_incoming_msg    (aim_session_t *sess, aim_frame_t *fr, ...);
+
+/* Connection callbacks */
+static void oscar_login_connect (int fd, int error, void *data);
+static void oscar_login_connect_status (const char *msg, void *data);
+static void oscar_chatnav_connect (int fd, int error, void *data);
+static void oscar_chatnav_connect_status (const char *msg, void *data);
+static void oscar_chat_connect (int fd, int error, void *data);
 
 /* Debug functions taken from yahoo module */
 
@@ -282,7 +354,11 @@ ay_aim_callback (void *data, int source, eb_input_condition condition)
 	
 	if (alad->conn->fd == source)
 		conn = alad->conn;
-	
+	else if (alad->conn_chatnav->fd == source)
+		conn = alad->conn_chatnav;
+	else if ((conn = oscar_find_chat_conn_by_source (alad, source)) != NULL)
+		;
+
 	if (conn == NULL) {
 		// connection not found
 		WARNING (("connection not found"))
@@ -294,26 +370,22 @@ ay_aim_callback (void *data, int source, eb_input_condition condition)
 			g_assert(ela);
 			ay_aim_logout(ela);
 			ay_aim_login(ela);
-		}
-#if 0
-		else if (conn->type == AIM_CONN_TYPE_CHATNAV) {
-			g_warning("CONNECTION ERROR! (ChatNav)");
-			eb_input_remove(alad->chatnav_input);
-			aim_conn_kill(&(alad->aimsess), &conn);
-			alad->chatnav_conn = NULL;
+		} else if (conn->type == AIM_CONN_TYPE_CHATNAV) {
+			WARNING (("CONNECTION ERROR! (ChatNav)"))
+			eb_input_remove (alad->input_chatnav);
+			aim_conn_kill (&(alad->aimsess), &conn);
+			alad->conn_chatnav = NULL;
 		} else if (conn->type == AIM_CONN_TYPE_CHAT) {
-			g_warning("CONNECTION ERROR! (Chat)");
+			WARNING (("CONNECTION ERROR! (Chat)"))
+#if 0
 			eb_input_remove(alad->chatnav_input);
 			aim_conn_kill(&(alad->aimsess), &conn);
 			alad->chat_conn = NULL;
 			alad->chat_room = NULL;
-		}
 #endif
-		WARNING (("CONNECTION ERROR !!"))
-	}
-	else
-	{
-		aim_rxdispatch(&(alad->aimsess));
+		}
+	} else {
+		aim_rxdispatch (&(alad->aimsess));
 	}
 }
 
@@ -453,7 +525,7 @@ faim_cb_parse_authresp (aim_session_t *sess, aim_frame_t *fr, ...)
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_BUD, AIM_CB_BUD_RIGHTSINFO, faim_cb_parse_buddyrights, 0);
 
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_MSG, AIM_CB_MSG_PARAMINFO, faim_cb_icbmparaminfo, 0 );
-	
+
 	/* FIXME : fix libfaim and use meaningful names:) */
 	aim_conn_addhandler(sess, alad->conn, 0x0001, 0x001f, faim_cb_memrequest, 0);
 	
@@ -461,8 +533,9 @@ faim_cb_parse_authresp (aim_session_t *sess, aim_frame_t *fr, ...)
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_BUD, AIM_CB_BUD_OFFGOING, faim_cb_parse_offgoing, 0); 
 	
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_MSG, AIM_CB_MSG_INCOMING, faim_cb_parse_incoming_im, 0 );
+
+	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_GEN, AIM_CB_GEN_REDIRECT, faim_cb_handle_redirect, 0 );
 #if 0
-	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_GEN, AIM_CB_GEN_REDIRECT, eb_aim_handleredirect, 0 );
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_STS, AIM_CB_STS_SETREPORTINTERVAL, NULL, 0 );
 	
 	aim_conn_addhandler(sess, alad->conn, AIM_CB_FAM_MSG, AIM_CB_MSG_MISSEDCALL, eb_aim_msg_missed, 0);
@@ -503,8 +576,26 @@ faim_cb_connerr (aim_session_t *sess, aim_frame_t *fr, ...)
 		} else {
 			connect_error (alad, "You have been signed off for an unknown reason.");
 		}
-		ay_aim_logout (ela);
+		if (ela->status_menu) {
+			eb_set_active_menu_status (ela->status_menu, AIM_OFFLINE);
+		}
+		// ay_aim_logout (ela);
 	}
+
+	return 1;
+}
+
+static int
+faim_cb_parse_genericerr (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	va_list ap;
+	fu16_t reason;
+
+	va_start(ap, fr);
+	reason = (fu16_t) va_arg(ap, unsigned int);
+	va_end(ap);
+
+	WARNING (("snac threw error (reason 0x%04hx: %s)\n", reason, (reason < msgerrreasonlen) ? msgerrreason[reason] : "unknown"))
 
 	return 1;
 }
@@ -751,7 +842,7 @@ faim_cb_parse_locaterights (aim_session_t *sess, aim_frame_t *fr, ...)
 	aim_locate_setprofile(sess,
 			      "us-ascii", profile, strlen(profile), /* Profile */
 			      NULL, NULL, 0, /* Away message */
-			      0); /* What we can do */
+			      caps_aim); /* What we can do */
 
 	return 1;
 }
@@ -898,42 +989,100 @@ faim_cb_parse_offgoing (aim_session_t *sess, aim_frame_t *fr, ...)
 }
 
 static int
-faim_cb_parse_incoming_im (aim_session_t *sess, aim_frame_t *fr, ...)
+oscar_incoming_im_chan1 (aim_session_t *sess,
+			 aim_conn_t *conn, aim_userinfo_t *userinfo,
+			 struct aim_incomingim_ch1_args *args)
 {
 	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+	eb_account *sender = NULL;
+
+	LOG (("Message from = %s\n", userinfo->sn))
+	LOG (("Message = %s\n", args->msg))
+
+	sender = oscar_find_account_with_ela (userinfo->sn, ela, TRUE);
+
+	if (!sender) {
+		WARNING (("Sender == NULL"))
+		sender = ay_aim_new_account (ela, userinfo->sn);
+		add_unknown (sender);
+		ay_aim_add_user (sender);
+	}
+
+	/* TODO: the message might be in unicode UCS-2BE format */
+	eb_parse_incoming_message(ela, sender, args->msg);
+
+	return 1;
+}
+
+
+static int
+oscar_incoming_im_chan2 (aim_session_t *sess,
+			 aim_conn_t *conn, aim_userinfo_t *userinfo,
+			 struct aim_incomingim_ch2_args *args)
+{
+	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+
+	LOG (("Rendez vous with %s", userinfo->sn))
+
+	if (args->reqclass & AIM_CAPS_CHAT) {
+		char *name;
+		struct oscar_chat_room_data *ocrd;
+
+		if (!args->info.chat.roominfo.name || !args->info.chat.roominfo.exchange || !args->msg)
+			return 1;
+		
+		name = extract_name (args->info.chat.roominfo.name);
+		LOG (("Chat room name = %s", name))
+
+		ocrd = g_new0 (struct oscar_chat_room_data, 1);
+		ocrd->name = (name) ? g_strdup (name) : g_strdup (args->info.chat.roominfo.name);
+		ocrd->exchange = args->info.chat.roominfo.exchange;
+
+		invite_dialog (ela, g_strdup (userinfo->sn),
+			       (name) ? g_strdup (name) : g_strdup (args->info.chat.roominfo.name),
+			       ocrd);
+
+		if (name) {
+			g_free (name);
+		}
+	}
+
+	return 1;
+}
+
+static int
+faim_cb_parse_incoming_im (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	int ret;
 
 	va_list ap;
 	fu16_t channel;
 	aim_userinfo_t *userinfo;
 	
-	eb_account *sender = NULL;
-
 	LOG (("faim_cb_parse_incoming_im"))
 
 	va_start (ap, fr);
 	channel = (fu16_t)va_arg (ap, unsigned int);
 	userinfo = va_arg(ap, aim_userinfo_t *);
 
-	if (channel == 1) {
+	switch (channel) {
+	case 1: { /* Standard message */
 		struct aim_incomingim_ch1_args *args;
-                args = va_arg(ap, struct aim_incomingim_ch1_args *);
-		va_end(ap);
+                args = va_arg (ap, struct aim_incomingim_ch1_args *);
+		va_end (ap);
+		ret = oscar_incoming_im_chan1 (sess, fr->conn, userinfo, args);
+	} break;
 
-		LOG (("Message from = %s\n", userinfo->sn))
-		LOG (("Message = %s\n", args->msg))
+	case 2: { /* Rendez vous */
+		struct aim_incomingim_ch2_args *args;
+		args = va_arg (ap, struct aim_incomingim_ch2_args *);
+		va_end (ap);
+		ret = oscar_incoming_im_chan2 (sess, fr->conn, userinfo, args);
+	} break;
 
-		sender = oscar_find_account_with_ela (userinfo->sn, ela, TRUE);
-
-		if (!sender) {
-			WARNING (("Sender == NULL"))
-
-			sender = ay_aim_new_account (ela, userinfo->sn);
-			add_unknown (sender);
-			ay_aim_add_user (sender);
-		}
-
-		/* TODO: the message might be in unicode UCS-2BE format */
-		eb_parse_incoming_message(ela, sender, args->msg);
+	default:
+		WARNING (("ICBM received on unsupported channel (channel 0x%04hx).", channel))
+		ret = 0;
 	}
 #if 0
 	else if (channel == 2)
@@ -979,214 +1128,403 @@ faim_cb_parse_incoming_im (aim_session_t *sess, aim_frame_t *fr, ...)
 	}
 #endif	
 
+	return ret;
+}
+
+
+static int
+faim_cb_handle_redirect (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+	struct eb_aim_local_account_data * alad =
+		(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+	
+	va_list ap;
+	struct aim_redirect_data *redir;
+	aim_conn_t *tstconn;
+
+	char *host;
+	int port, i;
+
+	LOG (("faim_cb_handle_redirect ()"))
+	
+	va_start (ap, fr);
+	redir = va_arg (ap, struct aim_redirect_data *);
+	va_end (ap);
+
+	port = FAIM_LOGIN_PORT;
+	for (i = 0; i < (int)strlen (redir->ip); i++) {
+		if (redir->ip[i] == ':') {
+			port = atoi (&(redir->ip[i+1]));
+			break;
+		}
+	}
+	host = g_strndup (redir->ip, i);
+
+
+	switch (redir->group) {
+
+	case 0x7: /* Authorizer */
+		LOG ((" -> Authorizer"))
+		/* TODO */
+		break;
+
+	case 0xd: /* ChatNav */
+		LOG ((" -> ChatNav"))
+		tstconn = aim_newconn (&(alad->aimsess), AIM_CONN_TYPE_CHATNAV, NULL);
+		alad->conn_chatnav = tstconn;
+
+		if (!tstconn) {
+			WARNING (("unable to connect to chatnav server\n"))
+			g_free (host);
+			return 1;
+		}
+
+		aim_conn_addhandler(&(alad->aimsess), tstconn, AIM_CB_FAM_SPECIAL,
+				    AIM_CB_SPECIAL_CONNERR, faim_cb_connerr, 0);
+		aim_conn_addhandler(&(alad->aimsess), tstconn, AIM_CB_FAM_SPECIAL,
+				    AIM_CB_SPECIAL_CONNINITDONE, faim_cb_conninitdone_chatnav, 0);
+
+		tstconn->status |= AIM_CONN_STATUS_INPROGRESS;
+
+		if (proxy_connect_host (host, port,
+					oscar_chatnav_connect, ela,
+					oscar_chatnav_connect_status) < 0) {
+			aim_conn_kill (sess, &tstconn);
+			alad->conn_chatnav = NULL;
+			WARNING (("unable to create socket to chatnav server\n"))
+			g_free (host);
+			return 1;
+		}
+
+		aim_sendcookie (sess, tstconn, redir->cookielen, redir->cookie);
+
+		break;
+
+	case 0xe: { /* Chat */
+		struct oscar_chat_room *ocr;
+		eb_chat_room *ecr;
+
+		LOG ((" -> Chat"))
+
+		tstconn = aim_newconn (&(alad->aimsess), AIM_CONN_TYPE_CHAT, NULL);
+
+		if (!tstconn) {
+			WARNING (("unable to connect to chatnav server\n"))
+			g_free (host);
+			return 1;
+		}
+
+		aim_conn_addhandler(&(alad->aimsess), tstconn, AIM_CB_FAM_SPECIAL,
+				    AIM_CB_SPECIAL_CONNERR, faim_cb_connerr, 0);
+		aim_conn_addhandler(&(alad->aimsess), tstconn, AIM_CB_FAM_SPECIAL,
+				    AIM_CB_SPECIAL_CONNINITDONE, faim_cb_conninitdone_chat, 0);
+
+		ocr = g_new0 (struct oscar_chat_room, 1);
+		ocr->conn = tstconn;
+		ocr->name = g_strdup(redir->chat.room);
+		ocr->exchange = redir->chat.exchange;
+		ocr->instance = redir->chat.instance;
+		ocr->show = extract_name(redir->chat.room);
+
+		ecr = oscar_find_chat_room_by_name (alad, ocr->show);
+		ecr->protocol_local_chat_room_data = ocr;
+
+		ocr->conn->status |= AIM_CONN_STATUS_INPROGRESS;
+
+		if (proxy_connect_host (host, port,
+					oscar_chat_connect, ecr,
+					oscar_chatnav_connect_status) < 0) {
+			aim_conn_kill (&(alad->aimsess), &tstconn);
+			WARNING (("unable to create socket to chat server\n"))
+			g_free (host);
+			g_free (ocr->name);
+			g_free (ocr->show);
+			g_free (ocr);
+			return 1;
+		}
+
+		aim_sendcookie(sess, tstconn, redir->cookielen, redir->cookie);
+
+		} break;
+
+	case 0x0010: /* Icon */
+		LOG ((" -> Icon"))
+		/* TODO */
+		break;
+
+	case 0x0018: /* EMail */
+		LOG ((" -> EMail"))
+		/* TODO */
+		break;
+
+	default:
+		WARNING ((" -> got redirect for unknown service 0x%04hx\n", redir->group))
+		break;
+	}
+
+	g_free (host);
+
+	return 1;
+}
+
+static int
+faim_cb_conninitdone_chatnav (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	LOG (("faim_cb_conninitdone_chatnav()"))
+
+	aim_conn_addhandler (sess, fr->conn, 0x000d, 0x0001, faim_cb_parse_genericerr, 0);
+	aim_conn_addhandler (sess, fr->conn, AIM_CB_FAM_CTN, AIM_CB_CTN_INFO, faim_cb_chatnav_info, 0);
+
+	aim_clientready (sess, fr->conn);
+	aim_chatnav_reqrights (sess, fr->conn);
+
+	return 1;
+}
+
+static int
+faim_cb_chatnav_info (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	va_list ap;
+	fu16_t type;
+	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+	struct eb_aim_local_account_data * alad =
+		(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+
+	va_start (ap, fr);
+	type = (fu16_t)va_arg (ap, unsigned int);
+
+	LOG (("faim_cb_chatnav_info() with type %04hx", type))
+
+	switch(type) {
+	case 0x0002: {
+		fu8_t maxrooms;
+		struct aim_chat_exchangeinfo *exchanges;
+		int exchangecount, i;
+
+		maxrooms = (fu8_t) va_arg(ap, unsigned int);
+		exchangecount = va_arg(ap, int);
+		exchanges = va_arg(ap, struct aim_chat_exchangeinfo *);
+
+		LOG (("chat info: Chat Rights:"))
+		LOG (("chat info: \tMax Concurrent Rooms: %hhd", maxrooms))
+		LOG (("chat info: \tExchange List: (%d total)", exchangecount))
+
+		for (i = 0; i < exchangecount; i++) {
+			LOG (("chat info: \t\t%hu    %s", exchanges[i].number, exchanges[i].name ? exchanges[i].name : ""))
+		}
+
+		while (alad->pending_rooms) {
+			struct oscar_chat_room_data *ocrd =
+				(struct oscar_chat_room_data *)alad->pending_rooms->data;
+			LOG (("Creating room %s", ocrd->name))
+
+			alad->rooms = l_list_append (alad->rooms, ocrd->ecr);
+			aim_chatnav_createroom (sess, fr->conn, ocrd->name, ocrd->exchange);
+
+			g_free (ocrd->name);
+			alad->pending_rooms = l_list_remove (alad->pending_rooms, ocrd);
+			g_free (ocrd);
+		}
+	}
+		break;
+
+	case 0x0008: {
+		char *fqcn, *name, *ck;
+		fu16_t instance, flags, maxmsglen, maxoccupancy, unknown, exchange;
+		fu8_t createperms;
+		fu32_t createtime;
+
+		fqcn = va_arg(ap, char *);
+		instance = (fu16_t)va_arg(ap, unsigned int);
+		exchange = (fu16_t)va_arg(ap, unsigned int);
+		flags = (fu16_t)va_arg(ap, unsigned int);
+		createtime = va_arg(ap, fu32_t);
+		maxmsglen = (fu16_t)va_arg(ap, unsigned int);
+		maxoccupancy = (fu16_t)va_arg(ap, unsigned int);
+		createperms = (fu8_t)va_arg(ap, unsigned int);
+		unknown = (fu16_t)va_arg(ap, unsigned int);
+		name = va_arg(ap, char *);
+		ck = va_arg(ap, char *);
+
+		LOG (("created room: %s %hu %hu %hu %u %hu %hu %hhu %hu %s %s\n", fqcn, exchange, instance, flags, createtime, maxmsglen, maxoccupancy, createperms, unknown, name, ck))
+		aim_chat_join (&(alad->aimsess), alad->conn, exchange, ck, instance);
+	}
+		break;
+	default:
+		LOG (("chatnav info: unknown type (%04hx)\n", type))
+		break;
+	}
+
+	va_end(ap);
+
+	return 1;
+}
+
+static int
+faim_cb_conninitdone_chat (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	eb_chat_room *ecr;
+	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+	struct eb_aim_local_account_data *alad =
+		(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+
+	aim_conn_addhandler (&(alad->aimsess), fr->conn, AIM_CB_FAM_CHT,
+			     0x0001, faim_cb_parse_genericerr, 0);
+	aim_conn_addhandler (&(alad->aimsess), fr->conn, AIM_CB_FAM_CHT,
+			     AIM_CB_CHT_USERJOIN, faim_cb_chat_join, 0);
+	aim_conn_addhandler (&(alad->aimsess), fr->conn, AIM_CB_FAM_CHT,
+			     AIM_CB_CHT_USERLEAVE, faim_cb_chat_leave, 0);
+	aim_conn_addhandler (&(alad->aimsess), fr->conn, AIM_CB_FAM_CHT,
+			     AIM_CB_CHT_ROOMINFOUPDATE, faim_cb_chat_info_update, 0);
+	aim_conn_addhandler (&(alad->aimsess), fr->conn, AIM_CB_FAM_CHT,
+			     AIM_CB_CHT_INCOMINGMSG, faim_cb_chat_incoming_msg, 0);
+
+	aim_clientready(&(alad->aimsess), fr->conn);
+
+	ecr = oscar_find_chat_room_by_conn (alad, fr->conn);
+	eb_join_chat_room (ecr);
+
+	return 1;
+}
+
+static int
+faim_cb_chat_join (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+	struct eb_aim_local_account_data * alad =
+		(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+
+	va_list ap;
+	int count, i;
+	aim_userinfo_t *info;
+	eb_chat_room *ecr;
+
+	LOG (("faim_cb_chat_join()"))
+
+	va_start(ap, fr);
+	count = va_arg(ap, int);
+	info  = va_arg(ap, aim_userinfo_t *);
+	va_end(ap);
+
+	ecr = oscar_find_chat_room_by_conn (alad, fr->conn);
+	if (!ecr) {
+		WARNING (("Can't find chatroom !"))
+		return 1;
+	}
+
+	for (i = 0; i < count; i++) {
+		eb_account *ea = oscar_find_account_with_ela (info[i].sn, ela, TRUE);
+		if (ea) {
+			eb_chat_room_buddy_arrive (ecr, ea->account_contact->nick, info[i].sn);
+		} else {
+			eb_chat_room_buddy_arrive (ecr, info[i].sn, info[i].sn);
+		}
+	}
+
+	return 1;
+}
+
+static int
+faim_cb_chat_leave (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+	struct eb_aim_local_account_data * alad =
+		(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+
+	va_list ap;
+	int count, i;
+	aim_userinfo_t *info;
+	eb_chat_room *ecr;
+
+	LOG (("faim_cb_chat_leave()"))
+
+	va_start(ap, fr);
+	count = va_arg(ap, int);
+	info  = va_arg(ap, aim_userinfo_t *);
+	va_end(ap);
+
+	ecr = oscar_find_chat_room_by_conn (alad, fr->conn);
+	if (!ecr) {
+		WARNING (("Can't find chatroom !"))
+		return 1;
+	}
+
+	for (i = 0; i < count; i++) {
+		eb_chat_room_buddy_leave (ecr, info[i].sn);
+	}
+
+	return 1;
+}
+
+static int
+faim_cb_chat_info_update (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	va_list ap;
+	aim_userinfo_t *userinfo;
+	struct aim_chat_roominfo *roominfo;
+	char *roomname;
+	int usercount;
+	char *roomdesc;
+	fu16_t unknown_c9, unknown_d2, unknown_d5, maxmsglen, maxvisiblemsglen;
+	fu32_t creationtime;
+
+	va_start(ap, fr);
+	roominfo = va_arg(ap, struct aim_chat_roominfo *);
+	roomname = va_arg(ap, char *);
+	usercount= va_arg(ap, int);
+	userinfo = va_arg(ap, aim_userinfo_t *);
+	roomdesc = va_arg(ap, char *);
+	unknown_c9 = (fu16_t)va_arg(ap, unsigned int);
+	creationtime = va_arg(ap, fu32_t);
+	maxmsglen = (fu16_t)va_arg(ap, unsigned int);
+	unknown_d2 = (fu16_t)va_arg(ap, unsigned int);
+	unknown_d5 = (fu16_t)va_arg(ap, unsigned int);
+	maxvisiblemsglen = (fu16_t)va_arg(ap, unsigned int);
+	va_end(ap);
+
+	LOG (("inside chat_info_update (maxmsglen = %hu, maxvislen = %hu)\n", maxmsglen, maxvisiblemsglen))
+
+	return 1;
+}
+
+static int
+faim_cb_chat_incoming_msg (aim_session_t *sess, aim_frame_t *fr, ...)
+{
+	eb_local_account *ela = (eb_local_account *)sess->aux_data;
+	struct eb_aim_local_account_data * alad =
+		(struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+
+	va_list ap;
+	aim_userinfo_t *info;
+	char *msg;
+
+	eb_chat_room *ecr;
+
+	va_start (ap, fr);
+	info = va_arg (ap, aim_userinfo_t *);
+	msg = va_arg (ap, char *);
+	va_end (ap);
+
+	LOG (("faim_cb_chat_incoming_msg(): %s => %s", info->sn, msg))
+
+	ecr = oscar_find_chat_room_by_conn (alad, fr->conn);
+	if (!ecr) {
+		WARNING (("Can't find chatroom !"))
+		return 1;
+	}
+
+	eb_account *ea = oscar_find_account_with_ela (info->sn, ela, TRUE);
+	if (ea) {
+		eb_chat_room_show_message (ecr, ea->account_contact->nick, msg);
+	} else {
+		eb_chat_room_show_message (ecr, info->sn, msg);
+	}
+
 	return 1;
 }
 
 #if 0
-
-int eb_aim_handleredirect(struct aim_session_t *sess, struct command_rx_struct *command, ...)
-{
-  va_list ap;
-  int serviceid;
-  char *ip;
-  char *cookie;
-  /* this is the new buddy list */
-  char * buddies = NULL;
-  /* this is the new profile */
-  char buff[1024];
-  FILE *fp;  
-  int i = 0;
-  LList * node;
-  eb_local_account * account = aim_find_local_account_by_conn(command->conn ); 
-  struct eb_aim_local_account_data *alad =
-    account->protocol_local_account_data;
-
-
-#ifdef DEBUG
-  g_message("eb_aim_handleredirect");
-#endif
-
-
-  for( node = aim_buddies; node && i < 50; node=node->next, i++ )
-  {
-    char *handle = node->data;
-    if (buddies)
-    {
-      char * buddies_old = buddies;
-      buddies = g_strconcat(buddies, aim_normalize(handle), "&", NULL);
-      free(buddies_old);
-    }
-    else
-    {
-      buddies = g_strconcat(aim_normalize(handle), "&", NULL);
-    }
-  }
-  node=aim_buddies;
-
-#ifdef DEBUG
-  g_message("%s\n", buddies);
-#endif
-  
-
-  va_start(ap, command);
-  serviceid = va_arg(ap, int);
-  ip = va_arg(ap, char *);
-  cookie = va_arg(ap, char *);
-  va_end(ap);
-  switch(serviceid)
-  {
-      case 0x0005: /* Advertisements */
-        /* send the buddy list and profile (required, even if empty) */
-		buddies = g_strconcat(aim_normalize(sess->logininfo.screen_name), "&", NULL ); 
-        //aim_bos_setbuddylist(sess, command->conn, "");
-        aim_bos_setprofile(sess, command->conn, profile, NULL, AIM_CAPS_CHAT);
-		aim_seticbmparam(sess, command->conn);
-		aim_conn_setlatency(command->conn, 1);
-
-        /* send final login command (required) */
-        aim_bos_clientready(sess, command->conn); /* tell BOS we're ready to go live */
-		
-
-		eb_input_remove(alad->input);
-		while( node )
-		{
-			int j =0;
-  			for(i=0 ; node && i < 50 ; node=node->next, i++ )
-			{
-				signal(SIGPIPE, SIG_IGN);
-				aim_add_buddy(sess, command->conn, aim_normalize((char*)(node->data)));
-		 		while (gtk_events_pending())
-					gtk_main_iteration();
-				usleep(10000);
-				//fprintf(stderr, "Ignoring %s\n", node->data);	
-
-			}
-			if(node)
-			{
-			
-				for( j = 0; j < 50; j++ )
-				{
-		 			while (gtk_events_pending())
-						gtk_main_iteration();
-					usleep(10000);
-				}
-			}
-
-			//sleep(5);
-		}
-  		alad->input = eb_input_add(alad->conn->fd, EB_INPUT_READ|EB_INPUT_EXCEPTION , eb_aim_callback, account);
-
-
-        /* you should now be ready to go */
-#ifdef DEBUG
-                                                                                                                        		g_message("You are now officially online. (%s)", ip);
-#endif
-
-        break;
-      case 0x0007: /* Authorizer */
-      {
-         struct aim_conn_t *tstconn;
-         /* Open a connection to the Auth */
-
-         tstconn = aim_newconn(sess, AIM_CONN_TYPE_AUTH, ip);
-         if ( (tstconn==NULL) || (tstconn->status >= AIM_CONN_STATUS_RESOLVERR) )
-             g_warning("faimtest: unable to reconnect with authorizer");
-         else
-	 {
-	   /* TODO */
-	   eb_input_add(tstconn->fd,
-			 EB_INPUT_READ | EB_INPUT_EXCEPTION,
-			 eb_aim_callback, tstconn);
-
-	   /* Send the cookie to the Auth */
-	   aim_auth_sendcookie(sess, tstconn, cookie);
-	 }
-      }
-      break;
-      case 0x000d: /* ChatNav */
-      {
-          struct aim_conn_t *tstconn = NULL;
-#ifdef DEBUG
-	  g_message("eb_aim_handleredirect (ChatNav)");
-#endif
-
-          tstconn = aim_newconn(sess, AIM_CONN_TYPE_CHATNAV, ip);
-          if ( (tstconn==NULL) || (tstconn->status >= AIM_CONN_STATUS_RESOLVERR))
-	    g_warning("faimtest: unable to connect to chatnav server");
-          else
-	  {
-#ifdef DEBUG
-	    g_message("eb_aim_handleredirect (ChatNav)");
-#endif
-
-	    aim_conn_addhandler(sess, tstconn, AIM_CB_FAM_GEN,
-				AIM_CB_GEN_SERVERREADY,
-				eb_aim_serverready, 0);
-	    aim_auth_sendcookie(sess, tstconn, cookie);
-
-	    alad->chatnav_conn = tstconn;
-	    alad->chatnav_input =
-	      eb_input_add(tstconn->fd,
-			    EB_INPUT_READ|EB_INPUT_EXCEPTION,
-			    eb_aim_callback, account);
-	  }
-      }
-      break;
-      case 0x000e: /* Chat */
-      {
-	char *roomname = NULL;
-	struct aim_conn_t *tstconn = NULL;
-
-#ifdef DEBUG
-	g_message("eb_aim_handleredirect (Chat)");
-#endif
-
-	roomname = va_arg(ap, char *);
-
-	if (alad->chat_conn == NULL)
-	{
-	  tstconn = aim_newconn(sess, AIM_CONN_TYPE_CHAT, ip);
-	  if ((tstconn==NULL) ||
-	      (tstconn->status >= AIM_CONN_STATUS_RESOLVERR))
-          {
-            g_warning("faimtest: unable to connect to chat server");
-            if (tstconn) aim_conn_kill(sess, &tstconn);
-	  }
-	  else
-	  {
-	    aim_chat_attachname(tstconn, roomname);
-
-	    aim_conn_addhandler(sess, tstconn, AIM_CB_FAM_GEN,
-				AIM_CB_GEN_SERVERREADY,
-				eb_aim_serverready, 0);
-	    aim_auth_sendcookie(sess, tstconn, cookie);
-
-	    alad->chat_conn = tstconn;
-	    strncpy(alad->chat_room->id, sizeof(alad->chat_room->id)-1, roomname);
-	    alad->chat_input =
-	      eb_input_add(tstconn->fd,
-			    EB_INPUT_READ|EB_INPUT_EXCEPTION,
-			    eb_aim_callback, account);
-
-#ifdef DEBUG
-	    g_message("new CHAT connection: %d", tstconn->fd);
-#endif
-	  }
-	}
-	else
-	{
-	  g_warning("Sorry, only one chat connection.");
-	}
-      }
-      break;
-
-   default:
-    g_warning("uh oh... got redirect for unknown service 0x%04x!!", serviceid);
-    /* dunno */
-  }
-  free(buddies);
-  return 1;
-}
 
 int eb_aim_msg_missed(struct aim_session_t * sess,struct command_rx_struct *command, ...)
 {
@@ -1206,7 +1544,93 @@ int eb_aim_msg_error(struct aim_session_t * sess,struct command_rx_struct *comma
 #endif /* #if 0 */
 
 
+/************************/
+/* Connection callbacks */
+/************************/
 
+static void
+oscar_login_connect (int fd, int error, void *data)
+{
+	eb_local_account *account = (eb_local_account *)data;
+	struct eb_aim_local_account_data *alad =
+		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	LOG (("oscar_login_connect(): fd=%d, error=%d", fd, error))
+
+	alad->conn->fd = fd;
+
+	if (fd < 0) {
+		connect_error (alad, "Could not connect to host");
+		ref_count--;
+		return;
+	}
+
+	aim_conn_completeconnect (&(alad->aimsess), alad->conn);
+
+	alad->input = eb_input_add (alad->conn->fd, EB_INPUT_READ|EB_INPUT_EXCEPTION ,
+				    ay_aim_callback, account);
+}
+
+static void
+oscar_login_connect_status (const char *msg, void *data)
+{
+	LOG (("oscar_login_connect_status() : %s", msg))
+	/* TODO */
+}			    
+
+static void
+oscar_chatnav_connect (int fd, int error, void *data)
+{
+	eb_local_account *account = (eb_local_account *)data;
+	struct eb_aim_local_account_data *alad =
+		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	LOG (("oscar_chatnav_connect(): fd=%d, error=%d", fd, error))
+
+	alad->conn_chatnav->fd = fd;
+
+	if (fd < 0) {
+		WARNING (("unable to create socket to chatnav server\n"))
+		return;
+	}
+
+	aim_conn_completeconnect (&(alad->aimsess), alad->conn_chatnav);
+
+	alad->input_chatnav = eb_input_add (alad->conn_chatnav->fd, EB_INPUT_READ|EB_INPUT_EXCEPTION ,
+					    ay_aim_callback, account);
+}
+
+static void
+oscar_chatnav_connect_status (const char *msg, void *data)
+{
+	LOG (("oscar_chatnav_connect_status() : %s", msg))
+}			    
+
+static void
+oscar_chat_connect (int fd, int error, void *data)
+{
+	eb_chat_room *ecr = (eb_chat_room *)data;
+	struct oscar_chat_room *ocr = (struct oscar_chat_room *)ecr->protocol_local_chat_room_data;
+	eb_local_account *account = ecr->local_user;
+	struct eb_aim_local_account_data *alad =
+		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	LOG (("oscar_chat_connect(): fd=%d, error=%d", fd, error))
+
+	if (fd < 0) {
+		aim_conn_kill (&(alad->aimsess), &(ocr->conn));
+		g_free (ocr->name);
+		g_free (ocr->show);
+		g_free (ocr);
+		WARNING (("unable to create socket to chat server\n"))
+		return;
+	}
+
+	ocr->conn->fd = fd;
+	aim_conn_completeconnect (&(alad->aimsess), ocr->conn);
+	ocr->input = eb_input_add (ocr->conn->fd, EB_INPUT_READ|EB_INPUT_EXCEPTION ,
+				   ay_aim_callback, account);
+}
 
 /*********************************/
 /***  callbacks used by Ayttm  ***/
@@ -1258,7 +1682,7 @@ ay_oscar_finish_login (const char *password, void *data)
 	 * time we want to send something !                                */
 	aim_tx_setenqueue(&(alad->aimsess), AIM_TX_IMMEDIATE, NULL);
 	
-	alad->conn = aim_newconn(&(alad->aimsess), AIM_CONN_TYPE_AUTH, FAIM_LOGIN_SERVER);
+	alad->conn = aim_newconn(&(alad->aimsess), AIM_CONN_TYPE_AUTH, NULL);
 	if(!alad->conn)
 	{
 		connect_error (alad, "Failed to connect to AIM server.");
@@ -1266,25 +1690,6 @@ ay_oscar_finish_login (const char *password, void *data)
 		fprintf (stderr, "ay_aim_login: Decrementing ref_count to %i\n", ref_count);
 		return;
 	}
-	if(alad->conn->fd == -1 )
-	{
-		ref_count--;
-		fprintf (stderr, "ay_aim_login: Decrementing ref_count to %i\n", ref_count);
-		if (alad->conn->status & AIM_CONN_STATUS_RESOLVERR)
-		{
-			connect_error (alad, "Could not resolve authorizer name.");
-		}
-		else if (alad->conn->status & AIM_CONN_STATUS_CONNERR)
-		{
-			connect_error (alad, "Could not connect to authorizer.");
-		}
-		else
-		{
-			connect_error (alad, "Unknown connection problem.");
-		}
-		return;
-	}
-		
 
 	aim_conn_addhandler (&(alad->aimsess), alad->conn,
 			     AIM_CB_FAM_ATH, AIM_CB_ATH_AUTHRESPONSE,
@@ -1296,13 +1701,18 @@ ay_oscar_finish_login (const char *password, void *data)
 			     AIM_CB_FAM_SPECIAL, AIM_CB_SPECIAL_CONNERR,
 			     faim_cb_connerr, 0);
 
+	alad->conn->status |= AIM_CONN_STATUS_INPROGRESS;
+
+	if (proxy_connect_host (FAIM_LOGIN_SERVER, FAIM_LOGIN_PORT,
+				oscar_login_connect, account,
+				oscar_login_connect_status) < 0) {
+		connect_error (alad, "Could not connect to host");
+		ref_count--;
+		return;
+	}
+
 	LOG (("Requesting connection with screename %s\n", account->handle))
 	aim_request_login (&(alad->aimsess), alad->conn, account->handle);
-
-	alad->input = eb_input_add (alad->conn->fd, EB_INPUT_READ|EB_INPUT_EXCEPTION ,
-				    ay_aim_callback, account);
-	LOG (("ADDING TAG = %d\n", alad->input))
-	
 }
 
 static void
@@ -1428,7 +1838,9 @@ ay_aim_read_local_config (LList *pairs)
 
 	oscar_init_account_prefs (ela);
 	eb_update_from_value_pair(ela->prefs, pairs);
-	
+
+	strncpy(ela->alias, ela->handle, sizeof(ela->alias));
+
 	return ela;
 }
 
@@ -1482,9 +1894,9 @@ ay_aim_new_account (eb_local_account * ela, const char *account)
 {
 	eb_account *a = g_new0 (eb_account, 1);
 	struct eb_aim_account_data *aad = g_new0 (struct eb_aim_account_data, 1);
-	
+
 	LOG (("new account = %s\n", account))
-	
+
 	a->protocol_account_data = aad;
 	strncpy (a->handle, account, sizeof(a->handle)-1);
 	a->service_id = SERVICE_INFO.protocol_id;
@@ -1526,22 +1938,13 @@ ay_oscar_set_away (eb_local_account * account, gchar * message)
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
 	if (message) {
-		if(account->status_menu)
-		{
-			eb_set_active_menu_status(account->status_menu, AIM_AWAY);
-			LOG (("SETTING AWAY"))
-
+		if (account->status_menu) {
+			eb_set_active_menu_status (account->status_menu, AIM_AWAY);
 		}
-		// aim_bos_setprofile(&(alad->aimsess), alad->conn, profile, message, AIM_CAPS_CHAT);
-		LOG (("MESSAGE : %s", message))
 	} else {
-		if(account->status_menu)
-		{
-			eb_set_active_menu_status(account->status_menu, AIM_ONLINE);
-
+		if (account->status_menu) {
+			eb_set_active_menu_status (account->status_menu, AIM_ONLINE);
 		}
-		// aim_bos_setprofile(&(alad->aimsess), alad->conn, profile, NULL, AIM_CAPS_CHAT);
-		LOG (("PAS DE MESSAGE"))
 	}
 }
 
@@ -1611,7 +2014,7 @@ ay_aim_set_current_state (eb_local_account * account, gint state)
 		aim_locate_setprofile(&(alad->aimsess),
 				      NULL, NULL, 0, /* Profile */
 				      NULL, "", 0, /* Away message */
-				      0); /* What we can do */
+				      caps_aim); /* What we can do */
 		break;
 
 	case AIM_AWAY:
@@ -1626,7 +2029,7 @@ ay_aim_set_current_state (eb_local_account * account, gint state)
 		aim_locate_setprofile(&(alad->aimsess),
 				      NULL, NULL, 0,
 				      "iso-8859-1", awaymsg, strlen (awaymsg),
-				      0);
+				      caps_aim);
 		break;
 
 	case AIM_OFFLINE:
@@ -1702,6 +2105,130 @@ ay_aim_check_login (char *user, char *pass)
 	return NULL;
 }
 
+static void
+oscar_create_room (eb_local_account *account, struct oscar_chat_room_data *ocrd)
+{
+	aim_conn_t *cur;
+	struct eb_aim_local_account_data *alad;
+	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	if ((cur = aim_getconn_type(&(alad->aimsess), AIM_CONN_TYPE_CHATNAV))) {
+		LOG (("chatnav exists, creating room"))
+
+		alad->rooms = l_list_append (alad->rooms, ocrd->ecr);
+		aim_chatnav_createroom(&(alad->aimsess), cur, ocrd->name, ocrd->exchange);
+		g_free (ocrd->name);
+		g_free (ocrd);
+	} else {
+		LOG (("chatnav does not exist, opening chatnav"))
+		alad->pending_rooms = l_list_append (alad->pending_rooms, ocrd);
+		aim_reqservice(&(alad->aimsess), alad->conn, AIM_CONN_TYPE_CHATNAV);
+	}
+}
+
+static void
+ay_oscar_accept_invite (eb_local_account *account, void *data)
+{
+	struct oscar_chat_room_data *ocrd =
+		(struct oscar_chat_room_data *)data;
+	eb_chat_room * ecr = g_new0 (eb_chat_room, 1);
+
+	LOG (("ay_oscar_accept_invite()"))
+
+	strncpy(ecr->room_name, ocrd->name, sizeof(ecr->room_name));
+	ecr->fellows = NULL;
+	ecr->connected = FALSE;
+	ecr->local_user = account;
+
+	ocrd->ecr = ecr;
+
+	oscar_create_room (account, ocrd);
+}
+
+static void
+ay_oscar_decline_invite (eb_local_account *account, void *data)
+{
+	struct oscar_chat_room_data *ocrd =
+		(struct oscar_chat_room_data *)data;
+	LOG (("ay_oscar_decline_invite()"))
+	g_free (ocrd->name);
+	g_free (ocrd);
+}
+
+static eb_chat_room *
+ay_oscar_make_chat_room (char *name, eb_local_account *account, int is_public)
+{
+	struct oscar_chat_room_data *ocrd;
+	eb_chat_room * ecr = g_new0 (eb_chat_room, 1);
+
+	LOG (("ay_oscar_make_chat_room()"))
+
+	strncpy(ecr->room_name, name, sizeof(ecr->room_name));
+	ecr->fellows = NULL;
+	ecr->connected = FALSE;
+	ecr->local_user = account;
+
+	ocrd = g_new0 (struct oscar_chat_room_data, 1);
+	ocrd->name = g_strdup (name);
+	ocrd->exchange = 4; /* FIXME */
+	ocrd->ecr = ecr;
+
+	oscar_create_room (account, ocrd);
+
+	return ecr;
+}
+
+static void
+ay_oscar_join_chat_room (eb_chat_room * room)
+{
+	LOG (("ay_oscar_join_chat_room()"))
+}
+
+static void
+ay_oscar_leave_chat_room (eb_chat_room * room)
+{
+	struct oscar_chat_room *ocr = (struct oscar_chat_room *)room->protocol_local_chat_room_data;
+	eb_local_account *account = room->local_user;
+	struct eb_aim_local_account_data *alad =
+		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	LOG (("ay_oscar_leave_chat_room()"))
+
+	alad->rooms = l_list_remove (alad->rooms, room);
+	g_free (ocr->name);
+	g_free (ocr->show);
+
+	aim_conn_kill (&(alad->aimsess), &(ocr->conn));
+	eb_input_remove (ocr->input);
+
+	g_free (ocr);
+}
+
+static void
+ay_oscar_send_chat_room_message (eb_chat_room *room, char * message)
+{
+	struct oscar_chat_room *ocr = (struct oscar_chat_room *)room->protocol_local_chat_room_data;
+	eb_local_account *account = room->local_user;
+	struct eb_aim_local_account_data *alad =
+		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
+
+	aim_chat_send_im(&(alad->aimsess), ocr->conn, 0, message, strlen(message));
+}
+
+static void
+ay_oscar_send_invite (eb_local_account *account, eb_chat_room *room,
+		      char *user, char *message)
+{
+	struct eb_aim_local_account_data * alad;
+	struct oscar_chat_room *ocr;
+
+	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
+	ocr = (struct oscar_chat_room *)room->protocol_local_chat_room_data;
+
+	aim_chat_invite (&(alad->aimsess), alad->conn, user, message,
+			 ocr->exchange, ocr->name, 0x0);
+}
+
 #if 0
 
 void eb_aim_set_idle( eb_local_account * ela, gint idle )
@@ -1769,16 +2296,16 @@ query_callbacks ()
 	sc->set_idle = NULL; /* eb_aim_set_idle; */
 	sc->set_away = ay_oscar_set_away;
 
-	/* Chat room */ /* Not yet implemented */
+	/* Chat room */
 
-	sc->send_chat_room_message = NULL; /* eb_aim_send_chat_room_message; */
-	sc->join_chat_room = NULL; /* eb_aim_join_chat_room; */
-	sc->leave_chat_room = NULL; /* eb_aim_leave_chat_room; */
-	sc->make_chat_room = NULL; /* eb_aim_make_chat_room; */
+	sc->send_chat_room_message = ay_oscar_send_chat_room_message;
+	sc->join_chat_room =  ay_oscar_join_chat_room;
+	sc->leave_chat_room = ay_oscar_leave_chat_room;
+	sc->make_chat_room = ay_oscar_make_chat_room;
 
-	sc->send_invite = NULL; /* eb_aim_send_invite; */
-	sc->accept_invite = NULL; /* eb_aim_accept_invite; */
-	sc->decline_invite = NULL; /* eb_aim_decline_invite; */
+	sc->send_invite = ay_oscar_send_invite;
+	sc->accept_invite = ay_oscar_accept_invite;
+	sc->decline_invite = ay_oscar_decline_invite;
 
 	/* Not yet implemented */
 	sc->send_file = NULL;
@@ -1840,10 +2367,42 @@ aim_normalize (const char *s)
 }
 
 
+/* Extract Chat room name */
+static char *
+extract_name (const char *name)
+{
+	char *tmp, *x;
+	int i, j;
+	
+	if (!name)
+		return NULL;
+	
+	x = strchr(name, '-');
+	
+	if (!x) return NULL;
+	x = strchr(++x, '-');
+	if (!x) return NULL;
+	tmp = g_strdup(++x);
+
+	for (i = 0, j = 0; x[i]; i++) {
+		char hex[3];
+		if (x[i] != '%') {
+			tmp[j++] = x[i];
+			continue;
+		}
+		strncpy(hex, x + ++i, 2); hex[2] = 0;
+		i++;
+		tmp[j++] = strtol(hex, NULL, 16);
+	}
+
+	tmp[j] = 0;
+	return tmp;
+}
+
 static eb_account *
 oscar_find_account_with_ela (const char *handle, eb_local_account *ela, gint should_update)
 {
-	eb_account *result;
+	eb_account *result = NULL;
 
 
 	result = find_account_with_ela (aim_normalize(handle), ela);
@@ -1874,6 +2433,81 @@ oscar_find_account_with_ela (const char *handle, eb_local_account *ela, gint sho
 			strncpy (result->handle, handle, sizeof (result->handle)-1);
 			write_contact_list ();
 		}
+	}
+
+	if (result) {
+		LOG (("oscar_find_account_with_ela(): %s => %s", handle, result->account_contact->nick))
+	} else {
+		LOG (("oscar_find_account_with_ela(): nothing found"))
+	}
+
+	return result;
+}
+
+static eb_chat_room *
+oscar_find_chat_room_by_name (struct eb_aim_local_account_data *alad,
+			      const char *name)
+{
+	LList *node;
+	eb_chat_room *result = NULL;
+	eb_chat_room *ecr = NULL;
+
+	node = alad->rooms;
+	while (node) {
+		ecr = (eb_chat_room *)node->data;
+		if (strcmp (ecr->room_name, name) == 0) {
+			result = ecr;
+			break;
+		}
+
+		node = l_list_next (node);
+	}
+
+	return result;
+}
+
+static aim_conn_t *
+oscar_find_chat_conn_by_source (struct eb_aim_local_account_data *alad,
+				int fd)
+{
+	LList *node;
+	eb_chat_room *ecr = NULL;
+	struct oscar_chat_room *ocr = NULL;
+	aim_conn_t *result = NULL;
+
+	node = alad->rooms;
+	while (node) {
+		ecr = (eb_chat_room *)node->data;
+		ocr = (struct oscar_chat_room *)ecr->protocol_local_chat_room_data;
+		if (ocr->conn->fd == fd) {
+			result = ocr->conn;
+			break;
+		}
+
+		node = l_list_next (node);
+	}
+
+	return result;
+}
+
+static eb_chat_room *
+oscar_find_chat_room_by_conn (struct eb_aim_local_account_data *alad,
+			      aim_conn_t *conn)
+{
+	LList *node;
+	eb_chat_room *result = NULL;
+	eb_chat_room *ecr = NULL;
+
+	node = alad->rooms;
+	while (node) {
+		ecr = (eb_chat_room *)node->data;
+
+		if (((struct oscar_chat_room *)ecr->protocol_local_chat_room_data)->conn == conn) {
+			result = ecr;
+			break;
+		}
+
+		node = l_list_next (node);
 	}
 
 	return result;
