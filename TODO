@@ -7,12 +7,13 @@ TODO 0.3.1
   * local account should be stored in the eb_account struct - Done
   * Modules should be fixed (static things and so on)
     - MSN 	ok
-    - Yahoo	almost ok (grep FIXME)
+    - Yahoo	Done
     - *TOC	Half-fixed (some unknown problems like segs)
     - Jabber	Not checked
     - IRC	Not checked
-* Yahoo webcam support
+* Yahoo webcam support - half done
 * Standardise on autoconf/automake versions (2.53/1.6) - Done
+* Right click on contact list to sort contacts
 
 
 TODO later
@@ -24,6 +25,7 @@ TODO later
 * Yahoo voice support ? 
 * GPG encryption utility
 * 1-to-1 conversation -> group chat by inviting a user
+* Remember last selected smiley pack
 
 eyecandy
 * emoticons in contact names and status
