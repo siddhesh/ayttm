@@ -1,3 +1,7 @@
+* Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-73
+- src/message_parse.c
+Use new activity_bar for ayttm-ayttm FT
+
 * Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-72
 - modules/*toc
 Use new activity_bar for file transfers

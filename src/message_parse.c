@@ -53,7 +53,6 @@
 #include "util.h"
 #include "dialog.h"
 #include "globals.h"
-#include "progress_window.h"
 #include "service.h"
 #include "plugin_api.h"
 #ifdef __MINGW32__
@@ -177,26 +176,26 @@ static int update_send_progress(void * data )
 #endif
 	if( xfer_in_progress > 0 )
 	{
-		update_progress(pcd->tag, amount_received);
+		ay_progress_bar_update_progress(pcd->tag, amount_received);
 	}
 	else if( xfer_in_progress == -1 )
 	{
 		do_error_dialog(_("Remote Side Disconnected"), _("Ayttm file x-fer"));
-		progress_window_close(pcd->tag);
+		ay_activity_bar_remove(pcd->tag);
 		eb_timeout_remove(pcd->timer);
 		free(pcd);
 	}
 	else if( xfer_in_progress == -2 )
 	{
 		do_error_dialog(_("Unable to open file!"), _("Ayttm file x-fer"));
-		progress_window_close(pcd->tag);
+		ay_activity_bar_remove(pcd->tag);
 		eb_timeout_remove(pcd->timer);
 		free(pcd);
 	}
 	else
 	{
 		do_error_dialog(_("File Sent Successfully"), _("Ayttm file x-fer"));
-		progress_window_close(pcd->tag);
+		ay_activity_bar_remove(pcd->tag);
 		eb_timeout_remove(pcd->timer);
 		free(pcd);
 	}
@@ -259,10 +258,12 @@ static void send_file( char * filename, int s )
 	if(!strcmp(accept,"ACCEPT") )
 	{
 		progress_callback_data * pcd = calloc(1, sizeof(progress_callback_data));
+		char label[1024];
 		xfer_in_progress = 1;
 		fp = fopen(filename,"rb");
 		printf("%s %s %d %5d %p\n", filename, filename+i+1, strlen(filename), htons(strlen(filename+i+1)), fp);
-		pcd->tag = progress_window_new(filename,fileinfo.st_size);
+		snprintf(label,1024,"Transferring %s...", filename);
+		pcd->tag = ay_progress_bar_add(label,fileinfo.st_size,NULL,NULL);
 #ifndef __MINGW32__
 		pthread_mutex_init(&mutex, NULL);
 		if(pthread_create(&thread, NULL, 
@@ -294,7 +295,7 @@ static void get_file2( void *data, int source, eb_input_condition condition )
 		fclose(fp);
 		close(source);
 		do_error_dialog(_("File Receive Complete"), _("Ayttm File x-fer"));
-		progress_window_close(pcd->tag);
+		ay_activity_bar_remove(pcd->tag);
 
 		xfer_in_progress = 0;
 		eb_input_remove(pcd->input);
@@ -308,7 +309,7 @@ static void get_file2( void *data, int source, eb_input_condition condition )
 			fputc(buffer[i], fp);
 		}
 		amount_received += len2;
-		update_progress(pcd->tag, amount_received);
+		ay_progress_bar_update_progress(pcd->tag, amount_received);
 	}
 }
 
@@ -333,7 +334,7 @@ static void accept_file( GtkWidget * widget, gpointer data )
 		close(fd);
 		fclose(fp);
 		xfer_in_progress = 0;
-		progress_window_close(pcd->tag);
+		ay_activity_bar_remove(pcd->tag);
 		free(pcd);
 	}
 }
@@ -375,7 +376,8 @@ static void get_file( int s )
 	recv(fd, &filelen, 4, 0);
 	filelen = ntohl(filelen);
 
-	pcd->tag = progress_window_new(buffer2, filelen);
+	snprintf( buffer, 1024, "Transferring %s...",buffer2);
+	pcd->tag = ay_progress_bar_add(buffer, filelen, NULL, NULL);
 
 	snprintf( buffer, 1024, "%s/%s", getenv("HOME"),buffer2);
 	printf("receiving file %s\n", buffer);
