@@ -1,3 +1,7 @@
+* Wed Aug 20 2003 06:00 GMT [colin]	0.3.3-28
+- src/status.c
+Differentiate add and edit accounts
+
 * Sun Aug 17 2003 06:00 GMT [philip]	0.3.3-27
 - po/es.po
 Ryan fixed the problem with dup strings in es.po

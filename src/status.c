@@ -626,9 +626,14 @@ static void add_group_callback(GtkWidget *widget, GtkTree *tree)
 	show_add_group_window();
 }
 
-static void eb_edit_accounts( GtkWidget * widget, gpointer stats )
+static void eb_add_accounts( GtkWidget * widget, gpointer stats )
 {
 	ay_edit_local_accounts();
+}
+
+static void eb_edit_accounts( GtkWidget * widget, gpointer stats )
+{
+	ayttm_prefs_show_window();
 }
 
 static void build_prefs_callback( GtkWidget * widget, gpointer stats )
@@ -1930,7 +1935,9 @@ static GtkItemFactoryEntry menu_items[] = {
 	{ N_("/_Edit"),		NULL,       NULL, 0, "<Branch>" },
 	{ N_("/Edit/_Preferences..."),
   				NULL, build_prefs_callback, 0, NULL },
-	{ N_("/Edit/My _accounts..."),
+	{ N_("/Edit/Add or _delete accounts..."),
+  				NULL, eb_add_accounts, 0, NULL },
+	{ N_("/Edit/Edit _accounts..."),
   				NULL, eb_edit_accounts, 0, NULL },
 	{ N_("/Edit/---"),	NULL, NULL, 0, "<Separator>" },
 	{ N_("/Edit/Add a _contact account..."),		
