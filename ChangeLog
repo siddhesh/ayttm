@@ -1,3 +1,7 @@
+* Sat Oct  4 2003 11:05 GMT [colin]   0.4.2-8
+- modules/jabber
+Jabber typing notifications
+
 * Sat Oct  4 2003 11:05 GMT [colin]   0.4.2-7
 - modules/jabber
 SSL Jabber

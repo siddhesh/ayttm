@@ -208,5 +208,6 @@ int JABBER_SendChatRoomMessage(JABBER_Conn *JConn, char *room_name, char *messag
 
 /* Debugging routines */
 void j_list_agents();
+void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, int typing);
 
 #endif /* __LIB_JABBER__ */

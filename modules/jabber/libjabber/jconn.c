@@ -165,7 +165,6 @@ void jab_continue (int fd, int error, void *data)
 		  STATE_EVT(JCONN_STATE_OFF)
 		  return;
 	    }
-	    
     }  
 #endif
 

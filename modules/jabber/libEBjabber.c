@@ -43,7 +43,8 @@ extern void JABBERAddBuddy(void *data);
 extern void JABBERInstantMessage(void *data);
 extern void JABBERDialog(void *data);
 extern void JABBERListDialog(const char **list, void *data);
-extern void	JABBERError( char *message, char *title );
+extern void JABBERError( char *message, char *title );
+extern void JABBERBuddy_typing(JABBER_Conn *JConn, char *from, int typing);
 extern void JABBERLogout(void *data);
 extern void JABBERChatRoomMessage(char *id, char *user, char *message);
 extern void JABBERChatRoomBuddyStatus(char *id, char *user, int offline);
@@ -522,6 +523,39 @@ int JABBER_LeaveChatRoom(JABBER_Conn *JConn, char *room_name, char *nick)
 	return(0);
 }
 
+void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, int typing)
+{
+	char buffer[4096];
+	if (!JConn->conn) 
+		return;
+	
+	if (typing) {
+		snprintf(buffer, 4095, 
+			"<message "
+    				"from='%s' "
+				"to='%s'>"
+  				"<x xmlns='jabber:x:event'>"
+    					"<composing/>"
+    					"<id>typ%s</id>"
+  				"</x>"
+			"</message>",
+			from, to, from);
+  	
+	} else {
+		snprintf(buffer, 4095,
+			"<message "
+				"from='%s' "
+				"to='%s'>"
+				"<x xmlns='jabber:x:event'>"
+					"<id>typ%s</id>"
+				"</x>"
+			"</message>",
+			from,to,from);
+	}	
+	printf("sending %s\n",buffer);
+	jab_send_raw(JConn->conn, buffer);
+}
+
 int JABBER_IsChatRoom(char *from)
 {
 	char buffer[256];
@@ -679,6 +713,21 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		eb_debug(DBG_JBR, "Message type: %s\n", type);
 		x = xmlnode_get_tag (packet->x, "body");
 		body = xmlnode_get_data (x);
+		x = xmlnode_get_tag(packet->x, "x");
+		if (x) {
+			type = xmlnode_get_attrib(x, "xmlns");
+			printf("type: %s\n", type);
+			if (!strcmp(type, "jabber:x:event")) {
+				xmlnode comp = xmlnode_get_tag(x, "composing");
+				char *tfrom = strdup(from);
+				if (comp) {
+					JABBERBuddy_typing(JConn, tfrom,1);
+				} else {
+					JABBERBuddy_typing(JConn, tfrom,0);
+				}
+				free(tfrom);
+			}
+		}
 		x = xmlnode_get_tag (packet->x, "subject");
 		if (x) {
 			subj = xmlnode_get_data (x);

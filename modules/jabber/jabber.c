@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.35 $",
-	"$Date: 2003/10/04 11:06:28 $",
+	"$Revision: 1.36 $",
+	"$Date: 2003/10/04 13:06:57 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -94,7 +94,8 @@ struct service SERVICE_INFO = { "Jabber", -1,
 /* End Module Exports */
 
 static char *eb_jabber_get_color(void) { static char color[]="#88aa00"; return color; }
-
+static int eb_jabber_send_typing( eb_local_account * from, eb_account * account_to );
+static int eb_jabber_send_cr_typing( eb_chat_room *chatroom );
 unsigned int module_version() {return CORE_VERSION;}
 
 static int plugin_init()
@@ -171,6 +172,7 @@ typedef struct _eb_jabber_local_account_data
 	JABBER_Conn	*JConn;
 	int activity_tag;
 	int connect_tag;
+	int typing_tag;
 	int use_ssl;
 	char server_port[MAX_PREF_LEN];
 	char ssl_server_port[MAX_PREF_LEN];
@@ -813,6 +815,8 @@ struct service_callbacks * query_callbacks()
 	sc->query_connected = eb_jabber_query_connected;
 	sc->login = eb_jabber_login;
 	sc->logout = eb_jabber_logout;
+	sc->send_typing = eb_jabber_send_typing;
+	sc->send_cr_typing = eb_jabber_send_cr_typing;
 	sc->send_im = eb_jabber_send_im;
 	sc->read_local_account_config = eb_jabber_read_local_account_config;
 	sc->write_local_config = eb_jabber_write_local_config;
@@ -1110,4 +1114,69 @@ void JABBERLogout(void *data)
 void	JABBERError( char *message, char *title )
 {
 	ay_do_error( title, message );
+}
+
+void JABBERBuddy_typing(JABBER_Conn *JConn, char *from, int typing) {
+	eb_local_account *ela = NULL;
+	eb_account *ea = NULL;
+	
+	ela = find_local_account_by_conn(JConn);
+	printf("JABBERBuddy_Typing %s\n", from);
+	if (!ela)
+		return;
+	printf("ela %s\n",ela->handle);
+	ea = find_account_with_ela(from, ela);
+
+	if (!ea) 
+		return;
+	printf("ea %s\n",ea->handle);
+	if (iGetLocalPref("do_typing_notify"))
+		eb_update_status(ea, typing?_("typing..."):"");
+	
+	
+}
+
+typedef struct {
+	eb_local_account *from;
+	eb_account *to;
+} jabber_typing_callback_data;
+
+static int eb_jabber_send_typing_stop(void *data)
+{
+	jabber_typing_callback_data *tcd = (jabber_typing_callback_data *)data;
+	eb_local_account *from = tcd->from;
+	eb_account *to = tcd->to;
+	eb_jabber_local_account_data *jlad = (eb_jabber_local_account_data *)from->protocol_local_account_data;
+	eb_jabber_account_data *jad = (eb_jabber_account_data *)to->protocol_account_data;	
+	if (!iGetLocalPref("do_typing_notify"))
+		return;
+	JABBER_Send_typing(jlad->JConn, from->handle, to->handle, 0);
+	free(tcd);
+}
+
+static int eb_jabber_send_typing( eb_local_account * from, eb_account * to )
+{
+	eb_jabber_local_account_data *jlad = (eb_jabber_local_account_data *)from->protocol_local_account_data;
+	eb_jabber_account_data *jad = (eb_jabber_account_data *)to->protocol_account_data;	
+	jabber_typing_callback_data *tcd = (jabber_typing_callback_data *)malloc(sizeof(jabber_typing_callback_data));
+	
+	if (!iGetLocalPref("do_typing_notify"))
+		return 20;
+	
+	if (jlad->typing_tag) {
+		eb_timeout_remove(jlad->typing_tag);
+	}
+	tcd->from = from;
+	tcd->to = to;
+	jlad->typing_tag = eb_timeout_add(5000, (void *)eb_jabber_send_typing_stop, tcd);
+	JABBER_Send_typing(jlad->JConn, from->handle, to->handle, 1);
+	return 4;
+}
+
+static int eb_jabber_send_cr_typing( eb_chat_room *chatroom )
+{
+	if (!iGetLocalPref("do_typing_notify"))
+		return 20;
+	
+	return 4;
 }
