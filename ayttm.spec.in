@@ -56,6 +56,7 @@ rm -rf $RPM_BUILD_ROOT
 # Icons and sounds
 %{_datadir}/pixmaps/ayttm.png
 %{_datadir}/@PACKAGE@/sounds/*
+%{_datadir}/@PACKAGE@/smileys/*
 # Red Hat menu (doesn't do any damage on other distros)
 %{_datadir}/gnome/apps/Internet/@PACKAGE@.desktop
 %{_datadir}/applnk/Internet/@PACKAGE@.desktop
