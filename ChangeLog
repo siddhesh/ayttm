@@ -1,3 +1,7 @@
+* Mon May 19 2003 21:41 GMT [edward]	0.3.1-pre10
+- src/gtk/gtkutils.c
+Reverted back because this did not work.
+
 * Mon May 19 2003 19:07 GMT [edward]	0.3.1-pre9
 - src/gtk/gtkutils.c
   modules/aim-toc/aim-toc.c
