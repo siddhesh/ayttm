@@ -1,3 +1,8 @@
+* Sat May  3 2003 14:43 GMT [colin]	0.3.0-120
+- modules/smtp/smtp.c
+Put To: header in mail or server may append what it
+wants
+
 * Sat May  3 2003 14:25 GMT [colin]	0.3.0-119
 - modules/smtp/smtp.c
 Reword a few labels, check login validity,

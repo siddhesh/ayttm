@@ -71,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.13 $",
-	"$Date: 2003/05/03 14:26:45 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/05/03 14:44:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -530,6 +530,11 @@ static void send_message_async(void * data, int fd, eb_input_condition cond)
 	case SMTP_DATA:
 		{
 		int n, len = strlen(d->msg);
+		char buf[1024];
+		/* avoid having no To: in mail - server may append 
+		"Undisclosed recipients"*/
+		snprintf(buf, 1024, "To: %s <%s>", d->to->handle, d->to->handle);
+		smtp_tcp_writeline(buf, fd);
 		for(n=1; d->msg[len-n] == '\r' || d->msg[len-n] == '\n'; n++)
 			d->msg[len-n] = '\0';
 		if(strncasecmp(d->msg, "Subject:", strlen("Subject:")))
