@@ -92,8 +92,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.16 $",
-	"$Date: 2003/10/13 22:56:05 $",
+	"$Revision: 1.17 $",
+	"$Date: 2003/10/19 07:12:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1573,9 +1573,9 @@ ay_aim_send_im (eb_local_account *account_from,
 static LList *
 ay_aim_get_states ()
 {
-	LOG (("ay_aim_get_states ()\n"))
-	
 	LList * states = NULL;
+	LOG (("ay_aim_get_states ()"))
+	
 	states = l_list_append (states, "Online");
 	states = l_list_append (states, "Away");
 	states = l_list_append (states, "Offline");

@@ -1,3 +1,8 @@
+* Sun Oct 19 2003 07:06 GMT [philip]	0.4.3-3
+- modules/aim-oscar/aim-oscar.c
+line 1578, LList *states was placed after LOG().  C declarations
+should be the first statement in a function.
+
 * Sat Oct 18 2003 23:00 GMT [colin]	0.4.3-2
 - src/ssl* src/dialog.[ch] modules/msn2 modules/jabber
 Check SSL certificates for validity or change
