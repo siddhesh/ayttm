@@ -24,8 +24,8 @@
 #include <gdk/gdkkeysyms.h>
 #include <time.h>
 
-#include "globals.h"
 #include "util.h"
+#include "globals.h"
 #include "sound.h"
 #include "prefs.h"
 #include "smileys.h"

@@ -27,8 +27,8 @@
 #include <stdlib.h>
 
 #include "spellcheck.h"
-#include "platform_defs.h"
 #include "util.h"
+#include "platform_defs.h"
 
 
 /* size of the text buffer used in various word-processing routines. */

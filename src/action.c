@@ -28,11 +28,11 @@
 #include <string.h>
 #include <errno.h>
 
+#include "util.h"
 #include "globals.h"
 #include "action.h"
 #include "prefs.h"
 #include "mem_util.h"
-#include "util.h"
 #include "messages.h"
 #include "dialog.h"
 #include "edit_list_window.h"

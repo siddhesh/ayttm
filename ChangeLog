@@ -1,3 +1,18 @@
+* Wed May 01 2003 16:40 GMT [edward]	0.3.0-86
+- src/account_parser.y
+  src/action.c
+  src/add_contact_window.c
+  src/chat_room.c
+  src/contact_parser.y
+  src/log_window.c
+  src/nomodule.c
+  src/offline_queue_mgmt.c
+  src/service.c
+  src/status.c
+  src/trigger.c
+  moved util.h before globals.h as there was a mkdir dependency issue
+  with MINGW32
+
 * Wed Apr 30 2003 14:00 GMT [colin]	0.3.0-85
 - src/contact_parser.y
 Fix account staying orphaned

@@ -32,9 +32,9 @@
 #include "chat_window.h"
 #include "dialog.h"
 #include "sound.h"
+#include "util.h"
 #include "globals.h"
 #include "file_select.h"
-#include "util.h"
 
 #include "gtk/gtkutils.h"
 

@@ -31,9 +31,9 @@
 #include <assert.h>
 
 #include "service.h"
+#include "util.h"
 #include "globals.h"
 #include "chat_window.h"
-#include "util.h"
 #include "nomodule.h"
 #include "plugin_api.h"
 #include "value_pair.h"

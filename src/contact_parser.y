@@ -4,12 +4,12 @@
 	#include <stdlib.h>
 	#include <string.h>
 
+	#include "util.h"
 	#include "globals.h"
 	#include "account.h"
 	#include "value_pair.h"
 	#include "service.h"
 	#include "trigger.h"
-	#include "util.h"
 
 	extern int Line_contact;
 	#define contacterror(error) printf("Parse error on line %d: %s\n", Line_contact, error );

@@ -27,11 +27,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "util.h"
 #include "globals.h"
 #include "service.h"
 #include "mem_util.h"
 #include "offline_queue_mgmt.h"  /* so the compiler tells us about type mismatches */
-#include "util.h"
 
 
 /* FIXME: temporary UGLY !!! */

@@ -25,9 +25,9 @@
 #include <stdlib.h>
 
 #include "service.h"
+#include "util.h"
 #include "globals.h"
 #include "status.h"
-#include "util.h"
 #include "add_contact_window.h"
 #include "messages.h"
 

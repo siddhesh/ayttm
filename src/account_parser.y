@@ -4,10 +4,10 @@
         #include <stdlib.h>
         #include <string.h>
 
+        #include "util.h"
         #include "globals.h"
         #include "value_pair.h"
         #include "service.h"
-        #include "util.h"
 
 
 	extern int Line;

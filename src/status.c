@@ -39,11 +39,11 @@
 #endif
 
 #include "service.h"
+#include "util.h"
 #include "globals.h"
 #include "status.h"
 #include "chat_window.h"
 #include "help_menu.h"
-#include "util.h"
 #include "add_contact_window.h"
 #include "dialog.h"
 #include "away_window.h"

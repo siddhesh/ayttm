@@ -34,8 +34,8 @@
 
 #include "value_pair.h"
 #include "service.h"
-#include "globals.h"
 #include "util.h"
+#include "globals.h"
 
 /* Can never be online */
 /* #include "pixmaps/nomodule_online.xpm" */

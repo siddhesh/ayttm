@@ -36,8 +36,8 @@
 
 #include <gdk/gdkkeysyms.h>
 
-#include "globals.h"
 #include "util.h"
+#include "globals.h"
 #include "prefs.h"
 #include "action.h"
 
