@@ -25,20 +25,37 @@
 #ifndef __DIALOG__
 #define __DIALOG__
 
-#include <gtk/gtk.h>
-#include <llist.h>
+#include "llist.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*dialog.c*/
 
-void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widget, gpointer data), gpointer data );
-void do_list_dialog( char * message, char * title, const char **list, void (*action)(char * text, gpointer data), gpointer data );
-void do_llist_dialog( char * message, char * title, LList *list, void (*action)(char * text, gpointer data), gpointer data );
-void do_text_input_window( gchar * title, gchar * value, void (*action)(char * text, gpointer data), gpointer data );
-void do_password_input_window( gchar * title, gchar * value, void (*action)(char * text, gpointer data), gpointer data );
-void do_text_input_window_multiline( gchar * title, gchar * value, int ismulti, int ispassword, void (*action)(char * text, gpointer data), gpointer data );
+void eb_do_dialog( const char *message, const char *title, 
+		void (*action)(void *data, int result), 
+		void *data );
+
+void do_list_dialog( const char *message, const char *title, const char **list, 
+		void (*action)(const char *text, void *data), 
+		void *data );
+
+void do_llist_dialog( const char *message, const char *title, const LList *list, 
+		void (*action)(const char *text, void *data), 
+		void *data );
+
+void do_text_input_window( const char *title, const char *value, 
+		void (*action)(const char *text, void *data), 
+		void *data );
+
+void do_password_input_window( const char *title, const char *value, 
+		void (*action)(const char *text, void *data), 
+		void *data );
+
+void do_text_input_window_multiline( const char *title, const char *value, 
+		int ismulti, int ispassword, 
+		void (*action)(const char *text, void *data), 
+		void *data );
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -99,7 +99,6 @@ typedef struct {
 	char *local_account;    /* The actual account we're using */
 } ebmContactData;
 
-typedef void (*eb_callback_action) (void *data, int value);
 typedef void (*eb_menu_callback) (ebmCallbackData *data);
 
 ebmCallbackData *ebmProfileData_new(eb_local_account * ela);
@@ -107,7 +106,6 @@ ebmImportData *ebmImportData_new();
 ebmSmileyData *ebmSmileyData_new();
 ebmContactData *ebmContactData_new();
 void eb_set_active_menu_status(LList *status_menu, int status);
-void eb_do_dialog(char *message, char *title, eb_callback_action action, void *data);
 
 /* eb_add_menu_item returns a tag, which can be used by eb_remove_menu_item 
  * label:	The name of the menu item to add to the menu

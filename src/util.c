@@ -1389,10 +1389,9 @@ typedef struct _invite_request
 	void * id;
 } invite_request;
 
-static void process_invite( GtkWidget * widget, gpointer data )
+static void process_invite( void *data, int result )
 {
 	invite_request * invite = data;
-	int result = (int)gtk_object_get_user_data( GTK_OBJECT(widget));
 
 	if (result && RUN_SERVICE(invite->ela)->accept_invite)
 		RUN_SERVICE(invite->ela)->accept_invite( invite->ela, invite->id );
@@ -1413,7 +1412,7 @@ void invite_dialog( eb_local_account * ela, char * user, char * chat_room,
 
 	invite->ela = ela;
 	invite->id = id;
-	do_dialog( message, _("Chat Invite"), process_invite, invite );
+	eb_do_dialog( message, _("Chat Invite"), process_invite, invite );
 	g_free(message);
 }
 

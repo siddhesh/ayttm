@@ -51,12 +51,6 @@ typedef struct {
 } eb_PLUGIN_INFO;
 
 typedef struct {
-	void *data;
-	eb_callback_action action;
-	
-} callback_data;
-
-typedef struct {
 	char *label;
 	eb_menu_callback callback;
 	/*FIXME: Should have some sort of conditional callback to see if menu item should be displayed */

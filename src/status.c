@@ -207,9 +207,9 @@ static void edit_account_callback(GtkWidget * w, gpointer a)
 }
 
 
-static void remove_group_callback(GtkWidget *w, gpointer d)
+static void remove_group_callback(void *d, int result)
 {
-	if (gtk_object_get_user_data (GTK_OBJECT(w)) != 0) {
+	if(result != 0) {
 		grouplist * g = (grouplist *) d;
 
 		eb_debug(DBG_CORE, "Delete Group\n");
@@ -227,13 +227,13 @@ static void offer_remove_group_callback(GtkWidget *w, gpointer d)
 		char buff [1024];
 
 		snprintf(buff, sizeof(buff), _("Do you really want to delete group \"%s\"?"), g->name);
-		do_dialog (buff, _("Delete Group"), remove_group_callback, d);
+		eb_do_dialog (buff, _("Delete Group"), remove_group_callback, d);
 	}
 }
 
-static void remove_contact_callback(GtkWidget *w, gpointer d)
+static void remove_contact_callback(void *d, int result)
 {
-	if (gtk_object_get_user_data (GTK_OBJECT(w)) != 0) {
+	if (result != 0) {
 		struct contact * conn = (struct contact *) d;
 
 		eb_debug(DBG_CORE, "Delete Contact\n");
@@ -251,13 +251,13 @@ static void offer_remove_contact_callback(GtkWidget *w, gpointer d)
 		char buff [1024];
 	
 		snprintf(buff, sizeof(buff), _("Do you really want to delete contact \"%s\"?"), c->nick);
-		do_dialog (buff, _("Delete Contact"), remove_contact_callback, d);
+		eb_do_dialog (buff, _("Delete Contact"), remove_contact_callback, d);
 	}
 }
 
-static void remove_account_callback(GtkWidget *w, gpointer d)
+static void remove_account_callback(void *d, int result)
 {
-	if (gtk_object_get_user_data (GTK_OBJECT(w)) != 0) {
+	if (result != 0) {
 		eb_debug(DBG_CORE, "Delete Account\n");
 		remove_account(d);
 
@@ -273,7 +273,7 @@ static void offer_remove_account_callback(GtkWidget *w, gpointer d)
 		char buff [1024];
 
 		snprintf(buff, sizeof(buff), _("Do you really want to delete account \"%s\"?"), a->handle);
-		do_dialog (buff, _("Delete Account"), remove_account_callback, d);
+		eb_do_dialog (buff, _("Delete Account"), remove_account_callback, d);
 	}
 }
 

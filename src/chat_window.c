@@ -1037,9 +1037,9 @@ static gboolean chat_singleline_key_press(GtkWidget *widget, GdkEventKey *event,
 	return gtk_true();
 }
 
-static void chat_away_set_back(GtkWidget *widget, gpointer data)
+static void chat_away_set_back(void *data, int value)
 {
-	if (gtk_object_get_user_data (GTK_OBJECT(widget)) != 0) {
+	if (value != 0) {
 		chat_window *cw = (chat_window *)data;
 		cw->away_warn_displayed = (time_t)NULL;
 		away_window_set_back();
@@ -1050,7 +1050,7 @@ static void chat_warn_if_away(chat_window *cw)
 {
 	if (is_away && (time(NULL) - cw->away_warn_displayed) > (60*30)) {
 		cw->away_warn_displayed = time(NULL);
-		do_dialog(_("You are currently away. \n\nDo you want to be back Online?"), 
+		eb_do_dialog(_("You are currently away. \n\nDo you want to be back Online?"), 
 			  _("Away"), chat_away_set_back, cw);
 	}
 	

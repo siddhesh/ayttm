@@ -312,9 +312,8 @@ static void get_file2( void *data, int source, eb_input_condition condition )
 }
 
 	
-static void accept_file( GtkWidget * widget, gpointer data )
+static void accept_file( void *data, int result )
 {
-	int result = (int)gtk_object_get_user_data( GTK_OBJECT(widget));
 	progress_callback_data * pcd = data;
 	if(result)
 	{
@@ -383,7 +382,7 @@ static void get_file( int s )
 	fp = fopen(buffer, "wb");
 
 	snprintf( buffer3, 1024, _("Would you like to accept\n the file %s?\nSize=%lu"), buffer2,(unsigned long)filelen);
-	do_dialog( buffer3, _("Download File"), accept_file, pcd );
+	eb_do_dialog( buffer3, _("Download File"), accept_file, pcd );
 }
 
 

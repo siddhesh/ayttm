@@ -41,13 +41,18 @@
 
 
 typedef struct _list_dialog_data {
-	void (*callback)(char *value, void *data);
+	void (*callback)(const char *value, void *data);
 	void *data;
 } list_dialog_data;
 
+typedef struct {
+	void *data;
+	void (*action)(void *, int);
+} callback_data;
+
 typedef struct _text_input_window
 {
-	void (*callback)(char *value, void *data);
+	void (*callback)(const char *value, void *data);
 	void *data;
 	GtkWidget *window;
 	GtkWidget *text;
@@ -58,7 +63,7 @@ static void list_dialog_callback(GtkWidget *widget,
 			gint row,
 			gint column,
 			GdkEventButton *event,
-			gpointer data)
+			void *data)
 {
 	gchar *text;
 	list_dialog_data *ldd = data;
@@ -68,7 +73,7 @@ static void list_dialog_callback(GtkWidget *widget,
 	free(ldd);
 }
 
-void do_list_dialog( char * message, char * title, const char **list, void (*action)(char * text, gpointer data), gpointer data )
+void do_list_dialog( const char *message, const char *title, const char **list, void (*action)(const char *text, void *data), void *data )
 {
 	const char **ptr=list;
 	LList *tmp = NULL;
@@ -78,6 +83,12 @@ void do_list_dialog( char * message, char * title, const char **list, void (*act
 		tmp = l_list_append(tmp, t);
 	}
 	do_llist_dialog(message, title, tmp, action, data);
+	while(tmp) {
+		LList *t=tmp;
+		free(tmp->data);
+		tmp = l_list_remove_link(tmp, tmp);
+		l_list_free_1(t);
+	}
 }
 
 static int sig1 = 0, sig2 = 0;
@@ -123,7 +134,7 @@ static gboolean list_dialog_key_press(GtkWidget *widget, GdkEventKey *event, gpo
 	return TRUE;
 }
 
-void do_llist_dialog( char * message, char * title, LList *list, void (*action)(char * text, gpointer data), gpointer data )
+void do_llist_dialog( const char *message, const char *title, const LList *list, void (*action)(const char *text, void *data), void *data )
 {
 	GtkWidget * dialog_window;
 	GtkWidget * label;
@@ -133,7 +144,7 @@ void do_llist_dialog( char * message, char * title, LList *list, void (*action)(
 	/*  UNUSED GtkWidget * button_box; */
 	char *Row[2]={NULL, NULL};
 	list_dialog_data *ldata;
-	LList *t_list = list;
+	const LList *t_list = list;
 
 	eb_debug(DBG_CORE, ">Entering\n");
 	if(list==NULL) {
@@ -150,11 +161,9 @@ void do_llist_dialog( char * message, char * title, LList *list, void (*action)(
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->vbox),
 		label, FALSE, FALSE, 5);
 
-	/* Convert the **list to a LList */
 	clist = gtk_clist_new(1);	/* Only 1 column */
 	gtk_clist_set_selection_mode(GTK_CLIST(clist), GTK_SELECTION_SINGLE);
 	gtk_clist_set_column_width (GTK_CLIST(clist), 0, 200);
-	/* Array of pointers to elements, one per column */
 	while(t_list) {
 		Row[0]=strdup(t_list->data);
 		gtk_clist_append(GTK_CLIST(clist), Row);
@@ -210,11 +219,20 @@ static void dialog_close(GtkWidget *widget, GdkEventAny *event, gpointer data)
 		} else if (((GdkEventKey *)event)->keyval == GDK_Return) {
 			gtk_signal_emit_by_name(GTK_OBJECT(b->yes), "clicked");
 		}
-			
 	}
 }
 
-void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widget, gpointer data), gpointer data )
+static void eb_gtk_dialog_callback(GtkWidget *widget, gpointer data)
+{
+	callback_data *cd = (callback_data *)data;
+	int result=0;
+
+	result=(int)gtk_object_get_user_data(GTK_OBJECT(widget));
+	cd->action(cd->data, result);
+	free(cd);
+}
+
+static void do_dialog( const char *message, const char *title, void (*action)(GtkWidget *widget, gpointer data), gpointer data )
 {
 	GtkWidget *dialog_window;
 	GtkWidget *label;
@@ -250,8 +268,7 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 		
 	button = gtkut_create_icon_button( _("No"), tb_no_xpm, dialog_window );
 	
-	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 		   GTK_SIGNAL_FUNC(action), data );
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(action), data );
 	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
 			                  GTK_SIGNAL_FUNC(gtk_widget_destroy),
 							  (gpointer)dialog_window);
@@ -265,8 +282,7 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 
 	button = gtkut_create_icon_button( _("Yes"), tb_yes_xpm, dialog_window );
 	
-	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 		   GTK_SIGNAL_FUNC(action), data );
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(action), data );
 	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
 			                  GTK_SIGNAL_FUNC(gtk_widget_destroy),
 							  (gpointer)dialog_window);
@@ -295,6 +311,14 @@ void do_dialog( gchar * message, gchar * title, void (*action)(GtkWidget * widge
 		gtk_widget_set_usize(dialog_window, 350, -1);
 }
 
+void eb_do_dialog(const char *message, const char *title, void (*action)(void *, int), void *data)
+{
+	callback_data *cd=calloc(1, sizeof(callback_data));
+	cd->action=action;
+	cd->data=data;
+	do_dialog(message, title, eb_gtk_dialog_callback, cd);
+}
+
 
 /*
  * The following methods are for the text input window
@@ -319,24 +343,24 @@ static void input_window_ok(GtkWidget * widget, gpointer data)
 	g_free(text);
 }
 
-void do_text_input_window(gchar * title, gchar * value, 
-		void (*action)(char * text, gpointer data), 
-		gpointer data )
+void do_text_input_window(const char *title, const char *value, 
+		void (*action)(const char *text, void *data), 
+		void *data )
 {
 	do_text_input_window_multiline(title, value, 1, 0, action, data);
 }
 
-void do_password_input_window(gchar * title, gchar * value, 
-		void (*action)(char * text, gpointer data), 
-		gpointer data )
+void do_password_input_window(const char *title, const char *value, 
+		void (*action)(const char *text, void *data), 
+		void *data )
 {
 	do_text_input_window_multiline(title, value, 0, 1, action, data);
 }
 
-void do_text_input_window_multiline(gchar * title, gchar * value, 
+void do_text_input_window_multiline(const char *title, const char *value, 
 		int ismulti, int ispassword, 
-		void (*action)(char * text, gpointer data), 
-		gpointer data )
+		void (*action)(const char *text, void *data), 
+		void *data )
 {
 	GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
 	GtkWidget * label; 

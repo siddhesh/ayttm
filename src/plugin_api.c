@@ -22,6 +22,7 @@
  *
  */
 
+#include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>	/* for strcmp */
 #include <stdlib.h>
@@ -32,16 +33,6 @@
 #include "prefs.h"
 
 extern void set_menu_sensitivity(void);
-
-static void eb_gtk_dialog_callback(GtkWidget *widget, gpointer data)
-{
-	callback_data *cd= (callback_data *)data;
-	int result=0;
-
-	result=(int)gtk_object_get_user_data(GTK_OBJECT(widget));
-	cd->action(cd->data, result);
-	free(cd);
-}
 
 /* End local structures and functions */
 
@@ -165,14 +156,6 @@ int eb_remove_menu_item(char *menu_name, void *tag)
 	}
 	eb_debug(DBG_CORE, "<Returning success\n");
 	return(0);
-}
-
-void eb_do_dialog(char *message, char *title, eb_callback_action action, void *data)
-{
-	callback_data *cd=calloc(1, sizeof(callback_data));
-	cd->action=action;
-	cd->data=data;
-	do_dialog(message, title, eb_gtk_dialog_callback, cd);
 }
 
 void eb_set_active_menu_status(LList *status_menu, int status)

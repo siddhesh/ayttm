@@ -1,3 +1,9 @@
+* Fri Oct 10 2003 09:48 GMT [philip]	0.4.3-pre8
+- src/dialog.[ch]
+cleaner interface for dialogs
+all files that used do_dialog will now use eb_do_dialog which
+does not expect a callback to accept a GtkWidget
+
 * Fri Oct 10 2003 07:13 GMT [philip]	0.4.3-pre7
 - modules/yahoo/yahoo.c
 fix duplicate sign on problem
