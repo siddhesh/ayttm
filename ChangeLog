@@ -1,3 +1,7 @@
+* Sat May  3 2003 10:17 GMT [colin]	0.3.0-106
+- src/edit_local_accounts.c
+Fix another segfault
+
 * Fri May  2 2003 21:00 GMT [colin]	0.3.0-105
 - src/log_window.c
 Fix off-by-one errors in log parsing

@@ -368,7 +368,7 @@ static LList * save_account_information(void)
 				ai->local_acc = strdup(ea->ela->handle);
 			else
 				ai->local_acc = NULL;
-			eb_debug(DBG_CORE, " SAVED { %p(%s), %d, %s }\n", ea, ea->handle, ea->service_id, ea->ela->handle);
+			eb_debug(DBG_CORE, " SAVED { %p(%s), %d, %s }\n", ea, ea->handle, ea->service_id, ea->ela?ea->ela->handle:NULL);
 			saved = l_list_append(saved, ai);
 		}
 	}
