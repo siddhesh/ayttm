@@ -127,8 +127,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.50 $",
-	"$Date: 2003/05/08 20:25:39 $",
+	"$Revision: 1.51 $",
+	"$Date: 2003/05/10 17:56:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -308,6 +308,9 @@ struct webcam_feed {
 	unsigned image_size;
 	unsigned recd_size;
 	int image_window_tag;
+
+	unsigned char *buff;
+	long buff_len;
 };
 
 static void free_yahoo_local_account(eb_yahoo_local_account_data * yla, int free_all)
@@ -318,6 +321,7 @@ static void free_yahoo_local_account(eb_yahoo_local_account_data * yla, int free
 	while(yla->webcams) {
 		struct webcam_feed *wf = yla->webcams->data;
 		FREE(wf->who);
+		FREE(wf->buff);
 		if(wf->image_window_tag)
 			ay_image_window_close(wf->image_window_tag);
 		FREE(wf);
@@ -1536,6 +1540,7 @@ static void _image_window_closed(int tag, void *data)
 	}
 
 	FREE(wf->who);
+	FREE(wf->buff);
 	FREE(wf);
 }
 
@@ -1547,6 +1552,9 @@ static void ext_yahoo_got_webcam_image(int id, const char *who,
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *yla = ela->protocol_local_account_data;
 	YList *l;
+
+	if(!image_size)
+		return;
 
 	for(l = yla->webcams; l; l = y_list_next(l)) {
 		wf = l->data;
@@ -1564,19 +1572,26 @@ static void ext_yahoo_got_webcam_image(int id, const char *who,
 	if(!wf->image_window_tag) {
 		char buff[1024];
 		snprintf(buff, sizeof(buff), _("%s's webcam"), wf->who);
-		wf->image_window_tag = ay_image_window_new(160, 120, buff, _image_window_closed, wf);
+		wf->image_window_tag = ay_image_window_new(320, 240, buff, _image_window_closed, wf);
 	}
 
-	/* we set wf->image_size to 0 after the entire image has been read */
-	/* we also guess that if current image size is different from what we expected,
-	 * then it may be a new image. */
-	ay_image_window_add_data(wf->image_window_tag, image, real_size, wf->image_size==0 || wf->image_size != image_size);
+	if(wf->image_size != image_size || wf->recd_size==0) {
+		FREE(wf->buff);
+		wf->recd_size=0;
+		wf->buff = malloc(image_size);
+	}
 
-	wf->image_size = image_size;
+	memcpy(wf->buff+wf->recd_size, image, real_size);
 	wf->recd_size += real_size;
 
-	if(wf->recd_size == wf->image_size)
-		wf->image_size=wf->recd_size=0;
+	if(wf->recd_size == wf->image_size) {
+		ay_image_window_add_data(wf->image_window_tag, image, wf->image_size, 1);
+		ay_image_window_add_data(wf->image_window_tag, NULL, 0, 0);
+		FREE(wf->buff);
+		wf->recd_size=0;
+	}
+
+	wf->image_size = image_size;
 
 }
 

@@ -1,3 +1,8 @@
+* Fri May 10 2003 17:50 GMT [philip]	0.3.0-176
+- modules/yahoo2/yahoo.c src/image_window.c
+fix jasper handling, and maybe the webcam stuff works now...
+darn.. where are my friends when I need them most... lol
+
 * Fri May 10 2003 23:35 GMT [edward]	0.3.0-175
 - mingw
 fix to CC usage

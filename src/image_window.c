@@ -24,9 +24,9 @@
 #endif
 #include "globals.h"
 #include "image_window.h"
+#include "debug.h"
 
 #ifndef HAVE_GDK_PIXBUF
-#include "debug.h"
 int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data) { 
 	eb_debug(DBG_CORE, "Image window support not included\n");
 	return 0; 
@@ -49,6 +49,7 @@ struct ay_image_wnd {
 	GtkWidget *window;
 	GtkWidget *pixmap;
 	GdkPixbufLoader *loader;
+	int loader_open;
 
 	ay_image_window_cancel_callback callback;
 	void *callback_data;
@@ -67,34 +68,57 @@ static unsigned char * image_2_jpg(const unsigned char * in_img, long *size)
 	jas_stream_t *in, *out;
 	jas_image_t *image;
 	int infmt;
+	static int outfmt;
 	static int init;
 
-	/* TODO log an error */
-	if(!init && !(init = jas_init()))
-		return ay_memdup(in_img, *size);
+	if(!init) {
+		if(jas_init()) {
+			eb_debug(DBG_CORE, "Could not init jasper\n");
+			return ay_memdup(in_img, *size);
+		}
+		init=1;
+		outfmt = jas_image_strtofmt("jpg");
+	}
 
-	in = jas_stream_memopen((unsigned char *)in_img, *size);
+	if(!(in = jas_stream_memopen((unsigned char *)in_img, *size))) {
+		eb_debug(DBG_CORE, "Could not open jasper input stream\n");
+		return ay_memdup(in_img, *size);
+	}
 	infmt = jas_image_getfmt(in);
+	eb_debug(DBG_CORE, "Got input image format: %d %s\n", infmt, jas_image_fmttostr(infmt));
 	if(!strcmp(jas_image_fmttostr(infmt), "jpg")) {
-	/* TODO log an error */
+		/* image is already jpeg */
 		jas_stream_close(in);
 		return ay_memdup(in_img, *size);
 	}
 
-	image = jas_image_decode(in, infmt, NULL);
+	if(!(image = jas_image_decode(in, infmt, NULL))) {
+		eb_debug(DBG_CORE, "Could not decode image format\n");
+		return ay_memdup(in_img, *size);
+	}
 
-	out = jas_stream_memopen(out_img, 0);
+	if(!(out = jas_stream_memopen(out_img, 0))) {
+		eb_debug(DBG_CORE, "Could not open output stream\n");
+		return ay_memdup(in_img, *size);
+	}
 
-	jas_image_encode(image, out, jas_image_strtofmt("jpg"), "quality=100");
+	eb_debug(DBG_CORE, "Encoding to format: %d %s\n", outfmt, "jpg");
+	if((jas_image_encode(image, out, outfmt, NULL))) {
+		eb_debug(DBG_CORE, "Could not encode image format\n");
+		return ay_memdup(in_img, *size);
+	}
 	jas_stream_flush(out);
 
-	*size = out->bufsize_;
+	*size = ((jas_stream_memobj_t *)out->obj_)->bufsize_;
+	eb_debug(DBG_CORE, "Encoded size is: %ld\n", *size);
 	jas_stream_close(in);
+	out_img=ay_memdup(((jas_stream_memobj_t *)out->obj_)->buf_, *size);
 	jas_stream_close(out);
 	jas_image_destroy(image);
 
 	return out_img;
 #else
+	eb_debug(DBG_CORE, "jasper not available\n");
 	return ay_memdup(in_img, *size);
 #endif
 	
@@ -121,7 +145,10 @@ static void ay_image_window_destroy(GtkWidget *widget, gpointer data)
 
 	images = l_list_remove(images, aiw);
 
-	gdk_pixbuf_loader_close(aiw->loader);
+	if(aiw->loader_open) {
+		gdk_pixbuf_loader_close(aiw->loader);
+		aiw->loader_open=0;
+	}
 
 	if(aiw->callback)
 		aiw->callback(aiw->tag, aiw->callback_data);
@@ -166,32 +193,19 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 		title = _("Viewing Image");
 
 	wndImage = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_object_set_data(GTK_OBJECT(wndImage), "wndImage", wndImage);
 	gtk_window_set_title(GTK_WINDOW(wndImage), title);
 
 	vbox1 = gtk_vbox_new(FALSE, 0);
-	gtk_widget_ref(vbox1);
-	gtk_object_set_data_full(GTK_OBJECT(wndImage), "vbox1", vbox1,
-				 (GtkDestroyNotify) gtk_widget_unref);
 	gtk_widget_show(vbox1);
 	gtk_container_add(GTK_CONTAINER(wndImage), vbox1);
 
 	pixImage = create_dummy_pixmap(wndImage);
-
-	gtk_widget_ref(pixImage);
-	gtk_object_set_data_full(GTK_OBJECT(wndImage), "pixImage",
-				 pixImage,
-				 (GtkDestroyNotify) gtk_widget_unref);
 	gtk_widget_show(pixImage);
 
 	gtk_box_pack_start(GTK_BOX(vbox1), pixImage, TRUE, TRUE, 0);
 	gtk_widget_set_usize(pixImage, width, height);
 
 	btnClose = gtk_button_new_with_label(_("Close"));
-	gtk_widget_ref(btnClose);
-	gtk_object_set_data_full(GTK_OBJECT(wndImage), "btnClose",
-				 btnClose,
-				 (GtkDestroyNotify) gtk_widget_unref);
 	gtk_signal_connect_object(GTK_OBJECT(btnClose), "clicked",
 				GTK_SIGNAL_FUNC(gtk_widget_destroy),
 				GTK_OBJECT(wndImage));
@@ -237,19 +251,25 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 	}
 
 	if(new) {
-		if(aiw->loader)
+		if(aiw->loader_open)
 			gdk_pixbuf_loader_close(aiw->loader);
-		aiw->loader = NULL;
+		aiw->loader_open = 0;
 	}
-	if(!aiw->loader)
+	if(!aiw->loader) {
 		aiw->loader = gdk_pixbuf_loader_new();
+		aiw->loader_open = 1;
+	}
 
 	if(buf) {
 		unsigned char *jpg_buf = image_2_jpg(buf, &count);
+		eb_debug(DBG_CORE, "jpg_buf is %p\n", jpg_buf);
 		gdk_pixbuf_loader_write(aiw->loader, jpg_buf, count);
+		aiw->loader_open = 1;
 		free(jpg_buf);
-	} else
+	} else {
 		gdk_pixbuf_loader_close(aiw->loader);
+		aiw->loader_open = 0;
+	}
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(aiw->loader);
 	if(!pixbuf) {
