@@ -1,3 +1,7 @@
+* Sat Sep 20 2003 10:26 GMT [philip]	0.4.1-3
+- modules/yahoo2/libyahoo2
+support YMSG 0x000b
+
 * Sat Sep 20 2003 08:50 GMT [philip]	0.4.1-2
 - Makefile.am
 include ayttm.spec in DIST
