@@ -1723,10 +1723,10 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 			gdk_window_raise(remote_contact->chatwindow->window->window);
 			/*ENTRY_FOCUS(remote_contact->chatwindow);*/
 			chat_window_list = l_list_append (chat_window_list, remote_contact->chatwindow);
-		}
-		/* init preferred if no choice */
-		if (l_list_length(remote_contact->accounts) == 1 && remote_account) {
-			remote_contact->chatwindow->preferred = remote_account;
+			/* init preferred if no choice */
+			if (l_list_length(remote_contact->accounts) == 1 && remote_account) {
+				remote_contact->chatwindow->preferred = remote_account;
+			}
 		}
 	} else {
 		gdk_window_raise(remote_contact->chatwindow->window->window);
