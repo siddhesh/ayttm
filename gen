@@ -49,7 +49,9 @@ function check_gettext
 
 libtoolize --copy --force --ltdl --automake
 check_gettext
-aclocal -I m4 $ACLOCAL_FLAGS
+aclocal=`type -p aclocal-1.7` || aclocal=`type -p aclocal-1.6` || `aclocal=type -p aclocal`
+$aclocal -I m4 $ACLOCAL_FLAGS
 autoheader
-automake -a -c
+automake=`type -p automake-1.7` || automake=`type -p automake-1.6` || `automake=type -p automake`
+$automake -a -c
 autoconf
