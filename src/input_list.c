@@ -63,7 +63,7 @@ LList	*eb_input_to_value_pair( input_list *il )
 					vp = value_pair_add( vp, key, value );
 				}
 				break;
-				
+
 			case EB_INPUT_ENTRY:
 				{
 					snprintf( key, sizeof(key), "%s", il->widget.entry.name );
@@ -72,8 +72,18 @@ LList	*eb_input_to_value_pair( input_list *il )
 					vp = value_pair_add( vp, key, il->widget.entry.value );
 				}
 				break;
+
+			case EB_INPUT_LIST:
+				{
+					snprintf( key, sizeof(key), "%s", il->widget.listbox.name );
+					s_convert_space_to_underscore( key );
+						
+					snprintf( value, sizeof(value), "%i", *il->widget.listbox.value );
+					vp = value_pair_add( vp, key, value );
+				}
+				break;
 		}
-		
+
 		il = il->next;
 	}
 	
@@ -130,6 +140,27 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 					if ( value != NULL )
 					{
 						strncpy( il->widget.entry.value, value, MAX_PREF_LEN );
+						free( value );
+					}
+				}
+				break;
+
+			case EB_INPUT_LIST:
+				{
+					if ( il->widget.listbox.value == NULL )
+					{
+						eb_debug(DBG_CORE, "listbox.value is NULL\n");
+						break;
+					}
+					
+					snprintf( key, sizeof(key), "%s", il->widget.listbox.name );
+					s_convert_space_to_underscore( key );
+					
+					value = value_pair_get_value( vp, key );
+
+					if ( value != NULL )
+					{
+						*il->widget.checkbox.value = atoi(value);
 						free( value );
 					}
 				}

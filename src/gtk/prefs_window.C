@@ -2577,6 +2577,16 @@ void	ay_module_panel::Apply( void )
 					gtk_entry_set_text( GTK_ENTRY(entry_widget), the_list->widget.entry.value );
 				}
 				break;
+				
+			case EB_INPUT_LIST:
+				{
+					GtkWidget	*list_widget = reinterpret_cast<GtkWidget *>(the_list->widget.listbox.widget);
+					GtkWidget	*list_item = gtk_menu_get_active(GTK_MENU(list_widget));
+					const char	*text = gtk_widget_get_name(GTK_WIDGET(list_item));
+					if(text)
+						*the_list->widget.listbox.value = atoi(text);
+				}
+				break;
 		}
 
 		the_list = the_list->next;
@@ -2648,6 +2658,52 @@ void	ay_module_panel::RenderModulePrefs( void )
 					gtk_entry_set_text( GTK_ENTRY(widget), the_list->widget.entry.value );
 					gtk_editable_set_position( GTK_EDITABLE(widget), 0 );
 					gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
+
+					gtk_box_pack_start( GTK_BOX(m_top_container), hbox, FALSE, FALSE, 0 );
+
+				}
+				break;
+			
+			case EB_INPUT_LIST:
+				{
+					GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
+					gtk_widget_show( hbox );
+						
+					char	*item_label = NULL;
+					
+					if ( the_list->widget.listbox.label != NULL )
+						item_label = the_list->widget.listbox.label;
+					else
+						item_label = the_list->widget.listbox.name;
+					
+					GtkWidget	*label = gtk_label_new( item_label );
+					gtk_widget_show( label );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					gtk_widget_set_usize( label, 130, 15 );
+					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+
+					GtkWidget	*menu = gtk_option_menu_new();
+					gtk_widget_show(menu);
+					GtkWidget	*widget = gtk_menu_new();
+					gtk_widget_show( widget );
+					the_list->widget.listbox.widget = widget;
+					
+					int i; LList *l;
+					for(i=0, l=the_list->widget.listbox.list; l; l=l_list_next(l), i++) {
+						char *label = (char *)l->data;
+						char name[10];
+						GtkWidget *w = gtk_menu_item_new_with_label(label);
+						gtk_widget_show(w);
+						snprintf(name, sizeof(name), "%d", i);
+						gtk_widget_set_name(w, name);
+						gtk_menu_append(GTK_MENU(widget), w);
+					}
+					
+					gtk_option_menu_set_menu(GTK_OPTION_MENU(menu), widget);
+					gtk_option_menu_set_history(GTK_OPTION_MENU(menu), 
+							*the_list->widget.listbox.value);
+
+					gtk_box_pack_start( GTK_BOX(hbox), menu, FALSE, FALSE, 0 );
 
 					gtk_box_pack_start( GTK_BOX(m_top_container), hbox, FALSE, FALSE, 0 );
 

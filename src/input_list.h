@@ -31,7 +31,8 @@
 enum
 {
 	EB_INPUT_CHECKBOX,
-	EB_INPUT_ENTRY
+	EB_INPUT_ENTRY,
+	EB_INPUT_LIST
 };
 
 
@@ -51,13 +52,23 @@ typedef struct _entry_input
 	void	*entry; /* GtkWidget */
 } entry_input;
 
+typedef struct _list_input
+{
+	char	*name;
+	char	*label;
+	int	*value;
+	LList	*list;
+	void	*widget; /* GtkWidget */
+} list_input;
+
 typedef struct _input_list
 {
 	int	type;
 	union
 	{
 		checkbox_input	checkbox;
-		entry_input		entry;
+		entry_input	entry;
+		list_input	listbox;
 	} widget;
 	
 	struct _input_list *next;

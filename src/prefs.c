@@ -232,7 +232,18 @@ static input_list	*s_copy_input_list( input_list *inList )
 				}
 				break;
 			
-			default:
+			case EB_INPUT_LIST:
+				{
+					new_item->widget.entry.name = s_strdup_allow_null( list->widget.listbox.name );
+					new_item->widget.entry.label = s_strdup_allow_null( list->widget.listbox.label );
+					new_item->widget.entry.value = calloc( 1, sizeof(int) );
+					new_item->widget.listbox.widget = NULL;	/* this will be filled in when rendered - we ignore this field */
+					new_item->widget.listbox.list = list->widget.listbox.list;
+					if ( list->widget.listbox.value != NULL )
+						*(new_item->widget.listbox.value) = *(list->widget.listbox.value);
+				}
+				break;
+				default:
 				assert( FALSE );
 				break;
 		}
@@ -277,7 +288,14 @@ static void	s_destroy_input_list( input_list *inList )
 				}
 				break;
 			
-			default:
+			case EB_INPUT_LIST:
+				{
+					free( list->widget.listbox.name );
+					free( list->widget.listbox.label );
+					free( list->widget.listbox.value );
+				}
+				break;
+				default:
 				assert( FALSE );
 				break;
 		}
@@ -461,6 +479,17 @@ static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 				case EB_INPUT_ENTRY:
 					{
 						strncpy( real_list->widget.entry.value, local_copy->widget.entry.value, MAX_PREF_LEN );
+					}
+					break;
+
+				case EB_INPUT_LIST:
+					{
+						if ( (real_list->widget.listbox.value != NULL) &&
+							(local_copy->widget.listbox.value != NULL) )
+						{
+							*(real_list->widget.listbox.value) = *(local_copy->widget.listbox.value);
+						}
+
 					}
 					break;
 

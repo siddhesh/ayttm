@@ -1,3 +1,9 @@
+* Mon May 12 2003 19:41 GMT [philip]	0.3.0-188
+- src/input_list.[ch] src/prefs.c src/gtk/prefs_window.C
+add EB_INPUT_LIST pref type
+- modules/yahoo2/yahoo.c
+use it
+
 * Mon May 12 2003 04:49 GMT [edward]	0.3.0-187
 - mingw32/Makefile.am
   mingw32/import_everybuddy.la

@@ -96,6 +96,7 @@
 /* Function Prototypes */
 static int plugin_init();
 static int plugin_finish();
+static int reload_prefs();
 static void register_callbacks();
 
 /* called from plugin.c */
@@ -127,11 +128,12 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.53 $",
-	"$Date: 2003/05/11 13:35:57 $",
+	"$Revision: 1.54 $",
+	"$Date: 2003/05/12 19:47:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
+	reload_prefs,
 	NULL
 };
 struct service SERVICE_INFO = {"Yahoo", -1, 
@@ -188,6 +190,21 @@ static int plugin_init()
 	il->widget.entry.name = "webcam_port";
 	il->widget.entry.label= _("Webcam Port:");
 	il->type = EB_INPUT_ENTRY;
+
+	
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.listbox.value = &conn_type;
+	il->widget.listbox.name = "conn_type";
+	il->widget.listbox.label= _("Connection type:");
+	{
+		LList *l=NULL;
+		l = l_list_append(l, _("Dialup"));
+		l = l_list_append(l, _("DSL/Cable"));
+		l = l_list_append(l, _("T1/Lan"));
+		il->widget.listbox.list=l;
+	}
+	il->type = EB_INPUT_LIST;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
@@ -247,11 +264,19 @@ static int plugin_finish()
 {
 	while(plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
+		if(il && il->type == EB_INPUT_LIST) {
+			l_list_free(il->widget.listbox.list);
+		}
 		g_free(plugin_info.prefs);
 		plugin_info.prefs = il;
 	}
 	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
 	return (ref_count);
+}
+
+static int reload_prefs()
+{
+	return 0;
 }
 
 /*******************************************************************************
