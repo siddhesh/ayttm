@@ -1212,7 +1212,7 @@ chat_window *find_tabbed_chat_window_index (int current_page)
 				return c->chatwindow;
 		}
 	}
-	return NULL;
+	return find_tabbed_chat_room_index(current_page);
 }
 
 static chat_window *find_tabbed_current_chat_window ()

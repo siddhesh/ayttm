@@ -59,6 +59,7 @@ char* next_chatroom_name();
 void eb_chat_room_display_status (eb_account *remote, char *message);
 void eb_destroy_chat_room (eb_chat_room *ecr);
 eb_chat_room* find_tabbed_chat_room(void);
+eb_chat_room *find_tabbed_chat_room_index (int current_page);
 void do_invite_window(void *widget, eb_chat_room * room );
 void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num);
 eb_chat_room * find_chat_room_by_id( char * id );

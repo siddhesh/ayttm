@@ -1,3 +1,7 @@
+* Wed Jul 09 2003 10:32 GMT [colin]	0.3.2-19
+- src/chat_window.c src/chat_room.[ch]
+Fix focus bugs in tabbed chatrooms
+
 * Wed Jul 09 2003 10:32 GMT [colin]	0.3.2-18
 - src/chat_window.c
 Log status changes only for current remote account

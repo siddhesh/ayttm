@@ -52,6 +52,22 @@
 #include "pixmaps/action.xpm"
 #include "pixmaps/invite_btn.xpm"
 
+
+#define GET_CHAT_ROOM(cur_cw) {\
+	if( iGetLocalPref("do_tabbed_chat") ) { \
+		eb_chat_room *bck = cur_cw; \
+		if (cur_cw->notebook) \
+			cur_cw = find_tabbed_chat_room_index(gtk_notebook_get_current_page(GTK_NOTEBOOK(cur_cw->notebook))); \
+		if (cur_cw == NULL) \
+			cur_cw = bck; \
+	} \
+}
+
+#define ENTRY_FOCUS(x) { eb_chat_room *x2 = x; \
+			 GET_CHAT_ROOM(x2); \
+			 gtk_widget_grab_focus(x2->entry); \
+}
+
 LList * chat_rooms = NULL;
 
 static LList * get_contacts( eb_chat_room * room );
@@ -227,6 +243,7 @@ void eb_chat_room_notebook_switch(GtkNotebook *notebook, GtkNotebookPage *page, 
 		if (cr->notebook_child == page->child) {
 			set_tab_normal(cr);
 			eb_chat_room_update_window_title(cr, FALSE);
+			gtk_widget_grab_focus(cr->entry);
 			return;
 		}
 	}	
@@ -886,6 +903,27 @@ eb_chat_room *find_tabbed_chat_room(void)
 	return NULL;
 }
 
+eb_chat_room *find_tabbed_chat_room_index (int current_page)
+{
+	LList *l1;
+	LList *l2;
+	struct contact *c;
+
+	eb_chat_room *notebook_window = find_tabbed_chat_room ();
+	if (notebook_window == NULL || notebook_window->notebook == NULL)
+		return NULL;
+
+	if (current_page == -1)
+		current_page = gtk_notebook_get_current_page (GTK_NOTEBOOK (notebook_window->notebook));
+
+	for (l1 = chat_rooms; l1; l1 = l1->next) {
+		eb_chat_room *cr = (eb_chat_room *)l1->data;
+		if (gtk_notebook_page_num(GTK_NOTEBOOK (notebook_window->notebook), 
+					cr->notebook_child) == current_page)
+			return cr;
+	}
+	return NULL;
+}
 
 void eb_chat_room_refresh_list(eb_chat_room * room )
 {
@@ -1007,6 +1045,8 @@ static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer user
 	}	
 	eb_chat_room_update_window_title(cr, FALSE);
 	set_tab_normal (cr);
+	if(cr->entry)
+		ENTRY_FOCUS(cr);
 
 }
 
