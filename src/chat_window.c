@@ -788,6 +788,7 @@ static void handle_focus(GtkWidget *widget, GdkEventFocus * event,
 {
 	chat_window * cw = (chat_window *)userdata;
 	eb_update_window_title(cw, FALSE);
+	gtk_widget_grab_focus(cw->entry);
 }
 
 /*This handles the right mouse button clicks*/
@@ -1312,7 +1313,6 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 	} else {
 		if(iGetLocalPref("do_raise_window"))
 			gdk_window_raise(remote_contact->chatwindow->window->window);	  
-		gtk_widget_grab_focus(remote_contact->chatwindow->entry);
 	}
 
 	eb_update_window_title(remote_contact->chatwindow, TRUE);

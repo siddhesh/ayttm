@@ -1,3 +1,7 @@
+* Tue May  6 2003 06:38 GMT [philip]	0.3.0-135
+- src/chat_window.c
+let text entry grab focus whenever chat window gets focus
+
 * Tue May  6 2003 05:30 GMT [philip]	0.3.0-134
 - configure.ac
 Check if libfontconfig needed for xft
