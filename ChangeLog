@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 19:30 GMT [philip]	0.3.0-55
+- src/nomodule.c
+I'm stupid
+
 * Tue Apr 29 2003 19:30 GMT [philip]	0.3.0-54
 - src/chat_window.c
 pick the correct local and remote accounts

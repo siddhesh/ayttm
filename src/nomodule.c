@@ -35,6 +35,7 @@
 #include "value_pair.h"
 #include "service.h"
 #include "globals.h"
+#include "util.h"
 
 /* Can never be online */
 /* #include "pixmaps/nomodule_online.xpm" */
@@ -143,6 +144,13 @@ static eb_account * eb_nomodule_read_config( LList * config, struct contact *con
 	str = value_pair_get_value( config, "NAME");
 	strncpy(ea->handle, str, 255);
 	free( str );
+
+	str = value_pair_get_value(config, "LOCAL_ACCOUNT");
+	if (str) {
+		ea->ela = find_local_account_by_handle(str, SERVICE_INFO.protocol_id);
+		free(str);
+	} else 
+		ea->ela = find_local_account_for_remote(ea, 0);
 
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->protocol_account_data = aad;
