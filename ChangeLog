@@ -1,3 +1,7 @@
+* Fri Apr 25 2003 15:49 GMT [edward]	0.3.0-pre28
+- mingw
+Fix to ship ayttmrc properly
+
 * Fri Apr 25 2003 15:14 GMT [edward]	0.3.0-pre27
 - src/status.c
 Fixed movement of window after startup for improper Window Managers
