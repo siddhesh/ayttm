@@ -1,38 +1,21 @@
-TODO 0.3.1
-* Use pspell for spell-checker - Done
-  * Right click context menu on misspelled words - Done
-* Phase in multiple accounts per service
-  * add service flag for multi account if service supports it - Done
-  * add contact should add to local account, not to service - Done
-  * local account should be stored in the eb_account struct - Done
-  * Modules should be fixed (static things and so on)
-    - MSN 	ok
-    - Yahoo	Done
+TODO 0.3.2
+  * Yahoo chat rooms
+  * Active Webcam request
+  * Modules should be fixed for multiaccount (static things and so on)
     - *TOC	Half-fixed (some unknown problems like segs)
     - Jabber	Not checked
-    - IRC	Not checked
-* Yahoo webcam support - Done
-* Standardise on autoconf/automake versions (2.53/1.6) - Done
-* Right click on contact list to sort contacts - Partial
-
-TODO 0.3.2
-* Yahoo chat rooms
-* Active Webcam request
 
 TODO later
 * Native file transfer for all protocols.
 * clean up the code
 * recoding and filtering in chatrooms
 * Non-blocking connection in IRC
-* use our own linked list routines - partially done
 * Yahoo voice support ? 
-* GPG encryption utility - Done
 * 1-to-1 conversation -> group chat by inviting a user
 * Remember last selected smiley pack - Done gloablly, should be per chat
 
 eyecandy
 * emoticons in contact names and status
-* allow contact names to have non-ascii characters
 
 eternal TODO
 * Make ayttm fully stable in stable releases. 
