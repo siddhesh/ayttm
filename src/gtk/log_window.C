@@ -636,7 +636,7 @@ gboolean ay_log_window::s_search_callback( GtkWidget *widget, GdkEventKey *event
 		buffer[0] = '\'';
 		buffer[1] = '\0';
 		strncat( buffer, search_text, buffer_len );
-		strncat( buffer, _("' not found in the logs"), buffer_len );
+		strncat( buffer, _("' not found in the logs."), buffer_len );
 		
 		ay_do_info( _("Log Search"), buffer );
 	
