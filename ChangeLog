@@ -1,3 +1,7 @@
+* Thu Oct  9 2003 09:10 GMT [colin]	0.4.3-pre2
+- src/dialog.[ch]
+add do_password_input_window()
+
 * Thu Oct  9 2003 09:10 GMT [colin]	0.4.3-pre1
 - src/status.c src/gtk/prefs_window.C
 remove gtk warnings & prerelease

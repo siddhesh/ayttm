@@ -439,7 +439,7 @@ other_btn_cb (GtkWidget *widget, gpointer data)
 
     g_return_if_fail (sk);
     do_text_input_window_multiline( _("Enter another user or key ID:"),
-                         _(""), 0, other_selected_cb, sk);
+                         _(""), 0, 0, other_selected_cb, sk);
 }
 
 static gint 

@@ -323,11 +323,18 @@ void do_text_input_window(gchar * title, gchar * value,
 		void (*action)(char * text, gpointer data), 
 		gpointer data )
 {
-	do_text_input_window_multiline(title, value, 1, action, data);
+	do_text_input_window_multiline(title, value, 1, 0, action, data);
+}
+
+void do_password_input_window(gchar * title, gchar * value, 
+		void (*action)(char * text, gpointer data), 
+		gpointer data )
+{
+	do_text_input_window_multiline(title, value, 0, 1, action, data);
 }
 
 void do_text_input_window_multiline(gchar * title, gchar * value, 
-		int ismulti,
+		int ismulti, int ispassword, 
 		void (*action)(char * text, gpointer data), 
 		gpointer data )
 {
@@ -340,6 +347,9 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 	int dummy;
 	char *window_title;
 	text_input_window * input_window = g_new0(text_input_window, 1);
+	
+	if (ispassword) ismulti=FALSE;
+	
 	input_window->callback = action;
 	input_window->data = data;
 
@@ -354,6 +364,9 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 		input_window->text = gtk_text_new(NULL, NULL);
 	else
 		input_window->text = gtk_entry_new();
+	
+	if (ispassword)
+		gtk_entry_set_visibility(GTK_ENTRY(input_window->text), FALSE);
 	
 	gtk_widget_set_usize(input_window->text, 400, ismulti?200:-1);
 	gtk_editable_insert_text(GTK_EDITABLE(input_window->text),
