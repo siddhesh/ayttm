@@ -37,11 +37,12 @@ struct contact * find_contact_in_group_by_nick(const char *nick, grouplist *grou
 struct contact * find_contact_by_nick(const char *nick);
 struct contact * find_contact_by_handle( char * handle );
 eb_account * find_account_by_handle(const char *handle, const eb_local_account * ela);
+eb_account * find_account_by_handle_and_service(const char * handle, int service_id);
 
 /* Add methods */
 grouplist * add_group(const char *group_name);
-struct contact * add_contact(const char *contact_name, const char *group_name);
-struct contact * add_contact_with_group(const char *contact_name, grouplist *group);
+struct contact * add_contact(const char *contact_name, const char *group_name, int default_service);
+struct contact * add_contact_with_group(const char *contact_name, grouplist *group, int default_service);
 eb_account * add_account(const char *handle, struct contact *contact, eb_local_account *ela);
 
 /* Destroy methods */

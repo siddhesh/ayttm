@@ -34,18 +34,41 @@
 static LList *groups = NULL;
 extern LList *accounts;
 
-static LList * account_hash[27]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static int account_hash_length=27;
+class account_hash {
+	LList * _hash[27];
+	int hash_length;
 
-/*
- * Warning: Not portable across character sets
- */
-static int isalpha(char c)
-{
-	return (c>='a' && c<='z') || (c>='A' && c<='Z');
-}
+	int isalpha(char c)
+	{
+		return (c>='a' && c<='z') || (c>='A' && c<='Z');
+	}
 
-static int hash(const char * s)
+	int hash();
+
+	public:
+	account_hash(): hash_length(27)
+	{
+		_hash={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	}
+	void add(eb_account * ea);
+	void remove(eb_account *ea);
+	eb_account * find(const char * handle, const eb_local_account *ela=NULL);
+	eb_account * find(const char * handle, int service_id);
+	~account_hash()
+	{
+		for(int i=0; i<hash_length; i++) {
+			while(_hash[i]) {
+				free(_hash[i]->data);
+				_hash[i] = l_list_remove(_hash[i], _hash[i]);
+			}
+		}
+	}
+};
+
+static account_hash hash;
+
+
+int account_hash::hash(const char * s)
 {
 	int i;
 	if(!s)
@@ -54,41 +77,55 @@ static int hash(const char * s)
 	if(isalpha(s[0]))
 		i = s[0]-(s[0]>'a'?'a':'A');
 	else
-		i = account_hash_length-1;
+		i = hash_length-1;
 
 	if(isalpha(s[1]))
 		i += s[1]-(s[1]>'a'?'a':'A');
 	else
-		i += account_hash_length-1;
+		i += hash_length-1;
 
-	return i%account_hash_length;
-
+	return i%hash_length;
 }
 
-static void add_to_hash(eb_account * ea)
+void account_hash::add(eb_account * ea)
 {
 	int i = hash(ea->handle);
 	if(i<0)
 		return;
-	account_hash[i] = l_list_prepend(account_hash[i], ea);
+	_hash[i] = l_list_prepend(_hash[i], ea);
 }
 
-static void remove_from_hash(eb_account * ea)
+void account_hash::remove(eb_account * ea)
 {
 	int i = hash(ea->handle);
 	if(i<0)
 		return;
-	account_hash[i] = l_list_remove(account_hash[i], ea);
+	_hash[i] = l_list_remove(_hash[i], ea);
 }
 
-static eb_account * find_in_hash(const char * handle, const eb_local_account * ela)
+eb_account * account_hash::find(const char * handle, int service_id)
 {
 	int i = hash(handle);
 	LList * l;
 	if(i<0)
 		return NULL;
 
-	for(l = account_hash[i]; l; l = l_list_next(l)) {
+	for(l = _hash[i]; l; l = l_list_next(l)) {
+		eb_account * ea = l->data;
+		if(!strcmp(ea->handle, handle) && ea->service_id == service_id)
+			return ea;
+	}
+	return NULL;
+}
+
+eb_account * account_hash::find(const char * handle, const eb_local_account * ela=NULL)
+{
+	int i = hash(handle);
+	LList * l;
+	if(i<0)
+		return NULL;
+
+	for(l = _hash[i]; l; l = l_list_next(l)) {
 		eb_account * ea = l->data;
 		if(!strcmp(ea->handle, handle) && (!ela || ea->ela == ela))
 			return ea;
@@ -174,7 +211,7 @@ struct contact * find_contact_by_nick(const char *nick)
  */
 struct contact * find_contact_by_handle( char * handle )
 {
-	eb_account * account = find_in_hash(handle, NULL);
+	eb_account * account = hash.find(handle);
 	if(account)
 		return account->account_contact;
 	else
@@ -207,7 +244,7 @@ struct contact * find_contact_by_handle( char * handle )
 eb_account * find_account_by_handle(const char *handle, const eb_local_account * ela)
 {
 
-	return find_in_hash(handle, ela);
+	return hash.find(handle, ela);
 	/*
 	LList *l1, *l2, *l3;
 
@@ -221,7 +258,7 @@ eb_account * find_account_by_handle(const char *handle, const eb_local_account *
 	return NULL;
 	*/
 }
-		
+
 /**
  * Add a new group with the given name and return it
  * @param	group_name	the name of the new group
@@ -272,6 +309,7 @@ struct contact * add_contact_with_group(const char *contact_name, grouplist *gro
 	contact = calloc(1, sizeof(struct contact));
 	strncpy(contact->nick, contact_name, sizeof(contact->nick)-1);
 	contact->default_chatb = contact->default_filetransb = default_service;
+	contact->icon_handler=-1;
 	
 	group->members = l_list_insert_sorted(group->members, contact, contact_cmp );
 
@@ -307,7 +345,7 @@ struct contact * add_contact(const char *contact_name, const char *group_name, i
 }
 
 /**
- * Add a new account to a contact attached to a local account
+ * Add a new account to a contact attached to a local account.  Also adds the account on the server.
  * @param	handle		the handle of the new account
  * @param	contact		the contact to add the account to
  * @param	ela		the local account that this account is associated with
@@ -322,6 +360,7 @@ eb_account * add_account(const char *handle, struct contact *contact, eb_local_a
 		return NULL;
 
 	account = calloc(1, sizeof(eb_account));
+	strncpy(account->handle, handle, sizeof(account->handle)-1);
 	account->service_id = ela->service_id;
 	account->ela = ela;
 	account->account_contact = contact;
@@ -334,7 +373,7 @@ eb_account * add_account(const char *handle, struct contact *contact, eb_local_a
 	}
 
 	contact->accounts = l_list_append(contact->accounts, account);
-	add_to_hash(account);
+	hash.add(account);
 
 	return account;
 }
@@ -387,7 +426,7 @@ void remove_account(eb_account * account)
 {
 	RUN_SERVICE(account)->del_user(account);
 	account->account_contact->accounts = l_list_remove(account->account_contact->accounts, account);
-	remove_from_hash(account);
+	hash.remove(account);
 	destroy_account(account);
 }
 
