@@ -39,7 +39,7 @@
 #include "value_pair.h"
 #include "gtk_globals.h"
 #include "status.h"
-#include "plugin.h"
+/* #include "plugin.h" */
 #include "file_select.h"
 #include "smileys.h"
 
