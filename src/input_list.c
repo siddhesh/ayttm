@@ -30,233 +30,112 @@
 #include "input_list.h"
 #include "value_pair.h"
 
-#include "gtk/gtkutils.h"
 
-
-void	eb_input_render( input_list * il, void * box )
+static void	s_convert_space_to_underscore( char *inStr )
 {
-	char	*item_label = NULL;
+	char	*ptr = inStr;
+	
+	if ( ptr == NULL )
+		return;
+		
+	for ( ptr = strchr( inStr, ' ' ); ptr && *ptr; ptr = strchr( ptr, ' ' ) )
+		*ptr = '_';
+}
+
+LList	*eb_input_to_value_pair( input_list *il )
+{
+	LList	*vp = NULL;
+	char	key[MAX_PREF_NAME_LEN];
+	char	value[MAX_PREF_LEN];
 
 	
-	if ( il == NULL )
-		return;
-
-	switch ( il->type )
+	while ( il != NULL )
 	{
-		case EB_INPUT_CHECKBOX:
-			if ( il->widget.checkbox.label )
-				item_label = il->widget.checkbox.label;
-			else
-				item_label = il->widget.checkbox.name;
-
-			break;
-			
-		case EB_INPUT_ENTRY:
-			if ( il->widget.entry.label )
-				item_label = il->widget.entry.label;
-			else
-				item_label = il->widget.entry.name;
-
-			break;
-		
-		default:
-			assert( FALSE );
-			break;
-	}
-
-	switch ( il->type )
-	{
-		case EB_INPUT_CHECKBOX:
-			{
-				gtkut_button( item_label, il->widget.checkbox.value, box );
-				il->widget.checkbox.saved_value = *(il->widget.checkbox.value);
-			}
-			break;
-			
-		case EB_INPUT_ENTRY:
-			{
-				GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
-				GtkWidget	*widget = gtk_label_new( item_label );
-				gtk_widget_show( hbox );
-				gtk_widget_show( widget );
-				
-				gtk_misc_set_alignment( GTK_MISC( widget ), 0.0, 0.5 );
-				gtk_widget_set_usize( widget, 120, 15 );
-				gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
-
-				widget = gtk_entry_new();
-				gtk_widget_show( widget );
-				il->widget.entry.entry = widget;
-				gtk_entry_set_text( GTK_ENTRY(widget), il->widget.entry.value );
-				gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
-
-				gtk_box_pack_start( GTK_BOX(box), hbox, FALSE, FALSE, 0 );
-			}
-			break;
-	}
-
-	eb_input_render( il->next, box );
-}
-
-void eb_input_cancel(input_list * il)
-{
-	if(!il)
-	{
-		return;
-	}
-
-	switch(il->type)
-	{
-		case EB_INPUT_CHECKBOX:
-			{
-				*(il->widget.checkbox.value)
-					= il->widget.checkbox.saved_value;
-			}
-			break;
-		case EB_INPUT_ENTRY:
-			{
-				GtkWidget * w = il->widget.entry.entry;
-				char * text = il->widget.entry.value;
-				gtk_entry_set_text(GTK_ENTRY(w), text);
-			}
-			break;
-	}
-
-	eb_input_cancel(il->next);
-}
-
-void eb_input_accept(input_list * il)
-{
-	if(!il)
-	{
-		return;
-	}
-
-	switch(il->type)
-	{
-		case EB_INPUT_CHECKBOX:
-			{
-			}
-			break;
-		case EB_INPUT_ENTRY:
-			{
-				GtkWidget * w = il->widget.entry.entry;
-				char * text = gtk_entry_get_text(GTK_ENTRY(w));
-				strncpy(il->widget.entry.value, text, MAX_PREF_LEN);
-				gtk_entry_set_text(GTK_ENTRY(w), il->widget.entry.value);
-
-			}
-			break;
-	}
-
-	eb_input_accept(il->next);
-}
-
-LList *eb_input_to_value_pair(input_list * il)
-{
-	LList *vp=NULL;
-	char key[MAX_PREF_NAME_LEN];
-	char value[MAX_PREF_LEN];
-	char *ptr=NULL;
-
-	for(; il; il=il->next)
-	{
-		switch(il->type)
+		switch ( il->type )
 		{
 			case EB_INPUT_CHECKBOX:
 				{
-					snprintf(key, sizeof(key), "%s", il->widget.checkbox.name);
-					for( ptr=strchr(key, ' '); ptr && *ptr; ptr=strchr(ptr, ' '))
-						*ptr='_';
-					snprintf(value, sizeof(value), "%i", *il->widget.checkbox.value);
-					vp=value_pair_add(vp, key, value);
+					snprintf( key, sizeof(key), "%s", il->widget.checkbox.name );
+					s_convert_space_to_underscore( key );
+						
+					snprintf( value, sizeof(value), "%i", *il->widget.checkbox.value );
+					
+					vp = value_pair_add( vp, key, value );
 				}
 				break;
+				
 			case EB_INPUT_ENTRY:
 				{
-					snprintf(key, sizeof(key), "%s", il->widget.entry.name);
-					for( ptr=strchr(key, ' '); ptr && *ptr; ptr=strchr(ptr, ' '))
-						*ptr='_';
-					vp=value_pair_add(vp, key, il->widget.entry.value);
+					snprintf( key, sizeof(key), "%s", il->widget.entry.name );
+					s_convert_space_to_underscore( key );
+						
+					vp = value_pair_add( vp, key, il->widget.entry.value );
 				}
 				break;
 		}
+		
+		il = il->next;
 	}
-	return(vp);
+	
+	return( vp );
 }
 
-void eb_update_from_value_pair(input_list *il, LList *vp)
+void	eb_update_from_value_pair( input_list *il, LList *vp )
 {
-	char key[MAX_PREF_NAME_LEN];
-	char *value;
-	char *ptr=NULL;
+	char	key[MAX_PREF_NAME_LEN];
+	char	*value = NULL;
 
-	if(!il || ! vp)
+	
+	if ( vp == NULL )
 		return;
-	for(; il; il=il->next)
+		
+	while ( il != NULL )
 	{
-		switch(il->type)
+		switch ( il->type )
 		{
 			case EB_INPUT_CHECKBOX:
 				{
-					if(!il->widget.checkbox.value) {
+					if ( il->widget.checkbox.value == NULL )
+					{
 						eb_debug(DBG_CORE, "checkbox.value is NULL\n");
 						break;
 					}
-					snprintf(key, sizeof(key), "%s", il->widget.checkbox.name);
-					for( ptr=strchr(key, ' '); ptr && *ptr; ptr=strchr(ptr, ' '))
-						*ptr='_';
-					value=value_pair_get_value(vp, key);
+					
+					snprintf( key, sizeof(key), "%s", il->widget.checkbox.name );
+					s_convert_space_to_underscore( key );
+						
+					value = value_pair_get_value( vp, key );
 
-					/* XXX
-					 * this block is to convert old prefs files to new format.
-					 * this should be removed after about two or three versions
-					 * have been released.  We're currently in 0.4.2
-					 */
-					if(!value && il->widget.checkbox.label) {
-						snprintf(key, sizeof(key), "%s", il->widget.checkbox.label);
-						for( ptr=strchr(key, ' '); ptr && *ptr; ptr=strchr(ptr, ' '))
-							*ptr='_';
-						value=value_pair_get_value(vp, key);
-					}
-
-					/* Was there a matching entry? */
-					if(value) {
-						*il->widget.checkbox.value=atoi(value);
-						g_free(value);
+					if ( value != NULL )
+					{
+						*il->widget.checkbox.value = atoi(value);
+						free( value );
 					}
 				}
 				break;
+				
 			case EB_INPUT_ENTRY:
 				{
-					if(!il->widget.entry.value) {
+					if ( il->widget.entry.value == NULL )
+					{
 						eb_debug(DBG_CORE, "entry.value is NULL\n");
 						break;
 					}
-					snprintf(key, sizeof(key), "%s", il->widget.entry.name);
-					for( ptr=strchr(key, ' '); ptr && *ptr; ptr=strchr(ptr, ' '))
-						*ptr='_';
-					value=value_pair_get_value(vp, key);
 					
-					/* XXX
-					 * this block is to convert old prefs files to new format.
-					 * this should be removed after about two or three versions
-					 * have been released.  We're currently in 0.4.2
-					 */
-					if(!value && il->widget.entry.label) {
-						snprintf(key, sizeof(key), "%s", il->widget.entry.label);
-						for( ptr=strchr(key, ' '); ptr && *ptr; ptr=strchr(ptr, ' '))
-							*ptr='_';
-						value=value_pair_get_value(vp, key);
-					}
+					snprintf( key, sizeof(key), "%s", il->widget.entry.name );
+					s_convert_space_to_underscore( key );
+					
+					value = value_pair_get_value( vp, key );
 
-					/* Was there a matching entry? */
-					if(value) {
-						strncpy(il->widget.entry.value, value, MAX_PREF_LEN);
-						g_free(value);
+					if ( value != NULL )
+					{
+						strncpy( il->widget.entry.value, value, MAX_PREF_LEN );
+						free( value );
 					}
 				}
 				break;
 		}
+		
+		il = il->next;
 	}
 }

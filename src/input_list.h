@@ -22,10 +22,11 @@
  *
  */
 
-#ifndef __EB_INPUT_LIST_H__
-#define __EB_INPUT_LIST_H__
+#ifndef __INPUT_LIST_H__
+#define __INPUT_LIST_H__
 
 #include "llist.h"
+
 
 enum
 {
@@ -34,46 +35,45 @@ enum
 };
 
 
-typedef struct _chekbox_input
+typedef struct _checkbox_input
 {
-	char * name;
-	char * label;
-	int * value;
-	int saved_value;
+	char	*name;
+	char	*label;
+	int		*value;
+	int		saved_value;
 } checkbox_input;
 
 typedef struct _entry_input
 {
-	char * name;
-	char * label;
-	char * value;
-	void * entry; /* GtkWidget */
+	char	*name;
+	char	*label;
+	char	*value;
+	void	*entry; /* GtkWidget */
 } entry_input;
 
 typedef struct _input_list
 {
-	int type;
+	int	type;
 	union
 	{
-		checkbox_input checkbox;
-		entry_input entry;
+		checkbox_input	checkbox;
+		entry_input		entry;
 	} widget;
-	struct _input_list * next;
+	
+	struct _input_list *next;
 } input_list;
-		
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void eb_input_render(input_list * il, void * box); /* GtkWidget * box */
-void eb_input_cancel(input_list * il);
-void eb_input_accept(input_list * il);
-LList *eb_input_to_value_pair(input_list * il);
+LList	*eb_input_to_value_pair( input_list *il );
+
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-__declspec(dllimport) void eb_update_from_value_pair(input_list *il, LList *vp);
+	__declspec(dllimport) void	eb_update_from_value_pair( input_list *il, LList *vp );
 #else
-extern void eb_update_from_value_pair(input_list *il, LList *vp);
+	extern void	eb_update_from_value_pair( input_list *il, LList *vp );
 #endif
 
 #ifdef __cplusplus

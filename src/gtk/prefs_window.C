@@ -423,6 +423,8 @@ class ay_module_panel : public ay_prefs_window_panel
 		
 	private:
 		static void		AddInfoRow( GtkWidget *inTable, int inRow, const char *inHeader, const char *inInfo );
+
+		void			RenderModulePrefs( void );
 		
 		t_module_pref &m_prefs;
 };
@@ -889,12 +891,12 @@ void	ay_prefs_window_panel::Show( void )
 void	ay_prefs_window_panel::AddTopFrame( const char *in_text )
 {
 	const char	*ayttm_yellow = "#F9E589";
-	GdkColor	the_color;
+	GdkColor	the_colour;
 	
-	gdk_color_parse( ayttm_yellow, &the_color );
+	gdk_color_parse( ayttm_yellow, &the_colour );
 	
 	GtkRcStyle	*rc_style = gtk_rc_style_new();
-	rc_style->bg[GTK_STATE_NORMAL] = the_color;
+	rc_style->bg[GTK_STATE_NORMAL] = the_colour;
 	rc_style->color_flags[GTK_STATE_NORMAL] = static_cast<GtkRcFlags>(rc_style->color_flags[GTK_STATE_NORMAL] | GTK_RC_BG);
 
 	GtkWidget	*frame = gtk_frame_new( NULL );
@@ -1370,8 +1372,8 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
 	gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
 	gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
-	gtkut_button( _("Ignore foreground Colors"), &m_prefs.do_ignore_fore, m_top_vbox );
-	gtkut_button( _("Ignore background Colors"), &m_prefs.do_ignore_back, m_top_vbox );
+	gtkut_button( _("Ignore foreground Colours"), &m_prefs.do_ignore_fore, m_top_vbox );
+	gtkut_button( _("Ignore background Colours"), &m_prefs.do_ignore_back, m_top_vbox );
 	gtkut_button( _("Ignore fonts"), &m_prefs.do_ignore_font, m_top_vbox );
 
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
@@ -2162,7 +2164,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 	{	
 		if ( m_prefs.pref_list != NULL )
 		{
-			eb_input_render( m_prefs.pref_list, m_top_vbox );
+			RenderModulePrefs();
 		}
 		else
 		{	
@@ -2195,7 +2197,31 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 // Apply
 void	ay_module_panel::Apply( void )
 {
-	eb_input_accept( m_prefs.pref_list );
+	input_list	*the_list = m_prefs.pref_list;
+
+	
+	while ( the_list != NULL )
+	{
+		switch(the_list->type)
+		{
+			case EB_INPUT_CHECKBOX:
+				break;
+				
+			case EB_INPUT_ENTRY:
+				{
+					GtkWidget	*entry_widget = reinterpret_cast<GtkWidget *>(the_list->widget.entry.entry);
+					const char	*text = gtk_entry_get_text(GTK_ENTRY(entry_widget));
+					
+					strncpy( the_list->widget.entry.value, text, MAX_PREF_LEN );
+					
+					gtk_entry_set_text( GTK_ENTRY(entry_widget), the_list->widget.entry.value );
+
+				}
+				break;
+		}
+
+		the_list = the_list->next;
+	}
 }
 
 // AddInfoRow
@@ -2213,4 +2239,65 @@ void	ay_module_panel::AddInfoRow( GtkWidget *inTable, int inRow, const char *inH
 	gtk_label_set_line_wrap( GTK_LABEL(label), TRUE );
 	gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_LEFT );
 	gtk_table_attach_defaults( GTK_TABLE(inTable), label, 1, 2, inRow, inRow + 1 );
+}
+
+// RenderModulePrefs
+void	ay_module_panel::RenderModulePrefs( void )
+{
+	input_list	*the_list = m_prefs.pref_list;
+
+	
+	while ( the_list != NULL )
+	{
+		switch ( the_list->type )
+		{
+			case EB_INPUT_CHECKBOX:
+				{
+					char	*item_label = NULL;
+					
+					if ( the_list->widget.checkbox.label != NULL )
+						item_label = the_list->widget.checkbox.label;
+					else
+						item_label = the_list->widget.checkbox.name;
+						
+					gtkut_button( item_label, the_list->widget.checkbox.value, m_top_vbox );
+					the_list->widget.checkbox.saved_value = *(the_list->widget.checkbox.value);
+				}
+				break;
+
+			case EB_INPUT_ENTRY:
+				{
+					GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
+					gtk_widget_show( hbox );
+						
+					char	*item_label = NULL;
+					
+					if ( the_list->widget.entry.label != NULL )
+						item_label = the_list->widget.entry.label;
+					else
+						item_label = the_list->widget.entry.name;
+					
+					GtkWidget	*widget = gtk_label_new( item_label );
+					gtk_widget_show( widget );
+					gtk_misc_set_alignment( GTK_MISC( widget ), 0.0, 0.5 );
+					gtk_widget_set_usize( widget, 120, 15 );
+					gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
+
+					widget = gtk_entry_new();
+					gtk_widget_show( widget );
+					the_list->widget.entry.entry = widget;
+					gtk_entry_set_text( GTK_ENTRY(widget), the_list->widget.entry.value );
+					gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
+
+					gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
+				}
+				break;
+			
+			default:
+				assert( FALSE );
+				break;
+		}
+
+		the_list = the_list->next;
+	}
 }

@@ -1,3 +1,8 @@
+* Mon Apr 28 2003 11:50 GMT [andy]	0.3.0-10
+- src/input_list.[ch]
+  src/gtk/prefs_window.C
+Move rendering of input_lists into gtk dir
+
 * Mon Apr 28 2003 10:40 GMT [colin]	0.3.0-9
 - src/contact_parser.y src/account.c
   modules/*/*
