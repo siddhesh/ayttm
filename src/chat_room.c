@@ -315,14 +315,21 @@ static void set_sound_on_toggle(GtkWidget * sound_button, gpointer userdata)
     cr->sound_enabled = FALSE;
 }
 
+static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
+{
+	return strcasecmp((const char *)a, (const char *)b);
+}
+
 static GList * chat_service_list()
 {
 	GList * list = NULL;
+	LList * walk = NULL;
 	int i;
-	for(i = 0; i < NUM_SERVICES; i++ ) {
-		if(can_group_chat(eb_services[i]) 
-				&& find_suitable_local_account(NULL,i)) {
-			list = g_list_append(list, eb_services[i].name);
+	for (walk = accounts; walk; walk = walk->next) {
+		eb_local_account *ela = (eb_local_account *)walk->data;
+		if (ela && ela->connected && can_group_chat(eb_services[ela->service_id])) {
+			char *str = g_strdup_printf("[%s] %s", get_service_name(ela->service_id), ela->handle);
+			list = g_list_insert_sorted(list, str, strcasecmp_glist);
 		}
 	}
 	return list;
@@ -360,7 +367,7 @@ static void do_invite_window(eb_chat_room * room )
 	box = gtk_vbox_new(FALSE, 3);
 	box2 = gtk_hbox_new(FALSE, 3);
 
-	label = gtk_label_new(_("Handle:"));
+	label = gtk_label_new(_("Handle: "));
 	gtk_container_add(GTK_CONTAINER(box2), label);
 	gtk_widget_show(label);
 
@@ -420,13 +427,36 @@ char * next_chatroom_name(void)
 
 static void join_chat_callback(GtkWidget * widget, gpointer data )
 {
-	int id = get_service_id(gtk_entry_get_text(
-				GTK_ENTRY(GTK_COMBO(chat_room_type)->entry)));
+	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
 	char *name = gtk_editable_get_chars(GTK_EDITABLE(chat_room_name),0,-1);
+	char *local_acc = NULL;
+	eb_local_account *ela = NULL;
+	int service_id = -1;
+	if (!strstr(service, "]") || !strstr(service," ")) {
+		ay_do_error(_("Cannot join"), _("No local account specified."));
+		g_free(service);
+		return;
+	}
+	
+	local_acc = strstr(service, " ") +1;
+
+	*(strstr(service, "]")) = '\0';
+	service = strstr(service,"[")+1;
+	
+	service_id = get_service_id( service );
+	ela = find_local_account_by_handle(local_acc, service_id);
+	
+	g_free(service);
+	
+	if (!ela) {
+		ay_do_error(_("Cannot join"), _("The local account doesn't exist."));
+		return;			
+	}
 
 	if (!name || strlen(name) == 0)
 		name = next_chatroom_name();
-	eb_start_chat_room(id, name);
+	
+	eb_start_chat_room(ela, name);
 	g_free(name);
 	gtk_widget_destroy(join_chat_window);
 }
@@ -469,7 +499,7 @@ void open_join_chat_window()
 
 	table = gtk_table_new(2, 2, FALSE);
 
-	label = gtk_label_new(_("Chat Room Name:"));
+	label = gtk_label_new(_("Chat Room Name: "));
 	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 0, 1);
 	gtk_widget_show(label);
 
@@ -477,7 +507,7 @@ void open_join_chat_window()
 	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_name, 1, 2, 0, 1);
 	gtk_widget_show(chat_room_name);
 
-	label = gtk_label_new(_("Service Type:"));
+	label = gtk_label_new(_("Local account: "));
 	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 1, 2);
 	gtk_widget_show(label);
 
@@ -727,9 +757,8 @@ static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_mes
 	g_free(room_title);
 }
 
-void eb_start_chat_room( gint service, gchar * name )
+void eb_start_chat_room( eb_local_account *ela, gchar * name )
 {
-	eb_local_account * ela =  find_suitable_local_account(NULL, service);
 	eb_chat_room * ecb = NULL;
 
 	/* if we don't have a working account just bail right now */
@@ -1198,7 +1227,7 @@ static LList * get_group_contacts(gchar *group, eb_chat_room * room)
 		struct contact * contact = (struct contact *)node->data;
 		accounts = contact->accounts;
 		while (accounts) {
-			if( ((struct account *)accounts->data)->service_id == room->local_user->service_id
+			if( ((struct account *)accounts->data)->ela == room->local_user
 			&&  ((struct account *)accounts->data)->online) {
 				newlist = l_list_append(newlist, ((struct account *)accounts->data)->handle);	
 			}

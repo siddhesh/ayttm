@@ -63,11 +63,11 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 		*(strstr(service, "]")) = '\0';
 		service = strstr(service,"[")+1;
 
-		printf("service = %s local_acc = %s\n",service, local_acc);
 		service_id = get_service_id( service );
 		ela = find_local_account_by_handle(local_acc, service_id);
 		if (!ela) {
 			ay_do_error(_("Account error"), _("The local account doesn't exist."));
+			g_free(service);
 			return;			
 		}
 		account->ela = ela;
@@ -78,6 +78,7 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 					local account later. */
 	} else {
 		ay_do_error(_("Account error"), _("The local account doesn't exist."));
+		g_free(service);
 		return;
 	}
 	
@@ -226,7 +227,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 			eb_local_account *ela = (eb_local_account *)walk->data;
 			if (ela) {
 				char *str = g_strdup_printf("[%s] %s", get_service_name(ela->service_id), ela->handle);
-				list = g_list_append(list, str);
+				list = g_list_insert_sorted(list, str, strcasecmp_glist);
 				
 				if (ela == ea->ela)
 					cur_la = strdup(str);

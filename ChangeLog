@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 09:43 GMT [colin]	0.3.0-66
+- src/chat_room.c
+Chatrooms with ela instead of service_id
+
 * Wed Apr 30 2003 09:43 GMT [colin]	0.3.0-65
 - src/contact_parser.y
 Alpha-sort lists

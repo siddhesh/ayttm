@@ -94,7 +94,7 @@ extern "C" {
 void eb_join_chat_room( eb_chat_room * chat_room );
 void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, char * message);
 void eb_chat_room_show_message( eb_chat_room * chat_room, char * user, char * message );
-void eb_start_chat_room( int service, char * name );
+void eb_start_chat_room( eb_local_account *ela, char * name );
 void eb_chat_room_buddy_arrive( eb_chat_room * room, char * alias, char * handle );
 void eb_chat_room_buddy_leave( eb_chat_room * room, char * handle );
 int eb_chat_room_buddy_connected( eb_chat_room * room, char * user );

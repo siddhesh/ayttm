@@ -195,13 +195,28 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
 	gint service_id = -1;
 	gchar *local_acc = strstr(service, " ") +1;
+	eb_local_account *ela = NULL;
 	eb_account *ea = NULL;
+
+	if (!strstr(service, "]") || !strstr(service," ")) {
+		ay_do_error(_("Account error"), _("No local account specified."));
+		g_free(service);
+		return;
+	}
+	
 	*(strstr(service, "]")) = '\0';
 	
 	service = strstr(service,"[")+1;
 	service_id = get_service_id( service );
-	
-	ea = eb_services[service_id].sc->new_account(find_local_account_by_handle(local_acc, service_id), account);
+	ela = find_local_account_by_handle(local_acc, service_id);
+
+	if (!ela) {
+		ay_do_error(_("Account error"), _("Local account doesn't exist."));
+		g_free(service);
+		return;
+	}
+		
+	ea = eb_services[service_id].sc->new_account(ela, account);
 	ea->service_id = service_id;
 	
 	g_free(service);
@@ -304,7 +319,7 @@ static void show_add_defined_contact_window(struct contact * cont, grouplist *gr
 			eb_local_account *ela = (eb_local_account *)walk->data;
 			if (ela) {
 				char *str = g_strdup_printf("[%s] %s", get_service_name(ela->service_id), ela->handle);
-				list = g_list_append(list, str);
+				list = g_list_insert_sorted(list, str, strcasecmp_glist);
 			}
 		}
 		gtk_combo_set_popdown_strings(GTK_COMBO(service_list), list );
