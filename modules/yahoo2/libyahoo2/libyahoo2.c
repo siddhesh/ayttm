@@ -1062,7 +1062,10 @@ static void yahoo_process_conference(struct yahoo_input_data *yid, struct yahoo_
 		if(who)
 			YAHOO_CALLBACK(ext_yahoo_conf_userdecline)(yd->client_id, who, room, msg);
 		break;
+
+
 	case YAHOO_SERVICE_CONFLOGON:
+
 		if(who)
 			YAHOO_CALLBACK(ext_yahoo_conf_userjoin)(yd->client_id, who, room);
 		break;
@@ -1563,11 +1566,7 @@ static void yahoo_process_auth_pre_0x0b(struct yahoo_input_data *yid,
 }
 
 /*
- * New auth protocol cracked by Sean Egan from the Gaim team
- * Dude you Rock!
- *
- * I should say thanks again to gaim without which this library
- * would not have been possible
+ * New auth protocol cracked by Cerulean Studios and sent in to Gaim
  */
 static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *seed, const char *sn)
 {
@@ -1587,8 +1586,8 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 	char *operand_lookup = "+|&%/*^-";
 	char *delimit_lookup = ",;";
 
-	unsigned char *password_hash = g_malloc0(25);
-	unsigned char *crypt_hash = g_malloc0(25);
+	unsigned char *password_hash = malloc(25);
+	unsigned char *crypt_hash = malloc(25);
 	char *crypt_result = NULL;
 	unsigned char pass_hash_xor1[64];
 	unsigned char pass_hash_xor2[64];
@@ -1764,7 +1763,8 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 
 	/* Dump magic key into a char for SHA1 action. */
 		
-	memcpy(&magic_key_char[0], &value, sizeof(int));
+	for(x = 0; x < sizeof(int); x++, value>>=8) 
+		magic_key_char[x] = value & 0xff;
 
 	/* Get password and crypt hashes as per usual. */
 	md5_init(&ctx);
@@ -1969,7 +1969,7 @@ static void yahoo_process_auth(struct yahoo_input_data *yid, struct yahoo_packet
 	char *seed = NULL;
 	char *sn   = NULL;
 	YList *l = pkt->hash;
-	int m = 1;
+	int m = 0;
 
 	while (l) {
 		struct yahoo_pair *pair = l->data;
@@ -3132,7 +3132,7 @@ int yahoo_read_ready(int id, int fd, void *data)
 	return len;
 }
 
-int yahoo_init(const char *username, const char *password, ...)
+int yahoo_init_with_attributes(const char *username, const char *password, ...)
 {
 	va_list ap;
 	struct yahoo_data *yd;
@@ -3157,6 +3157,11 @@ int yahoo_init(const char *username, const char *password, ...)
 	va_end(ap);
 
 	return yd->client_id;
+}
+
+int yahoo_init(const char *username, const char *password)
+{
+	return yahoo_init_with_attributes(username, password, NULL);
 }
 
 struct connect_callback_data {

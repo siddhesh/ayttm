@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.65 $",
-	"$Date: 2003/09/27 09:05:09 $",
+	"$Revision: 1.66 $",
+	"$Date: 2003/09/30 19:02:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1964,7 +1964,7 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
 	ela->connecting = 1;
 	ref_count++;
-	ylad->id = yahoo_init(ela->handle, ylad->password,
+	ylad->id = yahoo_init_with_attributes(ela->handle, ylad->password,
 			"pager_host", pager_host,
 			"pager_port", atoi(pager_port),
 			"filetransfer_host", filetransfer_host,

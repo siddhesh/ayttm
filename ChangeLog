@@ -1,3 +1,7 @@
+* Tue Sep 30 2003 18:56 GMT [philip]	0.4.2-4
+- modules/yahoo2/libyahoo2.c
+fix for big endian auth
+
 * Tue Sep 30 2003 16:13 GMT [colin]	0.4.2-3
 - modules/msn2/libmsn2/msn_core.C
 Fix crash when https servers are unreacheable
