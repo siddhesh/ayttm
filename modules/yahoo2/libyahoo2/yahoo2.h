@@ -22,19 +22,13 @@
 #ifndef YAHOO2_H
 #define YAHOO2_H
 
-#ifdef __MINGW32__
-# include <winsock2.h>
-# define write(a,b,c) send(a,b,c,0)
-# define read(a,b,c)  recv(a,b,c,0)
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "yahoo2_types.h"
 
-/* returns the socket descriptor for a given connection. shouldn't be needed */
+/* returns the socket descriptor for a given pager connection. shouldn't be needed */
 int  yahoo_get_fd(int id);
 
 /* says how much logging to do */
@@ -50,10 +44,13 @@ int  yahoo_set_log_level(enum yahoo_log_level level);
 /* or 0 on failure */
 /* you must call init before calling any other function */
 int  yahoo_init(const char *username, const char *password);
+/* release all resources held by this session */
+/* you need to call yahoo_close for a session only if
+ * yahoo_logoff is never called for it (ie, it was never logged in) */
 void yahoo_close(int id);
 /* login logs in to the server */
 /* initial is of type enum yahoo_status.  see yahoo2_types.h */
-void  yahoo_login(int id, int initial);
+void yahoo_login(int id, int initial);
 void yahoo_logoff(int id);
 /* reloads status of all buddies */
 void yahoo_refresh(int id);

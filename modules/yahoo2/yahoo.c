@@ -84,6 +84,9 @@
 #endif
 #if defined(__MINGW32__)
 # define snprintf _snprintf
+# include <winsock2.h>
+# define write(a,b,c) send(a,b,c,0)
+# define read(a,b,c)  recv(a,b,c,0)
 #endif
 
 /*******************************************************************************
@@ -122,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/06 14:39:22 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/06 18:40:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

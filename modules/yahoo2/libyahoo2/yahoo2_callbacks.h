@@ -52,6 +52,17 @@ typedef enum {
 	YAHOO_INPUT_EXCEPTION = 1 << 2
 } yahoo_input_condition;
 
+/*
+ * A callback function called when an asynchronous connect completes.
+ * 
+ * Params:
+ *     fd    - The file descriptor that has been connected, or -1 on error
+ *     error - The value of errno set by the call to connect or 0 if no error
+ *             Set both fd and error to 0 if the connect was cancelled by the
+ *             user
+ *     callback_data - the callback_data passed to the ext_yahoo_connect_async
+ *             function
+ */
 typedef void (*yahoo_connect_callback)(int fd, int error, void *callback_data);
 
 /*
@@ -371,7 +382,9 @@ int YAHOO_CALLBACK_TYPE(ext_yahoo_log)(char *fmt, ...);
 
 /*
  * Name: ext_yahoo_add_handler
- * 	Add a listener for the fd
+ * 	Add a listener for the fd.  Must call yahoo_read_ready
+ * 	when a YAHOO_INPUT_READ fd is ready and yahoo_write_ready
+ * 	when a YAHOO_INPUT_WRITE fd is ready.
  * Params:
  * 	id   - the id that identifies the server connection
  * 	fd   - the fd on which to listen
@@ -384,7 +397,7 @@ void YAHOO_CALLBACK_TYPE(ext_yahoo_add_handler)(int id, int fd, yahoo_input_cond
 
 /*
  * Name: ext_yahoo_remove_handler
- * 	Remove the listener for the fd
+ * 	Remove the listener for the fd.
  * Params:
  * 	id   - the id that identifies the server connection
  * 	fd   - the fd on which to listen
@@ -407,14 +420,26 @@ void YAHOO_CALLBACK_TYPE(ext_yahoo_remove_handler)(int id, int fd);
 int YAHOO_CALLBACK_TYPE(ext_yahoo_connect)(char *host, int port);
 
 
+
+
+
+
+
+
 /*
  * Name: ext_yahoo_connect_async
- * 	Connect to a host:port asynchronously
+ * 	Connect to a host:port asynchronously.  This function should return
+ * 	immediately returing a tag used to identify the connection handler,
+ * 	or a pre-connect error (eg: host name lookup failure).
+ * 	Once the connect completes (successfully or unsuccessfully), callback
+ * 	should be called (see the signature for yahoo_connect_callback).
+ * 	The callback may safely be called before this function returns, but
+ * 	it should not be called twice.
  * Params:
  * 	id   - the id that identifies this connection
  * 	host - the host to connect to
  * 	port - the port to connect on
- * 	callback - function to callback when connect completes
+ * 	callback - function to call when connect completes
  * 	callback_data - data to pass to the callback function
  * Returns:
  * 	a unix file descriptor to the socket
