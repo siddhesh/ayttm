@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.38 $",
-	"$Date: 2003/07/20 16:42:20 $",
+	"$Revision: 1.39 $",
+	"$Date: 2003/07/30 15:54:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -168,7 +168,7 @@ struct eb_icq_account_data {
 
 struct eb_icq_local_account_data {
 	char icq_info[MAX_PREF_LEN]; 
-        char password[255];
+        char password[MAX_PREF_LEN];
         int fd;
 	toc_conn * conn;
 	int input;
@@ -937,67 +937,66 @@ static void eb_icq_send_im( eb_local_account * account_from,
 	g_free(message2);
 }
 		
+static void icq_init_account_prefs(eb_local_account * ela)
+{
+	struct eb_icq_local_account_data *alad = ela->protocol_local_account_data;
+	input_list *il = g_new0(input_list, 1);
+
+	ela->prefs = il;
+
+	il->widget.entry.value = ela->handle;
+	il->widget.entry.name = "SCREEN_NAME";
+	il->widget.entry.label= _("ICQ _UIN:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = alad->password;
+	il->widget.entry.name = "PASSWORD";
+	il->widget.entry.label= _("_Password:");
+	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ela->connect_at_startup;
+	il->widget.checkbox.name = "CONNECT";
+	il->widget.checkbox.label= _("_Connect at startup");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = alad->icq_info;
+	il->widget.entry.name = "PROFILE";
+	il->widget.entry.label= _("P_rofile:");
+	il->type = EB_INPUT_ENTRY;
+
+}
+
 static eb_local_account * eb_icq_read_local_config(LList * pairs)
 {
 
 	eb_local_account * ela = g_new0(eb_local_account, 1);
-	char buff[1024];
 	struct eb_icq_local_account_data * ala = g_new0(struct eb_icq_local_account_data, 1);
-	char		*str = NULL;
-	
-	
-	strncpy(ala->icq_info,  "Visit the Ayttm website at <a href=\"http://ayttm.sf.net/\">ayttm.sf.net</a>",
-			sizeof(ala->icq_info));
-
 	
 	eb_debug(DBG_TOC, "eb_icq_read_local_config: entering\n");	
-	/*you know, eventually error handling should be put in here*/
-	ela->handle=value_pair_get_value(pairs, "SCREEN_NAME");
-	strncpy(ela->alias, ela->handle, 255);
-	str = value_pair_get_value(pairs, "PASSWORD");
-	strncpy(ala->password, str, 255);
-	free( str );
-	str = value_pair_get_value(pairs,"CONNECT");
-	ela->connect_at_startup=(str && !strcmp(str,"1"));
-	free(str);
 
-
-	str = value_pair_get_value(pairs, "PROFILE");
-	if(str) {	
-		strncpy(ala->icq_info, str, MAX_PREF_LEN);
-		free( str );
-	}
-
-	snprintf(buff, sizeof(buff), "%s [icq]", ela->alias);
-	eb_add_menu_item(strdup(buff), EB_PROFILE_MENU, icq_set_profile_window, ebmPROFILEDATA, ebmProfileData_new(ela));
-
-    ela->service_id = SERVICE_INFO.protocol_id;
-    ela->protocol_local_account_data = ala;
+	ela->service_id = SERVICE_INFO.protocol_id;
+	ela->protocol_local_account_data = ala;
 	ala->status = ICQ_OFFLINE;
+	icq_init_account_prefs(ela);
+
+	eb_update_from_value_pair(ela->prefs, pairs);
+
 	eb_debug(DBG_TOC, "eb_icq_read_local_config: returning %p\n", ela);
 
-    return ela;
+	return ela;
 }
 
 static LList * eb_icq_write_local_config( eb_local_account * account )
 {
-	LList * list = NULL;
-	struct eb_icq_local_account_data * alad = account->protocol_local_account_data; 
-
-	list = value_pair_add(list, "SCREEN_NAME", account->handle);
-	list = value_pair_add(list, "PASSWORD", alad->password);
-	list = value_pair_add(list, "PROFILE", alad->icq_info);
-
-	if (account->connect_at_startup)
-		list = value_pair_add (list, "CONNECT", "1");
-	else 
-		list = value_pair_add (list, "CONNECT", "0");
-	
-	return list;
+	return eb_input_to_value_pair( account->prefs );
 }
-			
 
-	
 
 static eb_account * eb_icq_read_config( eb_account *ea, LList * config )
 {

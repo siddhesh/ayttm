@@ -126,8 +126,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.61 $",
-	"$Date: 2003/07/30 09:18:42 $",
+	"$Revision: 1.62 $",
+	"$Date: 2003/07/30 15:54:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -289,7 +289,6 @@ static void eb_yahoo_free_account_data(eb_account * account)
 }
 
 typedef struct {
-	char yahoo_id[MAX_PREF_LEN];
 	char password[MAX_PREF_LEN];
 	char *act_id;
 	int do_mail_notify;
@@ -2137,7 +2136,7 @@ static void yahoo_init_account_prefs(eb_local_account * ela)
 
 	ela->prefs = il;
 
-	il->widget.entry.value = ylad->yahoo_id;
+	il->widget.entry.value = ela->handle;
 	il->widget.entry.name = "SCREEN_NAME";
 	il->widget.entry.label= _("_Yahoo Id:");
 	il->type = EB_INPUT_ENTRY;
@@ -2192,9 +2191,6 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 	ela = g_new0(eb_local_account, 1);
 	ylad = g_new0(eb_yahoo_local_account_data, 1);
 
-	ela->handle = value_pair_get_value(pairs, "SCREEN_NAME");
-	strncpy(ela->alias, ela->handle, 255);
-
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = ylad;
 	ylad->status = YAHOO_STATUS_OFFLINE;
@@ -2202,6 +2198,8 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 	yahoo_init_account_prefs(ela);
 
 	eb_update_from_value_pair(ela->prefs, pairs);
+
+	strncpy(ela->alias, ela->handle, 255);
 
 	return ela;
 }

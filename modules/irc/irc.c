@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.32 $",
-	"$Date: 2003/07/15 14:01:19 $",
+	"$Revision: 1.33 $",
+	"$Date: 2003/07/30 15:54:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -121,9 +121,9 @@ static int plugin_finish()
 
 typedef struct irc_local_account_type
 {
-	char		server[255];
-	char		password[255];
-	char 		port[10];
+	char		server[MAX_PREF_LEN];
+	char		password[MAX_PREF_LEN];
+	char 		port[MAX_PREF_LEN];
 	int 		fd;
 	int		fd_tag;
 	int		keepalive_tag;
@@ -1322,6 +1322,48 @@ static void irc_send_im( eb_local_account * account_from,
 	return;
 }
 
+static void irc_init_account_prefs(eb_local_account *ela)
+{
+	irc_local_account *ila = ela->protocol_local_account_data;
+	input_list *il = g_new0(input_list, 1);
+
+	ela->prefs = il;
+
+	il->widget.entry.value = ela->handle;
+	il->widget.entry.name = "SCREEN_NAME";
+	il->widget.entry.label= _("_Nick:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = ila->password;
+	il->widget.entry.name = "PASSWORD";
+	il->widget.entry.label= _("_Password:");
+	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ela->connect_at_startup;
+	il->widget.checkbox.name = "CONNECT";
+	il->widget.checkbox.label= _("_Connect at startup");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = ila->server;
+	il->widget.entry.name = "irc_host";
+	il->widget.entry.label= _("IRC _Host:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = ila->port;
+	il->widget.entry.name = "irc_port";
+	il->widget.entry.label= _("IRC P_ort:");
+	il->type = EB_INPUT_ENTRY;
+
+}
+
 static eb_local_account * irc_read_local_config(LList * pairs)
 {
 	eb_local_account * ela = g_new0(eb_local_account, 1);
@@ -1333,83 +1375,43 @@ static eb_local_account * irc_read_local_config(LList * pairs)
 	ela->protocol_local_account_data = ila;
 	ila->status = IRC_OFFLINE;
 
-	temp = value_pair_get_value(pairs, "SCREEN_NAME");
-	if (temp)
+	temp = ela->handle;
+
+	strncpy(ela->alias, ela->handle, MAX_PREF_LEN);
+	ela->service_id = SERVICE_INFO.protocol_id;
+
+	irc_init_account_prefs(ela);
+	eb_update_from_value_pair(ela->prefs, pairs);
+
+	/* string magic - point to the first char after '@' */
+	if ((temp = strrchr(ela->handle, '@')) != NULL)
 	{
-		ela->handle = temp;
-			
-		strncpy(ela->alias, ela->handle, 254);
-		ela->service_id = SERVICE_INFO.protocol_id;
+		*temp='\0';
+		temp++;
+		strncpy(ila->server, temp, sizeof(ila->server));
 
-		/* string magic - point to the first char after '@' */
-		if (strrchr(temp, '@') != NULL)
+		/* Remove the port from ila->server */
+		temp2 = strrchr(ila->server, ':');
+		if (temp2)
+			*temp2 = '\0';
+
+		/* string magic - point to the first char after ':' */
+		if ((temp = strrchr(temp, ':')) != NULL)
 		{
-			temp = strrchr(temp, '@') + 1;
-			strncpy(ila->server, temp, 254);
-
-			/* Remove the port from ila->server */
-			temp2 = strrchr(ila->server, ':');
-			if (temp2) temp2[0] = '\0';
-
-			/* string magic - point to the first char after ':' */
-			if (strrchr(temp, ':') != NULL)
-			{
-				temp = strrchr(temp, ':') + 1;
-				strncpy(ila->port, temp, 9);
-			}
-
-			temp = value_pair_get_value(pairs, "PASSWORD");
-			if (temp)
-			{
-				strncpy(ila->password, temp, sizeof(ila->password));
-				free( temp );
-				temp = NULL;
-			}
-			str = value_pair_get_value(pairs,"CONNECT");
-			ela->connect_at_startup=(str && !strcmp(str,"1"));
-			free(str);
-
-			return (ela);
+			temp++;
+			strncpy(ila->port, temp, 9);
 		}
-		eb_debug(DBG_MOD, "no @ found in login name\n");
 	}
-	else
-		eb_debug(DBG_MOD, "SCREEN_NAME not defined\n");
-		
 
-	/* Uh-oh ... something has gone wrong. */
-	return NULL;
+	if(ela->handle[0] && ila->server[0])
+		return ela;
+	else
+		return NULL;
 }
 
 static LList * irc_write_local_config( eb_local_account * account )
 {
-	LList * list = NULL;
-	value_pair * vp;
-	irc_local_account * ila = (irc_local_account *)account->protocol_local_account_data;
-
-	vp = g_new0( value_pair, 1 );
-
-	strcpy( vp->key, "SCREEN_NAME");
-	strncpy( vp->value, account->handle, 254 );
-
-	list = l_list_append( list, vp );
-
-	vp = g_new0( value_pair, 1 );
-
-	strcpy( vp->key, "PASSWORD");
-	strncpy( vp->value, ila->password, 254 );
-
-	list = l_list_append( list, vp );
-	
-	vp = g_new0( value_pair, 1 );
-	strcpy( vp->key, "CONNECT" );
-	if (account->connect_at_startup)
-		strcpy( vp->value, "1");
-	else 
-		strcpy( vp->value, "0");
-	
-	list = l_list_append( list, vp );
-	return list;
+	return eb_input_to_value_pair(account->prefs);
 }
 
 static eb_account * irc_read_config(eb_account *ea, LList *config)

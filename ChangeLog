@@ -1,3 +1,9 @@
+* Wed Jul 30 2003 15:52 GMT [philip]	0.3.3-15
+- src/service.c
+fix some bug that I still don't understand
+- modules/icq-toc/ modules/irc/
+use new account prefs
+
 * Wed Jul 30 2003 12:30 GMT [philip]	0.3.3-14
 - src/gtk/prefs_window.C
 Use separate accel_group for each tab to avoid clashes

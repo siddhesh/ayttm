@@ -106,14 +106,14 @@ static void refresh_service_contacts(int type)
 
 static void reload_service_accounts(int service_id)
 {
-	LList				*node = accounts;
-	LList				*account_pairs = NULL;
+	LList			*node = accounts;
+	LList			*account_pairs = NULL;
 	eb_local_account	*oela = NULL;
 	eb_local_account	*nela = NULL;
-	const int			buffer_size = 256;
-	char				buff[buffer_size];
-	char				buff2[buffer_size];
-	LList			       *saved_info = NULL;
+	const int		buffer_size = 256;
+	char			buff[buffer_size];
+	char			buff2[buffer_size];
+	LList			*saved_info = NULL;
 	
 	saved_info = ay_save_account_information(service_id);
 	while(node)

@@ -72,8 +72,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP",
 	"Provides Simple Mail Transfer Protocol (SMTP) support",
-	"$Revision: 1.17 $",
-	"$Date: 2003/05/06 17:04:50 $",
+	"$Revision: 1.18 $",
+	"$Date: 2003/07/30 15:54:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -209,7 +209,9 @@ static eb_local_account *eb_smtp_read_local_account_config(LList * pairs)
 	ela = calloc(1, sizeof(eb_local_account));
 	sla = calloc(1, sizeof(eb_smtp_local_account_data));
 
-	ela->handle = value_pair_get_value(pairs, "SCREEN_NAME");
+	str = value_pair_get_value(pairs, "SCREEN_NAME");
+	strncpy(ela->handle, str, sizeof(ela->handle));
+	free(str);
 	strncpy(ela->alias, ela->handle, sizeof(ela->alias));
 	str = value_pair_get_value(pairs, "PASSWORD");
 	strncpy(sla->password, str, sizeof(sla->password));

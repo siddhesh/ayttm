@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.31 $",
-	"$Date: 2003/06/04 22:07:20 $",
+	"$Revision: 1.32 $",
+	"$Date: 2003/07/30 15:54:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -386,7 +386,7 @@ static eb_local_account * eb_jabber_read_local_account_config( LList * values )
 			free( pass );
 
 			ela = g_new0( eb_local_account, 1);
-			ela->handle = name;
+			strncpy(ela->handle, name, MAX_PREF_LEN);
 
 			/*the alias will be the persons login minus the @servername */
 			strcpy( buff, ela->handle );
@@ -395,6 +395,7 @@ static eb_local_account * eb_jabber_read_local_account_config( LList * values )
 			ela->service_id = SERVICE_INFO.protocol_id;
 			ela->protocol_local_account_data = jlad;
 		}
+		free(name);
 	}
 	str = value_pair_get_value(values,"CONNECT");
 	ela->connect_at_startup=(str && !strcmp(str,"1"));

@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.49 $",
-	"$Date: 2003/07/30 12:27:18 $",
+	"$Revision: 1.50 $",
+	"$Date: 2003/07/30 15:54:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1054,14 +1054,9 @@ static eb_local_account * eb_aim_read_local_config(LList * pairs)
 {
 
 	eb_local_account * ela = g_new0(eb_local_account, 1);
-	char buff[1024];
 	struct eb_aim_local_account_data * ala = g_new0(struct eb_aim_local_account_data, 1);
-	char	*str = NULL;
 	
 	
-	strncpy(ala->aim_info, "Visit the Ayttm website at <a href=\"http://ayttm.sf.net/\">ayttm.sf.net</a>",
-			sizeof(ala->aim_info));
-
 	ela->protocol_local_account_data = ala;
 	
 	eb_debug(DBG_TOC, "eb_aim_read_local_config: entering\n");	
@@ -1069,9 +1064,6 @@ static eb_local_account * eb_aim_read_local_config(LList * pairs)
 	aim_init_account_prefs(ela);
 
 	eb_update_from_value_pair(ela->prefs, pairs);
-
-	snprintf(buff, sizeof(buff), "%s [AIM]", ela->alias);
-	/*eb_add_menu_item(strdup(buff), EB_PROFILE_MENU, aim_set_profile_window, ebmPROFILEDATA, ebmProfileData_new(ela));*/
 
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ala->status = AIM_OFFLINE;
