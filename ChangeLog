@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 13:30 GMT [philip]	0.3.0-81
+- src/util.c
+find_local_account_for_remote looks at remote->ela first
+
 * Wed Apr 30 2003 12:59 GMT [yann]	0.3.0-80
 - modules/workwizu/workwizu.c
 Patch deprecated workwizu module

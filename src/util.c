@@ -421,6 +421,8 @@ eb_local_account * find_local_account_for_remote( eb_account *remote, int online
 
 	/* If this is a normal call, start at the top and give the first, otherwise continue where we left off */
 	if(remote) {
+		if(remote->ela && (!online || ela->connected))
+			return remote->ela;
 		node = accounts;
 		last_remote=remote;
 	} else {
