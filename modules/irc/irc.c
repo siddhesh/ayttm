@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.38 $",
-	"$Date: 2004/12/29 21:04:21 $",
+	"$Revision: 1.39 $",
+	"$Date: 2005/02/13 13:33:26 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -133,6 +133,7 @@ typedef struct irc_local_account_type
 	int		status;
 	LList *		friends;
 	LList *		channel_list;
+	LList *	current_rooms;
 } irc_local_account;
 
 typedef struct irc_account_type
@@ -198,7 +199,7 @@ static eb_account * irc_new_account(eb_local_account *ela, const char * account 
 static char * irc_get_status_string( eb_account * account );
 static char ** irc_get_status_pixmap( eb_account * account);
 static void irc_set_idle(eb_local_account * account, int idle );
-static void irc_set_away( eb_local_account * account, char * message);
+static void irc_set_away( eb_local_account * account, char * message, int away);
 static void irc_send_file( eb_local_account * from, eb_account * to, char * file );
 static void irc_info_update(info_window * iw);
 static void irc_info_data_cleanup(info_window * iw);
@@ -1677,7 +1678,7 @@ static void irc_set_idle(eb_local_account * account, int idle )
 	return;
 }
 
-static void irc_set_away( eb_local_account * account, char * message)
+static void irc_set_away( eb_local_account * account, char * message, int away)
 {
 	irc_local_account *ila = (irc_local_account *)account->protocol_local_account_data;
 	char buf[BUF_LEN];
@@ -1692,8 +1693,19 @@ static void irc_set_away( eb_local_account * account, char * message)
 			eb_set_active_menu_status(account->status_menu, IRC_AWAY);
 		is_setting_state = 0;
 		/* Actually set away */
-		snprintf(buf, BUF_LEN, "AWAY :%s\n", message);
-		ret = sendall(ila->fd, buf, strlen(buf));
+        if(away)
+		{
+    		snprintf(buf, BUF_LEN, "AWAY :%s\n", message);
+			ret = sendall(ila->fd, buf, strlen(buf));
+		}
+        else
+		{
+			LList *l;
+			for(l=ila->current_rooms; l; l=l->next) {
+				snprintf(buf, BUF_LEN, "PRIVMSG %s :\1ACTION %s\1\n", ((eb_chat_room*)l->data)->room_name, message);
+				ret = sendall(ila->fd, buf, strlen(buf));
+			}
+		}
 		if (ret == -1) irc_logout(account);
 
 	} else {
@@ -1822,6 +1834,7 @@ static void irc_join_chat_room(eb_chat_room *room)
 	g_snprintf(buff, BUF_LEN, "JOIN :%s\n", room->room_name);
 			
 	ret = sendall(ila->fd, buff, strlen(buff));
+	ila->current_rooms = l_list_prepend(ila->current_rooms, room);
 	if (ret == -1) irc_logout(room->local_user);
 	return;
 }
@@ -1835,6 +1848,7 @@ static void irc_leave_chat_room(eb_chat_room *room)
 	g_snprintf(buff, BUF_LEN, "PART :%s\n", room->room_name);
 			
 	ret = sendall(ila->fd, buff, strlen(buff));
+	ila->current_rooms = l_list_remove(ila->current_rooms, room);
 	if (ret == -1) irc_logout(room->local_user);
 	return;
 }
@@ -1848,10 +1862,10 @@ static void irc_send_chat_room_message(eb_chat_room *room, char *message)
 
 	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
 
-   if(strncmp(message, "/me ", 4) == 0 && strlen(message) > 4)
-      g_snprintf(buff, BUF_LEN, "PRIVMSG %s :\1ACTION %s\1\n", room->room_name, message+4);
-   else
-   	g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", room->room_name, message);
+	if(strncmp(message, "/me ", 4) == 0 && strlen(message) > 4)
+		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :\1ACTION %s\1\n", room->room_name, message+4);
+	else
+		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", room->room_name, message);
 			
 	ret = sendall(ila->fd, buff, strlen(buff));
 	if (ret == -1) irc_logout(room->local_user);
