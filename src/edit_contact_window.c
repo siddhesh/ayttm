@@ -174,7 +174,7 @@ void edit_contact_window_new( struct contact * c )
 		
 		/*Ok Button*/
    
-		button = do_icon_button(_("Apply"), tb_edit_xpm, edit_contact_window);
+		button = do_icon_button(_("Save"), tb_edit_xpm, edit_contact_window);
 
 		gtk_signal_connect(GTK_OBJECT(button), "clicked", 
 						   GTK_SIGNAL_FUNC(ok_callback), NULL );
