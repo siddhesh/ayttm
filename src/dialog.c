@@ -392,6 +392,8 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
   	gtk_widget_set_usize(hbox2, 200,25);
 
 	button = gtkut_create_icon_button( _("OK"), ok_xpm, input_window->window );
+	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+	gtk_window_set_default(GTK_WINDOW(input_window->window), button);
 	     
 	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_ok,
 			input_window);
@@ -433,6 +435,7 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 	gtk_signal_connect(GTK_OBJECT(input_window->window), "destroy",
 			GTK_SIGNAL_FUNC(input_window_destroy), input_window);
 
+	gtk_widget_grab_focus(input_window->text);
 	gtk_widget_show(input_window->window);
 }
 

@@ -1,3 +1,11 @@
+* Fri Oct 10 2003 05:43 GMT [philip]	0.4.3-pre6
+- src/value_pair.c src/account_parser.y
+Fix overzealous escaping of values
+- src/contact_parser.y src/contact_scanner.l
+allow comments in contact file too
+- src/dialog.c
+Ok button has default
+
 * Fri Oct 10 2003 04:55 GMT [philip]	0.4.3-pre5
 - modules/yahoo2/yahoo.c
 Prompt for password if not given in prefs

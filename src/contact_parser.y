@@ -28,6 +28,7 @@
 	struct contact * cntct;
 }
 
+%token <string> COMMENT
 %token <string> IDENTIFIER
 %token <string> STRING
 %type <vals> group_list
@@ -37,7 +38,6 @@
 %type <vals> account_list
 %type <acnt> account
 %type <vals> value_list
-%type <val> key_pair
 %%
 
 start:
@@ -45,12 +45,13 @@ start:
 ;
 
 group_list:
-	group group_list {$$ = l_list_prepend( $2, $1 ); }
+	COMMENT group_list { $$=$2; }
+|	group group_list {$$ = l_list_prepend( $2, $1 ); }
 |	EPSILON { $$ = 0; }
 ;
 
 group:
-	 GROUP value_list
+	GROUP value_list
 	{
 		char * c;
 		cur_group = calloc(1, sizeof(grouplist));
@@ -60,12 +61,16 @@ group:
 		cur_group->tree = NULL;
 		value_pair_free($2);
 	}
-				contact_list END_GROUP	{ cur_group->members = $4;
-		$$ = cur_group; }
+	contact_list END_GROUP
+	{
+		cur_group->members = $4;
+		$$ = cur_group;
+	}
 ;
 
 contact_list:
-	contact contact_list { $$ = l_list_insert_sorted( $2, $1, contact_cmp ); }
+	COMMENT contact_list { $$ = $2; }
+|	contact contact_list { $$ = l_list_insert_sorted( $2, $1, contact_cmp ); }
 |	EPSILON { $$ = 0; }
 ;
 
@@ -133,7 +138,8 @@ contact:
 ;	
 
 account_list:
- 	account account_list { 
+	COMMENT account_list { $$=$2; }
+| 	account account_list { 
 		$$ = l_list_insert_sorted( $2, $1, account_cmp); 
 		if(cur_contact->default_chatb == -1)
 			cur_contact->default_filetransb = cur_contact->default_chatb = $1->service_id;
@@ -180,25 +186,16 @@ account:
 ;
 
 value_list:
-		key_pair value_list { $$ = l_list_append( $2, $1 ); }
-	|	key_pair { $$ = l_list_append(NULL, $1); }
-
-;
-
-key_pair:
-		IDENTIFIER '=' STRING
-		{
-			{
-				char * tmp = escape_string ($3);
-				value_pair * vp = calloc(1, sizeof(value_pair));
-				strncpy( vp->key, $1 , sizeof(vp->key));
-				strncpy( vp->value, tmp, sizeof(vp->value) );
-				free(tmp);
-				free($1);
-				free($3);
-				$$ = vp;
-			}
+		COMMENT value_list { $$ = $2; }
+	|	IDENTIFIER '=' STRING value_list { 
+			char *tmp = unescape_string($3);
+			free($3);
+			$$ = value_pair_add($4, $1, tmp);
+			free($1);
+			free(tmp);
 		}
+	|	EPSILON { $$ = 0; }
+
 ;
 
 EPSILON : ;

@@ -19,6 +19,7 @@ account		{return ACCOUNT;}
 [<]CONTACT[>]	{return CONTACT;}
 [<][/]CONTACT[>]	{return END_CONTACT;}
 ["=<>]		return contacttext[0];
+#[^\n]*		{return COMMENT;}
 {A}+		{contactlval.string = strdup(contacttext); return IDENTIFIER;}
 ["]([^"]|(\\\"))*["] { contactlval.string = strdup(contacttext+1); contactlval.string[strlen(contactlval.string)-1] = '\0'; return STRING; }
 [ \t]       { }

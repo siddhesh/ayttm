@@ -31,8 +31,12 @@ char * value_pair_get_value( LList * pairs, const char * key )
 	LList * node;
 	for( node = pairs; node; node=node->next) {
 		value_pair * vp = node->data;
-		if(!strcasecmp(key, vp->key))
-			return unescape_string(vp->value);
+		if(!strcasecmp(key, vp->key)) {
+			if(!vp->value)
+				return strdup("");
+			else
+				return strdup(vp->value);
+		}
 	}
 	return NULL;
 }
@@ -49,6 +53,7 @@ void value_pair_print_values( LList * pairs, FILE * file, int indent )
 {
 	LList * node;
 	int i;
+	char *tmp;
 	
 	for( node = pairs; node; node = node->next ) {
 		value_pair * vp = node->data;
@@ -56,14 +61,14 @@ void value_pair_print_values( LList * pairs, FILE * file, int indent )
 		for( i = 0; i < indent; i++ )
 			fprintf( file, "\t" );
 
-		/* XXX do we need to escape vp->value first? */
-		fprintf(file, "%s=\"%s\"\n", vp->key, vp->value);
+		tmp = escape_string(vp->value);
+		fprintf(file, "%s=\"%s\"\n", vp->key, tmp);
+		free(tmp);
 	}
 }
 
 LList * value_pair_add(LList * list, const char * key, const char * value)
 {
-	char		*tmp = escape_string(value);
 	value_pair	*vp = NULL;
 	char		*old_value = NULL;
 	
@@ -78,8 +83,7 @@ LList * value_pair_add(LList * list, const char * key, const char * value)
 
 	vp = calloc(1, sizeof(value_pair));
 	strncpy(vp->key, key, MAX_PREF_NAME_LEN);
-	strncpy(vp->value,tmp, MAX_PREF_LEN);
-	free(tmp);
+	strncpy(vp->value, value, MAX_PREF_LEN);
 	
 	return l_list_append(list, vp);
 }

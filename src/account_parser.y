@@ -103,9 +103,11 @@ account:
 value_list:
 		COMMENT value_list { $$ = $2; }
 	|	IDENTIFIER '=' STRING value_list { 
-			$$ = value_pair_add($4, $1, $3);
-			free($1);
+			char *tmp = unescape_string($3);
 			free($3);
+			$$ = value_pair_add($4, $1, tmp);
+			free($1);
+			free(tmp);
 		}
 	|	EPSILON { $$ = 0; }
 
