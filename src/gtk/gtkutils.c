@@ -43,9 +43,10 @@ static void	s_set_option( GtkWidget *inWidget, int *ioData )
 	*ioData = !(*ioData);	
 }
 
-GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage )
+GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage, GtkAccelGroup *inAccelGroup )
 {
-	GtkWidget	*button = gtk_check_button_new_with_label( inText );
+	GtkWidget	*button = gtk_check_button_new_with_label( "" );
+	int		key	= gtk_label_parse_uline(GTK_LABEL(GTK_BIN(button)->child), inText);
 	
 	assert( inValue != NULL );
 	
@@ -53,6 +54,10 @@ GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage )
 	gtk_box_pack_start( GTK_BOX(inPage), button, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_set_option), inValue );
 	gtk_widget_show( button );
+
+	gtk_widget_add_accelerator(button, "grab_focus", inAccelGroup,
+			key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+
 	
 	return( button );
 }

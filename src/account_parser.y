@@ -4,6 +4,7 @@
         #include <stdlib.h>
         #include <string.h>
 
+	#include "input_list.h"
         #include "util.h"
         #include "globals.h"
         #include "value_pair.h"
@@ -71,8 +72,8 @@ account:
 			$$ = eb_services[id].sc->read_local_account_config($5);
 			eb_debug(DBG_CORE, "read_local_account_config returned: %p\n", $$);
 			if($$) {
+/*				eb_update_from_value_pair( $$->prefs, $5 );*/
 				$$->service_id = id;
-				/*eb_services[id].sc->login($$);*/
 			}
 			else {
 				g_warning("Failed to create %s account", $3);

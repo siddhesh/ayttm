@@ -32,7 +32,9 @@ enum
 {
 	EB_INPUT_CHECKBOX,
 	EB_INPUT_ENTRY,
-	EB_INPUT_LIST
+	EB_INPUT_PASSWORD,
+	EB_INPUT_LIST,
+	EB_INPUT_HIDDEN
 };
 
 
@@ -40,8 +42,8 @@ typedef struct _checkbox_input
 {
 	char	*name;
 	char	*label;
-	int		*value;
-	int		saved_value;
+	int	*value;
+	int	saved_value;
 } checkbox_input;
 
 typedef struct _entry_input

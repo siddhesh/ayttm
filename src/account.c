@@ -46,13 +46,6 @@ void write_account_list()
 	char buff2[1024];
 	LList * l1;
 
-	/*
-	 * The contact list is a 3 dimensional linked list, at the top
-	 * level you have a list of groups, each group can have several
-	 * contacts, each contact can have several accounts.  Please see
-	 * the Nomenclature file in the docs directory for details
-	 */
-
 	snprintf(buff2, 1024, "%saccounts", config_dir);
 	if(! (fp = fdopen( creat(buff2, S_IRWXU), "w") ) )
 		return;
@@ -60,7 +53,7 @@ void write_account_list()
 
 	for(l1 = accounts; l1; l1=l1->next )
 	{
-		eb_local_account * ela = (eb_local_account*)l1->data; 
+		eb_local_account * ela = l1->data; 
 
 		/*
 		* This is the deal, what a protocol stores as account data is 
@@ -69,8 +62,10 @@ void write_account_list()
 		*/
 
 		LList * config = RUN_SERVICE(ela)->write_local_config(ela);
+/*		LList * prefs = eb_input_to_value_pair(ela->prefs);*/
 		fprintf(fp, "<ACCOUNT %s>\n", eb_services[ela->service_id].name);
 		value_pair_print_values(config, fp, 1);
+/*		value_pair_print_values(prefs, fp, 1);*/
 		fprintf( fp, "</ACCOUNT>\n" );
 	}
 
@@ -150,8 +145,8 @@ int load_accounts_from_file(const char *file)
 	FILE * fp;
 	extern int accountparse();
 	extern FILE * accountin;
-	char buff[1024];
-	LList *accounts_old = accounts, *naccounts = NULL;
+	/*char buff[1024];
+	LList *accounts_old = accounts;*/
 
 	if(!(fp = fopen(file,"r")))
 		return 0;
@@ -160,15 +155,13 @@ int load_accounts_from_file(const char *file)
 	accountparse();
 	eb_debug(DBG_CORE, "closing fp\n");
 	fclose(fp);
-	if (accounts_old) {
-		/* we already had accounts */
+	/*if (accounts_old) {
 		LList *walk = accounts_old;
 		for (; walk; walk = walk->next) 
 			accounts = l_list_append(accounts, walk->data);
 	}
-	fp = NULL;
-	naccounts = accounts;
-	g_snprintf(buff, 1024, "%saccounts", eb_config_dir());
+	fp = NULL;*/
+/*	g_snprintf(buff, 1024, "%saccounts", eb_config_dir());
 	fp = fdopen(creat(buff, 0700), "w");
 	while (fp && naccounts) {
 		LList *config = NULL;
@@ -182,6 +175,7 @@ int load_accounts_from_file(const char *file)
 		naccounts = naccounts->next;
 	}
 	fclose(fp);
+*/
 	ay_set_submenus();
 	return accounts != NULL;
 }

@@ -64,6 +64,7 @@ LList	*eb_input_to_value_pair( input_list *il )
 				}
 				break;
 
+			case EB_INPUT_PASSWORD:
 			case EB_INPUT_ENTRY:
 				{
 					snprintf( key, sizeof(key), "%s", il->widget.entry.name );
@@ -93,7 +94,6 @@ LList	*eb_input_to_value_pair( input_list *il )
 void	eb_update_from_value_pair( input_list *il, LList *vp )
 {
 	char	key[MAX_PREF_NAME_LEN];
-	char	*value = NULL;
 
 	
 	if ( vp == NULL )
@@ -101,6 +101,7 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 		
 	while ( il != NULL )
 	{
+		char *value = NULL;
 		switch ( il->type )
 		{
 			case EB_INPUT_CHECKBOX:
@@ -117,15 +118,14 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 					value = value_pair_get_value( vp, key );
 
 					if ( value != NULL )
-					{
 						*il->widget.checkbox.value = atoi(value);
-						free( value );
-					}
 				}
 				break;
 				
+			case EB_INPUT_PASSWORD:
 			case EB_INPUT_ENTRY:
 				{
+					char tmp[MAX_PREF_LEN]="";
 					if ( il->widget.entry.value == NULL )
 					{
 						eb_debug(DBG_CORE, "entry.value is NULL\n");
@@ -138,10 +138,8 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 					value = value_pair_get_value( vp, key );
 
 					if ( value != NULL )
-					{
-						strncpy( il->widget.entry.value, value, MAX_PREF_LEN );
-						free( value );
-					}
+						strncpy( tmp, value, MAX_PREF_LEN);
+					strcpy( il->widget.entry.value, tmp );
 				}
 				break;
 
@@ -159,14 +157,13 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 					value = value_pair_get_value( vp, key );
 
 					if ( value != NULL )
-					{
 						*il->widget.checkbox.value = atoi(value);
-						free( value );
-					}
 				}
 				break;
 		}
 		
 		il = il->next;
+		if(value)
+			free(value);
 	}
 }

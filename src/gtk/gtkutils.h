@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage );
+GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage, GtkAccelGroup *inAccelGroup );
 
 /** Create a widget with an xpm.
 	

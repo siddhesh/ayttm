@@ -36,7 +36,7 @@ typedef struct protocol_smiley_struct protocol_smiley;
 
 struct smiley_struct
 {
-	char 	*service;
+	char    *service;
 	char	name[64];
 	gchar	**pixmap; // from an xpm file, you know the drill...
 };

@@ -31,6 +31,7 @@
 #define __ACCOUNT_H__
 
 #include "llist.h"
+#include "input_list.h"
 
 struct contact;
 
@@ -61,6 +62,7 @@ typedef struct local_account {
         void *protocol_local_account_data;
 	int mgmt_flush_tag;
 	int connect_at_startup;
+	input_list *prefs;
 } eb_local_account;
 
 typedef struct account {

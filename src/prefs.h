@@ -52,6 +52,14 @@ typedef struct
 	input_list		*pref_list;
 } t_module_pref;
 
+typedef struct
+{
+	const char		*screen_name;
+	int			service_id;
+	int			is_connected;
+	input_list		*pref_list;
+} t_account_pref;
+
 struct prefs
 {
 	struct chat
@@ -132,6 +140,11 @@ struct prefs
 	{
 		LList	*module_info;
 	} module;
+	
+	struct account_p
+	{
+		LList	*account_info;
+	} account;
 };
 
 
@@ -147,9 +160,11 @@ void	ayttm_prefs_read_file( char *file );
 void	ayttm_prefs_write( void );
 
 void			ayttm_prefs_show_window( void );
-t_module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName );
-int				ayttm_prefs_unload_module( t_module_pref *ioPrefs );
-int				ayttm_prefs_load_module( t_module_pref *ioPrefs );
+t_module_pref		*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName );
+int			ayttm_prefs_unload_module( t_module_pref *ioPrefs );
+int			ayttm_prefs_load_module( t_module_pref *ioPrefs );
+void			ayttm_prefs_connect_account( t_account_pref *ioPrefs );
+void			ayttm_prefs_disconnect_account( t_account_pref *ioPrefs );
 void			ayttm_prefs_apply( struct prefs *inPrefs );
 void			ayttm_prefs_cancel( struct prefs *inPrefs );
 

@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #endif
 
+#include "account.h"
 #include "service.h"
 #include "value_pair.h"
 #include "globals.h"
@@ -42,6 +43,7 @@
 #include "prefs.h"
 #include "messages.h"
 #include "status.h"
+#include "util.h"
 
 #include "ui_prefs_window.h"
 
@@ -225,6 +227,7 @@ static input_list	*s_copy_input_list( input_list *inList )
 				break;
 				
 			case EB_INPUT_ENTRY:
+			case EB_INPUT_PASSWORD:
 				{
 					new_item->widget.entry.name = s_strdup_allow_null( list->widget.entry.name );
 					new_item->widget.entry.label = s_strdup_allow_null( list->widget.entry.label );
@@ -282,6 +285,7 @@ static void	s_destroy_input_list( input_list *inList )
 				break;
 				
 			case EB_INPUT_ENTRY:
+			case EB_INPUT_PASSWORD:
 				{
 					free( list->widget.entry.name );
 					free( list->widget.entry.label );
@@ -307,6 +311,34 @@ static void	s_destroy_input_list( input_list *inList )
 		
 		free( saved );
 	}
+}
+
+static void	s_reset_account_info( t_account_pref *outAccountPref )
+{
+	assert( outAccountPref != NULL );
+		
+	if ( outAccountPref->screen_name != NULL )
+		free( (void *)outAccountPref->screen_name );
+	outAccountPref->service_id = 0;
+	
+	s_destroy_input_list( outAccountPref->pref_list );
+	outAccountPref->pref_list = NULL;
+}
+
+static void	s_fill_in_account_pref_info( t_account_pref *outAccountPref, const eb_local_account *ela )
+{
+	assert( outAccountPref != NULL );
+	assert( ela != NULL );
+	
+
+	s_reset_account_info( outAccountPref );
+	
+	outAccountPref->screen_name = s_strdup_allow_null( ela->handle );
+	outAccountPref->service_id = ela->service_id;
+
+	outAccountPref->is_connected = ela->connected | ela->connecting;
+	
+	outAccountPref->pref_list = s_copy_input_list( ela->prefs );
 }
 
 static void	s_reset_module_info( t_module_pref *outModulePref )
@@ -361,6 +393,46 @@ static void	s_fill_in_module_pref_info( t_module_pref *outModulePref, const eb_P
 	outModulePref->pref_list = s_copy_input_list( inPluginInfo->pi.prefs );
 }
 
+static LList	*s_create_account_prefs_list( void )
+{
+	const LList		*l_accounts = accounts;
+	LList			*account_prefs_list = NULL;
+	
+	for ( ; l_accounts; l_accounts = l_accounts->next )
+	{
+		const eb_local_account	*ela = l_accounts->data;
+		t_account_pref		*pref_info = NULL;
+		
+		
+		if ( ela == NULL )
+			continue;
+		
+		pref_info = calloc( 1, sizeof( t_account_pref ) );
+
+		s_fill_in_account_pref_info( pref_info, ela );
+				
+		account_prefs_list = l_list_append( account_prefs_list, pref_info );
+	}
+	
+	return( l_list_nth( account_prefs_list, 0 ) );
+}
+
+static void	s_destroy_account_prefs_list( LList *io_account_prefs_list )
+{
+	for ( ; io_account_prefs_list != NULL; io_account_prefs_list = io_account_prefs_list->next )
+	{
+		t_account_pref		*pref_info = io_account_prefs_list->data;
+		
+		
+		if ( pref_info == NULL )
+			continue;
+
+		s_reset_account_info( pref_info );	
+	}
+	
+	l_list_free( io_account_prefs_list );
+}
+
 static LList	*s_create_module_prefs_list( void )
 {
 	const LList		*plugins = GetPref( EB_PLUGIN_LIST );
@@ -407,6 +479,7 @@ static void	s_free_pref_struct( struct prefs *ioPrefs )
 		return;
 		
 	s_destroy_module_prefs_list( ioPrefs->module.module_info );
+	s_destroy_account_prefs_list( ioPrefs->account.account_info );
 	free( ioPrefs );
 }
 
@@ -478,6 +551,7 @@ static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 					break;
 
 				case EB_INPUT_ENTRY:
+				case EB_INPUT_PASSWORD:
 					{
 						strncpy( real_list->widget.entry.value, local_copy->widget.entry.value, MAX_PREF_LEN );
 					}
@@ -508,6 +582,73 @@ static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 
 		if(plugin_info->pi.reload_prefs)
 			plugin_info->pi.reload_prefs();
+	}
+}
+
+static void	s_apply_or_cancel_account_prefs( void *inListItem, void *inData )
+{
+	t_account_pref	*the_prefs = inListItem;
+	int		apply = (int)inData;
+	eb_local_account	*ela = NULL;
+		
+	if ( !apply )
+		return;
+
+	/* now we have to apply to the things that have pointers in the 'real' list
+	*/
+	ela = find_local_account_by_handle( the_prefs->screen_name, the_prefs->service_id );
+	
+	if ( ela != NULL )
+	{
+		input_list	*real_list = ela->prefs;
+		input_list	*local_copy = the_prefs->pref_list;
+		
+		while ( real_list != NULL )
+		{
+			switch ( real_list->type )
+			{
+				case EB_INPUT_CHECKBOX:
+					{
+						if ( (real_list->widget.checkbox.value != NULL) &&
+							(local_copy->widget.checkbox.value != NULL) )
+						{
+							*(real_list->widget.checkbox.value) = *(local_copy->widget.checkbox.value);
+						}
+
+					}
+					break;
+
+				case EB_INPUT_ENTRY:
+				case EB_INPUT_PASSWORD:
+					{
+						char tmp[MAX_PREF_LEN];
+						strncpy( tmp, local_copy->widget.entry.value, MAX_PREF_LEN );
+						strcpy( real_list->widget.entry.value, tmp );
+					}
+					break;
+
+				case EB_INPUT_LIST:
+					{
+						if ( (real_list->widget.listbox.value != NULL) &&
+							(local_copy->widget.listbox.value != NULL) )
+						{
+							*(real_list->widget.listbox.value) = *(local_copy->widget.listbox.value);
+						}
+
+					}
+					break;
+
+				default:
+					assert( FALSE );
+					break;
+			}
+			
+			real_list = real_list->next;
+			
+			assert( local_copy != NULL );
+			
+			local_copy = local_copy->next;
+		}
 	}
 }
 
@@ -950,6 +1091,9 @@ void	ayttm_prefs_show_window( void )
 	strncpy( prefs->advanced.local_encoding, cGetLocalPref("local_encoding"), MAX_PREF_LEN );
 	strncpy( prefs->advanced.remote_encoding, cGetLocalPref("remote_encoding"), MAX_PREF_LEN );
 
+	/* accounts */
+	prefs->account.account_info = s_create_account_prefs_list();
+	
 	/* modules */
 	prefs->module.module_info = s_create_module_prefs_list();
 	
@@ -1016,6 +1160,28 @@ int		ayttm_prefs_load_module( t_module_pref *ioPrefs )
 	s_fill_in_module_pref_info( ioPrefs, plugin_info );
 	
 	return( 0 );
+}
+
+void ayttm_prefs_connect_account( t_account_pref *ioPrefs )
+{
+	eb_local_account *ela = find_local_account_by_handle( ioPrefs->screen_name, ioPrefs->service_id );
+	
+	RUN_SERVICE(ela)->login(ela);
+
+	s_fill_in_account_pref_info( ioPrefs, ela );
+	
+	return;
+}
+
+void ayttm_prefs_disconnect_account( t_account_pref *ioPrefs )
+{
+	eb_local_account *ela = find_local_account_by_handle( ioPrefs->screen_name, ioPrefs->service_id );
+	
+	RUN_SERVICE(ela)->logout(ela);
+
+	s_fill_in_account_pref_info( ioPrefs, ela );
+	
+	return;
 }
 
 void	ayttm_prefs_apply( struct prefs *inPrefs )
@@ -1090,6 +1256,11 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	l_list_foreach( inPrefs->module.module_info, s_apply_or_cancel_module_prefs, (void *)1 );
 	
 	ayttm_prefs_write();
+
+	/* accounts */
+	l_list_foreach( inPrefs->account.account_info, s_apply_or_cancel_account_prefs, (void *)1 );
+	
+	write_account_list();
 	
 	proxy_set_proxy( iGetLocalPref("proxy_type"), cGetLocalPref("proxy_host"), iGetLocalPref("proxy_port") );
 	
@@ -1106,6 +1277,7 @@ void	ayttm_prefs_cancel( struct prefs *inPrefs )
 	assert( inPrefs != NULL );
 	
 	l_list_foreach( inPrefs->module.module_info, s_apply_or_cancel_module_prefs, (void *)0 );
+	l_list_foreach( inPrefs->account.account_info, s_apply_or_cancel_account_prefs, (void *)0 );
 	
 	s_free_pref_struct( inPrefs );
 }

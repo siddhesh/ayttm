@@ -104,15 +104,10 @@ struct service_callbacks * query_callbacks();
 
 static int ref_count = 0;
 static int is_setting_state = 0;
-static int do_mail_notify = 0;
 static int do_yahoo_debug = 0;
-static int login_invisible = 0;
-static int ignore_system = 0;
 static int do_prompt_save_file = 1;
 static int do_guess_away = 0;
 static int do_show_away_time = 0;
-
-static void *wc_chat_menu, *wc_contact_menu;
 
 /* Exported to libyahoo2 */
 char pager_host[MAX_PREF_LEN]="scs.yahoo.com";
@@ -131,8 +126,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.60 $",
-	"$Date: 2003/07/13 06:30:00 $",
+	"$Revision: 1.61 $",
+	"$Date: 2003/07/30 09:18:42 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -208,27 +203,6 @@ static int plugin_init()
 		il->widget.listbox.list=l;
 	}
 	il->type = EB_INPUT_LIST;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &do_mail_notify;
-	il->widget.checkbox.name = "do_mail_notify";
-	il->widget.checkbox.label= _("Yahoo Mail Notification");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &login_invisible;
-	il->widget.checkbox.name = "login_invisible";
-	il->widget.checkbox.label= _("Login invisible");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &ignore_system;
-	il->widget.checkbox.name = "ignore_system";
-	il->widget.checkbox.label= _("Ignore System Messages");
-	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
@@ -315,8 +289,12 @@ static void eb_yahoo_free_account_data(eb_account * account)
 }
 
 typedef struct {
-	char password[255];
+	char yahoo_id[MAX_PREF_LEN];
+	char password[MAX_PREF_LEN];
 	char *act_id;
+	int do_mail_notify;
+	int login_invisible;
+	int ignore_system;
 	int fd;
 	int id;
 	int input;
@@ -1865,11 +1843,12 @@ static void ext_yahoo_game_notify(int id, char *who, int stat)
 static void ext_yahoo_mail_notify(int id, char *from, char *subj, int cnt)
 {
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	char buff[1024] = {0}, buff2[200] = {0};
 
 	snprintf(buff, sizeof(buff), "%s: ", ela->handle);
 	
-	if(!do_mail_notify)
+	if(!ylad->do_mail_notify)
 		return;
 
 	if(from && *from && subj && *subj) {
@@ -1891,7 +1870,10 @@ static void ext_yahoo_mail_notify(int id, char *from, char *subj, int cnt)
 
 static void ext_yahoo_system_message(int id, char *msg)
 {
-	if(ignore_system)
+	eb_local_account * ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+
+	if(ylad->ignore_system)
 		return;
 
 	ay_do_info( _("Yahoo System Message"), msg );
@@ -1920,8 +1902,9 @@ static int eb_yahoo_query_connected(eb_account * ea)
 
 static void eb_yahoo_login(eb_local_account * ela)
 {
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	LOG(("eb_yahoo_login"));
-	if (login_invisible)
+	if (ylad->login_invisible)
 		eb_yahoo_login_with_state(ela, YAHOO_STATUS_INVISIBLE);
 	else
 		eb_yahoo_login_with_state(ela, YAHOO_STATUS_AVAILABLE);
@@ -2147,6 +2130,54 @@ static void eb_yahoo_send_im(eb_local_account * account_from,
 	FREE(encoded);
 }
 
+static void yahoo_init_account_prefs(eb_local_account * ela)
+{
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	input_list *il = g_new0(input_list, 1);
+
+	ela->prefs = il;
+
+	il->widget.entry.value = ylad->yahoo_id;
+	il->widget.entry.name = "SCREEN_NAME";
+	il->widget.entry.label= _("_Yahoo Id:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = ylad->password;
+	il->widget.entry.name = "PASSWORD";
+	il->widget.entry.label= _("_Password:");
+	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ela->connect_at_startup;
+	il->widget.checkbox.name = "CONNECT";
+	il->widget.checkbox.label= _("_Connect at startup");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ylad->do_mail_notify;
+	il->widget.checkbox.name = "do_mail_notify";
+	il->widget.checkbox.label= _("Yahoo _Mail Notification");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ylad->login_invisible;
+	il->widget.checkbox.name = "login_invisible";
+	il->widget.checkbox.label= _("Login _invisible");
+	il->type = EB_INPUT_CHECKBOX;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ylad->ignore_system;
+	il->widget.checkbox.name = "ignore_system";
+	il->widget.checkbox.label= _("Ignore _System Messages");
+	il->type = EB_INPUT_CHECKBOX;
+}
+
 static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 {
 	eb_local_account *ela;
@@ -2163,49 +2194,21 @@ static eb_local_account *eb_yahoo_read_local_account_config(LList * pairs)
 
 	ela->handle = value_pair_get_value(pairs, "SCREEN_NAME");
 	strncpy(ela->alias, ela->handle, 255);
-	str = value_pair_get_value(pairs, "PASSWORD");
-	strncpy(ylad->password, str, 255);
-	free( str );
-	
-	str = value_pair_get_value(pairs,"CONNECT");
-	ela->connect_at_startup=(str && !strcmp(str,"1"));
-	free(str);
 
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = ylad;
 	ylad->status = YAHOO_STATUS_OFFLINE;
+
+	yahoo_init_account_prefs(ela);
+
+	eb_update_from_value_pair(ela->prefs, pairs);
 
 	return ela;
 }
 
 static LList *eb_yahoo_write_local_config(eb_local_account * ela)
 {
-	eb_yahoo_local_account_data *yla = ela->protocol_local_account_data;
-	LList *list = NULL;
-	value_pair *vp;
-
-	vp = g_new0(value_pair, 1);
-	strcpy(vp->key, "SCREEN_NAME");
-	strcpy(vp->value, ela->handle);
-
-	list = l_list_append(list, vp);
-
-	vp = g_new0(value_pair, 1);
-	strcpy(vp->key, "PASSWORD");
-	strcpy(vp->value, yla->password);
-
-	list = l_list_append(list, vp);
-
-	vp = g_new0( value_pair, 1 );
-	strcpy( vp->key, "CONNECT" );
-	if (ela->connect_at_startup)
-		strcpy( vp->value, "1");
-	else 
-		strcpy( vp->value, "0");
-	
-	list = l_list_append( list, vp );
-
-	return list;
+	return eb_input_to_value_pair( ela->prefs );
 }
 
 static eb_account *eb_yahoo_read_account_config(eb_account *ea, LList * config)
@@ -2720,7 +2723,6 @@ static void eb_yahoo_get_info(eb_local_account * reciever, eb_account * sender)
 			sender->handle);
 	open_url(NULL, buff);
 }
-
 
 static void eb_yahoo_read_prefs_config(LList * values)
 {

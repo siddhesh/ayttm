@@ -179,7 +179,7 @@ char * escape_string(const char * input)
 }
 char * unescape_string(const char * input)
 {
-	char * result = calloc(strlen(input)+1, sizeof(char));
+	char * result = malloc((strlen(input)+1) * sizeof(char));
 	int ipos=0, opos=0; 
 	while(input[ipos]) {
 		char c = input[ipos++];
@@ -199,6 +199,8 @@ char * unescape_string(const char * input)
 			result[opos++] = c;
 	}
 	result[opos] = '\0';
+
+	result = realloc(result, opos+1);
 
 	return result;
 
@@ -552,6 +554,7 @@ eb_account * find_suitable_remote_account( eb_account * first, struct contact * 
 			 RUN_SERVICE(first)->query_connected(first)) )
 		return first;
 	
+	return NULL;
 }
 	
 eb_account * find_suitable_file_transfer_account( eb_account * first, struct contact * rest )

@@ -24,6 +24,7 @@
 
 #include "intl.h"
 
+#include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <stdlib.h>
 #include <string.h>
@@ -98,6 +99,7 @@ class ay_prefs_window
 			PANEL_ENCODING,
 #endif
 			PANEL_PROXY,
+			PANEL_ACCOUNTS,
 			PANEL_SERVICES,
 			PANEL_FILTERS,
 			PANEL_UTILITIES,
@@ -107,6 +109,7 @@ class ay_prefs_window
 		};
 		
 		static const char	*s_titles[PANEL_MAX];
+		static GtkAccelGroup	*s_accel_group;
 
 	private:	// Gtk callbacks
 		static void		s_tree_item_selected( GtkWidget *widget, gpointer data );
@@ -121,13 +124,13 @@ class ay_prefs_window
 		void	OK( void );
 		void	Cancel( void );
 		
-		static ay_prefs_window	*s_only_prefs_window;		///< the instance of the prefs window
+		static ay_prefs_window	*s_only_prefs_window;	///< the instance of the prefs window
 		
-		struct prefs			&m_prefs;
-		GtkWidget				*m_prefs_window_widget;	///< the actual dialog widget
+		struct prefs		&m_prefs;
+		GtkWidget		*m_prefs_window_widget;	///< the actual dialog widget
 		
-		GtkTree					*m_tree;
-		GList					*m_panels;		///< a list of the panels (ay_prefs_window_panel *)
+		GtkTree			*m_tree;
+		GList			*m_panels;		///< a list of the panels (ay_prefs_window_panel *)
 };
 
 /// A prefs panel
@@ -135,7 +138,7 @@ class ay_prefs_window_panel
 {
 	protected:
 		ay_prefs_window_panel( const char *inTopFrameText );
-		
+		GtkWidget *_gtkut_button( const char *inText, int *inValue, GtkWidget *inPage );
 	public:
 		virtual ~ay_prefs_window_panel( void );
 		
@@ -153,6 +156,7 @@ class ay_prefs_window_panel
 			ay_prefs_window::ePanelID inPanelID, const char *inName );
 
 		static ay_prefs_window_panel	*CreateModulePanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_module_pref &inPrefs );
+		static ay_prefs_window_panel	*CreateAccountPanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_account_pref &inPrefs );
 
 	protected:
 		GtkWidget	*m_super_vbox;
@@ -442,9 +446,32 @@ class ay_module_panel : public ay_prefs_window_panel
 		GtkWidget		*m_top_container;	///< this holds all the widgets to be reset when the module is reloaded
 };
 
+/// An account prefs panel
+class ay_account_panel : public ay_prefs_window_panel
+{
+	public:
+		ay_account_panel( const char *inTopFrameText, t_account_pref &inPrefs );
+		
+		virtual void	Build( GtkWidget *inParent );
+		virtual void	Apply( void );
+
+	private:	// Gtk callbacks
+		static void		s_connect_account( GtkWidget *widget, void *data );
+		static void		s_disconnect_account( GtkWidget *widget, void *data );
+		
+	private:
+		void			RenderAccountPrefs( void );
+		void			ConnectAccount( void );
+		void			DisconnectAccount( void );
+		
+		t_account_pref	&m_prefs;
+		GtkWidget		*m_top_container;	///< this holds all the widgets to be reset when the account is reloaded
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 /// Entry point to this file - construct and display the prefs window
 void	ay_ui_prefs_window_create( struct prefs *inPrefs )
@@ -472,6 +499,7 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 	_( "Advanced:Encoding" ),
 #endif
 	_( "Advanced:Proxy" ),
+	_( "Accounts" ),
 	_( "Services" ),
 	_( "Filters" ),
 	_( "Utilities" ),
@@ -479,6 +507,7 @@ const char	*ay_prefs_window::s_titles[PANEL_MAX] =
 };
 
 ay_prefs_window	*ay_prefs_window::s_only_prefs_window = NULL;
+GtkAccelGroup	*ay_prefs_window::s_accel_group = NULL;
 
 ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 :	m_prefs( inPrefs ),
@@ -495,6 +524,9 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
 	
+	s_accel_group = gtk_accel_group_new();
+	gtk_window_add_accel_group(GTK_WINDOW(m_prefs_window_widget), s_accel_group);
+
 	gint height=460;
 	if(height > gdk_screen_height() - 40)
 		height = gdk_screen_height() - 40;
@@ -542,6 +574,34 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 		}
 	}
 	
+	// now add accounts
+	LList	*account_pref = m_prefs.account.account_info;
+	
+	while ( account_pref != NULL )
+	{
+		t_account_pref		*pref_info = reinterpret_cast<t_account_pref *>(account_pref->data);
+		
+		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::CreateAccountPanel( m_prefs_window_widget, notebook, *pref_info );
+		
+		if ( the_panel != NULL )
+		{
+			m_panels = g_list_append( m_panels, the_panel );
+
+			GtkWidget	*top_level_w = the_panel->TopLevelWidget();
+
+			if ( top_level_w != NULL )
+			{
+				gtk_notebook_append_page( GTK_NOTEBOOK(notebook), top_level_w, NULL );
+
+				the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(notebook), top_level_w ) );
+
+				AddToTree( the_panel->Name(), the_panel );
+			}
+		}
+		
+		account_pref = account_pref->next;
+	}
+
 	// now add modules
 	LList	*module_pref = m_prefs.module.module_info;
 	
@@ -843,6 +903,11 @@ ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
 	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(m_top_scrollbox), GTK_WIDGET(m_top_vbox) );
 }
 
+GtkWidget *ay_prefs_window_panel::_gtkut_button( const char *inText, int *inValue, GtkWidget *inPage )
+{
+	return gtkut_button( inText, inValue, inPage, ay_prefs_window::s_accel_group );
+}		
+
 // Create
 ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParentWindow, GtkWidget *inParent, struct prefs &inPrefs,
 	ay_prefs_window::ePanelID inPanelID, const char *inName )
@@ -889,6 +954,10 @@ ay_prefs_window_panel	*ay_prefs_window_panel::Create( GtkWidget *inParentWindow,
 			new_panel = new ay_encoding_panel( inName, inPrefs.advanced );
 			break;
 #endif
+
+		case ay_prefs_window::PANEL_ACCOUNTS:
+			section_info = _("All your messenger accounts are listed here.  You may change\ntheir settings, and sign on/off from here.");
+			break;
 
 		case ay_prefs_window::PANEL_SERVICES:
 			section_info = _("Services allow you to connect to and chat with people using a\nvariety of messenger protocols.");
@@ -948,6 +1017,26 @@ ay_prefs_window_panel	*ay_prefs_window_panel::CreateModulePanel( GtkWidget *inPa
 		snprintf( name, name_len, "%s:%s", _( "Other Plugins" ), inPrefs.module_name );
 	
 	ay_prefs_window_panel	*new_panel = new_panel = new ay_module_panel( name, inPrefs );
+			
+	assert( new_panel != NULL );
+	
+	new_panel->m_parent_window = inParentWindow;
+	new_panel->m_parent = inParent;
+	new_panel->Build( inParent );
+	
+	return( new_panel );
+}
+
+// CreateAccountPanel
+ay_prefs_window_panel	*ay_prefs_window_panel::CreateAccountPanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_account_pref &inPrefs )
+{
+	const int	name_len = 64;
+	char		name[name_len];
+	
+	
+	snprintf( name, name_len, "%s:%s:%s", _( "Accounts" ), get_service_name(inPrefs.service_id),
+			inPrefs.screen_name );
+	ay_prefs_window_panel	*new_panel = new_panel = new ay_account_panel( name, inPrefs );
 			
 	assert( new_panel != NULL );
 	
@@ -1073,10 +1162,10 @@ ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &in
 // Build
 void	ay_chat_panel::Build( GtkWidget *inParent )
 {
-	gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
-	gtkut_button( _("Show timestamps in chat window"), &m_prefs.do_convo_timestamp, m_top_vbox );
-	gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
-	gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
+	_gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
+	_gtkut_button( _("Show timestamps in chat window"), &m_prefs.do_convo_timestamp, m_top_vbox );
+	_gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
+	_gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
 	
 	GtkWidget *hbox = NULL;
 	GtkWidget *spacer = NULL;
@@ -1087,7 +1176,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
-	button = gtkut_button( _("Use spell checking"), &m_prefs.do_spell_checking, hbox );
+	button = _gtkut_button( _("Use spell checking"), &m_prefs.do_spell_checking, hbox );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
@@ -1126,9 +1215,9 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtk_widget_show( vbox );
 	gtk_container_add( GTK_CONTAINER(info_frame), vbox );
 
-	gtkut_button( _("Ignore fonts"), &m_prefs.do_ignore_font, vbox );
-	gtkut_button( _("Ignore foreground colors"), &m_prefs.do_ignore_fore, vbox );
-	gtkut_button( _("Ignore background colors"), &m_prefs.do_ignore_back, vbox );
+	_gtkut_button( _("Ignore fonts"), &m_prefs.do_ignore_font, vbox );
+	_gtkut_button( _("Ignore foreground colors"), &m_prefs.do_ignore_fore, vbox );
+	_gtkut_button( _("Ignore background colors"), &m_prefs.do_ignore_back, vbox );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), info_frame, FALSE, FALSE, 0 );
 	
@@ -1328,8 +1417,8 @@ ay_logs_panel::ay_logs_panel( const char *inTopFrameText, struct prefs::logging 
 // Build
 void	ay_logs_panel::Build( GtkWidget *inParent )
 {
-	gtkut_button( _("Save all conversations to logfiles"), &m_prefs.do_logging, m_top_vbox );
-	gtkut_button( _("Restore last conversation when opening a chat window"), &m_prefs.do_restore_last_conv, m_top_vbox );
+	_gtkut_button( _("Save all conversations to logfiles"), &m_prefs.do_logging, m_top_vbox );
+	_gtkut_button( _("Restore last conversation when opening a chat window"), &m_prefs.do_restore_last_conv, m_top_vbox );
 }
 
 
@@ -1618,12 +1707,12 @@ ay_sound_general_panel::ay_sound_general_panel( const char *inTopFrameText, stru
 // Build
 void	ay_sound_general_panel::Build( GtkWidget *inParent )
 {
-	gtkut_button( _("Disable sounds when I am away"), &m_prefs.do_no_sound_when_away, m_top_vbox );
-	gtkut_button( _("Disable sounds for Ignored people"), &m_prefs.do_no_sound_for_ignore, m_top_vbox );
-	gtkut_button( _("Play sounds when people sign on or off"), &m_prefs.do_online_sound, m_top_vbox );
-	gtkut_button( _("Play a sound when sending a message"), &m_prefs.do_play_send, m_top_vbox );
-	gtkut_button( _("Play a sound when receiving a message"), &m_prefs.do_play_receive, m_top_vbox );
-	gtkut_button( _("Play a special sound when receiving first message"), &m_prefs.do_play_first, m_top_vbox );
+	_gtkut_button( _("Disable sounds when I am away"), &m_prefs.do_no_sound_when_away, m_top_vbox );
+	_gtkut_button( _("Disable sounds for Ignored people"), &m_prefs.do_no_sound_for_ignore, m_top_vbox );
+	_gtkut_button( _("Play sounds when people sign on or off"), &m_prefs.do_online_sound, m_top_vbox );
+	_gtkut_button( _("Play a sound when sending a message"), &m_prefs.do_play_send, m_top_vbox );
+	_gtkut_button( _("Play a sound when receiving a message"), &m_prefs.do_play_receive, m_top_vbox );
+	_gtkut_button( _("Play a special sound when receiving first message"), &m_prefs.do_play_first, m_top_vbox );
 }
 
 
@@ -1933,7 +2022,7 @@ void	ay_misc_panel::Build( GtkWidget *inParent )
 	GtkWidget	*label = NULL;
 
 
-	brbutton = gtkut_button( _("Use alternate browser"), &m_prefs.use_alternate_browser, m_top_vbox );
+	brbutton = _gtkut_button( _("Use alternate browser"), &m_prefs.use_alternate_browser, m_top_vbox );
 	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
 
 	hbox = gtk_hbox_new( FALSE, 0 );
@@ -1961,11 +2050,11 @@ void	ay_misc_panel::Build( GtkWidget *inParent )
 
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 
-	gtkut_button( _("Enable debug messages"), &m_prefs.do_ayttm_debug, m_top_vbox );
+	_gtkut_button( _("Enable debug messages"), &m_prefs.do_ayttm_debug, m_top_vbox );
 	
-	gtkut_button( _("Show tooltips in status window"), &m_prefs.do_show_tooltips, m_top_vbox );
+	_gtkut_button( _("Show tooltips in status window"), &m_prefs.do_show_tooltips, m_top_vbox );
 	
-	gtkut_button( _("Check for latest version when signing on all"), &m_prefs.do_version_check, m_top_vbox );
+	_gtkut_button( _("Check for latest version when signing on all"), &m_prefs.do_version_check, m_top_vbox );
 	
 	SetActiveWidgets();
 }
@@ -2302,7 +2391,7 @@ void	ay_encoding_panel::Build( GtkWidget *inParent )
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), label, FALSE, FALSE, 0 );
 	gtk_widget_show( label);
 
-	GtkWidget	*button = gtkut_button( _("Use recoding in conversations"), &m_prefs.use_recoding, m_top_vbox );
+	GtkWidget	*button = _gtkut_button( _("Use recoding in conversations"), &m_prefs.use_recoding, m_top_vbox );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_set_use_of_recoding), this );
 
 	const int	label_len = 120;
@@ -2664,7 +2753,7 @@ void	ay_module_panel::RenderModulePrefs( void )
 					else
 						item_label = the_list->widget.checkbox.name;
 						
-					gtkut_button( item_label, the_list->widget.checkbox.value, m_top_container );
+					_gtkut_button( item_label, the_list->widget.checkbox.value, m_top_container );
 					the_list->widget.checkbox.saved_value = *(the_list->widget.checkbox.value);
 				}
 				break;
@@ -2791,4 +2880,289 @@ void	ay_module_panel::s_unload_module( GtkWidget *widget, void *data )
 	assert( the_panel != NULL );
 
 	the_panel->UnloadModule();
+}
+
+////////////////
+//// ay_account_panel implementation
+
+ay_account_panel::ay_account_panel( const char *inTopFrameText, t_account_pref &inPrefs )
+:	ay_prefs_window_panel( inTopFrameText ),
+	m_prefs( inPrefs ),
+	m_top_container( NULL )
+{
+}
+
+// Build
+void	ay_account_panel::Build( GtkWidget *inParent )
+{
+	if ( m_top_container != NULL )
+		gtk_widget_destroy( m_top_container );
+		
+	m_top_container = gtk_vbox_new( FALSE, 0 );
+	gtk_widget_show( m_top_container );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_top_container, TRUE, TRUE, 0 );
+
+	GtkWidget	*spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_box_pack_start( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
+
+	if ( m_prefs.pref_list != NULL )
+	{
+		RenderAccountPrefs();
+	}
+
+	GtkWidget	*connect_button = gtkut_create_label_button( _( "Connect" ), GTK_SIGNAL_FUNC(s_connect_account), this );
+	gtk_container_set_border_width( GTK_CONTAINER(connect_button), 5 );
+	gtk_widget_set_sensitive( connect_button, !m_prefs.is_connected );
+	
+	GtkWidget	*disconnect_button = gtkut_create_label_button( _( "Disconnect" ), GTK_SIGNAL_FUNC(s_disconnect_account), this );
+	gtk_container_set_border_width( GTK_CONTAINER(disconnect_button), 5 );
+	gtk_widget_set_sensitive( disconnect_button, m_prefs.is_connected );
+	
+	GtkWidget	*button_hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( button_hbox );
+	gtk_box_pack_start( GTK_BOX(button_hbox), connect_button, FALSE, FALSE, 0 );
+	gtk_box_pack_end( GTK_BOX(button_hbox), disconnect_button, FALSE, FALSE, 0 );
+	
+	gtk_box_pack_end( GTK_BOX(m_top_container), button_hbox, FALSE, FALSE, 0 );
+	
+	GtkWidget	*separator = gtk_hseparator_new();
+	gtk_widget_show( separator );
+	gtk_box_pack_end( GTK_BOX(m_top_container), separator, FALSE, FALSE, 0 );
+	
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_box_pack_end( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
+}
+
+// Apply
+void	ay_account_panel::Apply( void )
+{
+	input_list	*the_list = m_prefs.pref_list;
+
+	
+	while ( the_list != NULL )
+	{
+		switch(the_list->type)
+		{
+			case EB_INPUT_CHECKBOX:
+				break;
+				
+			case EB_INPUT_PASSWORD:
+			case EB_INPUT_ENTRY:
+				{
+					GtkWidget	*entry_widget = reinterpret_cast<GtkWidget *>(the_list->widget.entry.entry);
+					const char	*text = gtk_entry_get_text(GTK_ENTRY(entry_widget));
+
+					strncpy( the_list->widget.entry.value, text, MAX_PREF_LEN );
+
+					gtk_entry_set_text( GTK_ENTRY(entry_widget), the_list->widget.entry.value );
+				}
+				break;
+				
+			case EB_INPUT_LIST:
+				{
+					GtkWidget	*list_widget = reinterpret_cast<GtkWidget *>(the_list->widget.listbox.widget);
+					GtkWidget	*list_item = gtk_menu_get_active(GTK_MENU(list_widget));
+					const char	*text = gtk_widget_get_name(GTK_WIDGET(list_item));
+					if(text)
+						*the_list->widget.listbox.value = atoi(text);
+				}
+				break;
+		}
+
+		the_list = the_list->next;
+	}
+}
+
+// RenderAccountPrefs
+void	ay_account_panel::RenderAccountPrefs( void )
+{
+	input_list	*the_list = m_prefs.pref_list;
+
+	GtkAccelGroup *accel_group = ay_prefs_window::s_accel_group;
+
+	
+	while ( the_list != NULL )
+	{
+		switch ( the_list->type )
+		{
+			case EB_INPUT_HIDDEN:
+				break;
+
+			case EB_INPUT_CHECKBOX:
+				{
+					char	*item_label = NULL;
+					
+					if ( the_list->widget.checkbox.label != NULL )
+						item_label = the_list->widget.checkbox.label;
+					else
+						item_label = the_list->widget.checkbox.name;
+						
+					_gtkut_button( item_label, the_list->widget.checkbox.value, m_top_container );
+					the_list->widget.checkbox.saved_value = *(the_list->widget.checkbox.value);
+				}
+				break;
+
+			case EB_INPUT_ENTRY:
+				{
+					GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
+					gtk_widget_show( hbox );
+						
+					char	*item_label = NULL;
+					
+					if ( the_list->widget.entry.label != NULL )
+						item_label = the_list->widget.entry.label;
+					else
+						item_label = the_list->widget.entry.name;
+					
+					GtkWidget	*label = gtk_label_new( "" );
+					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
+					gtk_widget_show( label );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					gtk_widget_set_usize( label, 130, 15 );
+					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+
+					GtkWidget	*widget = gtk_entry_new();
+					gtk_widget_show( widget );
+					gtk_widget_add_accelerator(widget, "grab_focus", accel_group,
+							key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+					the_list->widget.entry.entry = widget;
+					gtk_entry_set_text( GTK_ENTRY(widget), the_list->widget.entry.value );
+					gtk_editable_set_position( GTK_EDITABLE(widget), 0 );
+					gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
+
+					gtk_box_pack_start( GTK_BOX(m_top_container), hbox, FALSE, FALSE, 0 );
+
+				}
+				break;
+			
+			case EB_INPUT_PASSWORD:
+				{
+					GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
+					gtk_widget_show( hbox );
+						
+					char	*item_label = NULL;
+					
+					if ( the_list->widget.entry.label != NULL )
+						item_label = the_list->widget.entry.label;
+					else
+						item_label = the_list->widget.entry.name;
+					
+					GtkWidget	*label = gtk_label_new( "" );
+					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
+					gtk_widget_show( label );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					gtk_widget_set_usize( label, 130, 15 );
+					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+
+					GtkWidget	*widget = gtk_entry_new();
+					gtk_entry_set_visibility(GTK_ENTRY(widget), FALSE);
+					gtk_widget_show( widget );
+					gtk_widget_add_accelerator(widget, "grab_focus", accel_group,
+							key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+					the_list->widget.entry.entry = widget;
+					gtk_entry_set_text( GTK_ENTRY(widget), the_list->widget.entry.value );
+					gtk_editable_set_position( GTK_EDITABLE(widget), 0 );
+					gtk_box_pack_start( GTK_BOX(hbox), widget, FALSE, FALSE, 0 );
+
+					gtk_box_pack_start( GTK_BOX(m_top_container), hbox, FALSE, FALSE, 0 );
+
+				}
+				break;
+			
+			case EB_INPUT_LIST:
+				{
+					GtkWidget	*hbox = gtk_hbox_new( FALSE, 3 );
+					gtk_widget_show( hbox );
+						
+					char	*item_label = NULL;
+					
+					if ( the_list->widget.listbox.label != NULL )
+						item_label = the_list->widget.listbox.label;
+					else
+						item_label = the_list->widget.listbox.name;
+					
+					GtkWidget	*label = gtk_label_new( "" );
+					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
+					gtk_widget_show( label );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					gtk_widget_set_usize( label, 130, 15 );
+					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+
+					GtkWidget	*menu = gtk_option_menu_new();
+					gtk_widget_show(menu);
+					GtkWidget	*widget = gtk_menu_new();
+					gtk_widget_show( widget );
+					the_list->widget.listbox.widget = widget;
+					
+					int i; LList *l;
+					for(i=0, l=the_list->widget.listbox.list; l; l=l_list_next(l), i++) {
+						char *label = (char *)l->data;
+						char name[10];
+						GtkWidget *w = gtk_menu_item_new_with_label(label);
+						gtk_widget_show(w);
+						snprintf(name, sizeof(name), "%d", i);
+						gtk_widget_set_name(w, name);
+						gtk_menu_append(GTK_MENU(widget), w);
+					}
+					
+					gtk_option_menu_set_menu(GTK_OPTION_MENU(menu), widget);
+					gtk_option_menu_set_history(GTK_OPTION_MENU(menu), 
+							*the_list->widget.listbox.value);
+
+					gtk_widget_add_accelerator(menu, "grab_focus", accel_group,
+							key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+
+					gtk_box_pack_start( GTK_BOX(hbox), menu, FALSE, FALSE, 0 );
+
+					gtk_box_pack_start( GTK_BOX(m_top_container), hbox, FALSE, FALSE, 0 );
+
+				}
+				break;
+			
+			default:
+				assert( FALSE );
+				break;
+		}
+
+		the_list = the_list->next;
+	}
+}
+
+// ConnectAccount
+void	ay_account_panel::ConnectAccount( void )
+{
+	ayttm_prefs_connect_account( &m_prefs );
+	Build( m_parent );
+}
+
+// DisconnectAccount
+void	ay_account_panel::DisconnectAccount( void )
+{
+	ayttm_prefs_disconnect_account( &m_prefs );
+	Build( m_parent );
+}
+
+////
+// ay_account_panel callbacks
+
+// s_connect_account
+void	ay_account_panel::s_connect_account( GtkWidget *widget, void *data )
+{
+	ay_account_panel	*the_panel = reinterpret_cast<ay_account_panel *>( data );
+	assert( the_panel != NULL );
+
+	the_panel->ConnectAccount();
+}
+
+// s_disconnect_account
+void	ay_account_panel::s_disconnect_account( GtkWidget *widget, void *data )
+{
+	ay_account_panel	*the_panel = reinterpret_cast<ay_account_panel *>( data );
+	assert( the_panel != NULL );
+
+	the_panel->DisconnectAccount();
 }

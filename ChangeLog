@@ -1,3 +1,17 @@
+* Wed Jul 30 2003 09:12 GMT [philip]	0.3.3-12
+- src/gtk/prefs_window.C src/gtk/gtkutils.[ch]
+Use keyboard shortcuts
+
+- src/account.[ch] src/account_parser.y src/input_list.[ch]
+- src/prefs.[ch] src/util.c
+- src/gtk/prefs_window.C
+
+Account editor is now in prefs, with service specific prefs for each
+account
+
+- modules/yahoo2/yahoo.c
+Yahoo uses service specific account prefs
+
 * Sun Jul 27 2003 06:02 GMT [philip]	0.3.3-11
 - src/Makefile.am
 generate defaults.h correctly for windows - \ escaped twice, once for
