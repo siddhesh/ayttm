@@ -1,3 +1,7 @@
+* Tue Oct 28 2003 11:20 GMT [colin]	0.4.4-5
+- src/status.c
+status_bar aware of do_noautoresize pref (ugly but i don't care)
+
 * Mon Oct 27 2003 17:20 GMT [colin]	0.4.4-4
 - src/status.c
 Don't log status changes containing numbers

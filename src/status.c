@@ -359,6 +359,7 @@ static void update_status_message(gchar * message )
 		char *tstamp_mess = NULL;
 		time_t t;
 		struct tm * cur_time;
+		int prevwidth = status_message->allocation.width;
 		
 		time(&t);
 		cur_time = localtime(&t);
@@ -385,8 +386,14 @@ static void update_status_message(gchar * message )
 		else {
 			last_inserted = strdup(message);
 		}
-		
+		gtk_widget_hide(status_message);
 		gtk_label_set_text(GTK_LABEL(status_message), message);
+
+		if (iGetLocalPref("do_noautoresize")) {
+			gtk_widget_set_usize(status_message, prevwidth, -1);
+
+		}
+		gtk_widget_show(status_message);
 		gtk_eb_html_add(EXT_GTK_TEXT(status_message_window_text), tstamp_mess, 0, 0, 0);
 		g_free(tstamp_mess);
 	}
@@ -2244,15 +2251,17 @@ void eb_status_window()
 	gtk_handle_box_set_handle_position(GTK_HANDLE_BOX(hbox), GTK_POS_LEFT);
 	gtk_handle_box_set_snap_edge(GTK_HANDLE_BOX(hbox), GTK_POS_LEFT);
 	status_message = gtk_label_new(_("Welcome To Ayttm"));
-	gtk_widget_show(status_message);
 	
 	status_bar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
 	gtk_toolbar_set_button_relief(GTK_TOOLBAR(status_bar), GTK_RELIEF_NONE);
 	gtk_container_set_border_width(GTK_CONTAINER(status_bar), 0);
 	gtk_toolbar_set_space_size(GTK_TOOLBAR(status_bar), 1);
 	gtk_widget_show(status_bar);
+	gtk_misc_set_alignment(GTK_MISC(status_message), 0.0, 0.5);
+	gtk_widget_show(status_message);
 	gtk_container_add(GTK_CONTAINER(hbox), status_bar);
 	gtk_widget_show(hbox);
+	gtk_widget_set_usize(status_message, status_bar->allocation.width -2, -1);
 	
 	create_log_window();
 	
