@@ -1,3 +1,7 @@
+* Mon Feb 16 2004 08:16 GMT [philip]	0.4.6-10
+- modules/image_filter/img2jpc.c
+jp2 compression handled.  We now have small images
+
 * Tue Feb 10 2004 04:25 GMT [philip]	0.4.6-9
 - src/usercount.c src/Makefile.am src/prefs.[ch]
 add usercount window - not operational yet

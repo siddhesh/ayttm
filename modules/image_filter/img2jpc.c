@@ -31,8 +31,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.5 $",
-	"$Date: 2004/02/10 04:30:26 $",
+	"$Revision: 1.6 $",
+	"$Date: 2004/02/16 08:14:40 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -87,7 +87,7 @@ static int plugin_finish()
  *                             End Module Code
  ******************************************************************************/
 
-static unsigned char * img_2_img(const unsigned char *in_img, long *size, int outfmt, const char *soutfmt)
+static unsigned char * img_2_img(const unsigned char *in_img, long *size, int outfmt, const char *soutfmt, const char *enc_opts)
 {
 	char * out_img = NULL;
 	jas_stream_t *in, *out;
@@ -136,7 +136,7 @@ static unsigned char * img_2_img(const unsigned char *in_img, long *size, int ou
 	}
 
 	eb_debug(DBG_MOD, "Encoding to format: %d %s\n", outfmt, soutfmt);
-	if((jas_image_encode(image, out, outfmt, NULL))) {
+	if((jas_image_encode(image, out, outfmt, enc_opts))) {
 		eb_debug(DBG_MOD, "Could not encode image format\n");
 		return ay_memdup(in_img, *size);
 	}
@@ -157,7 +157,7 @@ static unsigned char * img_2_jpg(const unsigned char *in_img, long *size)
 	static int outfmt;
 	if(!outfmt)
 		outfmt = jas_image_strtofmt("jpg");
-	return img_2_img(in_img, size, outfmt, "jpg");
+	return img_2_img(in_img, size, outfmt, "jpg", NULL);
 }
 
 static unsigned char * img_2_jpc(const unsigned char *in_img, long *size)
@@ -167,5 +167,5 @@ static unsigned char * img_2_jpc(const unsigned char *in_img, long *size)
 		return ay_memdup(in_img, *size);
 	if(!outfmt)
 		outfmt = jas_image_strtofmt("jpc");
-	return img_2_img(in_img, size, outfmt, "jpc");
+	return img_2_img(in_img, size, outfmt, "jpc", "rate=0.0219");
 }
