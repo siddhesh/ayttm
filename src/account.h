@@ -82,6 +82,7 @@ typedef struct account {
 	int priority;
 } eb_account;
 
+const char *decode_password(const char *pass_in, int enc_type);
 int load_accounts();
 int load_accounts_from_file(const char *file);
 int load_contacts();

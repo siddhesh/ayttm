@@ -1,4 +1,10 @@
-* mer Oct  8 2003 16:10 GMT [nicolas]	0.4.2-15
+* Thu Oct  9 2003 07:53 GMT [philip]	0.4.2-16
+- src/account.c src/account_parser.y
+encode passwords on disk - to prevent over the shoulder password loss.
+this is NOT encryption
+also ended up fixing a memory leak
+
+* Wed Oct  8 2003 16:10 GMT [nicolas]	0.4.2-15
 - modules/aim-oscar/aim-oscar.c
 Add prefs for debug messages, better connection error report, use an
 activity bar instead of a progress bar.

@@ -15,6 +15,8 @@
 	#define accounterror(error) printf("Parse error on line %d: %s\n", Line, error );
 	extern int accountlex();
 
+	const char *decode_password(const char *pass_in, int enc_type);
+
 	static int laccount_cmp(const void * a, const void * b)
 	{
 		const eb_local_account *ca=a, *cb=b;
@@ -26,6 +28,7 @@
 
 		return cmp;
 	}
+
 %}
 
 %union {
@@ -40,7 +43,6 @@
 %type <vals> account_list
 %type <acnt> account
 %type <vals> value_list
-%type <val> key_pair
 %%
 
 start:
@@ -68,6 +70,16 @@ account:
 		{
 			int id = get_service_id($3);
 
+			char *s = value_pair_get_value($5, "enc_type");
+			if(s) {
+				int enc_type = atoi(s);
+				char *password = value_pair_get_value($5, "password_encoded");
+				free(s);
+				$5 = value_pair_add($5, "PASSWORD", decode_password(password, enc_type));
+				free(password);
+			}
+			
+
 			eb_debug(DBG_CORE, "calling read_local_account_config for %s[%i]\n", $3, id);
 			$$ = eb_services[id].sc->read_local_account_config($5);
 			eb_debug(DBG_CORE, "read_local_account_config returned: %p\n", $$);
@@ -87,26 +99,13 @@ account:
 ;
 
 value_list:
-		key_pair value_list { $$ = l_list_append( $2, $1 ); }
+		IDENTIFIER '=' STRING value_list { 
+			$$ = value_pair_add($4, $1, $3);
+			free($1);
+			free($3);
+		}
 	|	EPSILON { $$ = 0; }
 
-;
-
-key_pair:
-		IDENTIFIER '=' STRING
-		{
-			{
-				value_pair * vp = g_new0( value_pair, 1 );
-				char * value = unescape_string($3);
-				strncpy( vp->key, $1, sizeof(vp->key));
-				strncpy( vp->value, value, sizeof(vp->value));
-
-				free($1);
-				free($3);
-				free(value);
-				$$ = vp;
-			}
-		}
 ;
 
 EPSILON : ;

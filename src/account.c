@@ -22,6 +22,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -39,6 +40,41 @@
 #define NAME_MAX 4096
 #endif
 
+
+enum {NONE, ROT13, XOR13, MAX_ENC};
+const char *decode_password(const char *pass_in, int enc_type)
+{
+	static char pwd[1024];
+	int i;
+	for(i=0; pass_in[i] && i<1023; i++) {
+		pwd[i] = pass_in[i];
+		if(enc_type == ROT13) {
+			if(pwd[i] >= 'a' && pwd[i] <='z') {
+				pwd[i] = (pwd[i]-'a' + 13)%26 + 'a';
+			} else if(pwd[i] >= 'A' && pwd[i] <='Z') {
+				pwd[i] = (pwd[i]-'A' + 13)%26 + 'A';
+			} else if(pwd[i] >= '0' && pwd[i] <='9') {
+				pwd[i] = (pwd[i]-'0' + 5)%10 + '0';
+			}
+		} else if(enc_type == XOR13) {
+			if(pwd[i] >= 'a' && pwd[i] <='x') {
+				pwd[i] = ((pwd[i]-'a')^2) + 'a';
+			} else if(pwd[i] >= 'x' && pwd[i] <='z') {
+				pwd[i] = ((pwd[i]-'a')^1) + 'a';
+			} else if(pwd[i] >= 'A' && pwd[i] <='X') {
+				pwd[i] = ((pwd[i]-'A')^2) + 'A';
+			} else if(pwd[i] >= 'X' && pwd[i] <='Z') {
+				pwd[i] = ((pwd[i]-'A')^1) + 'A';
+			} else if(pwd[i] >= '0' && pwd[i] <='9') {
+				pwd[i] = ((pwd[i]-'0')^2) + '0';
+			}
+		}
+	}
+
+	pwd[i]='\0';
+
+	return pwd;
+}
 
 void write_account_list()
 {
@@ -62,11 +98,19 @@ void write_account_list()
 		*/
 
 		LList * config = RUN_SERVICE(ela)->write_local_config(ela);
+		char * pwd = value_pair_get_value(config, "PASSWORD");
+		int enc_type = 1+(int)(rand()/(RAND_MAX+1.0)*(MAX_ENC-1));
+		char e[2]; snprintf(e, sizeof(e), "%d", enc_type);
+		config = value_pair_add(config, "enc_type", e);
+		config = value_pair_add(config, "password_encoded", decode_password(pwd, enc_type));
+		config = value_pair_remove(config, "PASSWORD");
+		free(pwd);
 /*		LList * prefs = eb_input_to_value_pair(ela->prefs);*/
 		fprintf(fp, "<ACCOUNT %s>\n", eb_services[ela->service_id].name);
 		value_pair_print_values(config, fp, 1);
 /*		value_pair_print_values(prefs, fp, 1);*/
 		fprintf( fp, "</ACCOUNT>\n" );
+		value_pair_free(config);
 	}
 
 	fclose(fp);
