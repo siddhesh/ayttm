@@ -41,7 +41,7 @@ char *strchr (), *strrchr ();
 
 #include "mem_util.h"
 
-char * ay_string_append(char * string, char * append)
+char * ay_string_append(char * string, const char * append)
 {
 	int size = strlen(string) + strlen(append) + 1;
 	char * new_string = ay_renew(char, string, size);

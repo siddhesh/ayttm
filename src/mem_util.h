@@ -82,7 +82,7 @@ enum {FALSE, TRUE};
  * The following three functions return newly allocated memory.
  * You must free it yourself
  */
-char * ay_string_append(char * str, char * append);
+char * ay_string_append(char * str, const char * append);
 char * ay_str_to_utf8(const char * in);
 char * ay_utf8_to_str(const char * in);
 #endif
