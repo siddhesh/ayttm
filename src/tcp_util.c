@@ -294,6 +294,15 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 	update_status(buff);
 	if(!(server = gethostbyname(host))) {
 		errno=h_errno;
+#ifndef HAVE_HSTRERROR
+#define hstrerror(err) (\
+err == TRY_AGAIN ? "Host not found, try again" : \
+err == HOST_NOT_FOUND ? "Host not found" : \
+err == NO_DATA ? "Host name has no address" : \
+err == NO_RECOVERY ? "Name server failure" : \
+strerror(errno) \
+) 
+#endif
 		eb_debug(DBG_CORE, "failed to look up server (%s:%d)\n%d: %s", 
 					host, port, errno, hstrerror(errno));
 		return -1;
