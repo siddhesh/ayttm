@@ -129,15 +129,16 @@ ay_activity_bar_pack::ay_activity_bar_pack(const char *label,
 	gtk_box_pack_start(GTK_BOX(m_hbox), m_pbar, TRUE, TRUE, 10);
 	gtk_widget_show(m_pbar);
 
+	m_cbtn = gtk_button_new_with_label(_("Cancel"));
 	if(cancel_callback) {
-		m_cbtn = gtk_button_new_with_label(_("Cancel"));
 		gtk_signal_connect(GTK_OBJECT(m_cbtn), "clicked",
-				GTK_SIGNAL_FUNC(s_cancel_clicked), this);
-		gtk_box_pack_start(GTK_BOX(m_hbox), m_cbtn, FALSE, FALSE, 10);
-		gtk_widget_show(m_cbtn);
+			GTK_SIGNAL_FUNC(s_cancel_clicked), this);
 	} else {
-		m_cbtn = NULL;
+		gtk_widget_set_sensitive(m_cbtn, FALSE);
 	}
+	
+	gtk_box_pack_start(GTK_BOX(m_hbox), m_cbtn, FALSE, FALSE, 10);
+	gtk_widget_show(m_cbtn);
 
 	gtk_widget_show(m_hbox);
 
