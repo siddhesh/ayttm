@@ -82,73 +82,41 @@ int clean_pid(void * dummy)
 
 char * get_local_addresses()
 {
-	static char addresses[1024];
+#ifndef __MINGW32__
+	char command[] = "/sbin/ifconfig `netstat -nr | grep '^0\\.0' | tr -s ' ' ' ' | cut -f 8 -d' '` | grep inet | tr -s ' ' ':' | cut -f4 -d:";
+#endif
 	char buff[1024];
-	char gateway[16];
-	char  * c;
+	static char addresses[1024];
 	struct hostent * hn;
-	int i;
-	FILE * f;
-	//system("getip.pl > myip");
-	f = popen("netstat -nr", "r");
-	if((int)f < 1)
-			goto IP_TEST_2;
-	while( fgets(buff, sizeof(buff), f)  != NULL ) {
-			c = strtok( buff, " " );
-			if( (strstr(c, "default") || strstr(c,"0.0.0.0") ) &&
-							!strstr(c, "127.0.0" ) )
-					break;
-	}
-	c = strtok( NULL, " " );
-	pclose(f);
-
-	strncpy(gateway,c, 16);
-
-
-
-	for(i = strlen(gateway); gateway[i] != '.'; i-- )
-		gateway[i] = 0;
-
-	gateway[i] = 0;
-
-	for(i = strlen(gateway); gateway[i] != '.'; i-- )
-		gateway[i] = 0;
-
-	//g_snprintf(buff, 1024, "/sbin/ifconfig -a|grep inet|grep %s", gateway );
-	f = popen("/sbin/ifconfig -a", "r");
-	if((int)f < 1)
-		goto IP_TEST_2;
-
-	while( fgets(buff, sizeof(buff), f) != NULL ) {
-		if( strstr(buff, "inet") && strstr(buff,gateway) )
-			break;
-	}
-	pclose(f);
-
-	c = strtok( buff, " " );
-	c = strtok( NULL, " " );
-
-	strncpy ( addresses, c, sizeof(addresses) );
-	c = strtok(addresses, ":" );
-	strncpy ( buff, c, sizeof(buff) );
-	if((c=strtok(NULL, ":")))
-		strncpy( buff, c, sizeof(buff) );
-
-	strncpy(addresses, buff, sizeof(addresses));
-
-	return addresses;
-		
-		
-IP_TEST_2:
+	FILE * f = NULL;
 
 	gethostname(buff,sizeof(buff));
 
 	hn = gethostbyname(buff);
-	if(hn)
-		strncpy(addresses, inet_ntoa( *((struct in_addr*)hn->h_addr)), sizeof(addresses) );
-	else
-		addresses[0] = 0;
+	if(hn) {
+		char *quad = hn->h_addr_list[0];
+		snprintf(addresses, sizeof(addresses), "%d.%d.%d.%d",
+				quad[0], quad[1], quad[2], quad[3] );
+#ifndef __MINGW32__
+	} else if( (f = popen(command, "r")) != NULL ) {
+		int i=0;
 
+		do {
+			buff[i] = fgetc(f);
+			if(buff[i]=='\r' || buff[i]=='\n' || buff[i]==EOF)
+				buff[i]='\0';
+			else if(i >= sizeof(buff)) {
+				buff[i]='\0';
+				/*return error?*/
+			}
+		} while(buff[i++]);
+		
+		pclose(f);
+		strncpy(addresses, buff, sizeof(addresses));
+#endif
+	} else {
+		addresses[0]=0;
+	}
 	return addresses;
 }
 
