@@ -1,3 +1,9 @@
+* Sat Jun 28 2003 12:25 GMT [colin]	0.3.1-52
+- modules/aim-toc/aim-toc.c
+Multiaccount works in AIM-toc (chatrooms with two local accounts
+act strange though). Probably works in ICQ-toc too but
+one has to check it.
+
 * Sat Jun 28 2003 11:35 GMT [colin]	0.3.1-51
 - src/gtk/extgtktext.c
 Links are now opened on double-click

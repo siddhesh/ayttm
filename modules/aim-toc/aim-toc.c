@@ -95,13 +95,13 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.45 $",
-	"$Date: 2003/06/28 11:31:00 $",
+	"$Revision: 1.46 $",
+	"$Date: 2003/06/28 12:17:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
 };
-struct service SERVICE_INFO = { "AIM", -1, SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
+struct service SERVICE_INFO = { "AIM", -1, SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
 /* End Module Exports */
 
 static char *eb_toc_get_color(void) { static char color[]="#000088"; return color; }
@@ -373,6 +373,7 @@ static void eb_aim_chat_update_buddy(toc_conn * conn, char * id,
 	if(!ecr)
 	{
 			fprintf(stderr, "Error: unable to fine the chat room!!!\n" );
+			return;
 	}
 	if(online)
 	{
