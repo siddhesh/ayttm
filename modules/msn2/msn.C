@@ -169,8 +169,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.59 $",
-	"$Date: 2003/07/30 10:20:37 $",
+	"$Revision: 1.60 $",
+	"$Date: 2003/07/30 12:33:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -892,6 +892,33 @@ static void eb_msn_send_file(eb_local_account *from, eb_account *to, char *file)
         msn_new_SB(mlad->mc, NULL);
 }
 
+static void msn_init_account_prefs(eb_local_account * ela)
+{
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	input_list *il = g_new0(input_list, 1);
+
+	ela->prefs = il;
+
+	il->widget.entry.value = ela->handle;
+	il->widget.entry.name = "SCREEN_NAME";
+	il->widget.entry.label= _("_MSN Passport:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = mlad->password;
+	il->widget.entry.name = "PASSWORD";
+	il->widget.entry.label= _("_Password:");
+	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &ela->connect_at_startup;
+	il->widget.checkbox.name = "CONNECT";
+	il->widget.checkbox.label= _("_Connect at startup");
+	il->type = EB_INPUT_CHECKBOX;
+}
+
 static eb_local_account * eb_msn_read_local_account_config( LList * values )
 {
 	char buff[255];
@@ -906,20 +933,20 @@ static eb_local_account * eb_msn_read_local_account_config( LList * values )
 	ela = g_new0(eb_local_account,1);
 	mlad = g_new0( eb_msn_local_account_data, 1);
 
-	ela->handle = value_pair_get_value( values, "SCREEN_NAME" );
-	
-	/*the alias will be the persons login minus the @hotmail.com */
-	strncpy( buff, ela->handle , sizeof(buff));
-	c = strtok( buff, "@" );
-	strncpy(ela->alias, buff , sizeof(ela->alias));
-
 	mlad->status = MSN_OFFLINE;
 	ela->protocol_local_account_data = mlad;
 
 	ela->service_id = SERVICE_INFO.protocol_id;
 
 	msn_init_account_prefs(ela);
+
 	eb_update_from_value_pair(ela->prefs, values);
+
+	/*the alias will be the persons login minus the @hotmail.com */
+	strncpy( buff, ela->handle , sizeof(buff));
+	c = strtok( buff, "@" );
+	strncpy(ela->alias, buff , sizeof(ela->alias));
+
 	return ela;
 }
 
