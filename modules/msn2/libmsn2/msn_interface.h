@@ -13,6 +13,7 @@ void handle_command(void);
 void ext_update_contact(char *username);
 void ext_register_sock(int s, int read, int write);
 void ext_unregister_sock(int s);
+int ext_is_sock_registered(int s);
 
 void ext_show_error(msnconn * conn, char * msg);
 

@@ -45,6 +45,12 @@ char ** msn_read_line(msnconn *conn, int * numargs)
 			else if (errno == EAGAIN) {
 				goto continued;
 			} else if (errno) {
+				/* may have been unregistered */
+				if (!ext_is_sock_registered(sock)) {
+					*numargs=0;
+					return NULL;
+				}
+				
 				printf("error %d %s\n",errno, strerror(errno));
 			        printf("What the.. (%d) (%s)?!\n", sock, conn->readbuf); //DEBUG
 				*numargs=-1;

@@ -82,6 +82,11 @@ main()
   }
 }
 
+int ext_is_sock_registered(int s)
+{
+	return 1;
+}
+
 void handle_command(void)
 {
   char command[40];

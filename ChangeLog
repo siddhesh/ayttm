@@ -1,3 +1,9 @@
+* Sun Apr 20 2003 19:28 GMT [colin]	0.3.0-pre13
+- libproxy/proxy.c
+Fix missing return
+- modules/msn2/msn.C
+Add missing cleans
+
 * Sun Apr 20 2003 11:46 GMT [colin]	0.3.0-pre12
 - src/Makefile.am
 Fix make dist from a clean checkout

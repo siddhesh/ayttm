@@ -165,8 +165,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.23 $",
-	"$Date: 2003/04/20 11:15:34 $",
+	"$Revision: 1.24 $",
+	"$Date: 2003/04/20 19:43:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -577,6 +577,7 @@ static int checkconn(msnconn *conn) {
 		close_conn(conn);
 		waiting_ans = 0; 
 		if (do_reconnect) {
+			close_conn(conn);
 			eb_msn_login(ela);
 		}
 		return 1;
@@ -589,6 +590,7 @@ static int checkconn(msnconn *conn) {
 		close_conn(conn);
 		waiting_ans = 0; 
 		if (do_reconnect) {
+			close_conn(conn);
 			eb_msn_login(ela);
 		}
 		return 1;
@@ -1717,6 +1719,19 @@ void ext_unregister_sock(int s)
   }
 }
 
+int ext_is_sock_registered(int s)
+{
+  eb_debug(DBG_MSN, "checking sock %i\n", s);
+  for(int a=0; a<20; a++)
+  {
+    if(tags[a].fd==s) {
+        eb_debug(DBG_MSN, "Successful %i\n", s);
+	return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 void ext_got_pong(msnconn *conn)
 {
 	waiting_ans = 0;	
@@ -2300,6 +2315,7 @@ void ext_closing_connection(msnconn * conn)
 	  inv->cancelled=1;
 	  list=list->next;
   }
+  ext_unregister_sock(conn->sock);
   eb_debug(DBG_MSN, "Closed connection with socket %d\n", conn->sock);
 }
 
