@@ -71,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.14 $",
-	"$Date: 2003/05/03 14:44:03 $",
+	"$Revision: 1.15 $",
+	"$Date: 2003/05/03 14:53:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -286,7 +286,7 @@ static void eb_smtp_login(eb_local_account *account)
 	ref_count++;
 
 	l_list_foreach(eb_smtp_buddies, _buddy_change_state, 
-			(void *)SMTP_STATUS_ONLINE);
+			(void *)SMTP_STATUS_OFFLINE);
 }
 
 static void eb_smtp_logout(eb_local_account *account)

@@ -1,3 +1,9 @@
+* Sat May  3 2003 14:43 GMT [colin]	0.3.0-121
+- modules/smtp/smtp.c
+Let our contacts stay offline - this way we won't send
+mails to them by mistake after they disconnected from 
+another account: we'll have to check enable offline messages.
+
 * Sat May  3 2003 14:43 GMT [colin]	0.3.0-120
 - modules/smtp/smtp.c
 Put To: header in mail or server may append what it
