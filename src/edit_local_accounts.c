@@ -418,8 +418,7 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 			pairs = value_pair_add(NULL, "SCREEN_NAME", user);
 			pairs = value_pair_add(pairs, "PASSWORD", pass);
 			save_account_info(service, pairs);
-			ela = eb_services[id].sc->
-			    read_local_account_config(pairs);
+			ela = eb_services[id].sc->read_local_account_config(pairs);
 			//prevent segfault
 			if (ela != NULL) {
 				// Is this an account for which a module is not loaded?

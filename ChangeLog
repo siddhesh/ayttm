@@ -1,3 +1,7 @@
+* Tue Apr 29 2003 17:36 GMT [philip]	0.3.0-51
+- src/account.c
+fix warnings
+
 * Tue Apr 29 2003 17:00 GMT [colin]	0.3.0-50
 - src/action.[ch]
 Use new window

@@ -26,11 +26,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "status.h"
 #include "service.h"
 #include "globals.h"
 #include "value_pair.h"
 #include "util.h"
 #include "add_contact_window.h"
+#include "edit_local_accounts.h"
 
 #ifndef NAME_MAX
 #define NAME_MAX 4096
@@ -275,6 +277,8 @@ int load_contacts()
 	result=load_contacts_from_file(buff2);
 	if (!groups)
 		groups = temp_groups;
+
+	return result;
 }
 
 eb_account *dummy_account(char *handle, char *group, eb_local_account *ela)
