@@ -1,3 +1,8 @@
+* Tue Apr 15 2003 18:05 GMT [philip]	0.2.3-106
+- src/chat_window.c src/edit_account_window.c
+Put Add Contact icon in chatwindow for contacts in
+__Ayttm_Dummy_Group__ too
+
 * Tue Apr 15 2003 18:05 GMT [philip]	0.2.3-105
 - modules/yahoo2/yahoo.c
 Fix bug #718464 (sourceforge) and in the process, a memory leak too

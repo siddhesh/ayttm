@@ -244,8 +244,11 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 	}
 
 	if(account->account_contact) {
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group)->entry), 
+		if(strncmp(account->account_contact->group->name, "__Ayttm_Dummy_Group__",
+			   strlen("__Ayttm_Dummy_Group__"))) {
+			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group)->entry), 
 				account->account_contact->group->name);
+		}
 		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(nick)->entry), 
 				account->account_contact->nick);
 	} else {

@@ -817,8 +817,9 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		menu = gtk_menu_new();
 
 		/*Add Contact Selection*/
-
-		if(!strcmp(cw->contact->group->name, _("Unknown"))) {
+		printf("====>%s\n",cw->contact->group->name);
+		if(!strcmp(cw->contact->group->name, _("Unknown"))
+		|| !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
 			button = gtk_menu_item_new_with_label(_("Add Contact"));
 			gtk_signal_connect(GTK_OBJECT(button), "activate",
 				     GTK_SIGNAL_FUNC(add_unknown_callback), cw);
@@ -1980,7 +1981,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	/*Add Contact Selection*/
 
-	if(!strcmp(cw->contact->group->name, _("Unknown"))) {
+	if(!strcmp(cw->contact->group->name, _("Unknown"))
+	|| !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
 		button = gtk_menu_item_new_with_label(_("Add Contact"));
 		gtk_signal_connect(GTK_OBJECT(button), "activate",
 			       GTK_SIGNAL_FUNC(add_unknown_callback),
@@ -2098,7 +2100,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	gtk_widget_show(iconwid); }
 
 
-	if (!strcmp(cw->contact->group->name, _("Unknown"))) {
+	if (!strcmp(cw->contact->group->name, _("Unknown"))
+	|| !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
 		ICON_CREATE(icon, iconwid, tb_book_red_xpm);
 		add_button = TOOLBAR_APPEND(_("Add Contact"),iconwid,add_unknown_callback,cw);
 		gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
