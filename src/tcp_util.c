@@ -59,6 +59,9 @@
 #define hstrerror strerror
 #endif
 
+#ifndef INT_MAX
+#define INT_MAX 2147483647
+#endif
 
 /**
  * ay_socket_new

@@ -1,3 +1,7 @@
+* Wed Apr 09 2003 10:52 GMT [colin]	0.2.3-68
+- src/tcp_util.c
+define INT_MAX if necessary
+
 * Wed Apr 09 2003 09:43 GMT [colin]	0.2.3-67
 - src/dialog.c
 Add cancel button to text_input_windows
