@@ -7,4 +7,4 @@ aim_oscar_la_SOURCES = aim-oscar.c
 
 aim_oscar_la_LDFLAGS = -module -avoid-version libfaim/src/*.lo
 
-EXTRA_DIST = README
+EXTRA_DIST = README aim.h
