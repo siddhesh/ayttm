@@ -45,8 +45,10 @@ static const char * get_language()
 	char * env_lang[] = {"LC_LANG", "LC_ALL", "LANG", NULL};
 	int i=0;
 
-	while(env_lang[i] && !lang || !lang[0])
-		lang = getenv(env_lang[i++]);
+	while(env_lang[i] && (!lang || !lang[0])) {
+		lang = getenv(env_lang[i]); 
+		i++;
+	}
 
 	if(!lang || !lang[0])
 		lang = "en_GB";
