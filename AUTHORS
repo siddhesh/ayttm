@@ -1,3 +1,11 @@
+Ayttm is brought to you by:
+Colin Leroy       <colin@colino.net>             Lead Developer
+Andy S. Maloney   <a_s_maloney@yahoo.com>        Code Monkey
+Philip S. Tellis  <philip.tellis@iname.com>      Yahoo!
+Edward. L. Haletky<elh@astroarch.com>            Windows Port
+Tahir Hashmi      <code_martial@softhome.net>    Manual, Doc.
+
+Ayttm is based on Everybuddy 0.4.3 which was brought to you by:
 Torrey Searle     <tsearle@uci.edu>	     	 Creator
 Ben Rigas         <ben@flygroup.org>         	 Web Design & GUI Devel 
 Jared Peterson    <jared@tgflinux.com>       	 GUI Devel 
@@ -5,15 +13,16 @@ Troy Morrison     <troy@akropolys.com>	     	 Yahoo Devel
 Shane Brady       <shane@jxie.com>           	 MSN Devel
 Alex Wheeler      <awheeler@speakeasy.org>   	 Jabber Devel & Much More :)
 Robert Lazzurs    <lazzurs@lazzurs.co.uk>    	 Maintainer
-Erik Inge Bolsø   <knan@mo.himolde.no>	     	 IRC Devel
 Meredydd	  <m_luff@mail.wincoll.ac.uk>	 MSN Devel
+Erik Inge Bolsø   <knan@mo.himolde.no>	     	 IRC Devel
 Colin Leroy	  <colin@colino.net>		 Various hacks, Ayttm fork
 Philip Tellis	  <philip.tellis@iname.com>	 Yahoo Devel
-Andy S. Maloney	  <a_s_maloney@yahoo.com>        Code Monkey
-Yann Marigo       <yann@yannos.com>              Art
-Edward L. Haletky <elh@astroarch.com>            Windows Port
-Tahir Hashmi      <code_martial@softhome.net>    Manual, Doc
+
+"With a little help from":
+Yann Marigo       <yann@yannos.com>              Art, Fr translation
+Toby A. Inkster   <tobyink@goddamn.co.uk>        Patches
+Ben Reser         <ben@reser.org>                Patches, MKD RPMs
+Lee Leahu         <penguin365@dyweni.com>        Patches
 
 And a special thanks to Mark Spencer, initial creator of GAIM, for all the 
-tremendous support he has given
-
+tremendous support he has given.
