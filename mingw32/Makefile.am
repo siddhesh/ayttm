@@ -15,7 +15,7 @@ ayttm.exe: ayttmrc
 	./makeebdll
 	cp ayttmrc /cygdrive/c
 	cp ../ayttm.exe /cygdrive/c/Program\ Files/ayttm
-	cp /target/lib/g*.dll /cygdrive/c/Program\ Files/ayttm
+	cp /target/lib/libg*.dll /cygdrive/c/Program\ Files/ayttm
 	cp /target/lib/iconv.dll /cygdrive/c/Program\ Files/ayttm
 	cp /target/lib/libXpm-noX4.dll /cygdrive/c/Program\ Files/ayttm
 	cp /target/lib/libintl-1.dll /cygdrive/c/Program\ Files/ayttm
