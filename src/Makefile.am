@@ -34,7 +34,7 @@ AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)
 AM_CXXFLAGS = $(AM_CFLAGS)
 LIBS = @LIBS@ $(EB_LIBS) -lproxy $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS)
-ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy
+ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy -export-dynamic
 CLEANFILES = @CLEANFILES@ defaults.h
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\" -D_REENTRANT

@@ -1,3 +1,8 @@
+* Wed Jun 25 2003 04:49 GMT [philip]	0.3.1-40
+- src/Makefile.am configure.ac
+always use -export-dynamic libtool flag, not just for MINGW
+hopefully fixes bug 753330
+
 * Thu Jun 19 2003 04:11 GMT [philip]	0.3.1-39
 - src/edit_local_accounts.c
 Allow editing of username too

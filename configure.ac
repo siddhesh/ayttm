@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.3.1, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=38
+RELEASE=40
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -29,7 +29,7 @@ if test "x$host_alias" = "xmingw32"; then
 
 	EB_CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -I../mingw32 -D_REENTRANT -Wall -g"
 	EB_LDADD="$LDADD"
-	EB_LIBS="-Wl,-subsystem,windows -Wl,--export-dynamic -L../libproxy -lproxy /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib /target/lib/libgtk.dll.a /target/lib/libgdk.dll.a /target/lib/libglib-2.0.dll.a -lwinmm -lws2_32 -lwst -lmsvcrt"
+	EB_LIBS="-Wl,-subsystem,windows -L../libproxy -lproxy /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib /target/lib/libgtk.dll.a /target/lib/libgdk.dll.a /target/lib/libglib-2.0.dll.a -lwinmm -lws2_32 -lwst -lmsvcrt"
 fi
 
 # Checks for programs.
