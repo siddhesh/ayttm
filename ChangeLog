@@ -1,3 +1,7 @@
+* Fri May 15 2003 07:20 GMT [philip]	0.3.0-195
+- modules/aim-toc/aim-toc.c
+disable profile adding stuff - it has no relevance now
+
 * Tue May 15 2003 14:18 GMT [edward]	0.3.0-194
 - mingw32/Makefile.am
 MSN was not being created.

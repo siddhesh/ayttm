@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.36 $",
-	"$Date: 2003/05/06 17:04:41 $",
+	"$Revision: 1.37 $",
+	"$Date: 2003/05/16 07:20:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -240,6 +240,7 @@ static eb_local_account * aim_find_local_account_by_conn(toc_conn * conn)
 	return NULL;
 }
 
+/*
 static void aim_set_profile_callback(char * value, void * data)
 {
 	eb_local_account * account = (eb_local_account*)data;
@@ -259,7 +260,7 @@ static void aim_set_profile_window(ebmCallbackData *data)
 	if(IS_ebmProfileData(data))
 		account = (eb_local_account*)data->user_data;
 	else 
-	{	/* This should never happen, unless something is horribly wrong */
+	{
 		fprintf(stderr, "data->CDType %d\n", data->CDType);
 		fprintf(stderr, "Error! not of profile type!\n");
 		return;
@@ -269,7 +270,7 @@ static void aim_set_profile_window(ebmCallbackData *data)
 	g_snprintf(buff, 256, _("Profile for account %s"), account->handle); 
 	do_text_input_window(buff, alad->aim_info, aim_set_profile_callback, account); 
 }
-
+*/
 static void eb_aim_disconnect( toc_conn * conn )
 {
 	eb_local_account * ela = conn->account;
@@ -597,7 +598,7 @@ static void eb_aim_parse_incoming_im(toc_conn * conn, char * user, char * messag
 		eb_account * sender = NULL;
 		eb_local_account * reciever = NULL;
 
-		eb_debug(DBG_TOC, "eb_aim_parse_incomming_im %d %d, %d %d\n", conn->fd, conn->seq_num, alad->conn->fd, alad->conn->seq_num );
+		eb_debug(DBG_TOC, "eb_aim_parse_incoming_im %d %d, %d %d\n", conn->fd, conn->seq_num, alad->conn->fd, alad->conn->seq_num );
 
 		sender = find_account_by_handle(user, ela->service_id);
 		if(sender==NULL)
@@ -943,7 +944,7 @@ static eb_local_account * eb_aim_read_local_config(LList * pairs)
 	}
 
 	snprintf(buff, sizeof(buff), "%s [AIM]", ela->alias);
-	eb_add_menu_item(strdup(buff), EB_PROFILE_MENU, aim_set_profile_window, ebmPROFILEDATA, ebmProfileData_new(ela));
+	/*eb_add_menu_item(strdup(buff), EB_PROFILE_MENU, aim_set_profile_window, ebmPROFILEDATA, ebmProfileData_new(ela));*/
 
     ela->service_id = SERVICE_INFO.protocol_id;
     ela->protocol_local_account_data = ala;
