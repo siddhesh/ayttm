@@ -135,7 +135,6 @@ void print_conversation(log_info *li)
 	fclose(output_file);
 	if (ftell(loginfo->fp) == loginfo->filepos) {
 		do_error_dialog(_("Cannot print log: no data available."),_("Print error"));
-		fclose(output_file);
 		unlink(output_fname);
 	} else	
 		do_text_input_window_multiline(_("Enter print command:\n(%s will be the current conversation's temporary file)"), 

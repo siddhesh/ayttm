@@ -1,4 +1,16 @@
-* Wed Apr 00 2003 09:25 GMT [colin]	0.2.3-64
+* Wed Apr 09 2003 09:43 GMT [colin]	0.2.3-67
+- src/dialog.c
+Add cancel button to text_input_windows
+
+* Wed Apr 09 2003 09:44 GMT [colin]	0.2.3-66
+- src/print.c
+fix segfault due to double close
+
+* Wed Apr 09 2003 09:43 GMT [colin]	0.2.3-65
+- src/log_window.c
+printf->eb_debug
+
+* Wed Apr 09 2003 09:25 GMT [colin]	0.2.3-64
 - modules/aim-toc/libtoc/libtoc.c
 Try to fix "network errors" from some places
 

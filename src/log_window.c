@@ -171,7 +171,7 @@ void eb_log_load_information(log_window* lw)
 	snprintf(posbuf, sizeof(posbuf), "%lu", ftell(fp));
 	gl = g_slist_append(gl, gl1);	
 	gl1 = g_slist_append(gl1, strdup(posbuf));
-	printf("%s at %s\n", p3[0],posbuf);
+	eb_debug(DBG_CORE,"%s at %s\n", p3[0],posbuf);
 	
 	/* set the datapointer for the clist */
 	gtk_clist_set_row_data(GTK_CLIST(lw->date_list), idx, gl1);
@@ -190,7 +190,7 @@ void eb_log_load_information(log_window* lw)
 		snprintf(posbuf, sizeof(posbuf), "%lu", ftell(fp));
 		gl = g_slist_append(gl, gl1);	
 		gl1 = g_slist_append(gl1, strdup(posbuf));
-		printf("%s at %s\n", p3[0],posbuf);
+		eb_debug(DBG_CORE,"%s at %s\n", p3[0],posbuf);
 
 		/* set the datapointer for the clist */
 		gtk_clist_set_row_data(GTK_CLIST(lw->date_list), idx, gl1);

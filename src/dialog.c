@@ -36,6 +36,7 @@
 #include "pixmaps/tb_yes.xpm"
 #include "pixmaps/tb_no.xpm"
 #include "pixmaps/ok.xpm"
+#include "pixmaps/cancel.xpm"
 #include "pixmaps/warning.xpm"
 #include "pixmaps/question.xpm"
 
@@ -477,6 +478,12 @@ static void input_window_destroy(GtkWidget * widget, gpointer data)
 	g_free(data);
 }
 
+static void input_window_cancel(GtkWidget * widget, gpointer data)
+{
+	text_input_window * window = (text_input_window*)data;
+	gtk_widget_destroy(window->window);
+}
+
 static void input_window_ok(GtkWidget * widget, gpointer data)
 {
 	text_input_window * window = (text_input_window*)data;
@@ -542,7 +549,7 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 
 	hbox2 = gtk_hbox_new(TRUE, 5);
 
-  	gtk_widget_set_usize(hbox2, 100,25);
+  	gtk_widget_set_usize(hbox2, 200,25);
 
 	button = do_icon_button(_("OK"), ok_xpm, input_window->window);
 	     
@@ -553,6 +560,14 @@ void do_text_input_window_multiline(gchar * title, gchar * value,
 				  GTK_SIGNAL_FUNC(gtk_widget_destroy),
 				  GTK_OBJECT(input_window->window));
 	     
+	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
+	gtk_widget_show(button);
+
+	button = do_icon_button(_("Cancel"), cancel_xpm, input_window->window);
+	     
+	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_cancel,
+			input_window);
+
 	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 	gtk_widget_show(button);
 
