@@ -1,3 +1,8 @@
+* Tue Apr 29 2003 01:00 GMT [andy]	0.3.0-57
+- modules/utility/middle.c
+Applied Ivor Cave's <ivor@happyfragger.com> patch [well, the spirit of it anyways]
+Added '3x7r3m3 L33t-speak' pref [as per his suggestion] if you want to go crazy
+
 * Tue Apr 29 2003 11:45 GMT [andy]	0.3.0-56
 - src/plugin.[ch]
 Clean up interface

@@ -20,6 +20,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *Modified By Ivor Cave on 29 Apr 2003 to make it more l337!!! :)
+ *email ivor@happyfragger.com
  */
 
 unsigned int module_version() {return CORE_VERSION;}
@@ -29,6 +31,7 @@ unsigned int module_version() {return CORE_VERSION;}
 #endif
 
 #include "intl.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -49,62 +52,68 @@ unsigned int module_version() {return CORE_VERSION;}
 /* Function Prototypes */
 static char *plstripHTML(const eb_local_account * local, const eb_account * remote,
 			 const struct contact *contact, const char *s);
-static int middle_init();
-static int middle_finish();
+static int middle_init( void );
+static int middle_finish( void );
 
-static int doLeet = 0;
+static int	s_doLeet = 0;
+static int	s_doExtremeLeet = 0;
 
-static int ref_count = 0;
+static int	s_ref_count = 0;
 
 /*  Module Exports */
-PLUGIN_INFO plugin_info = {
+PLUGIN_INFO plugin_info =
+{
 	PLUGIN_UTILITY,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/29 08:32:02 $",
-	&ref_count,
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/30 00:04:00 $",
+	&s_ref_count,
 	middle_init,
 	middle_finish,
 	NULL
 };
 /* End Module Exports */
 
-static int middle_init()
+static int middle_init( void )
 {
-	input_list *il = calloc(1, sizeof(input_list));
+	input_list *il = calloc( 1, sizeof(input_list) );
 	plugin_info.prefs = il;
 
-	il->widget.checkbox.value = &doLeet;
-	il->widget.checkbox.name = "doLeet";
-	il->widget.entry.label = strdup(_("Enable L33t-speak conversion"));
+	il->widget.checkbox.value = &s_doLeet;
+	il->widget.checkbox.name = "s_doLeet";
+	il->widget.entry.label = strdup( _("Enable L33t-speak conversion") );
+	il->type = EB_INPUT_CHECKBOX;
+	
+	il->next = calloc( 1, sizeof(input_list) );
+	il = il->next;
+	il->widget.checkbox.value = &s_doExtremeLeet;
+	il->widget.checkbox.name = "s_doExtremeLeet";
+	il->widget.entry.label = strdup( _("Enable 3x7r3m3 L33t-speak [implies previous]") );
 	il->type = EB_INPUT_CHECKBOX;
 
 	eb_debug(DBG_MOD, "L33tSp33k initialised\n");
 
-	outgoing_message_filters =
-	    l_list_append(outgoing_message_filters, &plstripHTML);
-	incoming_message_filters =
-	    l_list_append(incoming_message_filters, &plstripHTML);
+	outgoing_message_filters = l_list_append( outgoing_message_filters, &plstripHTML );
+	incoming_message_filters = l_list_append( incoming_message_filters, &plstripHTML );
 
-	return 0;
+	return( 0 );
 }
 
-static int middle_finish()
+static int middle_finish( void )
 {
 	eb_debug(DBG_MOD, "L33tSp33k shutting down\n");
-	outgoing_message_filters =
-	    l_list_remove(outgoing_message_filters, &plstripHTML);
-	incoming_message_filters =
-	    l_list_remove(incoming_message_filters, &plstripHTML);
+	outgoing_message_filters = l_list_remove( outgoing_message_filters, &plstripHTML );
+	incoming_message_filters = l_list_remove( incoming_message_filters, &plstripHTML );
 	
-	while(plugin_info.prefs) {
+	while( plugin_info.prefs )
+	{
 		input_list *il = plugin_info.prefs->next;
-		free(plugin_info.prefs);
+		free( plugin_info.prefs );
 		plugin_info.prefs = il;
 	}
 
-	return 0;
+	return( 0 );
 }
 
 /*******************************************************************************
@@ -113,32 +122,110 @@ static int middle_finish()
 static char *plstripHTML(const eb_local_account * local, const eb_account * remote,
 			 const struct contact *contact, const char *in)
 {
-	int pos = 0;
-	char * s = strdup(in);
+	int		pos = 0;
+	int		post = 0;
+	char	*s = strdup(in);
+	char	*t = NULL;
+	
+	
+	if ( !s_doLeet && !s_doExtremeLeet )
+		return( s );
+	
+	t = calloc( 3, strlen( s ) );
 
-	if (!doLeet) {
-		return s;
-	}
+	while ( s[pos] != '\0' )
+	{
+		switch ( s[pos] )
+		{
+			case 'a': case 'A':
+				t[post] = '4';
+				break;
+				
+			case 'c': case 'C':
+				t[post] = '(';
+				break;
+				
+			case 'e': case 'E':
+				t[post] = '3';
+				break;
+				
+			case 'l': case 'L':
+				t[post] = '1';
+				break;
+				
+			case 's': case 'S':
+				t[post] = '5';
+				break;
+				
+			case 't': case 'T':
+				t[post] = '7';
+				break;
+			
+			default:
+				t[post] = s[pos];
+				break;
+		}
+		
+		if ( s_doExtremeLeet )
+		{
+			switch ( s[pos] )
+			{
+				case 'd': case 'D':
+					t[post++] = '|';
+					t[post]   = ')';
+					break;
 
-	while (s[pos] != '\0') {
-		if (s[pos] == 'e' || s[pos] == 'E') {
-			s[pos] = '3';
-		}
-		if (s[pos] == 'i' || s[pos] == 'I') {
-			s[pos] = '1';
-		}
-		if (s[pos] == 'o' || s[pos] == 'O') {
-			s[pos] = '0';
-		}
-		if (s[pos] == 'a' || s[pos] == 'A') {
-			s[pos] = '4';
-		}
-		if (s[pos] == 's' || s[pos] == 'S') {
-			s[pos] = '5';
-		}
+				case 'h': case 'H':
+					t[post++] = '|';
+					t[post++] ='-';
+					t[post]   ='|';
+					break;
+					
+				case 'k': case 'K':
+					t[post++] = '|';
+					t[post]   ='<';
+					break;
+					
+				case 'm': case 'M':
+					t[post++] = '/';
+					t[post++] = 'v';
+					t[post]   = '\\';
+					break;
+					
+				case 'n': case 'N':
+					t[post++] = '|';
+					t[post++] = '\\';
+					t[post]   = '|';
+					break;
+					
+				case 'o': case 'O':
+					t[post++] = '(';
+					t[post]   = ')';
+					break;
+					
+				case 'v': case 'V':
+					t[post++] = '\\';
+					t[post]   = '/';
+					break;
+					
+				case 'w': case 'W':
+					t[post++] = '\\';
+					t[post++] = '^';
+					t[post]   = '/';
+					break;
 
+				default:
+					break;
+			}
+		}
+		
 		pos++;
+		post++;
 	}
-
-	return s;
+	
+	t[post] = '\0';
+	
+	free( s );
+	
+	return( t );
 }
