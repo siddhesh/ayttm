@@ -155,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.56 $",
-	"$Date: 2003/07/03 08:39:32 $",
+	"$Revision: 1.57 $",
+	"$Date: 2003/07/09 15:14:32 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -393,6 +393,8 @@ static int plugin_init()
         psmileys=add_protocol_smiley(psmileys, "+o(", "sick");
 
         psmileys=add_protocol_smiley(psmileys, "<:o)", "party");
+	
+        psmileys=add_protocol_smiley(psmileys, "<8-)", "crazy");
 
         psmileys=add_protocol_smiley(psmileys, "|-)", "sleepy");
 
