@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef __MINGW32__
-#include <sys/poll.h>
+#include <sys/poll.h>15
 #endif
 #include <fcntl.h>
 #include <time.h>
@@ -1550,7 +1550,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 #ifndef __MINGW32__
     struct pollfd pfd;
 #endif
-    char c;
+    unsigned char c;
 
 #ifndef __MINGW32__
     pfd.fd=conn->sock;
