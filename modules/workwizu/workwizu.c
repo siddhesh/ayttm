@@ -107,8 +107,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.5 $",
-	"$Date: 2003/04/05 08:54:54 $",
+	"$Revision: 1.6 $",
+	"$Date: 2003/04/08 08:40:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -623,12 +623,15 @@ void eb_workwizu_connected (int fd, int error, void *data)
 	wad->sock = fd;
 	
 	ay_activity_bar_remove(wad->activity_tag);
+	wad->activity_tag = 0;
 	
 	if (wad->sock == -1) {
 		eb_debug(DBG_WWZ, "wad->sock=-1 !\n");
+		if (error) {
 		do_error_dialog(_("Server doesn't answer."), 
 						_("Workwizu Error"));
-		account->connecting=0;
+		}
+		account->connected=0;
 		eb_workwizu_logout(account);
 		return;
 	}
@@ -645,17 +648,28 @@ void eb_workwizu_connected (int fd, int error, void *data)
 	register_sock(wad->sock, 1, 0);
 }
 
+static void ay_wwz_cancel_connect(void *data)
+{
+	eb_local_account *ela = (eb_local_account *)data;
+	wwz_account_data * wad;
+	wad = (wwz_account_data *)ela->protocol_local_account_data;
+	eb_debug(DBG_WWZ, "cancelling conn %d\n",wad->connect_tag);
+	ay_socket_cancel_async(wad->connect_tag);
+	wad->activity_tag=0;
+	eb_workwizu_logout(ela);
+}
+
 void eb_workwizu_login (eb_local_account *account)
 {
 	wwz_account_data *wad = (wwz_account_data *) account->protocol_local_account_data;
 	char buff[1024];
-	
+	int res;
 	if (account->connected || account->connecting) 
 		return;
 	
 	snprintf(buff, sizeof(buff), _("Logging in to Workwizu account: %s"), 
 			account->handle);
-	wad->activity_tag = ay_activity_bar_add(buff, NULL, NULL);
+	wad->activity_tag = ay_activity_bar_add(buff, ay_wwz_cancel_connect, account);
 	
 	account->connecting = 1;
 	my_user = g_new0(wwz_user, 1);
@@ -665,16 +679,17 @@ void eb_workwizu_login (eb_local_account *account)
 	my_user->typing_handler = -1;
 	
 	eb_debug(DBG_WWZ, "Logging in\n");
-	if (ay_socket_new_async(server, atoi(port), 
-			(ay_socket_callback)eb_workwizu_connected, account, NULL) < 0) {
+	if ((res = ay_socket_new_async(server, atoi(port), 
+			(ay_socket_callback)eb_workwizu_connected, account, NULL)) < 0) {
 		eb_debug(DBG_WWZ, "cant connect socket");
 		do_error_dialog(_("Server doesn't answer."), 
 						_("Workwizu Error"));
-		account->connecting=0;
 		ay_activity_bar_remove(wad->activity_tag);
+		wad->activity_tag = 0;
 		eb_workwizu_logout(account);
 		return;
 	}
+	wad->connect_tag = res;
 	
 }
 
@@ -695,7 +710,7 @@ void eb_workwizu_logout (eb_local_account *account)
 {  
 	LList *l = NULL;
 	wwz_account_data *wad = (wwz_account_data *) account->protocol_local_account_data;
-	if (!account->connected) 
+	if (!account->connected && !account->connecting) 
 		return;
 	eb_debug(DBG_WWZ, "Logging out\n");
 	l = wwz_contacts;
@@ -712,7 +727,7 @@ void eb_workwizu_logout (eb_local_account *account)
 		}
 		l = next;
 	}
-	account->connected = 0;
+	account->connected = account->connecting = 0;
 	eb_set_active_menu_status(account->status_menu, WWZ_OFFLINE);
 	clean_up(wad->sock);
 	if(ref_count >0)

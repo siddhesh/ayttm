@@ -40,6 +40,7 @@ struct _wwz_account_data
 	int sock;
 	eb_chat_room *chat_room; /* only one */	
 	int activity_tag;
+	int connect_tag;
 };
 
 typedef struct _wwz_user wwz_user;

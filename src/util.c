@@ -485,8 +485,11 @@ int connected_local_accounts(void)
 	LList *node = NULL;
 	for( node = accounts; node; node = node->next ) {
 		eb_local_account * ela = node->data;
-		if (ela->connected || ela->connecting)
+		if (ela->connected || ela->connecting) {
 			n++;
+			eb_debug(DBG_CORE, "%s: connected=%d, connecting=%d\n",
+					ela->handle, ela->connected, ela->connecting);
+		}
 	}
 	return n;
 }

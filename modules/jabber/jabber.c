@@ -80,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.11 $",
-	"$Date: 2003/04/08 07:47:44 $",
+	"$Revision: 1.12 $",
+	"$Date: 2003/04/08 08:40:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1011,11 +1011,13 @@ void JABBERDialog(void *data)
 
 void JABBERLogout(void *data)
 {
-    ref_count--;
+    if (ref_count >0)
+	    ref_count--;
     is_setting_state = 1;
 
     eb_debug(DBG_JBR, ">\n");
     jabber_local_account->connected = 0;
+    jabber_local_account->connecting = 0;
     if(jabber_local_account->status_menu) {
         eb_debug(DBG_JBR, "Setting menu to JABBER_OFFLINE\n");
 	eb_set_active_menu_status(jabber_local_account->status_menu, JABBER_OFFLINE);

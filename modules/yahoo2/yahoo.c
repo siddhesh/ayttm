@@ -125,8 +125,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.12 $",
-	"$Date: 2003/04/07 15:12:41 $",
+	"$Revision: 1.13 $",
+	"$Date: 2003/04/08 08:40:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1598,7 +1598,11 @@ static void ay_yahoo_cancel_connect(void *data)
 			ylad->connect_progress_tag = 0;
 		}
 	}
-
+	is_setting_state = 1;
+	if (ela->status_menu) {
+		eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_OFFLINE);
+	}
+	is_setting_state = 0;
 }
 
 static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
@@ -1682,6 +1686,11 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 	ylad->status = YAHOO_STATUS_OFFLINE;
 	do_error_dialog(buff, _("Yahoo Login Error"));
 	eb_yahoo_logout(ela);
+	is_setting_state = 1;
+	if (ela->status_menu) {
+		eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_OFFLINE);
+	}
+	is_setting_state = 0;
 }
 
 static void eb_yahoo_logout(eb_local_account * ela)

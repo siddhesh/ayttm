@@ -404,18 +404,19 @@ int JABBER_EndChat(JABBER_Conn *JConn, char *handle) {
 
 int JABBER_Logout(JABBER_Conn *JConn) {
 	eb_debug(DBG_JBR,  "Entering\n");
-	if(!JConn)
-		return(-1);
-	if(JConn->conn) {
-		eb_debug(DBG_JBR,  "JConn->conn exists, closing everything up\n");
-		j_remove_agents_from_host(JCgetServerName(JConn));
-		eb_input_remove(JConn->listenerID);
-		jab_stop(JConn->conn);
-		jab_delete(JConn->conn);
+	if(JConn) {
+		if(JConn->conn) {
+			eb_debug(DBG_JBR,  "JConn->conn exists, closing everything up\n");
+			j_remove_agents_from_host(JCgetServerName(JConn));
+			eb_input_remove(JConn->listenerID);
+			jab_stop(JConn->conn);
+			jab_delete(JConn->conn);
+		}
+		JConn->conn=NULL;
+		JCremoveConn(JConn);
 	}
-	JConn->conn=NULL;
-	JCremoveConn(JConn);
 	eb_debug(DBG_JBR,  "Leaving\n");
+	JABBERLogout(NULL);
 	return(0);
 }
 
@@ -1030,7 +1031,7 @@ void j_on_state_handler(jconn conn, int state) {
 		else if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
 			snprintf(buff, 4096, _("Connection to the jabber server %s failed!"), conn->user->server);
 			JABBERError(buff, _("Jabber server not responding"));
-			JABBERNotConnected(NULL);
+			JABBERLogout(NULL);
 			jab_delete(JConn->conn);
 			JConn->conn=NULL;
 		}
