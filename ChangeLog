@@ -1,3 +1,7 @@
+* Wed Sep  3 2003 15:55 GMT [colin]	0.4.0-17
+- src/gtk/pref_windows.C src/prefs.[ch] src/status.c
+"Edit accounts" now point to the correct page in prefs
+
 * Wed Sep  3 2003 11:55 GMT [elh]	0.4.0-16
 - src/gtk/pref_windows.C
 Remove include of plugin.h as its not needed and was interfering with 

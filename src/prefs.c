@@ -1025,7 +1025,7 @@ void	ayttm_prefs_write( void )
 	rename( buff, file );
 }
 
-void	ayttm_prefs_show_window( void )
+void	ayttm_prefs_show_window( int pagenum )
 {
 	struct prefs	*prefs = calloc( 1, sizeof( struct prefs ) );
 
@@ -1097,7 +1097,7 @@ void	ayttm_prefs_show_window( void )
 	/* modules */
 	prefs->module.module_info = s_create_module_prefs_list();
 	
-	ay_ui_prefs_window_create( prefs );
+	ay_ui_prefs_window_create( prefs, pagenum );
 }
 
 t_module_pref	*ayttm_prefs_find_module_by_name( const struct prefs *inPrefs, const char *inName )

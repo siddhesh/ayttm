@@ -1771,6 +1771,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 
           if(auth->bytes_done==auth->inv->filesize)
           {
+            /* should send \1\0\0 ? */
 	    if(auth->inv) {
 	            ext_filetrans_success(auth->inv);
         	    msn_del_from_llist(auth->inv->conn->invitations_in, auth->inv);

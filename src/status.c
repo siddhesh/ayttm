@@ -633,12 +633,12 @@ static void eb_add_accounts( GtkWidget * widget, gpointer stats )
 
 static void eb_edit_accounts( GtkWidget * widget, gpointer stats )
 {
-	ayttm_prefs_show_window();
+	ayttm_prefs_show_window(4);
 }
 
 static void build_prefs_callback( GtkWidget * widget, gpointer stats )
 {
-	ayttm_prefs_show_window();
+	ayttm_prefs_show_window(0);
 }
 
 static void launch_group_chat( GtkWidget * widget, gpointer userdata )

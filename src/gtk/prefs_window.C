@@ -1,4 +1,4 @@
-/*
+/*
  * Ayttm 
  *
  * Copyright (C) 2003, the Ayttm team
@@ -83,7 +83,7 @@ class ay_prefs_window
 			return( *s_only_prefs_window );
 		}
 		
-		void	Show( void );
+		void	Show( int pagenum );
 	
 	public:
 		enum ePanelID
@@ -476,9 +476,9 @@ extern "C" {
 
 
 /// Entry point to this file - construct and display the prefs window
-void	ay_ui_prefs_window_create( struct prefs *inPrefs )
+void	ay_ui_prefs_window_create( struct prefs *inPrefs, int pagenum )
 {
-	ay_prefs_window::Create( inPrefs ).Show();
+	ay_prefs_window::Create( inPrefs ).Show(pagenum);
 }
 
 #ifdef __cplusplus
@@ -693,7 +693,7 @@ ay_prefs_window::~ay_prefs_window( void )
 }
 
 // Show
-void	ay_prefs_window::Show( void )
+void	ay_prefs_window::Show( int pagenum )
 {
 	if ( m_prefs_window_widget != NULL )
 	{
@@ -715,11 +715,12 @@ void	ay_prefs_window::Show( void )
 				child = child->next;
 			}
 			
-			gtk_tree_select_item( m_tree, 0 );
 		} else {
 			gdk_window_show( m_prefs_window_widget->window );
 		}
 	}
+	eb_debug(DBG_CORE, "selecting %d\n",pagenum);
+	gtk_tree_select_item( m_tree, pagenum );
 }
 
 // AddToTree

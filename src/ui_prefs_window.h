@@ -32,7 +32,7 @@ struct prefs;
 extern "C" {
 #endif
 
-void	ay_ui_prefs_window_create( struct prefs *inPrefs );
+void	ay_ui_prefs_window_create( struct prefs *inPrefs, int pagenum );
 
 #ifdef __cplusplus
 }
