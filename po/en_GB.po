@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "POT-Creation-Date: 2003-04-18 21:20+0530\n"
-"PO-Revision-Date: 2003-04-18 21:20+0530\n"
+"PO-Revision-Date: $Date: 2003/04/18 18:22:10 $\n"
 "Last-Translator: Philip S Tellis <philip.tellis@gmx.net>\n"
 "Language-Team: Philip S Tellis <philip.tellis@gmx.net>\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr "Authorise ICQ User"
 
 #: modules/icq/icq.c:1490
 msgid "Authorization Required<BR>"
-msgstr "Autorisation Required<br>"
+msgstr "Authorisation Required<br>"
 
 #: modules/jabber/libEBjabber.c:892
 msgid "Register? You're not authorized"
