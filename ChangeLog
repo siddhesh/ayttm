@@ -1,3 +1,8 @@
+* Sun Apr 06 2003 14:35 GMT [philip]	0.2.3-43
+- modules/yahoo2/yahoo.c
+avoid segfault when cancelling after connect complete (but before login
+complete)
+
 * Sun Apr 06 2003 13:10 GMT [andy]	0.2.3-42
 - modules/aim-toc/aim-toc.c
   modules/icq-toc/icq-toc.c

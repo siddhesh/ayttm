@@ -122,8 +122,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.8 $",
-	"$Date: 2003/04/06 09:15:11 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/04/06 14:39:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1578,22 +1578,24 @@ static void ay_yahoo_cancel_connect(void *data)
 	if(ylad->connect_tag) {
 		LList *l;
 		ay_socket_cancel_async(ylad->connect_tag);
-		for(l=conn; ela->connecting && l; l=l_list_next(l)) {
-			struct connect_callback_data *ccd = l->data;
-			if(ccd->tag == ylad->connect_tag) {
-				conn = l_list_remove_link(conn, l);
-				ccd->callback(-1, 0, ccd->data);
-				FREE(ccd);
-				break;
+		if(ela->connecting) {
+			for(l=conn; l; l=l_list_next(l)) {
+				struct connect_callback_data *ccd = l->data;
+				if(ccd->tag == ylad->connect_tag) {
+					conn = l_list_remove_link(conn, l);
+					ccd->callback(-1, 0, ccd->data);
+					FREE(ccd);
+					break;
+				}
 			}
+			yahoo_close(ylad->id);
+			ref_count--;
+			ela->connecting = 0;
+			ylad->connect_tag = 0;
+			ylad->connect_progress_tag = 0;
 		}
 	}
-		
-	yahoo_close(ylad->id);
-	ref_count--;
-	ela->connecting = 0;
-	ylad->connect_tag = 0;
-	ylad->connect_progress_tag = 0;
+
 }
 
 static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
@@ -1629,8 +1631,13 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 static void ext_yahoo_login_response(int id, int succ, char *url)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
-	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	eb_yahoo_local_account_data *ylad;
 	char buff[1024];
+
+	if(!ela)
+		return;
+
+	ylad = ela->protocol_local_account_data;
 
 	ela->connecting = 0;
 
@@ -2389,6 +2396,7 @@ static void _yahoo_connected(int fd, int error, void * data)
 	eb_local_account * ela = ccd->ela;
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 
+	ela->connecting=0;
 	conn = l_list_remove(conn, ccd);
 
 	ccd->callback(fd, error, ccd->data);
