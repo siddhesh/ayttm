@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
-"POT-Creation-Date: 2003-04-25 16:05+0200\n"
-"PO-Revision-Date: $Date: 2003/04/26 17:38:40 $\n"
+"POT-Creation-Date: 2003-04-27 12:02+0200\n"
+"PO-Revision-Date: $Date: 2003/04/28 10:13:50 $\n"
 "Last-Translator: Philip S Tellis <philip.tellis@gmx.net>\n"
 "Language-Team: Philip S Tellis <philip.tellis@gmx.net>\n"
 "MIME-Version: 1.0\n"
@@ -49,28 +49,28 @@ msgstr ""
 msgid "HTTP proxy error: permission denied."
 msgstr ""
 
-#: src/gtk/about.c:152
+#: src/gtk/about.c:154
 msgid "About Ayttm"
 msgstr ""
 
 #. text
-#: src/gtk/about.c:185
+#: src/gtk/about.c:187
 msgid "Ayttm is brought to you by:"
 msgstr ""
 
 #. text
-#: src/gtk/about.c:201
-msgid "Ayttm is based on Everybuddy 0.4.3 which was brought to you by:"
+#: src/gtk/about.c:203
+msgid "\"With a little help from\":"
 msgstr ""
 
 #. text
-#: src/gtk/about.c:217
-msgid "\"With a little help from\":"
+#: src/gtk/about.c:227
+msgid "Ayttm is based on Everybuddy 0.4.3 which was brought to you by:"
 msgstr ""
 
 #. close button
 #: src/chat_room.c:1119 src/chat_window.c:911 src/chat_window.c:2085
-#: src/gtk/about.c:236 src/info_window.c:120 src/log_window.c:484
+#: src/gtk/about.c:238 src/info_window.c:120 src/log_window.c:484
 msgid "Close"
 msgstr ""
 
@@ -305,8 +305,8 @@ msgstr ""
 #. adding to ignore
 #: modules/msn2/msn.C:1141 modules/msn2/msn.C:1780 modules/yahoo2/yahoo.c:2109
 #: modules/yahoo2/yahoo.c:2150 src/chat_window.c:636 src/chat_window.c:1226
-#: src/status.c:1065 src/status.c:1393 src/status.c:1425 src/util.c:1019
-#: src/util.c:1150 src/util.c:1154
+#: src/status.c:1065 src/status.c:1393 src/status.c:1425 src/util.c:987
+#: src/util.c:1118 src/util.c:1122
 msgid "Ignore"
 msgstr ""
 
@@ -333,7 +333,7 @@ msgstr ""
 #: src/chat_window.c:1223 src/chat_window.c:1225 src/chat_window.c:1787
 #: src/chat_window.c:1994 src/chat_window.c:2113 src/edit_account_window.c:256
 #: src/edit_account_window.c:277 src/status.c:1064 src/status.c:1472
-#: src/status.c:1513 src/util.c:988 src/util.c:1012 src/util.c:1120
+#: src/status.c:1513 src/util.c:956 src/util.c:980 src/util.c:1088
 msgid "Unknown"
 msgstr ""
 
@@ -1446,7 +1446,7 @@ msgstr ""
 msgid "Ayttm - Edit Trigger"
 msgstr ""
 
-#: src/util.c:993
+#: src/util.c:961
 #, c-format
 msgid ""
 "The account already exists on your\n"
@@ -1457,11 +1457,11 @@ msgid ""
 "Should I move it?"
 msgstr ""
 
-#: src/util.c:1005
+#: src/util.c:973
 msgid "Error: account exists"
 msgstr ""
 
-#: src/util.c:1323
+#: src/util.c:1291
 #, c-format
 msgid ""
 "User %s wants to invite you to\n"
@@ -1469,19 +1469,19 @@ msgid ""
 "Would you like to accept?"
 msgstr ""
 
-#: src/util.c:1329
+#: src/util.c:1297
 msgid "Chat Invite"
 msgstr ""
 
-#: src/util.c:1400 src/util.c:1417
+#: src/util.c:1368 src/util.c:1385
 msgid "deleting stale lock file\n"
 msgstr ""
 
-#: src/util.c:1448
+#: src/util.c:1416
 msgid "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
 msgstr ""
 
-#: src/util.c:1452
+#: src/util.c:1420
 msgid "No callback defined in call to eb_generic_menu_function, ignoring call!"
 msgstr ""
 

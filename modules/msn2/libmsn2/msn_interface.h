@@ -10,10 +10,9 @@
 */
 
 void handle_command(void);
-void ext_update_contact(char *username);
-void ext_register_sock(int s, int read, int write);
-void ext_unregister_sock(int s);
-int ext_is_sock_registered(int s);
+void ext_register_sock(msnconn *conn, int s, int read, int write);
+void ext_unregister_sock(msnconn *conn, int s);
+int ext_is_sock_registered(msnconn *conn, int s);
 
 void ext_show_error(msnconn * conn, char * msg);
 
@@ -90,6 +89,6 @@ void ext_update_local_contact(char *c);
 
 void ext_disable_conncheck(void);
 
-void ext_got_group(char *id, char *name);
-void ext_got_friend(char *name, char *groups);
-void ext_syncing_lists(int state);
+void ext_got_group(msnconn *conn, char *id, char *name);
+void ext_got_friend(msnconn *conn, char *name, char *groups);
+void ext_syncing_lists(msnconn *conn, int state);

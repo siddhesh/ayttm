@@ -82,7 +82,7 @@ main()
   }
 }
 
-int ext_is_sock_registered(int s)
+int ext_is_sock_registered(msnconn *conn, int s)
 {
 	return 1;
 }
@@ -154,7 +154,7 @@ int countsocks(void) // at last!  parental nagging has a result --My father
   return retval;
 }
 
-void ext_register_sock(int s, int reading, int writing)
+void ext_register_sock(msnconn *conn, int s, int reading, int writing)
 {
   for(int a=0; a<20; a++)
   {
@@ -172,7 +172,7 @@ void ext_register_sock(int s, int reading, int writing)
   }
 }
 
-void ext_unregister_sock(int s)
+void ext_unregister_sock(msnconn *conn, int s)
 {
   for(int a=0; a<20; a++)
   {

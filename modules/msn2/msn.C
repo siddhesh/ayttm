@@ -119,26 +119,18 @@ static void eb_msn_format_message (message * msg);
 static char *eb_msn_get_color(void) { static char color[]="#aa0000"; return color; }
 static void close_conn(msnconn *conn);
 static void eb_msn_change_group(eb_account * ea, const char *new_group);
-static void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char *new_group);
+static void eb_msn_real_change_group(eb_local_account *ela, eb_account * ea, const char *old_group, const char *new_group);
 static void invite_gnomemeeting(ebmCallbackData * data);
 
 static LList *eb_msn_get_smileys(void) { return psmileys; }
 }
 
-typedef struct {
-	int fd;
-	int tag_r;
-        int tag_w;
-}tag_info;
-
-static tag_info tags[21];
 static int ref_count = 0;
 static char fname_pref[MAX_PREF_LEN] = "";
 static char msn_server[MAX_PREF_LEN] = "messenger.hotmail.com";
 static char msn_port[MAX_PREF_LEN] = "1863";
 
 /* hack to check conn */
-static int waiting_ans = 0;
 static int do_check_connection = 0;
 static int do_reconnect = 0;
 
@@ -150,8 +142,6 @@ static int do_mail_notify_folders = 0;
 static int do_mail_notify_run_script = 0;
 static int do_guess_away = 1;
 static char do_mail_notify_script_name[MAX_PREF_LEN];
-static LList *msn_grouplist;
-static int listsyncing=0;
 
 /* #include "gtk_globals.h"*/
 
@@ -160,8 +150,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.28 $",
-	"$Date: 2003/04/27 14:16:21 $",
+	"$Revision: 1.29 $",
+	"$Date: 2003/04/28 10:13:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -179,8 +169,7 @@ static int plugin_init()
 	int count=0;
 
 	eb_debug(DBG_MSN, "MSN\n");
-	for(count=0;count<20;count++)
-		tags[count].fd=-1;
+
 	ref_count=0;
 	input_list * il = g_new0(input_list, 1);
 	plugin_info.prefs = il;
@@ -426,7 +415,7 @@ static int plugin_finish()
  *                             End Module Code
  ******************************************************************************/
 
-static LList *msn_contacts = NULL;
+//static LList *msn_contacts = NULL;
 
 static transfer_window * eb_find_window_by_inv(invitation_ftp * inv) {
   llist * l = transfer_windows;
@@ -481,8 +470,6 @@ typedef struct _msn_info_data
     gchar *profile;
 } msn_info_data;
 
-static msnconn *mainconn=NULL;
-
 /* Use this struct to hold any service specific information you need about
  * local accounts
  * below are just some suggested values
@@ -496,6 +483,10 @@ typedef struct _eb_msn_local_account_data
 	msnconn * mc;
 	int connect_tag;
 	int activity_tag;
+	LList *msn_contacts;
+	int waiting_ans;
+	LList *msn_grouplist;
+	int listsyncing;
 } eb_msn_local_account_data;
 
 static eb_local_account *msn_local_account;
@@ -559,11 +550,12 @@ static int checkconn(msnconn *conn) {
 	char * local_account_name = NULL;
 	local_account_name=((authdata_NS *)conn->auth)->username;
 	ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
+	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	eb_debug(DBG_MSN, "msn: checking conn\n");
-	if(waiting_ans > 2) {
+	if(mlad->waiting_ans > 2) {
 		eb_debug(DBG_MSN, "msn conn closed !\n");
 		close_conn(conn);
-		waiting_ans = 0; 
+		mlad->waiting_ans = 0; 
 		if (do_reconnect) {
 			close_conn(conn);
 			eb_msn_login(ela);
@@ -571,12 +563,12 @@ static int checkconn(msnconn *conn) {
 		return 1;
 	}
 	msn_send_ping(conn);
-	waiting_ans++;
+	mlad->waiting_ans++;
 
 	if (status == 0) {
 		eb_debug(DBG_MSN, "conn closed... :(\n");
 		close_conn(conn);
-		waiting_ans = 0; 
+		mlad->waiting_ans = 0; 
 		if (do_reconnect) {
 			close_conn(conn);
 			eb_msn_login(ela);
@@ -616,9 +608,12 @@ static void eb_msn_login( eb_local_account * account )
 	mlad->activity_tag = ay_activity_bar_add(buff, ay_msn_cancel_connect, account);
 
 	mlad->mc = new msnconn;
-	if(!mainconn)
-		mainconn=mlad->mc;
-	eb_debug(DBG_MSN, "mainconn=%p, mlad->mc=%p\n",mainconn,mlad->mc);
+	mlad->mc->ext_data = account;
+	for(int a=0; a<20; a++)
+	{ mlad->mc->tags[a].fd=-1; 
+	  mlad->mc->tags[a].tag_r=-1; 
+	  mlad->mc->tags[a].tag_w=-1; }
+
 	ref_count++;
 	msn_init(mlad->mc, account->handle, mlad->password);
 	port=atoi(msn_port);
@@ -657,7 +652,7 @@ static void eb_msn_logout( eb_local_account * account )
 	ay_activity_bar_remove(mlad->activity_tag);
 	mlad->activity_tag = mlad->connect_tag = 0;
 	eb_debug(DBG_MSN, "Logging out\n");
-	for (l = msn_contacts; l != NULL && l->data != NULL; l = l->next) {
+	for (l = mlad->msn_contacts; l != NULL && l->data != NULL; l = l->next) {
 		eb_account * ea = (eb_account *)find_account_by_handle((char *)l->data, SERVICE_INFO.protocol_id);
 		if (ea) {
 			eb_msn_account_data * mad = (eb_msn_account_data *)ea->protocol_account_data;
@@ -675,7 +670,6 @@ static void eb_msn_logout( eb_local_account * account )
 		msn_clean_up(mlad->mc);
 		mlad->mc=NULL;
 	}
-	mainconn = NULL;
 	if(ref_count >0)
 		ref_count--;
 }
@@ -960,11 +954,27 @@ static char * eb_msn_check_login(char * user, char * pass)
 static void eb_msn_terminate_chat(eb_account * account )
 {}
 
+typedef struct {
+	eb_local_account *ela;
+	char *username;
+} authorize_cb_data;
+
 static void eb_msn_authorize_callback( gpointer data, int response )
 {
   char * username;
-  username = (char *) data;
+  eb_local_account *ela;
+  authorize_cb_data *cb_data = (authorize_cb_data *)data;
+  username = cb_data->username;
+  ela = cb_data->ela;
+  eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+
   eb_account *ac = find_account_by_handle(username,SERVICE_INFO.protocol_id);
+
+  if (!mlad) {
+	  eb_debug(DBG_MSN, "leaving authorize_callback due to mlad==NULL\n");
+	  return;
+  }
+  	    
   eb_debug(DBG_MSN,"entering authorize_callback\n");
   if(response) {
     if (ac == NULL) {
@@ -980,16 +990,9 @@ static void eb_msn_authorize_callback( gpointer data, int response )
         eb_debug(DBG_MSN, "User (%s) not authorized - removing account\n",username);
         remove_account(ac);
      }
-     msn_add_to_list(mainconn, "BL", username);
+     msn_add_to_list(mlad->mc, "BL", username);
   }
   msn_del_from_llist(waiting_auth_callbacks, (llist_data *)username);	  
-}
-
-void ext_update_contact(char *username) {
-	if (mainconn != NULL) {
-	  msn_add_to_list(mainconn, "FL", username);
-	  msn_add_to_list(mainconn, "RL", username);
-        }
 }
 
 static void eb_msn_filetrans_callback( gpointer data, int response )
@@ -1096,23 +1099,33 @@ void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long r
 
 static void eb_msn_add_user(eb_account * account )
 {
-	msn_contacts = l_list_append(msn_contacts, account->handle);
-	if (mainconn != NULL && !listsyncing) {
-	  msn_del_from_list(mainconn, "BL", account->handle);
-	  msn_add_to_list(mainconn, "FL", account->handle);
-	  msn_add_to_list(mainconn, "AL", account->handle);
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+
+	mlad->msn_contacts = l_list_append(mlad->msn_contacts, account->handle);
+
+	if (mlad->mc != NULL && !mlad->listsyncing) {
+	  msn_del_from_list(mlad->mc, "BL", account->handle);
+	  msn_add_to_list(mlad->mc, "FL", account->handle);
+	  msn_add_to_list(mlad->mc, "AL", account->handle);
 	  if (strcmp(account->account_contact->group->name,_("Buddies"))) {
-		  eb_msn_real_change_group(account, _("Buddies"), account->account_contact->group->name);
+		  eb_msn_real_change_group(ela, account, _("Buddies"), account->account_contact->group->name);
 	  }
         }	
 }
 
 static void eb_msn_del_user(eb_account * account )
 {
-	msn_contacts = l_list_remove(msn_contacts, account->handle);
-	if (mainconn != NULL) {
-	  msn_del_from_list(mainconn, "FL", account->handle);
-	  msn_del_from_list(mainconn, "AL", account->handle);
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	mlad->msn_contacts = l_list_remove(mlad->msn_contacts, account->handle);
+	if (mlad->mc != NULL) {
+	  msn_del_from_list(mlad->mc, "FL", account->handle);
+	  msn_del_from_list(mlad->mc, "AL", account->handle);
         }
 }
 
@@ -1131,24 +1144,34 @@ static eb_account * eb_msn_new_account( const char * account )
 
 static void eb_msn_ignore_user(eb_account *ea)
 {
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+
 	if (!ea)
 		return;
 	
 	eb_msn_change_group(ea, _("Ignore"));
-	if (mainconn != NULL) {
-		msn_del_from_list(mainconn, "AL", ea->handle);	
-		msn_add_to_list(mainconn, "BL", ea->handle);
+	if (mlad->mc != NULL) {
+		msn_del_from_list(mlad->mc, "AL", ea->handle);	
+		msn_add_to_list(mlad->mc, "BL", ea->handle);
 	}
 }
 
 static void eb_msn_unignore_user(eb_account *ea, const char *new_group)
 {
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+
 	if (!ea)
 		return;
 	eb_msn_change_group(ea, new_group);
-	if (mainconn != NULL) {
-		msn_del_from_list(mainconn, "BL", ea->handle);	
-		msn_add_to_list(mainconn, "AL", ea->handle);
+	if (mlad->mc != NULL) {
+		msn_del_from_list(mlad->mc, "BL", ea->handle);	
+		msn_add_to_list(mlad->mc, "AL", ea->handle);
 	}
 }
 
@@ -1281,26 +1304,30 @@ static int is_waiting_auth(char *name)
   return 0;	
 }
 
-static int eb_msn_authorize_user (char * username, char * friendlyname)
+static int eb_msn_authorize_user (eb_local_account *ela, char * username, char * friendlyname)
 {
   char dialog_message[1025];
   char *uname;
+  eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
   eb_debug(DBG_MSN,"entering authorize_user\n");
   /* that's not the right fix */
   if (strlen(friendlyname) > 254 || strlen (username) > 254) {
 	  eb_debug(DBG_MSN, "refusing contact %s because its name is too long\n", username);
-	  msn_add_to_list(mainconn, "BL", username);
+	  msn_add_to_list(mlad->mc, "BL", username);
 	  return 0;
   }
   if(!is_waiting_auth(username)) {
 	  char *tmp = Utf8ToStr(friendlyname);
+	  authorize_cb_data *cbd = g_new0(authorize_cb_data, 1);
 	  eb_debug(DBG_MSN, "** %s (%s) has added you to their list.\n", friendlyname, username);
 	  snprintf(dialog_message, sizeof(dialog_message), _("The MSN user %s (%s) would like to add you to their contact list.\n\nDo you want to allow them to see when you are online?"), 
 			  tmp, username);
 	  free(tmp);
   	  uname = msn_permstring(username);
 	  msn_add_to_llist(waiting_auth_callbacks, (llist_data *)uname);
-	  eb_do_dialog(dialog_message, _("Authorize MSN User"), eb_msn_authorize_callback, (gpointer)uname );
+	  cbd->username = uname;
+	  cbd->ela = ela;
+	  eb_do_dialog(dialog_message, _("Authorize MSN User"), eb_msn_authorize_callback, (gpointer)cbd );
 	  return 1;
   } else return 0;	 
 }
@@ -1334,11 +1361,14 @@ static void eb_msn_get_info( eb_local_account * reciever, eb_account * sender)
     open_url(NULL, buff);
 }
 
-void ext_got_friend(char *name, char *groups) 
+void ext_got_friend(msnconn *conn, char *name, char *groups) 
 {
 	char *group = NULL, groupname[255];
-	LList *walk = msn_grouplist;
 	eb_account *ea = find_account_by_handle(name, SERVICE_INFO.protocol_id);
+	eb_local_account *ela = (eb_local_account *)conn->ext_data;
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+
 	if (ea)
 		return; /* we already know him */
 	
@@ -1355,7 +1385,8 @@ void ext_got_friend(char *name, char *groups)
 	
 	ea = eb_msn_new_account(name);
 	
-	for (walk = msn_grouplist; walk && walk->data; walk=walk->next) {
+	LList *walk = mlad->msn_grouplist;
+	for (walk = mlad->msn_grouplist; walk && walk->data; walk=walk->next) {
 		value_pair *grpinfo = (value_pair *)walk->data;
 		if(grpinfo && !strcmp(grpinfo->value, group)) {
 			strncpy(groupname, grpinfo->key, sizeof(groupname));
@@ -1372,16 +1403,20 @@ void ext_got_friend(char *name, char *groups)
 	write_contact_list();
 }
 
-void ext_got_group(char *id, char *name) 
+void ext_got_group(msnconn *conn, char *id, char *name) 
 {
 	char *eb_name = NULL;
 	char *t = NULL;
+	eb_local_account *ela = (eb_local_account *)conn->ext_data;
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+
 	
 	if (!strcmp(name,"~")) {
 		eb_name = _("Buddies");
-		t = value_pair_get_value(msn_grouplist, eb_name);
+		t = value_pair_get_value(mlad->msn_grouplist, eb_name);
 		if (!t) {
-			msn_grouplist = value_pair_add (msn_grouplist, eb_name, id);
+			mlad->msn_grouplist = value_pair_add (mlad->msn_grouplist, eb_name, id);
 			eb_debug(DBG_MSN,"got group id %s, %s\n",id,eb_name);
 		}
 		else {
@@ -1390,9 +1425,9 @@ void ext_got_group(char *id, char *name)
 		}
 	} 
 	eb_name = Utf8ToStr(name);
-	t = value_pair_get_value(msn_grouplist, eb_name);
+	t = value_pair_get_value(mlad->msn_grouplist, eb_name);
 	if (!t || !strcmp("-1", t)) {
-		msn_grouplist = value_pair_add (msn_grouplist, eb_name, id);
+		mlad->msn_grouplist = value_pair_add (mlad->msn_grouplist, eb_name, id);
 		eb_debug(DBG_MSN,"got group id %s, %s\n",id,eb_name);
 	}
 	if (t) {
@@ -1416,8 +1451,10 @@ typedef struct _movecb_data
 
 static int finish_group_move(movecb_data *tomove);
 
-static void eb_msn_real_change_group(eb_account * ea, const char *old_group, const char *new_group)
+static void eb_msn_real_change_group(eb_local_account *ela, eb_account * ea, const char *old_group, const char *new_group)
 {
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	
 	char *oldid = NULL, *newid = NULL;
 	const char *int_new_group = NULL, *int_old_group;
 	if (!strcmp(_("Buddies"), new_group))
@@ -1428,16 +1465,16 @@ static void eb_msn_real_change_group(eb_account * ea, const char *old_group, con
 		int_old_group = "~";
 	else
 		int_old_group = old_group;
-	if (!mainconn || listsyncing) /* not now */
+	if (!mlad->mc || mlad->listsyncing) /* not now */
 		return;
 	eb_debug(DBG_MSN,"moving %s from %s to %s\n", ea->handle, int_old_group, int_new_group);
-	newid = value_pair_get_value(msn_grouplist, int_new_group);
+	newid = value_pair_get_value(mlad->msn_grouplist, int_new_group);
 	if (newid == NULL || !strcmp("-1",newid)) {
 		movecb_data *tomove = g_new0(movecb_data, 1);
 		if (newid == NULL) {
 			char *enc = StrToUtf8(int_new_group);
-			msn_add_group(mainconn, enc);
-			ext_got_group("-1",enc);
+			msn_add_group(mlad->mc, enc);
+			ext_got_group(mlad->mc, "-1",enc);
 			free(enc);
 		}
 		else
@@ -1451,8 +1488,8 @@ static void eb_msn_real_change_group(eb_account * ea, const char *old_group, con
 		eb_timeout_add(1000, (eb_timeout_function)finish_group_move, (gpointer)tomove);
 		return;
 	} 
-	oldid = value_pair_get_value(msn_grouplist, int_old_group);
-	msn_change_group(mainconn, ea->handle, oldid, newid);
+	oldid = value_pair_get_value(mlad->msn_grouplist, int_old_group);
+	msn_change_group(mlad->mc, ea->handle, oldid, newid);
 	
 	if ( oldid != NULL )
 		free( oldid );
@@ -1462,7 +1499,10 @@ static void eb_msn_real_change_group(eb_account * ea, const char *old_group, con
 
 static void eb_msn_change_group(eb_account * ea, const char *new_group)
 {
-	eb_msn_real_change_group(ea,ea->account_contact->group->name, new_group);
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if (ela)
+		eb_msn_real_change_group(ela, ea, ea->account_contact->group->name, new_group);
 }
 
 static int finish_group_move(movecb_data *tomove) 
@@ -1471,8 +1511,11 @@ static int finish_group_move(movecb_data *tomove)
 	char *ogroup = tomove->oldgr;
 	char *handle = tomove->handle;
 	eb_account *ea = find_account_by_handle(handle, SERVICE_INFO.protocol_id);
-	if (ea && ogroup && ngroup) {
-		char *id = value_pair_get_value(msn_grouplist, ngroup);
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	if (ela && ea && ogroup && ngroup) {
+		char *id = value_pair_get_value(mlad->msn_grouplist, ngroup);
 		if (id == NULL || !strcmp(id,"-1")) {
 			eb_debug(DBG_MSN,"ID still %s\n",id);
 			if ( id != NULL )
@@ -1480,7 +1523,7 @@ static int finish_group_move(movecb_data *tomove)
 			return TRUE;
 		}
 		eb_debug(DBG_MSN,"Got ID %s\n",id);
-		eb_msn_real_change_group(ea,ogroup,ngroup);
+		eb_msn_real_change_group(ela, ea,ogroup,ngroup);
 		free( id );
 		return FALSE;
 	}
@@ -1490,11 +1533,15 @@ static int finish_group_move(movecb_data *tomove)
 static void eb_msn_del_group(const char *group) 
 {
 	char *id = NULL;
-	
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+
 	if (!group || !strlen(group))
 		return;
 	
-	id = value_pair_get_value(msn_grouplist, group);
+	id = value_pair_get_value(mlad->msn_grouplist, group);
 	
 	if (!id || !strcmp(id, "-1") || !strcmp(id, "0")) {
 		eb_debug(DBG_MSN,"ID for group %s is %s,not deleting\n",group,id);
@@ -1502,12 +1549,12 @@ static void eb_msn_del_group(const char *group)
 			free ( id );
 		return;
 	}
-	if (mainconn) {
+	if (mlad->mc) {
 		eb_debug(DBG_MSN,"ID for group %s is %s,deleting\n",group,id);
-		msn_del_group(mainconn, id);
-		msn_grouplist = value_pair_remove(msn_grouplist, group);
+		msn_del_group(mlad->mc, id);
+		mlad->msn_grouplist = value_pair_remove(mlad->msn_grouplist, group);
 	} else {
-		eb_debug(DBG_MSN,"ID for group %s is %s,not deleting because mainconn is null\n",group,id);
+		eb_debug(DBG_MSN,"ID for group %s is %s,not deleting because mlad->mc is null\n",group,id);
 	}
 	
 	free( id );
@@ -1516,16 +1563,20 @@ static void eb_msn_del_group(const char *group)
 static void eb_msn_add_group(const char *group) 
 {
 	char *id = NULL;
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	
 	if (!group || !strlen(group) || !strcmp(group,_("Buddies")))
 		return;
 	
-	id = value_pair_get_value(msn_grouplist, group);
+	id = value_pair_get_value(mlad->msn_grouplist, group);
 	
-	if (!id && mainconn) {
+	if (!id && mlad->mc) {
 		char *enc = StrToUtf8(group);
-		msn_add_group(mainconn, enc);
-		ext_got_group("-1", enc);
+		msn_add_group(mlad->mc, enc);
+		ext_got_group(mlad->mc, "-1", enc);
 		free(enc);
 	}
 	
@@ -1536,17 +1587,21 @@ static void eb_msn_add_group(const char *group)
 static void eb_msn_rename_group(const char *ogroup, const char *ngroup) 
 {
 	char *id = NULL;
+	/* MULTIACCOUNT UNCLEAN */
+	eb_local_account *ela = find_suitable_local_account(NULL, SERVICE_INFO.protocol_id);
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
 	
 	if (!ogroup || !strlen(ogroup) || !strcmp(ogroup,_("Buddies")))
 		return;
 	
-	id = value_pair_get_value(msn_grouplist, ogroup);
+	id = value_pair_get_value(mlad->msn_grouplist, ogroup);
 	
-	if (id && strcmp("-1",id) && mainconn) {
+	if (id && strcmp("-1",id) && mlad->mc) {
 		char *enc = StrToUtf8(ngroup);
-		msn_rename_group(mainconn, id, enc);
-		msn_grouplist = value_pair_remove(msn_grouplist, ogroup);
-		msn_grouplist = value_pair_add (msn_grouplist, ngroup, id);
+		msn_rename_group(mlad->mc, id, enc);
+		mlad->msn_grouplist = value_pair_remove(mlad->msn_grouplist, ogroup);
+		mlad->msn_grouplist = value_pair_add (mlad->msn_grouplist, ngroup, id);
 		free(enc);
 	}
 	
@@ -1665,54 +1720,114 @@ static void eb_msn_incoming(void *data, int source, eb_input_condition condition
 }
 
 
-void ext_register_sock(int s, int reading, int writing)
+void ext_register_sock(msnconn *conn, int s, int reading, int writing)
 {
   eb_debug(DBG_MSN, "Registering sock %i\n", s);
-  for(int a=0; a<20; a++)
-  {
-    if(tags[a].fd==-1) {
-	tags[a].fd=s;
-
-        tags[a].tag_r=tags[a].tag_w=-1;
-
-        if(reading)
-        {
-	  tags[a].tag_r=eb_input_add(s, EB_INPUT_READ, eb_msn_incoming, NULL);
-        }
-
-        if(writing)
-        {
-	  tags[a].tag_w=eb_input_add(s, EB_INPUT_WRITE, eb_msn_incoming, NULL);
-        }
-
-        eb_debug(DBG_MSN, "Successful %i\n", s);
+  if (conn->type == CONN_NS) {
+     for(int a=0; a<20; a++)
+    {
+      if(conn->tags[a].fd==s) {eb_debug(DBG_MSN, "already registered"); return;}
+    }
+   for(int a=0; a<20; a++)
+    {
+      if(conn->tags[a].fd==-1)
+      {
+	conn->tags[a].tag_r = conn->tags[a].tag_w = -1;
+	if(reading)
+	{ conn->tags[a].tag_r = eb_input_add(s, EB_INPUT_READ, eb_msn_incoming, conn); }
+	if(writing)
+	{ conn->tags[a].tag_w = eb_input_add(s, EB_INPUT_WRITE, eb_msn_incoming, conn); }
+	conn->tags[a].fd=s;
 	return;
+      }
+    }
+  } else {
+    msnconn *parent = NULL;
+    if (conn->type == CONN_FTP)
+	    parent = find_nsconn_by_name(((authdata_FTP *)conn->auth)->username);
+    else
+	    parent = find_nsconn_by_name(((authdata_SB *)conn->auth)->username);
+    if (parent) {
+     for(int a=0; a<20; a++)
+    {
+      if(parent->tags[a].fd==s) {eb_debug(DBG_MSN, "already registered"); return;}
+    }
+      for(int a=0; a<20; a++)
+      {
+	if(parent->tags[a].fd==-1)
+	{
+	  parent->tags[a].tag_r = parent->tags[a].tag_w = -1;
+	  if(reading)
+	  { parent->tags[a].tag_r = eb_input_add(s, EB_INPUT_READ, eb_msn_incoming, conn); }
+	  if(writing)
+	  { parent->tags[a].tag_w = eb_input_add(s, EB_INPUT_WRITE, eb_msn_incoming, conn);}
+	  parent->tags[a].fd=s;
+	  fprintf(stderr,"Added socket %d\n", a);
+	  return;
+	}
+      }
     }
   }
 }
 
-void ext_unregister_sock(int s)
+void ext_unregister_sock(msnconn *conn, int s)
 {
   eb_debug(DBG_MSN, "Unregistering sock %i\n", s);
-  for(int a=0; a<20; a++)
-  {
-    if(tags[a].fd==s) {
-        if(tags[a].tag_r!=-1) { eb_input_remove(tags[a].tag_r); }
-        if(tags[a].tag_w!=-1) { eb_input_remove(tags[a].tag_w); }
-	tags[a].fd=-1;
-	tags[a].tag_r=tags[a].tag_w=0;
-        eb_debug(DBG_MSN, "Successful %i\n", s);
-	return;
+  if (conn->type == CONN_NS) {	
+    for(int a=0; a<20; a++)
+    {
+      if(conn->tags[a].fd==s)
+      {
+	eb_input_remove(conn->tags[a].tag_r);		
+	eb_input_remove(conn->tags[a].tag_w);
+	for(int b=a; b<19; b++)
+	{
+          conn->tags[b].fd = conn->tags[b+1].fd;
+	  conn->tags[b].tag_r = conn->tags[b+1].tag_r;
+	  conn->tags[b].tag_w = conn->tags[b+1].tag_w;
+	}
+	conn->tags[19].fd=-1;
+	conn->tags[19].tag_r=-1;
+	conn->tags[19].tag_w=-1;
+      }
     }
+  } else {
+     msnconn *parent = NULL;
+     if (conn->type == CONN_FTP)
+	     parent = find_nsconn_by_name(((authdata_FTP *)conn->auth)->username);
+     else
+	     parent = find_nsconn_by_name(((authdata_SB *)conn->auth)->username);
+     if (parent) {
+       for(int a=0; a<20; a++)
+       {
+	 if(parent->tags[a].fd==s)
+	 {
+           eb_input_remove(parent->tags[a].tag_r);		
+           eb_input_remove(parent->tags[a].tag_w);
+	   eb_debug(DBG_MSN, "Unregistered sock %i\n", s);
+	   for(int b=a; b<19; b++)
+	   {
+             parent->tags[b].fd = parent->tags[b+1].fd;
+	     parent->tags[b].tag_r = parent->tags[b+1].tag_r;
+	     parent->tags[b].tag_w = parent->tags[b+1].tag_w;
+	   }
+	   parent->tags[19].fd=-1;
+	   parent->tags[19].tag_r=-1;
+	   parent->tags[19].tag_w=-1;
+	 }
+       }     
+     } else {
+	   eb_debug(DBG_MSN, "can't find sock with username %s\n", ((authdata_FTP *)conn->auth)->username);
+     }
   }
 }
 
-int ext_is_sock_registered(int s)
+int ext_is_sock_registered(msnconn *conn, int s)
 {
   eb_debug(DBG_MSN, "checking sock %i\n", s);
   for(int a=0; a<20; a++)
   {
-    if(tags[a].fd==s) {
+    if(conn->tags[a].fd==s) {
         eb_debug(DBG_MSN, "Successful %i\n", s);
 	return TRUE;
     }
@@ -1722,7 +1837,9 @@ int ext_is_sock_registered(int s)
 
 void ext_got_pong(msnconn *conn)
 {
-	waiting_ans = 0;	
+	eb_local_account *ela = (eb_local_account *)conn->ext_data;
+	eb_msn_local_account_data * mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	mlad->waiting_ans = 0;	
 }
 
 void ext_got_friendlyname(msnconn * conn, char * friendlyname)
@@ -1733,8 +1850,8 @@ void ext_got_friendlyname(msnconn * conn, char * friendlyname)
   eb_debug(DBG_MSN, "Your friendlyname is now: %s\n", friendlyname);
   local_account_name=((authdata_NS *)conn->auth)->username;
   ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
+  eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
   strncpy(ela->alias, tmp, 255);
-  waiting_ans = 0;
   if(fname_pref[0]=='\0')
   { strncpy(fname_pref, tmp, MAX_PREF_LEN); }
   free(tmp);
@@ -1744,7 +1861,7 @@ void ext_got_friendlyname(msnconn * conn, char * friendlyname)
 	  ela->connected = 1;
 	  close_conn(conn);
 	  msn_clean_up(conn);
-	  mainconn = NULL;
+	  mlad->mc = NULL;
   }
 }
 
@@ -1755,6 +1872,7 @@ void ext_got_info(msnconn * conn, syncinfo * info)
   
   char* local_account_name=((authdata_SB *)conn->auth)->username;
   eb_local_account *ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
+  eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
   if (ela == NULL)
 	  printf("ela is null ! :-s");
   else
@@ -1776,11 +1894,11 @@ void ext_got_info(msnconn * conn, syncinfo * info)
 	 if (ea && strcmp(ea->account_contact->group->name, _("Ignore"))) {
 		 if (!is_on_list(cnt,info->al)) {
 			 eb_debug(DBG_MSN,"adding %s to al\n",cnt);
-		     msn_add_to_list(mainconn, "AL", cnt);
+		     msn_add_to_list(mlad->mc, "AL", cnt);
 		 }
 		 if (!is_on_list(cnt,info->fl)) {
 			 eb_debug(DBG_MSN,"adding %s to fl\n",cnt);
-		     msn_add_to_list(mainconn, "FL", cnt);
+		     msn_add_to_list(mlad->mc, "FL", cnt);
 		 }
 	 }
   }
@@ -1804,8 +1922,9 @@ void ext_got_BLP(msnconn * conn, char c)
 
 int ext_new_RL_entry(msnconn * conn, char * username, char * friendlyname)
 {
+  eb_local_account *ela = (eb_local_account *)conn->ext_data;
   eb_debug(DBG_MSN, "%s (%s) has added you to their contact list.\nYou might want to add them to your Allow or Block list\n", username, friendlyname);
-  return eb_msn_authorize_user(username, friendlyname);
+  return eb_msn_authorize_user(ela, username, friendlyname);
 }
 
 void ext_new_list_entry(msnconn * conn, char * list, char * username)
@@ -2302,7 +2421,7 @@ void ext_closing_connection(msnconn * conn)
 	  inv->cancelled=1;
 	  list=list->next;
   }
-  ext_unregister_sock(conn->sock);
+  ext_unregister_sock(conn, conn->sock);
   eb_debug(DBG_MSN, "Closed connection with socket %d\n", conn->sock);
 }
 
@@ -2595,9 +2714,13 @@ static void eb_msn_clean_up_chat_room(msnconn * conn)
   return;
 }
 
-void ext_syncing_lists(int state) 
+void ext_syncing_lists(msnconn *conn, int state) 
 {
-	listsyncing = state;	
+	eb_local_account *ela = (eb_local_account *)conn->ext_data;
+	if(!ela) return;
+	eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
+	
+	mlad->listsyncing = state;	
 }
 
 static void invite_gnomemeeting(ebmCallbackData * data)

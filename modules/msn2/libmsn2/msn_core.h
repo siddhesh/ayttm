@@ -77,6 +77,11 @@ class userdata : public llist_data
 class authdata
 {};
 
+typedef struct {
+	int fd;
+	int tag_r;
+        int tag_w;
+}tag_info;
 
 class msnconn : public llist_data
 {
@@ -90,8 +95,11 @@ class msnconn : public llist_data
   llist * callbacks;
   authdata * auth;
 
+  tag_info tags[21];
+
   int pos, numspaces;
   char readbuf[1250];
+  void *ext_data;
   
   msnconn() { 
 	users=NULL; 
@@ -99,6 +107,7 @@ class msnconn : public llist_data
   	invitations_out=NULL; 
   	invitations_in=NULL; 
 	pos=numspaces=0;
+	ext_data = NULL;
 	memset(readbuf,0,sizeof(readbuf));
 	}
   ~msnconn()
@@ -243,6 +252,8 @@ void msn_netmeeting_reject(invitation_voice * inv);
 invitation_voice * msn_invite_netmeeting(msnconn *conn);
 
 invitation_ftp * msn_filetrans_send(msnconn * conn, char * path);
+
+msnconn *find_nsconn_by_name(char *name);
 
 void msn_sync_lists(msnconn * conn, int version);
 

@@ -46,7 +46,7 @@ char ** msn_read_line(msnconn *conn, int * numargs)
 				goto continued;
 			} else if (errno) {
 				/* may have been unregistered */
-				if (!ext_is_sock_registered(sock)) {
+				if (!ext_is_sock_registered(conn, sock)) {
 					*numargs=0;
 					return NULL;
 				}
@@ -132,7 +132,7 @@ void msn_clean_up(msnconn * conn)
   }
 
   close(conn->sock);
-  ext_unregister_sock(conn->sock);
+  ext_unregister_sock(conn, conn->sock);
   delete conn;
 
   if(connlist->next!=NULL)

@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 10:12 GMT [colin]	0.3.0-8
+- modules/msn2
+First bunch of fixes for multiaccounting
+
 * Sun Apr 27 2003 15:10 GMT [andy]	0.3.0-7
 - src/gtk/gtkutils.ch
 Fix declaration-first problem

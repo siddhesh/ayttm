@@ -273,10 +273,30 @@ int msn_set_friendlyname(msnconn * conn, char * friendlyname)
   return (res);
 }
 
+msnconn *find_nsconn_by_name(char *name)
+{
+    llist * list;
+
+    list=msnconnections;
+    while(1)
+    {
+      msnconn * c;
+      
+      if(list==NULL) { break ; }
+      c=(msnconn *)list->data;
+      if(c->type==CONN_NS &&
+         !strcmp (name,((authdata_SB *)c->auth)->username)) {
+	      /* printf("yeah: %s\n",((authdata_NS *)c->auth)->username); */
+	      return c;
+      }
+   }
+   return NULL;
+}
+
 void msn_sync_lists(msnconn * conn, int version)
 {
   syncinfo *info=new syncinfo;
-  ext_syncing_lists(1);
+  ext_syncing_lists(conn, 1);
   info->serial=version;
 
   snprintf(buf, sizeof(buf), "SYN %d %d\r\n", next_trid, version);
@@ -310,7 +330,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
     /*  delete info;
       info=NULL;*/
       msn_del_callback(conn, trid);
-      ext_syncing_lists(0);
+      ext_syncing_lists(conn, 0);
       ext_got_info(conn, NULL);
       return;
     } else {
@@ -334,7 +354,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
 		newuser->groups=msn_permstring(args[8]);
 	else
 		newuser->groups=NULL;
-	ext_got_friend(newuser->username, newuser->groups);
+	ext_got_friend(conn, newuser->username, newuser->groups);
         msn_add_to_llist(info->fl, newuser);
         if(atoi(args[4])==atoi(args[5]))
         { info->complete|=LST_FL; }
@@ -386,7 +406,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
   
   if(numargs >=7 && !strcmp(args[0], "LSG"))
   {
-	  ext_got_group(args[5], msn_decode_URL(args[6]));
+	  ext_got_group(conn, args[5], msn_decode_URL(args[6]));
   }
   if(numargs >=4 && !strcmp(args[0], "GTC"))
   {
@@ -406,7 +426,7 @@ void msn_syncdata(msnconn * conn, int trid, char ** args, int numargs, callback_
   {
     msn_del_callback(conn, trid);
     msn_check_rl(conn, info);
-    ext_syncing_lists(0);
+    ext_syncing_lists(conn, 0);
     ext_got_info(conn, info);
    /* delete info; */
   }
@@ -540,7 +560,8 @@ void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_
   newconn->auth=info->auth;
   newconn->type=CONN_SB;
   newconn->ready=0;
-
+  newconn->ext_data = conn->ext_data;
+  
   msn_add_to_llist(msnconnections, newconn);
 
   int port=1863;
@@ -614,7 +635,7 @@ void msn_handle_incoming(msnconn *conn, int readable, int writable,
     delete conn->callbacks; // delete the callback data
     conn->callbacks=NULL;
 
-    ext_unregister_sock(conn->sock);
+    ext_unregister_sock(conn, conn->sock);
     close(conn->sock);
 
     char * c = NULL;
@@ -779,7 +800,7 @@ void msn_handle_default(msnconn * conn, char ** args, int numargs)
   
   if(numargs >=5 && !strcmp(args[0], "ADG"))
   {
-	  ext_got_group(args[4], msn_decode_URL(args[3]));
+	  ext_got_group(conn, args[4], msn_decode_URL(args[3]));
 	  return;
   }
     
@@ -821,7 +842,7 @@ void msn_handle_MSG(msnconn * conn, char ** args, int numargs)
 
   msg=(char *)malloc(msglen+1);
   memset(msg,'\0',msglen);
-  ext_unregister_sock(conn->sock);
+  ext_unregister_sock(conn, conn->sock);
 
   remaining=msglen;
   do {
@@ -837,7 +858,7 @@ void msn_handle_MSG(msnconn * conn, char ** args, int numargs)
 	  strncat(msg, tbuf, msglen-strlen(msg));
   } while (remaining > 0 && tries < 6);
   
-  ext_register_sock(conn->sock, 1, 0);
+  ext_register_sock(conn, conn->sock, 1, 0);
   
   msg[msglen]='\0';
 
@@ -1133,6 +1154,16 @@ void msn_recv_file(invitation_ftp * inv, char * msg_body)
 
   msnconn * conn=new msnconn;
   conn->type=CONN_FTP;
+  conn->ext_data = inv->conn->ext_data;
+  authdata_FTP * auth=new authdata_FTP;
+  auth->cookie=msn_permstring(cookie);
+  delete cookie;
+  auth->inv=inv;
+  auth->username=msn_permstring(((authdata_SB *)inv->conn->auth)->username);
+  auth->direction=MSNFTP_RECV;
+
+  conn->auth=auth;
+
 
   snprintf(buf, sizeof(buf), "Connecting to %s:%d\n", remote, port);
   ext_filetrans_progress(inv, buf, 0, 0);
@@ -1149,18 +1180,9 @@ void msn_recv_file(invitation_ftp * inv, char * msg_body)
     return;
   }
 
-  ext_register_sock(conn->sock, 1, 0);
+  ext_register_sock(conn, conn->sock, 1, 0);
 
   ext_filetrans_progress(inv, "Connected", 0, 0);
-
-  authdata_FTP * auth=new authdata_FTP;
-  auth->cookie=msn_permstring(cookie);
-  delete cookie;
-  auth->inv=inv;
-  auth->username=msn_permstring(((authdata_SB *)inv->conn->auth)->username);
-  auth->direction=MSNFTP_RECV;
-
-  conn->auth=auth;
 
   msn_add_to_llist(msnconnections, conn);
 
@@ -1261,12 +1283,12 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
     pfd.fd=conn->sock;
     pfd.events=POLLIN;
 
-    while(poll(&pfd, 1, 0)==1)
+    while(poll(&pfd, 1, 0)!=0)
 #else
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(conn->sock,&fds);
-    ext_unregister_sock(conn->sock);
+    ext_unregister_sock(conn, conn->sock);
     if (DEBUG) printf("unregistered FTP sock\n");
     
     while(select(conn->sock+1,&fds,NULL,NULL,&zerotime))
@@ -1310,7 +1332,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 	return;
       }
     }
-    ext_register_sock(conn->sock, 1, 0);
+    ext_register_sock(conn, conn->sock, 1, 0);
     if (DEBUG) printf("registered again\n");
   } else {
     // We are sending
@@ -1328,11 +1350,11 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
         return;
       }
 
-      ext_unregister_sock(conn->sock);
+      ext_unregister_sock(conn, conn->sock);
       close(conn->sock);
 
       conn->sock=s;
-      ext_register_sock(conn->sock, 1, 1);
+      ext_register_sock(conn, conn->sock, 1, 1);
 
       ext_filetrans_progress(auth->inv, "Connected", 0, 0);
 
@@ -1409,7 +1431,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
         pfd.events=POLLOUT;
 	pin.fd=conn->sock;
 	pin.events=POLLIN;
-        while(poll(&pfd, 1, 0)==1)
+        while(poll(&pfd, 1, 0)!=0)
 #else
         fd_set fds;
         FD_ZERO(&fds);
@@ -1423,7 +1445,7 @@ void msn_handle_filetrans_incoming(msnconn * conn, int readable, int writable)
 	    char check[3];
 #else
             unsigned char check[3];
-	    if (poll(&pin, 1, 0)==1) {
+	    if (poll(&pin, 1, 0)!=0) {
 		int numargs;
 		char **args =msn_read_line(conn, &numargs);
 		/* TODO Check if args is NULL */
@@ -1493,7 +1515,7 @@ void msn_send_file(invitation_ftp * inv, char * msg_body)
   ext_filetrans_progress(inv, "Sending IP address", 0, 0);
 
   conn->type=CONN_FTP;
-
+  conn->ext_data = inv->conn->ext_data;
   while((conn->sock=ext_server_socket(port))<0)
   {
     port++;
@@ -1507,21 +1529,23 @@ void msn_send_file(invitation_ftp * inv, char * msg_body)
     }
   }
 
-  ext_register_sock(conn->sock, 1, 0);
-
-  msn_add_to_llist(msnconnections, conn);
-
   authdata_FTP * auth=new authdata_FTP;
 
   conn->auth=auth;
-
+  
   auth->cookie=new char[64];
   sprintf(auth->cookie, "%d", rand());
-
+  
+  auth->username = msn_permstring(((authdata_SB *)(inv->conn->auth))->username);
+  
   auth->inv=inv;
   auth->direction=MSNFTP_SEND;
 
   auth->connected=0;
+
+  ext_register_sock(conn, conn->sock, 1, 0);
+
+  msn_add_to_llist(msnconnections, conn);
 
   message * msg=new message;
   msg->content=msn_permstring("text/x-msmsgsinvite; charset=UTF-8");
@@ -1576,7 +1600,7 @@ void msn_handle_RNG(msnconn * conn, char ** args, int numargs)
   if (numargs < 5) return;
   newSBconn->type=CONN_SB;
   newSBconn->auth=auth;
-
+  newSBconn->ext_data = conn->ext_data;
   auth->username=msn_permstring(((authdata_NS *)(conn->auth))->username);
   auth->sessionID=msn_permstring(args[1]);
   auth->cookie=msn_permstring(args[4]);
@@ -1904,7 +1928,7 @@ static void msn_connect_cb(int fd, int error, void *data)
       return;
     }
     conn->sock=fd;
-    ext_register_sock(conn->sock, 1, 0);
+    ext_register_sock(conn, conn->sock, 1, 0);
 
     if(auth->sessionID==NULL)
     {
@@ -1945,7 +1969,7 @@ static void msn_connect_cb2(int fd, int error, void *data)
   }
   conn->sock = fd;
   
-  ext_register_sock(conn->sock, 1, 0);
+  ext_register_sock(conn, conn->sock, 1, 0);
 
   if(DEBUG)
   printf("Connected\n"); // DEBUG
@@ -1993,7 +2017,7 @@ void msn_connect_2(msnconn * conn, int trid, char ** args, int numargs, callback
   {
     ext_show_error(NULL, "MSN Protocol negotiation failed.");
     delete info;
-    ext_unregister_sock(conn->sock);
+    ext_unregister_sock(conn, conn->sock);
     close(conn->sock);
     conn->sock=-1;
     return;
