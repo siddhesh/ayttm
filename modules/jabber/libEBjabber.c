@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <jabber/jabber.h>
 
+#include "chat_room.h"
 #include "plugin_api.h"
 #include "libEBjabber.h"
 #include "messages.h"
@@ -567,7 +568,7 @@ void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, i
 
 int JABBER_IsChatRoom(char *from)
 {
-	char buffer[256];
+	char buffer[257];
 	char *ptr=NULL;
 	Agent *agent=NULL;
 
@@ -587,7 +588,26 @@ int JABBER_IsChatRoom(char *from)
 			|| !strncmp(agent->alias, "conference.",strlen("conference.")))) {
 		eb_debug(DBG_JBR, "Returning True\n");
 		return(1);
+	} else if (find_chat_room_by_id(ptr) != NULL) {
+		eb_debug(DBG_JBR, "Returning True\n");
+		return(1);
 	}
+	
+	/* test with @ */
+	strncpy(buffer, from, 256);
+	if (strchr(buffer,'/'))
+		*strchr(buffer,'/') = 0;
+	
+	eb_debug(DBG_JBR, "looking for %s\n",buffer);
+	agent = j_find_agent_by_alias(buffer);
+	if(agent && (!strcmp(agent->type, "groupchat"))) {
+		eb_debug(DBG_JBR, "Returning True\n");
+		return(1);
+	} else if (find_chat_room_by_id(buffer) != NULL) {
+		eb_debug(DBG_JBR, "Returning True\n");
+		return(1);
+	}
+	
 	eb_debug(DBG_JBR, "Returning False\n");
 	return(0);
 
