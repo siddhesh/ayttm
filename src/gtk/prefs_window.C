@@ -142,7 +142,7 @@ class ay_prefs_window_panel
 		void		SetNotebookID( int inID ) { m_notebook_id = inID; }
 		
 		const char	*Name( void ) const { return( m_name ); }
-		GtkWidget	*TopLevelWidget( void ) { return( m_top_vbox ); }
+		GtkWidget	*TopLevelWidget( void ) { return( m_super_vbox ); }
 		
 		virtual void	Build( GtkWidget *inParent );
 		virtual void	Apply( void );
@@ -155,7 +155,9 @@ class ay_prefs_window_panel
 		static ay_prefs_window_panel	*CreateModulePanel( GtkWidget *inParentWindow, GtkWidget *inParent, t_module_pref &inPrefs );
 
 	protected:
+		GtkWidget	*m_super_vbox;
 		GtkWidget	*m_top_vbox;
+		GtkWidget	*m_top_scrollbox;
 		GtkWidget	*m_parent_window;
 		GtkWidget	*m_parent;
 	
@@ -493,6 +495,12 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
 	
+	gint height=430;
+	if(height > gdk_screen_height() - 40)
+		height = gdk_screen_height() - 40;
+
+	gtk_window_set_default_size(GTK_WINDOW(m_prefs_window_widget), -1, height);
+
 	gtk_signal_connect( GTK_OBJECT(m_prefs_window_widget), "delete_event", GTK_SIGNAL_FUNC(s_delete_event_callback), this );
 	
 	GtkWidget	*main_hbox = gtk_hbox_new( FALSE, 5 );
@@ -500,7 +508,8 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	// a scrolled window for the tree
 	GtkWidget	*scrolled_win = gtk_scrolled_window_new( NULL, NULL );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scrolled_win), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-	gtk_widget_set_usize( scrolled_win, 210, 430 );
+
+	gtk_widget_set_usize( scrolled_win, 210, height );
 	gtk_box_pack_start( GTK_BOX(main_hbox), GTK_WIDGET(scrolled_win), FALSE, FALSE, 0 );
 
 	m_tree = GTK_TREE(gtk_tree_new());
@@ -812,12 +821,22 @@ ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
 	m_panel_id( ay_prefs_window::PANEL_MAX )
 {
 	m_name = strdup( inTopFrameText );
-	m_top_vbox = gtk_vbox_new( FALSE, 3 );
-	gtk_widget_show( m_top_vbox );
-	gtk_container_set_border_width( GTK_CONTAINER(m_top_vbox), 3 );
+	m_super_vbox = gtk_vbox_new( FALSE, 3 );
+	gtk_widget_show( m_super_vbox );
+	gtk_container_set_border_width( GTK_CONTAINER(m_super_vbox), 3 );
 	
 	if ( inTopFrameText )
 		AddTopFrame( inTopFrameText );
+
+	m_top_scrollbox = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(m_top_scrollbox), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
+	gtk_box_pack_start( GTK_BOX(m_super_vbox), GTK_WIDGET(m_top_scrollbox), TRUE, TRUE, 0 );
+	gtk_widget_set_usize( m_top_scrollbox, -1, 430 );
+	gtk_widget_show(m_top_scrollbox);
+
+	m_top_vbox = gtk_vbox_new( FALSE, 0 );
+	gtk_widget_show( m_top_vbox );
+	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(m_top_scrollbox), GTK_WIDGET(m_top_vbox) );
 }
 
 // Create
@@ -988,7 +1007,7 @@ void	ay_prefs_window_panel::AddTopFrame( const char *in_text )
 	gtk_misc_set_padding( GTK_MISC(label), 4, 3 );
 	gtk_container_add( GTK_CONTAINER(useless_event_box_because_of_stupid_gtk_colour_handling), label );
 	
-	gtk_box_pack_start( GTK_BOX(m_top_vbox), frame, FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX(m_super_vbox), frame, FALSE, FALSE, 0 );
 }
 
 

@@ -1,3 +1,7 @@
+* Mon Jun  2 2003 08:45 GMT [philip]	0.3.1-12
+- src/gtk/prefs_window.C
+make prefs panel scrollable if window shrinks too much
+
 * Mon Jun  2 2003 05:34 GMT [philip]	0.3.1-11
 - src/service.[ch] src/trigger.[ch] src/util.[ch]
 make some functions take const char * args instead of char *
