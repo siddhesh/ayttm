@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.90 $",
-	"$Date: 2004/01/29 05:13:14 $",
+	"$Revision: 1.91 $",
+	"$Date: 2004/03/03 05:45:52 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2422,6 +2422,7 @@ static void eb_yahoo_logout(eb_local_account * ela)
 
 	ylad->status = YAHOO_STATUS_OFFLINE;
 	ylad->id = 0;
+	ylad->act_id = NULL;
 	free_yahoo_local_account(ylad, 0);
 
 	ref_count--;

@@ -1,3 +1,12 @@
+* Wed Mar  3 2004 05:47 GMT [philip]	0.4.6-13
+- modules/yahoo2/yahoo.c
+Set active id to NULL when logging out.
+If we logged out of yahoo and then logged in again, without restarting
+ayttm/reloading the module, then the yahoo connection would close if we
+tried to send a message.  This happened because the active id contained
+junk after the logout, and the server thought we were trying to forge
+someone else's id, or something like that.
+
 * Tue Mar  2 2004 19:10 GMT [philip]	0.4.6-12
 - modules/image_filter/img2jpc.c
 add mode=real to jpc encoding options thanks to Lars Sundqvist for
@@ -20,7 +29,7 @@ jp2 compression handled.  We now have small images
 - src/usercount.c src/Makefile.am src/prefs.[ch]
 add usercount window - not operational yet
 
-* Thu Jan 20 2004 08:16 GMT [chris]     0.4.6-8
+* Thu Jan 30 2004 08:16 GMT [chris]     0.4.6-8
  - src/account.c
  - src/chat_room.c
  - src/chat_window.h
