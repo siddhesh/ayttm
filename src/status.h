@@ -81,6 +81,8 @@ void reset_list (void);
 
 void set_tooltips_active(int);
 
+void do_events(void);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

@@ -77,8 +77,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Rainbow",
 	"Turns all outgoing messages into rainbow colours using HTML",
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/06 17:04:50 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,
@@ -94,46 +94,46 @@ static int rainbow_init()
 	plugin_info.prefs = il;
 
 	il->widget.checkbox.value = &doRainbow;
-	il->widget.checkbox.name = "doRainbow";
-	il->widget.checkbox.label = strdup(_("Enable rainbow conversion"));
+	il->name = "doRainbow";
+	il->label = strdup(_("Enable rainbow conversion"));
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sstart_r;
-	il->widget.entry.name = "sstart_r";
-	il->widget.entry.label = strdup(_("Starting R value:"));
+	il->name = "sstart_r";
+	il->label = strdup(_("Starting R value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sstart_g;
-	il->widget.entry.name = "sstart_g";
-	il->widget.entry.label = strdup(_("Starting G value:"));
+	il->name = "sstart_g";
+	il->label = strdup(_("Starting G value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sstart_b;
-	il->widget.entry.name = "sstart_b";
-	il->widget.entry.label = strdup(_("Starting B value:"));
+	il->name = "sstart_b";
+	il->label = strdup(_("Starting B value:"));
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = send_r;
-	il->widget.entry.name = "send_r";
-	il->widget.entry.label = strdup(_("Ending R value:"));
+	il->name = "send_r";
+	il->label = strdup(_("Ending R value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = send_g;
-	il->widget.entry.name = "send_g";
-	il->widget.entry.label = strdup(_("Ending G value:"));
+	il->name = "send_g";
+	il->label = strdup(_("Ending G value:"));
 	il->type = EB_INPUT_ENTRY;
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = send_b;
-	il->widget.entry.name = "send_b";
-	il->widget.entry.label = strdup(_("Ending B value:"));
+	il->name = "send_b";
+	il->label = strdup(_("Ending B value:"));
 	il->type = EB_INPUT_ENTRY;
 
 	eb_debug(DBG_MOD, "Rainbow initialised\n");

@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.36 $",
-	"$Date: 2003/08/30 11:48:59 $",
+	"$Revision: 1.37 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1347,36 +1347,36 @@ static void irc_init_account_prefs(eb_local_account *ela)
 	ela->prefs = il;
 
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= _("_Nick:");
+	il->name = "SCREEN_NAME";
+	il->label= _("_Nick:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = ila->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label= _("_Password:");
+	il->name = "PASSWORD";
+	il->label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
-	il->widget.checkbox.name = "CONNECT";
-	il->widget.checkbox.label= _("_Connect at startup");
+	il->name = "CONNECT";
+	il->label= _("_Connect at startup");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = ila->server;
-	il->widget.entry.name = "irc_host";
-	il->widget.entry.label= _("IRC _Host:");
+	il->name = "irc_host";
+	il->label= _("IRC _Host:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = ila->port;
-	il->widget.entry.name = "irc_port";
-	il->widget.entry.label= _("IRC P_ort:");
+	il->name = "irc_port";
+	il->label= _("IRC P_ort:");
 	il->type = EB_INPUT_ENTRY;
 
 }

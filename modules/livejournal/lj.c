@@ -75,8 +75,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"LiveJournal",
 	"Ayttm client for LiveJournal (http://www.livejournal.com/)",
-	"$Revision: 1.2 $",
-	"$Date: 2003/08/04 04:47:14 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -101,15 +101,15 @@ static int plugin_init()
 
 	plugin_info.prefs = il;
 	il->widget.entry.value = lj_url;
-	il->widget.entry.name = "lj_url";
-	il->widget.entry.label = _("LiveJournal _URL:");
+	il->name = "lj_url";
+	il->label = _("LiveJournal _URL:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.checkbox.value = &do_lj_debug;
-	il->widget.checkbox.name = "do_lj_debug";
-	il->widget.checkbox.label = _("Enable debugging");
+	il->name = "do_lj_debug";
+	il->label = _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
 
 	return (0);
@@ -186,15 +186,15 @@ static void lj_account_prefs_init(eb_local_account *ela)
 
 	ela->prefs = il;
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label = _("_Username:");
+	il->name = "SCREEN_NAME";
+	il->label = _("_Username:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = lla->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label = _("_Password:");
+	il->name = "PASSWORD";
+	il->label = _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
 
 }

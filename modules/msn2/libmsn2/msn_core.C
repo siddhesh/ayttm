@@ -56,6 +56,7 @@ static const char default_error_msg[]="Unknown error code";
 
 static void msn_finish_netmeeting_inv(msnconn *conn, invitation_voice *inv, char *ip);
 
+
 void msn_init(msnconn * conn, char * username, char * password)
 {
   srand(time(NULL));
@@ -440,10 +441,10 @@ if(DEBUG)
     
     for(olist=info->al; olist != NULL && olist->data != NULL; olist=olist->next) {
       ocontact = (userdata *)olist->data;
-      if(!strcasecmp(ocontact->username, contact->username))
+      if(!strcasecmp(ocontact->username, contact->username)) {
           is_on_al=1;
-      if (is_on_al)
 	  break;
+      }
     }
     if (!is_on_al) {
 if(DEBUG)    
@@ -468,7 +469,7 @@ if(DEBUG)
       {
         ocontact=(userdata *)olist->data;
 if(DEBUG)
-        printf("Comparing %s to %s\n", ocontact->username, fcontact->username);
+        printf("Comparing %s to %s\n", fcontact->username, ocontact->username);
 
         if(!strcasecmp(ocontact->username, fcontact->username))
         {

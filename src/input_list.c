@@ -55,7 +55,7 @@ LList	*eb_input_to_value_pair( input_list *il )
 		{
 			case EB_INPUT_CHECKBOX:
 				{
-					snprintf( key, sizeof(key), "%s", il->widget.checkbox.name );
+					snprintf( key, sizeof(key), "%s", il->name );
 					s_convert_space_to_underscore( key );
 						
 					snprintf( value, sizeof(value), "%i", *il->widget.checkbox.value );
@@ -67,7 +67,7 @@ LList	*eb_input_to_value_pair( input_list *il )
 			case EB_INPUT_PASSWORD:
 			case EB_INPUT_ENTRY:
 				{
-					snprintf( key, sizeof(key), "%s", il->widget.entry.name );
+					snprintf( key, sizeof(key), "%s", il->name );
 					s_convert_space_to_underscore( key );
 						
 					vp = value_pair_add( vp, key, il->widget.entry.value );
@@ -76,7 +76,7 @@ LList	*eb_input_to_value_pair( input_list *il )
 
 			case EB_INPUT_LIST:
 				{
-					snprintf( key, sizeof(key), "%s", il->widget.listbox.name );
+					snprintf( key, sizeof(key), "%s", il->name );
 					s_convert_space_to_underscore( key );
 						
 					snprintf( value, sizeof(value), "%i", *il->widget.listbox.value );
@@ -112,7 +112,7 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 						break;
 					}
 					
-					snprintf( key, sizeof(key), "%s", il->widget.checkbox.name );
+					snprintf( key, sizeof(key), "%s", il->name );
 					s_convert_space_to_underscore( key );
 						
 					value = value_pair_get_value( vp, key );
@@ -132,7 +132,7 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 						break;
 					}
 					
-					snprintf( key, sizeof(key), "%s", il->widget.entry.name );
+					snprintf( key, sizeof(key), "%s", il->name );
 					s_convert_space_to_underscore( key );
 					
 					value = value_pair_get_value( vp, key );
@@ -151,7 +151,7 @@ void	eb_update_from_value_pair( input_list *il, LList *vp )
 						break;
 					}
 					
-					snprintf( key, sizeof(key), "%s", il->widget.listbox.name );
+					snprintf( key, sizeof(key), "%s", il->name );
 					s_convert_space_to_underscore( key );
 					
 					value = value_pair_get_value( vp, key );

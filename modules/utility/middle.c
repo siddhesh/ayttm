@@ -64,8 +64,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_FILTER,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.8 $",
-	"$Date: 2003/05/06 17:04:50 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&s_ref_count,
 	middle_init,
 	middle_finish,
@@ -81,15 +81,15 @@ static int middle_init( void )
 	plugin_info.prefs = il;
 
 	il->widget.checkbox.value = &s_doLeet;
-	il->widget.checkbox.name = "s_doLeet";
-	il->widget.entry.label = strdup( _("Enable L33t-speak conversion") );
+	il->name = "s_doLeet";
+	il->label = strdup( _("Enable L33t-speak conversion") );
 	il->type = EB_INPUT_CHECKBOX;
 	
 	il->next = calloc( 1, sizeof(input_list) );
 	il = il->next;
 	il->widget.checkbox.value = &s_doExtremeLeet;
-	il->widget.checkbox.name = "s_doExtremeLeet";
-	il->widget.entry.label = strdup( _("Enable 3x7r3m3 L33t-speak [implies previous]") );
+	il->name = "s_doExtremeLeet";
+	il->label = strdup( _("Enable 3x7r3m3 L33t-speak [implies previous]") );
 	il->type = EB_INPUT_CHECKBOX;
 
 	eb_debug(DBG_MOD, "L33tSp33k initialised\n");

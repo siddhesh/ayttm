@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.57 $",
-	"$Date: 2003/10/22 08:54:23 $",
+	"$Revision: 1.58 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -115,30 +115,30 @@ static int plugin_init()
 	ref_count=0;
 	plugin_info.prefs = il;
 	il->widget.entry.value = aim_server;
-	il->widget.entry.name = "aim_server";
-	il->widget.entry.label = _("Server:");
+	il->name = "aim_server";
+	il->label = _("Server:");
 	il->type = EB_INPUT_ENTRY;
 
         il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = aim_port;
-	il->widget.entry.name = "aim_port";
-	il->widget.entry.label = _("Port:");
+	il->name = "aim_port";
+	il->label = _("Port:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
        	il = il->next;
        	il->widget.checkbox.value = &do_aim_debug;
-       	il->widget.checkbox.name = "do_aim_debug";
-       	il->widget.checkbox.label = _("Enable debugging");
+       	il->name = "do_aim_debug";
+       	il->label = _("Enable debugging");
        	il->type = EB_INPUT_CHECKBOX;
 
 /*
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = aim_info;
-	il->widget.entry.name = "aim_info";
-	il->widget.entry.label = _("Info:");
+	il->name = "aim_info";
+	il->label = _("Info:");
 	il->type = EB_INPUT_ENTRY;
 */
         return(0);
@@ -1038,36 +1038,36 @@ static void aim_init_account_prefs(eb_local_account * ela)
 	ela->prefs = il;
 
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= _("_Screen Name:");
+	il->name = "SCREEN_NAME";
+	il->label= _("_Screen Name:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = alad->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label= _("_Password:");
+	il->name = "PASSWORD";
+	il->label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &alad->prompt_password;
-	il->widget.checkbox.name = "prompt_password";
-	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->name = "prompt_password";
+	il->label= _("_Ask for password at Login time");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
-	il->widget.checkbox.name = "CONNECT";
-	il->widget.checkbox.label= _("_Connect at startup");
+	il->name = "CONNECT";
+	il->label= _("_Connect at startup");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = alad->aim_info;
-	il->widget.entry.name = "PROFILE";
-	il->widget.entry.label= _("P_rofile:");
+	il->name = "PROFILE";
+	il->label= _("P_rofile:");
 	il->type = EB_INPUT_ENTRY;
 
 }

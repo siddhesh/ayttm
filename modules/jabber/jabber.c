@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.43 $",
-	"$Date: 2003/11/07 11:43:27 $",
+	"$Revision: 1.44 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -105,15 +105,15 @@ static int plugin_init()
 	ref_count=0;
 		plugin_info.prefs = il;
 		il->widget.entry.value = jabber_server;
-		il->widget.entry.name = "jabber_server";
-		il->widget.entry.label = _("Default Server:");
+		il->name = "jabber_server";
+		il->label = _("Default Server:");
 		il->type = EB_INPUT_ENTRY;
 
 		il->next = g_new0(input_list, 1);
                 il = il->next;
                 il->widget.checkbox.value = &do_jabber_debug;
-                il->widget.checkbox.name = "do_jabber_debug";
-                il->widget.checkbox.label = _("Enable debugging");
+                il->name = "do_jabber_debug";
+                il->label = _("Enable debugging");
                 il->type = EB_INPUT_CHECKBOX;
 	return(0);
 }
@@ -456,52 +456,52 @@ static void jabber_account_prefs_init(eb_local_account *ela)
 	ela->prefs = il;
 
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= _("_Username:");
+	il->name = "SCREEN_NAME";
+	il->label= _("_Username:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = jlad->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label= _("_Password:");
+	il->name = "PASSWORD";
+	il->label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &jlad->prompt_password;
-	il->widget.checkbox.name = "prompt_password";
-	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->name = "prompt_password";
+	il->label= _("_Ask for password at Login time");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
-	il->widget.checkbox.name = "CONNECT";
-	il->widget.checkbox.label= _("_Connect at startup");
+	il->name = "CONNECT";
+	il->label= _("_Connect at startup");
 	il->type = EB_INPUT_CHECKBOX;
 
 #ifdef HAVE_OPENSSL
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &jlad->use_ssl;
-	il->widget.checkbox.name = "USE_SSL";
-	il->widget.checkbox.label= _("Use _SSL");
+	il->name = "USE_SSL";
+	il->label= _("Use _SSL");
 	il->type = EB_INPUT_CHECKBOX;
 #endif	
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = jlad->server_port;
-	il->widget.entry.name = "PORT";
-	il->widget.entry.label= _("P_ort:");
+	il->name = "PORT";
+	il->label= _("P_ort:");
 	il->type = EB_INPUT_ENTRY;
 	
 #ifdef HAVE_OPENSSL
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = jlad->ssl_server_port;
-	il->widget.entry.name = "SSL_PORT";
-	il->widget.entry.label= _("SSL Po_rt:");
+	il->name = "SSL_PORT";
+	il->label= _("SSL Po_rt:");
 	il->type = EB_INPUT_ENTRY;
 #endif	
 }

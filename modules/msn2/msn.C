@@ -172,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.74 $",
-	"$Date: 2003/12/05 11:56:27 $",
+	"$Revision: 1.75 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -194,51 +194,51 @@ static int plugin_init()
 	input_list * il = g_new0(input_list, 1);
 	plugin_info.prefs = il;
 	il->widget.entry.value = msn_server;
-	il->widget.entry.name = "msn_server";
-	il->widget.entry.label = _("Server:");
+	il->name = "msn_server";
+	il->label = _("Server:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = msn_port;
-	il->widget.entry.name = "msn_port";
-	il->widget.entry.label = _("Port:");
+	il->name = "msn_port";
+	il->label = _("Port:");
 	il->type = EB_INPUT_ENTRY;
 
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_guess_away;
-	il->widget.checkbox.name = "do_guess_away";
-	il->widget.checkbox.label = _("Guess status from Away messages");
+	il->name = "do_guess_away";
+	il->label = _("Guess status from Away messages");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_check_connection;
-	il->widget.checkbox.name = "do_check_connection";
-	il->widget.checkbox.label = _("Check the connection state");
+	il->name = "do_check_connection";
+	il->label = _("Check the connection state");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_reconnect;
-	il->widget.checkbox.name = "do_reconnect";
-	il->widget.checkbox.label = _("Reconnect if connection unexpectedly drops");
+	il->name = "do_reconnect";
+	il->label = _("Reconnect if connection unexpectedly drops");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_rename_contacts;
-	il->widget.checkbox.name = "do_rename_contacts";
-	il->widget.checkbox.label = _("Rename my MSN-only contacts whenever they change their alias");
+	il->name = "do_rename_contacts";
+	il->label = _("Rename my MSN-only contacts whenever they change their alias");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_msn_debug;
-	il->widget.checkbox.name = "do_msn_debug";
-	il->widget.checkbox.label = _("Enable debugging");
+	il->name = "do_msn_debug";
+	il->label = _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
 
 	
@@ -476,71 +476,71 @@ static void msn_init_account_prefs(eb_local_account *ela)
 	ela->prefs = il;
 	
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= _("_MSN Login:");
+	il->name = "SCREEN_NAME";
+	il->label= _("_MSN Login:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = mlad->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label= _("_Password:");
+	il->name = "PASSWORD";
+	il->label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->prompt_password;
-	il->widget.checkbox.name = "prompt_password";
-	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->name = "prompt_password";
+	il->label= _("_Ask for password at Login time");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
-	il->widget.checkbox.name = "CONNECT";
-	il->widget.checkbox.label= _("_Connect at startup");
+	il->name = "CONNECT";
+	il->label= _("_Connect at startup");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->login_invisible;
-	il->widget.checkbox.name = "LOGIN_INVISIBLE";
-	il->widget.checkbox.label= _("_Login invisible");
+	il->name = "LOGIN_INVISIBLE";
+	il->label= _("_Login invisible");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;	
 	il->widget.entry.value = mlad->fname_pref;
-	il->widget.entry.name = "fname_pref";
-	il->widget.entry.label = _("Friendly Name:");
+	il->name = "fname_pref";
+	il->label = _("Friendly Name:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->do_mail_notify;
-	il->widget.checkbox.name = "do_mail_notify";
-	il->widget.checkbox.label = _("Tell me about new Hotmail/MSN mail");
+	il->name = "do_mail_notify";
+	il->label = _("Tell me about new Hotmail/MSN mail");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->do_mail_notify_folders;
-	il->widget.checkbox.name = "do_mail_notify_folders";
-	il->widget.checkbox.label = _("Notify me about new mail even if it isn't in my Inbox");
+	il->name = "do_mail_notify_folders";
+	il->label = _("Notify me about new mail even if it isn't in my Inbox");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->do_mail_notify_run_script;
-	il->widget.checkbox.name = "do_mail_notify_run_script";
-	il->widget.checkbox.label = _("Run Script on Mail Notification");
+	il->name = "do_mail_notify_run_script";
+	il->label = _("Run Script on Mail Notification");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = mlad->do_mail_notify_script_name;
-	il->widget.entry.name = "do_mail_notify_script_name";
-	il->widget.entry.label = _("Script Name:");
+	il->name = "do_mail_notify_script_name";
+	il->label = _("Script Name:");
 	il->type = EB_INPUT_ENTRY;
 }
 
@@ -2095,15 +2095,17 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
     int state=0;
     char *tmp = Utf8ToStr(friendlyname);
     state=get_status_num(status);
+    eb_debug(DBG_MSN, "searching for %s in %s...", buddy, ela->handle);
     ea = find_account_with_ela(buddy, ela);
     if (ea) {
+	eb_debug(DBG_MSN, "found\n");
         mad = (eb_msn_account_data *)ea->protocol_account_data;
 	if ((do_rename_contacts && l_list_length(ea->account_contact->accounts) == 1)
 	|| !strcmp(buddy, ea->account_contact->nick)) {	
 	   rename_contact(ea->account_contact, tmp);	
 	}
     } else {
-	    eb_debug(DBG_MSN, "ea not found, creating new account\n");
+	    eb_debug(DBG_MSN, "not found, creating new account\n");
 	    ea = eb_msn_new_account(ela, buddy);
             mad = (eb_msn_account_data *)ea->protocol_account_data;
 	    if(!find_grouplist_by_name(_("Buddies")))

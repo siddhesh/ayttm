@@ -106,7 +106,8 @@ enum yahoo_connection_type {
 	YAHOO_CONNECTION_YAB,
 	YAHOO_CONNECTION_WEBCAM_MASTER,
 	YAHOO_CONNECTION_WEBCAM,
-	YAHOO_CONNECTION_CHATCAT
+	YAHOO_CONNECTION_CHATCAT,
+	YAHOO_CONNECTION_SEARCH
 };
 
 enum yahoo_webcam_direction_type {
@@ -188,6 +189,7 @@ struct yahoo_buddy {
 	char *real_name;
 	struct yab *yab_entry;
 };
+
 
 /*
  * Function pointer to be passed to http get/post and send file

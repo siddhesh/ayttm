@@ -216,8 +216,8 @@ static input_list	*s_copy_input_list( input_list *inList )
 		{
 			case EB_INPUT_CHECKBOX:
 				{
-					new_item->widget.checkbox.name = s_strdup_allow_null( list->widget.checkbox.name );
-					new_item->widget.checkbox.label = s_strdup_allow_null( list->widget.checkbox.label );
+					new_item->name = s_strdup_allow_null( list->name );
+					new_item->label = s_strdup_allow_null( list->label );
 					new_item->widget.checkbox.value = calloc( 1, sizeof( int ) );
 					
 					if ( list->widget.checkbox.value != NULL )
@@ -229,8 +229,8 @@ static input_list	*s_copy_input_list( input_list *inList )
 			case EB_INPUT_ENTRY:
 			case EB_INPUT_PASSWORD:
 				{
-					new_item->widget.entry.name = s_strdup_allow_null( list->widget.entry.name );
-					new_item->widget.entry.label = s_strdup_allow_null( list->widget.entry.label );
+					new_item->name = s_strdup_allow_null( list->name );
+					new_item->label = s_strdup_allow_null( list->label );
 					new_item->widget.entry.value = s_strdup_pref( list->widget.entry.value );
 					new_item->widget.entry.entry = NULL;	/* this will be filled in when rendered - we ignore this field */
 				}
@@ -238,9 +238,9 @@ static input_list	*s_copy_input_list( input_list *inList )
 			
 			case EB_INPUT_LIST:
 				{
-					new_item->widget.entry.name = s_strdup_allow_null( list->widget.listbox.name );
-					new_item->widget.entry.label = s_strdup_allow_null( list->widget.listbox.label );
-					new_item->widget.entry.value = calloc( 1, sizeof(int) );
+					new_item->name = s_strdup_allow_null( list->name );
+					new_item->label = s_strdup_allow_null( list->label );
+					new_item->widget.listbox.value = calloc( 1, sizeof(int) );
 					new_item->widget.listbox.widget = NULL;	/* this will be filled in when rendered - we ignore this field */
 					new_item->widget.listbox.list = list->widget.listbox.list;
 					if ( list->widget.listbox.value != NULL )
@@ -278,8 +278,8 @@ static void	s_destroy_input_list( input_list *inList )
 		{
 			case EB_INPUT_CHECKBOX:
 				{
-					free( list->widget.checkbox.name );
-					free( list->widget.checkbox.label );
+					free( list->name );
+					free( list->label );
 					free( list->widget.checkbox.value );
 				}
 				break;
@@ -287,16 +287,16 @@ static void	s_destroy_input_list( input_list *inList )
 			case EB_INPUT_ENTRY:
 			case EB_INPUT_PASSWORD:
 				{
-					free( list->widget.entry.name );
-					free( list->widget.entry.label );
+					free( list->name );
+					free( list->label );
 					free( list->widget.entry.value );
 				}
 				break;
 			
 			case EB_INPUT_LIST:
 				{
-					free( list->widget.listbox.name );
-					free( list->widget.listbox.label );
+					free( list->name );
+					free( list->label );
 					free( list->widget.listbox.value );
 				}
 				break;

@@ -91,8 +91,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.19 $",
-	"$Date: 2003/10/26 17:19:22 $",
+	"$Revision: 1.20 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -108,22 +108,22 @@ static int aycryption_init()
 	plugin_info.prefs = il;
 
 	il->widget.checkbox.value = &store_passphrase;
-	il->widget.checkbox.name = "store_passphrase";
-	il->widget.checkbox.label = strdup(_("Store passphrase in memory"));
+	il->name = "store_passphrase";
+	il->label = strdup(_("Store passphrase in memory"));
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
        	il = il->next;
 	il->widget.entry.value = mykey;
-	il->widget.entry.name = "mykey";
-	il->widget.entry.label = strdup(_("Private key for signing:"));
+	il->name = "mykey";
+	il->label = strdup(_("Private key for signing:"));
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
        	il = il->next;
 	il->widget.checkbox.value = &do_aycryption_debug;
-	il->widget.checkbox.name = "do_aycryption_debug";
-	il->widget.checkbox.label = strdup(_("Enable debugging"));
+	il->name = "do_aycryption_debug";
+	il->label = strdup(_("Enable debugging"));
 	il->type = EB_INPUT_CHECKBOX;
 
 	outgoing_message_filters = l_list_append(outgoing_message_filters, &aycryption_out);

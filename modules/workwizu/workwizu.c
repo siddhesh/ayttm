@@ -113,8 +113,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu",
 	"Provides Workwizu Chat support",
-	"$Revision: 1.14 $",
-	"$Date: 2003/06/04 22:07:21 $",
+	"$Revision: 1.15 $",
+	"$Date: 2003/12/10 10:28:55 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -137,29 +137,29 @@ int plugin_init()
 	plugin_info.prefs = il;
 
 	il->widget.entry.value = server;
-	il->widget.entry.name = "server";
-	il->widget.entry.label = _("Server:");
+	il->name = "server";
+	il->label = _("Server:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = port;
-	il->widget.entry.name = "port";
-	il->widget.entry.label = _("Port:");
+	il->name = "port";
+	il->label = _("Port:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = owner;
-	il->widget.entry.name = "owner";
-	il->widget.entry.label = _("Distbase:");
+	il->name = "owner";
+	il->label = _("Distbase:");
 	il->type = EB_INPUT_ENTRY;
 	
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_wwz_debug;
-	il->widget.checkbox.name = "do_wwz_debug";
-	il->widget.checkbox.label = _("Enable debugging");
+	il->name = "do_wwz_debug";
+	il->label = _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
 
 	return(0);

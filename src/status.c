@@ -109,6 +109,11 @@ static int status_show = -1;
 static time_t last_sound_played = 0;
 static void eb_save_size( GtkWidget * widget, gpointer data );
 
+void do_events(void)
+{
+	gtk_main_iteration_do(FALSE);
+}
+
 void set_tooltips_active(int active)
 {
 	if(!status_tips)

@@ -3,6 +3,8 @@
  *
  * Some code copyright (C) 2002, Philip S Tellis <philip . tellis AT gmx . net>
  *
+ * Yahoo Search copyright (C) 2003, Konstantin Klyagin <konst@konst.org.ua>
+ *
  * Much of this code was taken and adapted from the yahoo module for
  * gaim released under the GNU GPL.  This code is also released under the 
  * GNU GPL.
@@ -1247,7 +1249,10 @@ static void yahoo_process_message(struct yahoo_input_data *yid, struct yahoo_pac
 	for (l = pkt->hash; l; l = l->next) {
 		struct yahoo_pair *pair = l->data;
 		if (pair->key == 1 || pair->key == 4)
-			message->from = pair->value;
+		{
+			if(!message->from)
+				message->from = pair->value;
+		}
 		else if (pair->key == 5)
 			message->to = pair->value;
 		else if (pair->key == 15)
@@ -1672,7 +1677,7 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 		if (isalpha(*magic_ptr) || isdigit(*magic_ptr)) {
 			loc = strchr(challenge_lookup, *magic_ptr);
 			if (!loc) {
-			        /* This isn't good */
+				/* This isn't good */
 				continue;
 			}
 
@@ -1688,7 +1693,7 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 
 			loc = strchr(operand_lookup, *magic_ptr);
 			if (!loc) {
-			        /* Also not good. */
+				/* Also not good. */
 				continue;
 			}
 
@@ -1696,7 +1701,7 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 
 			/* Oops; how did this happen? */
 			if (magic_cnt >= 64) 
-			        break;
+				break;
 
 			magic[magic_cnt++] = magic_work | local_store;
 			magic_ptr++;
@@ -1717,7 +1722,7 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 		/* Bad.  Abort.
 		 */
 		if ((magic_cnt + 1 > magic_len) || 
-		    (magic_cnt > magic_len))
+				(magic_cnt > magic_len))
 			break;
 
 		byte1 = magic[magic_cnt];
@@ -1748,21 +1753,21 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 			bl = cl;
 		else {
 			if (cl >= 0x0e0) {
-			        cl = cl & 0x0f;
-			        cl = cl << 6;
-			        bl = bl & 0x3f;
-			        bl = cl + bl;
-			        bl = bl << 6;
+				cl = cl & 0x0f;
+				cl = cl << 6;
+				bl = bl & 0x3f;
+				bl = cl + bl;
+				bl = bl << 6;
 			} else {
-			        cl = cl & 0x1f;
-			        cl = cl << 6;
-			        bl = cl;
+				cl = cl & 0x1f;
+				cl = cl << 6;
+				bl = cl;
 			}
 
 			cl = magic[magic_cnt+2];
 
 			if (!cl)
-			        break;
+				break;
 
 			cl = cl & 0x3f;
 			bl = bl + cl;
@@ -1775,10 +1780,10 @@ static void yahoo_process_auth_0x0b(struct yahoo_input_data *yid, const char *se
 
 		if (times == 0) {
 			value |= (bl & 0xff) << 8; 
-			value |= (bl & 0xff00) >> 8;           
+			value |= (bl & 0xff00) >> 8;
 		} else { 
 			value |= (bl & 0xff) << 24; 
-			value |= (bl & 0xff00) << 8;           
+			value |= (bl & 0xff00) << 8;
 			break; 
 		} 
 
@@ -2522,7 +2527,7 @@ static struct yahoo_packet * yahoo_getdata(struct yahoo_input_data * yid)
 	pkt->service = yahoo_get16(yid->rxqueue + pos); pos += 2;
 	pkt->status = yahoo_get32(yid->rxqueue + pos); pos += 4;
 	DEBUG_MSG(("Yahoo Service: 0x%02x Status: %d", pkt->service,
-		       pkt->status));
+				pkt->status));
 	pkt->id = yahoo_get32(yid->rxqueue + pos); pos += 4;
 
 	yd->session_id = pkt->id;
@@ -2641,7 +2646,7 @@ static struct yab * yahoo_getyab(struct yahoo_input_data *yid)
 	end = pos+2;
 	/* end with /> */
 	while(end < yid->rxlen-strlen("/>")+1 && memcmp(yid->rxqueue + end, "/>", strlen("/>")))
-	       	end++;
+		end++;
 
 	if(end >= yid->rxlen-1)
 		return NULL;
@@ -2787,7 +2792,7 @@ static int yahoo_get_webcam_data(struct yahoo_input_data *yid)
 		case 0x00:
 			/* user requests to view webcam (uploading) */
 			if (yid->wcd->data_size &&
-			    yid->wcm->direction == YAHOO_WEBCAM_UPLOAD) {
+				yid->wcm->direction == YAHOO_WEBCAM_UPLOAD) {
 				end = begin;
 				while (end <= yid->rxlen &&
 					yid->rxqueue[end++] != 13);
@@ -2883,11 +2888,14 @@ int yahoo_write_ready(int id, int fd, void *data)
 	return 1;
 }
 
-static void yahoo_process_pager_connection(struct yahoo_input_data *yid)
+static void yahoo_process_pager_connection(struct yahoo_input_data *yid, int over)
 {
 	struct yahoo_packet *pkt;
 	struct yahoo_data *yd = yid->yd;
 	int id = yd->client_id;
+
+	if(over)
+		return;
 
 	while (find_input_by_id_and_type(id, YAHOO_CONNECTION_PAGER) 
 			&& (pkt = yahoo_getdata(yid)) != NULL) {
@@ -2898,24 +2906,30 @@ static void yahoo_process_pager_connection(struct yahoo_input_data *yid)
 	}
 }
 
-static void yahoo_process_ft_connection(struct yahoo_input_data *yid)
+static void yahoo_process_ft_connection(struct yahoo_input_data *yid, int over)
 {
 }
 
-static void yahoo_process_chatcat_connection(struct yahoo_input_data *yid)
+static void yahoo_process_chatcat_connection(struct yahoo_input_data *yid, int over)
 {
+	if(over)
+		return;
+
 	if (strstr((char*)yid->rxqueue+(yid->rxlen-20), "</content>")) {
 		YAHOO_CALLBACK(ext_yahoo_chat_cat_xml)(yid->yd->client_id, (char*)yid->rxqueue);
 	}
 }
 
-static void yahoo_process_yab_connection(struct yahoo_input_data *yid)
+static void yahoo_process_yab_connection(struct yahoo_input_data *yid, int over)
 {
 	struct yahoo_data *yd = yid->yd;
 	struct yab *yab;
 	YList *buds;
 	int changed=0;
 	int id = yd->client_id;
+
+	if(over)
+		return;
 
 	while(find_input_by_id_and_type(id, YAHOO_CONNECTION_YAB) 
 			&& (yab = yahoo_getyab(yid)) != NULL) {
@@ -2969,7 +2983,7 @@ static void _yahoo_webcam_connected(int fd, int error, void *d)
 	inputs = y_list_prepend(inputs, yid);
 
 	LOG(("Connected"));
-       	/* send initial packet */
+	/* send initial packet */
 	switch (wcm->direction)
 	{
 		case YAHOO_WEBCAM_DOWNLOAD:
@@ -3076,10 +3090,13 @@ static void yahoo_webcam_connect(struct yahoo_input_data *y)
 
 }
 
-static void yahoo_process_webcam_master_connection(struct yahoo_input_data *yid)
+static void yahoo_process_webcam_master_connection(struct yahoo_input_data *yid, int over)
 {
 	char* server;
 	struct yahoo_server_settings *yss;
+
+	if(over)
+		return;
 
 	server = yahoo_getwebcam_master(yid);
 
@@ -3097,17 +3114,20 @@ static void yahoo_process_webcam_master_connection(struct yahoo_input_data *yid)
 	}
 }
 
-static void yahoo_process_webcam_connection(struct yahoo_input_data *yid)
+static void yahoo_process_webcam_connection(struct yahoo_input_data *yid, int over)
 {
 	int id = yid->yd->client_id;
 	int fd = yid->fd;
+
+	if(over)
+		return;
 
 	/* as long as we still have packets available keep processing them */
 	while (find_input_by_id_and_fd(id, fd) 
 			&& yahoo_get_webcam_data(yid) == 1);
 }
 
-static void (*yahoo_process_connection[])(struct yahoo_input_data *) = {
+static void (*yahoo_process_connection[])(struct yahoo_input_data *, int over) = {
 	yahoo_process_pager_connection,
 	yahoo_process_ft_connection,
 	yahoo_process_yab_connection,
@@ -3135,8 +3155,11 @@ int yahoo_read_ready(int id, int fd, void *data)
 		int e = errno;
 		DEBUG_MSG(("len == %d (<= 0)", len));
 
-		if(yid->type == YAHOO_CONNECTION_PAGER)
-			yid->yd->current_status = -1;
+		if(yid->type == YAHOO_CONNECTION_PAGER) {
+			YAHOO_CALLBACK(ext_yahoo_login_response)(yid->yd->client_id, YAHOO_LOGIN_SOCK, NULL);
+		}
+
+		yahoo_process_connection[yid->type](yid, 1);
 		yahoo_input_close(yid);
 
 		/* no need to return an error, because we've already fixed it */
@@ -3151,7 +3174,7 @@ int yahoo_read_ready(int id, int fd, void *data)
 	memcpy(yid->rxqueue + yid->rxlen, buf, len);
 	yid->rxlen += len;
 
-	yahoo_process_connection[yid->type](yid);
+	yahoo_process_connection[yid->type](yid, 0);
 
 	return len;
 }
@@ -3224,9 +3247,12 @@ static void yahoo_connected(int fd, int error, void *data)
 	if(fd < 0)
 		return;
 
-	pkt = yahoo_packet_new(YAHOO_SERVICE_VERIFY, YAHOO_STATUS_AVAILABLE, yd->session_id);
+	pkt = yahoo_packet_new(YAHOO_SERVICE_AUTH, YAHOO_STATUS_AVAILABLE, yd->session_id);
 	NOTICE(("Sending initial packet"));
+
+	yahoo_packet_hash(pkt, 1, yd->user);
 	yahoo_send_packet(fd, pkt, 0);
+
 	yahoo_packet_free(pkt);
 
 	yid = y_new0(struct yahoo_input_data, 1);

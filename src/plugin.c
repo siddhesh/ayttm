@@ -386,7 +386,7 @@ static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 		if(user_prefs) {
 			eb_update_from_value_pair(info->prefs, user_prefs);
 		}
-		eb_debug(DBG_MOD, "prefs name: %s\n", info->prefs->widget.entry.name);
+		eb_debug(DBG_MOD, "prefs name: %s\n", info->prefs->name);
 
 		if(info->reload_prefs) {
 			eb_debug(DBG_CORE, "Executing reload_prefs for %s\n", info->module_name);
@@ -433,7 +433,7 @@ static int	load_plugin_default( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 		if ( user_prefs != NULL )
 			eb_update_from_value_pair( info->prefs, user_prefs );
 
-		eb_debug( DBG_MOD, "prefs name: %s\n", info->prefs->widget.entry.name );
+		eb_debug( DBG_MOD, "prefs name: %s\n", info->prefs->name );
 
 		if(info->reload_prefs) {
 			eb_debug(DBG_CORE, "Executing reload_prefs for %s\n", info->module_name);

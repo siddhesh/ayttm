@@ -70,8 +70,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP",
 	"Provides Simple Mail Transfer Protocol (SMTP) support",
-	"$Revision: 1.19 $",
-	"$Date: 2003/07/31 09:02:11 $",
+	"$Revision: 1.20 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -96,15 +96,15 @@ static int plugin_init()
 
 	plugin_info.prefs = il;
 	il->widget.checkbox.value = &do_smtp_debug;
-	il->widget.checkbox.name = "do_smtp_debug";
-	il->widget.checkbox.label = _("Enable debugging");
+	il->name = "do_smtp_debug";
+	il->label = _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.checkbox.value = &default_online;
-	il->widget.checkbox.name = "default_online";
-	il->widget.checkbox.label = _("Contacts online by default");
+	il->name = "default_online";
+	il->label = _("Contacts online by default");
 	il->type = EB_INPUT_CHECKBOX;
 
 	return (0);
@@ -177,29 +177,29 @@ static void smtp_account_prefs_init(eb_local_account *ela)
 
 	ela->prefs = il;
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label = _("_Email Address:");
+	il->name = "SCREEN_NAME";
+	il->label = _("_Email Address:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sla->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label = _("_Password:");
+	il->name = "PASSWORD";
+	il->label = _("_Password:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sla->smtp_host;
-	il->widget.entry.name = "smtp_host";
-	il->widget.entry.label = _("SMTP _Server:");
+	il->name = "smtp_host";
+	il->label = _("SMTP _Server:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.entry.value = sla->smtp_port;
-	il->widget.entry.name = "smtp_port";
-	il->widget.entry.label = _("P_ort:");
+	il->name = "smtp_port";
+	il->label = _("P_ort:");
 	il->type = EB_INPUT_ENTRY;
 
 }

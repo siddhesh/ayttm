@@ -44,6 +44,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -119,8 +120,11 @@ static char filetransfer_port[MAX_PREF_LEN]="80";
 static char webcam_host[MAX_PREF_LEN]="webcam.yahoo.com";
 static char webcam_description[MAX_PREF_LEN]="";
 static char webcam_port[MAX_PREF_LEN]="5100";
+static char webcam_path[MAX_PREF_LEN]="";
 static int conn_type=0;
 
+static void * mywebcam_chat_menu_tag=0;
+static void * mywebcam_contact_menu_tag=0;
 static void * webcam_chat_menu_tag=0;
 static void * webcam_contact_menu_tag=0;
 
@@ -130,8 +134,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.76 $",
-	"$Date: 2003/11/14 11:28:05 $",
+	"$Revision: 1.77 $",
+	"$Date: 2003/12/10 10:28:55 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -154,51 +158,58 @@ static int plugin_init()
 	ref_count = 0;
 	plugin_info.prefs = il;
 	il->widget.entry.value = pager_host;
-	il->widget.entry.name = "pager_host";
-	il->widget.entry.label= _("Pager Server:");
+	il->name = "pager_host";
+	il->label= _("Pager Server:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = pager_port;
-	il->widget.entry.name = "pager_port";
-	il->widget.entry.label= _("Pager Port:");
+	il->name = "pager_port";
+	il->label= _("Pager Port:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = filetransfer_host;
-	il->widget.entry.name = "filetransfer_host";
-	il->widget.entry.label= _("File Transfer Host:");
+	il->name = "filetransfer_host";
+	il->label= _("File Transfer Host:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = filetransfer_port;
-	il->widget.entry.name = "filetransfer_port";
-	il->widget.entry.label= _("File Transfer Port:");
+	il->name = "filetransfer_port";
+	il->label= _("File Transfer Port:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = webcam_host;
-	il->widget.entry.name = "webcam_host";
-	il->widget.entry.label= _("Webcam Host:");
+	il->name = "webcam_host";
+	il->label= _("Webcam Host:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = webcam_port;
-	il->widget.entry.name = "webcam_port";
-	il->widget.entry.label= _("Webcam Port:");
+	il->name = "webcam_port";
+	il->label= _("Webcam Port:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = webcam_path;
+	il->name = "webcam_path";
+	il->label= _("Webcam Image Path:");
 	il->type = EB_INPUT_ENTRY;
 
 	
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.listbox.value = &conn_type;
-	il->widget.listbox.name = "conn_type";
-	il->widget.listbox.label= _("Connection type:");
+	il->name = "conn_type";
+	il->label= _("Connection type:");
 	{
 		LList *l=NULL;
 		l = l_list_append(l, _("Dialup"));
@@ -211,29 +222,29 @@ static int plugin_init()
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_prompt_save_file;
-	il->widget.checkbox.name = "do_prompt_save_file";
-	il->widget.checkbox.label= _("Prompt for transferred filename");
+	il->name = "do_prompt_save_file";
+	il->label= _("Prompt for transferred filename");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_guess_away;
-	il->widget.checkbox.name = "do_guess_away";
-	il->widget.checkbox.label= _("Guess status from Away messages");
+	il->name = "do_guess_away";
+	il->label= _("Guess status from Away messages");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_show_away_time;
-	il->widget.checkbox.name = "do_show_away_time";
-	il->widget.checkbox.label= _("Show how long contact has been away");
+	il->name = "do_show_away_time";
+	il->label= _("Show how long contact has been away");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_yahoo_debug;
-	il->widget.checkbox.name = "do_yahoo_debug";
-	il->widget.checkbox.label= _("Enable debugging");
+	il->name = "do_yahoo_debug";
+	il->label= _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
 
 	register_callbacks();
@@ -304,10 +315,15 @@ typedef struct {
 	int ignore_system;
 	int fd;
 	int id;
+
 	int input;
 	int timeout_tag;
 	int connect_progress_tag;
 	int connect_tag;
+
+	int webcam_timeout;
+	unsigned int webcam_start;
+
 	int status;
 	char *status_message;
 	int away;
@@ -1656,6 +1672,10 @@ static void ay_yahoo_view_users_webcam(ebmCallbackData *data)
 	eb_local_account *ela;
 	eb_yahoo_local_account_data *ylad;
 
+	if(!ecd->remote_account) {
+		return;
+	}
+
 	ela = find_local_account_by_handle(ecd->local_account, SERVICE_INFO.protocol_id);
 	if(!ela) {
 		ay_do_warning(_("Yahoo Error"), _("Cannot find a valid local account to view user's webcam.") );
@@ -1738,16 +1758,140 @@ static void ext_yahoo_webcam_closed(int id, char *who, int reason)
 
 }
 
+static void ay_yahoo_authorise_webcam(gpointer data, int result)
+{
+	struct webcam_feed *wf = data;
+
+	yahoo_webcam_accept_viewer(wf->id, wf->who, result);
+
+	free(wf->who);
+	free(wf);
+}
+
 static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
 {
+	eb_local_account *ela;
+	char buff[1024];
+	struct webcam_feed *wf;
+
+	ela = yahoo_find_local_account_by_id(id);
+
+	switch(connect) {
+		case 0:
+			snprintf(buff, sizeof(buff), 
+					_("%s, the yahoo user %s has stopped viewing your webcam."), ela->handle, who);
+			break;
+		case 1:
+			snprintf(buff, sizeof(buff), 
+					_("%s, the yahoo user %s is viewing your webcam."), ela->handle, who);
+			break;
+		case 2:
+			snprintf(buff, sizeof(buff), 
+					_("%s, the yahoo user %s wants to view your webcam.\nDo you want to allow this?"), ela->handle, who);
+			break;
+		default:
+			snprintf(buff, sizeof(buff), 
+					_("%s, the yahoo user %s wants to %d your webcam.  Tell the ayttm devels about this."), ela->handle, who, connect);
+			break;
+
+	}
+	if(connect != 2)
+		ay_do_info(_("Yahoo Webcam"), buff);
+	else {
+		wf = y_new0(struct webcam_feed, 1);
+		wf->id = id;
+		wf->who = strdup(who);
+		eb_do_dialog(buff, _("Yahoo Webcam Request"), ay_yahoo_authorise_webcam, wf);
+	}
+}
+
+static double get_time()
+{
+	struct timeval ct;
+	gettimeofday(&ct, 0);
+
+	/* return time in milliseconds */
+	return (ct.tv_sec * 1E3 + ct.tv_usec / 1E3);
+}
+
+static int ay_yahoo_webcam_timeout_callback(gpointer data)
+{
+	int id = GPOINTER_TO_INT(data);
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	unsigned char *image = NULL;
+	unsigned int length = 0;
+	unsigned int timestamp = (unsigned int)(get_time() - ylad->webcam_start);
+	FILE *f_image = NULL;
+	struct stat s_image;
+
+	if (stat(webcam_path, &s_image) == -1)
+		return 0;
+	length = s_image.st_size;
+	image = y_new0(unsigned char, length);
+
+	if ((f_image = fopen(webcam_path, "rb")) != NULL) {
+		fread(image, length, 1, f_image);
+		fclose(f_image);
+	} else {
+		WARNING(("Error reading from %s\n", webcam_path));
+		ay_do_warning(_("Yahoo Webcam"), _("Could not read images from your webcam, please check the webcam image path.") );
+		ylad->webcam_timeout=0;
+		return 0;
+	}
+
+	LOG(("Sending a webcam image (%d bytes)", length));
+	yahoo_webcam_send_image(id, image, length, timestamp);
+	FREE(image);
+	return 1;
 }
 
 static void ext_yahoo_webcam_data_request(int id, int send)
 {
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	if (send) {
+		LOG(("Got request to start sending images"));
+		ylad->webcam_timeout = eb_timeout_add(2*1000, 
+			(void *) ay_yahoo_webcam_timeout_callback, GINT_TO_POINTER(id));
+	} else {
+		LOG(("Got request to stop sending images"));
+		eb_timeout_remove(ylad->webcam_timeout);
+		ylad->webcam_timeout=0;
+	}
 }
 
 static void ext_yahoo_webcam_invite_reply(int id, char *from, int accept)
 {
+	eb_local_account *ela;
+
+	if(from && !accept) {
+		char buff[1024];
+		ela = yahoo_find_local_account_by_id(id);
+		snprintf(buff, sizeof(buff), _("%s, the yahoo user %s has declined your invitation to view your webcam."), ela->handle, from);
+		ay_do_info(_("Webcam invite declined"), buff);
+	}
+}
+
+static void ay_yahoo_invite_to_view_my_webcam(ebmCallbackData *data)
+{
+	ebmContactData *ecd = (ebmContactData *)data;
+	eb_local_account *ela;
+	eb_yahoo_local_account_data *ylad;
+
+	if(!ecd->remote_account) {
+		return;
+	}
+
+	ela = find_local_account_by_handle(ecd->local_account, SERVICE_INFO.protocol_id);
+	if(!ela) {
+		ay_do_warning(_("Yahoo Error"), _("Cannot find a valid local account to view user's webcam.") );
+		return;
+	}
+
+	ylad = ela->protocol_local_account_data;
+
+	yahoo_webcam_invite(ylad->id, ecd->remote_account);
 }
 
 /*
@@ -2198,50 +2342,50 @@ static void yahoo_init_account_prefs(eb_local_account * ela)
 	ela->prefs = il;
 
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= _("_Yahoo Id:");
+	il->name = "SCREEN_NAME";
+	il->label= _("_Yahoo Id:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = ylad->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label= _("_Password:");
+	il->name = "PASSWORD";
+	il->label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ylad->prompt_password;
-	il->widget.checkbox.name = "prompt_password";
-	il->widget.checkbox.label= _("_Ask for password at Login time");
+	il->name = "prompt_password";
+	il->label= _("_Ask for password at Login time");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
-	il->widget.checkbox.name = "CONNECT";
-	il->widget.checkbox.label= _("_Connect at startup");
+	il->name = "CONNECT";
+	il->label= _("_Connect at startup");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ylad->do_mail_notify;
-	il->widget.checkbox.name = "do_mail_notify";
-	il->widget.checkbox.label= _("Yahoo _Mail Notification");
+	il->name = "do_mail_notify";
+	il->label= _("Yahoo _Mail Notification");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ylad->login_invisible;
-	il->widget.checkbox.name = "login_invisible";
-	il->widget.checkbox.label= _("Login _invisible");
+	il->name = "login_invisible";
+	il->label= _("Login _invisible");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ylad->ignore_system;
-	il->widget.checkbox.name = "ignore_system";
-	il->widget.checkbox.label= _("Ignore _System Messages");
+	il->name = "ignore_system";
+	il->label= _("Ignore _System Messages");
 	il->type = EB_INPUT_CHECKBOX;
 }
 
@@ -3205,19 +3349,32 @@ struct service_callbacks *query_callbacks()
 
 static void register_menuentries()
 {
+	mywebcam_chat_menu_tag = eb_add_menu_item(_("Invite to view Webcam"), EB_CHAT_WINDOW_MENU, ay_yahoo_invite_to_view_my_webcam, ebmCONTACTDATA, NULL);
+	mywebcam_contact_menu_tag = eb_add_menu_item(_("Invite to view Webcam"), EB_CONTACT_MENU, ay_yahoo_invite_to_view_my_webcam, ebmCONTACTDATA, NULL);
+
+	eb_menu_item_set_protocol(mywebcam_chat_menu_tag, "Yahoo");
+	eb_menu_item_set_protocol(mywebcam_contact_menu_tag, "Yahoo");
+
 	webcam_chat_menu_tag = eb_add_menu_item(_("View Webcam"), EB_CHAT_WINDOW_MENU, ay_yahoo_view_users_webcam, ebmCONTACTDATA, NULL);
 	webcam_contact_menu_tag = eb_add_menu_item(_("View Webcam"), EB_CONTACT_MENU, ay_yahoo_view_users_webcam, ebmCONTACTDATA, NULL);
+
 	eb_menu_item_set_protocol(webcam_chat_menu_tag, "Yahoo");
 	eb_menu_item_set_protocol(webcam_contact_menu_tag, "Yahoo");
 }
 
 static void unregister_menuentries()
 {
+	if(mywebcam_chat_menu_tag)
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, mywebcam_chat_menu_tag);
+	if(mywebcam_contact_menu_tag)
+		eb_remove_menu_item(EB_CONTACT_MENU, mywebcam_contact_menu_tag);
+
 	if(webcam_chat_menu_tag)
 		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, webcam_chat_menu_tag);
 	if(webcam_contact_menu_tag)
 		eb_remove_menu_item(EB_CONTACT_MENU, webcam_contact_menu_tag);
 
+	mywebcam_chat_menu_tag = mywebcam_contact_menu_tag = 0;
 	webcam_chat_menu_tag = webcam_contact_menu_tag = 0;
 }
 

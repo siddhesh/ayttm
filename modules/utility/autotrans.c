@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.10 $",
-	"$Date: 2003/05/13 05:15:06 $",
+	"$Revision: 1.11 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
@@ -110,15 +110,15 @@ static int trans_init()
 	languages[10] = NULL;
 
 	il->widget.checkbox.value = &doTrans;
-	il->widget.checkbox.name = "doTrans";
-	il->widget.checkbox.label = _("Enable automatic translation");
+	il->name = "doTrans";
+	il->label = _("Enable automatic translation");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = calloc(1, sizeof(input_list));
 	il = il->next;
 	il->widget.listbox.value = &myLanguage;
-	il->widget.listbox.name = "myLanguage";
-	il->widget.listbox.label = _("My language code:");
+	il->name = "myLanguage";
+	il->label = _("My language code:");
 	{
 		LList *l=NULL;
 		int i;

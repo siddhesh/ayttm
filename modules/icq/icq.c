@@ -98,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ", 
 	"Provides support for the ICQ protocol", 
-	"$Revision: 1.8 $",
-	"$Date: 2003/06/04 22:07:19 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -116,22 +116,22 @@ static int plugin_init()
 	ref_count=0;
 	plugin_info.prefs = il;
 	il->widget.entry.value = icq_server;
-	il->widget.entry.name = "icq_server";
-	il->widget.entry.label = _("Server:");
+	il->name = "icq_server";
+	il->label = _("Server:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = icq_port;
-	il->widget.entry.name = "icq_port";
-	il->widget.entry.label = _("Port:");
+	il->name = "icq_port";
+	il->label = _("Port:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_icq_debug;
-	il->widget.checkbox.name = "do_icq_debug";
-	il->widget.checkbox.label = _("Enable debugging");
+	il->name = "do_icq_debug";
+	il->label = _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
 	return(0);
 }

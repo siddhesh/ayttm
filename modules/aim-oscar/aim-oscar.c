@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.18 $",
-	"$Date: 2003/10/26 15:04:03 $",
+	"$Revision: 1.19 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -120,15 +120,15 @@ plugin_init ()
 
 	plugin_info.prefs = il;
 	il->widget.checkbox.value = &do_oscar_debug;
-	il->widget.checkbox.name = "do_oscar_debug";
-	il->widget.checkbox.label = "Enable debugging";
+	il->name = "do_oscar_debug";
+	il->label = "Enable debugging";
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0 (input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &do_libfaim_debug;
-	il->widget.checkbox.name = "do_libfaim_debug";
-	il->widget.checkbox.label = "Enable libfaim debugging";
+	il->name = "do_libfaim_debug";
+	il->label = "Enable libfaim debugging";
 	il->type = EB_INPUT_CHECKBOX;
 
 	return 0;
@@ -1797,29 +1797,29 @@ oscar_init_account_prefs (eb_local_account *ela)
 	ela->prefs = il;
 
 	il->widget.entry.value = ela->handle;
-	il->widget.entry.name = "SCREEN_NAME";
-	il->widget.entry.label= "Screen name:";
+	il->name = "SCREEN_NAME";
+	il->label= "Screen name:";
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0 (input_list, 1);
 	il = il->next;
 	il->widget.entry.value = alad->password;
-	il->widget.entry.name = "PASSWORD";
-	il->widget.entry.label= "Password:";
+	il->name = "PASSWORD";
+	il->label= "Password:";
 	il->type = EB_INPUT_PASSWORD;
 
 	il->next = g_new0 (input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &alad->prompt_password;
-	il->widget.checkbox.name = "prompt_password";
-	il->widget.checkbox.label= "_Ask for password at Login time";
+	il->name = "prompt_password";
+	il->label= "_Ask for password at Login time";
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0 (input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &(ela->connect_at_startup);
-	il->widget.checkbox.name = "CONNECT";
-	il->widget.checkbox.label= "Connect at startup";
+	il->name = "CONNECT";
+	il->label= "Connect at startup";
 	il->type = EB_INPUT_CHECKBOX;
 }
 

@@ -72,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Notes", 
 	"Store notes about your contacts and buddies", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/06 17:04:50 $",
+	"$Revision: 1.8 $",
+	"$Date: 2003/12/10 10:28:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -108,8 +108,8 @@ static int plugin_init()
 	eb_debug(DBG_MOD, "Notes Dir: %s\n", notes_dir);
 	plugin_info.prefs = il;
 	il->widget.entry.value = notes_editor;
-	il->widget.entry.name = "notes_editor";
-	il->widget.entry.label = _("Notes Editor:");
+	il->name = "notes_editor";
+	il->label = _("Notes Editor:");
 	il->type = EB_INPUT_ENTRY;
 	return(0);
 }

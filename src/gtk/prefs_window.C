@@ -2768,10 +2768,10 @@ void	ay_module_panel::RenderModulePrefs( void )
 				{
 					char	*item_label = NULL;
 					
-					if ( the_list->widget.checkbox.label != NULL )
-						item_label = the_list->widget.checkbox.label;
+					if ( the_list->label != NULL )
+						item_label = the_list->label;
 					else
-						item_label = the_list->widget.checkbox.name;
+						item_label = the_list->name;
 						
 					_gtkut_button( item_label, the_list->widget.checkbox.value, m_top_container );
 					the_list->widget.checkbox.saved_value = *(the_list->widget.checkbox.value);
@@ -2785,10 +2785,10 @@ void	ay_module_panel::RenderModulePrefs( void )
 						
 					char	*item_label = NULL;
 					
-					if ( the_list->widget.entry.label != NULL )
-						item_label = the_list->widget.entry.label;
+					if ( the_list->label != NULL )
+						item_label = the_list->label;
 					else
-						item_label = the_list->widget.entry.name;
+						item_label = the_list->name;
 					
 					GtkWidget	*label = gtk_label_new( item_label );
 					gtk_widget_show( label );
@@ -2815,10 +2815,10 @@ void	ay_module_panel::RenderModulePrefs( void )
 						
 					char	*item_label = NULL;
 					
-					if ( the_list->widget.listbox.label != NULL )
-						item_label = the_list->widget.listbox.label;
+					if ( the_list->label != NULL )
+						item_label = the_list->label;
 					else
-						item_label = the_list->widget.listbox.name;
+						item_label = the_list->name;
 					
 					GtkWidget	*label = gtk_label_new( item_label );
 					gtk_widget_show( label );
@@ -3027,10 +3027,10 @@ void	ay_account_panel::RenderAccountPrefs( void )
 				{
 					char	*item_label = NULL;
 
-					if ( the_list->widget.checkbox.label != NULL )
-						item_label = the_list->widget.checkbox.label;
+					if ( the_list->label != NULL )
+						item_label = the_list->label;
 					else
-						item_label = the_list->widget.checkbox.name;
+						item_label = the_list->name;
 
 					_gtkut_button( item_label, the_list->widget.checkbox.value, m_top_container );
 					the_list->widget.checkbox.saved_value = *(the_list->widget.checkbox.value);
@@ -3044,10 +3044,10 @@ void	ay_account_panel::RenderAccountPrefs( void )
 
 					char	*item_label = NULL;
 
-					if ( the_list->widget.entry.label != NULL )
-						item_label = the_list->widget.entry.label;
+					if ( the_list->label != NULL )
+						item_label = the_list->label;
 					else
-						item_label = the_list->widget.entry.name;
+						item_label = the_list->name;
 
 					GtkWidget	*label = gtk_label_new( "" );
 					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
@@ -3077,10 +3077,10 @@ void	ay_account_panel::RenderAccountPrefs( void )
 						
 					char	*item_label = NULL;
 					
-					if ( the_list->widget.entry.label != NULL )
-						item_label = the_list->widget.entry.label;
+					if ( the_list->label != NULL )
+						item_label = the_list->label;
 					else
-						item_label = the_list->widget.entry.name;
+						item_label = the_list->name;
 					
 					GtkWidget	*label = gtk_label_new( "" );
 					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
@@ -3111,10 +3111,10 @@ void	ay_account_panel::RenderAccountPrefs( void )
 						
 					char	*item_label = NULL;
 					
-					if ( the_list->widget.listbox.label != NULL )
-						item_label = the_list->widget.listbox.label;
+					if ( the_list->label != NULL )
+						item_label = the_list->label;
 					else
-						item_label = the_list->widget.listbox.name;
+						item_label = the_list->name;
 					
 					GtkWidget	*label = gtk_label_new( "" );
 					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);

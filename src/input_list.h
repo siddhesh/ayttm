@@ -40,24 +40,18 @@ enum
 
 typedef struct _checkbox_input
 {
-	char	*name;
-	char	*label;
 	int	*value;
 	int	saved_value;
 } checkbox_input;
 
 typedef struct _entry_input
 {
-	char	*name;
-	char	*label;
 	char	*value;
 	void	*entry; /* GtkWidget */
 } entry_input;
 
 typedef struct _list_input
 {
-	char	*name;
-	char	*label;
 	int	*value;
 	LList	*list;
 	void	*widget; /* GtkWidget */
@@ -66,6 +60,9 @@ typedef struct _list_input
 typedef struct _input_list
 {
 	int	type;
+	char	*name;
+	char	*label;
+	char	*tooltip;
 	union
 	{
 		checkbox_input	checkbox;
