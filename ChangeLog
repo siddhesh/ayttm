@@ -1,3 +1,9 @@
+* Wed Oct 22 2003 05:23 GMT [philip]	0.4.3-9
+- src/account.c
+Fix password encoding algorithm which was broken for two specific
+characters in a password.  Passwords for any account with password
+enc_type==2 will have to be reset in ayttm (through the account editor).
+
 * Tue Oct 21 2003 04:09 GMT [philip]	0.4.3-8
 - ChangeLog, configure
 we're still in 0.4.3 - which was the last release.  0.4.4 is

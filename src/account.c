@@ -67,8 +67,10 @@ const char *decode_password(const char *pass_in, int enc_type)
 				pwd[i] = ((pwd[i]-'A')^2) + 'A';
 			} else if(pwd[i] >= 'X' && pwd[i] <='Z') {
 				pwd[i] = ((pwd[i]-'A')^1) + 'A';
-			} else if(pwd[i] >= '0' && pwd[i] <='9') {
+			} else if(pwd[i] >= '0' && pwd[i] <='7') {
 				pwd[i] = ((pwd[i]-'0')^2) + '0';
+			} else if(pwd[i] >= '8' && pwd[i] <='9') {
+				pwd[i] = ((pwd[i]-'0')^1) + '0';
 			}
 		}
 	}
