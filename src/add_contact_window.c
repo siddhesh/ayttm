@@ -22,6 +22,7 @@
 #include "intl.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "service.h"
 #include "status.h"
@@ -129,10 +130,14 @@ LList * get_all_accounts(int serviceid)
 	while(node) {
 		LList * g = get_eb_accounts(((struct contact*)node->data)->nick);
 		while (g) {
-			eb_account *ac = (eb_account *)g->data;
+			eb_account	*ac = (eb_account *)g->data;
+			LList		*next = g->next;
+			
 			if (ac->service_id == serviceid)
-				newlist = l_list_append(newlist, ac->handle);	
-			g = g->next;
+				newlist = l_list_append(newlist, ac->handle);
+			
+			free( g );	
+			g = next;
 		}
 		node = node->next;
 	}

@@ -52,6 +52,7 @@ typedef unsigned long ulong;
 #include "smileys.h"
 #include "gtk_globals.h"
 #include "activity_bar.h"
+#include "tcp_util.h"
 
 #include "pixmaps/jabber_online.xpm"
 #include "pixmaps/jabber_away.xpm"
@@ -79,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber Service", 
 	"Jabber Messenger support", 
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/07 10:35:42 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/08 02:44:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -120,6 +121,11 @@ static int plugin_init()
 
 static int plugin_finish()
 {
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		g_free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
 	return(ref_count);
 }
@@ -179,8 +185,8 @@ static void jabber_info_update(eb_account *account);
 static void jabber_info_data_cleanup(info_window *iw);
 static int is_setting_state = 0;
 
-void jabber_dialog_callback( gpointer data, int result );
-void jabber_list_dialog_callback( char * text, gpointer data );
+static void jabber_dialog_callback( gpointer data, int result );
+static void jabber_list_dialog_callback( char * text, gpointer data );
 void JABBERInstantMessage(void *data);
 void JABBERStatusChange(void *data);
 void JABBERDialog(void *data);
@@ -188,7 +194,7 @@ void JABBERListDialog(char **list, void *data);
 void JABBERLogout(void *data);
 void JABBERError(char* title, char *message);
 
-void jabber_dialog_callback( gpointer data, int response )
+static void jabber_dialog_callback( gpointer data, int response )
 {
     JABBER_Dialog_PTR jd;
 
@@ -204,7 +210,7 @@ void jabber_dialog_callback( gpointer data, int response )
     free(jd);
 }
 
-void jabber_list_dialog_callback( char * text, gpointer data )
+static void jabber_list_dialog_callback( char * text, gpointer data )
 {
     JABBER_Dialog_PTR jd;
 

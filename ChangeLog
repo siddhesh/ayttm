@@ -1,3 +1,11 @@
+* Tue Apr 08 2003 03:40 GMT [andy]	0.2.3-54
+- modules/*-toc/libtoc/libtoc.c
+Don't dereference pointer after we free it...
+- modules/jabber/jabber.c
+  modules/msn2/libmsn2/msn_core.C
+  src/add_contact_window.c
+Fix more memory leaks
+
 * Mon Apr 07 2003 15:50 GMT [edward]	0.2.3-53
 - modules/yahoo/libyahoo2/yahoo_httplib.c
   src/tcp_utils.c

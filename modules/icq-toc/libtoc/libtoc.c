@@ -477,8 +477,8 @@ static void icqtoc_get_file_data( gpointer data, int source, eb_input_condition 
 		send( conn->fd, conn->header2, header_size - 6, 0 );
 		eb_input_remove(conn->handle);
 		close(conn->fd);
-		g_free(conn);
 		icqtoc_complete_file_recieve(conn->progress);
+		g_free(conn);
 	}
 }
 

@@ -251,11 +251,15 @@ void msn_set_BLP(msnconn * conn, char c)
 
 int msn_set_friendlyname(msnconn * conn, char * friendlyname)
 {
-  char * username;
-  int res;
+  char	*username = NULL;
+  int	res = 0;
+  char	*url = NULL;
   
   username=((authdata_NS *)conn->auth)->username;
-  snprintf(buf, sizeof(buf), "REA %d %s %s\r\n", next_trid++, username, msn_encode_URL(friendlyname));
+  url = msn_encode_URL(friendlyname);
+  snprintf(buf, sizeof(buf), "REA %d %s %s\r\n", next_trid++, username, url);
+  delete [] url;
+  
   res = write(conn->sock, buf, strlen(buf));
   
   return (res);
@@ -1908,6 +1912,7 @@ static void msn_connect_cb2(int fd, int error, void *data)
   connectinfo * info;
   msnconn *conn = (msnconn *)data;	
 
+  /* FIXME: This memory is leaked - Andy */
   info=new connectinfo;
 
   // The following is necessary as username and password may be temp variables

@@ -476,8 +476,8 @@ static void toc_get_file_data( gpointer data, int source, eb_input_condition con
 		send( conn->fd, conn->header2, header_size - 6, 0 );
 		eb_input_remove(conn->handle);
 		close(conn->fd);
-		g_free(conn);
 		toc_complete_file_recieve(conn->progress);
+		g_free(conn);
 	}
 }
 
