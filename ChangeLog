@@ -1,3 +1,7 @@
+* Fri May 16 2003 16:05 GMT [colin]	0.3.1-pre2
+- src/chat_window.c
+disable focus grab when tabbed chat is on
+
 * Fri May 16 2003 16:05 GMT [colin]	0.3.1-pre1
 Freeze ! :)
 

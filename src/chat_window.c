@@ -100,6 +100,8 @@ static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer user
 LList *outgoing_message_filters=NULL;
 LList *incoming_message_filters=NULL;
 
+
+#define ENTRY_FOCUS(x) { if (!x->notebook) gtk_widget_grab_focus(x->entry); }
 #ifdef HAVE_ICONV_H
 
 /*
@@ -793,7 +795,7 @@ static void handle_focus(GtkWidget *widget, GdkEventFocus * event,
 	chat_window * cw = (chat_window *)userdata;
 	eb_update_window_title(cw, FALSE);
 	if(cw->entry)
-		gtk_widget_grab_focus(cw->entry);
+		ENTRY_FOCUS(cw);
 }
 
 /*This handles the right mouse button clicks*/
@@ -1117,7 +1119,7 @@ static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage
 			c = (struct contact*)l2->data;
 			if (c->chatwindow && c->chatwindow->notebook_child == page->child) {
 				set_tab_normal(c);
-				gtk_widget_grab_focus(c->chatwindow->entry);
+				ENTRY_FOCUS(c->chatwindow);
 				eb_update_window_title_to_tab (page_num, FALSE);
 			}
 		}
@@ -1434,12 +1436,12 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 				eb_restore_last_conv (buff, remote_contact->chatwindow);
 			}
 			gdk_window_raise(remote_contact->chatwindow->window->window);
-			gtk_widget_grab_focus(remote_contact->chatwindow->entry);
+			ENTRY_FOCUS(remote_contact->chatwindow);
 		}
 
 	} else {
 		gdk_window_raise(remote_contact->chatwindow->window->window);
-		gtk_widget_grab_focus(remote_contact->chatwindow->entry);
+		ENTRY_FOCUS(remote_contact->chatwindow);
 	}
 
 	if (remote_contact->chatwindow->notebook != NULL) {
@@ -1483,12 +1485,12 @@ void eb_chat_window_display_account(eb_account * remote_account)
 				eb_restore_last_conv(buff,remote_contact->chatwindow);	
 			}
 			gdk_window_raise(remote_contact->chatwindow->window->window);
-			gtk_widget_grab_focus(remote_contact->chatwindow->entry);
+			ENTRY_FOCUS(remote_contact->chatwindow);
 		} else /* Did they get denied because they're in the Unknown group? */
 			return;
 	} else if (remote_contact->chatwindow && remote_contact->chatwindow->window) {
 		gdk_window_raise(remote_contact->chatwindow->window->window);
-		gtk_widget_grab_focus(remote_contact->chatwindow->entry);
+		ENTRY_FOCUS(remote_contact->chatwindow);
 	}       
     
 	eb_update_window_title(remote_contact->chatwindow, FALSE);
@@ -1502,7 +1504,7 @@ void eb_chat_window_display_account(eb_account * remote_account)
 				  page_num);
 	} else {
 		gdk_window_raise(remote_contact->chatwindow->window->window);	  
-		gtk_widget_grab_focus(remote_contact->chatwindow->entry);
+		ENTRY_FOCUS(remote_contact->chatwindow);
 	}
 	remote_contact->chatwindow->preferred = remote_account;
 }
