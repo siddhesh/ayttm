@@ -1,3 +1,7 @@
+* Thu Dec 18 2003 19:31 GMT [philip]	0.4.5-13
+- modules/yahoo2/yahoo.c
+Webcam sending probably works, but I'm behind a firewall, so can't test
+
 * Wed Dec 17 2003 11:52 GMT [philip]	0.4.5-12
 - src/image_window.[ch]
 - modules/image_filter

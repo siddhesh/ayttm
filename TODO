@@ -11,7 +11,6 @@ TODO later
 * recoding and filtering in chatrooms
 * Non-blocking connection in IRC
 * Yahoo voice support ? 
-* 1-to-1 conversation -> group chat by inviting a user
 * Remember last selected smiley pack - Done gloablly, should be per chat
 
 eyecandy

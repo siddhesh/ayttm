@@ -135,8 +135,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.80 $",
-	"$Date: 2003/12/12 20:03:40 $",
+	"$Revision: 1.81 $",
+	"$Date: 2003/12/18 19:38:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1777,6 +1777,11 @@ static void ext_yahoo_webcam_closed(int id, char *who, int reason)
 static void ay_yahoo_authorise_webcam(gpointer data, int result)
 {
 	struct webcam_feed *wf = data;
+	eb_local_account *ela = yahoo_find_local_account_by_id(wf->id);
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+
+	if(!ylad->webcam_start && result)
+		yahoo_webcam_get_feed(ylad->id, NULL);
 
 	yahoo_webcam_accept_viewer(wf->id, wf->who, result);
 
@@ -1850,10 +1855,14 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	unsigned char *image = NULL;
 	unsigned int length = 0;
-	unsigned int timestamp = (unsigned int)(get_time() - ylad->webcam_start);
+	unsigned int timestamp;
 	FILE *f_image = NULL;
 	struct stat s_image;
 
+	if(ylad->webcam_start == 0)
+		ylad->webcam_start = (unsigned int)get_time();
+
+	timestamp = (unsigned int)(get_time() - ylad->webcam_start);
 	if (stat(webcam_path, &s_image) == -1)
 		return 0;
 	length = s_image.st_size;
@@ -1865,7 +1874,7 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 	} else {
 		WARNING(("Error reading from %s\n", webcam_path));
 		ay_do_warning(_("Yahoo Webcam"), _("Could not read images from your webcam, please check the webcam image path.") );
-		ylad->webcam_timeout=0;
+		ylad->webcam_timeout=ylad->webcam_start=0;
 		return 0;
 	}
 
@@ -1886,7 +1895,7 @@ static void ext_yahoo_webcam_data_request(int id, int send)
 	} else {
 		LOG(("Got request to stop sending images"));
 		eb_timeout_remove(ylad->webcam_timeout);
-		ylad->webcam_timeout=0;
+		ylad->webcam_timeout=ylad->webcam_start=0;
 	}
 }
 
@@ -1920,6 +1929,8 @@ static void ay_yahoo_invite_to_view_my_webcam(ebmCallbackData *data)
 
 	ylad = ela->protocol_local_account_data;
 
+	if(!ylad->webcam_start)
+		yahoo_webcam_get_feed(ylad->id, NULL);
 	yahoo_webcam_invite(ylad->id, ecd->remote_account);
 }
 
