@@ -1,3 +1,7 @@
+* Thu Apr 10 2003 18:30 GMT [philip]	0.2.3-92
+- modules/yahoo2/yahoo.c
+Don't segfault if typing timeout gets called while account is logged out
+
 * Thu Apr 10 2003 08:33 GMT [colin]	0.2.3-91
 - modules/jabber/jabber.c
 Still update the menu when signing off

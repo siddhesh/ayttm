@@ -124,8 +124,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.16 $",
-	"$Date: 2003/04/09 18:58:22 $",
+	"$Revision: 1.17 $",
+	"$Date: 2003/04/10 18:40:26 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -280,7 +280,7 @@ typedef struct {
 
 typedef struct {
 	int id;
-	char *to_handle;
+	eb_acccount *ea;
 } eb_ext_yahoo_typing_notify_data;
 
 typedef struct {
@@ -1454,38 +1454,37 @@ static int eb_yahoo_send_typing_stop(gpointer data)
 
 	ext_yahoo_log("Stop typing\n");
 
-	yahoo_send_typing(tcd->id, ylad->act_id, tcd->to_handle, 0);
+	yahoo_send_typing(tcd->id, ylad->act_id, tcd->ea->handle, 0);
 
-	FREE(tcd->to_handle);
+	((eb_yahoo_account_data *)tcd->ea->protocol_account_data)->typing_timeout_tag = 0;
+
 	FREE(tcd);
 
 	/* return 0 to remove the timeout */
 	return 0;
-
-
-	/* maybe I should also set yad->typing_timeout_tag to 0 here */
 }
 
 static int eb_yahoo_send_typing(eb_local_account *from, eb_account *to)
 {
 	eb_yahoo_local_account_data *ylad = from->protocol_local_account_data;
 	eb_yahoo_account_data *yad = to->protocol_account_data;
-	eb_ext_yahoo_typing_notify_data *tcd = g_new0(eb_ext_yahoo_typing_notify_data, 1);
+	eb_ext_yahoo_typing_notify_data *tcd;
 	
-
-
-	if( iGetLocalPref("do_send_typing_notify") )
-		yahoo_send_typing(ylad->id, ylad->act_id, to->handle, 1);
-
 
 	/* if there's already a typing stop notify in the queue,
 	 * cancel it and set a new one */
 	if(yad->typing_timeout_tag)
 		eb_timeout_remove(yad->typing_timeout_tag);
 
+	if( !iGetLocalPref("do_send_typing_notify") )
+		return;
 
+	yahoo_send_typing(ylad->id, ylad->act_id, to->handle, 1);
+
+
+	tcd = g_new0(eb_ext_yahoo_typing_notify_data, 1);
 	tcd->id = ylad->id;
-	tcd->to_handle = g_strdup(to->handle);
+	tcd->ea = to;
 	
 	/* now, set a timeout to send typing stop notify */
 	yad->typing_timeout_tag = eb_timeout_add(5*1000, 
@@ -1737,6 +1736,17 @@ static void eb_yahoo_logout(eb_local_account * ela)
 			buddy_logoff(ea);
 			buddy_update_status(ea);
 			yad = ea->protocol_account_data;
+			if(yad->typing_timeout_tag) {
+				eb_timeout_remove(yad->typing_timeout_tag);
+				/* FIXME */
+				/* This will cause a memory leak because the
+				 * timeout data has not been freed.  For now
+				 * this avoids a segfault, which is a bigger
+				 * problem from the user's pov.
+				 */
+				yad->typing_timeout_tag = 0;
+			}
+			
 			yad->status = YAHOO_STATUS_OFFLINE;
 			yad->away = 1;
 
