@@ -1,20 +1,24 @@
-* Wed Jan 14 2004 04:48 GMT [philip]     0.4.6-pre8
+* Wed Jan 14 2004 22:23 GMT [philip]	0.4.6-pre9
+- modules/yahoo2/libyahoo2/
+yahoo auth works again
+
+* Wed Jan 14 2004 04:48 GMT [philip]	0.4.6-pre8
 - modules/aycryption/aycryption.c
 use g_new0 instead of calloc for consistency
 
-* Fri Jan 09 2004 05:07 GMT [philip]     0.4.6-pre7
+* Fri Jan 09 2004 05:07 GMT [philip]	0.4.6-pre7
 - include ayttm_streamer_wrapper.sh in dist
 
-* Thu Jan 08 2004 15:51 GMT [philip]     0.4.6-pre6
+* Thu Jan 08 2004 15:51 GMT [philip]	0.4.6-pre6
 - configure.ac
 allow user to specify jasper path
 
-* Thu Jan 08 2004 09:49 GMT [chris]     0.4.6-pre5
+* Thu Jan 08 2004 09:49 GMT [chris]	0.4.6-pre5
 - src/crash.c
 include missing headers, needed for correct 64 bit
 compile (Debian bug#226665)
 
-* Wed Jan 07 2004 08:22 GMT [chris]     0.4.6-pre4
+* Wed Jan 07 2004 08:22 GMT [chris]	0.4.6-pre4
 - gen
 replace 'function check_gettext' with 
 POSIX sh compatible 'check_gettext()'

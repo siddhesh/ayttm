@@ -1,7 +1,7 @@
 /*
  * libyahoo2: yahoo2.h
  *
- * Copyright (C) 2002, Philip S Tellis <philip . tellis AT gmx . net>
+ * Copyright (C) 2002-2004, Philip S Tellis <philip.tellis AT gmx.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,6 +93,7 @@ void yahoo_get_yab(int id);
 /* modify that entry else it creates a new entry */
 void yahoo_set_yab(int id, struct yab * yab);
 void yahoo_keepalive(int id);
+void yahoo_chat_keepalive(int id);
 
 /* from is the identity you're sending from.  if NULL, the default is used */
 /* utf8 is whether msg is a utf8 string or not. */
