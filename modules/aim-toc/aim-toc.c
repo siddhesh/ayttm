@@ -84,13 +84,16 @@ static int ref_count = 0;
 static char aim_server[MAX_PREF_LEN] = "toc.oscar.aol.com";
 static char aim_port[MAX_PREF_LEN] = "80";
 
+static int aim_fallback_ports[]={9898, 80, 0};
+static int aim_last_fallback=0;
+static int should_fallback=0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.13 $",
-	"$Date: 2003/04/09 12:12:16 $",
+	"$Revision: 1.14 $",
+	"$Date: 2003/04/09 14:25:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -735,6 +738,7 @@ static void eb_aim_login( eb_local_account * account )
 {
 	struct eb_aim_local_account_data * alad;
 	char buff[1024];
+	int port = atoi(aim_port);
 	snprintf(buff, sizeof(buff), _("Logging in to AIM account: %s"), account->handle);
 
 	account->connecting = 1;
@@ -742,8 +746,14 @@ static void eb_aim_login( eb_local_account * account )
 
 	alad->activity_tag = ay_activity_bar_add(buff, ay_aim_cancel_connect, account);
 	
+	if (should_fallback) {
+		port = aim_fallback_ports[aim_last_fallback];
+		aim_last_fallback++;
+		should_fallback = 0;
+	}
+	printf("connecting WITH %d\n",port);
 	alad->connect_tag = toc_signon( account->handle, alad->password,
-			      aim_server, atoi(aim_port), alad->aim_info);
+			      aim_server, port, alad->aim_info);
 	
 }
 
@@ -765,8 +775,14 @@ static void eb_aim_logged_in (toc_conn *conn)
 	if(alad->conn->fd == -1 )
 	{
 		g_warning("eb_aim UNKNOWN CONNECTION PROBLEM");
-		do_error_dialog(_("Cannot connect to AIM due to network problem."), _("AIM Error"));
 		eb_aim_logout(ela);
+		if(aim_fallback_ports[aim_last_fallback] != 0) {
+			should_fallback=1;
+			eb_aim_login(ela);
+		} else {
+			do_error_dialog(_("Cannot connect to AIM due to network problem."), _("AIM Error"));
+			should_fallback=0;
+		}
 		return;
 	}
 	eb_debug(DBG_TOC, "eb_aim_login %d %d\n", alad->conn->fd, alad->conn->seq_num );

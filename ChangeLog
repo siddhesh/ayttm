@@ -1,4 +1,8 @@
-* Wed Apr 09 2003 13:35 GMT [andy]	0.2.3-78
+* Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-79
+- modules/aim-toc/aim-toc.c
+Fallback ports
+
+* Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-78
 - modules/icq-toc/libtoc
 Try to fix "network errors" from some places
 
