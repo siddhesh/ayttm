@@ -1,3 +1,9 @@
+* Sun Apr 13 2003 10:50 GMT [andy]	0.2.3-95
+- configure.in
+  modules/Makefile.am
+Allow aim-toc and icq-toc to be disabled
+Add sys/poll.h to AC_CHECK_HEADERS
+
 * Fri Apr 11 2003 16:45 GMT [andy]	0.2.3-94
 - configure.in
 '--enable-all-warnings' should apply to C++ too
