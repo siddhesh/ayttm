@@ -9,11 +9,25 @@ then
 	CXX=g++-2
 	export CXX
 fi
+case `$CC --version | sed -e 's,\..*,.,' -e q` in
+      2.)
+        if $CC -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
+          msnative_struct='-fnative-struct'
+        fi
+        ;;
+      *)
+        if $CC -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+          msnative_struct='-mms-bitfields'
+        fi
+        ;;
+esac
+
+export msnative_struct
 if [ X"$1" != X"noconfig" ]
 then
 	ACLOCAL_FLAGS='-I mingw32'
-	CFLAGS='-mno-cygwin -fnative-struct -I/target/include -I/target/include/glib-2.0 -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include'
-	CXXFLAGS='-mno-cygwin -fnative-struct -I/target/include -I/target/include/glib-2.0 -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include'
+	CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/target/include/glib-2.0 -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include"
+	CXXFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/target/include/glib-2.0 -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include"
 	export CFLAGS ACLOCAL_FLAGS CXXFLAGS
 	./gen
 	./configure -build="mingw32" -host="mingw32"
@@ -23,7 +37,7 @@ then
 	#cp -f .ACE src/Makefile
 fi
 cd libltdl
-${CC} -I. -I../mingw32 -mno-cygwin -fnative-struct -D__WINDOWS__ -DHAVE_CONFIG_H -UCYGWIN -UCYGWIN32 -c ltdl.c
+${CC} -I. -I../mingw32 -mno-cygwin $msnative_struct -D__WINDOWS__ -DHAVE_CONFIG_H -UCYGWIN -UCYGWIN32 -c ltdl.c
 ar r libltdl.a ltdl.o
 cd ..
 

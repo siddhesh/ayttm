@@ -1,3 +1,9 @@
+* Tue May 14 2003 12:20 GMT [edward]	0.3.0-190
+- mingw
+  configure.ac
+  mingw32/makeebdll
+Added more mingw32 flags
+
 * Tue May 13 2003 04:47 GMT [philip]	0.3.0-189
 - src/dialog.[ch] modules/utility/autotrans.c modules/jabber.c
 let do_list_dialog take a const list

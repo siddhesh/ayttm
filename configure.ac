@@ -14,7 +14,20 @@ CORE_VERSION=13
 AM_CONFIG_HEADER(config.h)
 
 if test "x$host_alias" = "xmingw32"; then
-	EB_CFLAGS="-mno-cygwin -fnative-struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -I../mingw32 -D_REENTRANT -Wall -g"
+    case `$CC --version | sed -e 's,\..*,.,' -e q` in
+      2.)
+        if $CC -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
+          msnative_struct='-fnative-struct'
+        fi
+        ;;
+      *)
+        if $CC -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+          msnative_struct='-mms-bitfields'
+        fi
+        ;;
+    esac
+
+	EB_CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -I../mingw32 -D_REENTRANT -Wall -g"
 	EB_LDADD="$LDADD"
 	EB_LIBS="-Wl,-subsystem,windows -Wl,--export-dynamic -L../libproxy -lproxy /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib /target/lib/libgtk.dll.a /target/lib/libgdk.dll.a /target/lib/libglib-2.0.dll.a -lwinmm -lws2_32 -lwst -lmsvcrt"
 fi
@@ -189,7 +202,7 @@ if test "$enable_webcam" != "no"; then
 
 fi
 else
- 	GTK_CFLAGS="-mno-cygwin -fnative-struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -D_REENTRANT -Wall -g -I../mingw32"
+ 	GTK_CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -D_REENTRANT -Wall -g -I../mingw32"
 fi
 
 EB_CFLAGS="$EB_CFLAGS $GLIB_CFLAGS $GTK_CFLAGS $GDK_PIXBUF_CFLAGS"
