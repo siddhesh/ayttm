@@ -126,15 +126,15 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.23 $",
-	"$Date: 2003/04/27 11:29:02 $",
+	"$Revision: 1.24 $",
+	"$Date: 2003/04/27 11:57:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
 	NULL
 };
 struct service SERVICE_INFO = {"Yahoo", -1, 
-	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER | SERVICE_CAN_ICONVERT, 
+	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_FILETRANSFER | SERVICE_CAN_ICONVERT | SERVICE_CAN_MULTIACCOUNT, 
 	NULL};
 /* End Module Exports */
 

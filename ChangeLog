@@ -1,4 +1,8 @@
-* Sun Apr 27 2003 09:45 GMT [philip]	0.3.0-3
+* Sun Apr 27 2003 11:55 GMT [philip]	0.3.0-4
+- src/edit_local_accounts.c
+allow multiple accounts for services that support it
+
+* Sun Apr 27 2003 10:15 GMT [philip]	0.3.0-3
 - src/service.h, modules/{all service modules}
 change service capabilities structure to be more flexible
 
