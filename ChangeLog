@@ -1,3 +1,7 @@
+* Sat Dec 20 2003 15:14 GMT [philip]	0.4.5-16
+- modules/yahoo2/yahoo.c
+Ok, I think webcam broadcast works... I've seen myself, and I'm green!
+
 * Sat Dec 20 2003 08:17 GMT [philip]	0.4.5-15
 - modules/yahoo2/yahoo.c
 set ela->connecting to 0 only after complete connect is through

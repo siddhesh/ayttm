@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.83 $",
-	"$Date: 2003/12/20 08:21:43 $",
+	"$Revision: 1.84 $",
+	"$Date: 2003/12/20 15:18:51 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -343,12 +343,15 @@ static void free_yahoo_local_account(eb_yahoo_local_account_data * yla, int free
 
 	while(yla->webcams) {
 		struct webcam_feed *wf = yla->webcams->data;
+		YList *tmp = yla->webcams;
 		FREE(wf->who);
 		FREE(wf->buff);
 		if(wf->image_window_tag)
 			ay_image_window_close(wf->image_window_tag);
 		FREE(wf);
-		yla->webcams = y_list_remove(yla->webcams, yla->webcams);
+
+		yla->webcams = y_list_remove_link(yla->webcams, yla->webcams);
+		y_list_free_1(tmp);
 	}
 
 	if(free_all)
@@ -1562,6 +1565,8 @@ static void ext_yahoo_chat_message(int id, char *who, char *room, char *msg, int
 /******************************
  * Webcam code starts here
  */
+static void ay_yahoo_stop_webcam(eb_local_account *);
+
 static void _image_window_closed(int tag, void *data)
 {
 	struct webcam_feed *wf = data;
@@ -1571,9 +1576,12 @@ static void _image_window_closed(int tag, void *data)
 	if(!wf || tag != wf->image_window_tag)
 		return;
 
-	yahoo_webcam_close_feed(wf->id, wf->who);
-
 	ela = yahoo_find_local_account_by_id(wf->id);
+
+	if(wf->who)
+		yahoo_webcam_close_feed(wf->id, wf->who);
+	else
+		ay_yahoo_stop_webcam(ela);
 
 	if(ela) {
 		yla = ela->protocol_local_account_data;
@@ -1767,6 +1775,67 @@ static void ext_yahoo_webcam_closed(int id, char *who, int reason)
 
 }
 
+/* added to allow compilation on Win32 : plasmoidia */
+#ifdef __MINGW32__
+static double get_time()
+{
+	struct _timeb ct;
+	_ftime(&ct);
+
+	/* return time in milliseconds */
+	return (ct.time * 1E3 + ct.millitm);
+}
+
+#else
+static double get_time()
+{
+	struct timeval ct;
+	gettimeofday(&ct, 0);
+
+	/* return time in milliseconds */
+	return (ct.tv_sec * 1E3 + ct.tv_usec / 1E3);
+}
+#endif
+
+static int ay_yahoo_webcam_timeout_callback(gpointer);
+
+static void ay_yahoo_start_webcam(eb_local_account *ela)
+{
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	struct webcam_feed *wf = NULL;
+	YList *l;
+
+	yahoo_webcam_get_feed(ylad->id, NULL);
+	ylad->webcam_start = get_time();
+	ylad->webcam_timeout = eb_timeout_add(2000, 
+		(void *) ay_yahoo_webcam_timeout_callback, GINT_TO_POINTER(ylad->id));
+
+	for(l = ylad->webcams; l; l = y_list_next(l)) {
+		wf = l->data;
+		if(wf->who == NULL)
+			break;
+		wf = NULL;
+	}
+
+	if(!wf) {
+		wf = y_new0(struct webcam_feed, 1);
+		wf->id = ylad->id;
+		ylad->webcams = y_list_prepend(ylad->webcams, wf);
+	}
+
+	if(!wf->image_window_tag) {
+		wf->image_window_tag = ay_image_window_new(320, 240, _("My webcam"), _image_window_closed, wf);
+	}
+
+}
+
+static void ay_yahoo_stop_webcam(eb_local_account *ela)
+{
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	eb_timeout_remove(ylad->webcam_timeout);
+	ylad->webcam_timeout = ylad->webcam_start = 0;
+}
+
 static void ay_yahoo_authorise_webcam(gpointer data, int result)
 {
 	struct webcam_feed *wf = data;
@@ -1774,7 +1843,7 @@ static void ay_yahoo_authorise_webcam(gpointer data, int result)
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 
 	if(!ylad->webcam_start && result)
-		yahoo_webcam_get_feed(ylad->id, NULL);
+		ay_yahoo_start_webcam(ela);
 
 	yahoo_webcam_accept_viewer(wf->id, wf->who, result);
 
@@ -1819,28 +1888,6 @@ static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
 	}
 }
 
-/* added to allow compilation on Win32 : plasmoidia */
-#ifdef __MINGW32__
-static double get_time()
-{
-	struct _timeb ct;
-	_ftime(&ct);
-
-	/* return time in milliseconds */
-	return (ct.time * 1E3 + ct.millitm);
-}
-
-#else
-static double get_time()
-{
-	struct timeval ct;
-	gettimeofday(&ct, 0);
-
-	/* return time in milliseconds */
-	return (ct.tv_sec * 1E3 + ct.tv_usec / 1E3);
-}
-#endif
-
 static int ay_yahoo_webcam_timeout_callback(gpointer data)
 {
 	int id = GPOINTER_TO_INT(data);
@@ -1850,13 +1897,20 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 	long length = 0;
 	unsigned int timestamp;
 
+	YList *l;
+	struct webcam_feed *wf=NULL;
+
+	for(l = ylad->webcams; l; l = y_list_next(l)) {
+		wf = l->data;
+		if(wf->who == NULL)
+			break;
+		wf = NULL;
+	}
+
 	if(!video_grab_frame) {
 		WARNING(("No frame grabber found"));
 		ay_do_warning(_("Yahoo Webcam"), _("Could not read images from your webcam, could not find a video grabber.") );
 	}
-
-	if(ylad->webcam_start == 0)
-		ylad->webcam_start = (unsigned int)get_time();
 
 	timestamp = (unsigned int)(get_time() - ylad->webcam_start);
 	if((length = video_grab_frame(&image)) <= 0) {
@@ -1870,7 +1924,13 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 		image2000 = image_2_jpc(image, &length);
 	else
 		image2000 = ay_memdup(image, length);
+	
+	if(wf) {
+		ay_image_window_add_data(wf->image_window_tag, image, length, 1);
+		ay_image_window_add_data(wf->image_window_tag, NULL, 0, 0);
+	}
 	ay_free(image);
+	
 	LOG(("Sending a webcam image (%d bytes)", length));
 	yahoo_webcam_send_image(id, image2000, length, timestamp);
 	ay_free(image2000);
@@ -1880,15 +1940,12 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 static void ext_yahoo_webcam_data_request(int id, int send)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
-	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	if (send) {
 		LOG(("Got request to start sending images"));
-		ylad->webcam_timeout = eb_timeout_add(2*1000, 
-			(void *) ay_yahoo_webcam_timeout_callback, GINT_TO_POINTER(id));
+		ay_yahoo_start_webcam(ela);
 	} else {
 		LOG(("Got request to stop sending images"));
-		eb_timeout_remove(ylad->webcam_timeout);
-		ylad->webcam_timeout=ylad->webcam_start=0;
+		ay_yahoo_stop_webcam(ela);
 	}
 }
 
@@ -1923,7 +1980,7 @@ static void ay_yahoo_invite_to_view_my_webcam(ebmCallbackData *data)
 	ylad = ela->protocol_local_account_data;
 
 	if(!ylad->webcam_start)
-		yahoo_webcam_get_feed(ylad->id, NULL);
+		ay_yahoo_start_webcam(ela);
 	yahoo_webcam_invite(ylad->id, ecd->remote_account);
 }
 
@@ -2292,6 +2349,10 @@ static void eb_yahoo_logout(eb_local_account * ela)
 	if(ylad->timeout_tag) {
 		eb_timeout_remove(ylad->timeout_tag);
 		ylad->timeout_tag=0;
+	}
+	if(ylad->webcam_timeout) {
+		eb_timeout_remove(ylad->webcam_timeout);
+		ylad->webcam_timeout = ylad->webcam_start = 0;
 	}
 	
 	if (!(ela->connected || ela->connecting)) {
