@@ -1,3 +1,9 @@
+* Wed Apr 09 2003 18:31 GMT [colin]	0.2.3-83
+- src/print.[ch] src/chat_room.c src/chat_window.c 
+  src/log_window.c
+Add to_end flag to printing (fixes printing of chatwindows
+with restored conversations)
+
 * Wed Apr 09 2003 13:35 GMT [colin]	0.2.3-82
 - modules/yahoo2/yahoo.c
 do_prompt_save_file defaults to 1 (more intuitive than 

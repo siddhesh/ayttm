@@ -66,7 +66,7 @@ static void print_do_print(char * value, void * data)
 	unlink(filename);
 }
 
-void print_conversation(log_info *li)
+void print_conversation(log_info *li, int to_end)
 {
 	char buf[4096], output_fname[255];
 	int firstline = 1;
@@ -108,13 +108,13 @@ void print_conversation(log_info *li)
 	
 	fprintf(output_file, "<html><head><title>Ayttm conversation</title></head><body>\n");
 	while (fgets(buf, sizeof(buf), loginfo->fp)) {
-		if (strstr(buf, _("Conversation ended on ")) != NULL)
+		if (!to_end && strstr(buf, _("Conversation ended on ")) != NULL)
 			break;
 		if (strstr(buf, _("Conversation started on ")) != NULL) {
 			if (firstline) {
 				firstline = 0;
 				continue;
-			} else {
+			} else if (!to_end) {
 				break;
 			}
 		}

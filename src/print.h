@@ -27,7 +27,6 @@
 
 #include "log_window.h"
 
-
-void print_conversation(log_info *loginfo);
+void print_conversation(log_info *loginfo, int to_end);
 
 #endif

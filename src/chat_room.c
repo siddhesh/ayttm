@@ -863,7 +863,7 @@ static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 static void print_callback(GtkWidget *widget, gpointer d)
 {
 	eb_chat_room * ecr = (eb_chat_room *)d;
-	print_conversation(ecr->loginfo);
+	print_conversation(ecr->loginfo, TRUE);
 }
 
 static void _show_smileys_cb(GtkWidget * widget, smiley_callback_data *data)

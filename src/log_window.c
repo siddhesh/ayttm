@@ -247,7 +247,7 @@ static void print_callback(GtkWidget *widget, gpointer d)
 	li->log_started = 0;
 	li->fp = lw->fp;
 	li->filepos = lw->filepos;
-	print_conversation(li);
+	print_conversation(li, FALSE);
 }
 
 

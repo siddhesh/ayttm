@@ -623,7 +623,7 @@ static void print_callback(GtkWidget *widget, gpointer d)
 {
 	chat_window* data = (chat_window*)d;
 	GET_CHAT_WINDOW(data);
-	print_conversation(data->loginfo);
+	print_conversation(data->loginfo, TRUE);
 }
 
 /*This is the callback for ignoring a user*/
