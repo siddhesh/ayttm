@@ -1,3 +1,7 @@
+* Mon Apr 28 2003 22:30 GMT [colin]	0.3.0-28
+- modules/*toc/*toc.c
+avoid segfault when ea->ela is null at buddy logout
+
 * Mon Apr 28 2003 19:00 GMT [philip]	0.3.0-27
 - modules/yahoo2/yahoo.c
 avoid segfault when deleting non-existent buddy

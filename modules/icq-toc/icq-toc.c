@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.27 $",
-	"$Date: 2003/04/28 15:32:09 $",
+	"$Revision: 1.28 $",
+	"$Date: 2003/04/28 22:33:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -424,12 +424,12 @@ static void eb_icq_oncoming_buddy(char * user, int online, time_t idle, int evil
 {
 	eb_account * ea = find_account_by_handle( user, SERVICE_INFO.protocol_id);
 	struct eb_icq_account_data * aad ;
-	struct eb_icq_local_account_data *alad = (struct eb_icq_local_account_data *)ea->ela->protocol_local_account_data;
+	struct eb_icq_local_account_data *alad = ea->ela?(struct eb_icq_local_account_data *)ea->ela->protocol_local_account_data:NULL;
 	
 	if(ea)
 	{
 		aad = ea->protocol_account_data;
-		if (!l_list_find(alad->icq_buddies, ea->handle))
+		if (alad && !l_list_find(alad->icq_buddies, ea->handle))
 			alad->icq_buddies = l_list_append(alad->icq_buddies, ea->handle);
 	}
 	else
