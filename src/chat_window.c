@@ -95,6 +95,7 @@
 static chat_window * find_tabbed_chat_window_index (int current_page);
 static void eb_update_window_title(chat_window * cw, gboolean new_message);
 static void eb_update_window_title_to_tab(int tab, gboolean new_message);
+static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
 
 LList *outgoing_message_filters=NULL;
 LList *incoming_message_filters=NULL;
@@ -330,6 +331,8 @@ static void destroy_event(GtkWidget *widget, gpointer userdata)
 {
 	chat_window* cw = (chat_window*)userdata;
 	/* gotta clean up all of the people we're talking with */
+	gtk_signal_disconnect_by_func(GTK_OBJECT(cw->window),
+			   GTK_SIGNAL_FUNC(handle_focus), cw);
 	if(cw->smiley_window != NULL && cw->smiley_window->window != NULL) {
 		/* close smileys popup */
 		gtk_widget_destroy(cw->smiley_window);
