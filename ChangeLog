@@ -1,3 +1,7 @@
+* Sun Apr 20 2003 11:46 GMT [colin]	0.3.0-pre12
+- src/Makefile.am
+Fix make dist from a clean checkout
+
 * Sat Apr 19 2003 14:51 GMT [colin]	0.3.0-pre11
 - modules/msn2
 Remove friendlyname hack to check conn and use PNG

@@ -66,12 +66,12 @@ defaults.h: Makefile
 
 prefs.c plugin.c: defaults.h
 
-account_parser.c: account_parser.y
+account_parser.c account_parser.h: account_parser.y
 	$(YACC) $(AM_LFLAGS) $(LFLAGS) -d -p account $< && \
 		mv y.tab.c $*.c && \
 		mv y.tab.h $*.h
 
-contact_parser.c: contact_parser.y
+contact_parser.c contact_parser.h: contact_parser.y
 	$(YACC) $(AM_LFLAGS) $(LFLAGS) -d -p contact $< && \
 		mv y.tab.c $*.c && \
 		mv y.tab.h $*.h
