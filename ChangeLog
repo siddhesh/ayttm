@@ -1,3 +1,7 @@
+* Sun Sep 21 2003 15:52 GMT [philip]	0.4.1-4
+- modules/yahoo2/libyahoo2/libyahoo2.c
+forgot the strdup
+
 * Sat Sep 20 2003 10:26 GMT [philip]	0.4.1-3
 - modules/yahoo2/libyahoo2
 support YMSG 0x000b
