@@ -1016,7 +1016,9 @@ static void add_account_verbose( char * contact, eb_account * ea, int verbosity 
 		account = find_account_by_handle(ea->handle, ea->service_id);
 
 	if(account) {
-		if(!strcasecmp(account->account_contact->group->name, _("Unknown"))) {
+		if(!strcasecmp(account->account_contact->group->name, _("Unknown")) 
+				|| strstr(account->account_contact->group->name, "__Ayttm_Dummy_Group__") 
+				== account->account_contact->group->name) {
 			move_account(c, account);
 		} else {
 			char buff[2048];
