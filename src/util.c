@@ -1233,7 +1233,10 @@ void move_contact (char * group, struct contact * c)
 	}
 
 	con = find_contact_in_group_by_nick(c->nick, g);
-	if(con) {
+	if (con && con == c) {
+		/* that's the same */
+		return;
+	} else if(con) {
 		/* contact already exists in new group : 
 		   move accounts for old contact to new one */
 		while(c && (l=c->accounts)) {
@@ -1241,7 +1244,7 @@ void move_contact (char * group, struct contact * c)
 			c=move_account(con,ea);
 		}
 		return; 
-	} else {
+	} else if (!con) {
 		g->members = l_list_insert_sorted(g->members, c, contact_cmp);
 		c->group = g;
 		add_contact_and_accounts(c);
