@@ -38,7 +38,7 @@
 #define snprintf _snprintf
 #endif
 
-static void create_action_menu(char *html_file, char *plain_file);
+static void create_action_menu(char *html_file, char *plain_file, int sens);
 static void save_action(char *action);
 
 static void action_do_action(char * value, void * data)
@@ -53,8 +53,6 @@ static void action_do_action(char * value, void * data)
 	
 	filename_html = files[0];
 	filename_plain = files[1];
-	
-	printf("files: %x %x %s\n", data, files[0], files[0]);
 	
 	tvalue = strdup(value);
 	if (strstr(tvalue, "%s") != NULL) {
@@ -107,7 +105,6 @@ static void action_prepare(GtkWidget *w, void *data)
 {
 	char *val = gtk_widget_get_name(w);
 	char **c = data;
-	printf("%s %s\n",c[0],c[1]);
 	action_do_action(val, data);
 }
 
@@ -137,11 +134,11 @@ void conversation_action(log_info *li, int to_end)
 	free (loginfo->filename);
 	
 	if (!loginfo->fp) {
-		do_error_dialog(_("Cannot use log: no data available."),_("Action error"));
+		do_error_dialog(_("Cannot use log: no logfile available."),_("Action error"));
 		return;
 	}
 	if (fseek(loginfo->fp, loginfo->filepos, SEEK_SET) < 0) {
-		do_error_dialog(_("Cannot use log: no data available."),_("Action error"));
+		do_error_dialog(_("Cannot use log: logfile too short (!?)."),_("Action error"));
 		return;
 	}
 	
@@ -198,9 +195,9 @@ void conversation_action(log_info *li, int to_end)
 	fclose(output_fplain);
 	
 	if (ftell(loginfo->fp) == loginfo->filepos) {
-		do_error_dialog(_("Cannot use log: no data available."),_("Action error"));
+		create_action_menu(output_html, output_plain, FALSE);
 	} else	{
-		create_action_menu(output_html, output_plain);
+		create_action_menu(output_html, output_plain, TRUE);
 	}
 	g_free(output_html);
 	g_free(output_plain);
@@ -263,19 +260,20 @@ static void save_action(char *action)
 	fclose(in);	
 }
 
-static void create_action_menu(char *html_file, char *plain_file)
+static void create_action_menu(char *html_file, char *plain_file, int sens)
 {
 	GtkWidget *menu = NULL;
+	GtkWidget *item = NULL;
 	LList *commands = NULL, *walk = NULL;
 	char **files = ay_new(char *, 2);
 	
 	files[0] = strdup(html_file);	/* free after callback */
 	files[1] = strdup(plain_file);
 	
-	printf("a %x %x %s\n",files, files[0], files[0]);
 	menu = gtk_menu_new();
-	eb_menu_button (GTK_MENU(menu), _("New command..."),
+	item = eb_menu_button (GTK_MENU(menu), _("New command..."),
 			GTK_SIGNAL_FUNC(add_command_cb), files);
+	gtk_widget_set_sensitive(item, sens); /* don't set the whole menu unsensitive */
 
 	commands = load_actions();
 	
@@ -290,9 +288,10 @@ static void create_action_menu(char *html_file, char *plain_file)
 		eb_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 		walk = commands;
 		while (walk) {
-			GtkWidget *m = eb_menu_button(GTK_MENU(menu), walk->data, 
+			item = eb_menu_button(GTK_MENU(menu), walk->data, 
 					GTK_SIGNAL_FUNC(action_prepare), files);
-			gtk_widget_set_name(m, walk->data);
+			gtk_widget_set_name(item, walk->data);
+			gtk_widget_set_sensitive(item, sens);
 			walk = walk->next;
 		}
 	}	
