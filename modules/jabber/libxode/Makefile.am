@@ -4,6 +4,8 @@ SUBDIRS = include
 
 noinst_LTLIBRARIES = libxode.la
 
+AM_CFLAGS = $(GLIB_CFLAGS)
+
 libxode_la_SOURCES = \
 	xstream.c \
 	expat.c \

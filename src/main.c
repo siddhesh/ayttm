@@ -37,7 +37,6 @@
 
 #ifdef __MINGW32__
 #include <winsock2.h>
-int WinVer;
 #else
 #include <sys/un.h>
 #include <sys/socket.h>
@@ -196,67 +195,18 @@ int main(int argc, char *argv[])
 /* Setup default value for config_dir */
 #if defined( _WIN32 )
 	{
-		OSVERSIONINFO vi;
-		vi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		GetVersionEx(&vi);
-		switch(vi.dwMajorVersion)
-		{
-			case 3:
-				// switch(vi.dwMinorVersion)
-				// {
-					// case 51: // v3.51
-						// exit 51;//unknown
-					// default:
-						// exit -1;
-				// }
-				exit(-3); // We do not support v3.51
-				break;
-			case 4:
-				switch(vi.dwMinorVersion)
-				{
-					case 0:
-						if(vi.dwPlatformId == VER_PLATFORM_WIN32_NT)
-							WinVer = 1;
-						else
-							exit(-95); // Win95
-						break;
-					case 10:
-						WinVer = 0; // Win98
-						break;
-					case 90:
-						WinVer = 0; // WinMe
-						break;
-					default:
-						exit(-4); // unknown
-						break;
-				}
-				break;
-			case 5:
-				switch(vi.dwMinorVersion)
-				{
-					case 0:
-						WinVer = 1; // Win2000
-						break;
-					case 1:
-						WinVer = 1; // WinXP
-						break;
-					case 2:
-						WinVer = 1; // WinNetServer
-						break;
-					default:
-						exit(-5); // Unknown
-						break;
-				}
-				break;
-			default:
-				exit(-1); //unknown
-				break;
-		}
-		if (WinVer == 0) { // lesser windows
-			strcpy(config_dir, "/.ayttm/");
-		} else {
-			_snprintf(config_dir, 1024, "%s/ayttm/",getenv("USERPROFILE"));
-		}
+		HKEY appKey;
+		DWORD dwType, dwSize;
+		char appDir[1024];
+		dwType = REG_SZ;
+		dwSize = 1024;
+		RegOpenKey(HKEY_CURRENT_USER,
+	"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
+		&appKey);
+		RegQueryValueEx(appKey, "AppData", NULL, &dwType, 
+			&appDir[0], &dwSize);
+		RegCloseKey(appKey);
+		g_snprintf(config_dir, 1024, "%s\\AYTTM\\", appDir);
 	}
 #else
 	gtk_set_locale ();

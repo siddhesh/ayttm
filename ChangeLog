@@ -1,4 +1,12 @@
-* Tue Aug 26 2003 04:48 GMT [philip	0.4.0-4
+* Tue Aug 26 2003 12:09 GMT [elh]	0.4.0-5
+- configure.ac
+  src/Makefile.am
+  Makefile.am
+  src/prefs.c
+  most Makefile.am files
+Fixes for new MINGW32 compile
+
+* Tue Aug 26 2003 04:48 GMT [philip]	0.4.0-4
 - configure.ac
 Allow user to specify openssl prefix
 - ChangeLog

@@ -2,6 +2,15 @@ SUBDIRS = gtk
 
 bin_PROGRAMS = ayttm
 
+if MINGW32
+localedir = locale
+WIN32_SOURCES = ayttm.rc
+WIN32_LDFLAGS = -mwindows -Wl,--export-all-symbols -Wl,--out-implib,libayttm.a
+WIN32_LIBS = -lws2_32 -lwinmm
+else
+localedir = $(datadir)/locale
+endif
+
 ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	account.c info_window.c chat_window.c util.c add_contact_window.c \
 	edit_contact_window.c edit_account_window.c  sound.c dialog.c \
@@ -13,7 +22,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
 	offline_queue_mgmt.c tcp_util.c image_window.c action.c about.c \
-	messages.c edit_list_window.c flash_window_title.c ssl.c
+	messages.c edit_list_window.c flash_window_title.c ssl.c $(WIN32_SOURCES)
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
@@ -34,10 +43,9 @@ EXTRA_DIST =
 AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)
 AM_CXXFLAGS = $(AM_CFLAGS)
-LIBS = @LIBS@ $(EB_LIBS) -lproxy $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS)
-ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy -export-dynamic
+LIBS = @LIBS@ $(EB_LIBS) -lproxy $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS) $(WIN32_LIBS)
+ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy -export-dynamic $(WIN32_LDFLAGS)
 CLEANFILES = @CLEANFILES@ defaults.h
-localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\" -D_REENTRANT
 
 ayttm_LDADD = \
@@ -59,12 +67,12 @@ defaults.h: Makefile
 	@echo "#ifndef __DEFAULTS_H__" >> defaults.h;
 	@echo "#define __DEFAULTS_H__" >> defaults.h;
 	@echo "#ifdef __MINGW32__" >> defaults.h;
-	@echo \#define BuddyArriveDefault \"\\\\Program Files\\\\ayttm\\\\BuddyArrive.au\" >> defaults.h;
-	@echo \#define BuddyLeaveDefault \"\\\\Program Files\\\\ayttm\\\\BuddyLeave.au\" >> defaults.h;
-	@echo \#define SendDefault \"\\\\Program Files\\\\ayttm\\\\Send.au\" >> defaults.h;
-	@echo \#define ReceiveDefault \"\\\\Program Files\\\\ayttm\\\\Receive.au\" >> defaults.h;
+	@echo \#define BuddyArriveDefault \"BuddyArrive.au\" >> defaults.h;
+	@echo \#define BuddyLeaveDefault \"BuddyLeave.au\" >> defaults.h;
+	@echo \#define SendDefault \"Send.au\" >> defaults.h;
+	@echo \#define ReceiveDefault \"Receive.au\" >> defaults.h;
 	@echo \#define SpeechProgramDefault \"\" >> defaults.h;
-	@echo \#define MODULE_DIR \"\\\\Program Files\\\\ayttm\\\\modules\" >> defaults.h;
+	@echo \#define MODULE_DIR \"modules\" >> defaults.h;
 	@echo \#define AYTTMRC  \"\\\\@PACKAGE@rc\" >> defaults.h;
 	@echo "#else" >> defaults.h;
 	@echo \#define MODULE_DIR \"${libdir}/@PACKAGE@\" >> defaults.h;
@@ -93,3 +101,6 @@ account_scanner.c: account_scanner.l
 
 contact_scanner.c: contact_scanner.l
 	$(LEX) $(AM_LFLAGS) $(LFLAGS) -i -t -Pcontact $< > $@
+
+.rc.o:
+	@RC@ -I rc -O coff -i $< -o $@

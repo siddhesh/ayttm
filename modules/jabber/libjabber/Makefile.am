@@ -2,7 +2,7 @@ SUBDIRS = include
 
 noinst_LTLIBRARIES = libjabber.la
 
-AM_CFLAGS = -I../libxode/include -Iinclude -Iinclude/jabber
+AM_CFLAGS = $(GLIB_CFLAGS) -I../libxode/include -Iinclude -Iinclude/jabber
 
 libjabber_la_SOURCES = \
 	jid.c \

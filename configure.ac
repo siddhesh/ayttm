@@ -5,32 +5,13 @@ AC_INIT(Ayttm, 0.4.0, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=4
+RELEASE=5
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
 CORE_VERSION=16
 
 AM_CONFIG_HEADER(config.h)
-
-if test "x$host_alias" = "xmingw32"; then
-    case `$CC --version | sed -e 's,\..*,.,' -e q` in
-      2.)
-        if $CC -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
-          msnative_struct='-fnative-struct'
-        fi
-        ;;
-      *)
-        if $CC -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
-          msnative_struct='-mms-bitfields'
-        fi
-        ;;
-    esac
-
-	EB_CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/lib/glib-2.0/include -I/target/lib/gtk+/include -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -I../mingw32 -D_REENTRANT -Wall -g"
-	EB_LDADD="$LDADD"
-	EB_LIBS="-Wl,-subsystem,windows -L../libproxy -lproxy /target/lib/intl.lib /target/lib/iconv.lib ../libltdl/libltdl.a /target/lib/dirent.lib /target/lib/libgtk.dll.a /target/lib/libgdk.dll.a /target/lib/libglib-2.0.dll.a -lwinmm -lws2_32 -lwst -lmsvcrt"
-fi
 
 # Checks for programs.
 AC_PROG_CC
@@ -43,12 +24,17 @@ AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
+AC_CHECK_TOOL(RC, windres, no)
 
 # add some platform-specific flags
+use_mingw=no
 case "$host" in
 *-darwin*)
         CFLAGS="$CFLAGS -no-cpp-precomp"
         CXXFLAGS="$CXXFLAGS -no-cpp-precomp"
+        ;;
+*-*-mingw*)
+        use_mingw=yes
         ;;
 esac
 
@@ -67,11 +53,8 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
 AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h pspell/pspell.h])
-if test "x$host_alias" != "xmingw32"; then
 AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
-else
 AC_CHECK_HEADERS([sys/utsname.h])
-fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
@@ -92,9 +75,7 @@ AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([atexit bzero dcgettext dup2 getcwd gethostbyname gethostname gettimeofday getwd inet_ntoa isascii memchr memmove mempcpy memset mkdir modf munmap nl_langinfo pow select setlocale socket stpcpy strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname snprintf])
-if test "x$host_alias" != "xmingw32"; then
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify getopt_long getopt])
-fi
 
 ALL_LINGUAS="fr en_GB pt_BR"
 AM_GNU_GETTEXT
@@ -103,26 +84,28 @@ AM_GNU_GETTEXT
 #  Check for pthreads
 ###############################################################################
 
-AC_MSG_CHECKING(how to include pthread)
-AC_MSG_RESULT([])
-AC_MSG_CHECKING(for -lpthread compiler option)
-TMP_LIBS="$LIBS"
-LIBS="$LIBS -lpthread"
-AC_TRY_LINK_FUNC(pthread_create, [AC_MSG_RESULT(yes)
-	have_l_pthread=yes], [AC_MSG_RESULT(no)
-	have_l_pthread=no] )
+if test "$use_mingw" = no ; then
+  AC_MSG_CHECKING(how to include pthread)
+  AC_MSG_RESULT([])
+  AC_MSG_CHECKING(for -lpthread compiler option)
+  TMP_LIBS="$LIBS"
+  LIBS="$LIBS -lpthread"
+  AC_TRY_LINK_FUNC(pthread_create, [AC_MSG_RESULT(yes)
+  	have_l_pthread=yes], [AC_MSG_RESULT(no)
+  	have_l_pthread=no] )
 
-if test "$have_l_pthread" = no; then
-  AC_MSG_CHECKING(for -pthread compiler option)
-  LIBS="$TMP_LIBS"
-  TMP_CFLAGS="$CFLAGS"
-  CFLAGS="$CFLAGS -pthread"
+  if test "$have_l_pthread" = no; then
+    AC_MSG_CHECKING(for -pthread compiler option)
+    LIBS="$TMP_LIBS"
+    TMP_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -pthread"
 
-  AC_TRY_LINK_FUNC(pthread_create,
-  	[AC_MSG_RESULT(yes)
-	have_l_pthread=yes],
-	[AC_MSG_RESULT(no)
-	AC_MSG_ERROR(No pthread capability found)])
+    AC_TRY_LINK_FUNC(pthread_create,
+    	[AC_MSG_RESULT(yes)
+  	have_l_pthread=yes],
+  	[AC_MSG_RESULT(no)
+  	AC_MSG_ERROR(No pthread capability found)])
+  fi
 fi
 
 ###############################################################################
@@ -135,20 +118,22 @@ AC_SEARCH_LIBS(libiconv_open, iconv)
 #  Check for Crash Dialog
 ###############################################################################
 
-AC_SUBST(REQUIRES)
-REQUIRES=
-AC_ARG_ENABLE(crash-dialog, AC_HELP_STRING([--disable-crash-dialog],
-		[Disable crash dialog]),
-	[enable_crash_dialog=$enableval], [enable_crash_dialog=yes])
-if test "$enable_crash_dialog" != "no"; then
-dnl check if GDB is somewhere
-	AC_CHECK_PROG(enable_crash_dialog, gdb, yes, no)
-	AC_MSG_CHECKING([whether to use crash dialog])
-	if test "$enable_crash_dialog" != "no"; then
-		AC_DEFINE(CRASH_DIALOG, 1, Pop up crash dialog)
-		REQUIRES="gdb"
-	fi
-	AC_MSG_RESULT($enable_crash_dialog)
+if test "$use_mingw" = no ; then
+  AC_SUBST(REQUIRES)
+  REQUIRES=
+  AC_ARG_ENABLE(crash-dialog, AC_HELP_STRING([--disable-crash-dialog],
+  		[Disable crash dialog]),
+  	[enable_crash_dialog=$enableval], [enable_crash_dialog=yes])
+  if test "$enable_crash_dialog" != "no"; then
+  dnl check if GDB is somewhere
+  	AC_CHECK_PROG(enable_crash_dialog, gdb, yes, no)
+  	AC_MSG_CHECKING([whether to use crash dialog])
+  	if test "$enable_crash_dialog" != "no"; then
+  		AC_DEFINE(CRASH_DIALOG, 1, Pop up crash dialog)
+  		REQUIRES="gdb"
+  	fi
+  	AC_MSG_RESULT($enable_crash_dialog)
+  fi
 fi
 
 ###############################################################################
@@ -176,8 +161,6 @@ if test "$arts" = yes ; then
     EB_LIBS="$EB_LIBS $ARTS_LIBS"
 fi
 
-# Hack it out of mingw32
-if test "x$host_alias" != "xmingw32"; then
 AM_PATH_GLIB(1.2.0, [AC_DEFINE(HAVE_GLIB, 1, [Define if you have glib])],
 	AC_MSG_ERROR([Unable to find glib-devel version 1.2.0 or higher]))
 AM_PATH_GTK(1.2.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
@@ -229,14 +212,8 @@ AC_TRY_LINK([#include <openssl/opensslv.h>],
 LIBS=$ac_check_lib_save_LIBS 
 CFLAGS=$ac_check_lib_save_CFLAGS
 
-else
- 	GTK_CFLAGS="-mno-cygwin $msnative_struct -I/target/include -I/usr/include/mingw -I/usr/include/w32api -I/target/include/glib -I/target/include/glib-2.0 -I/usr/local/include -I/opt/include -I../ -I/usr/include/w32api -I/usr/include -D_REENTRANT -Wall -g -I../mingw32"
-fi
-
 EB_CFLAGS="$EB_CFLAGS $GLIB_CFLAGS $GTK_CFLAGS $GDK_PIXBUF_CFLAGS"
-if test "x$host_alias" != "xmingw32"; then
-	EB_LIBS="$EB_LIBS $GLIB_LIBS $GTK_LIBS $GDK_PIXBUF_LIBS"
-fi
+EB_LIBS="$EB_LIBS $GLIB_LIBS $GTK_LIBS $GDK_PIXBUF_LIBS"
 
 
 ###############################################################################
@@ -417,18 +394,9 @@ HOST=`echo $host | sed -e 's/^[[^-]]*-[[^-]]*-\([[^-]]*\).*/\1/'`
 HOST=`echo -n ${HOST%${HOST#?}} | tr a-z A-Z; echo ${HOST#?} | tr A-Z a-z`
 AC_DEFINE_UNQUOTED(HOST, "$HOST", [OS that this system was built for])
 AC_SUBST(HOST)
+AC_SUBST(RC)
 
-case "$host" in
-*-mingw*)
-	# lists more subdirectories to build
-	MINGW32="mingw32"
-	;;
-*)
-	MINGW32=""
-	;;
-esac
-
-AC_SUBST(MINGW32)
+AM_CONDITIONAL(MINGW32, test $use_mingw = yes)
 
 AC_CONFIG_FILES([Makefile ayttm.spec
                  doc/Makefile
@@ -468,8 +436,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  pixmaps/Makefile
                  sounds/Makefile
                  src/Makefile
-		 src/gtk/Makefile
-		 mingw32/Makefile])
+		 src/gtk/Makefile])
 
 
 AC_OUTPUT
