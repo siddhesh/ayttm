@@ -52,7 +52,7 @@ static int plugin_init();
 static int plugin_finish();
 static int reload_prefs();
 
-static int is_setting_state=0;
+static int is_setting_state=1;
 static int ref_count=0;
 static char smiley_directory[MAX_PREF_LEN]=AYTTM_SMILEY_DIR;
 static char last_selected[MAX_PREF_LEN]="";
@@ -69,8 +69,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.8 $",
-	"$Date: 2003/05/10 14:48:07 $",
+	"$Revision: 1.9 $",
+	"$Date: 2003/05/10 19:16:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -128,6 +128,7 @@ static int plugin_finish()
 
 static int reload_prefs()
 {
+	is_setting_state=0;
 	activate_theme_by_name(last_selected);
 	return 0;
 }
@@ -332,13 +333,13 @@ static void enable_smileys(ebmCallbackData *data)
 	if(is_setting_state || !theme || !theme->smileys)
 		return;
 
+	is_setting_state = 1;
 	smileys = theme->smileys;
 
-	is_setting_state = 1;
 	eb_activate_menu_item(EB_SMILEY_MENU, theme->menu_tag);
-	is_setting_state = 0;
 
 	strncpy(last_selected, theme->name, sizeof(last_selected)-1);
+	is_setting_state = 0;
 }
 
 static void load_themes()

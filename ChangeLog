@@ -1,3 +1,7 @@
+* Sat May 10 2003 19:15 GMT [philip]	0.3.0-178
+- src/status.c modules/smileys/smiley-themer.c
+theme memory works again - I hate gtk radio menus
+
 * Sat May 10 2003 18:10 GMT [philip]	0.3.0-177
 - src/util.[ch] src/status.c
 Try to implement right-click sort contact list

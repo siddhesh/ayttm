@@ -1744,7 +1744,6 @@ void eb_smiley_window(void *v_smiley_submenuitem)
 	LList *list=NULL;
 	GtkWidget * smiley_menu = gtk_menu_new();
 	menu_data *md=NULL;
-	menu_item_data *mid=NULL;
 
 	label = gtk_tearoff_menu_item_new();
 	gtk_menu_append(GTK_MENU(smiley_menu), label);
@@ -1753,18 +1752,27 @@ void eb_smiley_window(void *v_smiley_submenuitem)
 
 	md = GetPref(EB_SMILEY_MENU);
 	if(md) {
-		for(list = md->menu_items; list; list  = list->next ) {
-			mid=(menu_item_data *)list->data;
-			eb_debug(DBG_CORE, "adding smiley item: %s\n", mid->label);
-			label = gtk_radio_menu_item_new_with_label(group, mid->label);
-			group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(label));
-			if(md->active == mid)
-				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(label), TRUE);
-			gtk_menu_append(GTK_MENU(smiley_menu), label);
-			gtk_signal_connect(GTK_OBJECT(label), "activate",
-					eb_smiley_function, mid);
-			gtk_widget_show(label);
+		struct _menu_items {
+			menu_item_data *mid;
+			GtkWidget *label;
+		} *items=malloc(sizeof(struct _menu_items)*l_list_length(md->menu_items));
+		int i;
+		for(i=0,list = md->menu_items; list; i++, list = list->next ) {
+			items[i].mid=(menu_item_data *)list->data;
+			eb_debug(DBG_CORE, "adding smiley item: %s\n", items[i].mid->label);
+			items[i].label = gtk_radio_menu_item_new_with_label(group, items[i].mid->label);
+			group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(items[i].label));
+			if(md->active == items[i].mid)
+				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(items[i].label), TRUE);
+			else
+				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(items[i].label), FALSE);
+			gtk_menu_append(GTK_MENU(smiley_menu), items[i].label);
+			gtk_widget_show(items[i].label);
 		}
+		for(--i; i>=0; i--)
+			gtk_signal_connect(GTK_OBJECT(items[i].label), "activate",
+					eb_smiley_function, items[i].mid);
+		free(items);
 	}
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(smiley_submenuitem), smiley_menu);
 	gtk_widget_show(smiley_menu);
