@@ -77,7 +77,7 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([atexit bzero dcgettext dup2 getcwd gethostbyname gethostname gettimeofday getwd inet_ntoa isascii memchr memmove mempcpy memset mkdir modf munmap nl_langinfo pow select setlocale socket stpcpy strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname snprintf])
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify getopt_long getopt])
 
-ALL_LINGUAS="fr en_GB pt_BR de_DE"
+ALL_LINGUAS="fr en_GB pt_BR de"
 AM_GNU_GETTEXT
 
 ###############################################################################
