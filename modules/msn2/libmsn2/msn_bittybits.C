@@ -1,5 +1,6 @@
 /* msn_bittybits.c - all the little string- and list-bashing functions */
-
+/* WARNING - Ayttm's libmsn2 differs from the original one and Meredydd,
+   its original author, does not provide support for it :) */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

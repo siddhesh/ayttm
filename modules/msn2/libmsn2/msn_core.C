@@ -1,4 +1,6 @@
 /* msn_core.c - this contains all the functions used to do anything with MSN */
+/* WARNING - Ayttm's libmsn2 differs from the original one and Meredydd,
+   its original author, does not provide support for it :) */
 
 #include <stdio.h>
 #include <unistd.h>
