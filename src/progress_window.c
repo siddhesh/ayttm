@@ -79,7 +79,7 @@ static int activity_update_timeout(void * data)
 	return 1;
 }
 
-static int _progress_window_new( char * title, unsigned long size, int activity )
+static int _progress_window_new( const char * title, unsigned long size, int activity )
 {
 	progress_window_data *pwd = g_new0(progress_window_data, 1);
 	
@@ -123,12 +123,12 @@ static int _progress_window_new( char * title, unsigned long size, int activity 
 	return pwd->tag;
 }
 
-int activity_window_new( char * title )
+int activity_window_new( const char * title )
 {
 	return _progress_window_new( title, 150, 1 );
 }
 
-int progress_window_new( char * filename, unsigned long size )
+int progress_window_new( const char * filename, unsigned long size )
 {
 	gchar buff[2048];
 	g_snprintf( buff, sizeof(buff), _("Transfering %s"), filename);

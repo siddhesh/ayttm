@@ -29,8 +29,8 @@
 extern "C" {
 #endif
 
-int activity_window_new( char * title );
-int progress_window_new( char * filename, unsigned long size );
+int activity_window_new( const char * title );
+int progress_window_new( const char * filename, unsigned long size );
 void update_progress(int tag, unsigned long progress);
 void progress_window_close(int tag);
 void progress_window_set_close_cb(int tag, void (*close_cb)(int));
