@@ -117,6 +117,7 @@ static int plugin_finish();
 struct service_callbacks * query_callbacks();
 //char * msn_create_mail_initial_notify (int unread_ibc, int unread_fold);
 //char * msn_create_new_mail_notify (char * from, char * subject);
+static void msn_new_mail_run_script(void);
 static char *Utf8ToStr(const char *in);
 static char *StrToUtf8(const char *in);
 static void eb_msn_format_message (message * msg);
@@ -154,8 +155,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.44 $",
-	"$Date: 2003/05/02 13:46:16 $",
+	"$Revision: 1.45 $",
+	"$Date: 2003/05/04 01:49:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2326,9 +2327,13 @@ void ext_new_mail_arrived(msnconn * conn, char * from, char * subject) {
 
   if(!do_mail_notify) { return; }
 
-  snprintf(buf, 1024, "New mail from %s: \"%s\"", from, subject);
+  if (!do_mail_notify_run_script) {
+  	snprintf(buf, 1024, "New mail from %s: \"%s\"", from, subject);
 
-  ay_do_info( _("MSN Mail"), buf );
+	  ay_do_info( _("MSN Mail"), buf );
+  } else {
+	msn_new_mail_run_script();
+  }
 }
 void ext_typing_user(msnconn * conn, char * username, char * friendlyname)
 {
@@ -2760,4 +2765,15 @@ static void invite_gnomemeeting(ebmCallbackData * data)
         msn_add_to_llist(pending_invitations, pfs);
 
 	msn_new_SB(mlad->mc,NULL);
+}
+
+void msn_new_mail_run_script(void)
+{
+	char buf[1024];
+	if (!strstr(do_mail_notify_script_name," &")) {
+		snprintf(buf, 1024, "(%s) &", do_mail_notify_script_name);
+	} else {
+		strncpy(buf, do_mail_notify_script_name, 1024);
+	}
+	system(buf);	
 }

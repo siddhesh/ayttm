@@ -1,3 +1,8 @@
+* Sat May  3 2003 18:20 GMT [andy]	0.3.0-123
+- modules/msn2/msn.C
+Add mail notify script based on a patch by Ivor Cave
+(ivor@users.sf.net)
+
 * Sat May  3 2003 18:20 GMT [andy]	0.3.0-122
 - src/ui_log_window.h	** ADDED **
   src/Makefile.am
