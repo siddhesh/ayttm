@@ -17,7 +17,7 @@ src/message_parse.c
 src/nomodule.c
 src/plugin.c
 src/prefs.c
-src/prefs_window.c
+src/gtk/prefs_window.C
 src/action.c
 src/status.c
 src/trigger.c
