@@ -9,7 +9,7 @@ RELEASE=31
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
-CORE_VERSION=19
+CORE_VERSION=20
 
 AM_CONFIG_HEADER(config.h)
 
