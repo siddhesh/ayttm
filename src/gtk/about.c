@@ -69,13 +69,14 @@ static tDevInfo sEverybuddyDevTeam[EVERYBUDDY_TEAM_SIZE] =
 	{"Toby A. Inkster", 	"<tobyink@goddamn.co.uk>", 	"Patches"}
 };
 
-#define	HELP_TEAM_SIZE	(3)
+#define	HELP_TEAM_SIZE	(4)
 
 static tDevInfo sHelpDevTeam[HELP_TEAM_SIZE] =
 {
 	{"Yann Marigo", 	"<yann@yannos.com>", 		"Art, Fr translation"},
 	{"Ben Reser", 		"<ben@reser.org>", 		"Patches, MDK RPMs"},
-	{"Lee Leahu", 		"<penguin365@dyweni.com>", 	"Patches"}
+	{"Lee Leahu", 		"<penguin365@dyweni.com>", 	"Patches"},
+	{"Richard Ellis",	"<rellis9@yahoo.com>",		"Patches"}
 };
 
 /* the one and only about window */
