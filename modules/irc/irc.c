@@ -53,6 +53,8 @@
 #include "plugin_api.h"
 #include "smileys.h"
 #include "messages.h"
+#include "tcp_util.h"
+#include "activity_bar.h"
 
 #include "libproxy/libproxy.h"
 
@@ -82,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.28 $",
-	"$Date: 2003/07/05 17:17:28 $",
+	"$Revision: 1.29 $",
+	"$Date: 2003/07/05 22:38:06 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -117,18 +119,6 @@ static int plugin_finish()
    violations is nice nevertheless. */
 #define BUF_LEN 512*2
 
-static int set_nonblock (int fd)
-{
-#ifndef __MINGW32__
-  int flags = fcntl (fd, F_GETFL, 0);
-  if (flags == -1)
-    return -1;
-  return fcntl (fd, F_SETFL, flags | O_NONBLOCK);
-#endif
-}
-
-
-
 typedef struct irc_local_account_type
 {
 	char		server[255];
@@ -137,6 +127,8 @@ typedef struct irc_local_account_type
 	int 		fd;
 	int		fd_tag;
 	int		keepalive_tag;
+	int		connect_tag;
+	int		activity_tag;
 	GString *	buff;
 	int		status;
 	LList *		friends;
@@ -220,7 +212,7 @@ static void irc_accept_invite( eb_local_account * account, void * invitation );
 static void irc_decline_invite( eb_local_account * account, void * invitation );
 static void eb_irc_read_prefs_config(LList * values);
 static LList * eb_irc_write_prefs_config();
-
+static void irc_connect_cb(int fd, int error, void *data);
 /* taken from X-Chat 1.6.4: src/common/util.c */
 /* Added: stripping of CTCP/2 color/formatting attributes, which is
    everything between two '\006' = ctrl-F characters.
@@ -1135,63 +1127,84 @@ static int irc_keep_alive( gpointer data )
 	return TRUE;
 }
 
+static void ay_irc_cancel_connect(void *data)
+{
+	eb_local_account *ela = (eb_local_account *)data;
+	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
+	
+	ay_socket_cancel_async(ila->connect_tag);
+	ila->activity_tag=0;
+	irc_logout(ela);
+}
+
+static void ay_irc_connect_status(const char *msg, void *data)
+{
+	eb_local_account *ela = (eb_local_account *)data;
+
+	irc_local_account *ila =
+		(irc_local_account *)ela->protocol_local_account_data;
+	if (!ila) return;
+	ay_activity_bar_update_label(ila->activity_tag, msg);
+}
+
 static void irc_login( eb_local_account * account)
 {
 	irc_local_account * ila = (irc_local_account *) account->protocol_local_account_data;
 
 	char buff[BUF_LEN];
-	struct hostent *host;
-	struct sockaddr_in site;
-	int i;
-	int ret = 0;
-	char *nick = NULL;
-	char *alpha = NULL;
+	int port, tag;
 
 	/* Setup and connect */
 
-	host = proxy_gethostbyname(ila->server);
-	if (!host) { 
-		char buff[1024]; 
-		snprintf(buff, sizeof(buff), _("%s: Unknown host."), ila->server);
-		ay_do_error( _("IRC Error"), buff );
-		fprintf(stderr, buff);
+	snprintf(buff, sizeof(buff), _("Logging in to IRC account: %s"), account->handle);
+	ila->activity_tag = ay_activity_bar_add(buff, ay_irc_cancel_connect, account);
 
-		return; 
-	}
-
-	site.sin_family = AF_INET;
-	site.sin_addr.s_addr = ((struct in_addr *)(host->h_addr))->s_addr;
-	site.sin_port = htons(atoi(ila->port));
 	/* default to port 6667 if nothing specified */
-	if (ila->port[0] == '\0') site.sin_port = htons(6667);
-	
-	i = socket(AF_INET, SOCK_STREAM, 0);
-	if (i < 0) { fprintf(stderr, "IRC: socket() failed for %s\n", ila->server); return; }
-	
-	if (proxy_connect(i, (struct sockaddr *)&site, sizeof(site),NULL,NULL,NULL) < 0)
+	if (ila->port[0] == '\0') 
+		port = 6667;
+	else 
+		port = atoi(ila->port);
+		
+	if ((tag = proxy_connect_host(ila->server, port, irc_connect_cb, account, (void *)ay_irc_connect_status)) < 0)
 	{
 		char buff[1024]; 
 		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
 		ay_do_error( _("IRC Error"), buff );
 		fprintf(stderr, buff);
+		return;
+	}
+	ila->connect_tag = tag;
+}
 
+static void irc_connect_cb(int fd, int error, void *data)
+{
+	eb_local_account *ela = (eb_local_account *)data;	
+	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
+
+	char buff[BUF_LEN];
+	int ret = 0;
+	char *nick = NULL;
+	char *alpha = NULL;
+
+	if(fd == -1 || error) {
+		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
+		ay_do_error( _("IRC Error"), buff );
+		fprintf(stderr, buff);
 		return;
 	}
 
 	/* Puzzle out the nick we're going to ask the server for */
-	nick = strdup(account->handle);
+	nick = strdup(ela->handle);
 	if (nick == NULL) return;
 	alpha = strchr(nick, '@');
 	if(alpha == NULL) { free (nick); return; }
 	*alpha = '\0';
 
-	set_nonblock(i);
-
-	ila->fd = i;
+	ila->fd = fd;
 
 	/* Set up callbacks and timeouts */
 
-	ila->fd_tag = eb_input_add(ila->fd, EB_INPUT_READ, irc_callback, account);
+	ila->fd_tag = eb_input_add(ila->fd, EB_INPUT_READ, irc_callback, ela);
 
 	/* Log in */
 	g_snprintf(buff, BUF_LEN, "NICK %s\nUSER %s 0 * :Ayttm user\n", nick, nick);
@@ -1200,24 +1213,27 @@ static void irc_login( eb_local_account * account)
 	/* Try twice, then give up */
 	ret = sendall(ila->fd, buff, strlen(buff));
 	if (ret == -1) ret = sendall(ila->fd, buff, strlen(buff));
-	if (ret == -1) { irc_logout(account); return; }
+	if (ret == -1) { irc_logout(ela); return; }
 	
 	/* No use adding this one before we're in anyway */
-	ila->keepalive_tag = eb_timeout_add((guint32)60000, irc_keep_alive, (gpointer)account );
+	ila->keepalive_tag = eb_timeout_add((guint32)60000, irc_keep_alive, (gpointer)ela );
 
 	/* get list of channels */
 	ret = sendall(ila->fd, "LIST\n", strlen("LIST\n"));
 
 	/* Claim us to be online */
-	account->connected = TRUE;
+	ela->connected = TRUE;
 	ila->status = IRC_ONLINE;
 	ref_count++;
 
 	is_setting_state = 1;
-	if(account->status_menu)
-		eb_set_active_menu_status(account->status_menu, IRC_ONLINE);
+	if(ela->status_menu)
+		eb_set_active_menu_status(ela->status_menu, IRC_ONLINE);
 	is_setting_state = 0;
-
+	
+	ay_activity_bar_remove(ila->activity_tag);
+	ila->connect_tag = 0;
+	ila->activity_tag = 0;
 	return;
 }
 
@@ -1233,7 +1249,8 @@ static void irc_logout( eb_local_account * ela )
 	ela->connected = 0;
 	eb_input_remove(ila->fd_tag);
 	eb_timeout_remove(ila->keepalive_tag);
-
+	ay_activity_bar_remove(ila->activity_tag);
+	ila->activity_tag = ila->connect_tag = 0;
 	/* Log off in a nice way */
 	g_snprintf(buff, BUF_LEN, "QUIT :Ayttm logging off\n");
 	sendall(ila->fd, buff, strlen(buff));
@@ -1528,25 +1545,6 @@ static int irc_is_suitable (eb_local_account *local, eb_account *remote)
 	return FALSE;
 }
 
-static eb_local_account * irc_search_for_local_account (char *server)
-{
-	LList *node;
-	
-	for( node = accounts; node; node = node->next )
-	{
-		eb_local_account * ela = (eb_local_account *)(node->data);
-		
-		if (ela->service_id == SERVICE_INFO.protocol_id)
-		{
-			irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
-
-			if (!strcmp(ila->server, server))
-				return ela;
-		}
-	}
-	return NULL;
-}
-
 /* This func expects account names of the form Nick@server,
    for example Knan@irc.midgardsormen.net, and will return
    NULL otherwise, very probably causing a crash. */
@@ -1554,7 +1552,6 @@ static eb_account * irc_new_account(eb_local_account *ela, const char * account 
 {
 	eb_account * ea = g_new0(eb_account, 1);
 	irc_account * ia = g_new0(irc_account, 1);
-	LList * node;
 	
 	strncpy(ea->handle, account, 254);
 	ea->ela = ela;
@@ -1873,7 +1870,6 @@ static void irc_send_invite( eb_local_account * account, eb_chat_room * room,
 
 static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account, int is_public)
 {
-	LList * node;
 	eb_chat_room * ecr;
 	char *chatroom_server = NULL;
 	char *alpha = NULL;

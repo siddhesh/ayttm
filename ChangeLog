@@ -1,3 +1,7 @@
+* Sat Jul 05 2003 22:37 GMT [colin]	0.3.2-4
+- modules/irc/irc.c
+Async connect for irc
+
 * Sat Jul 05 2003 17:16 GMT [colin]	0.3.2-3
 - modules/irc/irc.c
 Use dummy contacts instead of Unknown group
