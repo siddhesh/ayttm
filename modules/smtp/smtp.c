@@ -70,8 +70,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP Service",
 	"SMTP Service Module",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:53 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/04 08:20:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -583,7 +583,7 @@ static void eb_smtp_send_im(eb_local_account * account_from,
 	d->from = account_from;
 	d->to = account_to;
 	d->msg = strdup(message);
-	d->tag = ay_socket_new_async(smtp_host, atoi(smtp_port), eb_smtp_got_connected, d);
+	d->tag = ay_socket_new_async(smtp_host, atoi(smtp_port), eb_smtp_got_connected, d, NULL);
 
 	pending_connects = l_list_append(pending_connects, (void *)d->tag);
 }

@@ -173,8 +173,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/03 17:34:28 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/04 08:20:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2287,7 +2287,7 @@ void ext_changed_state(msnconn * conn, char * state)
 
 int ext_async_socket(char *host, int port, void *cb, void *data)
 {
-  return ay_socket_new_async(host, port, (ay_socket_callback)cb, data);
+  return ay_socket_new_async(host, port, (ay_socket_callback)cb, data, NULL);
 }
 
 int ext_connect_socket(char * hostname, int port)

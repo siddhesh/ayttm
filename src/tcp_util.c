@@ -199,6 +199,7 @@ int ay_tcp_writeline(const char *buff, int nbytes, int fd)
 
 struct connect_callback_data {
 	ay_socket_callback callback;
+	ay_socket_status_callback status_callback;
 	void * callback_data;
 
 	int ebi_tag;
@@ -275,7 +276,8 @@ void ay_socket_cancel_async(int tag)
  * -1 if connect failed immediately (callback is already called with errno);
  * a tag that identifies the pending connect and can be used to cancel it.
  **/
-int ay_socket_new_async(const char * host, int port, ay_socket_callback callback, void * callback_data)
+#define update_status(x) if(status_callback) status_callback(x, callback_data)
+int ay_socket_new_async(const char * host, int port, ay_socket_callback callback, void * callback_data, ay_socket_status_callback status_callback)
 {
 	struct sockaddr_in serv_addr;
 	static struct hostent *server;
@@ -286,12 +288,14 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 	if(tag_pool >= INT_MAX)
 		return -1;
 
+	update_status(_("Looking for remote host..."));
 	if(!(server = gethostbyname(host))) {
 		errno=h_errno;
 		eb_debug(DBG_CORE, "failed to look up server (%s:%d)\n%d: %s", 
 					host, port, errno, strerror(errno));
 		return -1;
 	}
+	update_status("");
 
 	if((servfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		eb_debug(DBG_CORE, "Socket create error (%d): %s", errno, strerror(errno));
@@ -302,6 +306,7 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 	fcntl(servfd, F_SETFL, O_NONBLOCK);
 #endif
 	
+	update_status(_("Connecting to remote host..."));
 	eb_debug(DBG_CORE, "connecting to %s:%d\n", host, port);
 
 	memset(&serv_addr, 0, sizeof(serv_addr));
@@ -323,6 +328,7 @@ int ay_socket_new_async(const char * host, int port, ay_socket_callback callback
 	} else if(error == -1 && err == EINPROGRESS) {
 		ccd = calloc(1, sizeof(struct connect_callback_data));
 		ccd->callback = callback;
+		ccd->status_callback = status_callback;
 		ccd->callback_data = callback_data;
 		ccd->tag = ++tag_pool;
 

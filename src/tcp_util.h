@@ -32,6 +32,12 @@
 #define __TCP_UTIL_H__
 
 /**
+ * @msg: a status message to be displayed
+ * @callback_data: callback_data passed to the ay_socket_new_async function
+ **/
+typedef void ( *ay_socket_status_callback )(const char *msg, void *callback_data);
+
+/**
  * @fd: file descriptor to connected socket; -1 if connect fails
  * @error: 0 on success, else one of the error values returned by connect
  * @callback_data: callback_data passed to the ay_socket_new_async function
@@ -46,7 +52,7 @@ int  ay_socket_new(const char * host, int port);
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 __declspec(dllimport)
 #endif
-int  ay_socket_new_async(const char * host, int port, ay_socket_callback callback, void * callback_data);
+int  ay_socket_new_async(const char * host, int port, ay_socket_callback callback, void * callback_data, ay_socket_status_callback status_callback);
 
 void ay_socket_cancel_async(int tag);
 int  ay_tcp_readline(char * buff, int maxlen, int fd);

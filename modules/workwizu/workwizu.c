@@ -106,8 +106,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:53 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/04 08:20:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -657,7 +657,7 @@ void eb_workwizu_login (eb_local_account *account)
 	
 	eb_debug(DBG_WWZ, "Logging in\n");
 	if (ay_socket_new_async(server, atoi(port), 
-			(ay_socket_callback)eb_workwizu_connected, account) < 0) {
+			(ay_socket_callback)eb_workwizu_connected, account, NULL) < 0) {
 		eb_debug(DBG_WWZ, "cant connect socket");
 		do_error_dialog(_("Server doesn't answer."), 
 						_("Workwizu Error"));

@@ -718,7 +718,7 @@ int proxy_connect(int  sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
 		      return ay_socket_new_async(
 				      inet_ntoa(sin->sin_addr), 
 				      ntohs(sin->sin_port), 
-				      (ay_socket_callback)cb, data);     
+				      (ay_socket_callback)cb, data, NULL);     
 	      }
 	      break;
       case PROXY_HTTP:    /* Http proxy */

@@ -1,3 +1,8 @@
+* Fri Apr 05 2003 08:15 GMT [philip]	0.2.3-13
+- src/tcp_util.[ch] and all files that use async connect
+Add socket status callback so that the async connect can also report
+on the current state of its attempt
+
 * Thu Apr 04 2003 00:15 GMT [andy]	0.2.3-12
 - modules/aim-oscar/aim-oscar.c
   modules/aim-oscar/libfaim/aim_chatnav.c

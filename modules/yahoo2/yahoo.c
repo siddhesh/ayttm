@@ -121,8 +121,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/01 18:54:53 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/04 08:21:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2324,7 +2324,7 @@ static int ext_yahoo_connect(int id, char *host, int port)
 	return ay_socket_new(host,port);
 #else
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
-	ay_socket_new_async(host, port, _yahoo_connected, ela);
+	ay_socket_new_async(host, port, _yahoo_connected, ela, NULL);
 	errno = EINPROGRESS;
 	return -1;
 #endif
