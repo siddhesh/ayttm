@@ -365,7 +365,7 @@ static LList * save_account_information(void)
 			account_information * ai = g_new0(account_information,1);
 			ai->ea = ea;
 			ai->local_acc = strdup(ea->ela->handle);
-			printf(" SAVED { %p(%s), %d, %s }\n", ea, ea->handle, ea->service_id, ea->ela->handle);
+			eb_debug(DBG_CORE, " SAVED { %p(%s), %d, %s }\n", ea, ea->handle, ea->service_id, ea->ela->handle);
 			saved = l_list_append(saved, ai);
 		}
 	}
@@ -385,7 +385,7 @@ static void restore_account_information(LList *saved)
 			ea->ela = find_local_account_for_remote(ea, 0);
 			/* if still NULL, too bad. */
 		}
-		printf(" RESTORED { %p(%s), %d, %s(%s) }\n", ea, ea->handle, ea->service_id, ai->local_acc, ea->ela?ea->ela->handle:"NULL");
+		eb_debug(DBG_CORE, " RESTORED { %p(%s), %d, %s(%s) }\n", ea, ea->handle, ea->service_id, ai->local_acc, ea->ela?ea->ela->handle:"NULL");
 		free(ai->local_acc);
 	}
 }
