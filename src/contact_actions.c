@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "util.h"
+#include "globals.h"
 #include "service.h"
 #include "intl.h"
 #include "message_parse.h"

@@ -344,7 +344,13 @@ static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const cha
 	
 	module_version = lt_dlsym(Module, "module_version");
 	if (!module_version || module_version() != CORE_VERSION) {
-		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, "Plugin version differs from core version, which means it is probably not binary compatible.\nTry a clean install (or read README).", Service_Info->name, FALSE);
+		char error[1024];
+		snprintf(error, 1024, _("Plugin version (%d) differs from core version (%d), "
+					"which means it is probably not binary compatible.\n"
+					"Try a clean install (or read README)."), 
+					module_version?module_version():"undefined",
+					CORE_VERSION);
+		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, error, Service_Info->name, FALSE);
 		lt_dlclose(Module);
 		return(-1);	
 	}

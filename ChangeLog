@@ -1,4 +1,10 @@
 * Fri May  2 2003 03:20 GMT [colin]	0.3.0-93
+- src/contact_actions.c src/edit_account_window.c
+Fix compilation
+- src/plugin.c 
+More precise error
+
+* Fri May  2 2003 03:20 GMT [colin]	0.3.0-93
 - src/contact_actions.c
 Avoid (not fix :() a segfault
 

@@ -62,9 +62,10 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 	eb_local_account *ela = NULL;
 	
 	if (strcmp(service, _("[None]")) && strstr(service, "]")) {
+		char *mservice = NULL;
 		*(strstr(service, "]")) = '\0';
-		char *mservice = strstr(service,"[")+1;
-
+		mservice = strstr(service,"[")+1;
+		
 		service_id = get_service_id( mservice );
 		ela = find_local_account_by_handle(local_acc, service_id);
 		if (!ela) {
