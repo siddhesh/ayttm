@@ -260,8 +260,10 @@ AC_ARG_ENABLE(broken_icq, AC_HELP_STRING([--enable-broken-icq],
 		[include broken icq service instead of working one]))
 AC_ARG_ENABLE(smtp, AC_HELP_STRING([--enable-smtp],
 		[include smtp service]))
-AC_ARG_ENABLE(aycryption, AC_HELP_STRING([--enable-aycryption],
-		[include encryption utility]))
+AC_ARG_ENABLE(zephyr, AC_HELP_STRING([--enable-zephyr],
+		[include Zephyr service]))
+AC_ARG_ENABLE(aycryption, AC_HELP_STRING([--disable-aycryption],
+		[exclude encryption utility]))
 AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
 		[exclude aim-toc service]))
 AC_ARG_ENABLE(icq_toc, AC_HELP_STRING([--disable-icq-toc],
@@ -274,13 +276,12 @@ AC_ARG_ENABLE(jabber, AC_HELP_STRING([--disable-jabber],
 		[exclude jabber service]))
 AC_ARG_ENABLE(msn, AC_HELP_STRING([--disable-msn],
 		[exclude msn service]))
-AC_ARG_ENABLE(libmsn2_debug, AC_HELP_STRING([--enable-libmsn2-debug],
-		[enable debugging of libmsn2]))
 AC_ARG_ENABLE(yahoo, AC_HELP_STRING([--disable-yahoo],
 		[exclude yahoo service]))
 
 OPTIONAL_PLUG_DIR=""
 DEBUG_LIBMSN=""
+
 if test "$enable_oscar" == yes; then
  	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aim-oscar"
 fi
@@ -297,11 +298,8 @@ if test "$enable_workwizu" = yes; then
 	if test "$have_gmp" = no; then
 	 echo "You need gmp for workwizu"
 	 echo "http://www.swox.com/gmp/"
-	 exit
+	 enable_workwizu=no;
 	fi;
-fi
-if test "$enable_libmsn2_debug" == yes; then
-	DEBUG_LIBMSN="-DDEBUG=1"
 fi
 if test "$enable_yahoo" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR yahoo2"
@@ -324,13 +322,12 @@ fi
 if test "$enable_icq_toc" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq-toc"
 fi
-if test "$enable_aycryption" == yes; then
+if test "$enable_aycryption" != no; then
 	GPGME_CFLAGS=`gpgme-config --cflags`
 	if test $? != 0 ; then
 	 enable_aycryption=no;
 	 echo "you have to install gpgme 0.3 to use encryption"
 	else
-	 echo "aycryption enabled"
 	 GPGME_LDFLAGS=`gpgme-config --libs`
 	 EB_CFLAGS="$EB_CFLAGS $GPGME_CFLAGS"
 	 EB_LIBS="$EB_LIBS $GPGME_LDFLAGS"
@@ -344,8 +341,6 @@ fi
 
 with_krb4_dir=/usr/kerberos
 
-AC_ARG_ENABLE(zephyr, AC_HELP_STRING([--enable-zephyr],
-		[include Zephyr service]))
 AC_ARG_ENABLE(krb4, AC_HELP_STRING([--disable-krb4],
 		[disable KerberosIV in Zephyr]))
 AC_ARG_WITH(krb4-dir, AC_HELP_STRING([--with-krb4-dir=dir],
@@ -451,3 +446,5 @@ fi
 
 AC_OUTPUT
 
+echo "$PACKAGE_STRING-$RELEASE configured with the following plugins:"
+echo "	$OPTIONAL_PLUG_DIR"

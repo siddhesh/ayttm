@@ -1,5 +1,7 @@
 libproxy/proxy.c
 modules/aim-toc/aim-toc.c
+modules/aycryption/aycryption.c
+modules/aycryption/select-keys.c
 modules/icq/icq.c
 modules/icq-toc/icq-toc.c
 modules/importers/import_everybuddy.c
@@ -32,11 +34,12 @@ src/edit_list_window.c
 src/edit_local_accounts.c
 src/gtk/about_window.c
 src/gtk/gtkspell.c
+src/gtk/log_window.C
 src/gtk/message_windows.c
 src/gtk/prefs_window.C
 src/image_window.c
 src/info_window.c
-src/log_window.c
+src/logs.c
 src/main.c
 src/message_parse.c
 src/nomodule.c
