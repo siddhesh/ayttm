@@ -1410,7 +1410,8 @@ ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &in
 :	ay_prefs_window_panel( inTopFrameText ),
 	m_prefs( inPrefs ),
 	m_font_face_entry( NULL ),
-	m_font_sel_win( NULL )
+	m_font_sel_win( NULL ),
+	m_font_sel_conn_id( 0 )
 {
 }
 
@@ -1478,20 +1479,17 @@ void	ay_chat_panel::s_browse_font( GtkWidget *widget, void *data )
 			(_("Font selection"));
 		gtk_window_position(GTK_WINDOW(the_panel->m_font_sel_win),
 				    GTK_WIN_POS_CENTER);
-		gtk_signal_connect(GTK_OBJECT(the_panel->m_font_sel_win), "delete_event",
-				   GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete),
-				   NULL);
 		gtk_signal_connect_object
 			(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->cancel_button),
 			 "clicked",
 			 GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete),
 			 GTK_OBJECT(the_panel->m_font_sel_win));
 	}
-
-	if(the_panel->m_font_sel_conn_id) {
+	if (the_panel->m_font_sel_conn_id) {
 		gtk_signal_disconnect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(
 				the_panel->m_font_sel_win)->ok_button), the_panel->m_font_sel_conn_id);
 	}
+
 	the_panel->m_font_sel_conn_id = gtk_signal_connect
 		(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button),
 	         "clicked",
@@ -1503,9 +1501,11 @@ void	ay_chat_panel::s_browse_font( GtkWidget *widget, void *data )
 			the_panel->m_font_sel_win), font_name);
 	g_free(font_name);
 	gtk_window_set_modal(GTK_WINDOW(the_panel->m_font_sel_win), TRUE);
+	gtk_window_set_wmclass(GTK_WINDOW(the_panel->m_font_sel_win), "ayttm", "Ayttm");
+	gtk_widget_realize(the_panel->m_font_sel_win);
+	gtk_widget_show(the_panel->m_font_sel_win);
 	gtk_widget_grab_focus
 		(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button);
-	gtk_widget_show(the_panel->m_font_sel_win);
 }
 
 // Build
