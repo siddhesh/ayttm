@@ -58,6 +58,7 @@
 #include "input_list.h"
 #include "plugin_api.h"
 #include "progress_window.h"
+#include "activity_bar.h"
 #include "account.h"
 #include "util.h"
 #include "status.h"
@@ -173,8 +174,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN Service New",
 	"MSN Messenger support, new library",
-	"$Revision: 1.9 $",
-	"$Date: 2003/04/04 10:12:52 $",
+	"$Revision: 1.10 $",
+	"$Date: 2003/04/04 19:38:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -613,7 +614,7 @@ void eb_msn_login( eb_local_account * account )
 	mlad = (eb_msn_local_account_data *)account->protocol_local_account_data;
 	char buff[1024];
 	snprintf(buff, sizeof(buff), _("Logging in to MSN account: %s"), account->handle);
-	/*mlad->connect_tag = activity_window_new(buff);*/
+	mlad->connect_tag = ay_activity_bar_add(buff, NULL, NULL);
 
 	mlad->mc = new msnconn;
 	if(!mainconn)
@@ -641,7 +642,7 @@ void eb_msn_connected(eb_local_account * account)
 	account->connecting = 0;
         eb_debug(DBG_MSN,"SETTTING STATE TO %d\n",mlad->status);
         eb_msn_set_current_state(account, mlad->status);
-	/*progress_window_close(mlad->connect_tag);*/
+	ay_activity_bar_remove(mlad->connect_tag);
 }
 
 void eb_msn_logout( eb_local_account * account )

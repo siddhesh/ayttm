@@ -51,6 +51,7 @@ typedef unsigned long ulong;
 #include "status.h"
 #include "dialog.h"
 #include "progress_window.h"
+#include "activity_bar.h"
 #include "message_parse.h"
 #include "value_pair.h"
 #include "info_window.h"
@@ -89,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/04 11:54:00 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/04 19:38:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -718,17 +719,16 @@ static void eb_icq_add_user( eb_account * account )
 static void eb_icq_login( eb_local_account * account )
 {
 	struct eb_icq_local_account_data * alad;
+	char buff[1024];
 
 	account->connecting = 1;
 	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
 
-
- 	/*alad->connect_tag = activity_window_new(buff);*/
+	snprintf(buff, sizeof(buff), _("Logging in to ICQ account: %s"), account->handle);
+ 	alad->connect_tag = ay_activity_bar_add(buff, NULL, NULL);
 
 	icqtoc_signon( account->handle, alad->password,
 			      icq_server, atoi(icq_port), alad->icq_info);
-	
- 	progress_window_close (alad->connect_tag);
 }
 
 static void eb_icq_logged_in (toc_conn *conn) 
@@ -742,6 +742,8 @@ static void eb_icq_logged_in (toc_conn *conn)
 	ela = find_local_account_by_handle(conn->username, SERVICE_INFO.protocol_id);
  	alad = (struct eb_icq_local_account_data *)ela->protocol_local_account_data;
  	alad->conn = conn;
+	
+ 	ay_activity_bar_remove(alad->connect_tag);
  	
 	if(!alad->conn)
 	{

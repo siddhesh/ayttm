@@ -5,7 +5,8 @@ bin_PROGRAMS = ayttm
 ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	account.c info_window.c chat_window.c util.c add_contact_window.c \
 	edit_contact_window.c edit_account_window.c  sound.c dialog.c \
-	prefs.c prefs_window.c away_window.c browser.c message_parse.c progress_window.c \
+	prefs.c prefs_window.c away_window.c browser.c message_parse.c \
+	progress_window.c activity_bar.C \
 	chat_room.c value_pair.c edit_group_window.c log_window.c \
 	trigger.c console_session.c input_list.c nomodule.c \
 	plugin_api.c plugin.c file_select.c contact_actions.c \
@@ -19,7 +20,7 @@ noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	message_parse.h help_menu.h chat_room.h value_pair.h log_window.h \
 	info_window.h log_window.h trigger.h console_session.h \
 	browser.h input_list.h plugin.h plugin_api.h debug.h \
-	nomodule.h file_select.h contact_actions.h \
+	nomodule.h file_select.h contact_actions.h activity_bar.h \
 	smileys.h intl.h account_parser.h contact_parser.h crash.h \
 	externs.h llist.h mem_util.h offline_queue_mgmt.h tcp_util.h \
 	image_window.h
@@ -28,6 +29,7 @@ EXTRA_DIST =
 
 AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)
+AM_CXXFLAGS = $(AM_CFLAGS)
 LIBS = @LIBS@ $(EB_LIBS) -lproxy $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS)
 ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy
 CLEANFILES = @CLEANFILES@ defaults.h

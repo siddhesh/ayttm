@@ -56,6 +56,7 @@
 #include "service.h"
 #include "dialog.h"
 #include "progress_window.h"
+#include "activity_bar.h"
 #include "status.h"
 #include "util.h"
 #include "message_parse.h"
@@ -121,8 +122,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo2 Service",
 	"Yahoo Instant Messenger new protocol support",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/04 09:15:45 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/04 19:38:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1554,7 +1555,7 @@ static void eb_yahoo_login_with_state(eb_local_account * ela, int login_mode)
 		return;
 
 	snprintf(buff, sizeof(buff), _("Logging in to Yahoo account: %s"), ela->handle);
-	/*ylad->timeout_tag = activity_window_new(buff);*/
+	ylad->timeout_tag = ay_activity_bar_add(buff, NULL, NULL);
 
 	ela->connecting = 1;
 	ylad->id = yahoo_init(ela->handle, ylad->password);
@@ -1582,7 +1583,7 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 
 	ela->connecting = 0;
 
-	/*progress_window_close(ylad->timeout_tag);*/
+	ay_activity_bar_remove(ylad->timeout_tag);
 	if(succ == YAHOO_LOGIN_OK) {
 		ela->connected = 1;
 		ylad->status = yahoo_current_status(id);
