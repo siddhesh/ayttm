@@ -1,3 +1,7 @@
+* Sun Jun  1 2003 14:15 GMT [philip]	0.3.1-10
+- src/gtk/prefs_window.C
+make OK button activate on Enter, and Cancel button on Escape
+
 * Sat May 31 2003 19:36 GMT [philip]	0.3.1-9
 - modules/smileys/smiley_themer.c
 Add logging

@@ -575,16 +575,24 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtk_widget_show( hbox2 );
 	gtk_widget_set_usize( hbox2, 200, 25 );
 
+	GtkAccelGroup *accel_group = gtk_accel_group_new();
+
 	GtkWidget	*button = gtkut_create_icon_button( _("OK"), ok_xpm, m_prefs_window_widget );
 	gtk_widget_show( button );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC( s_ok_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+			GDK_Return, 0, GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+			GDK_KP_Enter, 0, GTK_ACCEL_VISIBLE);
 
 	// Cancel Button
 	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, m_prefs_window_widget );
 	gtk_widget_show( button );
 	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC( s_cancel_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+			GDK_Escape, 0, GTK_ACCEL_VISIBLE);
 
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 5 );
 	gtk_widget_show( hbox );
@@ -594,6 +602,9 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtk_box_pack_start( GTK_BOX(main_hbox), prefs_vbox, FALSE, FALSE, 3 );
 
 	gtk_container_add( GTK_CONTAINER(m_prefs_window_widget), main_hbox );
+
+	gtk_window_add_accel_group(GTK_WINDOW(m_prefs_window_widget), 
+			accel_group);
 }
 
 ay_prefs_window::~ay_prefs_window( void )
