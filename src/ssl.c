@@ -26,8 +26,10 @@
 
 #ifdef HAVE_OPENSSL
 #include "ssl.h"
-#include "debug.h"
+#include "ssl_certificate.h"
 
+#include "debug.h"
+#include <string.h>
 #include <glib.h>
 #include <fcntl.h>
 #include "globals.h"
@@ -65,8 +67,14 @@ void ssl_done(void)
 	SSL_CTX_free(ssl_ctx);
 }
 
-int ssl_init_socket(SockInfo *sockinfo)
+int ssl_init_socket(SockInfo *sockinfo, char *hostname, unsigned short port)
 {
+	if (sockinfo == NULL) {
+		eb_debug(DBG_CORE, "sockinfo == NULL!\n");
+		return -1;
+	}
+	sockinfo->hostname = strdup(hostname);
+	sockinfo->port = port;
 	return ssl_init_socket_with_method(sockinfo, SSL_METHOD_SSLv23);
 }
 
@@ -155,6 +163,12 @@ int ssl_init_socket_with_method(SockInfo *sockinfo, SSLMethod method)
 	/* Get server's certificate (note: beware of dynamic allocation) */
 	if ((server_cert = SSL_get_peer_certificate(ssl)) == NULL) {
 		eb_debug(DBG_CORE, "server_cert is NULL ! this _should_not_ happen !\n");
+		SSL_free(ssl);
+		return FALSE;
+	}
+
+	if (!ssl_certificate_check(server_cert, sockinfo->hostname, sockinfo->port)) {
+		X509_free(server_cert);
 		SSL_free(ssl);
 		return FALSE;
 	}

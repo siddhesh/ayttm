@@ -652,7 +652,7 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 }
 
 	 ssl_init();
-	 if (!ssl_init_socket(sock)) {
+	 if (!ssl_init_socket(sock, hdata->remote_host, 80)) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
 		 return;
 	 }
@@ -722,6 +722,7 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 
 	 
 	 ssl_done_socket(sock);
+	 free(sock->hostname);
 	 sock->ssl = NULL;
 	 close(sock->sock);
 	 
@@ -750,7 +751,7 @@ static void msn_https_cb2(int fd, int error, void *data)
 		 return;
 	 }
 
-	 if (!ssl_init_socket(sock)) {
+	 if (!ssl_init_socket(sock, hdata->remote_host, 80)) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
 		 return;
 	 }
@@ -779,6 +780,7 @@ static void msn_https_cb2(int fd, int error, void *data)
 		 
 	 }
 	 ssl_done_socket(sock);
+	 free(sock->hostname);
 	 sock->ssl = NULL;
 	 close(sock->sock);
 

@@ -36,6 +36,8 @@ void eb_do_dialog( const char *message, const char *title,
 		void (*action)(void *data, int result), 
 		void *data );
 
+void eb_do_no_callback_dialog( const char *message, const char *title, int *value);
+
 void do_list_dialog( const char *message, const char *title, const char **list, 
 		void (*action)(const char *text, void *data), 
 		void *data );

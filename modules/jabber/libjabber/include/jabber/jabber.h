@@ -78,6 +78,7 @@ typedef struct jid_struct
     char*              resource;
     char*              user;
     char*              server;
+    unsigned short     port;
     char*              full;
     struct jid_struct *next; /* for lists of jids */
 } *jid;

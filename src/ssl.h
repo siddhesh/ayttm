@@ -51,11 +51,13 @@ typedef enum {
 typedef struct _SockInfo {
 	int sock;
 	SSL *ssl;
+	char *hostname;
+	unsigned short port;
 } SockInfo;
 
 int ssl_read(SSL *ssl, char *buf, int len);
 int ssl_write(SSL *ssl, const char *buf, int len);
-int ssl_init_socket(SockInfo *sockinfo);
+int ssl_init_socket(SockInfo *sockinfo, char *host, unsigned short port);
 int ssl_init_socket_with_method(SockInfo *sockinfo, SSLMethod method);
 void ssl_done_socket(SockInfo *sockinfo);
 void ssl_done(void);

@@ -319,6 +319,21 @@ void eb_do_dialog(const char *message, const char *title, void (*action)(void *,
 	do_dialog(message, title, eb_gtk_dialog_callback, cd);
 }
 
+static void self_update_value(void *data, int ans)
+{
+	int *value = (int *)data;
+	*value = ans;
+	
+}
+
+void eb_do_no_callback_dialog( const char *message, const char *title, int *value)
+{
+	*value = -1;
+	eb_do_dialog(message, title, self_update_value, value);
+	while (*value == -1) {
+		gtk_main_iteration();
+	}	
+}
 
 /*
  * The following methods are for the text input window

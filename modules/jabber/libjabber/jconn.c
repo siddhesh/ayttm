@@ -132,6 +132,8 @@ int jab_start(jconn j, int port, int use_ssl)
 #else
     j->usessl = 0;
 #endif    
+    
+    j->user->port = port;
     if ((tag = proxy_connect_host(j->user->server, port, 
 		    	    (ay_socket_callback)jab_continue, j, NULL)) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
@@ -160,7 +162,7 @@ void jab_continue (int fd, int error, void *data)
             j->ssl_sock = (SockInfo*)malloc(sizeof(SockInfo));
 	    ssl_init();
 	    j->ssl_sock->sock = fd;
-	    if (!ssl_init_socket(j->ssl_sock)) {
+	    if (!ssl_init_socket(j->ssl_sock, j->user->server, j->user->port)) {
 		  printf("ssl error !\n");  
 		  STATE_EVT(JCONN_STATE_OFF)
 		  return;
