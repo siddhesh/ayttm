@@ -1,3 +1,7 @@
+* Web Oct 29 2003 11:20 GMT [colin]	0.4.4-8
+- src/chat_room.c
+MRU list for chatrooms
+
 * Web Oct 29 2003 11:20 GMT [colin]	0.4.4-7
 - configure.ac src/tcp_util.c
 Check for hstrerror() existence (fix for Solaris)

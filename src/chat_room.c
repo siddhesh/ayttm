@@ -660,14 +660,76 @@ char * next_chatroom_name(void)
 	return g_strdup_printf(_("Chatroom %d"), ++total_rooms);
 }
 
+static LList *get_chatroom_mru (void)
+{
+	LList *mru = NULL;
+	char buff [4096];
+	FILE *fp = NULL;
+	
+	snprintf(buff, 4095, "%s%cchatroom_mru", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	
+	fp = fopen(buff, "r");
+	memset (buff, 0, 4096);
+	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
+		char *name = strdup((char *)buff);
+		if (name[strlen(name)-1] == '\n')
+			name[strlen(name)-1] = '\0';
+		mru = l_list_append(mru, name);
+		eb_debug(DBG_CORE, "name='%s'\n",name);
+		memset (buff, 0, 4096);
+	}
+	if (fp)
+		fclose(fp);
+	
+	return mru;
+}
+
+static void add_chatroom_mru (const char * name)
+{
+	LList *mru = get_chatroom_mru();
+	LList *cur = NULL;
+	char buff [4096];
+	FILE *fp = NULL;
+	int i = 0;
+	
+	snprintf(buff, 4095, "%s%cchatroom_mru", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	
+	fp = fopen(buff, "w");
+	memset (buff, 0, 4096);
+	
+	mru = l_list_prepend(mru, strdup(name));
+	cur = mru;
+	while (fp && cur && cur->data && i < 10) {
+		if (i == 0 || strcmp(cur->data, name)) {
+			/* not the same twice */
+			
+			fprintf(fp, "%s\n", cur->data);
+			i++;
+		}
+		cur = cur->next;
+	}
+	
+	if (fp)
+		fclose(fp);
+	
+	l_list_free(mru);	
+}
+
 static void join_chat_callback(GtkWidget * widget, gpointer data )
 {
 	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
-	char *name = gtk_editable_get_chars(GTK_EDITABLE(chat_room_name),0,-1);
+	char *name = NULL;
 	char *mservice = NULL;
 	char *local_acc = NULL;
 	eb_local_account *ela = NULL;
 	int service_id = -1;
+	
+	name = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_name)->entry),0,-1);
+	
 	if (!strstr(service, "]") || !strstr(service," ")) {
 		ay_do_error(_("Cannot join"), _("No local account specified."));
 		g_free(service);
@@ -692,6 +754,8 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 
 	if (!name || strlen(name) == 0)
 		name = next_chatroom_name();
+	
+	add_chatroom_mru(name);
 	
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(reconnect_chkbtn)))
 		eb_add_auto_chatroom(ela, name, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(public_chkbtn)));
@@ -732,8 +796,8 @@ static void update_public_sensitivity(GtkWidget * widget, gpointer data ) {
 static void choose_list_cb(char *text, gpointer data) {
 	int pos;
 	
-	gtk_editable_delete_text(GTK_EDITABLE(chat_room_name), 0, -1);
-	gtk_editable_insert_text(GTK_EDITABLE(chat_room_name), text, strlen(text), &pos);
+	gtk_editable_delete_text(GTK_EDITABLE(GTK_COMBO(chat_room_name)->entry), 0, -1);
+	gtk_editable_insert_text(GTK_EDITABLE(GTK_COMBO(chat_room_name)->entry), text, strlen(text), &pos);
 	
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(public_chkbtn), TRUE);
 }
@@ -788,7 +852,6 @@ static void join_chat_destroy(GtkWidget * widget, gpointer data )
  *  Let's build ourselfs a nice little dialog window to
  *  ask us what chat window we want to join :)
  */
-
 void open_join_chat_window()
 {
 	GtkWidget * label;
@@ -800,7 +863,7 @@ void open_join_chat_window()
 	GtkWidget * button;
 	GtkWidget * separator;
 	
-	GList * list;
+	GList * list = NULL;
 
 	if(join_service_is_open)
 	{
@@ -819,11 +882,17 @@ void open_join_chat_window()
 
 	table = gtk_table_new(2, 5, FALSE);
 
+	
 	label = gtk_label_new(_("Chat Room Name: "));
 	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 0, 1);
 	gtk_widget_show(label);
 
-	chat_room_name = gtk_entry_new();
+	/* mru */
+	chat_room_name = gtk_combo_new();
+	list = llist_to_glist(get_chatroom_mru(), 1);
+	list = g_list_prepend(list, strdup(""));
+	gtk_combo_set_popdown_strings(GTK_COMBO(chat_room_name), list);
+	g_list_free(list);
 	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_name, 1, 2, 0, 1);
 	gtk_widget_show(chat_room_name);
 
@@ -1565,7 +1634,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 				     eb_is_chatroom_auto(chat_room) );
 	
 	ICON_CREATE(icon, iconwid, tb_volume_xpm);
-	
+
   	chat_room->sound_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 						GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
 						NULL,
@@ -1575,7 +1644,6 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 						iconwid,
 						GTK_SIGNAL_FUNC(set_sound_on_toggle),
 						chat_room);
-  /*Toggle the sound button based on preferences*/
 
 	/* Toggle the sound button based on preferences */
 	if ( iGetLocalPref("do_play_send") )
@@ -1595,12 +1663,10 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		chat_room->first_enabled = TRUE;
 		enableSoundButton = TRUE;
 	}
-
 	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON( chat_room->sound_button ), 
 				     enableSoundButton );
 
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
-
 	ICON_CREATE(icon, iconwid, action_xpm);
 	print_button = TOOLBAR_APPEND(_("Actions..."), iconwid, action_callback, chat_room);
 
