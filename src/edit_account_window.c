@@ -63,9 +63,9 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 	
 	if (strcmp(service, _("[None]")) && strstr(service, "]")) {
 		*(strstr(service, "]")) = '\0';
-		service = strstr(service,"[")+1;
+		char *mservice = strstr(service,"[")+1;
 
-		service_id = get_service_id( service );
+		service_id = get_service_id( mservice );
 		ela = find_local_account_by_handle(local_acc, service_id);
 		if (!ela) {
 			ay_do_error(_("Account error"), _("The local account doesn't exist."));

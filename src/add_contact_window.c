@@ -192,6 +192,7 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	struct contact *con;
 	gchar *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(service_list)->entry),0,-1);
 	gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
+	gchar *mservice = NULL;
 	gint service_id = -1;
 	gchar *local_acc = strstr(service, " ") +1;
 	eb_local_account *ela = NULL;
@@ -205,8 +206,8 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	
 	*(strstr(service, "]")) = '\0';
 	
-	service = strstr(service,"[")+1;
-	service_id = get_service_id( service );
+	mservice = strstr(service,"[")+1;
+	service_id = get_service_id( mservice );
 	ela = find_local_account_by_handle(local_acc, service_id);
 
 	if (!ela) {

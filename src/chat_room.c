@@ -429,6 +429,7 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 {
 	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
 	char *name = gtk_editable_get_chars(GTK_EDITABLE(chat_room_name),0,-1);
+	char *mservice = NULL;
 	char *local_acc = NULL;
 	eb_local_account *ela = NULL;
 	int service_id = -1;
@@ -441,9 +442,9 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 	local_acc = strstr(service, " ") +1;
 
 	*(strstr(service, "]")) = '\0';
-	service = strstr(service,"[")+1;
+	mservice = strstr(service,"[")+1;
 	
-	service_id = get_service_id( service );
+	service_id = get_service_id( mservice );
 	ela = find_local_account_by_handle(local_acc, service_id);
 	
 	g_free(service);
