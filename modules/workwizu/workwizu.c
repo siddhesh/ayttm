@@ -64,6 +64,7 @@ typedef unsigned long ulong;
 #include "smileys.h"
 #include "globals.h"
 #include "tcp_util.h"
+#include "activity_bar.h"
 
 #include "pixmaps/workwizu_online.xpm"
 #include "pixmaps/workwizu_away.xpm"
@@ -106,8 +107,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu Service",
 	"Workwizu Chat support",
-	"$Revision: 1.4 $",
-	"$Date: 2003/04/04 12:12:58 $",
+	"$Revision: 1.5 $",
+	"$Date: 2003/04/05 08:54:54 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -621,6 +622,8 @@ void eb_workwizu_connected (int fd, int error, void *data)
 
 	wad->sock = fd;
 	
+	ay_activity_bar_remove(wad->activity_tag);
+	
 	if (wad->sock == -1) {
 		eb_debug(DBG_WWZ, "wad->sock=-1 !\n");
 		do_error_dialog(_("Server doesn't answer."), 
@@ -645,8 +648,14 @@ void eb_workwizu_connected (int fd, int error, void *data)
 void eb_workwizu_login (eb_local_account *account)
 {
 	wwz_account_data *wad = (wwz_account_data *) account->protocol_local_account_data;
+	char buff[1024];
+	
 	if (account->connected || account->connecting) 
 		return;
+	
+	snprintf(buff, sizeof(buff), _("Logging in to Workwizu account: %s"), 
+			account->handle);
+	wad->activity_tag = ay_activity_bar_add(buff, NULL, NULL);
 	
 	account->connecting = 1;
 	my_user = g_new0(wwz_user, 1);
@@ -662,6 +671,7 @@ void eb_workwizu_login (eb_local_account *account)
 		do_error_dialog(_("Server doesn't answer."), 
 						_("Workwizu Error"));
 		account->connecting=0;
+		ay_activity_bar_remove(wad->activity_tag);
 		eb_workwizu_logout(account);
 		return;
 	}

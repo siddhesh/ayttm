@@ -39,6 +39,7 @@ struct _wwz_account_data
 	char *password;
 	int sock;
 	eb_chat_room *chat_room; /* only one */	
+	int activity_tag;
 };
 
 typedef struct _wwz_user wwz_user;
