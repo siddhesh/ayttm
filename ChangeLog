@@ -1,3 +1,7 @@
+* Sun Apr 06 2003 14:50 GMT [philip]	0.2.3-45
+- src/activity_bar.C
+delete window contents before destroying window
+
 * Sun Apr 06 2003 14:40 GMT [philip]	0.2.3-44
 - modules/msn2/msn.C
 don't call ay_activity_bar_remove if it has been cancelled

@@ -254,17 +254,19 @@ void ay_activity_window::close_window( void )
 		s_timeout = 0;
 	}
 
-	if(s_window) {
+	if(s_window)
 		gtk_widget_hide(s_window);
-		gtk_widget_destroy(s_window);
-		s_window = s_vbox = NULL;
-	}
 
 	while(s_packs) {
 		ay_activity_bar_pack *abp = (ay_activity_bar_pack *)s_packs->data;
 		abp->cancel();
 		s_packs = l_list_remove(s_packs, abp);
 		delete abp;
+	}
+
+	if(s_window) {
+		gtk_widget_destroy(s_window);
+		s_window = s_vbox = NULL;
 	}
 }
 
