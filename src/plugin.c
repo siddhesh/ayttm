@@ -31,6 +31,7 @@ typedef long __off32_t;
 #include <dirent.h> /* Routines to read directories to find modules */
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "defaults.h"
@@ -54,14 +55,23 @@ static PLUGIN_INFO Plugin_Cannot_Load = {PLUGIN_UNKNOWN,
 				  "Unknown", 
 				  "Unknown", NULL, NULL, NULL, NULL};
 
-static gint compare_plugin_loaded_service(gconstpointer a, gconstpointer b) {
+static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
+static int	load_utility_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
+static int	load_log_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
+static int	load_sound_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
+static int	load_gui_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name );
+
+
+static int compare_plugin_loaded_service(gconstpointer a, gconstpointer b)
+{
 	const eb_PLUGIN_INFO *epi=a;
 	if(epi->service && epi->status==PLUGIN_LOADED && !strcmp( epi->service, (char *)b))
 		return(0);
 	return(1);
 }
 
-static gint compare_plugin_name(gconstpointer a, gconstpointer b) {
+static int compare_plugin_name(gconstpointer a, gconstpointer b)
+{
 	const eb_PLUGIN_INFO *epi=a;
 	if(epi->name && !strcmp( epi->name, (char *)b))
 		return(0);
@@ -69,7 +79,7 @@ static gint compare_plugin_name(gconstpointer a, gconstpointer b) {
 }
 
 
-static eb_PLUGIN_INFO *FindLoadedPluginByService(char *service)
+static eb_PLUGIN_INFO *FindLoadedPluginByService(const char *service)
 {
 	LList *plugins=GetPref(EB_PLUGIN_LIST);
 	LList *PluginData = l_list_find_custom(plugins, service, compare_plugin_loaded_service);
@@ -89,7 +99,8 @@ eb_PLUGIN_INFO *FindPluginByName(const char *name)
 
 
 /* Will add/update info about a plugin */
-static void SetPluginInfo(PLUGIN_INFO *pi, char *name, lt_dlhandle Module, PLUGIN_STATUS status, const char *status_desc, char *service, gboolean force)
+static void	SetPluginInfo( PLUGIN_INFO *pi, const char *name, lt_dlhandle Module,
+	PLUGIN_STATUS status, const char *status_desc, const char *service, gboolean force )
 {
 	LList *plugins=NULL;
 	eb_PLUGIN_INFO *epi=NULL;
@@ -138,7 +149,8 @@ static void SetPluginInfo(PLUGIN_INFO *pi, char *name, lt_dlhandle Module, PLUGI
 }
 
 /* Find names which end in .la, the expected module extension */
-static int select_module_entry(const struct dirent *dent) {
+static int select_module_entry(const struct dirent *dent)
+{
 	int len=0;
 	char *ext;
 
@@ -153,110 +165,88 @@ static int select_module_entry(const struct dirent *dent) {
 	return(0);
 }
 
-int unload_module(eb_PLUGIN_INFO *epi)
+int load_module_full_path( const char *inFullPath )
 {
-	int error=0;
-	char buf[1024];
+	lt_dlhandle		Module;
+	PLUGIN_INFO		*plugin_info = NULL;
+	eb_PLUGIN_INFO	*epi = NULL;
 
-	eb_debug(DBG_CORE, ">Unloading plugin %s\n", epi->name);
-	/* This is a service plugin, special handling required */
-	if (epi->status!=PLUGIN_LOADED)
-	{
-		eb_debug(DBG_CORE, "<Plugin not loaded\n");
-		return( 0 );
-	}
 	
-	if(epi->pi.finish) {
-		eb_debug(DBG_CORE, "Calling plugins finish function\n");
-		error=epi->pi.finish();
-		if(error > 0) {
-			snprintf(buf, sizeof(buf), _("Unable to unload plugin %s; maybe it is still in use?"), epi->name);
-			ay_do_error( _("Plugin error"), buf );
-			eb_debug(DBG_CORE, "<Plugin failed to unload\n");
-			return(-1);
-		}
-	}
-	if(epi->service) {
-		struct service SERVICE_INFO = { strdup(epi->service), -1, SERVICE_CAN_NOTHING, NULL };
-
-		SERVICE_INFO.sc=eb_nomodule_query_callbacks();
-		add_service(&SERVICE_INFO);
-	}
-	epi->status=PLUGIN_NOT_LOADED;
-	epi->pi.prefs=NULL;
-	eb_debug(DBG_CORE, "Closing plugin\n");
-	if(lt_dlclose(epi->Module)) {
-		fprintf(stderr, "Error closing plugin: %s\n", lt_dlerror());
-	}
-	eb_debug(DBG_CORE, "<Plugin unloaded\n");
-	return(0);
-}
-
-void unload_modules(void)
-{
-	LList *plugins = GetPref(EB_PLUGIN_LIST);
+	assert( inFullPath != NULL );
 	
-	for ( ; plugins; plugins=plugins->next)
-	{
-		unload_module(plugins->data);
-	}
-}
-
-int load_module(char *path, char *name)
-{
-	char full_path[1024];
-	lt_dlhandle Module;
-	PLUGIN_INFO *plugin_info=NULL;
-	eb_PLUGIN_INFO *epi=NULL;
-
-	snprintf(full_path, sizeof(full_path), "%s/%s", path, name);
-	eb_debug(DBG_CORE, "Opening module: %s\n", full_path);
-	Module = lt_dlopen(full_path);
-	eb_debug(DBG_CORE, "Module: %p\n", Module);
+	eb_debug( DBG_CORE, "Opening module: %s\n", inFullPath );
+	Module = lt_dlopen( inFullPath );
+	eb_debug( DBG_CORE, "Module: %p\n", Module );
 
 	/* Find out if this plugin is already loaded */
-	if(!Module) {
+	if ( Module == NULL )
+	{
 		/* Only update status on a plugin that is not already loaded */
-		SetPluginInfo(NULL, full_path, NULL, PLUGIN_CANNOT_LOAD, lt_dlerror(), NULL, FALSE);
-		return(-1);
+		SetPluginInfo( NULL, inFullPath, NULL, PLUGIN_CANNOT_LOAD, lt_dlerror(), NULL, FALSE );
+		return( -1 );
 	}
-	plugin_info = (PLUGIN_INFO *)lt_dlsym(Module, "plugin_info");
-	if(!plugin_info) {
-		lt_dlclose(Module);
+	
+	plugin_info = (PLUGIN_INFO *)lt_dlsym( Module, "plugin_info" );
+	if ( !plugin_info )
+	{
+		lt_dlclose( Module );
 		/* Only update status on a plugin that is not already loaded */
-		SetPluginInfo(NULL, full_path, NULL, PLUGIN_CANNOT_LOAD, _("Cannot resolve symbol \"plugin_info\"."), NULL, FALSE);
-		return(-1);
+		SetPluginInfo( NULL, inFullPath, NULL, PLUGIN_CANNOT_LOAD, _("Cannot resolve symbol \"plugin_info\"."), NULL, FALSE );
+		return( -1 );
 	}
-	epi=FindPluginByName(full_path);
-	if(epi && epi->status==PLUGIN_LOADED) {
-		lt_dlclose(Module);
-		eb_debug(DBG_CORE, "Not loading already loaded module %s\n", name);
-		return(-1);
+	
+	epi = FindPluginByName( inFullPath );
+	if ( epi && epi->status == PLUGIN_LOADED )
+	{
+		lt_dlclose( Module );
+		eb_debug( DBG_CORE, "Module already loaded: %s\n", inFullPath );
+		return( -1 );
 	}
-	switch(plugin_info->type) {
-	case PLUGIN_SERVICE:
-		load_service_plugin(Module, plugin_info, full_path);
-		break;
-	case PLUGIN_UTILITY:
-		load_utility_plugin(Module, plugin_info, full_path);
-		break;
-	case PLUGIN_SOUND:
-		load_sound_plugin(Module, plugin_info, full_path);
-		break;
-	case PLUGIN_LOG:
-		load_log_plugin(Module, plugin_info, full_path);
-		break;
-	case PLUGIN_GUI:
-		load_gui_plugin(Module, plugin_info, full_path);
-		break;
-	default:
-		break;
+	
+	switch ( plugin_info->type )
+	{
+		case PLUGIN_SERVICE:
+			load_service_plugin( Module, plugin_info, inFullPath );
+			break;
+			
+		case PLUGIN_UTILITY:
+			load_utility_plugin( Module, plugin_info, inFullPath );
+			break;
+			
+		case PLUGIN_SOUND:
+			load_sound_plugin( Module, plugin_info, inFullPath );
+			break;
+			
+		case PLUGIN_LOG:
+			load_log_plugin( Module, plugin_info, inFullPath );
+			break;
+			
+		case PLUGIN_GUI:
+			load_gui_plugin( Module, plugin_info, inFullPath );
+			break;
+			
+		default:
+			assert( FALSE );
+			break;
 	}
-	return(0);
+	
+	return( 0 );
+}
+
+int	load_module( const char *path, const char *name )
+{
+	char	full_path[PATH_MAX];
+
+	assert( path != NULL );
+	assert( name != NULL );
+	
+	snprintf( full_path, PATH_MAX, "%s/%s", path, name );
+	
+	return( load_module_full_path( full_path ) );
 }
 
 /* This is really a modules loader now */
-void load_modules()
+void load_modules( void )
 {
 	/* UNUSED struct dirent **namelist=NULL; */
 	char buf[1024], *modules_path=NULL, *cur_path=NULL;
@@ -326,7 +316,7 @@ void load_modules()
 	eb_debug(DBG_CORE, "<End services_init\n");
 }
 
-int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
+static int	load_service_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
 {
 	struct service *Service_Info=NULL;
 	struct service_callbacks *(*query_callbacks)();
@@ -386,7 +376,7 @@ int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
 	return(0);
 }
 
-int load_utility_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
+static int	load_utility_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
 {
 	char buf[1024];
 	LList *user_prefs=NULL;
@@ -413,19 +403,86 @@ int load_utility_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
 	return(0);
 }
 
-int load_log_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
+static int	load_log_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
 {
 	return(1);
 }
 
-int load_sound_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
+static int	load_sound_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
 {
 	return(1);
 }
 
-int load_gui_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name)
+static int	load_gui_plugin( lt_dlhandle Module, PLUGIN_INFO *info, const char *name )
 {
 	return(1);
+}
+
+int	unload_module_full_path( const char *inFullPath )
+{
+	eb_PLUGIN_INFO	*epi = NULL;
+
+	
+	assert( inFullPath != NULL );
+	
+	epi = FindPluginByName( inFullPath );
+	
+	if ( epi == NULL )
+	{
+		eb_debug( DBG_CORE, "<Plugin not found: %s [file: %s line: %d]\n", inFullPath, __FILE__, __LINE__ );
+		return( 0 );
+	}
+	
+	return( unload_module( epi ) );
+}
+
+int	unload_module( eb_PLUGIN_INFO *epi )
+{
+	int error=0;
+	char buf[1024];
+
+	eb_debug(DBG_CORE, ">Unloading plugin %s\n", epi->name);
+	/* This is a service plugin, special handling required */
+	if (epi->status!=PLUGIN_LOADED)
+	{
+		eb_debug(DBG_CORE, "<Plugin not loaded\n");
+		return( 0 );
+	}
+	
+	if(epi->pi.finish) {
+		eb_debug(DBG_CORE, "Calling plugins finish function\n");
+		error=epi->pi.finish();
+		if(error > 0) {
+			snprintf(buf, sizeof(buf), _("Unable to unload plugin %s; maybe it is still in use?"), epi->name);
+			ay_do_error( _("Plugin error"), buf );
+			eb_debug(DBG_CORE, "<Plugin failed to unload\n");
+			return(-1);
+		}
+	}
+	if(epi->service) {
+		struct service SERVICE_INFO = { strdup(epi->service), -1, SERVICE_CAN_NOTHING, NULL };
+
+		SERVICE_INFO.sc=eb_nomodule_query_callbacks();
+		add_service(&SERVICE_INFO);
+	}
+	epi->status=PLUGIN_NOT_LOADED;
+	epi->pi.prefs=NULL;
+	eb_debug(DBG_CORE, "Closing plugin\n");
+	if(lt_dlclose(epi->Module)) {
+		fprintf(stderr, "Error closing plugin: %s\n", lt_dlerror());
+	}
+	eb_debug(DBG_CORE, "<Plugin unloaded\n");
+	return(0);
+}
+
+void unload_modules( void )
+{
+	LList *plugins = GetPref(EB_PLUGIN_LIST);
+	
+	for ( ; plugins; plugins=plugins->next)
+	{
+		unload_module(plugins->data);
+	}
 }
 
 /* Make sure that all the plugin_api accessible menus are initialized */

@@ -74,15 +74,13 @@ typedef struct {
 
 eb_PLUGIN_INFO *FindPluginByName(const char *name);
 
-int unload_module(eb_PLUGIN_INFO *epi);
-void unload_modules();
-int load_module(char *path, char *name);
-void load_modules();
-int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name);
-int load_utility_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name);
-int load_log_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name);
-int load_sound_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name);
-int load_gui_plugin(lt_dlhandle Module, PLUGIN_INFO *info, char *name);
+int		load_module_full_path( const char *inFullPath );
+int		load_module( const char *path, const char *name );
+void	load_modules( void );
+
+int		unload_module_full_path( const char *inFullPath );
+int		unload_module(eb_PLUGIN_INFO *epi);
+void	unload_modules( void );
 
 /* Make sure that all the plugin_api accessible menus, as defined in plugin_api.h, are initialized */
 int init_menus();
