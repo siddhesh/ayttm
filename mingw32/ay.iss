@@ -2,17 +2,15 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 [Setup]
-AppName=AYTTM
-AppVerName=AYTTM 0.3.1-pre13
+AppName=Ayttm
+AppVerName=Ayttm v0.4.1-pre3
 AppPublisherURL=http://ayttm.sourceforge.net
 AppSupportURL=http://ayttm.sourceforge.net
 AppUpdatesURL=http://ayttm.sourceforge.net
-DefaultDirName={pf}\AYTTM
-DefaultGroupName=AYTTM
-AllowNoIcons=yes
+DefaultDirName={pf}\Ayttm
+DefaultGroupName=Ayttm
 LicenseFile=C:\Program Files\ayttm\COPYING
-InfoAfterFile=C:\cygwin\home\Haletky\ay\README.WIN32
-MinVersion=0,4.0.1381
+InfoAfterFile=C:\Program Files\ayttm\README.WIN32
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
@@ -20,36 +18,45 @@ Name: "quicklaunchicon"; Description: "Create a &Quick Launch icon"; GroupDescri
 
 [Files]
 Source: "C:\Program Files\ayttm\ayttm.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\BuddyArrive.au"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\Send.au"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\BuddyLeave.au"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\COPYING"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\iconv.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libcharset-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libcrypto-0.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libgdk_pixbuf-2.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libgdk-0.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libgettextlib-0-12-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libgettextpo-0.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libgettextsrc-0-12-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libglib-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libgmodule-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libgobject-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libgpgme-6.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libgthread-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libgtk-0.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\libintl-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libiconv-2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libintl-2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libjasper-1-700-2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libjpeg-62.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libltdl-3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\libssl-0.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\libXpm-noX4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\Receive.au"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files\ayttm\Send.au"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\BuddyArrive.au"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\ayttm\modules\*.*"; DestDir: "{app}\modules"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\README.WIN32"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\COPYING"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\ayttmrc"; DestDir: "C:\"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\smileys\console_smileys\*.*"; DestDir: "{app}\smileys\console_smileys"; Flags: ignoreversion
+Source: "C:\Program Files\ayttm\smileys\giles_smiles\*.*"; DestDir: "{app}\smileys\giles_smiles"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
-[INI]
-Filename: "{app}\ayttm.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://ayttm.sourceforge.net"
-
 [Icons]
-Name: "{group}\AYTTM"; Filename: "{app}\ayttm.exe"
-Name: "{group}\AYTTM on the Web"; Filename: "{app}\ayttm.url"
-Name: "{userdesktop}\AYTTM"; Filename: "{app}\ayttm.exe"; Tasks: desktopicon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\AYTTM"; Filename: "{app}\ayttm.exe"; Tasks: quicklaunchicon
+Name: "{group}\Ayttm"; Filename: "{app}\ayttm.exe"
+Name: "{group}\Uninstall Ayttm"; Filename: "{uninstallexe}"
+Name: "{userdesktop}\Ayttm"; Filename: "{app}\ayttm.exe"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Ayttm"; Filename: "{app}\ayttm.exe"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\ayttm.exe"; Description: "Launch AYTTM"; Flags: nowait postinstall skipifsilent
-
-[UninstallDelete]
-Type: files; Name: "{app}\ayttm.url"
+Filename: "{app}\ayttm.exe"; Description: "Launch Ayttm"; Flags: nowait postinstall skipifsilent
 

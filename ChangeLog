@@ -1,3 +1,8 @@
+* Thu Sep 26 2003 21:21 GMT [elh]	0.4.1-8
+- src/smileys.h 
+  mingw32/ay.iss
+Missing export and release script
+
 * Thu Sep 25 2003 07:53 GMT [philip]	0.4.1-7
 - configure.ac
 Applied Brian Ford's patch to make it more consistent

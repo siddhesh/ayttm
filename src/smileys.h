@@ -73,6 +73,9 @@ gchar * eb_smilify( const char *text, LList *protocol_smileys, const char *servi
 
 LList * eb_default_smileys( void );
 
+#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
+__declspec(dllimport)
+#endif
 LList * add_smiley( LList *list, const char *name, char **data, const char *service );
 
 LList * add_protocol_smiley( LList *list, const char *text, const char *name );
