@@ -1,3 +1,7 @@
+* Mon May  5 2003 11:40 GMT [andy]	0.3.0-130
+- src/gtk/prefs_window.C
+Fix window closing problem introduced in -124
+
 * Mon May  5 2003 08:57 GMT [colin]	0.3.0-129
 - modules/aycryption/aycryption.c
 Fix key selection badly inited 

@@ -102,6 +102,7 @@ class ay_prefs_window
 	private:	// Gtk callbacks
 		static void		s_tree_item_selected( GtkWidget *widget, gpointer data );
 		static void		s_destroy_callback( GtkWidget* widget, gpointer data );
+		static int		s_delete_event_callback( GtkWidget* widget, GdkEvent *inEvent, gpointer data );
 		static void		s_ok_callback( GtkWidget *widget, gpointer data );
 		static void		s_cancel_callback( GtkWidget *widget, gpointer data );
 	
@@ -494,7 +495,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
 	
-	gtk_signal_connect( GTK_OBJECT(m_prefs_window_widget), "destroy", GTK_SIGNAL_FUNC(s_destroy_callback), this );
+	gtk_signal_connect( GTK_OBJECT(m_prefs_window_widget), "delete_event", GTK_SIGNAL_FUNC(s_delete_event_callback), this );
 	
 	GtkWidget	*main_hbox = gtk_hbox_new( FALSE, 5 );
 
@@ -609,7 +610,9 @@ ay_prefs_window::~ay_prefs_window( void )
 		iter = g_list_next( iter );
 	}
 	g_list_free( m_panels );
-		
+
+	gtk_widget_destroy( m_prefs_window_widget );
+	
 	s_only_prefs_window = NULL;
 }
 
@@ -736,25 +739,19 @@ void	ay_prefs_window::OK( void )
 	{
 		ay_prefs_window_panel	*the_panel = reinterpret_cast<ay_prefs_window_panel *>(iter->data);
 		
-		if ( the_panel != NULL );
+		if ( the_panel != NULL )
 			the_panel->Apply();
 			
 		iter = g_list_next( iter );
 	}
 
 	ayttm_prefs_apply( &m_prefs );
-	
-	gtk_widget_destroy( m_prefs_window_widget );
-	m_prefs_window_widget = NULL;
 }
 
 // Cancel
 void	ay_prefs_window::Cancel( void )
 {
 	ayttm_prefs_cancel( &m_prefs );
-	
-	gtk_widget_destroy( m_prefs_window_widget );
-	m_prefs_window_widget = NULL;
 }
 
 ////
@@ -768,13 +765,12 @@ void	ay_prefs_window::s_tree_item_selected( GtkWidget *widget, gpointer data )
 	the_panel->Show();
 }
 
-// s_destroy_callback
-void	ay_prefs_window::s_destroy_callback( GtkWidget* widget, gpointer data )
+// s_delete_event_callback
+int	ay_prefs_window::s_delete_event_callback( GtkWidget* widget, GdkEvent *inEvent, gpointer data )
 {
-	ay_prefs_window	*the_window = reinterpret_cast<ay_prefs_window *>( data );
-	assert( the_window != NULL );
-
-	delete the_window;
+	// don't allow closing of the window from the window manager
+	//	i.e. force the user to click OK or Cancel
+	return( TRUE );
 }
 
 // s_ok_callback
@@ -784,6 +780,7 @@ void	ay_prefs_window::s_ok_callback( GtkWidget *widget, gpointer data )
 	assert( the_window != NULL );
 	
 	the_window->OK();
+	delete the_window;
 }
 
 // s_cancel_callback
@@ -793,6 +790,7 @@ void	ay_prefs_window::s_cancel_callback( GtkWidget *widget, gpointer data )
 	assert( the_window != NULL );
 	
 	the_window->Cancel();
+	delete the_window;
 }
 
 ////////////////
