@@ -1,3 +1,6 @@
+* Wed Jul 16 2003 13:30 GMT [colin]	0.3.3-1
+Release :)
+
 * Wed Jul 16 2003 09:09 GMT [philip]	0.3.3-pre1
 - modules/yahoo2/libyahoo2/libyahoo2.c
 Fix bug 770652 - crash on read yab
