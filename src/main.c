@@ -506,6 +506,8 @@ int main(int argc, char *argv[])
 	ay_spell_check_reload();
 
 	/* Load all the modules in the module_path preference, details can be found in the preferences module tab */
+	init_smileys();
+	
 	load_modules();
 
 	accounts_success = load_accounts();
@@ -514,8 +516,6 @@ int main(int argc, char *argv[])
 
 	start_login(!accounts_success);
 
-	init_smileys();
-	
 	gtk_main();
 
 	clean_up_dummies();

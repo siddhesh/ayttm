@@ -46,6 +46,7 @@
 
 static int plugin_init();
 static int plugin_finish();
+static int reload_prefs();
 
 static int ref_count=0;
 static char smiley_directory[MAX_PREF_LEN]=AYTTM_SMILEY_DIR;
@@ -59,11 +60,12 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.3 $",
-	"$Date: 2003/05/08 19:11:03 $",
+	"$Revision: 1.4 $",
+	"$Date: 2003/05/08 20:23:14 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
+	reload_prefs,
 	NULL
 };
 /* End Module Exports */
@@ -73,6 +75,7 @@ unsigned int module_version() {return CORE_VERSION;}
 static void load_themes();
 static void unload_themes();
 static void enable_smileys(ebmCallbackData *data);
+static void activate_theme_by_name(const char *name);
 
 static int plugin_init()
 {
@@ -111,6 +114,12 @@ static int plugin_finish()
 
 	unload_themes();
 
+	return 0;
+}
+
+static int reload_prefs()
+{
+	activate_theme_by_name(last_selected);
 	return 0;
 }
 
@@ -270,7 +279,6 @@ static void load_themes()
 {
 	struct dirent *entry;
 	DIR *theme_dir = opendir(smiley_directory);
-	struct smiley_theme *selected=NULL;
 	if(!theme_dir)
 		return;
 
@@ -295,14 +303,20 @@ static void load_themes()
 		ay_add_smiley_set( theme->name, theme->smileys );
 
 		themes = l_list_prepend(themes, theme);
-
-		if(!strcmp(last_selected, theme->name))
-			selected = theme;
 	}
 
 	closedir(theme_dir);
+}
 
-	if(selected)
-		enable_smileys((ebmCallbackData *)selected);
+static void activate_theme_by_name(const char *name)
+{
+	LList * l;
+	for(l=themes; l; l=l_list_next(l)) {
+		struct smiley_theme *theme = l->data;
+		if(!strcmp(theme->name, name)) {
+			enable_smileys((ebmCallbackData *)theme);
+			return;
+		}
+	}
 }
 
