@@ -639,7 +639,6 @@ static void msn_https_cb1(int fd, int error, void *data)
 {
 	 SockInfo *sock = (SockInfo*)malloc(sizeof(SockInfo));
 	 char *urlread = NULL;
-	 char *cookie0 = NULL, *cookie1 = NULL, *cookie2 = NULL;
 	 char *tmp = NULL;
 	 https_data *hdata = (https_data *)data;	
 	 
@@ -740,7 +739,6 @@ static void msn_https_cb2(int fd, int error, void *data)
 {
 	 SockInfo *sock = (SockInfo*)malloc(sizeof(SockInfo));
 	 char *urlread = NULL;
-	 char *cookie0 = NULL, *cookie1 = NULL, *cookie2 = NULL;
 	 char *tmp = NULL;	
 	 https_data *hdata = (https_data *)data;	
 	 sock->sock = fd;
@@ -2317,10 +2315,6 @@ void msn_connect_2(msnconn * conn, int trid, char ** args, int numargs, callback
 void msn_connect_3(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
 {
   connectinfo * info;
-
-  md5_state_t state;
-  md5_byte_t digest[16];
-  int a;
 
   info=(connectinfo *)data;
   msn_del_callback(conn, trid);

@@ -172,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.77 $",
-	"$Date: 2004/05/18 18:55:41 $",
+	"$Revision: 1.78 $",
+	"$Date: 2005/02/13 13:34:59 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -960,7 +960,6 @@ static eb_local_account * eb_msn_read_local_account_config( LList * values )
 
 	eb_local_account * ela;
 	eb_msn_local_account_data *  mlad;
-	char *str;
 	if(!values)
 		return NULL;
 
@@ -1314,7 +1313,7 @@ static void eb_msn_set_idle( eb_local_account * account, gint idle )
     }
 }
 
-static void eb_msn_set_away( eb_local_account * account, char * message )
+static void eb_msn_set_away( eb_local_account * account, char * message, int away )
 {
     if(message)
     {
