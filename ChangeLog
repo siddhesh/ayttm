@@ -1,3 +1,8 @@
+* Sun Jul 27 2003 06:02 GMT [philip]	0.3.3-11
+- src/Makefile.am
+generate defaults.h correctly for windows - \ escaped twice, once for
+shell, and second time for C
+
 * Wed Jul 23 2003 18:00 GMT [philip]	0.3.3-10
 - modules/msn2/msn.C
 Generate warnings instead of errors so that dialog boxes are non-modal
