@@ -871,7 +871,7 @@ enum {
 	PLUGIN_ERROR_COL
 };
 
-const int	s_plugin_info_num_columns = 7;
+static const int	s_plugin_info_num_columns = 7;
 
 static GtkWidget	*plugin_prefs_win = NULL;
 
@@ -1321,7 +1321,6 @@ static GtkWidget *add_sound_file_selection_box(char *labelString,
 
      widget = gtk_entry_new ();
      gtk_entry_set_text (GTK_ENTRY (widget), initialFilename);
-     gtk_widget_ref (widget);
      gtk_box_pack_start(GTK_BOX(hbox), widget, TRUE, TRUE, 0);
      gtk_widget_show (widget);
 

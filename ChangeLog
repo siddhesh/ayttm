@@ -1,3 +1,15 @@
+* Sun Apr 06 2003 13:10 GMT [andy]	0.2.3-42
+- modules/aim-toc/aim-toc.c
+  modules/icq-toc/icq-toc.c
+  modules/utility/autotrans.c
+  modules/utility/middle.c
+  modules/utility/notes.c
+  modules/utility/rainbow.c
+  src/prefs_window.c
+Fix more memory leaks
+- src/console_session.c
+Put back include for darwin...
+
 * Sun Apr 06 2003 10:25 GMT [colin]	0.2.3-41
 - modules/*toc/libtoc/libtoc.h
 fix toc modules (broken in -35)

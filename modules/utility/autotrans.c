@@ -78,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Auto-translator",
 	"Automatic translation",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:46 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/06 12:14:48 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
@@ -134,6 +134,12 @@ static int trans_finish()
 	eb_debug(DBG_MOD, "Auto-trans shutting down\n");
 	outgoing_message_filters = l_list_remove(outgoing_message_filters, &translate_out);
 	incoming_message_filters = l_list_remove(incoming_message_filters, &translate_in);
+	
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 
 	/* This is also from utility.c */
 
@@ -243,7 +249,7 @@ static int isurlchar(unsigned char c)
 	return (isalnum(c) || '-' == c || '_' == c);
 }
 
-char *trans_urlencode(const char *instr)
+static char *trans_urlencode(const char *instr)
 {
 	int ipos=0, bpos=0;
 	char *str = NULL;

@@ -34,7 +34,7 @@
 #include "externs.h"
 #include "plugin_api.h"
 #include "prefs.h"
-#include "debug.h"
+
 #ifdef __MINGW32__
 #define snprintf _snprintf
 #endif
@@ -78,8 +78,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Rainbow",
 	"Turns all outgoing messages rainbow colours",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:46 $",
+	"$Revision: 1.2 $",
+	"$Date: 2003/04/06 12:14:52 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,
@@ -148,6 +148,12 @@ static int rainbow_finish()
 	eb_debug(DBG_MOD, "Rainbow shutting down\n");
 	outgoing_message_filters =
 	    l_list_remove(outgoing_message_filters, &dorainbow);
+	
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 
 	return 0;
 }

@@ -90,8 +90,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC Service",
 	"ICQ support via the TOC protocol",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/05 10:52:13 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/06 12:14:45 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -139,6 +139,11 @@ static int plugin_init()
 
 static int plugin_finish()
 {
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		g_free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
 	return(ref_count);
 }

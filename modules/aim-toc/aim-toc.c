@@ -89,8 +89,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC Service",
 	"AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.6 $",
-	"$Date: 2003/04/05 10:52:13 $",
+	"$Revision: 1.7 $",
+	"$Date: 2003/04/06 12:14:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -138,6 +138,11 @@ static int plugin_init()
 
 static int plugin_finish()
 {
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		g_free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
 	return(ref_count);
 }
@@ -865,7 +870,7 @@ static eb_local_account * eb_aim_read_local_config(LList * pairs)
 	
 	eb_debug(DBG_TOC, "eb_aim_read_local_config: entering\n");	
 	/*you know, eventually error handling should be put in here*/
-	ela->handle=strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
+	ela->handle=value_pair_get_value(pairs, "SCREEN_NAME");
 	strncpy(ela->alias, ela->handle, 255);
 	str = value_pair_get_value(pairs, "PASSWORD");
 	strncpy(ala->password, str, 255);

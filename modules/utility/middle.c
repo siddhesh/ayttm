@@ -57,8 +57,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.2 $",
-	"$Date: 2003/04/03 19:51:38 $",
+	"$Revision: 1.3 $",
+	"$Date: 2003/04/06 12:14:51 $",
 	&ref_count,
 	middle_init,
 	middle_finish,
@@ -93,6 +93,12 @@ static int middle_finish()
 	    l_list_remove(outgoing_message_filters, &plstripHTML);
 	incoming_message_filters =
 	    l_list_remove(incoming_message_filters, &plstripHTML);
+	
+	while(plugin_info.prefs) {
+		input_list *il = plugin_info.prefs->next;
+		free(plugin_info.prefs);
+		plugin_info.prefs = il;
+	}
 
 	return 0;
 }
