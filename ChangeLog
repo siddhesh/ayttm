@@ -1,3 +1,7 @@
+* Wed Apr 30 2003 19:00 GMT [colin]	0.3.0-68
+- src/service.c
+Fix the order of things in module load
+
 * Wed Apr 30 2003 18:00 GMT [philip]	0.3.0-67
 - src/chat_window.c
 Don't raise chat window if do_raise_window is false - patch from
