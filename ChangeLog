@@ -1,3 +1,10 @@
+
+* Tue Jan 20 2004 04:34 GMT [philip]	0.4.6-pre11
+- modules/image_filter/ayttm_streamer_wrapper.sh
+create .webcamrc file if it doesn't exist
+- modules/yahoo2/libyahoo2/libyahoo2.c
+set version number to 0x0a - the official client seems to send that
+
 * Thu Jan 15 2004 08:19 GMT [chris]	0.4.6-pre10
 - pixmaps/Makefile.am
 add ayttm_32x32.xpm to distribution
