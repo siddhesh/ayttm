@@ -44,6 +44,9 @@ else
 	@echo default_module_path=${libdir}/@PACKAGE@ >> @PACKAGE@rc
 endif
 
+win32-install:
+	cd mingw32; make install
+
 ayttm.spec: ChangeLog
 
 dist: ayttm.spec

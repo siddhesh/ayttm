@@ -1,3 +1,13 @@
+* Tue Oct  1 2003 11:55 GMT [elh]	0.4.2-5
+- Makefile.am
+  README.WIN32
+  mingw32/Makefile.am
+  src/Makefile.am
+  src/exchndl2.cxx
+  src/gtk/prefs_window.C
+Fixes for MinGW installation, added a debug window (sort of a crash dialog), 
+fixed a missing translation. Crash and translation are thanks to Benoit.
+
 * Tue Sep 30 2003 18:56 GMT [philip]	0.4.2-4
 - modules/yahoo2/libyahoo2.c
 fix for big endian auth

@@ -553,7 +553,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	for ( int i = 0; i < PANEL_MAX; i++ )
 	{
 		ay_prefs_window_panel	*the_panel = ay_prefs_window_panel::Create( m_prefs_window_widget, m_notebook_widget, m_prefs,
-				static_cast<ePanelID>(i), s_titles[i] );
+				static_cast<ePanelID>(i), _(s_titles[i]) );
 		
 		if ( the_panel == NULL )
 			continue;
