@@ -237,8 +237,14 @@ struct yahoo_input_data {
 
 	int   fd;
 	enum yahoo_connection_type type;
+	
 	unsigned char	*rxqueue;
 	int   rxlen;
+	int   read_tag;
+
+	unsigned char	*txqueue;
+	int   txlen;
+	int   write_tag;
 };
 
 struct yahoo_server_settings {
@@ -382,7 +388,9 @@ static struct yahoo_input_data * find_input_by_id_and_webcam_user(int id, const 
 	for(l = inputs; l; l = y_list_next(l)) {
 		struct yahoo_input_data *yid = l->data;
 		if(yid->type == YAHOO_CONNECTION_WEBCAM && yid->yd->client_id == id 
-				&& yid->wcm && yid->wcm->user && !strcmp(who, yid->wcm->user))
+				&& yid->wcm && 
+				((who && yid->wcm->user && !strcmp(who, yid->wcm->user)) ||
+				 !(yid->wcm->user && !who)))
 			return yid;
 	}
 	return NULL;
@@ -729,7 +737,7 @@ static int yahoo_send_packet(int fd, struct yahoo_packet *pkt, int extra_pad)
 	
 	do {
 		ret = write(fd, data, len);
-	} while(ret == -1 && errno==EINTR);
+	} while(ret == -1 && (errno==EINTR || errno==EAGAIN));
 
 	if (ret == -1)  {
 		LOG(("wrote packet: ERR %s", strerror(errno)));
@@ -755,18 +763,20 @@ static void yahoo_packet_free(struct yahoo_packet *pkt)
 	FREE(pkt);
 }
 
-static int yahoo_send_data(int fd, char *data, int len)
+static int yahoo_send_data(int fd, void *data, int len)
 {
 	int ret;
+	int e;
 
 	if (fd < 0)
 		return -1;
 
-	yahoo_packet_dump((unsigned char*) data, len);
+	yahoo_packet_dump(data, len);
 
 	do {
 		ret = write(fd, data, len);
 	} while(ret == -1 && errno==EINTR);
+	e=errno;
 
 	if (ret == -1)  {
 		LOG(("wrote data: ERR %s", strerror(errno)));
@@ -774,6 +784,7 @@ static int yahoo_send_data(int fd, char *data, int len)
 		LOG(("wrote data: OK"));
 	}
 
+	errno=e;
 	return ret;
 }
 
@@ -794,7 +805,8 @@ static void yahoo_input_close(struct yahoo_input_data *yid)
 {
 	inputs = y_list_remove(inputs, yid);
 
-	YAHOO_CALLBACK(ext_yahoo_remove_handler)(yid->yd->client_id, yid->fd);
+	YAHOO_CALLBACK(ext_yahoo_remove_handler)(yid->read_tag);
+	YAHOO_CALLBACK(ext_yahoo_remove_handler)(yid->write_tag);
 	if(yid->fd)
 		close(yid->fd);
 	yid->fd = 0;
@@ -2355,7 +2367,7 @@ static void _yahoo_webcam_get_server_connected(int fd, int error, void *d)
 	FREE(packet);
 	FREE(data);
 
-	YAHOO_CALLBACK(ext_yahoo_add_handler)(yid->yd->client_id, fd, YAHOO_INPUT_READ, yid);
+	yid->read_tag=YAHOO_CALLBACK(ext_yahoo_add_handler)(yid->yd->client_id, fd, YAHOO_INPUT_READ, yid);
 }
 
 static void yahoo_webcam_get_server(struct yahoo_input_data *y, char *who, char *key)
@@ -2902,6 +2914,41 @@ static int yahoo_get_webcam_data(struct yahoo_input_data *yid)
 
 int yahoo_write_ready(int id, int fd, void *data)
 {
+	struct yahoo_input_data *yid = data;
+	int len;
+	LOG(("write callback: id=%d fd=%d data=%p", id, fd, data));
+
+	if(!yid)
+		return -2;
+	
+	LOG(("writing %d bytes", yid->txlen));
+	len = yahoo_send_data(fd, yid->txqueue, MIN(1024, yid->txlen));
+
+	if(len == -1 && errno == EAGAIN)
+		return 1;
+
+	if(len <= 0) {
+		int e = errno;
+		DEBUG_MSG(("len == %d (<= 0)", len));
+		FREE(yid->txqueue);
+		yid->txlen=0;
+		YAHOO_CALLBACK(ext_yahoo_remove_handler)(yid->write_tag);
+		errno=e;
+		return 0;
+	}
+
+
+	yid->txlen -= len;
+	if(yid->txlen > 0) {
+		unsigned char *tmp = y_memdup(yid->txqueue + len, yid->txlen);
+		FREE(yid->txqueue);
+		yid->txqueue = tmp;
+	} else {
+		FREE(yid->txqueue);
+		yid->txlen=0;
+		YAHOO_CALLBACK(ext_yahoo_remove_handler)(yid->write_tag);
+	}
+
 	return 1;
 }
 
@@ -3152,7 +3199,7 @@ static void _yahoo_webcam_connected(int fd, int error, void *d)
 	FREE(packet);
 	FREE(data);
 
-	YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ, yid);
+	yid->read_tag=YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ, yid);
 }
 
 static void yahoo_webcam_connect(struct yahoo_input_data *y)
@@ -3235,7 +3282,7 @@ int yahoo_read_ready(int id, int fd, void *data)
 	char buf[1024];
 	int len;
 
-	LOG(("read callback: id=%d fd=%d", id, fd));
+	LOG(("read callback: id=%d fd=%d data=%p", id, fd, data));
 
 	if(!yid)
 		return -2;
@@ -3243,6 +3290,9 @@ int yahoo_read_ready(int id, int fd, void *data)
 	do {
 		len = read(fd, buf, sizeof(buf));
 	} while(len == -1 && errno == EINTR);
+
+	if(len == -1 && errno == EAGAIN)	/* we'll try again later */
+		return 1;
 
 	if (len <= 0) {
 		int e = errno;
@@ -3260,10 +3310,11 @@ int yahoo_read_ready(int id, int fd, void *data)
 			return 1;
 
 		errno=e;
+		LOG(("read error: %s", strerror(errno)));
 		return -1;
 	}
 
-	yid->rxqueue = realloc(yid->rxqueue, len + yid->rxlen);
+	yid->rxqueue = y_renew(unsigned char, yid->rxqueue, len + yid->rxlen);
 	memcpy(yid->rxqueue + yid->rxlen, buf, len);
 	yid->rxlen += len;
 
@@ -3353,7 +3404,7 @@ static void yahoo_connected(int fd, int error, void *data)
 	yid->fd = fd;
 	inputs = y_list_prepend(inputs, yid);
 
-	YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ, yid);
+	yid->read_tag=YAHOO_CALLBACK(ext_yahoo_add_handler)(yd->client_id, yid->fd, YAHOO_INPUT_READ, yid);
 }
 
 void yahoo_login(int id, int initial)
@@ -3540,7 +3591,7 @@ static void _yahoo_http_connected(int id, int fd, int error, void *data)
 	}
 
 	yid->fd = fd;
-	YAHOO_CALLBACK(ext_yahoo_add_handler)(id, fd, YAHOO_INPUT_READ, yid);
+	yid->read_tag=YAHOO_CALLBACK(ext_yahoo_add_handler)(id, fd, YAHOO_INPUT_READ, yid);
 }
 
 void yahoo_get_yab(int id)
@@ -4132,14 +4183,16 @@ void yahoo_webcam_get_feed(int id, const char *who)
 void yahoo_webcam_send_image(int id, unsigned char *image, unsigned int length, unsigned int timestamp)
 {
 	struct yahoo_input_data *yid = find_input_by_id_and_type(id, YAHOO_CONNECTION_WEBCAM);
-	char *packet;
+	unsigned char *packet;
 	unsigned char header_len = 13;
 	unsigned int pos = 0;
 
 	if (!yid)
 		return;
 
-	packet = y_new0(char, header_len + length);
+	yid->txqueue = y_renew(unsigned char, yid->txqueue, yid->txlen+header_len+length);
+	packet = yid->txqueue+yid->txlen;
+
 	packet[pos++] = header_len;
 	packet[pos++] = 0;
 	packet[pos++] = 5; /* version byte?? */
@@ -4148,8 +4201,10 @@ void yahoo_webcam_send_image(int id, unsigned char *image, unsigned int length, 
 	packet[pos++] = 2; /* packet type, image */
 	pos += yahoo_put32(packet + pos, timestamp);
 	if (length) memcpy(packet + pos, image, length);
-	yahoo_send_data(yid->fd, packet, header_len + length);
-	FREE(packet);
+
+	yid->txlen += header_len+length;
+	if(yid->txlen == header_len+length)
+		yid->write_tag=YAHOO_CALLBACK(ext_yahoo_add_handler)(yid->yd->client_id, yid->fd, YAHOO_INPUT_WRITE, yid);
 }
 
 void yahoo_webcam_accept_viewer(int id, const char* who, int accept)

@@ -1,3 +1,12 @@
+* Sun Dec 21 2003 16:55 GMT [philip]	0.4.5-18
+- modules/yahoo2/
+loads of fixes, segfaults, mem leaks, some api changes in libyahoo2,
+asynchronous writes for webcam
+break webcam images into chunks of no more than 1024 bytes
+display number of people connected to your webcam
+check for EAGAIN on write
+run the webcam continuously for an hour - it works
+
 * Sun Dec 21 2003 07:33 GMT [philip]	0.4.5-17
 - modules/image_filter/ayttm_streamer_wrapper.sh
 don't race.  create a lock file

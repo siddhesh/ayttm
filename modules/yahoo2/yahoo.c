@@ -121,7 +121,7 @@ static char pager_port[MAX_PREF_LEN]="5050";
 static char filetransfer_host[MAX_PREF_LEN]="filetransfer.msg.yahoo.com";
 static char filetransfer_port[MAX_PREF_LEN]="80";
 static char webcam_host[MAX_PREF_LEN]="webcam.yahoo.com";
-static char webcam_description[MAX_PREF_LEN]="";
+static char webcam_description[MAX_PREF_LEN]="D-Link USB Digital Video Camera";
 static char webcam_port[MAX_PREF_LEN]="5100";
 static int conn_type=0;
 
@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.85 $",
-	"$Date: 2003/12/21 07:37:25 $",
+	"$Revision: 1.86 $",
+	"$Date: 2003/12/21 17:06:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -317,6 +317,8 @@ typedef struct {
 
 	int webcam_timeout;
 	unsigned int webcam_start;
+	int send_images;
+	int viewers;
 
 	int status;
 	char *status_message;
@@ -344,7 +346,7 @@ static struct webcam_feed *find_webcam_feed(eb_yahoo_local_account_data *yla, co
 	struct webcam_feed *wf;
 	for(l = yla->webcams; l; l = y_list_next(l)) {
 		wf = l->data;
-		if((!wf->who && !who) || (wf->who && !strcmp(who, wf->who)))
+		if((wf->who == who) || (who && wf->who && !strcmp(who, wf->who)))
 			return wf;
 	}
 	return NULL;
@@ -1254,7 +1256,7 @@ static void ext_yahoo_conf_userdecline(int id, char *who, char *room, char *msg)
 	snprintf(buff, sizeof(buff), _("The yahoo user %s declined your invitation to join conference %s, with the message: %s"),
 			who, room, msg);
 
-	ay_do_error( _("Yahoo Error"), buff );
+	ay_do_warning( _("Yahoo Error"), buff );
 }
 
 #if LOCAL_CHAT_CALLBACKS
@@ -1674,7 +1676,7 @@ static void eb_yahoo_webcam_invite_callback(gpointer data, int result)
 				wf->who = wd->who;
 				yla->webcams = y_list_prepend(yla->webcams, wf);
 			}
-			yahoo_webcam_get_feed(wd->id, wd->who);
+			yahoo_webcam_get_feed(wf->id, wf->who);
 		} else
 			FREE(wd->who);
 	} else
@@ -1809,17 +1811,22 @@ static void ay_yahoo_start_webcam(eb_local_account *ela)
 	}
 
 	if(!wf->image_window_tag) {
-		wf->image_window_tag = ay_image_window_new(320, 240, _("My webcam"), _image_window_closed, wf);
+		char buff[1024];
+		snprintf(buff, sizeof(buff), _("My webcam (%d viewer%s)"), 
+				ylad->viewers, ylad->viewers==1?"":"s");
+		wf->image_window_tag = ay_image_window_new(320, 240, buff, _image_window_closed, wf);
 	}
 
-	ylad->webcam_timeout = eb_timeout_add(5000, (void *) ay_yahoo_webcam_timeout_callback, wf);
+	if(ay_yahoo_webcam_timeout_callback(wf))
+		ylad->webcam_timeout = eb_timeout_add(5000, (void *) ay_yahoo_webcam_timeout_callback, wf);
 }
 
 static void ay_yahoo_stop_webcam(eb_local_account *ela)
 {
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	eb_timeout_remove(ylad->webcam_timeout);
-	ylad->webcam_timeout = ylad->webcam_start = 0;
+	ylad->send_images=ylad->viewers=ylad->webcam_timeout = ylad->webcam_start = 0;
+	yahoo_webcam_close_feed(ylad->id, NULL);
 }
 
 static void ay_yahoo_authorise_webcam(gpointer data, int result)
@@ -1840,19 +1847,23 @@ static void ay_yahoo_authorise_webcam(gpointer data, int result)
 static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
 {
 	eb_local_account *ela;
+	eb_yahoo_local_account_data *yla;
 	char buff[1024];
 	struct webcam_feed *wf;
 
 	ela = yahoo_find_local_account_by_id(id);
+	yla = ela->protocol_local_account_data;
 
 	switch(connect) {
 		case 0:
 			snprintf(buff, sizeof(buff), 
 					_("%s, the yahoo user %s has stopped viewing your webcam."), ela->handle, who);
+			yla->viewers--;
 			break;
 		case 1:
 			snprintf(buff, sizeof(buff), 
 					_("%s, the yahoo user %s is viewing your webcam."), ela->handle, who);
+			yla->viewers++;
 			break;
 		case 2:
 			snprintf(buff, sizeof(buff), 
@@ -1864,9 +1875,17 @@ static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
 			break;
 
 	}
-	if(connect != 2)
+	if(yla->viewers < 0)
+		yla->viewers = 0;
+
+	if(connect != 2) {
 		ay_do_info(_("Yahoo Webcam"), buff);
-	else {
+		if((wf = find_webcam_feed(yla, NULL))) {
+			snprintf(buff, sizeof(buff), _("My webcam (%d viewer%s)"), 
+					yla->viewers, yla->viewers==1?"":"s");
+			ay_image_window_update_title(wf->image_window_tag, buff);
+		}
+	} else {
 		wf = y_new0(struct webcam_feed, 1);
 		wf->id = id;
 		wf->who = strdup(who);
@@ -1894,38 +1913,44 @@ static int ay_yahoo_webcam_timeout_callback(gpointer data)
 	timestamp = (unsigned int)(get_time() - ylad->webcam_start);
 	if((length = video_grab_frame(&image)) <= 0) {
 		WARNING(("Error reading from video grabber"));
-		return 0;
+		length=0;
 	}
 
-	if(!image)
-		return 0;
-
-	if(image_2_jpc)
-		image2000 = image_2_jpc(image, &length);
-	else
-		image2000 = ay_memdup(image, length);
-	
-	if(wf) {
+	if(wf && image) {
 		ay_image_window_add_data(wf->image_window_tag, image, length, 1);
 		ay_image_window_add_data(wf->image_window_tag, NULL, 0, 0);
 	}
-	ay_free(image);
-	
+
+	if(ylad->send_images && image) {
+		if(image_2_jpc)
+			image2000 = image_2_jpc(image, &length);
+		else
+			image2000 = ay_memdup(image, length);
+	} else {
+		length=0;
+	}
+
+	if(image)
+		ay_free(image);
+
 	LOG(("Sending a webcam image (%d bytes)", length));
+
 	yahoo_webcam_send_image(id, image2000, length, timestamp);
-	ay_free(image2000);
+	if(image2000)
+		ay_free(image2000);
 	return 1;
 }
 
 static void ext_yahoo_webcam_data_request(int id, int send)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	if (send) {
 		LOG(("Got request to start sending images"));
-		ay_yahoo_start_webcam(ela);
+		ylad->send_images=1;
 	} else {
 		LOG(("Got request to stop sending images"));
-		ay_yahoo_stop_webcam(ela);
+		ylad->send_images=0;
 	}
 }
 
@@ -1996,7 +2021,7 @@ static void ext_yahoo_rejected(int id, char *who, char *msg)
 	char buff[1024];
 	snprintf(buff, sizeof(buff), _("%s has rejected your request to be added as a buddy%s%s"),
 			who, (msg?_(" with the message:\n"):"."), (msg?msg:""));
-	ay_do_error( _("Yahoo Error"), buff );
+	ay_do_warning( _("Yahoo Error"), buff );
 }
 
 static void ext_yahoo_contact_added(int id, char *myid, char *who, char *msg)
@@ -2138,7 +2163,7 @@ static void ext_yahoo_error(int id, char *err, int fatal)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 
-	ay_do_error( _("Yahoo Error"), err );
+	ay_do_warning( _("Yahoo Error"), err );
 	if(fatal) {
 		eb_yahoo_logout(ela);
 	}
@@ -3141,7 +3166,7 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 				_("Yahoo read error: Server closed socket"));
 	}
 
-	if(condition & EB_INPUT_WRITE) {
+	if(ret > 0 && condition & EB_INPUT_WRITE) {
 		LOG(("Write: %d", source));
 		ret = yahoo_write_ready(d->id, source, d->data);
 
@@ -3160,34 +3185,36 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 		LOG(("Unknown: %d", condition));
 
 	if(buff[0])
-		ay_do_error( _("Yahoo Error"), buff );
+		ay_do_warning( _("Yahoo Error"), buff );
 }
 
 static YList * handlers = NULL;
 
-static void ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond, void *data)
+static int ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond, void *data)
 {
 	eb_yahoo_callback_data *d = g_new0(eb_yahoo_callback_data, 1);
 	d->id = id;
 	d->fd = fd;
 	d->data = data;
 	d->tag = eb_input_add(fd, cond, eb_yahoo_callback, d);
-	LOG(("%d added %d for %d", id, fd, cond));
+	LOG(("client:%d added fd:%d for cond:%d; tag:%d", id, fd, cond, d->tag));
 
 	handlers = y_list_append(handlers, d);
+	return d->tag;
 }
 
-static void ext_yahoo_remove_handler(int id, int fd)
+static void ext_yahoo_remove_handler(int tag)
 {
 	YList * l;
 	for(l = handlers; l; l = l->next)
 	{
 		eb_yahoo_callback_data *d = l->data;
-		if(d->id == id && d->fd == fd) {
-			LOG(("%d removed %d", id, fd));
+		if(d->tag == tag) {
+			LOG(("client:%d removed fd:%d with tag:%d", d->id, d->fd, d->tag));
 			eb_input_remove(d->tag);
 			handlers = y_list_remove_link(handlers, l);
 			FREE(d);
+			y_list_free_1(l);
 			break;
 		}
 	}
