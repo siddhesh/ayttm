@@ -99,6 +99,8 @@ static int plugin_init();
 static int plugin_finish();
 static int reload_prefs();
 static void register_callbacks();
+static void register_menuentries();
+static void unregister_menuentries();
 
 /* called from plugin.c */
 struct service_callbacks * query_callbacks();
@@ -119,14 +121,17 @@ static char webcam_description[MAX_PREF_LEN]="";
 static char webcam_port[MAX_PREF_LEN]="5100";
 static int conn_type=0;
 
+static void * webcam_chat_menu_tag=0;
+static void * webcam_contact_menu_tag=0;
+
 /*  Module Exports */
 PLUGIN_INFO plugin_info =
 {
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.75 $",
-	"$Date: 2003/11/09 06:36:23 $",
+	"$Revision: 1.76 $",
+	"$Date: 2003/11/14 11:28:05 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -232,12 +237,14 @@ static int plugin_init()
 	il->type = EB_INPUT_CHECKBOX;
 
 	register_callbacks();
+	register_menuentries();
 	eb_debug(DBG_MOD, "returning 0\n");
 	return (0);
 }
 
 static int plugin_finish()
 {
+	unregister_menuentries();
 	while(plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
 		if(il && il->type == EB_INPUT_LIST) {
@@ -1643,6 +1650,23 @@ static void eb_yahoo_webcam_invite_callback(gpointer data, int result)
 	FREE(wd);
 }
 
+static void ay_yahoo_view_users_webcam(ebmCallbackData *data)
+{
+	ebmContactData *ecd = (ebmContactData *)data;
+	eb_local_account *ela;
+	eb_yahoo_local_account_data *ylad;
+
+	ela = find_local_account_by_handle(ecd->local_account, SERVICE_INFO.protocol_id);
+	if(!ela) {
+		ay_do_warning(_("Yahoo Error"), _("Cannot find a valid local account to view user's webcam.") );
+		return;
+	}
+
+	ylad = ela->protocol_local_account_data;
+
+	yahoo_webcam_get_feed(ylad->id, ecd->remote_account);
+}
+
 static void ext_yahoo_webcam_invite(int id, char *who)
 {
 	char buff[1024];
@@ -1660,6 +1684,10 @@ static void ext_yahoo_webcam_invite(int id, char *who)
 static void eb_yahoo_close_webcam_window(gpointer data, int result)
 {
 	struct webcam_feed *wf = data;
+
+	/* data can be null if there wasn't a window in the first place */
+	if(!wf)
+		return;
 
 	if(result) {
 		ay_image_window_close(wf->image_window_tag);
@@ -1694,8 +1722,6 @@ static void ext_yahoo_webcam_closed(int id, char *who, int reason)
 			break;
 	}
 
-	strncat(buff, _("\nClose image window?"), sizeof(buff) - strlen(buff));
-
 	for(l = yla->webcams; l; l = y_list_next(l)) {
 		wf = l->data;
 		if(!strcmp(who, wf->who))
@@ -1703,7 +1729,12 @@ static void ext_yahoo_webcam_closed(int id, char *who, int reason)
 		wf = NULL;
 	}
 
-	eb_do_dialog(buff, _("Webcam connection closed"), eb_yahoo_close_webcam_window, wf);
+	if(wf) {
+		strncat(buff, _("\nClose image window?"), sizeof(buff) - strlen(buff));
+		eb_do_dialog(buff, _("Webcam connection closed"), eb_yahoo_close_webcam_window, wf);
+	} else {
+		ay_do_info(_("Webcam connection closed"), buff);
+	}
 
 }
 
@@ -3170,6 +3201,24 @@ struct service_callbacks *query_callbacks()
 	sc->get_smileys 		= eb_yahoo_get_smileys;
 
 	return sc;
+}
+
+static void register_menuentries()
+{
+	webcam_chat_menu_tag = eb_add_menu_item(_("View Webcam"), EB_CHAT_WINDOW_MENU, ay_yahoo_view_users_webcam, ebmCONTACTDATA, NULL);
+	webcam_contact_menu_tag = eb_add_menu_item(_("View Webcam"), EB_CONTACT_MENU, ay_yahoo_view_users_webcam, ebmCONTACTDATA, NULL);
+	eb_menu_item_set_protocol(webcam_chat_menu_tag, "Yahoo");
+	eb_menu_item_set_protocol(webcam_contact_menu_tag, "Yahoo");
+}
+
+static void unregister_menuentries()
+{
+	if(webcam_chat_menu_tag)
+		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, webcam_chat_menu_tag);
+	if(webcam_contact_menu_tag)
+		eb_remove_menu_item(EB_CONTACT_MENU, webcam_contact_menu_tag);
+
+	webcam_chat_menu_tag = webcam_contact_menu_tag = 0;
 }
 
 static void register_callbacks()

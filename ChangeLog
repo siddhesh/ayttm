@@ -1,3 +1,7 @@
+* Fri Nov 14 2003 11:30 GMT [philip]	0.4.4-18
+- modules/yahoo2/yahoo.c
+We can now request to see other peoples' webcams
+
 * Sun Nov 9 2003 06:30 GMT [philip]	0.4.4-17
 - modules/yahoo2/yahoo.c
 make "s" a translatable string
