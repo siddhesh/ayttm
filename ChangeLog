@@ -1,3 +1,7 @@
+* Tue Apr 01 2003 15:50 GMT [colin]	0.2.3-pre67
+- src/log_window.c
+Fix log parsing after a log format change
+
 * Tue Apr 01 2003 15:50 GMT [colin]	0.2.3-pre66
 - po/fr.po
 Fix missing file after CVS move 

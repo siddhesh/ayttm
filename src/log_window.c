@@ -484,9 +484,14 @@ void log_parse_and_add(char *buff, void *text)
 				iGetLocalPref("do_ignore_fore"),
 				iGetLocalPref("do_ignore_font"));
 	} /* OTHER */
-	else if (!strncmp(tmp,"<P> <B><FONT COLOR=\"#", strlen("<P> <B><FONT COLOR=\"#")) 
-	&& isdigit(tmp[strlen("<P> <B><FONT COLOR=\"#??????\">1")])
-	&& strstr(tmp, "/FONT> </B> ")) {
+	else if (
+		(!strncmp(tmp,"<P> <B><FONT COLOR=\"#", strlen("<P> <B><FONT COLOR=\"#")) 
+		&& isdigit(tmp[strlen("<P> <B><FONT COLOR=\"#??????\">1")])
+		&& strstr(tmp, "/FONT> </B> "))
+	|| 	(!strncmp(tmp,"<P><B><FONT COLOR=\"#", strlen("<P><B><FONT COLOR=\"#")) 
+		&& isdigit(tmp[strlen("<P><B><FONT COLOR=\"#??????\">1")])
+		&& strstr(tmp, "/FONT> </B> "))
+		) {
 		/* seems to be a beginning of line... */
 		buff2 = strstr(tmp, "/FONT> </B> ")+strlen("/FONT> </B>");
 		buff2[0] = '\0';
