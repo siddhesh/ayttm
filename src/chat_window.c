@@ -449,11 +449,11 @@ void send_message(GtkWidget *widget, gpointer d)
 		if(data->contact->send_offline && can_offline_message(data->contact)) {
 			data->preferred = can_offline_message(data->contact);
 		} else {
-			cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
+			cw_put_message(data, _("<body bgcolor=#F9E589 width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
 			return;
 		}
 	} else if (!data->preferred->online && !data->contact->send_offline) {
-		cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
+		cw_put_message(data, _("<body bgcolor=#F9E589 width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
 		return;		
 	}
 
@@ -469,7 +469,7 @@ void send_message(GtkWidget *widget, gpointer d)
 		data->local_user = find_suitable_local_account(data->preferred->ela, data->preferred->service_id); 
 
 	if(!data->local_user) {
-		cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - no local account found.</b></body>\n"),0,0,0);
+		cw_put_message(data, _("<body bgcolor=#F9E589 width=*><b> Cannot send message - no local account found.</b></body>\n"),0,0,0);
 		return;		
 	}
 	
@@ -653,7 +653,7 @@ static void send_file (GtkWidget * sendf_button, gpointer userdata)
 	GET_CHAT_WINDOW(data);
 
 	if ( data->contact->online == 0 ) {
-		cw_put_message(data, _("<body bgcolor=#e0c96d width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
+		cw_put_message(data, _("<body bgcolor=#F9E589 width=*><b> Cannot send message - user is offline.</b></body>\n"),0,0,0);
 		return;
 	}
 
@@ -1194,7 +1194,7 @@ void eb_chat_window_do_timestamp(struct contact * c, gboolean online)
 	if( !iGetLocalPref("do_timestamp") )
 		return;
 	
-	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#e0c96d width=*><b> %s is logged %s @ %s.\n</b></body>"),
+	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#F9E589 width=*><b> %s is logged %s @ %s.\n</b></body>"),
 	     c->nick, (online?_("in"):_("out")), g_strchomp(asctime(localtime(&my_time))));
 	gtk_eb_html_add(EXT_GTK_TEXT(c->chatwindow->chat), buff, 0,0,0);
 }
@@ -1510,7 +1510,7 @@ void eb_log_status_changed(eb_account *ea, gchar *status)
 			ea->account_contact->chatwindow->logfile == NULL)
 		return;
 	
-	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#e0c96d width=*><b> %s changed status to %s @ %s.</b></body>"),
+	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#F9E589 width=*><b> %s changed status to %s @ %s.</b></body>"),
 		   ea->account_contact->nick, ((status && status[0])?status:_("(Online)")), 
 		   g_strchomp(asctime(localtime(&my_time))));
 
