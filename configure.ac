@@ -193,7 +193,9 @@ if test "$enable_webcam" != "no"; then
     ac_check_lib_save_LIBS=$LIBS
     ac_check_lib_save_CFLAGS=$CFLAGS
     LIBS="-ljasper -lm -ljpeg -L $with_jasper_prefix/lib $LIBS"
-    CFLAGS="$CFLAGS $with_jasper_prefix/include"
+    if test -n "$with_jasper_prefix"; then
+        CFLAGS="$CFLAGS $with_jasper_prefix/include"
+    fi
     AC_TRY_LINK([#include <jasper/jasper.h>],
 	[jas_init()],
 	[JASPER_LIBS="-ljasper -lm -ljpeg"
