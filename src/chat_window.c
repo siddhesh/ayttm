@@ -972,8 +972,9 @@ static void send_typing_status(chat_window *cw)
 	}
 }
 
-static gboolean	check_tab_accelerators( const GtkWidget *inWidget, const chat_window *inCW, GdkModifierType inModifiers, const GdkEventKey *inEvent )
+gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *inCW, GdkModifierType inModifiers, const GdkEventKey *inEvent )
 {
+	eb_debug(DBG_CORE,"checking acc\n");
 	if ( inCW->notebook != NULL )  /* only change tabs if this window is tabbed */
 	{
 		GdkDeviceKey 	accel_prev_tab;
@@ -992,12 +993,14 @@ static gboolean	check_tab_accelerators( const GtkWidget *inWidget, const chat_wi
 		{
 			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
 			gtk_notebook_prev_page( GTK_NOTEBOOK(inCW->notebook) );
+	eb_debug(DBG_CORE,"prev\n");
 			return( gtk_true() );
 		}
 		else if ((inModifiers == accel_next_tab.modifiers) && (inEvent->keyval == accel_next_tab.keyval))
 		{
 			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
 			gtk_notebook_next_page( GTK_NOTEBOOK(inCW->notebook) );
+	eb_debug(DBG_CORE,"next\n");
 			return( gtk_true() );
 		}
 	}

@@ -276,7 +276,7 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	  return gtk_true();
     	}
     }
-  else if (event->keyval == GDK_Up)
+  else if (event->keyval == GDK_Up && (modifiers == 0) )
     {
       gint p=0;
 
@@ -322,7 +322,7 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
       gtk_editable_delete_text(GTK_EDITABLE (cr->entry), 0, -1);
       gtk_editable_insert_text(GTK_EDITABLE (cr->entry), cr->hist_pos->data, strlen(cr->hist_pos->data), &p);
     }
-  else if (event->keyval == GDK_Down)
+  else if (event->keyval == GDK_Down && (modifiers == 0) )
     {
       gint p=0;
 
@@ -359,6 +359,12 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		  gtk_adjustment_set_value(ga, ga->upper);
 		  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scwin), ga);
 	  }		
+  }
+  else if (cr->notebook != NULL)
+  {
+	  // check tab changes if this is a tabbed chat window
+	  if ( check_tab_accelerators( widget, cr, modifiers, event ) )
+		  return( gtk_true() );
   }
 
   if(modifiers)

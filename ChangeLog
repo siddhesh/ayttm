@@ -1,3 +1,7 @@
+* Thu Jul 10 2003 12:57 GMT [colin]	0.3.2-25
+- src/chat_window.[ch] src/chat_room.c
+Tab accelerators for chatrooms
+
 * Thu Jul 10 2003 04:15 GMT [philip]	0.3.2-24
 - modules/smileys/smiley-themer.c
 fix memory leak since I forgot to free the smiley service.
