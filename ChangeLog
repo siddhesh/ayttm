@@ -1,3 +1,9 @@
+* Wed Dec 17 2003 11:52 GMT [philip]	0.4.5-12
+- src/image_window.[ch]
+- modules/image_filter
+moved jpeg2000 codec to a module
+we should replace the code in there with something that doesn't use jasper
+
 * Mon Dec 15 2003 18:35 UTC [elh]	0.4.5-11
 - src/util.c
 fix to get log file renaming working - plasmoida (bug 859659)

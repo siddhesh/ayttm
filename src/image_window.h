@@ -32,6 +32,8 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new_image);
 void ay_image_window_close(int tag);
 
+extern unsigned char *(*image_2_jpg)(const unsigned char *in_img, long *size);
+
 #ifdef __cplusplus
 }
 #endif

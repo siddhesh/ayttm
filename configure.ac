@@ -5,7 +5,7 @@ AC_INIT(Ayttm, 0.4.5, ayttm-users@lists.sourceforge.net)
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=11
+RELEASE=12
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -188,8 +188,7 @@ if test "$enable_webcam" != "no"; then
     LIBS="-ljasper -lm -ljpeg  $LIBS"
     AC_TRY_LINK([#include <jasper/jasper.h>],
 	[jas_init()],
-	[EB_LIBS="$EB_LIBS -ljasper -lm -ljpeg"
-	AC_DEFINE(HAVE_LIBJASPER, 1, [Define if you have jasper])
+	[JASPER_LIBS="-ljasper -lm -ljpeg"
 	AC_MSG_RESULT(yes)], 
 	[AC_MSG_RESULT(no)
 	AC_MSG_WARN([Unable to find jasper, you won't be able to view webcams])])
@@ -398,6 +397,7 @@ AC_DEFINE_UNQUOTED(CORE_VERSION, $CORE_VERSION,
 AC_SUBST(EB_CFLAGS)
 AC_SUBST(EB_LIBS)
 AC_SUBST(EB_LDFLAGS)
+AC_SUBST(JASPER_LIBS)
 AC_SUBST(OPTIONAL_PLUG_DIR)
 AC_SUBST(DEBUG_LIBMSN)
 

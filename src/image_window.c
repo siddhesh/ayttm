@@ -23,6 +23,9 @@
 #   include <config.h>
 #endif
 #include "image_window.h"
+#include "mem_util.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "debug.h"
 
 #ifndef HAVE_GDK_PIXBUF
@@ -44,12 +47,6 @@ void ay_image_window_close(int tag) { }
 #include "llist.h"
 #include "mem_util.h"
 
-#ifdef HAVE_LIBJASPER
-# include <jasper/jasper.h>
-#else
-# include <stdio.h>
-# include <stdlib.h>
-#endif
 #include "globals.h"
 
 struct ay_image_wnd {
@@ -68,79 +65,7 @@ static int last_tag = 0;
 static LList *images = NULL;
 
 
-static unsigned char * image_2_jpg(const unsigned char * in_img, long *size)
-{
-#ifdef HAVE_LIBJASPER
-	char * out_img = NULL;
-	jas_stream_t *in, *out;
-	jas_image_t *image;
-	int infmt;
-	static int outfmt;
-
-	/*
-	static int ctr;
-	char fn[100];
-	FILE *fp;
-	snprintf(fn, sizeof(fn), "ayttm-img-%03d.jpc", ctr++);
-	fp = fopen(fn, "wb");
-	if(fp) {
-		fwrite(in_img, 1, *size, fp);
-		fclose(fp);
-	}
-	*/
-	if(jas_init()) {
-		eb_debug(DBG_CORE, "Could not init jasper\n");
-		return ay_memdup(in_img, *size);
-	}
-	if(!outfmt)
-		outfmt = jas_image_strtofmt("jpg");
-
-	if(!(in = jas_stream_memopen((unsigned char *)in_img, *size))) {
-		eb_debug(DBG_CORE, "Could not open jasper input stream\n");
-		return ay_memdup(in_img, *size);
-	}
-	infmt = jas_image_getfmt(in);
-	eb_debug(DBG_CORE, "Got input image format: %d %s\n", infmt, jas_image_fmttostr(infmt));
-	if(infmt <= 0)
-		return ay_memdup(in_img, *size);
-
-	if(!strcmp(jas_image_fmttostr(infmt), "jpg")) {
-		/* image is already jpeg */
-		jas_stream_close(in);
-		return ay_memdup(in_img, *size);
-	}
-
-	if(!(image = jas_image_decode(in, infmt, NULL))) {
-		eb_debug(DBG_CORE, "Could not decode image format\n");
-		return ay_memdup(in_img, *size);
-	}
-
-	if(!(out = jas_stream_memopen(out_img, 0))) {
-		eb_debug(DBG_CORE, "Could not open output stream\n");
-		return ay_memdup(in_img, *size);
-	}
-
-	eb_debug(DBG_CORE, "Encoding to format: %d %s\n", outfmt, "jpg");
-	if((jas_image_encode(image, out, outfmt, NULL))) {
-		eb_debug(DBG_CORE, "Could not encode image format\n");
-		return ay_memdup(in_img, *size);
-	}
-	jas_stream_flush(out);
-
-	*size = ((jas_stream_memobj_t *)out->obj_)->bufsize_;
-	eb_debug(DBG_CORE, "Encoded size is: %ld\n", *size);
-	jas_stream_close(in);
-	out_img=ay_memdup(((jas_stream_memobj_t *)out->obj_)->buf_, *size);
-	jas_stream_close(out);
-	jas_image_destroy(image);
-
-	return out_img;
-#else
-	eb_debug(DBG_CORE, "jasper not available\n");
-	return ay_memdup(in_img, *size);
-#endif
-	
-}
+unsigned char *(*image_2_jpg)(const unsigned char *in_img, long *size) = NULL;
 
 static struct ay_image_wnd * get_image_wnd_by_tag(int tag)
 {
@@ -269,7 +194,13 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 		return 0;
 	}
 
-	jpg_buf = image_2_jpg(buf, &count);
+	if(image_2_jpg)
+		jpg_buf = image_2_jpg(buf, &count);
+	else {
+		eb_debug(DBG_CORE, "image decoder not loaded\n");
+		jpg_buf = ay_memdup(buf, count);
+	}
+
 	eb_debug(DBG_CORE, "jpg_buf is %p\n", jpg_buf);
 	aiw->loader = gdk_pixbuf_loader_new();
 	gdk_pixbuf_loader_write(aiw->loader, jpg_buf, count);
