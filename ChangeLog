@@ -1,3 +1,8 @@
+* Sat May 31 2003 09:00 GMT [philip]	0.3.1-6
+- src/gtk/prefs_window.C
+make prefs window user resizeable - user can possibly make it too
+small
+
 * Fri May 30 2003 09:27 GMT [colin]	0.3.1-5
 - modules/aycryption/aycryption.c
 Applied patch from Ben Reser - clean kopete's <br/>

@@ -487,7 +487,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	m_prefs_window_widget = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
 	gtk_window_set_position( GTK_WINDOW(m_prefs_window_widget), GTK_WIN_POS_MOUSE );
-	gtk_window_set_policy( GTK_WINDOW(m_prefs_window_widget), FALSE, FALSE, TRUE );
+	gtk_window_set_policy( GTK_WINDOW(m_prefs_window_widget), TRUE, TRUE, TRUE );
 	gtk_widget_realize( m_prefs_window_widget );
 	gtk_window_set_title( GTK_WINDOW(m_prefs_window_widget), _("Ayttm Preferences") );
 	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
