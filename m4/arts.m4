@@ -12,7 +12,7 @@ dnl AM_PATH_GARTS([MINIMUM-VERSION, [ACTION-IF-FOUND], [ACTION-IF-TOO-OLD], [ACT
 dnl Test for ARTS, and define ARTS_CFLAGS and ARTS_LIBS
 dnl
 
-AC_DEFUN(AM_PATH_GARTS,
+AC_DEFUN([AM_PATH_GARTS],
 [
   # We use the audiofile library: don't know how to probe...
   ARTS_LIBS="-laudiofile"

@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.4.6], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=20
+RELEASE=21
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -22,10 +22,11 @@ AM_PROG_LEX
 AC_PROG_YACC
 AC_PROG_CPP
 AC_PROG_CXX
+AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 AC_CHECK_TOOL(RC, windres, no)
 
 # add some platform-specific flags

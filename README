@@ -56,7 +56,6 @@ didn't read this file.
 * Build Requirements:
 =========
 	autoconf.2.59
-	autogen.5.5.1
 	automake-1.6
 	bison.1.875
 	flex.2.5.4

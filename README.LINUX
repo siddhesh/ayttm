@@ -5,9 +5,19 @@ RedHat:
 	1) install and build jasper
 	2) ./configure
 	3) make
+	4) make install
 
 Mandrake 10 (unconfirmed):
 	1) install and build jasper
 	2) ./configure --disable-arts
 	3) make
+	4) make install
 
+Mandrake 9.2 (automake-1.4, autconf-2.13, libtool-1.4)
+	# Base automake/autoconf tools can not properly install smileys. so use
+	# -i option to install everything. 
+	# Smileys will not be install.
+	1) install and build jasper
+	2) ./configure
+	3) make
+	4) make -i install

@@ -9,7 +9,7 @@
 dnl AM_PATH_GDK_PIXBUF([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
 dnl Test for GDK_PIXBUF, and define GDK_PIXBUF_CFLAGS and GDK_PIXBUF_LIBS
 dnl
-AC_DEFUN(AM_PATH_GDK_PIXBUF,
+AC_DEFUN([AM_PATH_GDK_PIXBUF],
 [dnl 
 dnl Get the cflags and libraries from the gdk-pixbuf-config script
 dnl
@@ -55,7 +55,7 @@ AC_ARG_ENABLE(gdk_pixbuftest, [  --disable-gdk_pixbuftest       Do not try to co
       CFLAGS="$CFLAGS $GDK_PIXBUF_CFLAGS"
       LIBS="$LIBS $GDK_PIXBUF_LIBS"
 dnl
-dnl Now check if the installed GDK_PIXBUF is sufficiently new. (Also sanity
+dnl Now check if the installed GDK_PIXBUF is sufficiently new. Also sanity
 dnl checks the results of gdk-pixbuf-config to some extent
 dnl
       rm -f conf.gdk_pixbuftest
@@ -167,14 +167,14 @@ int main ()
 
 
 dnl Autoconf macros for libgpgme
-dnl $Id: acinclude.m4,v 1.2 2003/05/06 13:36:09 bluesmoon Exp $
+dnl $Id: acinclude.m4,v 1.3 2004/07/12 14:27:57 elh Exp $
 
 
 dnl AM_PATH_GPGME([MINIMUM-VERSION,
 dnl               [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND ]]])
 dnl Test for libgpgme and define GPGME_CFLAGS and GPGME_LIBS
 dnl
-AC_DEFUN(AM_PATH_GPGME,
+AC_DEFUN([AM_PATH_GPGME],
 [ AC_ARG_WITH(gpgme-prefix,
             AC_HELP_STRING([--with-gpgme-prefix=PFX],
                            [prefix where GPGME is installed (optional)]),

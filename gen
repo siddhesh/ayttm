@@ -49,9 +49,7 @@ check_gettext()
 
 libtoolize --copy --force --ltdl --automake
 check_gettext
-aclocal=`which aclocal-1.7 2>/dev/null` || aclocal=`which aclocal-1.6 2>/dev/null` || aclocal='aclocal'
-$aclocal -I m4 $ACLOCAL_FLAGS
+aclocal -I m4 -I libltdl $ACLOCAL_FLAGS
 autoheader
-automake=`which automake-1.7 2>/dev/null` || automake=`which automake-1.6 2>/dev/null` || automake='automake'
-$automake -a -c
+automake -a -c
 autoconf

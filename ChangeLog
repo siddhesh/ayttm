@@ -1,3 +1,16 @@
+* Mon Jul 12 2004 14:23 GMT [edward] 0.4.6-21
+- Upgraded automake support for 1.8, fixed error in nl.po that mandrake build did 
+  not work. Tested mandrake-9.2 build and small fixes and updates to README for bug
+  #985974.
+  acinclude.m4
+  README.LINUX
+  configure.ac
+  gen
+  m4/arts.m4
+  m4/esd.m4
+  src/Makefile.am
+  po/nl.po
+
 * Sat Jul 10 2004 22:38 GMT [colin]	0.4.6-20
 - Added NL translation by Sander Devrieze <s.devrieze@pandora.be>
   po/nl.po
