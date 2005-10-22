@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.45 $",
-	"$Date: 2005/02/13 13:32:27 $",
+	"$Revision: 1.46 $",
+	"$Date: 2005/10/22 20:05:13 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -175,6 +175,7 @@ typedef struct _eb_jabber_local_account_data
 	int use_ssl;
 	char server_port[MAX_PREF_LEN];
 	char ssl_server_port[MAX_PREF_LEN];
+        char connect_server[MAX_PREF_LEN];
 	LList *jabber_contacts;
 } eb_jabber_local_account_data;
 
@@ -320,7 +321,7 @@ static void eb_jabber_finish_login( const char *password, void *data)
 		port = atoi(jlad->server_port);
 	
 	jlad->connect_tag = JABBER_Login(account->handle, (char *)password, 
-			jabber_server, jlad->use_ssl, port);
+			jabber_server, jlad->connect_server, jlad->use_ssl, port);
 }
 
 static void eb_jabber_login( eb_local_account * account )
@@ -464,6 +465,13 @@ static void jabber_account_prefs_init(eb_local_account *ela)
 	il->name = "PASSWORD";
 	il->label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = jlad->connect_server;
+	il->name = "CONNECT_SERVER";
+	il->label = _("Co_nnect Server:");
+	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;

@@ -39,12 +39,13 @@ void jab_continue (int fd, int error, void *data);
  *  parameters
  *      user -- jabber id of the user
  *      pass -- password of the user
+ *      serv -- connection server (overrides domain in JID)
  *
  *  results
  *      a pointer to the connection structure
  *      or NULL if allocations failed
  */
-jconn jab_new(char *user, char *pass)
+jconn jab_new(char *user, char *pass, char *serv)
 {
     pool p;
     jconn j;
@@ -59,6 +60,7 @@ jconn jab_new(char *user, char *pass)
 
     j->user = jid_new(p, user);
     j->pass = pstrdup(p, pass);
+    j->serv = pstrdup(p, serv);
     
     j->state = JCONN_STATE_OFF;
     j->id = 1;
@@ -134,7 +136,11 @@ int jab_start(jconn j, int port, int use_ssl)
 #endif    
     
     j->user->port = port;
-    if ((tag = proxy_connect_host(j->user->server, port, 
+
+    if (!j->serv || !strlen(j->serv))
+      j->serv = j->user->server;
+
+    if ((tag = proxy_connect_host(j->serv, port,
 		    	    (ay_socket_callback)jab_continue, j, NULL)) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
 	    return 0;

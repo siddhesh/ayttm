@@ -302,6 +302,7 @@ typedef struct jconn_struct
     int         fd;	       /* Connection file descriptor */
     jid         user;      /* User info */
     char        *pass;     /* User passwd */
+    char        *serv;     /* Server to connect to (overrides one in JID) */
 
     /* Stream stuff */
     int         id;        /* id counter for jab_getid() function */
@@ -324,7 +325,7 @@ typedef void (*jconn_state_h)(jconn j, int state);
 typedef void (*jconn_packet_h)(jconn j, jpacket p);
 
 
-jconn jab_new(char *user, char *pass);
+jconn jab_new(char *user, char *pass, char *serv);
 void jab_delete(jconn j);
 void jab_state_handler(jconn j, jconn_state_h h);
 void jab_packet_handler(jconn j, jconn_packet_h h);

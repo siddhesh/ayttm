@@ -212,7 +212,7 @@ void jabber_callback_handler(void *data, int source, eb_input_condition cond)
 
 /* Functions called from the ayttm jabber.c file */
 
-int JABBER_Login(char *handle, char *passwd, char *host, int use_ssl, int port) {
+int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, int use_ssl, int port) {
 	/* At this point, we don't care about host and port */
 	char jid[256+1];
 	int tag;
@@ -251,7 +251,7 @@ int JABBER_Login(char *handle, char *passwd, char *host, int use_ssl, int port) 
 	strncpy(JConn->jid,jid, LINE_LENGTH);
 	/* We assume we have an account, and don't need to register one */
 	JConn->reg_flag = 0;
-	JConn->conn=jab_new(jid, passwd);
+	JConn->conn=jab_new(jid, passwd, connect_server);
 	if(!JConn->conn) {
 		snprintf(buff, 4096, "Connection to server '%s' failed.", host);
 		JABBERError(buff, _("Jabber Error"));
