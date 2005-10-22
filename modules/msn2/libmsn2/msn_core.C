@@ -528,7 +528,7 @@ void msn_request_SB(msnconn * nsconn, char * rcpt, message * msg, void * tag)
 
 
 static void msn_https_cb1(int fd, int error, void *data);
-static void msn_https_cb2(int fd, int error, void *data);
+//static void msn_https_cb2(int fd, int error, void *data);
 
 void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
 {
@@ -537,67 +537,29 @@ void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_
   msn_del_callback(conn, trid);
 
   if(!strcmp(args[0], "USR") && !strcmp(args[2], "TWN")) {
-	 char *url = strdup(args[4]);
-	 https_data *hdata = (https_data *)malloc(sizeof(https_data));
-	 
-	 char *ru = NULL, *realurl = NULL, *endurl = NULL, *finalurl = NULL;
-	 char *lc=NULL, *id=NULL, *tw=NULL;
-	 
-	 char *remote_host = NULL;
-
-	 if (strstr(((authdata_NS *)conn->auth)->username,"@hotmail.com"))
-	 	remote_host = "loginnet.passport.com";
-	 else if (strstr(((authdata_NS *)conn->auth)->username,"@msn.com"))
-	 	remote_host = "msnialogin.passport.com";
-	 else
-	 	remote_host = "login.passport.com";
-
-	 while (strstr(url, ",")) {
-		*(strstr(url,",")) = '&'; 
-	 }
-	 
-	 lc = strdup(strstr(url, "lc=")+3);
-	 id = strdup(strstr(url, "id=")+3);
-	 tw = strdup(strstr(url, "tw=")+3);
-	 ru = strstr(url, "ru=")+3;
-	 
-	 *(strstr(lc, "&")) = 0;
-	 *(strstr(id, "&")) = 0;
-	 *(strstr(tw, "&")) = 0;
-	 endurl = strstr(ru, "&");
-	 
-	 realurl=strdup("http://messenger.msn.com"); /* shouldn't be hardcoded, better translate ru= param */
-	 *ru = 0;
-	 
-	 finalurl = (char *)malloc(strlen(url)+strlen(realurl)+strlen(endurl)+1);
-	 snprintf(finalurl, strlen(url)+strlen(realurl)+strlen(endurl),
-			 "%s%s%s", url, realurl, endurl);
-	 	 
-	 snprintf(buf, sizeof(buf), "GET /login.srf?%s HTTP/1.0\r\n\r\n", finalurl);
-	 
-	 if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
-	 
-	 hdata->url = strdup(buf);
-	 hdata->remote_host = strdup(remote_host);
-	 hdata->lc = strdup(lc);
-	 hdata->id = strdup(id);
-	 hdata->tw = strdup(tw);
-	 hdata->conn = conn;
-	 hdata->info = info;
-	 
-	 free(lc);
-	 free(id);
-	 free(tw);
-	 free(finalurl);
-	 free(realurl);
-	 free(url);
-	 
-	 if (ext_async_socket(remote_host, 443, (void *)msn_https_cb1, hdata) < 0) {
-		 if(DEBUG) printf("immediate connect failure to %s\n", remote_host);    
-		 ext_show_error(conn, "Could not connect to MSN HTTPS server.");
-		 ext_closing_connection(conn);
-	 }
-	 return;
+		 char *url = strdup(args[4]);
+		 https_data *hdata = (https_data *)malloc(sizeof(https_data));
+		 
+		 char *remote_host = "nexus.passport.com";
+	
+		 snprintf(buf, sizeof(buf), "GET /rdr/pprdr.asp HTTP/1.0\r\n\r\n");
+		 
+		 if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
+		 
+		 hdata->url = strdup(buf);
+		 hdata->remote_host = strdup(remote_host);
+		 hdata->lc = url;
+		 hdata->id = 0;
+		 hdata->tw = 0;
+		 hdata->conn = conn;
+		 hdata->info = info;
+		 
+		 if (ext_async_socket(remote_host, 443, (void *)msn_https_cb1, hdata) < 0) {
+			 if(DEBUG) printf("immediate connect failure to %s\n", remote_host);    
+			 ext_show_error(conn, "Could not connect to MSN HTTPS server.");
+			 ext_closing_connection(conn);
+		 }
+		 return;
   }
   
   if(strcmp(args[0], "XFR"))
@@ -652,7 +614,7 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 }
 
 	 ssl_init();
-	 if (!ssl_init_socket(sock, hdata->remote_host, 80)) {
+	 if (!ssl_init_socket(sock, hdata->remote_host, 443)) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
 		 return;
 	 }
@@ -664,62 +626,93 @@ static void msn_https_cb1(int fd, int error, void *data)
 		 
 		 if (urlread) {
 			 s += strlen(urlread)+1;
-			 tmp = strdup(urlread);
 		 } 
 		 
 		 urlread = (char *)realloc(urlread, s);
 		 
-		 snprintf(urlread, s-1, "%s%s", tmp?tmp:"", buf);
-		 free(tmp); tmp = NULL;
-		 if(strstr(buf, "</HTML>"))
+		 strcat(urlread, buf);
+		 if(strstr(urlread, "\r\n\r\n"))
 			 break;
 		 bzero(buf, sizeof(buf));
 	 }
 	 
 	 if (DEBUG) printf("---ANSWER---\n%s\n---END---\n",urlread);
+
+		if(strstr(hdata->remote_host, "nexus.passport.com"))
+		{
+			char *remote_host = strdup(strstr(urlread, "DALogin=")+8); 
+			*(strchr(remote_host, ',')) = 0;
+			char *realpath = strdup(strchr(remote_host, '/'));
+			*(strchr(remote_host, '/')) = 0;
+			char *url = hdata->lc;
+			hdata->lc=0;
+
+	 	char *ru = NULL, *realurl = NULL, *endurl = NULL, *finalurl = NULL;
+  	char *lc=NULL, *id=NULL, *tw=NULL;
 	 
-	 if (!urlread || !strstr(urlread, "BrowserTest") || !strstr(urlread, "MSPPost")) {
+		 lc = strdup(strstr(url, "lc=")+3);
+		 id = strdup(strstr(url, "id=")+3);
+		 tw = strdup(strstr(url, "tw=")+3);
+		 ru = strstr(url, "ru=")+3;
+		 
+		 *(strstr(lc, ",")) = 0;
+		 *(strstr(id, ",")) = 0;
+		 *(strstr(tw, ",")) = 0;
+		 endurl = strstr(ru, ",");
+		 
+		 realurl=strdup("http://messenger.msn.com"); // shouldn't be hardcoded, better translate ru= param 
+		 
+		 finalurl = (char *)malloc(strlen(url)+strlen(realurl)+strlen(endurl)+1);
+		 snprintf(finalurl, strlen(url)+strlen(realurl)+strlen(endurl),
+				 "%s%s%s", url, realurl, endurl);
+
+		 snprintf(buf, sizeof(buf), "GET %s HTTP/1.1\r\n"
+									                     "Authorization: Passport1.4 OrgVerb=GET,OrgURL=http%%3A%%2F%%2Fmessenger%%2Emsn%%2Ecom,sign-in=%s,pwd=%s,%s\r\n"
+																														"Host: %s\r\n"
+																														"\r\n",
+																														realpath,
+																														msn_encode_URL(((authdata_NS *)hdata->conn->auth)->username),
+																														msn_encode_URL(((authdata_NS *)hdata->conn->auth)->password),
+																														url, remote_host);
+		 
+		 if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
+		 
+		 hdata->url = strdup(buf);
+		 hdata->remote_host = strdup(remote_host);
+		 hdata->lc = lc;
+		 hdata->id = id;
+		 hdata->tw = tw;
+		 hdata->conn = hdata->conn;
+		 hdata->info = hdata->info;
+		 
+		 ssl_done_socket(sock);
+		 free(sock->hostname);
+	 	sock->ssl = NULL;
+		 close(sock->sock);
+
+		 if (ext_async_socket(remote_host, 443, (void *)msn_https_cb1, hdata) < 0) {
+			 if(DEBUG) printf("immediate connect failure to %s\n", remote_host);    
+			 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server.");
+			 ext_closing_connection(hdata->conn);
+		 }
+
+			free(remote_host);
+			free(url);
+			free(realpath);
+			free(urlread);
+
+			return;
+		}
+
+	 if (!urlread || !strstr(urlread, "Authentication-Info:")) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (bad cookies).");
 		 ext_closing_connection(hdata->conn);
 		 return;
 	 }
 	 
-	 tmp = strdup(strstr(urlread, "BrowserTest"));
-	 *(strstr(tmp+1, "\r\n")) = 0;
-	 hdata->cookie0 = strdup(tmp);
-	 free(tmp); tmp = NULL;
-	 
-	 tmp = strdup(strstr(urlread, "MSPPost"));
-	 *(strstr(tmp+1, "\r\n")) = 0;
-	 hdata->cookie1 = strdup(tmp);
-	 free(tmp); tmp = NULL;
-	 
-	 if (DEBUG) printf("got cookies: Cookie1: %s\nCookie2: %s\n", hdata->cookie0, hdata->cookie1);
-	 
-	 
-	 snprintf(buf, sizeof(buf),  
-		"GET /ppsecure/post.srf?lc=%s&id=%s&tw=%s&cbid=%s&da=passport.com&login=%s&domain=%s&passwd=%s&sec=&mspp_shared=&padding= HTTP/1.0\r\n"
-		"Cookie: %s\r\n"
-		"Cookie: %s\r\n\r\n",
-		hdata->lc, hdata->id, hdata->tw, hdata->id,
-		((authdata_NS *)hdata->conn->auth)->username,
-		"passport.com",
-		"************",
-		hdata->cookie0, hdata->cookie1);
-	 
-	 if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
-
-	 bzero(buf, sizeof(buf));
-	 snprintf(buf, sizeof(buf),  
-		"GET /ppsecure/post.srf?lc=%s&id=%s&tw=%s&cbid=%s&da=passport.com&login=%s&domain=%s&passwd=%s&sec=&mspp_shared=&padding= HTTP/1.0\r\n"
-		"Cookie: %s\r\n"
-		"Cookie: %s\r\n\r\n",
-		hdata->lc, hdata->id, hdata->tw, hdata->id,
-		((authdata_NS *)hdata->conn->auth)->username,
-		"passport.com",
-		((authdata_NS *)hdata->conn->auth)->password,
-		hdata->cookie0, hdata->cookie1);
-	 
+	 tmp = strstr(urlread, "Authentication-Info:");
+		char *tkt = strdup(strstr(tmp, "from-PP='") + strlen("from-PP='"));
+		*(strchr(tkt, '\'')) = 0;
 	 
 	 ssl_done_socket(sock);
 	 free(sock->hostname);
@@ -727,14 +720,17 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 close(sock->sock);
 	 
 	 free (hdata->url); 
-	 hdata->url = strdup(buf);
-	 
-	 if (ext_async_socket(hdata->remote_host, 443, (void *)msn_https_cb2, hdata) < 0) {
-		 if(DEBUG) printf("immediate connect failure to %s\n", hdata->remote_host);    
-		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server.");
-	 }
+  snprintf(buf, sizeof(buf), "USR %d TWN S %s\r\n", next_trid, tkt);
+		if(DEBUG) printf("ticket=%s\n", tkt);    
+  
+  write(hdata->conn->sock, buf, strlen(buf));
+  msn_add_callback(hdata->conn, msn_connect_4, next_trid, hdata->info);
+
+  next_trid++;
+		free (hdata);
 }
  	 
+/*
 static void msn_https_cb2(int fd, int error, void *data) 
 {
 	 SockInfo *sock = (SockInfo*)malloc(sizeof(SockInfo));
@@ -750,7 +746,7 @@ static void msn_https_cb2(int fd, int error, void *data)
 		 return;
 	 }
 
-	 if (!ssl_init_socket(sock, hdata->remote_host, 80)) {
+	 if (!ssl_init_socket(sock, hdata->remote_host, 443)) {
 		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
 		 return;
 	 }
@@ -819,6 +815,7 @@ static void msn_https_cb2(int fd, int error, void *data)
 	  free(hdata);
 	  hdata=NULL;	 
 }
+*/
 
  
 void msn_SBconn_3(msnconn * conn, int trid, char ** args, int numargs, callback_data * data)
