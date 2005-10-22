@@ -172,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.78 $",
-	"$Date: 2005/02/13 13:34:59 $",
+	"$Revision: 1.79 $",
+	"$Date: 2005/10/22 19:48:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1315,7 +1315,7 @@ static void eb_msn_set_idle( eb_local_account * account, gint idle )
 
 static void eb_msn_set_away( eb_local_account * account, char * message, int away )
 {
-    if(message)
+    if(away && message)
     {
         int state=MSN_AWAY;
         if(do_guess_away)
@@ -1343,7 +1343,7 @@ static void eb_msn_set_away( eb_local_account * account, char * message, int awa
 
         if(account->status_menu)
         {
-	    eb_set_active_menu_status(account->status_menu, state);
+           eb_set_active_menu_status(account->status_menu, state);
         }
     }
     else
