@@ -1,3 +1,6 @@
+* Sun Nov 20 2005 15:00 GMT [philip]	0.4.6-32
+- Add IRC commands patch sent in by Manish Malik <mm@bbspals.org>
+
 * Sun Feb 13 2005 14:00 GMT [philip]	0.4.6-31
 - Allow custom messages to be non-away messages
 - Send custom message to chat rooms (IRC)

@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.39 $",
-	"$Date: 2005/02/13 13:33:26 $",
+	"$Revision: 1.40 $",
+	"$Date: 2005/11/20 14:27:48 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -173,6 +173,42 @@ static char *irc_states[] =
 
 static int is_setting_state = 0;
 
+/* Denotes the end of list in irc_command_action array (irc_ca) ... */
+#define IRC_END_COMMAND         ""
+
+/* Max command and action strings length in an irc_command_action struct */
+#define MAX_IRC_COMMAND_LEN 255
+#define MAX_IRC_ACTION_LEN 255
+
+/* IRC_COMMAND_TYPE: type of command in an irc_command_action struct. */
+enum IRC_COMMAND_TYPE
+{
+    IRC_COMMAND_BUILTIN = 1,
+    IRC_COMMAND_USER_DEF = 2
+};
+
+typedef struct irc_command_action_type
+{
+    char command[MAX_IRC_COMMAND_LEN];
+    char action[MAX_IRC_ACTION_LEN];
+    enum IRC_COMMAND_TYPE command_type;
+} irc_command_action;
+
+/* Command-Action array of structs...
+ * Spaces at the end of command-strings are important. 
+ * IRC_END_COMMAND is the default action to take, if none of the commands match. */
+static irc_command_action irc_ca[] =
+{
+	{ "/ME ", "PRIVMSG %TARGET% :\1ACTION %ARGS%\1\n", IRC_COMMAND_BUILTIN },
+	{ "/MSG ", "PRIVMSG %ARGS1% :%ARGS2_ALL%\n", IRC_COMMAND_BUILTIN },
+	{ "/QUOTE ", "%ARGS%\n", IRC_COMMAND_BUILTIN },
+	{ "/QUIT ", "QUIT :%ARGS%\n", IRC_COMMAND_BUILTIN },
+	{ "/SAY ", "PRIVMSG %TARGET% :%ARGS%\n", IRC_COMMAND_BUILTIN },
+	{ "/KICK ", "KICK %TARGET% %ARGS1% :%ARGS2_ALL%\n", IRC_COMMAND_BUILTIN },
+	{ IRC_END_COMMAND, "PRIVMSG %TARGET% :%ARGS%\n", IRC_COMMAND_BUILTIN }
+};
+
+
 /* Local prototypes */
 static unsigned char *strip_color (unsigned char *text);
 static int sendall(int s, char *buf, int len);
@@ -214,6 +250,9 @@ static void irc_decline_invite( eb_local_account * account, void * invitation );
 static void eb_irc_read_prefs_config(LList * values);
 static LList * eb_irc_write_prefs_config();
 static void irc_connect_cb(int fd, int error, void *data);
+static int irc_replace_string_args(char* source, char **ptarget, const char* match, const char* replacement);
+static int irc_command_to_action(char* message, char* out, int max_out_len, char* target_name);
+
 /* taken from X-Chat 1.6.4: src/common/util.c */
 /* Added: stripping of CTCP/2 color/formatting attributes, which is
    everything between two '\006' = ctrl-F characters.
@@ -1862,10 +1901,14 @@ static void irc_send_chat_room_message(eb_chat_room *room, char *message)
 
 	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
 
-	if(strncmp(message, "/me ", 4) == 0 && strlen(message) > 4)
-		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :\1ACTION %s\1\n", room->room_name, message+4);
-	else
+	if (message && (message[0]!='/'))
+	{
 		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", room->room_name, message);
+	}
+	else
+	{
+		irc_command_to_action(message, buff, BUF_LEN, room->room_name);
+	}
 			
 	ret = sendall(ila->fd, buff, strlen(buff));
 	if (ret == -1) irc_logout(room->local_user);
@@ -2004,6 +2047,191 @@ static LList * eb_irc_get_public_chatrooms(eb_local_account *ela)
 	
 	return l_list_copy(ila->channel_list);
 }
+
+
+/*
+ * function: irc_replace_string_args
+ * Minion function, utilized by irc_command_to_action()
+ */
+int irc_replace_string_args(char* source, char **ptarget, const char* match,
+				const char* replacement)
+{
+	char *last_matched, *replaced, *last_replaced;
+	int current_replaced_len, difference_len;
+	int match_len = strlen(match);
+	int replacement_len = strlen(replacement);
+	int source_len = strlen(source);
+	int replaced_count = 0;
+
+	if ((NULL == match) || (NULL == replacement) || (match_len < 1)
+			|| (source_len < 1) )
+	{
+		return -1; /* Indicates nothing was done */
+	}
+
+	current_replaced_len = source_len;
+	difference_len = replacement_len - match_len;
+
+	last_matched = source; /* initialize lastMatch with source string */
+
+	replaced = g_strdup(source);
+    
+	/* Loop through the string to make replacements,
+	 * as long as there's a match available */
+	while ((last_matched = strstr(last_matched, match)))
+   	{
+		last_replaced = replaced;
+		current_replaced_len += difference_len;
+		replaced = g_strndup(last_replaced, current_replaced_len);
+		g_free(last_replaced);
+
+		 strncpy(replaced, source, last_matched - source);
+		*(replaced + (last_matched - source) ) = '\0'; /* <= replaced length */
+		strcat(replaced, replacement);
+		last_matched += match_len;
+		strcat(replaced, last_matched);
+        
+		/* Keep track of how many replacements we're making */
+		++replaced_count;
+    	}
+
+	/* Don't leak memory ... */
+	if ((*ptarget) != NULL)
+	{
+		g_free(*ptarget);
+		*ptarget = NULL;
+	}
+
+	/* Caller's responsibility to g_free() this, and set to NULL */
+	(*ptarget) = replaced;
+
+	/* Let the caller know how many replacements were made */
+	return replaced_count;
+}
+
+
+/*
+ * Function: irc_command_to_action
+ * Recognizes /-commands and replaces text for them in a given message... 
+ * Arguments:
+ *	message: source message
+ *	out: output message buffer.
+ *		Should've alrady been allocated memory by the calling function
+ *	max_out_len: maximum length of output message buffer (out)
+ *	target_name: target (Channel name if coming from irc_send_chat_room_message)
+ */
+
+int irc_command_to_action(char* message, char* out, int max_out_len, char* target_name)
+{
+	irc_command_action *irc_ca_iterator;
+	int command_matched = 0; /* 0 = no command matched, 1 = matched */
+	int command_length = 0; /* 0 if command_matched = 0 */
+	char *work_str; /* Temporary work-string used during calls to replace... */
+	/* replacement string holders */
+	char **args, *message_args, *args_1, *args_2, *args_2_all, *args_3_all;
+
+	/* if either of message or out is NULL, don't bother checking further.
+	 * Same goes for max_out_len being 0. */
+	if ((NULL == message) || (NULL == out) || (max_out_len == 0))
+	{
+		if (out != NULL)
+		{
+			out[0] = '\0';	
+		}
+		return -1;
+	}
+
+	/* Initialize command_to_action iterator */
+	irc_ca_iterator = &irc_ca[0];
+
+	while (strcmp(irc_ca_iterator->command,IRC_END_COMMAND) != 0)
+	{
+		command_length = strlen(irc_ca_iterator->command);
+
+		if (g_strncasecmp((irc_ca_iterator->command), 
+					message, command_length) == 0) 
+		{
+			command_matched = 1;
+			strncpy(message, irc_ca_iterator->command, command_length);
+			break; /* break out of the loop. We found it. */
+		}
+
+		irc_ca_iterator++;
+	}
+
+	if (0 == command_matched)
+	{
+		command_length = 0;
+	}
+
+	/* %ARGS% is now (message + command_length) */
+	message_args = message + command_length;
+
+	args_1 = g_malloc0(1); /* first element after command */
+	args_2 = g_malloc0(1); /* second element */
+	args_2_all = g_malloc0(1); /* text after, and including second element */
+	args_3_all = g_malloc0(1); /* text after, and including third element */
+
+	if (strlen(message_args) > 0)  /* Use above values for empty %ARGS% */
+	{
+		/* To preserve multiple spaces between args, we'll extract
+		 * args_2_all, and args_3_all separately */
+		args = g_strsplit(message_args, " ", 2);
+		if (args && args[0])
+		{
+			g_free(args_1);		
+			args_1 = g_strdup(args[0]);
+			if (args[1])
+			{	
+				g_free(args_2_all);	
+				args_2_all = g_strdup(args[1]);
+			}
+		}
+
+		g_strfreev(args); /* Release whatever g_strsplit allocated for us */
+
+		args = g_strsplit(message_args, " ", 3);
+ 
+		if (args && args[1])
+		{
+			g_free(args_2);
+			args_2 = g_strdup(args[1]);
+ 
+			if (args[2])
+			{
+				g_free(args_3_all);
+				args_3_all = g_strdup(args[2]);
+			}
+		}
+ 
+		g_strfreev(args); /* Again, release whatever g_strsplit allocated */
+		args = NULL;
+	} 
+
+	work_str = g_strdup(irc_ca_iterator->action); 
+
+	/* Replacement */
+	irc_replace_string_args(work_str, &work_str, "%TARGET%", target_name);
+	irc_replace_string_args(work_str, &work_str, "%ARGS%", message_args);
+	irc_replace_string_args(work_str, &work_str, "%ARGS1%", args_1);
+	irc_replace_string_args(work_str, &work_str, "%ARGS2%", args_2);
+	irc_replace_string_args(work_str, &work_str, "%ARGS2_ALL%", args_2_all);
+	irc_replace_string_args(work_str, &work_str, "%ARGS3_ALL%", args_3_all);
+
+	strncpy(out, work_str, max_out_len);
+	out[max_out_len - 1] = '\0';
+
+	g_free(args_1);
+	g_free(args_2);
+	g_free(args_2_all);
+	g_free(args_3_all);
+
+	g_free(work_str);
+	work_str = NULL;
+
+	return 0;
+}
+
 
 struct service_callbacks * query_callbacks()
 {
