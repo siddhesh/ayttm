@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.93 $",
-	"$Date: 2005/02/13 13:39:32 $",
+	"$Revision: 1.94 $",
+	"$Date: 2005/11/25 08:02:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -274,7 +274,7 @@ static int reload_prefs()
 #define YAHOO_FONT_SIZE "size=\""
 
 #ifndef FREE
-#define FREE(x)	if(x) { g_free((void *)x); x=NULL; }
+#define FREE(x)	if(x) { g_free((void *)x); x=(void *)NULL; }
 #endif
 
 typedef struct {

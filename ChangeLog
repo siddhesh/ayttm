@@ -1,12 +1,39 @@
-* Sun Nov 20 2005 15:00 GMT [philip]	0.4.6-32
-- Add IRC commands patch sent in by Manish Malik <mm@bbspals.org>
+* Fri Nov 25 2005 07:24 GMT [philip]	0.4.6-34
+- modules/yahoo2/yahoo.c
+Make it compile with gcc 4.
+Patch sent in by Baishampayan Ghose <b.ghose@gmail.com>
+
+* Sun Nov 20 2005 15:00 GMT [philip]	0.4.6-33
+- modules/irc/irc.c
+Add IRC commands patch sent in by Manish Malik <mm@bbspals.org>
+
+* Sat Oct 22 2005 20:05 GMT [philip]	0.4.6-32
+- modules/jabber/jabber.c, libEBjabber.[ch],
+- modules/jabber/libjabber/jconn.c,
+- modules/jabber/libjabber/include/jabber/jabber.h
+Allow overriding of connect server for gtalk support
+Patch from Burt Holzman
 
 * Sun Feb 13 2005 14:00 GMT [philip]	0.4.6-31
-- Allow custom messages to be non-away messages
-- Send custom message to chat rooms (IRC)
-- Fix indentation in Jabber
-- Reduce dependency on gtk for headers
-- Add plugin to handle custom message status from a file
+- modules/{yahoo2,msn2,jabber,irc,aim-toc,icq}/
+- src/away_window.[hc]
+- src/nomodule.c
+Allow custom messages to be non-away messages
+- modules/irc/irc.c
+Send custom message to chat rooms (IRC)
+- modules/jabber
+Fix indentation in Jabber
+- src/edit_local_accounts.c
+- src/message_parse.c
+- src/status.c
+- src/gtk/extgtktext.c
+- src/chat_room.c
+- src/chat_room.h
+- src/edit_account_window.c
+- src/plugin.c
+Reduce dependency on gtk for headers
+- modules/utility/custom_message.c
+Add plugin to handle custom message status from a file
 
 * Wed Dec 29 2004 21:32 GMT [philip]	0.4.6-30
 - use rename(2) to rename log files
