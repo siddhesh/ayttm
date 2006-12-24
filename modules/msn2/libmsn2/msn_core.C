@@ -603,6 +603,8 @@ static void msn_https_cb1(int fd, int error, void *data)
 	 char *urlread = NULL;
 	 char *tmp = NULL;
 	 https_data *hdata = (https_data *)data;	
+
+	 urlread = (char *)calloc(1, sizeof(char));
 	 
 	 sock->sock = fd;
 	 if (DEBUG) printf("sock->sock = %d\n",sock->sock);
@@ -625,7 +627,7 @@ static void msn_https_cb1(int fd, int error, void *data)
 		 size_t s = (size_t)strlen(buf) +1;
 		 
 		 if (urlread) {
-			 s += strlen(urlread)+1;
+			 s += strlen(urlread);
 		 } 
 		 
 		 urlread = (char *)realloc(urlread, s);
