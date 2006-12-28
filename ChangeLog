@@ -1,3 +1,8 @@
+* Sat Dec 24 2006 16:43 GMT [philip]	0.4.6-35
+- modules/msn2/libmsn/msn_core.C
+Fix bad allocation issue that sometimes caused MSN login to freeze because
+of stray null bytes.
+
 * Fri Nov 25 2005 07:24 GMT [philip]	0.4.6-34
 - modules/yahoo2/yahoo.c
 Make it compile with gcc 4.
