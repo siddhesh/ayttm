@@ -2276,7 +2276,10 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	cw->away_msg_sent = (time_t)NULL;
 	cw->away_warn_displayed = (time_t)NULL;
 	cw->preferred = NULL;
-	cw->local_user = NULL;
+	/* This was incorrectly initialized to NULL. It caused the smiley
+	 * window to not be displayed until a message was sent
+	 */
+	cw->local_user = local;
 	cw->smiley_window = NULL;
 
 	vbox = gtk_vbox_new(FALSE,0);	
