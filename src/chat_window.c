@@ -2279,7 +2279,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	/* This was incorrectly initialized to NULL. It caused the smiley
 	 * window to not be displayed until a message was sent
 	 */
-	cw->local_user = local;
+	cw->local_user = NULL;
 	cw->smiley_window = NULL;
 
 	vbox = gtk_vbox_new(FALSE,0);	
