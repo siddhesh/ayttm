@@ -32,7 +32,12 @@ extern "C" {
 
 typedef	void	(t_file_selection_callback)( const char *inSelectedFile, void *inData );
 
-void	ay_do_file_selection( const char *inDefaultFile, const char *inWindowTitle, 
+#define ay_do_file_selection ay_do_file_selection_open
+
+void	ay_do_file_selection_open( const char *inDefaultFile, const char *inWindowTitle, 
+			 t_file_selection_callback *inCallback, void *inData );
+
+void	ay_do_file_selection_save( const char *inDefaultFile, const char *inWindowTitle, 
 			 t_file_selection_callback *inCallback, void *inData );
 
 #ifdef __cplusplus

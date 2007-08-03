@@ -23,7 +23,7 @@ Mandrake:
 	0) Install autoconf 2.59
 	   Install automake 1.7
 	   Install libltdl3-devel
-	   Install libgtk+1.2-devel
+	   Install libgtk+2.0-devel
 	1) install and build jasper
 	2) ./configure
 	3) make

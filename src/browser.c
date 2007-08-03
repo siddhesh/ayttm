@@ -98,7 +98,9 @@ void open_url(void *w, char *url) {
 		browser = cGetLocalPref("alternate_browser");
 	
 	if (!browser || (strlen(browser) == 0)) {
-		browser = "mozilla %s";
+		browser = (char *) malloc(strlen(DEFAULT_WWW_BROWSER)+4);
+		strcpy(browser, DEFAULT_WWW_BROWSER);
+		strncat(browser, " %s", 3);
 	}
 	url_pos = strstr(browser, "%s");
 	/*
@@ -121,6 +123,9 @@ void open_url(void *w, char *url) {
 	}
 	eb_debug(DBG_CORE, "launching %s\n", command);
 	system(command);
+
+	if(browser)
+		free(browser);
 }
 
 #else

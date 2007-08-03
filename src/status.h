@@ -51,6 +51,8 @@ void add_contact_and_accounts(struct contact * c);
 void add_contact_line(struct contact * ec);
 void add_account_line(eb_account * ea);
 void add_group_line(grouplist * eg);
+void update_group_line(grouplist * eg);
+	void update_contact_line(struct contact * ec);
 void remove_account_line(eb_account * ea);
 void remove_contact_line(struct contact * ec);
 void remove_group_line(grouplist * eg);

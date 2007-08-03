@@ -5,3 +5,5 @@ lj_la_SOURCES = lj.c lj_httplib.c
 lj_la_LDFLAGS = -module -avoid-version
 
 noinst_HEADERS = lj_httplib.h lj.h
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

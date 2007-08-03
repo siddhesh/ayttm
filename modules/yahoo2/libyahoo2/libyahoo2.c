@@ -203,7 +203,8 @@ enum yahoo_service { /* these are easier to see in hex */
 	YAHOO_SERVICE_CHATEXIT = 0x9b,
 	YAHOO_SERVICE_CHATLOGOUT = 0xa0,
 	YAHOO_SERVICE_CHATPING,
-	YAHOO_SERVICE_COMMENT = 0xa8
+	YAHOO_SERVICE_COMMENT = 0xa8,
+	YAHOO_SERVICE_Y6_STATUS_UPDATE = 0xc6 /* The new status update. Got from the gaim yahoo code */
 };
 
 struct yahoo_pair {
@@ -2464,6 +2465,7 @@ static void yahoo_packet_process(struct yahoo_input_data *yid, struct yahoo_pack
 	case YAHOO_SERVICE_GAMELOGOFF:
 	case YAHOO_SERVICE_IDACT:
 	case YAHOO_SERVICE_IDDEACT:
+	case YAHOO_SERVICE_Y6_STATUS_UPDATE:
 		yahoo_process_status(yid, pkt);
 		break;
 	case YAHOO_SERVICE_NOTIFY:
@@ -3341,6 +3343,7 @@ int yahoo_read_ready(int id, int fd, void *data)
 	int len;
 
 	LOG(("read callback: id=%d fd=%d data=%p", id, fd, data));
+
 	if(!yid)
 		return -2;
 
@@ -3577,10 +3580,8 @@ void yahoo_set_away(int id, enum yahoo_status state, const char *msg, int away)
 		yd->current_status = state;
 	}
 
-	if (yd->current_status == YAHOO_STATUS_AVAILABLE)
-		service = YAHOO_SERVICE_ISBACK;
-	else
-		service = YAHOO_SERVICE_ISAWAY;
+	/* Now we only need to send in UPDATE_STATUS, which'll do the rest for us */
+	service = YAHOO_SERVICE_Y6_STATUS_UPDATE;
 	pkt = yahoo_packet_new(service, yd->current_status, yd->session_id);
 	snprintf(s, sizeof(s), "%d", yd->current_status);
 	yahoo_packet_hash(pkt, 10, s);
@@ -3588,6 +3589,8 @@ void yahoo_set_away(int id, enum yahoo_status state, const char *msg, int away)
 		yahoo_packet_hash(pkt, 19, msg);
 		yahoo_packet_hash(pkt, 47, away?"1":"0");
 	}
+
+	DEBUG_MSG(("Assigned as %d, sending service as %d\n", service, pkt->service));
 
 	yahoo_send_packet(yid, pkt, 0);
 	yahoo_packet_free(pkt);

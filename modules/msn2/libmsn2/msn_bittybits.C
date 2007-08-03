@@ -299,7 +299,7 @@ char * msn_encode_URL(char * s)
     { *wptr='\0'; break; }
     if(!(isalpha(*rptr) || isdigit(*rptr)))
     {
-      sprintf(wptr, "%%%2x", (int)(*rptr)); /* this one is ok */
+      sprintf(wptr, "%%%2x", *rptr & 0xff); /* this one is ok */
 
       rptr++;
       wptr+=3;

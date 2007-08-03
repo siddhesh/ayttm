@@ -61,8 +61,8 @@ didn't read this file.
 	flex.2.5.4
 	freetype.2.1.8
 	gettext.0.13.1
-	glib.1.2.10
-	gtk.+-1.2.10 but NOT GTK2
+	glib 2.0.0
+	gtk2 2.6.0
 	libiconv.1.9.2
 	libtool.1.5.6
 	readline.4.3

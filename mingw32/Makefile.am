@@ -3,6 +3,8 @@ EXTRA_DIST =
 @PACKAGE@rc: Makefile
 	@rm -f @PACKAGE@rc >/dev/null 2>&1;
 	@echo version=\"@VERSION@-@RELEASE@\" > @PACKAGE@rc
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@
 
 all: ayttmrc
 

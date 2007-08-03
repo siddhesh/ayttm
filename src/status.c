@@ -60,19 +60,52 @@
 #include "messages.h"
 
 #include "gtk/gtkutils.h"
-#include "gtk/extgtktext.h"
-#include "gtk/gtk_eb_html.h"
-#include "gtk/gtkutils.h"
+#include "gtk/html_text_buffer.h"
+#include "gtk/gtk_tree_view_tooltip.h"
 
 #include "pixmaps/login_icon.xpm"
 #include "pixmaps/blank_icon.xpm"
 #include "pixmaps/logoff_icon.xpm"
-
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 /* define to add debug stuff to 'Help' Menu */
 /*
 #define	ADD_DEBUG_TO_MENU	1
 */
+
+#define MAIN_VIEW_EXPAND_ROW(row) \
+	gtk_tree_view_expand_to_path(\
+			GTK_TREE_VIEW(contact_list),\
+			gtk_tree_model_get_path(\
+				GTK_TREE_MODEL(contact_list_store),\
+				(GtkTreeIter *)row))
+
+#define MAIN_VIEW_COLLAPSE_ROW(row) \
+	gtk_tree_view_collapse_row(\
+			GTK_TREE_VIEW(contact_list),\
+			gtk_tree_model_get_path(\
+				GTK_TREE_MODEL(contact_list_store),\
+				(GtkTreeIter *)row))
+
+/*
+ * Enumerate the Main window tree view
+ */
+enum {
+	MAIN_VIEW_ICON,
+	MAIN_VIEW_LABEL,
+	MAIN_VIEW_STATUS_TIP,
+	MAIN_VIEW_STATUS,
+	MAIN_VIEW_ROW_DATA,
+	MAIN_VIEW_ROW_TYPE,
+	MAIN_VIEW_HAS_TIP,
+	MAIN_VIEW_COL_COUNT
+};
+
+enum {
+	TARGET_TYPE_ACCOUNT=1,
+	TARGET_TYPE_CONTACT,
+	TARGET_TYPE_GROUP
+};
 
 void update_contact_list();
 
@@ -95,12 +128,12 @@ GtkWidget *away_menu = NULL;
 
 static int window_title_handler = -1;
 
-static GtkTooltips * status_tips=NULL;
-
+static GtkTreeStore * contact_list_store = NULL;
 static GtkWidget * contact_list = NULL;
 static GtkWidget * contact_window = NULL;
 static GtkWidget * status_bar = 0;
-static GtkWidget * status_message = NULL;
+static GtkToolItem * status_message = NULL;
+static GtkTreeViewTooltip *tooltip = NULL;
 
 /* status_show is:
    0 => show all accounts,
@@ -119,13 +152,21 @@ void do_events(void)
 
 void set_tooltips_active(int active)
 {
-	if(!status_tips)
-		status_tips = gtk_tooltips_new();
-	
+	if(!tooltip)
+		tooltip = gtk_tree_view_tooltip_new_for_treeview(GTK_TREE_VIEW(contact_list));
+
 	if(active)
-		gtk_tooltips_enable(status_tips);
+		gtk_tree_view_tooltip_set_tip_columns(tooltip, 
+				MAIN_VIEW_HAS_TIP,
+				MAIN_VIEW_ICON,
+				MAIN_VIEW_LABEL,
+				MAIN_VIEW_STATUS_TIP );
 	else
-		gtk_tooltips_disable(status_tips);
+		gtk_tree_view_tooltip_set_tip_columns(tooltip, 
+				-1,
+				-1,
+				-1,
+				-1 );
 }
 
 void focus_statuswindow (void) 
@@ -133,21 +174,28 @@ void focus_statuswindow (void)
 	gdk_window_raise(statuswindow->window);
 }
 
-static void delete_event( GtkWidget *widget,
+void delete_event( GtkWidget *widget,
 				   GdkEvent *event,
 				   gpointer data )
 {
-	gchar *userrc = NULL;
+//	gchar *userrc = NULL;
 	
 	eb_debug(DBG_CORE, "Signing out...\n");
 	eb_sign_off_all();	
 	eb_debug(DBG_CORE, "Signed out\n");
 	
-	eb_save_size(contact_window, NULL);
+	eb_save_size(statuswindow, NULL);
 
-	userrc = g_strconcat(config_dir, G_DIR_SEPARATOR_S, "menurc", NULL);
-	gtk_item_factory_dump_rc(userrc, NULL, TRUE);
-	g_free(userrc);
+	/* Moved call to unload_modules() here from main() since we're 
+	 * giving all modules functionality to add/delete submenus. With 
+	 * the window already gone in main(), unloads were spewing a lot
+	 * of warnings
+	 */
+	unload_modules(); // Need to unload what we load
+
+//	userrc = g_strconcat(config_dir, G_DIR_SEPARATOR_S, "menurc", NULL);
+//	gtk_item_factory_dump_rc(userrc, NULL, TRUE);
+//	g_free(userrc);
 	gtk_main_quit();
 }
 
@@ -333,22 +381,24 @@ static void create_log_window(void)
 		return;
 	
 	status_message_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	status_message_window_text = ext_gtk_text_new(NULL,NULL);
+	status_message_window_text = gtk_text_view_new();
+	
 	status_message_swindow = gtk_scrolled_window_new(NULL,NULL);
 	
 	gtk_window_set_title(GTK_WINDOW(status_message_window), _("Ayttm - history"));
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(status_message_swindow), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	
-	gtk_eb_html_init(EXT_GTK_TEXT(status_message_window_text));
-	gtk_widget_set_usize(status_message_window_text, 450, 150);
+	html_text_view_init(GTK_TEXT_VIEW(status_message_window_text), HTML_IGNORE_FONT);
+	
+	gtk_widget_set_size_request(status_message_window_text, 450, 150);
 	
 	gtk_container_add(GTK_CONTAINER(status_message_swindow), status_message_window_text);
 	gtk_container_add(GTK_CONTAINER(status_message_window), status_message_swindow);
 	gtk_widget_show(status_message_window_text);
 	gtk_widget_show(status_message_swindow);
 	
-	gtk_signal_connect(GTK_OBJECT(status_message_window), "delete-event", 
-			GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), NULL);
+	g_signal_connect(status_message_window, "delete-event", 
+			G_CALLBACK(gtk_widget_hide_on_delete), NULL);
 	
 	gtk_widget_realize(status_message_window);
 	gtk_widget_realize(status_message_swindow);
@@ -396,14 +446,15 @@ static void update_status_message(gchar * message )
 		else {
 			last_inserted = strdup(message);
 		}
-		gtk_widget_hide(status_message);
-		gtk_label_set_text(GTK_LABEL(status_message), message);
+		gtk_widget_hide(GTK_WIDGET(status_message));
+		gtk_tool_button_set_label(GTK_TOOL_BUTTON(status_message), message);
 
 		if (iGetLocalPref("do_noautoresize")) {
-			gtk_widget_set_usize(status_message, status_bar->allocation.width-10, -1);
+			gtk_widget_set_size_request(GTK_WIDGET(status_message), status_bar->allocation.width-10, -1);
 		}
-		gtk_widget_show(status_message);
-		gtk_eb_html_add(EXT_GTK_TEXT(status_message_window_text), tstamp_mess, 0, 0, 0);
+		gtk_widget_show(GTK_WIDGET(status_message));
+		html_text_buffer_append( GTK_TEXT_VIEW(status_message_window_text),
+				tstamp_mess, HTML_IGNORE_NONE );
 		g_free(tstamp_mess);
 	}
 }
@@ -412,20 +463,51 @@ static void status_show_messages(GtkWidget *bar, void *data)
 {
 	gtk_widget_show(status_message_window);
 	gtk_widget_show(status_message_window_text);
-	gtk_widget_show(status_message_window_text);
 	gdk_window_raise(status_message_window->window);
 }
 
-static void collapse_contact( GtkTreeItem * treeItem, gpointer data )
+static gboolean collapse_callback ( GtkTreeView * tree_view, GtkTreeIter *iter,
+		GtkTreePath *path, gpointer data )
 {
-	struct contact * c = data;
-	c->expanded = FALSE;
+	gpointer d;
+	struct contact *c;
+	int type;
+
+
+	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+	gtk_tree_model_get( model, iter,
+			MAIN_VIEW_ROW_DATA, &d,
+			MAIN_VIEW_ROW_TYPE, &type, -1);
+
+	if(d && type == TARGET_TYPE_CONTACT) {
+		c = (struct contact *)d;
+		c->expanded = FALSE;
+	}
+
+	return FALSE;
 }
 
-static void expand_contact( GtkTreeItem * treeItem, gpointer data )
+static gboolean expand_callback ( GtkTreeView * tree_view, GtkTreeIter *iter,
+		GtkTreePath *path, gpointer data )
 {
-	struct contact * c = data;
-	c->expanded = TRUE;
+	gpointer d;
+	struct contact *c;
+	int type;
+
+
+	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+	
+	gtk_tree_model_get( model, iter,
+			MAIN_VIEW_ROW_DATA, &d,
+			MAIN_VIEW_ROW_TYPE, &type, -1);
+
+
+	if(d && type == TARGET_TYPE_CONTACT) {
+		c = (struct contact *)d;
+		c->expanded = TRUE;
+	}
+
+	return FALSE;
 }
 
 static void status_show_callback(GtkWidget *w, gpointer data)
@@ -451,9 +533,8 @@ static GtkWidget *make_info_menu(struct contact *c, int *nb)
 					get_service_name(account->service_id));	    
 			button = gtk_menu_item_new_with_label(buff);
 			g_free(buff);
-			gtk_signal_connect(GTK_OBJECT(button), "activate", 
-					GTK_SIGNAL_FUNC(get_info),account);
-			gtk_menu_append(GTK_MENU(InfoMenu), button);
+			g_signal_connect(button, "activate", G_CALLBACK(get_info),account);
+			gtk_menu_shell_append(GTK_MENU_SHELL(InfoMenu), button);
 			gtk_widget_show(button);
 			(*nb)++;
 		}
@@ -464,29 +545,26 @@ static GtkWidget *make_info_menu(struct contact *c, int *nb)
 /*
  * Menus raised by buttons
  */
-    
+
 static void group_menu(GdkEventButton * event, gpointer d )
 {
 	GtkWidget *menu;
 	grouplist *grp = (grouplist *)d;
 	menu = gtk_menu_new();
 	
-	if (contact_list && grp->list_item)
-		gtk_tree_select_child(GTK_TREE(contact_list), grp->list_item);
- 
-	gtkut_create_menu_button (GTK_MENU(menu), _("Add contact to group..."),
-			GTK_SIGNAL_FUNC(add_to_group_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Add contact to group"),
+			G_CALLBACK(add_to_group_callback), d);
 
 	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL);
 
-	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Group..."),
-			GTK_SIGNAL_FUNC(edit_group_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Group"),
+			G_CALLBACK(edit_group_callback), d);
 
-	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Group..."),
-			GTK_SIGNAL_FUNC(offer_remove_group_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Group"),
+			G_CALLBACK(offer_remove_group_callback), d);
 	
 	gtkut_create_menu_button (GTK_MENU(menu), _("Sort"),
-			GTK_SIGNAL_FUNC(sort_group_callback), grp);
+			G_CALLBACK(sort_group_callback), grp);
 	
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
 		 	event->button, event->time );
@@ -551,9 +629,9 @@ int add_menu_items(void *vmenu, int cur_service, int should_sep,
 			eb_debug(DBG_CORE, "ecd->contact:%s, ecd->ra=%s, ecd->la=%s\n",ecd->contact,ecd->remote_account,ecd->local_account);
 			button = gtk_menu_item_new_with_label(mid->label);
 			gtk_widget_set_sensitive(button, (mid->protocol==NULL || ecd->local_account!=NULL));
-			gtk_menu_append(GTK_MENU(submenu), button);
-			gtk_signal_connect(GTK_OBJECT(button), "activate",
-			eb_generic_menu_function, mid);
+			gtk_menu_shell_append(GTK_MENU_SHELL(submenu), button);
+			g_signal_connect(button, "activate",
+					G_CALLBACK(eb_generic_menu_function), mid);
 			gtk_widget_show(button);
 			last=cur_service;
 			next_sep=(mid->protocol==NULL);
@@ -574,30 +652,27 @@ static void contact_menu(GdkEventButton * event, gpointer d )
 	
 	menu = gtk_menu_new();
 	
-	if (contact_list && conn->list_item)
-		gtk_tree_select_child(GTK_TREE(contact_list), conn->list_item);
-	
-	gtkut_create_menu_button (GTK_MENU(menu), _("Add Account to Contact..."),
-			GTK_SIGNAL_FUNC(add_account_to_contact_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Add Account to Contact"),
+			G_CALLBACK(add_account_to_contact_callback), d);
 
-	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Contact..."),
-			GTK_SIGNAL_FUNC(edit_contact_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Contact"),
+			G_CALLBACK(edit_contact_callback), d);
 
-	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Contact..."),
-			GTK_SIGNAL_FUNC(offer_remove_contact_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Contact"),
+			G_CALLBACK(offer_remove_contact_callback), d);
 	
 	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 	
-	gtkut_create_menu_button (GTK_MENU(menu), _("Send File..."),
-			GTK_SIGNAL_FUNC(send_file_with_contact_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Send File"),
+			G_CALLBACK(send_file_with_contact_callback), d);
 	
-	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Trigger..."),
-			GTK_SIGNAL_FUNC(edit_trigger_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Trigger"),
+			G_CALLBACK(edit_trigger_callback), d);
 
 	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 
-	gtkut_create_menu_button (GTK_MENU(menu), _("View Log..."),
-			GTK_SIGNAL_FUNC(view_log_callback), d);
+	gtkut_create_menu_button (GTK_MENU(menu), _("View Log"),
+			G_CALLBACK(view_log_callback), d);
 
 	submenu = make_info_menu((struct contact *)d, &nbitems);
 	gtkut_attach_submenu (GTK_MENU(menu), _("Info"), submenu, nbitems);
@@ -629,23 +704,21 @@ static void account_menu(GdkEventButton * event, gpointer d )
 
 	
 	menu = gtk_menu_new();
-	if (contact_list && acc->list_item)
-		gtk_tree_select_child(GTK_TREE(contact_list), acc->list_item);
 
 	gtkut_create_menu_button (GTK_MENU(menu), _("Edit Account..."),
-			GTK_SIGNAL_FUNC(edit_account_callback), d);
+			G_CALLBACK(edit_account_callback), d);
 
 	gtkut_create_menu_button (GTK_MENU(menu), _("Delete Account..."),
-			GTK_SIGNAL_FUNC(offer_remove_account_callback), d);
+			G_CALLBACK(offer_remove_account_callback), d);
 
 	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 
 	if (CAN(acc, send_file))
 		 gtkut_create_menu_button (GTK_MENU(menu), _("Send File..."),
-			GTK_SIGNAL_FUNC(send_file_callback), d);
+			G_CALLBACK(send_file_callback), d);
 
 	gtkut_create_menu_button (GTK_MENU(menu), _("Info..."),
-			GTK_SIGNAL_FUNC(get_info),d);
+			G_CALLBACK(get_info),d);
 
 	gtkut_create_menu_button (GTK_MENU(menu), NULL, NULL, NULL); /* sep */
 
@@ -671,39 +744,71 @@ static void account_menu(GdkEventButton * event, gpointer d )
  * Mouse button event handlers for elements of the group/contact/account list
  */
 
-static void group_click (GtkWidget *widget, GdkEventButton * event,
+static gboolean right_click (GtkWidget *widget, GdkEventButton * event,
                          gpointer d)
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(widget),
-				   "button_press_event");
-		group_menu (event, d);
+		GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+		GtkTreeIter sel_iter;
+
+		int target_type;
+		gpointer data;
+
+		GtkTreePath *path;
+
+		if( gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
+					event->x, event->y, &path,
+					NULL, NULL, NULL) )
+		{
+			gtk_tree_selection_select_path(selection, path);
+			gtk_tree_model_get_iter(model, &sel_iter, path);
+			gtk_tree_path_free(path);
+		}
+		else
+			return FALSE;
+
+		gtk_tree_model_get(model, &sel_iter,
+				MAIN_VIEW_ROW_DATA, &data,
+				MAIN_VIEW_ROW_TYPE, &target_type,
+				-1);
+
+		if(target_type == TARGET_TYPE_CONTACT) {
+			contact_menu (event, data);
+		}
+		if(target_type == TARGET_TYPE_ACCOUNT) {
+			account_menu (event, data);
+		}
+		if(target_type == TARGET_TYPE_GROUP) {
+			group_menu (event, data);
+		}
 	}
+
+	return FALSE;
 }
 
-static void contact_click (GtkWidget *widget, GdkEventButton * event,
-                         gpointer d)
-{
-	if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
-    		eb_chat_window_display_contact((struct contact *)d);
-	else if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(widget),
-				       "button_press_event");
-		contact_menu (event, d);
-	}
-}
 
-
-static void account_click (GtkWidget *widget, GdkEventButton * event,
-                         gpointer d)
+static void double_click (GtkTreeView *tree_view, GtkTreePath *path,
+		GtkTreeViewColumn *col, gpointer data)
 {
-	if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
+	int target_type;
+	gpointer d;
+	GtkTreeIter pos;
+
+	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+
+	gtk_tree_model_get_iter(model, &pos, path);
+
+	gtk_tree_model_get(model, &pos,
+			MAIN_VIEW_ROW_DATA, &d,
+			MAIN_VIEW_ROW_TYPE, &target_type,
+			-1);
+
+	if(target_type == TARGET_TYPE_ACCOUNT)
 		eb_chat_window_display_account((eb_account *)d);
-	else if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(widget),
-					"button_press_event");
-		account_menu (event, d);
-	}
+	else if(target_type == TARGET_TYPE_CONTACT)
+    		eb_chat_window_display_contact((struct contact *)d);
+
 }
 
 /*
@@ -711,12 +816,12 @@ static void account_click (GtkWidget *widget, GdkEventButton * event,
  * list
  */
 
-static void add_callback(GtkWidget *widget, GtkTree *tree)
+static void add_callback(GtkWidget *widget)
 {
 	show_add_contact_window();
 }
 
-static void add_group_callback(GtkWidget *widget, GtkTree *tree)
+static void add_group_callback(GtkWidget *widget)
 {
 	show_add_group_window();
 }
@@ -753,11 +858,11 @@ static void ay_compare_version (const char *version, int warn_again)
 {
 	char *warned = cGetLocalPref("last_warned_version");
 	
-	if (version_cmp(version, VERSION "-" RELEASE) > 0) {
+	if (version_cmp(version, PACKAGE_VERSION "-" RELEASE) > 0) {
 		/* versions differ, should I warn ? */
 		if (warn_again || !warned || strcmp(warned, version)) {
 			char * buf = g_strdup_printf(_("A new release of ayttm is available.\n"
-					"Latest version is %s, while you have %s.\n"), version, VERSION "-" RELEASE);
+					"Latest version is %s, while you have %s.\n"), version, PACKAGE_VERSION "-" RELEASE);
 			ay_do_info(_("New release available !"), buf);
 			cSetLocalPref("last_warned_version", (char *)version);
 			ayttm_prefs_write();
@@ -884,31 +989,32 @@ void eb_sign_off_all()
 
 }
 
-static gint get_contact_position( struct contact * ec)
-{
-	gint i=0;
-	LList *l;
-	
-	for (l = ec->group->members; l && (l->data != ec); l=l->next)  {
-		struct contact * contact = l->data;
-		if (contact->list_item)
-			i++;
-	}
-	return i;
-}
+//static gint get_contact_position( struct contact * ec)
+//{
+//	gint i=0;
+//	LList *l;
+//	
+//	for (l = ec->group->members; l && (l->data != ec); l=l->next)  {
+//		struct contact * contact = l->data;
+//		if (contact->list_item)
+//			i++;
+//	}
+//	return i;
+//}
 
-static gint get_account_position( eb_account * ea)
-{
-	gint i=0;
-	LList *l;
-	
-	for (l = ea->account_contact->accounts; l && (l->data != ea); l=l->next) {
-		eb_account * account = l->data;
-		if (account->list_item)
-			i++;
-	}
-	return i;
-}
+//static gint get_account_position( eb_account * ea)
+//{
+//	gint i=0;
+//	LList *l;
+//	
+//	for (l = ea->account_contact->accounts; l && (l->data != ea); l=l->next) {
+//		eb_account * account = l->data;
+//		if (account->list_item)
+//			i++;
+//	}
+//	return i;
+//}
+
 
 void reset_list (void)
 {
@@ -966,17 +1072,18 @@ void update_contact_list ()
 
 					if (con->list_item == NULL)
 						fprintf (stderr, _("Account vanished after add_account_line.\n"));
-					else if (status_show == 0)
-						gtk_tree_item_expand (GTK_TREE_ITEM(con->list_item));
+					else if (status_show == 0) {
+						MAIN_VIEW_EXPAND_ROW (con->list_item);
+					}
 					else
-						gtk_tree_item_collapse (GTK_TREE_ITEM(con->list_item));
+						MAIN_VIEW_COLLAPSE_ROW(con->list_item);
 				} else {
 					/* Close it up */
 					if (ea->online) {
 						buddy_update_status(ea);
 
 						if (con->list_item != NULL)
-							gtk_tree_item_collapse (GTK_TREE_ITEM(con->list_item));
+							MAIN_VIEW_COLLAPSE_ROW(con->list_item);
 						else
 							fprintf (stderr, _("Account missing while online?\n"));
 					}
@@ -1009,53 +1116,14 @@ void add_contact_and_accounts(struct contact * c)
 	}
 }
 
-static GdkPixmap * iconlogin_pm = NULL;
-static GdkBitmap * iconlogin_bm = NULL;
-static GdkPixmap * iconblank_pm = NULL;
-static GdkBitmap * iconblank_bm = NULL;
-static GdkPixmap * iconlogoff_pm = NULL;
-static GdkBitmap * iconlogoff_bm = NULL;
+static GdkPixbuf * iconlogin_pb = NULL;
+static GdkPixbuf * iconblank_pb = NULL;
+static GdkPixbuf * iconlogoff_pb = NULL;
 
 static GtkTargetEntry drag_types[1] =
 {
-	{"text/plain", GTK_TARGET_SAME_APP, 0}
+	{"text/plain", GTK_TARGET_SAME_WIDGET, 0}
 };
-
-static gpointer dndtarget = NULL;
-static gboolean drag_motion_cb(GtkWidget      *widget,
-			       GdkDragContext *context,
-			       gint            x,
-			       gint            y,
-			       guint           time,
-			       gpointer        data)
-{
-	dndtarget = data;
-	return 1;
-}
-
-static void start_drag(GtkWidget *widget, GdkDragContext *dc, gpointer data)
-{
-	dndtarget=NULL;
-}
-
-static void drag_data_get(GtkWidget        *widget,
-			  GdkDragContext   *drag_context,
-			  GtkSelectionData *selection_data,
-			  guint             info,
-			  guint             time,
-			  gpointer	       data)
-{
-	grouplist *gl=(grouplist *)dndtarget;
-	struct contact *ec = data;
-	if(gl == NULL || ec == NULL) {
-		gtk_drag_finish(drag_context, FALSE, FALSE, time);
-		return;
-	}
-	move_contact(gl->name, ec);
-	update_contact_list ();
-	write_contact_list();
-	gtk_drag_finish(drag_context, TRUE, TRUE, time);
-}
 
 /*
  * Add/Remove entries to/from box -- group, contact, account
@@ -1064,50 +1132,43 @@ static void drag_data_get(GtkWidget        *widget,
 /* makes a group visible on the contact list */
 void add_group_line(grouplist * eg)
 {
-	GtkWidget * box;
+	GtkTreeIter iter;
 
 	/* Might call add_group() - which calls add_group_line() 
 	   before contact_list exists - this is OK so just return */
 	if (eg->list_item || !contact_list)
 		return;
-		
-	eg->list_item = gtk_tree_item_new();
+	
+	gtk_tree_store_append( contact_list_store, &iter, NULL );
+	gtk_tree_store_set(contact_list_store, &iter,
+			MAIN_VIEW_LABEL, eg->name,
+			MAIN_VIEW_ROW_DATA, eg,
+			MAIN_VIEW_ROW_TYPE, TARGET_TYPE_GROUP,
+			MAIN_VIEW_HAS_TIP, FALSE,
+			-1);
+	eg->list_item = gtk_tree_iter_copy(&iter);
 
-	box = gtk_hbox_new(FALSE, 1);
-
-	eg->label = gtk_label_new(eg->name);
-	gtk_label_set_justify(GTK_LABEL(eg->label), GTK_JUSTIFY_LEFT);
-
-	gtk_box_pack_start(GTK_BOX(box), eg->label, FALSE, FALSE, 1);
-	gtk_widget_show(eg->label);
-
-	gtk_container_add(GTK_CONTAINER(eg->list_item), box);
-	gtk_widget_show(box);
-
-	gtk_object_set_user_data(GTK_OBJECT(eg->list_item), (gpointer)eg);
 	eg->contacts_online = 0;
 	eg->contacts_shown = 0;
-	eg->tree = NULL;
-	gtk_tree_append(GTK_TREE(contact_list), eg->list_item);
+}
 
-	gtk_signal_connect(GTK_OBJECT(eg->list_item),  "button_press_event",
-			   GTK_SIGNAL_FUNC(group_click),
-			   (grouplist *)eg );
-	gtk_drag_dest_set(eg->list_item, GTK_DEST_DEFAULT_ALL &
-			  ~GTK_DEST_DEFAULT_HIGHLIGHT,
-			  drag_types, 1,
-			  GDK_ACTION_MOVE|GDK_ACTION_DEFAULT);
-	gtk_signal_connect(GTK_OBJECT(eg->list_item), "drag_motion",
-			   GTK_SIGNAL_FUNC(drag_motion_cb), eg);
-	
-	gtk_widget_show(eg->list_item);
+/* Refresh a group line after changing its label */
+void update_group_line(grouplist * eg)
+{
+	if (!eg->list_item)
+		return;
+
+	gtk_tree_store_set(contact_list_store, eg->list_item,
+			MAIN_VIEW_LABEL, eg->name,
+			MAIN_VIEW_ROW_DATA, eg,
+			-1);
 }
 
 static void set_status_label(eb_account *ea, int update_contact)
 {
 	char * c = NULL, *tmp = NULL;
 	int need_tooltip_update = 0;
-	int need_tooltip_display = 0;
+	
 	tmp = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 20);
 	c = g_strdup_printf("%s%s%s",
 			strlen(tmp)?"(":"",
@@ -1116,7 +1177,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 	
 	if (ea->status) {
 		char *current = NULL;
-		gtk_label_get(GTK_LABEL(ea->status), &current);
+		current = g_strdup(ea->status);
 		eb_debug(DBG_CORE,"current %s c %s\n",current,c);
 		if (current && strcmp(current, c)) {
 			char buff[1024];
@@ -1134,40 +1195,24 @@ static void set_status_label(eb_account *ea, int update_contact)
 
 	if(strlen(c) == 20) {
 		c[19] = c[18] = c[17] = '.';
-		if(!status_tips)
-			status_tips = gtk_tooltips_new();
-		/*
-		 * that 3rd parameter is not a bug, it really is a useless
-		 * parameter
-		 */
-
-		gtk_tooltips_set_tip(GTK_TOOLTIPS(status_tips), ea->list_item,
-				RUN_SERVICE(ea)->get_status_string(ea),
-				"");
 	}
-	if (!ea->status)
-		ea->status = gtk_label_new(c);
-	else
-		gtk_label_set_text(GTK_LABEL(ea->status),c);
+	ea->status = g_strdup(c);
+	ea->tiptext = ea->status;
 	
-	if (update_contact && !ea->account_contact->status) {
-		ea->account_contact->status = gtk_label_new(c);
-		need_tooltip_update = 1;
-	} else if (update_contact) {
-		need_tooltip_update = (ea->account_contact->last_status 
-					&& strcmp(c, ea->account_contact->last_status));
-		need_tooltip_display = !gtk_tooltips_data_get(ea->account_contact->list_item);
-		
-		gtk_label_set_text(ea->account_contact->status, c);
-	}
-	
-	if (update_contact && (need_tooltip_display || need_tooltip_update)) {
+	if (update_contact) {
 		struct tm *mytime;
 		char buff[128];
-		char *status = RUN_SERVICE(ea)->get_status_string(ea);
-		char *status_line = NULL;
+		char *status;
+
+		if(ea->account_contact->status)
+			g_free(ea->account_contact->status);
+		ea->account_contact->status = g_strdup(c);
+
+		need_tooltip_update = (ea->account_contact->last_status && strcmp(c, ea->account_contact->last_status));
+	
+		status = RUN_SERVICE(ea)->get_status_string(ea);
 		
-		if (need_tooltip_update) {
+		if(need_tooltip_update) {
 			time(&ea->account_contact->last_status_change);
 			if (ea->account_contact->last_status)
 				free(ea->account_contact->last_status);
@@ -1177,23 +1222,14 @@ static void set_status_label(eb_account *ea, int update_contact)
 		if (ea->account_contact->last_status_change != 0) {
 			mytime = localtime(&ea->account_contact->last_status_change);
 			strftime(buff, 128, "%H:%M (%b %d)", mytime);
-			status_line = g_strdup_printf(
+			ea->tiptext = g_strdup_printf(
 					_("%s since %s"),
 					strlen(status)?status:"Online", buff);
-
-			if(!status_tips)
-				status_tips = gtk_tooltips_new();
-			gtk_tooltips_set_tip(GTK_TOOLTIPS(status_tips), 
-				ea->account_contact->list_item,
-				status_line,
-				"");
-
-			g_free(status_line);
 		}
 	}
 	g_free(c);
 	g_free(tmp);
-
+	
 	set_tooltips_active(iGetLocalPref("do_show_tooltips"));
 }
 	
@@ -1201,113 +1237,101 @@ static void set_status_label(eb_account *ea, int update_contact)
    if necessary */
 void add_account_line( eb_account * ea)
 {
-	GtkWidget * box, * label;
+	char *label;
+	GtkTreeIter iter;
 	
 	if (ea->list_item)
 		return;
 	
 	add_contact_line(ea->account_contact);
 
-	ea->list_item = gtk_tree_item_new();
-
-	box = gtk_hbox_new(FALSE, 1);
-	ea->pix = gtk_pixmap_new(iconblank_pm, iconblank_bm);
-	label = gtk_label_new(ea->handle);
+	ea->pix = iconblank_pb;
+	label = g_strdup(ea->handle);
 	set_status_label(ea, TRUE);
-
-	gtk_box_pack_start(GTK_BOX(box), ea->pix, FALSE, FALSE, 1);
-	gtk_widget_show(ea->pix);
-	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 1);
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(box), ea->status, FALSE, FALSE, 1);
-	gtk_widget_show(ea->status);
-
-	gtk_container_add(GTK_CONTAINER(ea->list_item), box);
-	gtk_widget_show(box);
 
 	ea->icon_handler = -1;
 
-	gtk_object_set_user_data(GTK_OBJECT(ea->list_item), ea);
-	gtk_tree_insert(GTK_TREE(ea->account_contact->tree), ea->list_item,
-		get_account_position(ea));
-
-	gtk_signal_connect(GTK_OBJECT(ea->list_item),  "button_press_event",
-				  GTK_SIGNAL_FUNC(account_click),
-				  (eb_account *)ea );
-
-	gtk_widget_show(ea->list_item);
-
+	gtk_tree_store_append( contact_list_store, &iter,
+			(GtkTreeIter *)(ea->account_contact->list_item) );
+	gtk_tree_store_set(contact_list_store, &iter,
+			MAIN_VIEW_ICON, ea->pix,
+			MAIN_VIEW_LABEL, label,
+			MAIN_VIEW_STATUS, ea->status,
+			MAIN_VIEW_STATUS_TIP, ea->tiptext,
+			MAIN_VIEW_ROW_DATA, ea,
+			MAIN_VIEW_ROW_TYPE, TARGET_TYPE_ACCOUNT,
+			MAIN_VIEW_HAS_TIP, FALSE,
+			-1);
+	ea->list_item = gtk_tree_iter_copy(&iter);
 }
 
 /* makes a contact visible on the buddy list */
 void add_contact_line( struct contact * ec)
 {
-	GtkWidget * box;
-	
+	GtkTreeIter *sibling = NULL;
+	LList *c_iter;
+	GtkTreeIter iter;
+
 	if (ec->list_item)
 		return;
 	
-	ec->list_item = gtk_tree_item_new();
-	ec->tree = gtk_tree_new();
-
-	box = gtk_hbox_new(FALSE, 1);
-	ec->pix = gtk_pixmap_new(iconblank_pm, iconblank_bm);
-	ec->label = gtk_label_new(ec->nick);
-	ec->status = gtk_label_new("");
-
-	gtk_box_pack_start(GTK_BOX(box), ec->pix, FALSE, FALSE, 1);
-	gtk_widget_show(ec->pix);
-	gtk_misc_set_alignment(GTK_MISC(ec->label), 0.0, 0.5);
-	gtk_box_pack_start(GTK_BOX(box), ec->label, TRUE, TRUE, 1);
-	gtk_widget_show(ec->label);
-	gtk_box_pack_start(GTK_BOX(box), ec->status, FALSE, FALSE, 1);
-	gtk_widget_show(ec->status);
-
-	gtk_container_add(GTK_CONTAINER(ec->list_item), box);
-	gtk_widget_show(box);
+	ec->pix = iconblank_pb;
+	
+	ec->label = g_strdup(ec->nick);
+	ec->status = g_strdup("");
 
 	ec->icon_handler = -1;
 
-	gtk_object_set_user_data(GTK_OBJECT(ec->list_item), ec);
+	for(c_iter = ec->group->members; c_iter; c_iter = l_list_next(c_iter)) {
+		struct contact *c = c_iter->data;
+		if( strcasecmp(ec->nick, c->nick) < 0 && c->list_item ) {
+			sibling = c->list_item;
+			break;
+		}
+	}
+
+	gtk_tree_store_insert_before(contact_list_store, &iter, 
+				     (GtkTreeIter *)ec->group->list_item,
+				     sibling);
+
+	gtk_tree_store_set(contact_list_store, &iter,
+			MAIN_VIEW_ICON, ec->pix,
+			MAIN_VIEW_LABEL, ec->label,
+			MAIN_VIEW_STATUS, ec->status,
+			MAIN_VIEW_ROW_DATA, ec,
+			MAIN_VIEW_ROW_TYPE, TARGET_TYPE_CONTACT,
+			MAIN_VIEW_HAS_TIP, TRUE,
+			-1);
+	ec->list_item = gtk_tree_iter_copy(&iter);
 	
 	if (!ec->group->contacts_shown) {
-		ec->group->tree = gtk_tree_new();
-		gtk_tree_item_set_subtree(GTK_TREE_ITEM(ec->group->list_item),
-			ec->group->tree);
+		
 		if(strcmp(_("Unknown"),ec->group->name) !=0 &&
 		   strcmp(_("Ignore"),ec->group->name) !=0)
-			gtk_tree_item_expand(GTK_TREE_ITEM(ec->group->list_item));
+			MAIN_VIEW_EXPAND_ROW(ec->group->list_item);
 	}
-	gtk_drag_source_set(ec->list_item,
-		GDK_BUTTON1_MASK | GDK_BUTTON2_MASK,
-                drag_types, 1,
-		GDK_ACTION_MOVE|GDK_ACTION_DEFAULT);
-	gtk_signal_connect(GTK_OBJECT(ec->list_item), "drag_begin",
-			   GTK_SIGNAL_FUNC(start_drag), ec);
-	gtk_signal_connect(GTK_OBJECT(ec->list_item), "drag_data_get",
-			   GTK_SIGNAL_FUNC(drag_data_get),
-			   ec);
 	
 	ec->group->contacts_shown++;
-	gtk_tree_insert(GTK_TREE(ec->group->tree), ec->list_item,
-		get_contact_position(ec));
-
-	gtk_tree_item_set_subtree(GTK_TREE_ITEM(ec->list_item), ec->tree);
 	if(ec->expanded)
-		gtk_tree_item_expand(GTK_TREE_ITEM(ec->list_item));
+		MAIN_VIEW_EXPAND_ROW(ec->list_item);
 	else
-		gtk_tree_item_collapse(GTK_TREE_ITEM(ec->list_item));
+		MAIN_VIEW_COLLAPSE_ROW(ec->list_item);
 
-	gtk_signal_connect(GTK_OBJECT(ec->list_item),  "button_press_event",
-				  GTK_SIGNAL_FUNC(contact_click),
-				  (struct contact*)ec );
-	gtk_signal_connect(GTK_OBJECT(ec->list_item), "expand",
-				  GTK_SIGNAL_FUNC(expand_contact), (struct contact*)ec);
-	gtk_signal_connect(GTK_OBJECT(ec->list_item), "collapse",
-				  GTK_SIGNAL_FUNC(collapse_contact), (struct contact*)ec );
-		
-	gtk_widget_show(ec->list_item);	
+}
+
+/* Refresh a contact line after it's been modified */
+void update_contact_line( struct contact * ec)
+{
+	if (!ec->list_item)
+		return;
+	
+	gtk_tree_store_set(contact_list_store, ec->list_item,
+			MAIN_VIEW_ICON, ec->pix,
+			MAIN_VIEW_LABEL, ec->label,
+			MAIN_VIEW_STATUS, ec->status,
+			MAIN_VIEW_ROW_DATA, ec,
+			MAIN_VIEW_ROW_TYPE, TARGET_TYPE_CONTACT,
+			-1);
 }
 
 /* hides a group on the buddy list */
@@ -1324,7 +1348,7 @@ void remove_group_line( grouplist * eg)
 			remove_contact_line(ec);
 	}
 		
-	gtk_container_remove(GTK_CONTAINER(contact_list), eg->list_item);
+	gtk_tree_store_remove(contact_list_store, eg->list_item);
 	eg->list_item = NULL;
 	eg->tree = NULL;
 	eg->label = NULL;
@@ -1348,7 +1372,7 @@ void remove_contact_line( struct contact * ec)
 	}
 	
 	ec->group->contacts_shown--;
-	gtk_container_remove(GTK_CONTAINER(ec->group->tree), ec->list_item);
+	gtk_tree_store_remove(GTK_TREE_STORE(contact_list_store), ec->list_item);
 	ec->list_item = NULL;
 	ec->tree = NULL;
 	ec->pix = NULL;
@@ -1368,7 +1392,9 @@ void remove_account_line( eb_account * ea)
 		return;
 	}
 
-	gtk_container_remove(GTK_CONTAINER(ea->account_contact->tree), ea->list_item);
+	if( ea->account_contact->list_item )
+		gtk_tree_store_remove(GTK_TREE_STORE(contact_list_store),
+				ea->list_item);
 	ea->list_item = NULL;
 	ea->pix = NULL;
 	ea->status = NULL;
@@ -1436,6 +1462,8 @@ void contact_update_status(struct contact * ec)
 	int width2, height2;
 	int width3, height3;
 
+	GdkPixbuf *tmp = NULL;
+
 	/* find the account who's status information should be reflected in
 	   the contact line (preferably the default protocol account, but
 	   if that one is not logged on, use another) */
@@ -1460,13 +1488,24 @@ void contact_update_status(struct contact * ec)
 
 	set_status_label(ea, TRUE);
 	
-	gtk_label_set_text(GTK_LABEL(ec->label), ec->nick);
+	ec->label = ec->nick;
 
 	/* set the icon if there isn't another timeout about to alter the icon */
 	if (ec->icon_handler == -1) {
-		gtkut_set_pixmap(ea->ela, 
+		tmp = GDK_PIXBUF(ec->pix);
+
+		gtkut_set_pixbuf(ea->ela, 
 			RUN_SERVICE(ea)->get_status_pixmap(ea), 
-			&ec->pix);
+			&tmp);
+
+		ec->pix = tmp;
+
+		gtk_tree_store_set(contact_list_store, ec->list_item,
+				MAIN_VIEW_ICON, ec->pix,
+				MAIN_VIEW_LABEL, ec->label,
+				MAIN_VIEW_STATUS, ec->status,
+				MAIN_VIEW_STATUS_TIP, ea->tiptext,
+				-1);
 	}
 
 	width = contact_list->allocation.width;
@@ -1486,7 +1525,7 @@ void contact_update_status(struct contact * ec)
 		height2 = contact_window->allocation.height;
 
 		if(width+width3> width2)
-			gtk_widget_set_usize(contact_window,width+width3+2,height2);
+			gtk_widget_set_size_request(contact_window,width+width3+5,height2);
 	}
 		
 }
@@ -1508,6 +1547,7 @@ void buddy_update_status_and_log(eb_account * ea)
 void buddy_update_status(eb_account * ea)
 {
 	char *c = NULL, *tmp = NULL;
+	GdkPixbuf *tmpbuf = NULL;
 	if (!ea || !ea->list_item)
 		return;
 	
@@ -1526,10 +1566,21 @@ void buddy_update_status(eb_account * ea)
 	
 	/* update the icon if another timeout isn't about to change it */
 	if (ea->icon_handler == -1) {
-		if (RUN_SERVICE(ea) && RUN_SERVICE(ea)->get_status_pixmap && ea->pix)
-			gtkut_set_pixmap(ea->ela, 
+		tmpbuf = GDK_PIXBUF(ea->pix);
+		if (RUN_SERVICE(ea) && RUN_SERVICE(ea)->get_status_pixmap && ea->pix) {
+			gtkut_set_pixbuf(ea->ela, 
 				RUN_SERVICE(ea)->get_status_pixmap(ea), 
-				&ea->pix);
+				&tmpbuf);
+
+			ea->pix = tmpbuf;
+
+			gtk_tree_store_set(contact_list_store, ea->list_item,
+					MAIN_VIEW_ICON, ea->pix,
+					MAIN_VIEW_LABEL, ea->handle,
+					MAIN_VIEW_STATUS, ea->status,
+					MAIN_VIEW_STATUS_TIP, ea->tiptext,
+					-1);
+		}
 	}
 
 	/* since the contact's status info  might be a copy of this
@@ -1598,8 +1649,8 @@ static void contact_login(struct contact * ec)
 	ec->group->contacts_online++;
 
 	/* display the "open door" icon */
-	gtk_pixmap_set(GTK_PIXMAP(ec->pix), iconlogin_pm, iconlogin_bm);
-	
+	ec->pix = iconlogin_pb;
+
 	/* remove any other timeouts (if a user just logged out immediately before) */
 	if (ec->icon_handler != -1)
 		eb_timeout_remove(ec->icon_handler);
@@ -1622,6 +1673,11 @@ static void contact_login(struct contact * ec)
 	g_snprintf(buff, 1024, _("%s is now Online"), ec->nick);
 	update_window_title(ec);
 	update_status_message(buff);
+	
+	gtk_tree_store_set(contact_list_store, ec->list_item,
+			MAIN_VIEW_ICON, ec->pix,
+			MAIN_VIEW_STATUS, ec->status,
+			-1);
 }
 
 /* function called when a contact logs off */
@@ -1629,7 +1685,7 @@ static void contact_logoff(struct contact * ec)
 {
 	char buff[1024];
 	/* display the "closed door" icon */
-	gtk_pixmap_set(GTK_PIXMAP(ec->pix), iconlogoff_pm, iconlogoff_bm);
+	ec->pix = iconlogoff_pb;
 	ec->group->contacts_online--;
 	
 	/* remove any other timeouts (if the user just logged in) */
@@ -1656,6 +1712,10 @@ static void contact_logoff(struct contact * ec)
 	g_snprintf(buff, 1024, _("%s is now Offline"), ec->nick);
 	update_window_title(ec);
 	update_status_message(buff); 
+	gtk_tree_store_set(contact_list_store, ec->list_item,
+			MAIN_VIEW_ICON, ec->pix,
+			MAIN_VIEW_STATUS, ec->status,
+			-1);
 }
 
 /* timeout called every 30 seconds for each online account to update
@@ -1697,7 +1757,7 @@ void buddy_login(eb_account * ea)
 	add_account_line(ea);
 	
 	/* sets the "open door" icon */
-	gtk_pixmap_set(GTK_PIXMAP(ea->pix), iconlogin_pm, iconlogin_bm);
+	ea->pix = iconlogin_pb;
 
 	/* set the timeout to remove the "open door" icon */
 	if (ea->icon_handler != -1)
@@ -1711,6 +1771,11 @@ void buddy_login(eb_account * ea)
 		contact_login(ea->account_contact);
 		
 	buddy_update_status(ea);
+
+	gtk_tree_store_set(contact_list_store, ea->list_item,
+			MAIN_VIEW_ICON, ea->pix,
+			MAIN_VIEW_STATUS, ea->status,
+			-1);
 	
 	/* make sure the status gets updated often */
 	ea->status_handler = eb_timeout_add(30000,
@@ -1736,7 +1801,7 @@ void buddy_logoff(eb_account * ea)
 		return;
 
 	/* sets the "closed door" icon */
-	gtk_pixmap_set(GTK_PIXMAP(ea->pix), iconlogoff_pm, iconlogoff_bm);
+	ea->pix = iconlogoff_pb;
 
 	/* removes any previously set timeouts for the account */ 
 	if (ea->icon_handler != -1)
@@ -1750,6 +1815,11 @@ void buddy_logoff(eb_account * ea)
 	   we must log off the contact also */
 	if (ea->account_contact->online == 0)
 		contact_logoff(ea->account_contact);
+	
+	gtk_tree_store_set(contact_list_store, ea->list_item,
+			MAIN_VIEW_ICON, ea->pix,
+			MAIN_VIEW_STATUS, ea->status,
+			-1);
 
 	/* timeout to remove the "close door" icon */
 	ea->icon_handler = eb_timeout_add(10000, (GtkFunction)hide_account,
@@ -1763,33 +1833,210 @@ void update_contact_window_length ()
   h = iGetLocalPref("length_contact_window");
   w = iGetLocalPref("width_contact_window");
   if (h == 0) 
-	  h = 256;
+	  h = 300;
   if (w == 0)
 	  w = 150;
   eb_debug(DBG_CORE, "statuswindow size: %dx%d\n",h,w);
-  gtk_widget_set_usize(contact_window, w, h);
+  gtk_window_set_default_size(GTK_WINDOW(statuswindow), w, h);
 }
+
+/* DND Callbacks and supporting functions */
+
+struct contact *drag_data = NULL;
+int drag_data_type = -1;
+
+int get_target_type(GtkTreeView *tree_view, GtkTreePath *path)
+{
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
+	GtkTreeIter iter;
+	int target_type;
+
+	gtk_tree_model_get_iter(model, &iter, path);
+	gtk_tree_model_get(model, &iter,
+			MAIN_VIEW_ROW_TYPE, &target_type, -1);
+
+	return target_type;
+}
+
+
+void drag_begin_callback
+	(GtkWidget *widget, GdkDragContext *c, gpointer data)
+{
+	GtkTreePath *path;
+	GdkPixmap *pix;
+	GdkPixbuf *buf;
+	GtkTreeIter iter;
+	
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+
+	gtk_tree_selection_get_selected(selection, &model, &iter);
+	path = gtk_tree_model_get_path(model, &iter);
+
+	pix = gtk_tree_view_create_row_drag_icon(GTK_TREE_VIEW(widget), path);
+	buf = gdk_pixbuf_get_from_drawable(NULL, pix, NULL, 0,0,0,0,-1,-1);
+	gtk_drag_source_set_icon_pixbuf(widget, buf);
+
+	gtk_tree_model_get(model, &iter,
+			MAIN_VIEW_ROW_DATA, &drag_data,
+			MAIN_VIEW_ROW_TYPE, &drag_data_type,
+			-1);
+}
+
+void drag_motion_callback
+	(GtkWidget *widget, GdkDragContext *c, guint x, guint y, guint time, gpointer data)
+{
+	/* TODO
+	 * 1) Update the pixbuf as the drag is moved around the tree
+	 */
+
+	GtkTreePath *path;
+	GdkRectangle rectangle;
+	int wx, wy;
+	GtkTreeSelection *selection;
+	gboolean valid;
+
+	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(widget), &rectangle);
+
+	gtk_tree_view_widget_to_tree_coords(GTK_TREE_VIEW(widget), x, y, &wx, &wy);
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+	valid = gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
+			&path, NULL, NULL, NULL);
+
+	/*
+	 * This is probably a bit crude. Any better approach to this?
+	 */
+	if( wy<rectangle.y+10 ) {
+		gtk_tree_view_scroll_to_point(GTK_TREE_VIEW(widget), wx-10, wy-10);
+	}
+	else if( wy>rectangle.y+rectangle.height-10 ) {
+		gtk_tree_view_scroll_to_point(GTK_TREE_VIEW(widget), wx+10, wy+10);
+	}
+
+	if( valid && get_target_type(GTK_TREE_VIEW(widget), path) == TARGET_TYPE_GROUP )
+	{
+		gtk_tree_selection_select_path(selection, path);
+	}
+	else {
+		gtk_tree_selection_unselect_all(selection);
+	}
+
+	gtk_tree_path_free(path);
+}
+
+
+gboolean drag_drop_callback
+	(GtkWidget *widget, GdkDragContext *c, guint x, guint y, guint time, gpointer data)
+{
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+
+	grouplist *gl;
+	struct contact *ec = drag_data;
+	int target;
+
+	if( !gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y, &path, NULL, NULL, NULL) ) {
+		gtk_drag_finish(c, FALSE, FALSE, time);
+		return FALSE;
+	}
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+	gtk_tree_model_get_iter(model, &iter, path);
+
+	gtk_tree_model_get(model, &iter, 
+			MAIN_VIEW_ROW_DATA, &gl,
+			MAIN_VIEW_ROW_TYPE, &target,
+			-1);
+	
+	if(gl == NULL || ec == NULL ||
+			target != TARGET_TYPE_GROUP ||
+			drag_data_type != TARGET_TYPE_CONTACT)
+	{
+		gtk_drag_finish(c, FALSE, FALSE, time);
+		return FALSE;
+	}
+	move_contact(gl->name, ec);
+	update_contact_list ();
+	write_contact_list();
+
+	drag_data = NULL;
+	
+	gtk_drag_finish(c, TRUE, TRUE, time);
+	gtk_tree_path_free(path);
+	return TRUE;
+}
+
+/* End DND Callbacks and supporting functions */
 
 /* Generates the contact list tree (should only be called once) */
 static GtkWidget* MakeContactList()
 {
 	LList * l1;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
 	
 	contact_window = gtk_scrolled_window_new(NULL, NULL);
-	contact_list = gtk_tree_new();
+	contact_list_store = gtk_tree_store_new(
+				MAIN_VIEW_COL_COUNT,
+				GDK_TYPE_PIXBUF,
+				G_TYPE_STRING,
+				G_TYPE_STRING,
+				G_TYPE_STRING,
+				G_TYPE_POINTER,
+				G_TYPE_INT,
+				G_TYPE_BOOLEAN );
+
+	contact_list = gtk_tree_view_new_with_model( GTK_TREE_MODEL(contact_list_store) );
+
+	renderer = gtk_cell_renderer_pixbuf_new();
+	column = gtk_tree_view_column_new_with_attributes(NULL, renderer,
+			"pixbuf", MAIN_VIEW_ICON,
+			NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(contact_list), column);
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(NULL, renderer,
+			"text", MAIN_VIEW_LABEL,
+			NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(contact_list), column);
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(NULL, renderer,
+			"text", MAIN_VIEW_STATUS,
+			NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(contact_list), column);
+
+	gtk_drag_source_set(contact_list,
+			GDK_BUTTON1_MASK | GDK_BUTTON2_MASK,
+			drag_types, 1,
+			GDK_ACTION_DEFAULT|GDK_ACTION_MOVE);
+	gtk_drag_dest_set(contact_list, GTK_DEST_DEFAULT_ALL,
+			  drag_types, 1,
+			  GDK_ACTION_DEFAULT|GDK_ACTION_MOVE);
+
+	g_signal_connect(contact_list, "row-activated", G_CALLBACK(double_click), NULL );
+	g_signal_connect(contact_list, "button-press-event", G_CALLBACK(right_click), NULL );
+	g_signal_connect(contact_list, "row-expanded", G_CALLBACK(expand_callback), NULL);
+	g_signal_connect(contact_list, "row-collapsed", G_CALLBACK(collapse_callback), NULL );
+	g_signal_connect(contact_list, "drag-begin", G_CALLBACK(drag_begin_callback), NULL);
+	g_signal_connect(contact_list, "drag-drop", G_CALLBACK(drag_drop_callback), NULL);
+	g_signal_connect(contact_list, "drag-motion", G_CALLBACK(drag_motion_callback), NULL);
+
+	set_tooltips_active(iGetLocalPref("do_show_tooltips"));
 
 	for (l1 = groups; l1; l1=l1->next) {
 		grouplist * grp = l1->data;
 		add_group_line(grp);
 	}
 	
+	g_object_set(contact_list, "headers-visible", FALSE, NULL);
 	gtk_widget_show(contact_list);
-	gtk_scrolled_window_add_with_viewport
-	  (GTK_SCROLLED_WINDOW(contact_window),
-	   contact_list);
+	gtk_container_add(GTK_CONTAINER(contact_window), contact_list);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contact_window),
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	update_contact_window_length ();
+
 	return (contact_window);
 }
 
@@ -1815,7 +2062,7 @@ static GtkWidget* MakeStatusMenu(eb_local_account * ela)
 	  status_label = eb_services[ela->service_id].sc->get_states();
 
 	  status_menu_item = gtk_tearoff_menu_item_new();
-	  gtk_menu_append(GTK_MENU(status_menu), status_menu_item);
+	  gtk_menu_shell_append(GTK_MENU_SHELL(status_menu), status_menu_item);
 	  gtk_widget_show(status_menu_item);
 
 	  for(temp_list = status_label, x = 0; temp_list; x++, temp_list=temp_list->next) {
@@ -1825,7 +2072,7 @@ static GtkWidget* MakeStatusMenu(eb_local_account * ela)
 		stats->status= x;
 		
 		status_menu_item = gtk_radio_menu_item_new(group);
-		group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(status_menu_item));
+		group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(status_menu_item));
 		widgets = l_list_append(widgets, status_menu_item);
 		hbox = gtk_hbox_new(FALSE, 3);
 		label = gtk_label_new((gchar*)temp_list->data);
@@ -1835,11 +2082,11 @@ static GtkWidget* MakeStatusMenu(eb_local_account * ela)
 		gtk_widget_show(hbox);
 		gtk_widget_show(status_menu_item);
 		gtk_container_add(GTK_CONTAINER(status_menu_item), hbox);
-		gtk_menu_append(GTK_MENU(status_menu), status_menu_item);
-		gtk_signal_connect(GTK_OBJECT(status_menu_item), "activate", 
-				eb_status, (gpointer) stats );
-		gtk_signal_connect(GTK_OBJECT(status_menu_item), "remove", 
-				eb_status_remove, (gpointer) stats );
+		gtk_menu_shell_append(GTK_MENU_SHELL(status_menu), status_menu_item);
+		g_signal_connect(status_menu_item, "activate",
+				G_CALLBACK(eb_status), (gpointer) stats );
+		g_signal_connect(status_menu_item, "remove",
+				G_CALLBACK(eb_status_remove), (gpointer) stats );
 
 	}
 
@@ -1904,7 +2151,7 @@ void eb_profile_window(void * v_profile_submenuitem)
 	gboolean added = FALSE;
 
 	label = gtk_tearoff_menu_item_new();
-	gtk_menu_append(GTK_MENU(profile_menu), label);
+	gtk_menu_shell_append(GTK_MENU_SHELL(profile_menu), label);
 	gtk_widget_show(label);
 
 	md = GetPref(EB_PROFILE_MENU);
@@ -1912,9 +2159,9 @@ void eb_profile_window(void * v_profile_submenuitem)
 		for(list = md->menu_items; list; list  = list->next ) {
 			mid=(menu_item_data *)list->data;
 			label = gtk_menu_item_new_with_label(mid->label);
-			gtk_menu_append(GTK_MENU(profile_menu), label);
-			gtk_signal_connect(GTK_OBJECT(label), "activate",
-          			eb_profile_function, mid);
+			gtk_menu_shell_append(GTK_MENU_SHELL(profile_menu), label);
+			g_signal_connect(label, "activate",
+					G_CALLBACK(eb_profile_function), mid);
 			gtk_widget_show(label);  
 			added = TRUE;
 		}
@@ -1936,7 +2183,7 @@ void eb_smiley_window(void *v_smiley_submenuitem)
 	menu_data *md=NULL;
 
 	label = gtk_tearoff_menu_item_new();
-	gtk_menu_append(GTK_MENU(smiley_menu), label);
+	gtk_menu_shell_append(GTK_MENU_SHELL(smiley_menu), label);
 	gtk_widget_show(label);
 
 
@@ -1951,17 +2198,17 @@ void eb_smiley_window(void *v_smiley_submenuitem)
 			items[i].mid=(menu_item_data *)list->data;
 			eb_debug(DBG_CORE, "adding smiley item: %s\n", items[i].mid->label);
 			items[i].label = gtk_radio_menu_item_new_with_label(group, items[i].mid->label);
-			group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(items[i].label));
+			group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(items[i].label));
 			if(md->active == items[i].mid)
 				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(items[i].label), TRUE);
 			else
 				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(items[i].label), FALSE);
-			gtk_menu_append(GTK_MENU(smiley_menu), items[i].label);
+			gtk_menu_shell_append(GTK_MENU_SHELL(smiley_menu), items[i].label);
 			gtk_widget_show(items[i].label);
 		}
 		for(--i; i>=0; i--)
-			gtk_signal_connect(GTK_OBJECT(items[i].label), "activate",
-					eb_smiley_function, items[i].mid);
+			g_signal_connect(items[i].label, "activate",
+					G_CALLBACK(eb_smiley_function), items[i].mid);
 		free(items);
 	}
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(smiley_submenuitem), smiley_menu);
@@ -1979,7 +2226,7 @@ void eb_import_window(void *v_import_submenuitem)
 	menu_item_data *mid=NULL;
 
 	label = gtk_tearoff_menu_item_new();
-	gtk_menu_append(GTK_MENU(import_menu), label);
+	gtk_menu_shell_append(GTK_MENU_SHELL(import_menu), label);
 	gtk_widget_show(label);
 
 	md = GetPref(EB_IMPORT_MENU);
@@ -1988,9 +2235,9 @@ void eb_import_window(void *v_import_submenuitem)
 			mid=(menu_item_data *)list->data;
 			eb_debug(DBG_CORE, "adding import item: %s\n", mid->label);
 			label = gtk_menu_item_new_with_label(mid->label);
-			gtk_menu_append(GTK_MENU(import_menu), label);
-			gtk_signal_connect(GTK_OBJECT(label), "activate",
-					eb_import_function, mid);
+			gtk_menu_shell_append(GTK_MENU_SHELL(import_menu), label);
+			g_signal_connect(label, "activate",
+					G_CALLBACK(eb_import_function), mid);
 			gtk_widget_show(label);  
 		}
 	}
@@ -2007,12 +2254,12 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 	LList *list=NULL;
 
 	label = gtk_tearoff_menu_item_new();
-	gtk_menu_append(GTK_MENU(account_menu), label); 
+	gtk_menu_shell_append(GTK_MENU_SHELL(account_menu), label); 
 	gtk_widget_show(label);
 	for(list = accounts; list; list  = list->next ) {
 		eb_local_account *ela = (eb_local_account *)list->data;
 		label = MakeStatusMenu(ela);
-		gtk_menu_append(GTK_MENU(account_menu), label);
+		gtk_menu_shell_append(GTK_MENU_SHELL(account_menu), label);
 		if (!ela->status_menu)
 			gtk_widget_set_sensitive(label, FALSE);
 		else
@@ -2024,67 +2271,67 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 	gtk_widget_show(set_status_submenuitem);
 }
 
-static GtkItemFactoryEntry menu_items[] = {
-	{ N_("/_Chat"),		NULL,       NULL, 0, "<Branch>" },
-	{ N_("/Chat/Set _status"),	
-				NULL, 	    NULL, 0, NULL },
-	{ N_("/Chat/Sign o_n all"),	
-				"<control>A", eb_sign_on_all, 0, NULL },
-	{ N_("/Chat/Sign o_ff all"),	
-				"<control>F", eb_sign_off_all, 0, NULL },
-	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
-	{ N_("/Chat/New _group chat..."),
-  				NULL, launch_group_chat, 0, NULL },
-	{ N_("/Chat/Set as _away..."),	
-				NULL, show_away_choicewindow, 0, NULL },
-	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
-	{ N_("/Chat/_Smileys"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/Chat/---"),	NULL, NULL, 0, "<Separator>" },
-	{ N_("/Chat/_Quit"),	"<control>Q", delete_event, 0, NULL },
+GtkUIManager *ui_manager;
 
-	{ N_("/_Edit"),		NULL,       NULL, 0, "<Branch>" },
-	{ N_("/Edit/_Preferences..."),
-  				NULL, build_prefs_callback, 0, NULL },
-	{ N_("/Edit/Add or _delete accounts..."),
-  				NULL, eb_add_accounts, 0, NULL },
-	{ N_("/Edit/Edit _accounts..."),
-  				NULL, eb_edit_accounts, 0, NULL },
-	{ N_("/Edit/---"),	NULL, NULL, 0, "<Separator>" },
-	{ N_("/Edit/Add a _contact account..."),		
-  				NULL, add_callback, 0, NULL },
-	{ N_("/Edit/Add a _group..."),
-  				NULL, add_group_callback, 0, NULL },
-	{ N_("/Edit/---"),	NULL,         NULL, 0, "<Separator>" },
-	{ N_("/Edit/_Import"),	NULL, 	    NULL, 0, NULL },
-	{ N_("/Edit/Set profi_le"),	NULL, 	    NULL, 0, NULL },
-	
-	{ N_("/_Help"),		NULL, NULL, 0, "<Branch>" },
+static char *main_menu_xml;
+
+static GtkActionEntry action_items[] = {
+	/* All the menus */
+	{"Chat",	NULL,	"_Chat"		},
+	{"Set status",	NULL,	"Se_t status"	},
+	{"Smileys",	NULL,	"_Smileys"	},
+	{"Edit",	NULL,	"_Edit"		},
+	{"Import",	NULL,	"_Import"	},
+	{"Set profile",	NULL,	"Set _profile"	},
+	{"Help",	NULL,	"_Help"		},
+	/* All the submenus */
+	{"SignonAll", NULL, N_("Sign o_n all"), "<control>A", N_("Sign onto all accounts"),
+		G_CALLBACK(eb_sign_on_all)},
+	{"SignoffAll", NULL, N_("Sign o_ff all"), "<control>F", N_("Sign off all accounts"),
+		G_CALLBACK(eb_sign_off_all)},
+	{"GrpChat", NULL, N_("New group chat"), NULL, N_("Start a chat room for a group chat"),
+		G_CALLBACK(launch_group_chat)},
+	{"SetAway", NULL, N_("Set as _away"), NULL, N_("Set a Custom \"Away\" status"),
+		G_CALLBACK(show_away_choicewindow)},
+	{"Quit", NULL, N_("_Quit"),	"<control>Q", N_("Close Ayttm"),
+		G_CALLBACK(delete_event)},
+	{"Prefs", NULL, N_("_Preferences"), NULL, N_("Customize your Ayttm"),
+		G_CALLBACK(build_prefs_callback)},
+	{"AddDelAccounts", NULL, N_("Add or _delete accounts"), NULL,
+		N_("Add or Delete chat accounts"),
+		G_CALLBACK(eb_add_accounts)},
+	{"EditAccounts", NULL, N_("Edit _accounts"), NULL, N_("Edit your account details"),
+		G_CALLBACK(eb_edit_accounts)},
+	{"AddContactAccount", NULL, N_("Add a _contact account"), NULL,
+		N_("Add an account for a contact"),
+		G_CALLBACK(add_callback)},
+	{"AddGroup", NULL, N_("Add a _group"), NULL, N_("Add a contact group"),
+		G_CALLBACK(add_group_callback)},
 #ifndef __MINGW32__
-	{ N_("/Help/_Web site..."),	NULL, show_website, 0, NULL },
-	{ N_("/Help/_Manual..."),	NULL, show_manual, 0, NULL },
-	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
+	{"Website", NULL, N_("_Web site"), NULL, NULL,
+		G_CALLBACK(show_website)},
+	{"Manual", NULL, N_("_Manual"), NULL, NULL,
+		G_CALLBACK(show_manual)},
 #endif
-	{ N_("/Help/_About Ayttm..."),NULL, ay_show_about, 0, NULL },
-	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Help/Check for new _release"),NULL, ay_check_release, 0, GINT_TO_POINTER(0) }
+	{"About", NULL, N_("_About Ayttm"), NULL, NULL,
+		G_CALLBACK(ay_show_about)},
+	{"CheckRelease", NULL, N_("Check for new _release"), NULL, NULL,
+		G_CALLBACK(ay_check_release)}
 #if ADD_DEBUG_TO_MENU
 	,
-	{ N_("/Help/---"),		NULL, NULL, 0, "<Separator>" },
-	{ N_("/Help/Dump structures"),NULL, ay_dump_structures_cb, 0, NULL }
+	{"DebugMenu", NULL, N_("Dump structures"), NULL, NULL,
+		G_CALLBACK(ay_dump_structures_cb)}
 #endif	
 };
 
-static GtkItemFactory *main_menu_factory = NULL;
-
-static void menu_set_sensitive(GtkItemFactory *ifactory, const gchar *path,
-			gboolean sensitive)
+static void menu_set_sensitive(GtkUIManager *ui, const gchar *path, gboolean sensitive)
 {
 	GtkWidget *widget;
 
-	if (ifactory == NULL)
+	if (ui == NULL)
 		return;
 
-	widget = gtk_item_factory_get_item(ifactory, path);
+	widget = gtk_ui_manager_get_widget(ui, path);
 	if(widget == NULL) {
 		eb_debug(DBG_CORE, "unknown menu entry %s\n", path);
 		return;
@@ -2097,12 +2344,12 @@ void set_menu_sensitivity(void)
 {
 	int online = connected_local_accounts();
 	
-	menu_set_sensitive(main_menu_factory, N_("/Chat/Set status"), l_list_length(accounts));
-	menu_set_sensitive(main_menu_factory, N_("/Chat/New group chat..."), online);
-	menu_set_sensitive(main_menu_factory, N_("/Chat/Set as away..."), online);
-	menu_set_sensitive(main_menu_factory, N_("/Chat/Sign off all"), online);
-	menu_set_sensitive(main_menu_factory, N_("/Chat/Sign on all"),
-				(online != l_list_length(accounts)));
+	menu_set_sensitive(ui_manager, "ui/menubar/Chat/Set status", l_list_length(accounts));
+	menu_set_sensitive(ui_manager, "ui/menubar/Chat/GrpChat", online);
+	menu_set_sensitive(ui_manager, "ui/menubar/Chat/SetAway", online);
+	menu_set_sensitive(ui_manager, "ui/menubar/Chat/SignoffAll", online);
+	menu_set_sensitive(ui_manager, "ui/menubar/Chat/SignonAll",
+			(online != l_list_length(accounts)));
 	
 }
 
@@ -2115,28 +2362,84 @@ static gchar *menu_translate(const gchar *path, gpointer data)
 	return retval;
 }
 
-static void get_main_menu( GtkWidget  *window,
-                    GtkWidget **menubar )
+static void menu_add_widget (GtkUIManager *ui, GtkWidget *widget, GtkContainer *container)
 {
-	GtkItemFactory *item_factory;
+	gtk_container_add(GTK_CONTAINER(container), widget );
+	gtk_widget_show(widget);
+}
+
+static void get_main_menu( GtkWidget  *window,
+                    GtkWidget **menubar, GtkWidget *menubox )
+{
+	GError *error = NULL;
+	guint n_action_items;
+	GtkActionGroup *action_group;
 	GtkAccelGroup *accel_group;
-	gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
 
-	accel_group = gtk_accel_group_new ();
+	main_menu_xml=g_strdup("");
+	main_menu_xml = g_strconcat(
+		"<ui>\
+			<menubar>\
+				<menu name=\"Chat\" action=\"Chat\">\
+					<menu name=\"Set status\" action=\"Set status\"/>\
+					<menuitem action=\"SignonAll\"/>\
+					<menuitem action=\"SignoffAll\"/>\
+					<separator/>\
+					<menuitem action=\"GrpChat\"/>\
+					<menuitem action=\"SetAway\"/>\
+					<separator/>\
+					<menu name=\"Smileys\" action=\"Smileys\"/>\
+					<separator/>\
+					<menuitem action=\"Quit\"/>\
+				</menu>\
+				<menu name=\"Edit\" action=\"Edit\">\
+					<menuitem action=\"Prefs\"/>\
+					<menuitem action=\"AddDelAccounts\"/>\
+					<menuitem action=\"EditAccounts\"/>\
+					<separator/>\
+					<menuitem action=\"AddContactAccount\"/>\
+					<menuitem action=\"AddGroup\"/>\
+					<separator/>\
+					<menu name=\"Import\" action=\"Import\"/>\
+					<menu name=\"Set profile\" action=\"Set profile\"/>\
+				</menu>\
+				<menu name=\"Help\" action=\"Help\">",
+#ifndef __MINGW32__
+					"<menuitem action=\"Website\"/>\
+					<menuitem action=\"Manual\"/>\
+					<separator/>",
+#endif
+					"<menuitem name=\"About\" action=\"About\"/>\
+					<separator/>\
+					<menuitem action=\"CheckRelease\"/>",
+#if ADD_DEBUG_TO_MENU
+					"<separator/>\
+					<menuitem action=\"DebugMenu\"/>",
+#endif
+				"</menu>\
+			</menubar>\
+		</ui>",
+		NULL);
 
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", 
-                        	       accel_group);
-	main_menu_factory = item_factory;
-	gtk_item_factory_set_translate_func(item_factory, menu_translate,
-					    NULL, NULL);
+	n_action_items = G_N_ELEMENTS (action_items);
 
-	gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
+	action_group = gtk_action_group_new("MainMenuActions");
+	gtk_action_group_add_actions(action_group, action_items, n_action_items, NULL );
+	gtk_action_group_set_translate_func(action_group, menu_translate, NULL, NULL);
+	ui_manager = gtk_ui_manager_new();
+	gtk_ui_manager_insert_action_group(ui_manager, action_group, 0);
+	gtk_ui_manager_add_ui_from_string(ui_manager, main_menu_xml, -1, &error);
+	if(error) {
+		eb_debug(DBG_CORE, "Failed to build main menu: %s\n", error->message);
+		exit(1);
+	}
 
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
-
-	if (menubar)
-		/* Finally, return the actual menu bar created by the item factory. */ 
-		*menubar = gtk_item_factory_get_widget (item_factory, "<main>");
+	g_signal_connect(ui_manager, "add-widget", G_CALLBACK(menu_add_widget), menubox);
+	*menubar = gtk_ui_manager_get_widget(ui_manager, "ui/menubar");
+	if( (accel_group=gtk_ui_manager_get_accel_group(ui_manager)) != NULL )
+		gtk_window_add_accel_group(GTK_WINDOW(window), accel_group);
+	else
+		eb_debug(DBG_CORE, "WARNING: No Accel Group returned by UIManager\n");
 }
 
 void ay_set_submenus(void)
@@ -2144,22 +2447,23 @@ void ay_set_submenus(void)
 	/* fill in branches */
 	GtkWidget *submenuitem;
 
-	if (!main_menu_factory)
+	if (!ui_manager)
 		return; /* not a big problem, it's just too soon */
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Edit/Import");
+	submenuitem = gtk_ui_manager_get_widget(ui_manager, "ui/menubar/Edit/Import");
+
 	eb_import_window(submenuitem);
 	SetPref("widget::import_submenuitem", submenuitem);
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Chat/Smileys");
+	submenuitem = gtk_ui_manager_get_widget(ui_manager, "ui/menubar/Chat/Smileys");
 	eb_smiley_window(submenuitem);
 	SetPref("widget::smiley_submenuitem", submenuitem);
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Edit/Set profile");
+	submenuitem = gtk_ui_manager_get_widget(ui_manager, "ui/menubar/Edit/Set profile");
 	eb_profile_window(submenuitem);
 	SetPref("widget::profile_submenuitem", submenuitem);
 
-	submenuitem = gtk_item_factory_get_widget(main_menu_factory, "/Chat/Set status");
+	submenuitem = gtk_ui_manager_get_widget(ui_manager, "ui/menubar/Chat/Set status");
 	eb_set_status_window(submenuitem);
 	SetPref("widget::set_status_submenuitem", submenuitem);
 }
@@ -2173,17 +2477,15 @@ void eb_status_window()
 	GtkWidget *menu;
 	GtkWidget *hbox;
 	GtkWidget *radioonline, *radiocontact, *radioaccount;
-	GtkAccelGroup *accel = NULL;
-	char * userrc = NULL;
-	int win_x, win_y, win_w, win_h;
+//	char * userrc = NULL;
+	int win_x, win_y;
+	unsigned int win_w, win_h;
 	int flags;
 
 	statuswindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	accel = gtk_accel_group_new();
-	gtk_window_add_accel_group( GTK_WINDOW(statuswindow),accel );
 	/* The next line allows you to make the window smaller than the orig. size */
-	gtk_window_set_policy(GTK_WINDOW(statuswindow), TRUE, TRUE, FALSE);
-	gtk_window_set_wmclass(GTK_WINDOW(statuswindow), "main_window", "Ayttm");
+	gtk_window_set_resizable(GTK_WINDOW(statuswindow), TRUE);
+	gtk_window_set_role(GTK_WINDOW(statuswindow), "ayttm_main_window");
 
 	status_show = iGetLocalPref("status_show_level");
 
@@ -2194,15 +2496,14 @@ void eb_status_window()
 	gtk_handle_box_set_snap_edge(GTK_HANDLE_BOX(menubox), GTK_POS_LEFT);
 	gtk_handle_box_set_shadow_type(GTK_HANDLE_BOX(menubox), GTK_SHADOW_NONE);
 
-	userrc = g_strconcat(config_dir, G_DIR_SEPARATOR_S, "menurc", NULL);
-	gtk_item_factory_parse_rc(userrc);
-	g_free(userrc);
+//	userrc = g_strconcat(config_dir, G_DIR_SEPARATOR_S, "menurc", NULL);
+//	gtk_item_factory_parse_rc(userrc);
+//	g_free(userrc);
 
-	get_main_menu(statuswindow, &menu);
+	get_main_menu(statuswindow, &menu, menubox);
 	
 	ay_set_submenus();
 
-	gtk_container_add(GTK_CONTAINER(menubox), menu );
 	gtk_widget_show(menu);
 	gtk_box_pack_start(GTK_BOX(statusbox), menubox, FALSE, FALSE, 0 );
 	gtk_widget_show(menubox);
@@ -2216,25 +2517,23 @@ void eb_status_window()
 
 	label = gtk_radio_button_new_with_label (NULL, _("Online"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 1);
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(label),
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(label),
 			status_show==2);
 	gtk_widget_show(label);
 	radioonline = label;
 
-	label = gtk_radio_button_new_with_label
-	  (gtk_radio_button_group(GTK_RADIO_BUTTON(label)),
-	   _("Contacts"));
+	label = gtk_radio_button_new_with_label_from_widget
+		(GTK_RADIO_BUTTON(label), _("Contacts"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 1);
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(label),
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(label),
 			status_show==1);
 	gtk_widget_show(label);
 	radiocontact = label;
 
-	label = gtk_radio_button_new_with_label
-	  (gtk_radio_button_group(GTK_RADIO_BUTTON(label)),
-	   _("Accounts"));
+	label = gtk_radio_button_new_with_label_from_widget
+		(GTK_RADIO_BUTTON(label), _("Accounts"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 1);
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(label),
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(label),
 			status_show==0);
 	gtk_widget_show(label);
 	radioaccount = label;
@@ -2258,23 +2557,26 @@ void eb_status_window()
 	hbox = gtk_handle_box_new();
 	gtk_handle_box_set_handle_position(GTK_HANDLE_BOX(hbox), GTK_POS_LEFT);
 	gtk_handle_box_set_snap_edge(GTK_HANDLE_BOX(hbox), GTK_POS_LEFT);
-	status_message = gtk_label_new(_("Welcome To Ayttm"));
+
+	status_message = gtk_tool_button_new(NULL, _("Welcome To Ayttm"));
 	
-	status_bar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(status_bar), GTK_RELIEF_NONE);
-	gtk_container_set_border_width(GTK_CONTAINER(status_bar), 0);
-	gtk_toolbar_set_space_size(GTK_TOOLBAR(status_bar), 1);
+	status_bar = gtk_toolbar_new ();
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(status_bar), GTK_ORIENTATION_HORIZONTAL);
+	gtk_toolbar_set_style(GTK_TOOLBAR(status_bar), GTK_TOOLBAR_TEXT);
+	gtk_toolbar_set_show_arrow(GTK_TOOLBAR(status_bar), FALSE);
 	gtk_widget_show(status_bar);
-	gtk_misc_set_alignment(GTK_MISC(status_message), 0.0, 0.5);
-	gtk_widget_show(status_message);
+	gtk_widget_show(GTK_WIDGET(status_message));
 	gtk_container_add(GTK_CONTAINER(hbox), status_bar);
 	gtk_widget_show(hbox);
-	gtk_widget_set_usize(status_message, status_bar->allocation.width -2, -1);
+
+	gtk_widget_set_size_request(GTK_WIDGET(status_message), 
+			((status_bar->allocation.width - 10>= -1)?status_bar->allocation.width - 10:-1),
+			-1);
 	
 	create_log_window();
 	
-	gtk_toolbar_append_item(GTK_TOOLBAR(status_bar),NULL,NULL,NULL,status_message,
-			GTK_SIGNAL_FUNC(status_show_messages),NULL); 
+	gtk_toolbar_insert(GTK_TOOLBAR(status_bar),status_message, -1);
+	g_signal_connect (status_message, "clicked", G_CALLBACK (status_show_messages), NULL);
  	
         gtk_box_pack_start(GTK_BOX(statusbox), hbox ,FALSE, FALSE,0);
         gtk_window_set_title(GTK_WINDOW(statuswindow), _(PACKAGE_STRING"-"RELEASE));
@@ -2283,37 +2585,32 @@ void eb_status_window()
 
 	gtk_container_add(GTK_CONTAINER(statuswindow), statusbox );
 
-	gtk_signal_connect (GTK_OBJECT (statuswindow), "delete_event",
-			    GTK_SIGNAL_FUNC (delete_event), NULL);
+	g_signal_connect (statuswindow, "delete-event", G_CALLBACK (delete_event), NULL);
 
 	gtk_widget_realize(statuswindow);
 	
-	gtkut_set_window_icon(statuswindow->window, NULL);
-	iconlogin_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconlogin_bm,
-		NULL, (gchar **) login_icon_xpm);
-	iconblank_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconblank_bm,
-		NULL, (gchar **) blank_icon_xpm);
-	iconlogoff_pm = gdk_pixmap_create_from_xpm_d(statuswindow->window, &iconlogoff_bm,
-		NULL, (gchar **) logoff_icon_xpm);
+	iconlogin_pb = gdk_pixbuf_new_from_xpm_data( (const char **) login_icon_xpm );
+	iconlogoff_pb = gdk_pixbuf_new_from_xpm_data( (const char **) logoff_icon_xpm );
+	iconblank_pb = gdk_pixbuf_new_from_xpm_data( (const char **) blank_icon_xpm );
 
 	/* handle geometry - ivey */
 #ifndef __MINGW32__
 	if (geometry[0] != 0) { 
 		flags = XParseGeometry(geometry, &win_x, &win_y, &win_w, &win_h);
 		gtk_window_set_position(GTK_WINDOW(statuswindow), GTK_WIN_POS_NONE); 
-		gtk_widget_set_uposition(statuswindow, win_x, win_y);
-		gtk_widget_set_usize(statuswindow, win_w, win_h);
+		gtk_window_move(GTK_WINDOW(statuswindow), win_x, win_y);
+		gtk_window_set_default_size(GTK_WINDOW(statuswindow), win_w, win_h);
 	} else 
 #endif
 	{
 		if (iGetLocalPref("x_contact_window") > 0
 		&&  iGetLocalPref("y_contact_window") > 0)
-			gtk_widget_set_uposition(statuswindow, 
+			gtk_window_move(GTK_WINDOW(statuswindow), 
 					iGetLocalPref("x_contact_window"),
 					iGetLocalPref("y_contact_window"));
-	                gdk_window_move(statuswindow->window, 
-					iGetLocalPref("x_contact_window"),
-					iGetLocalPref("y_contact_window"));
+//	                gdk_window_move(statuswindow->window, 
+//					iGetLocalPref("x_contact_window"),
+//					iGetLocalPref("y_contact_window"));
 	}	
 
 	gtk_widget_show(statuswindow);
@@ -2330,7 +2627,7 @@ void eb_status_window()
 			while(gtk_events_pending())
 				gtk_main_iteration();
 			/* Move only after cleanup */
-	                gdk_window_move(statuswindow->window, 
+	                gtk_window_move(GTK_WINDOW(statuswindow), 
 					iGetLocalPref("x_contact_window"),
 					iGetLocalPref("y_contact_window"));
 		}
@@ -2338,17 +2635,14 @@ void eb_status_window()
 	
 	update_contact_list ();
 
-	gtk_signal_connect(GTK_OBJECT(radioonline), "clicked",
-			   GTK_SIGNAL_FUNC(status_show_callback),
-			   (gpointer) 2);
-	gtk_signal_connect(GTK_OBJECT(radiocontact), "clicked",
-			   GTK_SIGNAL_FUNC(status_show_callback),
-			   (gpointer) 1);
-	gtk_signal_connect(GTK_OBJECT(radioaccount), "clicked",
-			   GTK_SIGNAL_FUNC(status_show_callback),
-			   (gpointer) 0);
-	gtk_signal_connect(GTK_OBJECT(contact_window), "size_allocate",
-			eb_save_size,NULL);
+	g_signal_connect(radioonline, "clicked", G_CALLBACK(status_show_callback),
+			   GINT_TO_POINTER(2));
+	g_signal_connect(radiocontact, "clicked", G_CALLBACK(status_show_callback),
+			   GINT_TO_POINTER(1));
+	g_signal_connect(radioaccount, "clicked", G_CALLBACK(status_show_callback),
+			   GINT_TO_POINTER(0));
+	g_signal_connect(statuswindow, "size-allocate", G_CALLBACK(eb_save_size),
+			   NULL);
 	
 	set_menu_sensitivity();
 

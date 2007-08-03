@@ -49,7 +49,7 @@
 #include "status.h"
 #include "message_parse.h"
 #include "info_window.h"
-#include "gtk/gtk_eb_html.h"
+#include "gtk/html_text_buffer.h"
 #include "plugin_api.h"
 #include "smileys.h"
 #include "messages.h"
@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.40 $",
-	"$Date: 2005/11/20 14:27:48 $",
+	"$Revision: 1.41 $",
+	"$Date: 2007/08/03 20:38:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -227,7 +227,7 @@ static eb_account * irc_read_config(eb_account *ea, LList *config );
 static LList * irc_get_states();
 static int irc_get_current_state(eb_local_account * account );
 static void irc_set_current_state(eb_local_account * account, int state );
-static char * irc_check_login(char * user, char * pass);
+static char * irc_check_login(const char * user, const char * pass);
 static void irc_add_user( eb_account * account );
 static void irc_del_user( eb_account * account );
 static int irc_is_suitable (eb_local_account *local, eb_account *remote);
@@ -243,7 +243,7 @@ static void irc_get_info( eb_local_account * account_from, eb_account * account_
 static void irc_join_chat_room(eb_chat_room *room);
 static void irc_leave_chat_room(eb_chat_room *room);
 static void irc_send_chat_room_message(eb_chat_room *room, char *message);
-static void irc_send_invite( eb_local_account * account, eb_chat_room * room, char * user, char * message);
+static void irc_send_invite( eb_local_account * account, eb_chat_room * room, char * user, const char * message);
 static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account, int is_public);
 static void irc_accept_invite( eb_local_account * account, void * invitation );
 static void irc_decline_invite( eb_local_account * account, void * invitation );
@@ -267,9 +267,9 @@ static unsigned char *strip_color (unsigned char *text)
 	unsigned char *new_str;
 
 	if (text == NULL)
-		text = "";
+		text[0] = '\0';
 
-	len = strlen (text);
+	len = strlen ((char *)text);
 	new_str = malloc (len + 2);
 
 	while (len > 0)
@@ -384,18 +384,18 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 	/* according to RFC2812, channels can be marked by #, &, + or !, not only the conventional #. */
 	if ((*(buff2[2]) == '#') || (*(buff2[2]) == '&') || (*(buff2[2]) == '+') || (*(buff2[2]) == '!')) {
 		eb_chat_room * ecr = NULL;
-		strncpy(tempstring, buff2[2], BUF_LEN/2);
-		strncat (tempstring, "@", sizeof(tempstring)-strlen(tempstring));
-		strncat (tempstring, ila->server, sizeof(tempstring)-strlen(tempstring));
-		g_strdown(tempstring);
-		ecr = find_chat_room_by_id(tempstring);
+		strncpy((char *)tempstring, buff2[2], BUF_LEN/2);
+		strncat ((char *)tempstring, "@", sizeof(tempstring)-strlen((char *)tempstring));
+		strncat ((char *)tempstring, ila->server, sizeof(tempstring)-strlen((char *)tempstring));
+		g_strdown((char *)tempstring);
+		ecr = find_chat_room_by_id((char *)tempstring);
 		if (ecr) {
 			char *msg = NULL;
 			char mynick[100]="";
 			alpha = strchr(nick, '!');
 			if (alpha != NULL)
 				*alpha = '\0';
-			tempstring2 = strip_color(buff2[3] + 1);
+			tempstring2 = strip_color((unsigned char *)buff2[3] + 1);
 			if (strstr(ela->handle,"@")) {
 				strncpy(mynick, ela->handle, strlen(ela->handle)-strlen(ila->server)-1);
 				mynick[strlen(ela->handle)-strlen(ila->server)-1]='\0';
@@ -403,11 +403,11 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 				strncpy(mynick, ela->handle, strlen(ela->handle));
 				mynick[strlen(ela->handle)]='\0';
 		}
-			if (!strncmp(tempstring2, mynick, strlen(mynick))) {
+			if (!strncmp((char *)tempstring2, (char *)mynick, strlen((char *)mynick))) {
 				msg = g_strdup_printf("<font color=\"#ff0000\">%s</font> %s",
 						mynick, (tempstring2+strlen(mynick)));
 			} else {
-				msg = g_strdup(tempstring2);
+				msg = g_strdup((char *)tempstring2);
 			}
 			eb_chat_room_show_message( ecr, nick, msg);
 			g_free(msg);
@@ -467,21 +467,21 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 	buff2 = g_strsplit(buff, ":", 2);
 	if (buff2[2] != NULL) /* Is there any actual message out there? */
 	{
-		tempstring2 = strip_color(buff2[2]);
+		tempstring2 = strip_color((unsigned char *)buff2[2]);
 	}
 	else
 	{
-		tempstring2 = strdup("");
+		tempstring2 = (unsigned char *)strdup("");
 	}
 	g_strfreev (buff2);
-	if(is_nickserv && (strstr(tempstring2,"This nickname") || 
-		(strstr(tempstring2, "NickServ") && 
-		 (strstr(tempstring2, "identify") ||
-		  strstr(tempstring2, "IDENTIFY")))))
+	if(is_nickserv && (strstr((char *)tempstring2,"This nickname") || 
+		(strstr((char *)tempstring2, "NickServ") && 
+		 (strstr((char *)tempstring2, "identify") ||
+		  strstr((char *)tempstring2, "IDENTIFY")))))
 	{
 	        int ret;
 		char ps[255];
-		if (strstr(tempstring2,"/NickServ")) {
+		if (strstr((char *)tempstring2,"/NickServ")) {
 		  g_snprintf(ps, 255, "NICKSERV :identify %s\n", ila->password);
 		  fprintf(stderr, "IRC: NICKSERV sending password to NickServ\n");
 		  ret = sendall(ila->fd, ps, strlen(ps));
@@ -492,7 +492,7 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		  irc_send_im( ela, ea,ps);
 		}
 	} else if(!is_nickserv) {
-		eb_parse_incoming_message(ela, ea, tempstring2);
+		eb_parse_incoming_message(ela, ea, (char *)tempstring2);
 	}
 	free(tempstring2);
 	return;
@@ -760,7 +760,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 	{
 		buff2 = g_strsplit(buff, " ", -1);
 		ila->channel_list = l_list_insert_sorted(ila->channel_list, strdup(buff2[3]),
-					strcasecmp);
+					(LListCompFunc) strcasecmp);
 		g_strfreev (buff2);
 	}
 	else if (!strncmp(split_buff[1], "322", 3)) /* RPL_LISTEND */
@@ -983,7 +983,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 			if(ecr)
 			{
 				char colorized_message[BUF_LEN];
-				char * tempstring2 = strip_color(buff2[3]+1);
+				unsigned char * tempstring2 = strip_color((unsigned char *)buff2[3]+1);
 				g_snprintf(colorized_message, BUF_LEN, 
 						"<font color=\"#00AA00\">*%s</font>",
 						tempstring2);
@@ -1506,7 +1506,7 @@ static LList * irc_get_states()
 	return states;
 }
 
-static char * irc_check_login(char * user, char * pass)
+static char * irc_check_login(const char * user, const char * pass)
 {
 	if (strrchr(user, '@') == NULL) {
 		return strdup(_("No hostname found in your login (which should be in user@host form)."));
@@ -1770,7 +1770,7 @@ static void irc_info_update(info_window * iw)
 	char message[BUF_LEN*4];
 	char temp[BUF_LEN];
 	char *alpha = NULL;
-	char *freeme = NULL;
+	unsigned char *freeme = NULL;
 	irc_info *ii = (irc_info *)iw->info_data;
 
 	eb_account * ea = ii->me;
@@ -1787,7 +1787,7 @@ static void irc_info_update(info_window * iw)
 	strncat(message, temp, sizeof(message)-strlen(message));
 	if (ii->whois_info != NULL)
 	{
-		freeme = strip_color(ii->whois_info);
+		freeme = strip_color((unsigned char *)ii->whois_info);
 		snprintf(temp, sizeof(temp), _("<b>Whois info:</b> %s<br>"), freeme);
 		free(freeme);
 		strncat(message, temp, sizeof(message)-strlen(message));
@@ -1802,7 +1802,8 @@ static void irc_info_update(info_window * iw)
 	}
 	ii->fullmessage = strdup(message);
 
-	gtk_eb_html_add(EXT_GTK_TEXT(iw->info), ii->fullmessage,1,1,0);
+	html_text_buffer_append(GTK_TEXT_VIEW(iw->info), ii->fullmessage,
+			HTML_IGNORE_BACKGROUND|HTML_IGNORE_FOREGROUND);
 	gtk_adjustment_set_value(gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(iw->scrollwindow)),0);
 	return;
 }
@@ -1922,7 +1923,7 @@ static void irc_send_chat_room_message(eb_chat_room *room, char *message)
 }
 
 static void irc_send_invite( eb_local_account * account, eb_chat_room * room,
-				char * user, char * message)
+				char * user, const char * message)
 {
 	char buff[BUF_LEN];
 	signed int ret;

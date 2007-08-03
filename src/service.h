@@ -82,7 +82,7 @@ struct service_callbacks {
 	void (*set_current_state)(eb_local_account * account, int state);
 
 	/*Checks login validity */
-	char * (*check_login)(char * login, char * pass);
+	char * (*check_login)(const char * login, const char * pass);
 
 	/*Informs the service of an account that it needs to manage*/
 	void (*add_user)(eb_account * account);
@@ -157,7 +157,7 @@ struct service_callbacks {
 	/*this is to invite somebody into the chat room*/
 
 	void (*send_invite)( eb_local_account * account, eb_chat_room * room,
-				                         char * user, char * message);
+				                         char * user, const char * message);
 
 	void (*accept_invite)( eb_local_account * account, void * invitation );
 

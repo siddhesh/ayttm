@@ -45,10 +45,6 @@
 
 #include "gtkutils.h"
 
-#ifdef HAVE_LIBXFT
-#include "mem_util.h"
-#endif
-
 #ifdef HAVE_LIBPSPELL
 #include "spellcheck.h"
 #endif
@@ -57,6 +53,11 @@
 #include "pixmaps/cancel.xpm"
 #include "pixmaps/error.xpm"
 
+enum {
+	PANEL_NAME_COL,
+	PANEL_POINTER_COL,
+	COL_COUNT
+};
 
 // forward declaration
 class ay_prefs_window_panel;
@@ -111,14 +112,14 @@ class ay_prefs_window
 		static const char	*s_titles[PANEL_MAX];
 
 	private:	// Gtk callbacks
-		static void		s_tree_item_selected( GtkWidget *widget, gpointer data );
+		static void		s_tree_item_selected( GtkTreeSelection *widget, gpointer data );
 		static void		s_destroy_callback( GtkWidget* widget, gpointer data );
 		static int		s_delete_event_callback( GtkWidget* widget, GdkEvent *inEvent, gpointer data );
 		static void		s_ok_callback( GtkWidget *widget, gpointer data );
 		static void		s_cancel_callback( GtkWidget *widget, gpointer data );
 	
 	private:	
-		void	AddToTree( const char *inName, ay_prefs_window_panel *inPanel );
+		void		AddToTree( const char *inName, ay_prefs_window_panel *inPanel );
 		
 		void	OK( void );
 		void	Cancel( void );
@@ -129,8 +130,9 @@ class ay_prefs_window
 		GtkWidget		*m_prefs_window_widget;	///< the actual dialog widget
 		GtkWidget		*m_notebook_widget;
 		
-		GtkTree			*m_tree;
-		GList			*m_panels;		///< a list of the panels (ay_prefs_window_panel *)
+		GtkTreeView			*m_tree;
+		GtkTreeStore			*m_treestore;
+		GList				*m_panels;	///< a list of the panels (ay_prefs_window_panel *)
 };
 
 /// A prefs panel
@@ -516,13 +518,14 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	m_tree( NULL ),
 	m_panels( NULL )
 {
+	GtkTreeSelection *tree_selection;
+
 	m_prefs_window_widget = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
 	gtk_window_set_position( GTK_WINDOW(m_prefs_window_widget), GTK_WIN_POS_MOUSE );
-	gtk_window_set_policy( GTK_WINDOW(m_prefs_window_widget), TRUE, TRUE, TRUE );
+	gtk_window_set_resizable( GTK_WINDOW(m_prefs_window_widget), TRUE );
 	gtk_widget_realize( m_prefs_window_widget );
 	gtk_window_set_title( GTK_WINDOW(m_prefs_window_widget), _("Ayttm Preferences") );
-	gtkut_set_window_icon( m_prefs_window_widget->window, NULL );
 	gtk_container_set_border_width( GTK_CONTAINER(m_prefs_window_widget), 5 );
 	
 	gint height=460;
@@ -531,23 +534,31 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 
 	gtk_window_set_default_size(GTK_WINDOW(m_prefs_window_widget), -1, height);
 
-	gtk_signal_connect( GTK_OBJECT(m_prefs_window_widget), "delete_event", GTK_SIGNAL_FUNC(s_delete_event_callback), this );
+	g_signal_connect( m_prefs_window_widget, "delete_event", G_CALLBACK(s_delete_event_callback), this );
 	
 	GtkWidget	*main_hbox = gtk_hbox_new( FALSE, 5 );
 
-	// a scrolled window for the tree
+	/* a scrolled window for the tree */
 	GtkWidget	*scrolled_win = gtk_scrolled_window_new( NULL, NULL );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scrolled_win), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 
-	gtk_widget_set_usize( scrolled_win, 210, height );
-	gtk_box_pack_start( GTK_BOX(main_hbox), GTK_WIDGET(scrolled_win), FALSE, FALSE, 0 );
+	gtk_widget_set_size_request( scrolled_win, 210, height );
+	gtk_box_pack_start( GTK_BOX(main_hbox), GTK_WIDGET(scrolled_win), FALSE, TRUE, 0 );
 
-	m_tree = GTK_TREE(gtk_tree_new());
-	gtk_tree_set_view_lines( m_tree, FALSE );
-	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(scrolled_win), GTK_WIDGET(m_tree) );
+	/* 
+	 * Setting up the tree model. We will store two components in the tree: the
+	 * preference and the pointer to the corresponding panel
+	 */
+	m_treestore = gtk_tree_store_new(COL_COUNT, G_TYPE_STRING,
+					G_TYPE_POINTER, -1);
+	m_tree = GTK_TREE_VIEW(gtk_tree_view_new_with_model( GTK_TREE_MODEL(m_treestore) ));
+	
+
+	
+	gtk_container_add( GTK_CONTAINER(scrolled_win), GTK_WIDGET(m_tree) );
 	
 	m_notebook_widget = gtk_notebook_new();
-	gtk_widget_set_usize( m_notebook_widget, 410, -1 );
+	gtk_widget_set_size_request( m_notebook_widget, 410, -1 );
 	gtk_notebook_set_show_tabs( GTK_NOTEBOOK(m_notebook_widget), FALSE );
 	
 	for ( int i = 0; i < PANEL_MAX; i++ )
@@ -569,6 +580,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 			the_panel->SetNotebookID( gtk_notebook_page_num( GTK_NOTEBOOK(m_notebook_widget), top_level_w ) );
 			
 			AddToTree( the_panel->Name(), the_panel );
+
 		}
 	}
 	
@@ -627,6 +639,15 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 		
 		module_pref = module_pref->next;
 	}
+
+	// Setting up the TreeView view
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("Options", renderer, "text",
+			PANEL_NAME_COL, NULL);
+	gtk_tree_view_append_column(m_tree, column);
 	
 	gtk_widget_show( m_notebook_widget );
 	gtk_widget_show( GTK_WIDGET(m_tree) );
@@ -640,38 +661,44 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	// OK Button
 	GtkWidget	*hbox2 = gtk_hbox_new( TRUE, 5 );
 	gtk_widget_show( hbox2 );
-	gtk_widget_set_usize( hbox2, 200, 25 );
+	gtk_widget_set_size_request( hbox2, 200, 25 );
 
 	GtkAccelGroup *accel_group = gtk_accel_group_new();
 
 	GtkWidget	*button = gtkut_create_icon_button( _("OK"), ok_xpm, m_prefs_window_widget );
 	gtk_widget_show( button );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC( s_ok_callback ), this );
+	g_signal_connect( button, "clicked", G_CALLBACK( s_ok_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
 	gtk_widget_add_accelerator(button, "clicked", accel_group,
-			GDK_Return, 0, GTK_ACCEL_VISIBLE);
+			GDK_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(button, "clicked", accel_group,
-			GDK_KP_Enter, 0, GTK_ACCEL_VISIBLE);
+			GDK_KP_Enter, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
 	// Cancel Button
 	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, m_prefs_window_widget );
 	gtk_widget_show( button );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC( s_cancel_callback ), this );
+	g_signal_connect( button, "clicked", G_CALLBACK( s_cancel_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
 	gtk_widget_add_accelerator(button, "clicked", accel_group,
-			GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+			GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
 	GtkWidget	*hbox = gtk_hbox_new( FALSE, 5 );
 	gtk_widget_show( hbox );
 
 	gtk_box_pack_end( GTK_BOX(hbox), hbox2, FALSE, FALSE, 5 );
 	gtk_box_pack_start( GTK_BOX(prefs_vbox), hbox, FALSE, FALSE, 5 );
-	gtk_box_pack_start( GTK_BOX(main_hbox), prefs_vbox, FALSE, FALSE, 3 );
+	gtk_box_pack_start( GTK_BOX(main_hbox), prefs_vbox, TRUE, TRUE, 3 );
 
 	gtk_container_add( GTK_CONTAINER(m_prefs_window_widget), main_hbox );
 
 	gtk_window_add_accel_group(GTK_WINDOW(m_prefs_window_widget), 
 			accel_group);
+	
+	// Signal Handler setup for the tree
+	tree_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(m_tree));
+	gtk_tree_selection_set_mode(tree_selection, GTK_SELECTION_BROWSE);
+	g_signal_connect(G_OBJECT(tree_selection), "changed", 
+			G_CALLBACK(s_tree_item_selected), NULL);
 }
 
 ay_prefs_window::~ay_prefs_window( void )
@@ -692,123 +719,104 @@ ay_prefs_window::~ay_prefs_window( void )
 	s_only_prefs_window = NULL;
 }
 
+
 // Show
 void	ay_prefs_window::Show( int pagenum )
 {
+	char page_path[8];
+
 	if ( m_prefs_window_widget != NULL )
 	{
 		if(!GTK_WIDGET_VISIBLE( m_prefs_window_widget )) {
 			gtk_widget_show( m_prefs_window_widget );
-	
-			/* Because of some problem with GTK, we cannot create the tree expanded without creating drawing artifacts.
-				So we expand the tree 'by hand' after we've shown the window.
-			*/
-			GList		*child = m_tree->children;
-			GtkWidget	*the_tree_item = NULL;
-		
-			while ( child != NULL )
-			{
-				the_tree_item = GTK_WIDGET(child->data);
-				
-				gtk_tree_item_expand( GTK_TREE_ITEM(the_tree_item) );
-				
-				child = child->next;
-			}
-			
+			gtk_tree_view_expand_all(m_tree);
 		} else {
 			gdk_window_show( m_prefs_window_widget->window );
 		}
 	}
 	eb_debug(DBG_CORE, "selecting %d\n",pagenum);
-	gtk_tree_select_item( m_tree, pagenum );
+
+	sprintf(page_path, "%d", pagenum);
+	GtkTreePath *path = gtk_tree_path_new_from_string(page_path);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection( m_tree );
+	gtk_tree_selection_select_path(selection, path);
+	gtk_tree_path_free(path);
+}
+	
+struct _callback_data {
+	char		name[64];	// Hardcoded limit as was in the AddToTree function
+	GtkTreeIter	*tree_location;
+};
+
+/*
+ * FIXME: This needs to eventually go into the ay_prefs_window class
+ * as a private member.
+ */
+gboolean s_findnode_foreachfunc(GtkTreeModel *m_model, GtkTreePath *path,
+		GtkTreeIter *itr, gpointer data)
+{
+	gchar *val;
+	struct _callback_data *c_data = (struct _callback_data *)data;
+
+	gtk_tree_model_get(m_model, itr, PANEL_NAME_COL, &val, -1);
+	
+	if( val!=NULL && strcmp(c_data->name, val)==0 ) {
+		c_data->tree_location=gtk_tree_iter_copy(itr);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 // AddToTree
 void	ay_prefs_window::AddToTree( const char *inName, ay_prefs_window_panel *inPanel )
 {
+	struct _callback_data callback_data;
 	const int	name_len = 64;
-	char		name[name_len];
+	bzero(callback_data.name, 64);
+	GtkTreeIter 	iter;
+	gboolean tree_is_green =  gtk_tree_model_get_iter_first(GTK_TREE_MODEL(m_treestore), &iter);
 	
-	strncpy( name, inName, name_len );
+	strncpy( callback_data.name, inName, name_len );
+	callback_data.tree_location = NULL;
 	
-	char		*child_name = strchr( name, ':' );
-	GtkWidget	*section_tree = GTK_WIDGET(m_tree);
-	int			position = -1;	// inserting at position -1 puts it at the end
+	char		*child_name = strchr( callback_data.name, ':' );
 	
 	if ( child_name != NULL )
 	{
 		*child_name = '\0';
 		child_name++;
-		
-		// find the section in the tree
-		GList		*child = m_tree->children;
-		GtkWidget	*the_tree_item = NULL;
-		
-		while ( child != NULL )
-		{
-			the_tree_item = GTK_WIDGET(child->data);
-			
-			GtkLabel	*label = GTK_LABEL(GTK_BIN(the_tree_item)->child);
-			gchar		*text = NULL;
-			
-			gtk_label_get( label, &text );
-			
-			if ( !strncmp( name, text, name_len ) )
-				break;
-				
-			child = child->next;
-		}
-		
-		// not found, so add it
-		if ( child == NULL )
-		{
-			the_tree_item = gtk_tree_item_new_with_label( name );
-			gtk_widget_show( the_tree_item );
-			
-			gtk_tree_append( GTK_TREE(section_tree), the_tree_item );
-		}
-		
-		section_tree = GTK_TREE_ITEM_SUBTREE( GTK_TREE_ITEM(the_tree_item) );
-		
-		// we don't have a subtree yet, so make one
-		if ( section_tree == NULL )
-		{
-			section_tree = gtk_tree_new();
-			
-			gtk_tree_item_set_subtree( GTK_TREE_ITEM(the_tree_item), section_tree );
-			gtk_tree_set_view_lines( GTK_TREE(section_tree), TRUE );
-		}
-		
-		// find the position to put it in alphabetically
-		child = GTK_TREE(section_tree)->children;
-		position = 0;
-		
-		while ( child != NULL )
-		{
-			GtkWidget	*the_tree_item = GTK_WIDGET(child->data);
-			GtkLabel	*label = GTK_LABEL(GTK_BIN(the_tree_item)->child);
-			gchar		*text = NULL;
 
-			gtk_label_get( label, &text );
+		if( tree_is_green )
+			gtk_tree_model_foreach(GTK_TREE_MODEL(m_treestore), 
+					s_findnode_foreachfunc,
+					&callback_data);
 
-			if ( strncmp( text, child_name, name_len ) > 0 )
-				break;
-			
-			child = child->next;
-			position++;	
+		// not found, so first add parent as root
+		if ( tree_is_green != TRUE || callback_data.tree_location == NULL )
+		{
+			gtk_tree_store_append(m_treestore, &iter, NULL);
+			gtk_tree_store_set(m_treestore, &iter, 
+					PANEL_NAME_COL, callback_data.name,
+					PANEL_POINTER_COL, NULL, -1);
+			callback_data.tree_location = &iter;
 		}
+
+		GtkTreeIter newElement;
+
+		gtk_tree_store_append( m_treestore, &newElement, callback_data.tree_location );
+		gtk_tree_store_set(m_treestore, &newElement,
+				PANEL_NAME_COL, child_name,
+				PANEL_POINTER_COL, inPanel, -1);
 	}
 	else
 	{
-		child_name = name;
+		GtkTreeIter newElement;
+		child_name = callback_data.name;
+		gtk_tree_store_append(m_treestore, &newElement, NULL);
+		gtk_tree_store_set(m_treestore, &newElement, 
+				PANEL_NAME_COL, child_name,
+				PANEL_POINTER_COL, inPanel, -1);
 	}
-	
-	GtkWidget	*item = gtk_tree_item_new_with_label( child_name );
-	gtk_widget_show( item );
-
-	gtk_tree_insert( GTK_TREE(section_tree), item, position );
-
-	gtk_signal_connect( GTK_OBJECT(item), "select", GTK_SIGNAL_FUNC(s_tree_item_selected), inPanel );
 }
 
 // OK
@@ -838,37 +846,53 @@ void	ay_prefs_window::Cancel( void )
 ////
 // ay_prefs_window callbacks
 
-// tree_item_selected
-void	ay_prefs_window::s_tree_item_selected( GtkWidget *widget, gpointer data )
+void	ay_prefs_window::s_tree_item_selected( GtkTreeSelection *selection, gpointer data )
 {
-	ay_prefs_window_panel	*the_panel = reinterpret_cast<ay_prefs_window_panel *>( data );
+	GtkTreeIter iter;
+	GtkTreeModel *model;
 
-	for(GList *iter = s_only_prefs_window->m_panels; iter; iter=g_list_next(iter))
-	{
-		ay_prefs_window_panel *old_panel = reinterpret_cast<ay_prefs_window_panel *>(iter->data);
-		if(old_panel->GetNotebookID() == gtk_notebook_get_current_page(
-					GTK_NOTEBOOK(s_only_prefs_window->m_notebook_widget)))
+	ay_prefs_window_panel *the_panel;
+
+	if( gtk_tree_selection_get_selected(selection, &model, &iter) ) {
+		gtk_tree_model_get(model, &iter, PANEL_POINTER_COL, &the_panel, -1);
+		for(GList *iter = s_only_prefs_window->m_panels; iter; iter=g_list_next(iter))
 		{
-			if (the_panel->m_accel_group
-			&&  g_slist_find (the_panel->m_accel_group->attach_objects, 
-					  GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget)))
-				gtk_window_remove_accel_group(GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget),
-					the_panel->m_accel_group);
-			break;
+			ay_prefs_window_panel *old_panel = 
+				reinterpret_cast<ay_prefs_window_panel *>(iter->data);
+			if(old_panel->GetNotebookID() == gtk_notebook_get_current_page(
+						GTK_NOTEBOOK(
+							s_only_prefs_window->m_notebook_widget)))
+			{
+				if (the_panel->m_accel_group
+				&&  g_slist_find (the_panel->m_accel_group->acceleratables, 
+						  GTK_WINDOW(
+							  s_only_prefs_window->m_prefs_window_widget
+							  )))
+				{
+					gtk_window_remove_accel_group(GTK_WINDOW(
+								s_only_prefs_window->m_prefs_window_widget),
+						the_panel->m_accel_group);
+				}
+				break;
+			}
 		}
-	}
 		
-	the_panel->Show();
-	gtk_window_add_accel_group(GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget), 
-			the_panel->m_accel_group);
+		the_panel->Show();
+		gtk_window_add_accel_group(GTK_WINDOW(s_only_prefs_window->m_prefs_window_widget), 
+				the_panel->m_accel_group);
+	}
 }
 
 // s_delete_event_callback
 int	ay_prefs_window::s_delete_event_callback( GtkWidget* widget, GdkEvent *inEvent, gpointer data )
 {
-	// don't allow closing of the window from the window manager
-	//	i.e. force the user to click OK or Cancel
-	return( TRUE );
+	/* 
+	 * The Close button should cancel operations and close the window otherwise
+	 * users will get confused. What's more, it works well with: 
+	 * "Err... I guess I goofed up... oh look, my best friend the X button *click*"
+	 */
+	s_cancel_callback(widget, data);
+	return( FALSE );
 }
 
 // s_ok_callback
@@ -912,8 +936,9 @@ ay_prefs_window_panel::ay_prefs_window_panel( const char *inTopFrameText )
 
 	m_top_scrollbox = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(m_top_scrollbox), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
+
 	gtk_box_pack_start( GTK_BOX(m_super_vbox), GTK_WIDGET(m_top_scrollbox), TRUE, TRUE, 0 );
-	gtk_widget_set_usize( m_top_scrollbox, -1, 460 );
+	gtk_widget_set_size_request( m_top_scrollbox, -1, 460 );
 	gtk_widget_show(m_top_scrollbox);
 
 	m_top_vbox = gtk_vbox_new( FALSE, 0 );
@@ -1034,7 +1059,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::CreateModulePanel( GtkWidget *inPa
 	else
 		snprintf( name, name_len, "%s:%s", _( "Other Plugins" ), inPrefs.module_name );
 	
-	ay_prefs_window_panel	*new_panel = new_panel = new ay_module_panel( name, inPrefs );
+	ay_prefs_window_panel	*new_panel = new ay_module_panel( name, inPrefs );
 			
 	assert( new_panel != NULL );
 	
@@ -1054,7 +1079,7 @@ ay_prefs_window_panel	*ay_prefs_window_panel::CreateAccountPanel( GtkWidget *inP
 	
 	snprintf( name, name_len, "%s:%s:%s", _( "Accounts" ), get_service_name(inPrefs.service_id),
 			inPrefs.screen_name );
-	ay_prefs_window_panel	*new_panel = new_panel = new ay_account_panel( name, inPrefs );
+	ay_prefs_window_panel	*new_panel = new ay_account_panel( name, inPrefs );
 			
 	assert( new_panel != NULL );
 	
@@ -1085,7 +1110,7 @@ void	ay_prefs_window_panel::Apply( void )
 // Show
 void	ay_prefs_window_panel::Show( void )
 {
-	gtk_notebook_set_page( GTK_NOTEBOOK(m_parent), m_notebook_id );
+	gtk_notebook_set_current_page( GTK_NOTEBOOK(m_parent), m_notebook_id );
 }
 
 // AddTopFrame
@@ -1197,7 +1222,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtk_widget_show( hbox );
 	
 	button = _gtkut_button( _("Use spell checking"), &m_prefs.do_spell_checking, hbox );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
+	g_signal_connect( button, "clicked", G_CALLBACK(s_toggle_checkbox), this );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
 	
@@ -1206,7 +1231,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, 15, -1 );
+	gtk_widget_set_size_request( spacer, 15, -1 );
 	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
 	
 	label = gtk_label_new( _("Alternate dictionary:") );
@@ -1224,7 +1249,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	// spacer
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_widget_set_size_request( spacer, -1, 5 );
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), spacer, FALSE, FALSE, 0 );
 	
 	// message received prefs
@@ -1244,7 +1269,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	// spacer
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, -1, 10 );
+	gtk_widget_set_size_request( spacer, -1, 10 );
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), spacer, FALSE, FALSE, 0 );
 
 	// font selection
@@ -1255,10 +1280,10 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	gtk_widget_show( label );
 
 	m_font_face_entry = gtk_entry_new();
-	gtk_widget_set_usize( m_font_face_entry, 300, -1 );
+	gtk_widget_set_size_request( m_font_face_entry, 300, -1 );
 
 	button = gtk_button_new_with_label( _("Choose") );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_browse_font), this ); 
+	g_signal_connect( button, "clicked", G_CALLBACK(s_browse_font), this ); 
 	
 	const int	buff_len = 1024;
 	char		buff [buff_len];
@@ -1282,7 +1307,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 // Apply
 void	ay_chat_panel::Apply( void )
 {
-	char	*ptr = gtk_entry_get_text( GTK_ENTRY(m_font_face_entry) );
+	const gchar	*ptr = gtk_entry_get_text( GTK_ENTRY(m_font_face_entry) );
 	
 	if ( ptr != NULL )
 		strncpy(m_prefs.font_face, ptr, MAX_PREF_LEN );
@@ -1336,24 +1361,21 @@ void	ay_chat_panel::s_browse_font( GtkWidget *widget, void *data )
 	if ( !the_panel->m_font_sel_win )
 	{
 		the_panel->m_font_sel_win = gtk_font_selection_dialog_new( _("Font selection") );
-		gtk_window_position( GTK_WINDOW(the_panel->m_font_sel_win), GTK_WIN_POS_CENTER );
-		gtk_signal_connect_object(
-			GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->cancel_button),
-			"clicked",
-			GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete),
-			GTK_OBJECT(the_panel->m_font_sel_win) );
+		gtk_window_set_position( GTK_WINDOW(the_panel->m_font_sel_win), GTK_WIN_POS_CENTER );
+		g_signal_connect_swapped(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->cancel_button,
+			"clicked", G_CALLBACK(gtk_widget_hide_on_delete), the_panel->m_font_sel_win );
 	}
 	
 	if ( the_panel->m_font_sel_conn_id )
 	{
-		gtk_signal_disconnect( GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(
-				the_panel->m_font_sel_win)->ok_button), the_panel->m_font_sel_conn_id );
+		g_signal_handler_disconnect( GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button, 
+				the_panel->m_font_sel_conn_id );
 	}
 
-	the_panel->m_font_sel_conn_id = gtk_signal_connect(
-		GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button),
+	the_panel->m_font_sel_conn_id = g_signal_connect(
+		GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button,
 		"clicked",
-		GTK_SIGNAL_FUNC(s_font_selection_ok),
+		G_CALLBACK(s_font_selection_ok),
 		(GtkObject *)the_panel );
 
 	char	*font_name = gtk_editable_get_chars( GTK_EDITABLE(the_panel->m_font_face_entry), 0, -1 );
@@ -1361,7 +1383,6 @@ void	ay_chat_panel::s_browse_font( GtkWidget *widget, void *data )
 	g_free( font_name );
 	
 	gtk_window_set_modal( GTK_WINDOW(the_panel->m_font_sel_win), TRUE );
-	gtk_window_set_wmclass( GTK_WINDOW(the_panel->m_font_sel_win), "ayttm", "Ayttm" );
 	
 	gtk_widget_show( the_panel->m_font_sel_win );
 	gtk_widget_grab_focus( GTK_FONT_SELECTION_DIALOG(the_panel->m_font_sel_win)->ok_button );
@@ -1377,45 +1398,7 @@ void	ay_chat_panel::s_font_selection_ok( GtkButton *button, void *data )
 
 	if ( fontname )
 	{
-#ifdef HAVE_LIBXFT
-		/* convert to XFT fontname */
-		/*-bitstream-charter-medium-r-normal-*-13-160-*-*-p-*-iso8859-1*/
-		/*1         2       3      4 5      6 7  8   9 0 1 2 3      (4)*/
-		/*charter-13:bold:slant=italic,oblique*/
-		char	**tokens = ay_strsplit( fontname, "-", -1 );
-		char	result[1024];
-		
-		strcpy( result, tokens[2] );
-		strcat( result, "-" );
-
-		if ( strcmp( tokens[8], "*" ) )
-		{
-			int		i = atoi(tokens[8]);
-			char	b[10];
-			snprintf( b, 10, "%d", i/10 );
-			
-			strcat( result, b );
-		}
-		else if ( strcmp( tokens[7], "*" ) )
-		{
-			strcat( result, tokens[7] );
-		}
-		else
-		{
-			strcat( result, "12" );
-		}
-		
-		if ( !strcmp( tokens[3], "bold" ) )
-			strcat( result, ":bold" );
-		
-		if ( !strcmp( tokens[4], "i" ) || !strcmp( tokens[4], "o" ) )
-			strcat( result, ":slant=italic,oblique" );
-
-		ay_strfreev( tokens );
-		gtk_entry_set_text( GTK_ENTRY(the_panel->m_font_face_entry), result );
-#else
 		gtk_entry_set_text( GTK_ENTRY(the_panel->m_font_face_entry), fontname );
-#endif
 	
 		gtk_editable_set_position( GTK_EDITABLE(the_panel->m_font_face_entry), 0 );
 		
@@ -1460,7 +1443,7 @@ void	ay_tabs_panel::Build( GtkWidget *inParent )
 	m_toggle_data.m_panel = this;
 	m_toggle_data.m_toggle_data = &m_prefs.do_tabbed_chat;
 	gtkut_check_button( m_top_vbox, _("Use tabs in chat windows"), m_prefs.do_tabbed_chat,
-		GTK_SIGNAL_FUNC(s_set_tabbed), &m_toggle_data );
+		G_CALLBACK(s_set_tabbed), &m_toggle_data );
 	
 	// orientation
 	m_orientation_frame = gtk_frame_new( _( "Tab Position" ) );
@@ -1483,28 +1466,28 @@ void	ay_tabs_panel::Build( GtkWidget *inParent )
 
 	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
 			_("Bottom"), (m_prefs.do_tabbed_chat_orient == 0),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[0]) );
+			G_CALLBACK(s_change_orientation), &(m_orientation_cb_data[0]) );
 	
 	m_orientation_cb_data[1].m_panel = this;
 	m_orientation_cb_data[1].m_orientation_id = 1;
 
 	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
 			_("Top"), (m_prefs.do_tabbed_chat_orient == 1),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[1]) );
+			G_CALLBACK(s_change_orientation), &(m_orientation_cb_data[1]) );
 	
 	m_orientation_cb_data[2].m_panel = this;
 	m_orientation_cb_data[2].m_orientation_id = 2;
 
 	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
 			_("Left"), (m_prefs.do_tabbed_chat_orient == 2),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[2]) );
+			G_CALLBACK(s_change_orientation), &(m_orientation_cb_data[2]) );
 	
 	m_orientation_cb_data[3].m_panel = this;
 	m_orientation_cb_data[3].m_orientation_id = 3;
 
 	radio_group = gtkut_add_radio_button_to_group( radio_group, vbox,
 			_("Right"), (m_prefs.do_tabbed_chat_orient == 3),
-			GTK_SIGNAL_FUNC(s_change_orientation), &(m_orientation_cb_data[3]) );
+			G_CALLBACK(s_change_orientation), &(m_orientation_cb_data[3]) );
 
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_orientation_frame, FALSE, FALSE, 5 );
 	
@@ -1560,7 +1543,7 @@ void	ay_tabs_panel::AddKeySet( const char *inLabelString, t_cb_data *cb_data, Gt
 	GtkWidget	*label = gtk_label_new( inLabelString );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, 75, 10 );
+	gtk_widget_set_size_request( label, 75, 10 );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 3 );
 
 	const char	*clabel = gtk_accelerator_name( cb_data->m_device_key->keyval, cb_data->m_device_key->modifiers );
@@ -1568,7 +1551,7 @@ void	ay_tabs_panel::AddKeySet( const char *inLabelString, t_cb_data *cb_data, Gt
 	g_free( (void *)clabel );
 	gtk_widget_show( button );
 
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_getnewkey), cb_data );
+	g_signal_connect( button, "clicked", G_CALLBACK(s_getnewkey), cb_data );
 	gtk_box_pack_start( GTK_BOX(hbox), button, TRUE, TRUE, 5 );
 }
 
@@ -1622,7 +1605,7 @@ gboolean	ay_tabs_panel::s_newkey_callback( GtkWidget *keybutton, GdkEventKey *ev
 		const GdkDeviceKey	*the_key = cb_data->m_device_key;
 
 		gtk_label_set_text( GTK_LABEL(label), gtk_accelerator_name( the_key->keyval, the_key->modifiers) );
-		gtk_signal_disconnect( GTK_OBJECT(keybutton), the_panel->m_accel_change_handler_id );
+		g_signal_handler_disconnect( keybutton, the_panel->m_accel_change_handler_id );
 		gtk_grab_remove( keybutton );
 		the_panel->m_accel_change_handler_id = 0;
 		
@@ -1674,8 +1657,9 @@ gboolean	ay_tabs_panel::s_newkey_callback( GtkWidget *keybutton, GdkEventKey *ev
 					the_key->keyval = event->keyval;
 					the_key->modifiers = static_cast<GdkModifierType>(state);
 
-					gtk_label_set_text( GTK_LABEL(label), gtk_accelerator_name( the_key->keyval, the_key->modifiers) );
-					gtk_signal_disconnect( GTK_OBJECT(keybutton), the_panel->m_accel_change_handler_id );
+					gtk_label_set_text( GTK_LABEL(label), 
+							gtk_accelerator_name( the_key->keyval, the_key->modifiers) );
+					g_signal_handler_disconnect( keybutton, the_panel->m_accel_change_handler_id );
 					gtk_grab_remove( keybutton );
 					the_panel->m_accel_change_handler_id = 0;
 				}
@@ -1700,7 +1684,7 @@ void	ay_tabs_panel::s_getnewkey( GtkWidget *keybutton, void *data )
 	{
 		gtk_label_set_text( GTK_LABEL(label), _("<Press modifier + key or escape to cancel>") );
 
-		gtk_object_set_data( GTK_OBJECT(keybutton), "accel", data );
+		g_object_set_data( G_OBJECT(keybutton), "accel", data );
 
 		/* it's sad how this works: It grabs the events in the event mask
 		 * of the widget the mouse is over, NOT the grabbed widget.
@@ -1708,9 +1692,8 @@ void	ay_tabs_panel::s_getnewkey( GtkWidget *keybutton, void *data )
 		 */
 		gtk_grab_add( keybutton );
 
-		the_panel->m_accel_change_handler_id = gtk_signal_connect_after( GTK_OBJECT(keybutton),
-					"key_press_event",
-					GTK_SIGNAL_FUNC(s_newkey_callback), data );
+		the_panel->m_accel_change_handler_id = g_signal_connect_after( keybutton, "key_press_event",
+					G_CALLBACK(s_newkey_callback), data );
 	}
 }
 
@@ -1796,15 +1779,15 @@ GtkWidget	*ay_sound_files_panel::AddSoundFileSelectionBox( const char *inLabelSt
 	GtkWidget	*label = gtk_label_new( inLabelString );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, 125, 15 );
+	gtk_widget_set_size_request( label, 125, 15 );
 	gtk_box_pack_start( GTK_BOX(hbox), label, TRUE, TRUE, 3 );
 
-	const int	button_width = 54;
+	const int	button_width = 60;
 	
 	GtkWidget	*preview_button = gtk_button_new_with_label( _("Preview") );
 	gtk_widget_show( preview_button );
-	gtk_widget_set_usize( preview_button, button_width, -1 );
-	gtk_signal_connect( GTK_OBJECT(preview_button), "clicked", GTK_SIGNAL_FUNC(s_testsoundfile), &(m_cb_data[inSoundID]) );
+	gtk_widget_set_size_request( preview_button, button_width, -1 );
+	g_signal_connect( preview_button, "clicked", G_CALLBACK(s_testsoundfile), &(m_cb_data[inSoundID]) );
 	gtk_box_pack_start( GTK_BOX(hbox), preview_button, FALSE, FALSE, 5 );
 	
 	gtk_box_pack_start( GTK_BOX(vbox), hbox, FALSE, FALSE, 0 );
@@ -1814,7 +1797,7 @@ GtkWidget	*ay_sound_files_panel::AddSoundFileSelectionBox( const char *inLabelSt
 	
 	GtkWidget	*spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, 15, 15 );
+	gtk_widget_set_size_request( spacer, 15, 15 );
 	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 3 );
 
 	GtkWidget	*widget = gtk_entry_new();
@@ -1825,18 +1808,18 @@ GtkWidget	*ay_sound_files_panel::AddSoundFileSelectionBox( const char *inLabelSt
 
 	GtkWidget	*browse_button = gtk_button_new_with_label( _("Browse") );
 	gtk_widget_show( browse_button );
-	gtk_widget_set_usize( browse_button, button_width, -1 );
+	gtk_widget_set_size_request( browse_button, button_width, -1 );
 	
 	m_cb_data[inSoundID].m_panel = this;
 	m_cb_data[inSoundID].m_sound_id = inSoundID;
-	gtk_signal_connect( GTK_OBJECT(browse_button), "clicked", GTK_SIGNAL_FUNC(s_getsoundfile), &(m_cb_data[inSoundID]) );
+	g_signal_connect( browse_button, "clicked", G_CALLBACK(s_getsoundfile), &(m_cb_data[inSoundID]) );
 	gtk_box_pack_start( GTK_BOX(hbox), browse_button, FALSE, FALSE, 5 );
 	
 	gtk_box_pack_start( GTK_BOX(vbox), hbox, FALSE, FALSE, 0 );
 	
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_widget_set_size_request( spacer, -1, 5 );
 	gtk_box_pack_start( GTK_BOX(vbox), spacer, FALSE, FALSE, 3 );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), vbox, FALSE, FALSE, 0 );
@@ -1852,11 +1835,11 @@ GtkWidget	*ay_sound_files_panel::AddSoundVolumeSelectionBox( const char *inLabel
 
 	GtkWidget *label = gtk_label_new( inLabelString );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 3 );
-	gtk_widget_set_usize( label, 125, 10 );
+	gtk_widget_set_size_request( label, 125, 10 );
 	gtk_widget_show( label );
 
 	GtkWidget *widget = gtk_hscale_new( inAdjustment );
-	gtk_signal_connect( GTK_OBJECT(inAdjustment), "value_changed", GTK_SIGNAL_FUNC(s_soundvolume_changed), this );
+	g_signal_connect( inAdjustment, "value_changed", G_CALLBACK(s_soundvolume_changed), this );
 	gtk_box_pack_start( GTK_BOX(hbox), widget, TRUE, TRUE, 0 );
 	gtk_widget_show( widget );
 
@@ -2043,14 +2026,14 @@ void	ay_misc_panel::Build( GtkWidget *inParent )
 
 
 	brbutton = _gtkut_button( _("Use alternate browser"), &m_prefs.use_alternate_browser, m_top_vbox );
-	gtk_signal_connect( GTK_OBJECT(brbutton), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
+	g_signal_connect( brbutton, "clicked", G_CALLBACK(s_toggle_checkbox), this );
 
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, 15, -1 );
+	gtk_widget_set_size_request( spacer, 15, -1 );
 	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
 	
 	label = gtk_label_new( _("Browser command:") );
@@ -2065,7 +2048,7 @@ void	ay_misc_panel::Build( GtkWidget *inParent )
 
 	m_browser_browse_button = gtk_button_new_with_label( _("Browse") );
 	gtk_widget_show( m_browser_browse_button );
-	gtk_signal_connect( GTK_OBJECT(m_browser_browse_button), "clicked", GTK_SIGNAL_FUNC(s_get_alt_browser_path), this );
+	g_signal_connect( m_browser_browse_button, "clicked", G_CALLBACK(s_get_alt_browser_path), this );
 	gtk_box_pack_start( GTK_BOX(hbox), m_browser_browse_button, FALSE, FALSE, 5 );
 
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
@@ -2176,7 +2159,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	m_toggle_data.m_panel = this;
 	m_toggle_data.m_toggle_data = NULL;
 	m_proxy_checkbox = gtkut_check_button( m_top_vbox, _("Use a proxy server"), (m_prefs.proxy_type != PROXY_NONE),
-		GTK_SIGNAL_FUNC(s_toggle_checkbox), &m_toggle_data );
+		G_CALLBACK(s_toggle_checkbox), &m_toggle_data );
 	
 	m_proxy_frame = gtk_frame_new( _( "Proxy Type" ) );
 	gtk_widget_show( m_proxy_frame );
@@ -2200,7 +2183,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	
 	radio_group = gtkut_add_radio_button_to_group( radio_group, proxy_vbox,
 			_("HTTP"), (m_last_proxy_type == PROXY_HTTP),
-			GTK_SIGNAL_FUNC(s_set_proxy_type), &(m_cb_data[PROXY_HTTP]) );
+			G_CALLBACK(s_set_proxy_type), &(m_cb_data[PROXY_HTTP]) );
 
 	// PROXY_SOCKS4	
 	m_cb_data[PROXY_SOCKS4].m_panel = this;
@@ -2208,7 +2191,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	
 	radio_group = gtkut_add_radio_button_to_group( radio_group, proxy_vbox,
 			_("SOCKS4"), (m_last_proxy_type == PROXY_SOCKS4),
-			GTK_SIGNAL_FUNC(s_set_proxy_type), &(m_cb_data[PROXY_SOCKS4]) );
+			G_CALLBACK(s_set_proxy_type), &(m_cb_data[PROXY_SOCKS4]) );
 
 	// PROXY_SOCKS5
 	m_cb_data[PROXY_SOCKS5].m_panel = this;
@@ -2216,7 +2199,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 
 	radio_group = gtkut_add_radio_button_to_group( radio_group, proxy_vbox,
 			_("SOCKS5"), (m_last_proxy_type == PROXY_SOCKS5),
-			GTK_SIGNAL_FUNC(s_set_proxy_type), &(m_cb_data[PROXY_SOCKS5]) );
+			G_CALLBACK(s_set_proxy_type), &(m_cb_data[PROXY_SOCKS5]) );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_vbox), m_proxy_frame, FALSE, FALSE, 5 );
 
@@ -2232,7 +2215,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	GtkWidget	*label = gtk_label_new( _("Server:") );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, label_len, 15 );
+	gtk_widget_set_size_request( label, label_len, 15 );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_proxy_server_entry), m_prefs.proxy_host );
@@ -2248,7 +2231,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	label = gtk_label_new( _("Port:") );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, label_len, 15 );
+	gtk_widget_set_size_request( label, label_len, 15 );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	const int	buff_len = 10;
@@ -2256,7 +2239,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
      
 	g_snprintf( buff, buff_len, "%d", m_prefs.proxy_port );
 	gtk_entry_set_text( GTK_ENTRY(m_proxy_port_entry), buff );
-	gtk_widget_set_usize( m_proxy_port_entry, default_entry_len, -1 );
+	gtk_widget_set_size_request( m_proxy_port_entry, default_entry_len, -1 );
 	gtk_widget_show( m_proxy_port_entry );
 	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_port_entry, FALSE, FALSE, 5 );
 	
@@ -2266,7 +2249,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	m_auth_cb_data.m_panel = this;
 	m_auth_cb_data.m_toggle_data = &m_prefs.do_proxy_auth;
 	m_auth_toggle = gtkut_check_button( m_top_vbox, _("Proxy requires authentication"), m_prefs.do_proxy_auth,
-		GTK_SIGNAL_FUNC(s_toggle_checkbox), &m_auth_cb_data );
+		G_CALLBACK(s_toggle_checkbox), &m_auth_cb_data );
 
 	const int	spacer_len = 15;
 	
@@ -2276,17 +2259,17 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	
 	GtkWidget	*spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_widget_set_size_request( spacer, spacer_len, -1 );
 	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
 	
 	label = gtk_label_new( _("User ID:") );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
+	gtk_widget_set_size_request( label, label_len - spacer_len, 15 );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_proxy_user_entry), m_prefs.proxy_user );
-	gtk_widget_set_usize( m_proxy_user_entry, default_entry_len, -1 );
+	gtk_widget_set_size_request( m_proxy_user_entry, default_entry_len, -1 );
 	gtk_widget_show( m_proxy_user_entry );
 	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_user_entry, FALSE, FALSE, 5 );
 	
@@ -2298,18 +2281,18 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_widget_set_size_request( spacer, spacer_len, -1 );
 	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
 	
 	label = gtk_label_new( _("Password:") );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
+	gtk_widget_set_size_request( label, label_len - spacer_len, 15 );
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 5 );
 
 	gtk_entry_set_visibility( GTK_ENTRY(m_proxy_password_entry), FALSE );
 	gtk_entry_set_text( GTK_ENTRY(m_proxy_password_entry), m_prefs.proxy_password );
-	gtk_widget_set_usize( m_proxy_password_entry, default_entry_len, -1 );
+	gtk_widget_set_size_request( m_proxy_password_entry, default_entry_len, -1 );
 	gtk_widget_show( m_proxy_password_entry );
 	gtk_box_pack_start( GTK_BOX(hbox), m_proxy_password_entry, FALSE, FALSE, 5 );
 
@@ -2412,7 +2395,7 @@ void	ay_encoding_panel::Build( GtkWidget *inParent )
 	gtk_widget_show( label);
 
 	GtkWidget	*button = _gtkut_button( _("Use recoding in conversations"), &m_prefs.use_recoding, m_top_vbox );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_set_use_of_recoding), this );
+	g_signal_connect( button, "clicked", G_CALLBACK(s_set_use_of_recoding), this );
 
 	const int	label_len = 120;
 	const int 	spacer_len = 15;
@@ -2423,13 +2406,13 @@ void	ay_encoding_panel::Build( GtkWidget *inParent )
 	
 	GtkWidget	*spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_widget_set_size_request( spacer, spacer_len, -1 );
 	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
 	
 	label = gtk_label_new( _("Local encoding:") );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
+	gtk_widget_set_size_request( label, label_len - spacer_len, 15 );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_local_encoding_entry), cGetLocalPref("local_encoding") );
@@ -2444,13 +2427,13 @@ void	ay_encoding_panel::Build( GtkWidget *inParent )
 	
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, spacer_len, -1 );
+	gtk_widget_set_size_request( spacer, spacer_len, -1 );
 	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
 	
 	label = gtk_label_new( _("Remote encoding:") );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-	gtk_widget_set_usize( label, label_len - spacer_len, 15 );
+	gtk_widget_set_size_request( label, label_len - spacer_len, 15 );
 	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
 	gtk_entry_set_text( GTK_ENTRY(m_remote_encoding_entry), cGetLocalPref("remote_encoding") );
@@ -2533,7 +2516,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 	
 	GtkWidget	*spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_widget_set_size_request( spacer, -1, 5 );
 	
 	gtk_box_pack_start( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 
@@ -2545,11 +2528,8 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
 		gtk_widget_show( hbox );
 		
-		GtkStyle	*style = gtk_widget_get_style( m_parent_window );
-		GdkBitmap	*mask = NULL;
-	
-		GdkPixmap	*icon = gdk_pixmap_create_from_xpm_d( m_parent_window->window, &mask, &style->bg[GTK_STATE_NORMAL], error_xpm );
-		GtkWidget	*icon_widget = gtk_pixmap_new( icon, mask );
+		GdkPixbuf	*icon = gdk_pixbuf_new_from_xpm_data( (const char **) error_xpm );
+		GtkWidget	*icon_widget = gtk_image_new_from_pixbuf( icon );
 		gtk_widget_show( icon_widget );
 		gtk_box_pack_start( GTK_BOX(hbox), icon_widget, FALSE, FALSE, 0 );
 
@@ -2599,7 +2579,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 	{	
 		spacer = gtk_label_new( "" );
 		gtk_widget_show( spacer );
-		gtk_widget_set_usize( spacer, -1, 5 );
+		gtk_widget_set_size_request( spacer, -1, 5 );
 		gtk_box_pack_start( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 		
 		// a scrolled window for the smiley sets
@@ -2673,11 +2653,11 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		gtk_widget_show( scrolled_win );
 	}
 	
-	GtkWidget	*unload_button = gtkut_create_label_button( _( "Unload Module" ), GTK_SIGNAL_FUNC(s_unload_module), this );
+	GtkWidget	*unload_button = gtkut_create_label_button( _( "Unload Module" ), G_CALLBACK(s_unload_module), this );
 	gtk_container_set_border_width( GTK_CONTAINER(unload_button), 5 );
 	gtk_widget_set_sensitive( unload_button, m_prefs.is_loaded );
 	
-	GtkWidget	*load_button = gtkut_create_label_button( _( "Load Module" ), GTK_SIGNAL_FUNC(s_load_module), this );
+	GtkWidget	*load_button = gtkut_create_label_button( _( "Load Module" ), G_CALLBACK(s_load_module), this );
 	gtk_container_set_border_width( GTK_CONTAINER(load_button), 5 );
 	gtk_widget_set_sensitive( load_button, !m_prefs.is_loaded );
 	
@@ -2694,7 +2674,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 	
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_widget_set_size_request( spacer, -1, 5 );
 	gtk_box_pack_end( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 }
 
@@ -2725,10 +2705,8 @@ void	ay_module_panel::Apply( void )
 			case EB_INPUT_LIST:
 				{
 					GtkWidget	*list_widget = reinterpret_cast<GtkWidget *>(the_list->widget.listbox.widget);
-					GtkWidget	*list_item = gtk_menu_get_active(GTK_MENU(list_widget));
-					const char	*text = gtk_widget_get_name(GTK_WIDGET(list_item));
-					if(text)
-						*the_list->widget.listbox.value = atoi(text);
+					*the_list->widget.listbox.value = gtk_combo_box_get_active(
+							GTK_COMBO_BOX(list_widget));
 				}
 				break;
 		}
@@ -2743,7 +2721,7 @@ void	ay_module_panel::AddInfoRow( GtkWidget *inTable, int inRow, const char *inH
 	GtkWidget	*label = gtk_label_new( inHeader );
 	gtk_misc_set_alignment( GTK_MISC( label ), 1.0, 0.0 );
 	gtk_widget_show( label );
-	gtk_widget_set_usize( label, 65, -1 );
+	gtk_widget_set_size_request( label, 65, -1 );
 	gtk_table_attach( GTK_TABLE(inTable), label, 0, 1, inRow, inRow + 1, GTK_SHRINK, GTK_FILL, 10, 0 );
 	
 	label = gtk_label_new( inInfo );
@@ -2793,7 +2771,7 @@ void	ay_module_panel::RenderModulePrefs( void )
 					GtkWidget	*label = gtk_label_new( item_label );
 					gtk_widget_show( label );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-					gtk_widget_set_usize( label, 130, 15 );
+					gtk_widget_set_size_request( label, 130, 15 );
 					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
 					GtkWidget	*widget = gtk_entry_new();
@@ -2823,30 +2801,21 @@ void	ay_module_panel::RenderModulePrefs( void )
 					GtkWidget	*label = gtk_label_new( item_label );
 					gtk_widget_show( label );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-					gtk_widget_set_usize( label, 130, 15 );
+					gtk_widget_set_size_request( label, 130, 15 );
 					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
-					GtkWidget	*menu = gtk_option_menu_new();
+					GtkWidget	*menu = gtk_combo_box_new_text();
 					gtk_widget_show(menu);
-					GtkWidget	*widget = gtk_menu_new();
-					gtk_widget_show( widget );
-					the_list->widget.listbox.widget = widget;
+					the_list->widget.listbox.widget = menu;
 					
 					int i; LList *l;
 					for(i=0, l=the_list->widget.listbox.list; l; l=l_list_next(l), i++) {
 						char *label = (char *)l->data;
-						char name[10];
-						GtkWidget *w = gtk_menu_item_new_with_label(label);
-						gtk_widget_show(w);
-						snprintf(name, sizeof(name), "%d", i);
-						gtk_widget_set_name(w, name);
-						gtk_menu_append(GTK_MENU(widget), w);
+						gtk_combo_box_append_text(GTK_COMBO_BOX(menu), label);
 					}
-					
-					gtk_option_menu_set_menu(GTK_OPTION_MENU(menu), widget);
-					gtk_option_menu_set_history(GTK_OPTION_MENU(menu), 
-							*the_list->widget.listbox.value);
 
+					gtk_combo_box_set_active(GTK_COMBO_BOX(menu), *the_list->widget.listbox.value);
+					
 					gtk_box_pack_start( GTK_BOX(hbox), menu, FALSE, FALSE, 0 );
 
 					gtk_box_pack_start( GTK_BOX(m_top_container), hbox, FALSE, FALSE, 0 );
@@ -2924,7 +2893,7 @@ void	ay_account_panel::Build( GtkWidget *inParent )
 
 	GtkWidget	*spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_widget_set_size_request( spacer, -1, 5 );
 	gtk_box_pack_start( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 
 	if ( m_prefs.pref_list != NULL )
@@ -2946,11 +2915,12 @@ void	ay_account_panel::Build( GtkWidget *inParent )
 		g_string_free( labelText, TRUE );
 	}
 
-	GtkWidget	*connect_button = gtkut_create_label_button( _( "Connect" ), GTK_SIGNAL_FUNC(s_connect_account), this );
+	GtkWidget	*connect_button = gtkut_create_label_button( _( "Connect" ), G_CALLBACK(s_connect_account), this );
 	gtk_container_set_border_width( GTK_CONTAINER(connect_button), 5 );
 	gtk_widget_set_sensitive( connect_button, !m_prefs.is_connected );
 	
-	GtkWidget	*disconnect_button = gtkut_create_label_button( _( "Disconnect" ), GTK_SIGNAL_FUNC(s_disconnect_account), this );
+	GtkWidget	*disconnect_button = gtkut_create_label_button( _( "Disconnect" ),
+			G_CALLBACK(s_disconnect_account), this );
 	gtk_container_set_border_width( GTK_CONTAINER(disconnect_button), 5 );
 	gtk_widget_set_sensitive( disconnect_button, m_prefs.is_connected );
 	
@@ -2967,7 +2937,7 @@ void	ay_account_panel::Build( GtkWidget *inParent )
 	
 	spacer = gtk_label_new( "" );
 	gtk_widget_show( spacer );
-	gtk_widget_set_usize( spacer, -1, 5 );
+	gtk_widget_set_size_request( spacer, -1, 5 );
 	gtk_box_pack_end( GTK_BOX(m_top_container), spacer, FALSE, FALSE, 0 );
 }
 
@@ -2999,10 +2969,8 @@ void	ay_account_panel::Apply( void )
 			case EB_INPUT_LIST:
 				{
 					GtkWidget	*list_widget = reinterpret_cast<GtkWidget *>(the_list->widget.listbox.widget);
-					GtkWidget	*list_item = gtk_menu_get_active(GTK_MENU(list_widget));
-					const char	*text = gtk_widget_get_name(GTK_WIDGET(list_item));
-					if(text)
-						*the_list->widget.listbox.value = atoi(text);
+					*the_list->widget.listbox.value = gtk_combo_box_get_active(
+								GTK_COMBO_BOX(list_widget));
 				}
 				break;
 		}
@@ -3049,11 +3017,11 @@ void	ay_account_panel::RenderAccountPrefs( void )
 					else
 						item_label = the_list->name;
 
-					GtkWidget	*label = gtk_label_new( "" );
-					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
+					GtkWidget	*label = gtk_label_new_with_mnemonic( item_label );
+					int key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
 					gtk_widget_show( label );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-					gtk_widget_set_usize( label, 130, 15 );
+					gtk_widget_set_size_request( label, 130, 15 );
 					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
 					GtkWidget	*widget = gtk_entry_new();
@@ -3082,11 +3050,11 @@ void	ay_account_panel::RenderAccountPrefs( void )
 					else
 						item_label = the_list->name;
 					
-					GtkWidget	*label = gtk_label_new( "" );
-					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
+					GtkWidget	*label = gtk_label_new_with_mnemonic( item_label );
+					int key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
 					gtk_widget_show( label );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-					gtk_widget_set_usize( label, 130, 15 );
+					gtk_widget_set_size_request( label, 130, 15 );
 					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
 					GtkWidget	*widget = gtk_entry_new();
@@ -3116,34 +3084,25 @@ void	ay_account_panel::RenderAccountPrefs( void )
 					else
 						item_label = the_list->name;
 					
-					GtkWidget	*label = gtk_label_new( "" );
-					int key = gtk_label_parse_uline(GTK_LABEL(label), item_label);
+					GtkWidget	*label = gtk_label_new( item_label );
+					int key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
 					gtk_widget_show( label );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
-					gtk_widget_set_usize( label, 130, 15 );
+					gtk_widget_set_size_request( label, 130, 15 );
 					gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
 
-					GtkWidget	*menu = gtk_option_menu_new();
+					GtkWidget	*menu = gtk_combo_box_new_text();
 					gtk_widget_show(menu);
-					GtkWidget	*widget = gtk_menu_new();
-					gtk_widget_show( widget );
-					the_list->widget.listbox.widget = widget;
+					the_list->widget.listbox.widget = menu;
 					
 					int i; LList *l;
 					for(i=0, l=the_list->widget.listbox.list; l; l=l_list_next(l), i++) {
 						char *label = (char *)l->data;
-						char name[10];
-						GtkWidget *w = gtk_menu_item_new_with_label(label);
-						gtk_widget_show(w);
-						snprintf(name, sizeof(name), "%d", i);
-						gtk_widget_set_name(w, name);
-						gtk_menu_append(GTK_MENU(widget), w);
+						gtk_combo_box_append_text(GTK_COMBO_BOX(menu), label);
 					}
-					
-					gtk_option_menu_set_menu(GTK_OPTION_MENU(menu), widget);
-					gtk_option_menu_set_history(GTK_OPTION_MENU(menu), 
-							*the_list->widget.listbox.value);
 
+					gtk_combo_box_set_active(GTK_COMBO_BOX(menu), *the_list->widget.listbox.value);
+					
 					gtk_widget_add_accelerator(menu, "grab_focus", m_accel_group,
 							key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 

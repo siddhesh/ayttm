@@ -8,3 +8,5 @@ pkglib_LTLIBRARIES = icq.la
 icq_la_SOURCES = icq.c
 
 icq_la_LDFLAGS = -module -avoid-version libicq/*.lo
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

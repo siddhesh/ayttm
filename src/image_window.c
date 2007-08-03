@@ -84,6 +84,7 @@ static struct ay_image_wnd * get_image_wnd_by_tag(int tag)
 static void ay_image_window_destroy(GtkWidget *widget, gpointer data)
 {
 	struct ay_image_wnd *aiw = data;
+	GError *error = NULL;
 
 	if(!aiw)
 		return;
@@ -91,7 +92,7 @@ static void ay_image_window_destroy(GtkWidget *widget, gpointer data)
 	images = l_list_remove(images, aiw);
 
 	if(aiw->loader_open) {
-		gdk_pixbuf_loader_close(aiw->loader);
+		gdk_pixbuf_loader_close(aiw->loader, &error);
 		aiw->loader_open=0;
 	}
 
@@ -112,18 +113,13 @@ static char *dummy_pixmap_xpm[] = {
 
 static GtkWidget *create_dummy_pixmap(GtkWidget * widget)
 {
-	GdkColormap *colormap;
-	GdkPixmap *gdkpixmap;
-	GdkBitmap *mask;
-	GtkWidget *pixmap;
+	GdkPixbuf *gdkpixbuf;
+	GtkWidget *image;
 
-	colormap = gtk_widget_get_colormap(widget);
-	gdkpixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL, colormap, &mask,
-						  NULL, dummy_pixmap_xpm);
-	pixmap = gtk_pixmap_new(gdkpixmap, mask);
-	gdk_pixmap_unref(gdkpixmap);
-	gdk_bitmap_unref(mask);
-	return pixmap;
+	gdkpixbuf = gdk_pixbuf_new_from_xpm_data((const char **)dummy_pixmap_xpm);
+	image = gtk_image_new_from_pixbuf(gdkpixbuf);
+	gdk_pixbuf_unref(gdkpixbuf);
+	return image;
 }
 
 int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data)
@@ -148,12 +144,10 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 	gtk_widget_show(pixImage);
 
 	gtk_box_pack_start(GTK_BOX(vbox1), pixImage, TRUE, TRUE, 0);
-	gtk_widget_set_usize(pixImage, width, height);
+	gtk_widget_set_size_request(pixImage, width, height);
 
 	btnClose = gtk_button_new_with_label(_("Close"));
-	gtk_signal_connect_object(GTK_OBJECT(btnClose), "clicked",
-				GTK_SIGNAL_FUNC(gtk_widget_destroy),
-				GTK_OBJECT(wndImage));
+	g_signal_connect_swapped(btnClose, "clicked", G_CALLBACK(gtk_widget_destroy), wndImage);
 	gtk_widget_show(btnClose);
 	gtk_box_pack_start(GTK_BOX(vbox1), btnClose, FALSE, FALSE, 0);
 
@@ -167,8 +161,7 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 
 	images = l_list_prepend(images, aiw);
 
-	gtk_signal_connect(GTK_OBJECT(wndImage), "destroy",
-				GTK_SIGNAL_FUNC(ay_image_window_destroy), aiw);
+	g_signal_connect(wndImage, "destroy", G_CALLBACK(ay_image_window_destroy), aiw);
 
 	gtk_widget_show(wndImage);
 
@@ -191,6 +184,7 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 	GdkPixbuf *pixbuf;
 	GdkPixmap *gdkpixmap;
 	GdkBitmap *mask;
+	GError *error = NULL;
 
 	if(!aiw || !buf) {
 		return 0;
@@ -205,8 +199,8 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 
 	eb_debug(DBG_CORE, "jpg_buf is %p\n", jpg_buf);
 	aiw->loader = gdk_pixbuf_loader_new();
-	gdk_pixbuf_loader_write(aiw->loader, jpg_buf, count);
-	gdk_pixbuf_loader_close(aiw->loader);
+	gdk_pixbuf_loader_write(aiw->loader, jpg_buf, count, &error);
+	gdk_pixbuf_loader_close(aiw->loader, &error);
 	free(jpg_buf);
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(aiw->loader);
@@ -218,7 +212,7 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 	gdk_pixbuf_render_pixmap_and_mask(pixbuf, &gdkpixmap, &mask, 0);
 	gdk_pixbuf_unref(pixbuf);
 
-	gtk_pixmap_set(GTK_PIXMAP(aiw->pixmap), gdkpixmap, mask);
+	gtk_image_set_from_pixmap(GTK_IMAGE(aiw->pixmap), gdkpixmap, mask);
 
 	gtk_widget_show(aiw->pixmap);
 

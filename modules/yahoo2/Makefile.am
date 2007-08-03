@@ -13,3 +13,5 @@ yahoo2_la_SOURCES = yahoo.c
 
 yahoo2_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 yahoo2_la_LIBADD = libyahoo2/*.lo $(WIN32_LIBADD)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

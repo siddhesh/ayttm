@@ -81,7 +81,7 @@ void edit_group_window_new( grouplist * g)
 		GtkWidget * frame;
 		GtkWidget * separator;
 		
-		edit_group_window = gtk_window_new(GTK_WINDOW_DIALOG);
+		edit_group_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_window_set_transient_for(GTK_WINDOW(edit_group_window), GTK_WINDOW(statuswindow));
 		gtk_window_set_position(GTK_WINDOW(edit_group_window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(edit_group_window);
@@ -121,8 +121,7 @@ void edit_group_window_new( grouplist * g)
 		hbox2=gtk_hbox_new(FALSE,5);
 		button = gtkut_create_icon_button( g?_("Save"):_("Add"), tb_edit_xpm, edit_group_window );
 
-		gtk_signal_connect(GTK_OBJECT(button), "clicked", 
-						   GTK_SIGNAL_FUNC(ok_callback), NULL );
+		g_signal_connect(button, "clicked",G_CALLBACK(ok_callback), NULL );
 
 		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
@@ -131,8 +130,7 @@ void edit_group_window_new( grouplist * g)
       
 		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_group_window );
 
-		gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-						GTK_SIGNAL_FUNC(cancel_callback), NULL);
+		g_signal_connect_swapped (button, "clicked", G_CALLBACK(cancel_callback), NULL);
 
 		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
@@ -147,8 +145,7 @@ void edit_group_window_new( grouplist * g)
 		gtk_container_add(GTK_CONTAINER(edit_group_window), vbox);
 		gtk_widget_show(vbox);
 		
-		gtk_signal_connect( GTK_OBJECT(edit_group_window), "destroy",
-				GTK_SIGNAL_FUNC(destroy), NULL);
+		g_signal_connect( edit_group_window, "destroy", G_CALLBACK(destroy), NULL);
 		gtk_widget_show(edit_group_window);
 	}
 
@@ -158,9 +155,7 @@ void edit_group_window_new( grouplist * g)
 	else
 		g_snprintf(buff, 1024, _("Add group"));
 	gtk_window_set_title(GTK_WINDOW(edit_group_window), buff);
-	gtkut_set_window_icon(edit_group_window->window, NULL);
-	gtk_signal_connect(GTK_OBJECT(edit_group_window), "destroy",
-				GTK_SIGNAL_FUNC(destroy), NULL);
+	g_signal_connect(edit_group_window, "destroy", G_CALLBACK(destroy), NULL);
 
 	current_group = g;
 	window_open = 1;

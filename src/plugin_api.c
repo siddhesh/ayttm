@@ -171,7 +171,7 @@ void eb_set_active_menu_status(LList *status_menu, int status)
 int eb_input_add(int fd, eb_input_condition condition, eb_input_function function,
 		 void *callback_data)
 {
-	return(gdk_input_add(fd, condition, function, callback_data));
+	return(gdk_input_add(fd, condition, (GdkInputFunction)function, callback_data));
 }
 
 void eb_input_remove(int tag)
@@ -181,12 +181,12 @@ void eb_input_remove(int tag)
 
 int eb_timeout_add(int ms, eb_timeout_function function, void *callback_data)
 {
-	return(gtk_timeout_add(ms, function, callback_data));
+	return(g_timeout_add(ms, (GSourceFunc)function, callback_data));
 }
 
 void eb_timeout_remove(int tag)
 {
-	gtk_timeout_remove(tag);
+	g_source_remove(tag);
 }
 
 

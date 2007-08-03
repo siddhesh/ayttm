@@ -88,7 +88,7 @@ class ay_activity_bar_pack {
 class ay_activity_window {
 	private:
 	static LList *s_packs;
-	static GtkWidget *s_window, *s_vbox;
+	static GtkWidget *s_window;
 	static int s_last_tag;
 	static int s_timeout;
 
@@ -105,7 +105,6 @@ class ay_activity_window {
 /* initialise static variables */
 LList *ay_activity_window::s_packs=NULL;
 GtkWidget *ay_activity_window::s_window=NULL;
-GtkWidget *ay_activity_window::s_vbox=NULL;
 int ay_activity_window::s_last_tag=0;
 int ay_activity_window::s_timeout=0;
 
@@ -131,14 +130,12 @@ ay_activity_bar_pack::ay_activity_bar_pack(const char *label,
 	m_pbar = gtk_progress_bar_new();
 	gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(m_pbar), 
 			GTK_PROGRESS_LEFT_TO_RIGHT );
-	gtk_progress_set_activity_mode(GTK_PROGRESS(m_pbar), mode);
 	gtk_box_pack_start(GTK_BOX(m_hbox), m_pbar, TRUE, TRUE, 10);
 	gtk_widget_show(m_pbar);
 
 	m_cbtn = gtk_button_new_with_label(_("Cancel"));
 	if(cancel_callback) {
-		gtk_signal_connect(GTK_OBJECT(m_cbtn), "clicked",
-			GTK_SIGNAL_FUNC(s_cancel_clicked), this);
+		g_signal_connect(m_cbtn, "clicked", G_CALLBACK(s_cancel_clicked), this);
 	} else {
 		gtk_widget_set_sensitive(m_cbtn, FALSE);
 	}
@@ -158,20 +155,15 @@ void ay_activity_bar_pack::update_label(const char * label)
 
 void ay_activity_bar_pack::update_progress(const unsigned long done)
 {
-	gtk_progress_set_percentage(GTK_PROGRESS(m_pbar), ((float)done)/((float)m_size));
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(m_pbar), ((float)done)/((float)m_size));
 }
 
 void ay_activity_bar_pack::update_activity( void )
 {
-	float new_val = gtk_progress_get_value(GTK_PROGRESS(m_pbar)) + 3;
-	GtkAdjustment *adj = GTK_PROGRESS(m_pbar)->adjustment;
 	if (m_size > 0)
 		return;
 	
-	if (new_val > adj->upper)
-		new_val = adj->lower;
-
-	gtk_progress_set_value(GTK_PROGRESS(m_pbar), new_val);
+	gtk_progress_bar_pulse(GTK_PROGRESS_BAR(m_pbar));
 }
 
 void ay_activity_bar_pack::cancel( void )
@@ -204,22 +196,17 @@ ay_activity_bar_pack::~ay_activity_bar_pack()
  */
 void ay_activity_window::create_window( void )
 {
-	s_window = gtk_window_new(GTK_WINDOW_DIALOG);
+	s_window = gtk_dialog_new();
 	gtk_window_set_transient_for(GTK_WINDOW(s_window), GTK_WINDOW(statuswindow));
-	gtk_signal_connect(GTK_OBJECT(s_window), "delete_event", 
-			GTK_SIGNAL_FUNC(s_delete_event), NULL);
-	gtk_window_set_policy(GTK_WINDOW(s_window), FALSE, TRUE, TRUE);
+	g_signal_connect(s_window, "delete_event", G_CALLBACK(s_delete_event), NULL);
+	gtk_window_set_resizable(GTK_WINDOW(s_window), TRUE);
 	gtk_window_set_position(GTK_WINDOW(s_window), GTK_WIN_POS_MOUSE);
-	s_vbox = gtk_vbox_new(TRUE, 0);
-
-	gtk_container_add(GTK_CONTAINER(s_window), s_vbox);
 
 	s_timeout = eb_timeout_add(50, s_update_activity, &s_packs);
 }
 
 void ay_activity_window::show( void )
 {
-	gtk_widget_show(s_vbox);
 	gtk_widget_show(s_window);
 }
 
@@ -229,8 +216,8 @@ int ay_activity_window::add_pack(ay_activity_bar_pack *abp)
 		create_window();
 
 	s_packs = l_list_prepend(s_packs, abp);
-	gtk_box_pack_start(GTK_BOX(s_vbox), abp->m_lbl, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(s_vbox), abp->m_hbox, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(s_window)->vbox), abp->m_lbl, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(s_window)->vbox), abp->m_hbox, TRUE, TRUE, 0);
 
 	if(! GTK_WIDGET_VISIBLE(GTK_WIDGET(s_window)) )
 		show();
@@ -281,7 +268,7 @@ void ay_activity_window::close_window( void )
 
 	if(s_window) {
 		gtk_widget_destroy(s_window);
-		s_window = s_vbox = NULL;
+		s_window = NULL;
 	}
 }
 

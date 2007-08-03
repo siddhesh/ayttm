@@ -28,3 +28,5 @@ importlicq_la_LIBADD = $(WIN32_LIBADD)
 import_everybuddy_la_SOURCES = import_everybuddy.c
 import_everybuddy_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 import_everybuddy_la_LIBADD = $(WIN32_LIBADD)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

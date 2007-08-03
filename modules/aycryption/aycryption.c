@@ -40,8 +40,8 @@
 #include "platform_defs.h"
 #include "select-keys.h"
 #include <gtk/gtk.h>
-#include "gtk/extgtktext.h"
-#include "gtk/gtk_eb_html.h"
+#include "gtk/html_text_buffer.h"
+#include <errno.h>
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -53,19 +53,24 @@
 
 /* Function Prototypes */
 static char *aycryption_out(const eb_local_account * local, const eb_account * remote,
-			    const struct contact *contact, const char * s);
+			    struct contact *contact, const char * s);
 static char *aycryption_in(const eb_local_account * local, const eb_account * remote,
 			   const struct contact *contact, const char * s);
 static void set_gpg_key(ebmCallbackData *data);
 static void show_gpg_log(ebmCallbackData *data);
-static GpgmeData pgp_encrypt ( GpgmeData plain, GpgmeRecipients rset, int sign );
+void pgp_encrypt ( gpgme_data_t plain, gpgme_data_t *cipher, gpgme_key_t *kset, int sign );
 
-const char *gpgmegtk_passphrase_cb (void *opaque, const char *desc, void **r_hd);
+gpgme_error_t gpgmegtk_passphrase_cb (void *opaque, 
+				      const char *desc, 
+				      const char *passphrase_info, 
+				      int prev_was_bad, 
+				      int fd);
+
 static int aycryption_init();
 static int aycryption_finish();
 
 struct passphrase_cb_info_s {
-    GpgmeCtx c;
+    gpgme_ctx_t c;
     int did_it;
 };
 
@@ -73,7 +78,6 @@ static int store_passphrase = 0;
 static char mykey[MAX_PREF_LEN] = "";
 
 static int ref_count = 0;
-static int gpgme_inited = 0;
 static void *tag1=NULL;
 static void *tag2=NULL;
 static void *tag3=NULL;
@@ -91,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.21 $",
-	"$Date: 2004/01/14 04:49:14 $",
+	"$Revision: 1.22 $",
+	"$Date: 2007/08/03 20:38:38 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -130,22 +134,22 @@ static int aycryption_init()
 	incoming_message_filters = l_list_append(incoming_message_filters, &aycryption_in);
 	
 	gpg_log_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gpg_log_text = ext_gtk_text_new(NULL,NULL);
+	gpg_log_text = gtk_text_view_new();
 	gpg_log_swindow = gtk_scrolled_window_new(NULL,NULL);
 	
 	gtk_window_set_title(GTK_WINDOW(gpg_log_window), _("Aycryption - status"));
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(gpg_log_swindow), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
-	
-	gtk_eb_html_init(EXT_GTK_TEXT(gpg_log_text));
-	gtk_widget_set_usize(gpg_log_text, 450, 150);
+
+	html_text_view_init(GTK_TEXT_VIEW(gpg_log_text), HTML_IGNORE_FONT);
+	gtk_widget_set_size_request(gpg_log_text, 450, 150);
 	
 	gtk_container_add(GTK_CONTAINER(gpg_log_swindow), gpg_log_text);
 	gtk_container_add(GTK_CONTAINER(gpg_log_window), gpg_log_swindow);
 	gtk_widget_show(gpg_log_text);
 	gtk_widget_show(gpg_log_swindow);
 	
-	gtk_signal_connect(GTK_OBJECT(gpg_log_window), "delete-event", 
-			GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), NULL);
+	g_signal_connect(gpg_log_window, "delete-event",
+			G_CALLBACK(gtk_widget_hide_on_delete), NULL);
 	
 	gtk_widget_realize(gpg_log_window);
 	gtk_widget_realize(gpg_log_swindow);
@@ -178,14 +182,6 @@ static int aycryption_init()
 		return(-1);
 	}
 
-
-	if(!gpgme_inited) {
-		const char *version = gpgme_check_version(NULL);
-		if(strncmp("0.3",version , 3)) {
-			ay_do_error(_("aycryption error"), _("You need gpgme version 0.3 for aycryption to work."));
-			return -1;
-		}
-	}
 	return 0;
 }
 
@@ -238,14 +234,21 @@ static void br_to_nl(char * text)
 		}
 		else if (text[i] == '>')
 		{
-			if(!visible)
+			if(!visible) {
 				visible = 1;
-			continue;
+				continue;
+			}
 		}
 		if (visible)
 			text[j++] = text[i];
 	}
 	text[j] = '\0';
+}
+
+static gpgme_error_t mygpgme_data_rewind(gpgme_data_t dh)
+{
+	return (gpgme_data_seek (dh, 0, SEEK_SET) == -1)
+		? gpgme_error_from_errno (errno) : 0;
 }
 
 static void show_gpg_log(ebmCallbackData *data)
@@ -276,14 +279,16 @@ static void set_gpg_key(ebmCallbackData *data)
 	if (ct->gpg_key && ct->gpg_key[0]);
 		recp_names = g_slist_append(recp_names, strdup(ct->gpg_key));
 	keys = gpgmegtk_recipient_selection(recp_names, ct->gpg_do_encryption, ct->gpg_do_signature);
-	if (keys.rset && keys.key) {
+	if (keys.kset && keys.key) {
 		eb_debug(DBG_CRYPT,"got key %s\n", keys.key);
 		strncpy(ct->gpg_key, keys.key, 48);
+
 		ct->gpg_do_encryption = keys.do_crypt;
 		ct->gpg_do_signature = keys.do_sign;
 	} else {
 		eb_debug(DBG_CRYPT, "no key\n");
 		strncpy(ct->gpg_key, "", 48);
+
 		ct->gpg_do_encryption = 0;
 		ct->gpg_do_signature = keys.do_sign;
 	}
@@ -302,80 +307,112 @@ static void log_action(const struct contact *ct, int loglevel, const char *strin
 	
 	char buf[1024];
 	snprintf(buf, 1024, _("<font color=%s><b>%s</b>: %s</font><br>"),logcolor[loglevel], ct->nick, string);
-	gtk_eb_html_add(EXT_GTK_TEXT(gpg_log_text), buf, 0, 0, 0);
+	html_text_buffer_append(GTK_TEXT_VIEW(gpg_log_text), buf, HTML_IGNORE_NONE);
 	if (loglevel == LOG_ERR) {
 		show_gpg_log(NULL);
 	}
 }
 
+void gpg_get_kset(struct contact *ct, gpgme_key_t **kset)
+{
+	int num_keys = 0;
+	gpgme_ctx_t ctx;
+	gpgme_error_t err;
+
+	err = gpgme_new(&ctx);
+	g_assert(!err);
+
+	err = gpgme_op_keylist_start (ctx, ct->gpg_key, 0);
+	if (err) {
+		eb_debug(DBG_CRYPT, "err: %s\n", gpgme_strerror(err));
+		*kset = NULL;
+		return;
+	}
+
+	*kset = g_malloc(sizeof(gpgme_key_t));
+
+	while ( !(err = gpgme_op_keylist_next ( ctx, &(*kset)[num_keys] )) ) {
+		eb_debug(DBG_CRYPT,"found a key for %s with name %s\n", 
+			 ct->gpg_key, 
+			 (*kset)[num_keys]->uids->name);
+
+		*kset = g_realloc( *kset, sizeof(gpgme_key_t) * (num_keys + 1) );
+		num_keys++;
+	}
+
+	gpgme_release(ctx);
+}
+
+
 static char *aycryption_out(const eb_local_account * local, const eb_account * remote,
-			    const struct contact *ct, const char * s)
+			    struct contact *ct, const char * s)
 {
 	char *p = NULL;
 	char buf[4096];
-	int nread;
 
-	GpgmeRecipients rset;
-	if ((!ct->gpg_do_encryption || !ct->gpg_key || ct->gpg_key[0]=='\0')
-	&& !ct->gpg_do_signature) {
+	gpgme_data_t plain = NULL;
+	gpgme_data_t cipher = NULL;
+	gpgme_error_t error;
+	gpgme_key_t *kset = NULL;
+	int err;
+
+	if ((!ct->gpg_do_encryption || !ct->gpg_key || ct->gpg_key == '\0')
+	    && !ct->gpg_do_signature) {
 		if (ct->gpg_do_encryption)
 			log_action(ct, LOG_ERR, "Could not encrypt message.");
 		return strdup(s);
 	}
-        gpgme_recipients_new (&rset);
-	if ((ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
-	&& gpgme_recipients_add_name_with_validity( rset, ct->gpg_key, 
-		GPGME_VALIDITY_FULL) ) {
+
+	if( ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0] )
+		gpg_get_kset(ct, &kset);
+
+
+	if ( ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0] && !kset ) {
 		eb_debug(DBG_CRYPT,"can't init outgoing crypt: %d %p %c\n",
 				ct->gpg_do_encryption, ct->gpg_key, ct->gpg_key[0]);
 		log_action(ct, LOG_ERR, "Could not encrypt message - you may have to set your contact's key.");
 		return strdup(s);
-	} else {
-		GpgmeData plain = NULL;
-		GpgmeData cipher = NULL;
-		int err;
-		gpgme_data_new(&plain);
-		gpgme_data_write(plain, s, strlen(s));
-		
-		/* encrypt only */
-		if (ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0]
-		&& !ct->gpg_do_signature) {
-			cipher = pgp_encrypt (plain, rset, FALSE);
-			gpgme_data_release (plain); plain = NULL;
-  			gpgme_recipients_release (rset); rset = NULL;
-			log_action(ct, LOG_NORM, "Sent encrypted, unsigned message.");
-		/* sign only */
-		} else if (!(ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
-		&& ct->gpg_do_signature) {
-			cipher = pgp_encrypt(plain, NULL, TRUE);
-			gpgme_data_release (plain); plain = NULL;
-			log_action(ct, LOG_NORM, "Sent uncrypted, signed message.");		
-		/* encrypt and sign */
-		} else if (ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0]
-		&& ct->gpg_do_signature) {
-			cipher = pgp_encrypt (plain, rset, TRUE);
-			gpgme_data_release (plain); plain = NULL;
-  			gpgme_recipients_release (rset); rset = NULL;
-			log_action(ct, LOG_NORM, "Sent encrypted, signed message.");
-		}
-		err = gpgme_data_rewind (cipher);
-		if (err)
-			eb_debug(DBG_CRYPT,"error: %s\n",
-				gpgme_strerror(err));
-
-		memset(buf, 0, sizeof(buf));
-		while (!gpgme_data_read (cipher, buf, 4096, &nread)) {
-			char tmp[4096];
-			if (nread) {
-				snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
-				if (p)
-					free(p);
-				p = strdup(tmp);
-				memset(buf, 0, sizeof(buf));
-			}
-		}
-		
 	}
+		
+	error = gpgme_data_new(&plain);
+	err = gpgme_data_write(plain, s, strlen(s));
+	
+	/* encrypt only */
+	if (ct->gpg_do_encryption && kset && !ct->gpg_do_signature) {
+		pgp_encrypt (plain, &cipher, kset, FALSE);
+		gpgme_data_release (plain); plain = NULL;
+		log_action(ct, LOG_NORM, "Sent encrypted, unsigned message.");
+	/* sign only */
+	} else if (!(ct->gpg_do_encryption && kset) && ct->gpg_do_signature) {
+		pgp_encrypt(plain, &cipher, NULL, TRUE);
+		gpgme_data_release (plain); plain = NULL;
+		log_action(ct, LOG_NORM, "Sent uncrypted, signed message.");		
+	/* encrypt and sign */
+	} else if (ct->gpg_do_encryption && kset && ct->gpg_do_signature) {
+		pgp_encrypt (plain, &cipher, kset, TRUE);
+		gpgme_data_release (plain); plain = NULL;
+		log_action(ct, LOG_NORM, "Sent encrypted, signed message.");
+	}
+	err = mygpgme_data_rewind (cipher);
+	if (err)
+		eb_debug(DBG_CRYPT,"error: %s\n",
+			 gpgme_strerror(err));
+	
+	memset(buf, 0, sizeof(buf));
+
+	while ( gpgme_data_read (cipher, buf, 4096) >0 ) {
+		char tmp[4096];
+		
+		snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
+		if (p)
+			free(p);
+		p = strdup(tmp);
+		memset(buf, 0, sizeof(buf));
+	}
+
+	if(cipher)
+		gpgme_data_release(cipher);	
+
 	return p;
 }
 
@@ -383,17 +420,20 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 			   const struct contact *ct, const char * s)
 {
 	char *p = NULL, *res = NULL, *s_nohtml = NULL;
-	GpgmeData plain = NULL, cipher = NULL;
-	GpgmeKey key = NULL;
-        struct passphrase_cb_info_s info;
+	gpgme_data_t plain = NULL, cipher = NULL;
+	gpgme_key_t key = NULL;
 	int err;
 	char buf[4096];
-	int nread;
-	GpgmeCtx ctx = NULL;
-	GpgmeSigStat sigstat = 0;
+
+	gpgme_ctx_t ctx = NULL;
+	gpgme_data_t sigstat = NULL;
 	char s_sigstat[1024];
 	int was_crypted = 1;
 	int curloglevel = 0;
+	gpgme_verify_result_t verify_result;
+
+	int sig_code = 0;
+
 	memset(buf, 0, 4096);
 	if (strncmp (s, "-----BEGIN PGP ", strlen("-----BEGIN PGP "))) {
 		eb_debug(DBG_CRYPT, "Incoming message isn't PGP formatted\n");
@@ -423,147 +463,172 @@ static char *aycryption_in(const eb_local_account * local, const eb_account * re
 	br_to_nl(s_nohtml);
 	eb_debug(DBG_CRYPT,"html stripped: %s\n",s_nohtml);
 
-	gpgme_data_write(cipher, s_nohtml, strlen(s_nohtml));
+	err = gpgme_data_write(cipher, s_nohtml, strlen(s_nohtml));
+
+	if(err == -1)
+		perror("cipher write error");
 
 	free(s_nohtml);
+
+	mygpgme_data_rewind(cipher);
+	mygpgme_data_rewind(plain);
 	
 	if (!getenv("GPG_AGENT_INFO")) {
-            info.c = ctx;
-            gpgme_set_passphrase_cb (ctx, gpgmegtk_passphrase_cb, &info);
+            gpgme_set_passphrase_cb (ctx, gpgmegtk_passphrase_cb, NULL);
 	} 
-	err = gpgme_op_decrypt_verify (ctx, cipher, plain, &sigstat);
+	err = gpgme_op_decrypt_verify (ctx, cipher, plain);
 
-	if (err && err != GPGME_No_Data) {
+	if (err && gpg_err_code(err) != GPG_ERR_NO_DATA) {
 		log_action(ct, LOG_ERR, "Cannot decrypt message - maybe your contact uses an incorrect key.");
 		return strdup(s);
-	} else if (err == GPGME_No_Data) { /*plaintext signed*/
+	} else if (gpg_err_code(err) == GPG_ERR_NO_DATA) { /*plaintext signed*/
 		was_crypted = 0;
-		gpgme_data_rewind(cipher);
-		gpgme_data_new(&plain);
-		err = gpgme_op_verify(ctx, cipher, plain, &sigstat);
+		mygpgme_data_rewind(cipher);
+		mygpgme_data_rewind(plain);
+		err = gpgme_op_verify(ctx, cipher, sigstat, plain);
 		if (err)
-			eb_debug(DBG_CRYPT, "plaintext err: %d\n", err);
+			eb_debug(DBG_CRYPT, "plaintext err: %s\n", gpgme_strerror(err));
 	}
 	
-	err = gpgme_get_sig_key(ctx, 0, &key);
-	if (err) {
-		eb_debug(DBG_CRYPT, "getkey err %d\n", err);
+	verify_result = gpgme_op_verify_result(ctx);
+	
+	if(verify_result && verify_result->signatures) {
+		err = gpgme_get_key(ctx, verify_result->signatures->fpr, &key, 0);
+		if (err) {
+			eb_debug(DBG_CRYPT, "getkey err %s\n", gpgme_strerror(err));
+			key = NULL;
+		}
+	} 
+	else
 		key = NULL;
-	}
-	err = gpgme_data_rewind(plain);
+
+	err = mygpgme_data_rewind(plain);
 	if (err)
 		eb_debug(DBG_CRYPT, "rewind err %d\n", err);
+
 	
 	memset(buf, 0, sizeof(buf));
-	while (!(err = gpgme_data_read (plain, buf, sizeof(buf), &nread))) {
+	while ( gpgme_data_read (plain, buf, 4096) > 0 ) {
 		char tmp[4096];
 		memset(tmp, 0, 4096);
-		if (nread) {
-			snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
-			if (p)
-				free(p);
-			p = strdup(tmp);
-			memset(buf, 0, sizeof(buf));
-		}            
+
+		snprintf(tmp, sizeof(tmp), "%s%s",(p!=NULL)?p:"", buf);
+		if (p)
+			free(p);
+		p = strdup(tmp);
+		memset(buf, 0, sizeof(buf));
 	}
 		
 	if (p) {
 		while (p[strlen(p)-1] == '\n' || p[strlen(p)-1] == '\r')
 			p[strlen(p)-1] = '\0';	
 	}
-	
+
 	gpgme_release(ctx);
-	
-	switch(sigstat) {
-		case GPGME_SIG_STAT_NONE:
+
+	if( verify_result && verify_result->signatures ) {
+
+		sig_code = gpg_err_code(verify_result->signatures->status);
+		
+		switch( sig_code ) {
+		case GPG_ERR_NO_DATA:
 			curloglevel = LOG_NORM;
 			break;
-		case GPGME_SIG_STAT_GOOD:
+		case GPG_ERR_NO_ERROR:
 			curloglevel = LOG_OK;
 			break;
 		default:
 			curloglevel = LOG_ERR;
-	}
-	strcpy(s_sigstat, _("Got an "));
-	strcat(s_sigstat, was_crypted?_("encrypted"):_("uncrypted"));
-	switch(sigstat) {
-		case GPGME_SIG_STAT_NONE:
+			break;
+		}
+		
+		strcpy(s_sigstat, _("Got an "));
+		strcat(s_sigstat, was_crypted?_("encrypted"):_("unencrypted"));
+		
+		switch( sig_code ) {
+		case GPG_ERR_NO_DATA:
 			strcat(s_sigstat, _(", unsigned message."));
 			break;
-		case GPGME_SIG_STAT_GOOD:
+		case GPG_ERR_NO_ERROR:
 			strcat(s_sigstat, _(", correctly signed (by "));
-			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, key->uids->email);
 			strcat(s_sigstat, ") message.");
 			break;
-		case GPGME_SIG_STAT_BAD:
+		case GPG_ERR_SIG_EXPIRED:
 			strcat(s_sigstat, _(", badly signed (by "));
-			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, key->uids->email);
 			strcat(s_sigstat, ") message.");
 			break;
-		case GPGME_SIG_STAT_NOKEY:
+		case GPG_ERR_NO_PUBKEY:
 			strcat(s_sigstat, _(" message with no key."));
 			break;
-		case GPGME_SIG_STAT_NOSIG:
-			strcat(s_sigstat, _(" message with no signature."));
+		case GPG_ERR_CERT_REVOKED:
+			strcat(s_sigstat, _(" message ; signature is valid but  the signing key has been revoked"));
 			break;
-		case GPGME_SIG_STAT_ERROR:
-			strcat(s_sigstat, _(" message ; error happened while checking signature."));
-			break;
-		case GPGME_SIG_STAT_DIFF:
-			strcat(s_sigstat, _(" message with more than one signature (their status differ)."));
-			break;
-		case GPGME_SIG_STAT_GOOD_EXP:
+		case GPG_ERR_BAD_SIGNATURE:
 			strcat(s_sigstat, _(" correctly signed (by "));
-			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, key->uids->email);
 			strcat(s_sigstat, _(") message, but signature has expired."));
 			break;
-		case GPGME_SIG_STAT_GOOD_EXPKEY:
+		case GPG_ERR_KEY_EXPIRED:
 			strcat(s_sigstat, _(" correctly signed (by "));
-			strcat(s_sigstat, gpgme_key_get_string_attr (key, GPGME_ATTR_EMAIL, NULL, 0));
+			strcat(s_sigstat, key->uids->email);
 			strcat(s_sigstat, _(") message, but key has expired."));
+			break;
+		case GPG_ERR_GENERAL:
+			strcat(s_sigstat, _(") message, but there was an error verifying the signature"));
 			break;
 		default:
 			strcat(s_sigstat, _(" message - Unknown signature status (file a bugreport)!"));
 			break;
+		}
+
+		if (curloglevel == LOG_ERR) {
+			res = strdup(s);
+			free(p);
+			p = res;
+		}
+		log_action(ct, curloglevel, s_sigstat);
 	}
-	if (curloglevel == LOG_ERR) {
-		res = strdup(s);
-		free(p);
-		p = res;
-	}
-	log_action(ct, curloglevel, s_sigstat);
+
 	return p;
 }
 
 static GSList *create_signers_list (const char *keyid)
 {
 	GSList *key_list = NULL;
-	GpgmeCtx list_ctx = NULL;
+	gpgme_ctx_t list_ctx = NULL;
 	GSList *p;
-	GpgmeError err;
-	GpgmeKey key;
+	gpgme_error_t err;
+	gpgme_key_t key;
 
 	err = gpgme_new (&list_ctx);
-	if (err)
+	if ( gpg_err_code(err) != GPG_ERR_NO_ERROR ) {
 		goto leave;
-	err = gpgme_op_keylist_start (list_ctx, keyid, 1);
-	if (err)
-		goto leave;
-	while ( !(err = gpgme_op_keylist_next (list_ctx, &key)) ) {
-		key_list = g_slist_append (key_list, key);
 	}
-	if (err != GPGME_EOF)
+	err = gpgme_op_keylist_start (list_ctx, keyid, 1);
+	if ( gpg_err_code(err) != GPG_ERR_NO_ERROR ) {
 		goto leave;
+	}
+
+	err = gpgme_op_keylist_next(list_ctx, &key);
+	while ( gpg_err_code(err) != GPG_ERR_NO_ERROR ) {
+		key_list = g_slist_append (key_list, key);
+		err = gpgme_op_keylist_next(list_ctx, &key);
+	}
+	if (gpg_err_code(err) != GPG_ERR_EOF) {
+		goto leave;
+	}
 	err = 0;
 	if (key_list == NULL) {
 		eb_debug (DBG_CRYPT,"no keys found for keyid \"%s\"\n", keyid);
 	}
 
 leave:
-	if (err) {
+	if (gpg_err_code(err) != GPG_ERR_NO_ERROR) {
 		eb_debug (DBG_CRYPT,"create_signers_list failed: %s\n", gpgme_strerror (err));
 		for (p = key_list; p != NULL; p = p->next)
-			gpgme_key_unref ((GpgmeKey) p->data);
+			gpgme_key_unref ((gpgme_key_t) p->data);
 		g_slist_free (key_list);
 	}
 	if (list_ctx)
@@ -573,91 +638,91 @@ leave:
 
 /*
  * plain contains an entire mime object.
- * Encrypt it and return an GpgmeData object with the encrypted version of
+ * Encrypt it and return an gpgme_data_t object with the encrypted version of
  * the file or NULL in case of error.
  */
-static GpgmeData
-pgp_encrypt ( GpgmeData plain, GpgmeRecipients rset, int sign )
+void
+pgp_encrypt ( gpgme_data_t plain, gpgme_data_t *cipher, gpgme_key_t *kset, int sign )
 {
-    GpgmeCtx ctx = NULL;
-    GpgmeError err;
-    GpgmeData cipher = NULL;
-    GSList *p;
-    struct passphrase_cb_info_s info;
-    GSList *key_list = NULL;
-    memset (&info, 0, sizeof info);
+	gpgme_ctx_t ctx = NULL;
+	gpgme_error_t err ;
+	GSList *p;
+	GSList *key_list = NULL;
 
-    if(sign && mykey && mykey[0]) {
-     key_list = create_signers_list(mykey);
-    }
-    
-    err = gpgme_new (&ctx);
-    if (!err)
-	err = gpgme_data_new (&cipher);
-    if (!err && sign) {
 
-	    if (!getenv("GPG_AGENT_INFO")) {
-        	info.c = ctx;
-        	gpgme_set_passphrase_cb (ctx, gpgmegtk_passphrase_cb, &info);
-	    }
-	    if (rset != NULL) {
-		    gpgme_set_textmode (ctx, 1);
-		    gpgme_set_armor (ctx, 1);
-	    }
-	    gpgme_signers_clear (ctx);
-	    for (p = key_list; p != NULL; p = p->next) {
-		err = gpgme_signers_add (ctx, (GpgmeKey) p->data);
-	    }
-	    for (p = key_list; p != NULL; p = p->next)
-		gpgme_key_unref ((GpgmeKey) p->data);
-	    g_slist_free (key_list);
-	    if (rset != NULL) {
-	        err = gpgme_op_encrypt_sign(ctx, rset, plain, cipher);
-	    } else {
-	    	err = gpgme_op_sign (ctx, plain, cipher, GPGME_SIG_MODE_CLEAR);
-	    }
-    }
-    else if (!err) {
-	gpgme_set_armor (ctx, 1);
-	err = gpgme_op_encrypt (ctx, rset, plain, cipher);
-    }
+	if(sign && mykey && mykey[0]) {
+		key_list = create_signers_list(mykey);
+	}
+	
+	err = gpgme_new (&ctx);
+	if (gpg_err_code(err) == GPG_ERR_NO_ERROR)
+		err = gpgme_data_new (cipher);
 
-    if (err) {
-        gpgme_data_release (cipher);
-        cipher = NULL;
-    }
+	if (gpg_err_code(err) == GPG_ERR_NO_ERROR && sign) {
+		
+		if (!getenv("GPG_AGENT_INFO")) {
+			gpgme_set_passphrase_cb (ctx, gpgmegtk_passphrase_cb, NULL);
+		}
+		if (kset != NULL) {
+			gpgme_set_textmode (ctx, 1);
+			gpgme_set_armor (ctx, 1);
+		}
+		gpgme_signers_clear (ctx);
+		for (p = key_list; p != NULL; p = p->next) {
+			err = gpgme_signers_add (ctx, (gpgme_key_t) p->data);
+		}
+		if (kset != NULL) {
+			mygpgme_data_rewind(plain);
+			err = gpgme_op_encrypt_sign(ctx, kset, 0, plain, *cipher);
+		} else {
+			mygpgme_data_rewind(plain);
+			err = gpgme_op_sign (ctx, plain, *cipher, GPGME_SIG_MODE_CLEAR);
+		}
+		for (p = key_list; p != NULL; p = p->next)
+			gpgme_key_unref ((gpgme_key_t) p->data);
+		g_slist_free (key_list);
+	}
+	else if (gpg_err_code(err) == GPG_ERR_NO_ERROR) {
+		gpgme_set_armor (ctx, 1);
+		mygpgme_data_rewind(plain);
+		err = gpgme_op_encrypt (ctx, kset, 0, plain, *cipher);
+	}
+	
+	if (gpg_err_code(err) != GPG_ERR_NO_ERROR) {
+		eb_debug(DBG_CRYPT, "pgp_encrypt failed: %s\n", gpgme_strerror(err));
+		gpgme_data_release (*cipher);
+		*cipher = NULL;
+	}
 
-    gpgme_release (ctx);
-    return cipher;
+	gpgme_release (ctx);
 }
 
-const char*
-gpgmegtk_passphrase_cb (void *opaque, const char *desc, void **r_hd)
+gpgme_error_t
+gpgmegtk_passphrase_cb (void *opaque, const char *desc, const char *passphrase_info, int prev_was_bad, int fd)
 {
-    struct passphrase_cb_info_s *info = opaque;
-    GpgmeCtx ctx = info ? info->c : NULL;
-    const char *pass;
-    
-    if (!desc) {
-        /* FIXME: cleanup by looking at *r_hd */
-        return NULL;
-    }
-    
-    if (store_passphrase && aycrypt_last_pass != NULL &&
-        strncmp(desc, "TRY_AGAIN", 9) != 0)
-        return g_strdup(aycrypt_last_pass);
+	const char *pass;
+	
+	if (store_passphrase && aycrypt_last_pass != NULL && !prev_was_bad) {
+		write(fd, aycrypt_last_pass, strlen(aycrypt_last_pass));
+		write(fd, "\n", 1);
+		return GPG_ERR_NO_ERROR;
+	}
 
-    pass = passphrase_mbox (desc);
-    if (!pass) {
-        gpgme_cancel (ctx);
-    }
-    else {
-        if (store_passphrase) {
- 		if (aycrypt_last_pass)
-			g_free(aycrypt_last_pass);
-		aycrypt_last_pass = g_strdup(pass);
-        }
-    }
-    return pass;
+	pass = passphrase_mbox (desc, prev_was_bad);
+	if (!pass) {
+		eb_debug(DBG_CRYPT, "Cancelled passphrase entry\n");
+		write(fd, "\n", 1);
+		return GPG_ERR_CANCELED;
+	}
+	else {
+		if (store_passphrase) {
+			if (aycrypt_last_pass)
+				g_free(aycrypt_last_pass);
+			aycrypt_last_pass = g_strdup(pass);
+		}
+	}
+	write (fd, pass, strlen(pass));
+	write (fd, "\n", 1);
+	return GPG_ERR_NO_ERROR;
 }
 

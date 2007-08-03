@@ -41,197 +41,215 @@
  * all ispell-related variables can be static.  
  */
 
-/* FIXME? */
-static GdkColor highlight = { 0, 255*256, 0, 0 };
+GtkTextTag *error_tag = NULL;
 
-static void entry_insert_cb(GtkText *gtktext, gchar *newtext, guint len, guint *ppos, gpointer d);
 
 static gboolean iswordsep(char c) 
 {
 	return !isalpha(c) && c != '\'';
 }
 
-static gboolean get_word_from_pos(GtkText* gtktext, int pos, char* buf, int *pstart, int *pend) 
+/*
+ * Gets the text and boundaries of the word under a given position
+ */
+static gboolean get_word_from_pos(GtkTextBuffer* gtktext, GtkTextIter pos, char* buf,
+		GtkTextIter *pstart,GtkTextIter *pend) 
 {
-	int start, end;
+	GtkTextIter word_start, word_end;
+	gchar *tmp;
 
-	if (iswordsep(GTK_TEXT_INDEX(gtktext, pos)))
+	if(  !gtk_text_iter_inside_word(&pos) && gtk_text_iter_get_char(&pos)!='\'' )
 		return FALSE;
 
-	for (start = pos; start >= 0; --start) {
-		if (iswordsep(GTK_TEXT_INDEX(gtktext, start)))
-			break;
-	}
-	start++;
+	/* Get the end iter */
+	word_end = pos;
+	if( !gtk_text_iter_forward_word_end(&word_end) )
+		return FALSE;
 
-	for (end = pos; end <= gtk_text_get_length(gtktext); end++) {
-		if (iswordsep(GTK_TEXT_INDEX(gtktext, end)))
-			break;
-	}
+	if( gtk_text_iter_get_char(&word_end) == '\'' ) {
+		gtk_text_iter_forward_char(&word_end);
 
-	if (buf) {
-		for (pos = start; pos < end; pos++) 
-			buf[pos-start] = GTK_TEXT_INDEX(gtktext, pos);
-		buf[pos-start] = 0;
+		if(g_unichar_isalpha(gtk_text_iter_get_char(&word_end))) {
+			if(!gtk_text_iter_forward_word_end(&word_end))
+				return FALSE;
+		}
 	}
 
-	if (pstart)
-		*pstart = start;
-	if (pend)
-		*pend = end;
+	if(pend)
+		*pend = word_end;
+
+	/* Get the word start iter */
+	word_start = pos;
+	if( !gtk_text_iter_backward_word_start(&word_start) )
+		return FALSE;
+
+	if( gtk_text_iter_get_char(&word_start) == '\'' ) {
+		gtk_text_iter_backward_char(&word_start);
+
+		if(g_unichar_isalpha( gtk_text_iter_get_char(&word_start) )) {
+			if(!gtk_text_iter_backward_word_start(&word_start))
+				return FALSE;
+		}
+	}
+
+	if(pstart)
+		*pstart = word_start;
+
+	gtk_text_iter_forward_char(&word_end);
+	tmp = gtk_text_buffer_get_text(gtktext, &word_start, &word_end, FALSE);
+
+	g_strlcpy(buf, tmp, strlen(tmp));
 
 	return TRUE;
 }
 
-static gboolean get_curword(GtkText* gtktext, char* buf, int *pstart, int *pend) 
+/*
+ * Gets word under the cursor
+ */
+static gboolean get_curword(GtkTextBuffer* buffer, char* buf,
+		GtkTextIter *pstart, GtkTextIter *pend) 
 {
-	int pos = gtk_editable_get_position(GTK_EDITABLE(gtktext));
-	return get_word_from_pos(gtktext, pos, buf, pstart, pend);
+	GtkTextIter iter;
+	gtk_text_buffer_get_iter_at_mark(buffer, &iter, gtk_text_buffer_get_insert(buffer));
+
+	return get_word_from_pos(buffer, iter, buf, pstart, pend);
 }
 
-static void change_color(GtkText *gtktext, int start, int end, GdkColor *color) 
+/*
+ * Check word under the cursor and mark it if its spelling is incorrect
+ */
+static gboolean check_at(GtkTextBuffer *gtktext, GtkTextIter *from_pos) 
 {
-	char *newtext = gtk_editable_get_chars(GTK_EDITABLE(gtktext), start, end);
-	gtk_text_freeze(gtktext);
-	gtk_signal_handler_block_by_func(GTK_OBJECT(gtktext), 
-			GTK_SIGNAL_FUNC(entry_insert_cb), NULL);
-	
-	gtk_text_set_point(gtktext, start);
+	GtkTextIter start, end;
 
-	if(newtext && end-start > 0)
-	{
-		gtk_text_forward_delete(gtktext, end-start);
-		gtk_text_insert(gtktext, NULL, color, NULL, newtext, end-start);
-	}
-
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(gtktext), 
-			GTK_SIGNAL_FUNC(entry_insert_cb), NULL);
-	gtk_text_thaw(gtktext);
-	g_free(newtext);
-}
-
-static gboolean check_at(GtkText *gtktext, int from_pos) 
-{
-	int start, end;
 	char buf[BUFSIZE]={0};
 
-	if (!get_word_from_pos(gtktext, from_pos, buf, &start, &end)) {
+	if (!get_word_from_pos(gtktext, *from_pos, buf, &start, &end)) {
 		return FALSE;
 	}
 
 	if (ay_spell_check(buf)) {
-		change_color(gtktext, start, end, &(GTK_WIDGET(gtktext)->style->fg[0]));
+		gtk_text_buffer_remove_tag(gtktext, error_tag, &start, &end);
 		return FALSE;
 	} else { 
-		if (highlight.pixel == 0) {
-			/* add an entry for the highlight in the color map. */
-			GdkColormap *gc = gtk_widget_get_colormap(GTK_WIDGET(gtktext));
-			gdk_colormap_alloc_color(gc, &highlight, FALSE, TRUE);;
-		}
-		change_color(gtktext, start, end, &highlight);
+		gtk_text_buffer_apply_tag(gtktext, error_tag, &start, &end);
 		return TRUE;
 	}
 }
 
-void gtkspell_check_all(GtkText *gtktext) 
+/*
+ * Check the entire buffer and mark spelling erors
+ */
+void gtkspell_check_all(GtkTextBuffer *gtktext) 
 {
-	guint origpos;
-	guint pos = 0;
-	guint len;
-	float adj_value;
-	
-	len = gtk_text_get_length(gtktext);
+	GtkTextIter pos;
+	GtkTextIter end;
 
-	adj_value = gtktext->vadj->value;
-	gtk_text_freeze(gtktext);
-	origpos = gtk_editable_get_position(GTK_EDITABLE(gtktext));
-	while (pos < len) {
-		while (pos < len && iswordsep(GTK_TEXT_INDEX(gtktext, pos)))
-			pos++;
-		while (pos < len && !iswordsep(GTK_TEXT_INDEX(gtktext, pos)))
-			pos++;
-		if (pos > 0)
-			check_at(gtktext, pos-1);
+	gtk_text_buffer_get_bounds(gtktext, &pos, &end);
+	
+	while ( gtk_text_iter_compare(&pos, &end) < 0 ) {
+		while ( gtk_text_iter_compare(&pos, &end) <0 &&
+				iswordsep(gtk_text_iter_get_char(&pos)))
+		{
+			gtk_text_iter_forward_char(&pos);
+		}
+		while ( gtk_text_iter_compare(&pos, &end) <0 &&
+				!iswordsep(gtk_text_iter_get_char(&pos)))
+		{
+			gtk_text_iter_forward_char(&pos);
+		}
+		gtk_text_iter_backward_char(&pos);
+		check_at(gtktext, &pos);
 	}
-	gtk_text_thaw(gtktext);
-	gtk_editable_set_position(GTK_EDITABLE(gtktext), origpos);
 }
 
-static void entry_insert_cb(GtkText *gtktext, gchar *newtext, guint len, guint *ppos, gpointer d) 
+/*
+ * Text insert callback
+ */
+static void entry_insert_cb(GtkTextBuffer *gtktext, GtkTextIter *ppos,
+			gchar *newtext, guint len, gpointer d) 
 {
-	int origpos;
+	GtkTextIter end;
 
-	gtk_signal_handler_block_by_func(GTK_OBJECT(gtktext),
-					 GTK_SIGNAL_FUNC(entry_insert_cb),
-					 NULL);
-	gtk_text_insert(GTK_TEXT(gtktext), NULL,
-			&(GTK_WIDGET(gtktext)->style->fg[0]), NULL, newtext, len);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(gtktext),
-					   GTK_SIGNAL_FUNC(entry_insert_cb),
-					   NULL);
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(gtktext), "insert-text");
-	*ppos += len;
+	g_signal_handlers_block_by_func(gtktext, G_CALLBACK(entry_insert_cb), NULL);
+	gtk_text_buffer_insert_at_cursor(gtktext, newtext, len);
+	g_signal_handlers_unblock_by_func(gtktext, G_CALLBACK(entry_insert_cb), NULL);
+	g_signal_stop_emission_by_name(gtktext, "insert-text");
 
-	origpos = gtk_editable_get_position(GTK_EDITABLE(gtktext));
+	gtk_text_buffer_get_iter_at_mark(gtktext, ppos, gtk_text_buffer_get_insert(gtktext));
+	gtk_text_buffer_get_end_iter(gtktext, &end);
 
 	if (iswordsep(newtext[0])) {
 		/* did we just end a word? */
-		if (*ppos >= 2)
-			check_at(gtktext, *ppos-2);
+		if (gtk_text_iter_get_offset(ppos) >= 2) {
+			gtk_text_iter_backward_chars(ppos, 2);
+			check_at(gtktext, ppos);
+			gtk_text_iter_forward_chars(ppos, 2);
+		}
 
 		/* did we just split a word? */
-		if (*ppos < gtk_text_get_length(gtktext))
-			check_at(gtktext, *ppos+1);
+		if (gtk_text_iter_get_offset(ppos) < gtk_text_iter_get_offset(&end)) {
+			gtk_text_iter_forward_char(ppos);
+			check_at(gtktext, ppos);
+			gtk_text_iter_backward_char(ppos);
+		}
 	} else {
 		/* check as they type, *except* if they're typing at the end (the most
 		 * common case.
 		 */
-		if (*ppos < gtk_text_get_length(gtktext) && 
-				!iswordsep(GTK_TEXT_INDEX(gtktext, *ppos)))
-			check_at(gtktext, *ppos-1);
+		if (gtk_text_iter_get_offset(ppos) < gtk_text_iter_get_offset(&end) &&
+				!iswordsep(gtk_text_iter_get_char(ppos)))
+		{
+			gtk_text_iter_backward_char(ppos);
+			check_at(gtktext, ppos);
+			gtk_text_iter_forward_char(ppos);
+		}
 	}
 
-	gtk_editable_set_position(GTK_EDITABLE(gtktext), origpos);
 }
 
-static void entry_delete_cb(GtkText *gtktext, gint start, gint end, gpointer d) 
+/*
+ * Text delete callback
+ */
+static void entry_delete_cb(GtkTextBuffer *gtktext,
+		GtkTextIter *start, GtkTextIter *end, gpointer d) 
 {
-	int origpos;
-
-	origpos = gtk_editable_get_position(GTK_EDITABLE(gtktext));
-	check_at(gtktext, start-1);
-	gtk_editable_set_position(GTK_EDITABLE(gtktext), origpos);
-	gtk_editable_select_region(GTK_EDITABLE(gtktext), origpos, origpos);
-	/* this is to *UNDO* the selection, in case they were holding shift
-	 * while hitting backspace. */
+	check_at(gtktext, start);
 }
 
+/*
+ * Replace word with selected spelling suggestion
+ */
 static void replace_word(GtkWidget *w, gpointer d) 
 {
-	int start, end, newword_len;
-	char *newword;
+	GtkTextIter start, end;
+
+	int newword_len;
+	const gchar *newword;
 	char buf[BUFSIZE]={0};
+	int offset;
 
 	/* we don't save their position, 
 	 * because the cursor is moved by the click. */
 
-	gtk_text_freeze(GTK_TEXT(d));
+	newword = gtk_label_get_text(GTK_LABEL(GTK_BIN(w)->child));
+	get_curword(GTK_TEXT_BUFFER(d), buf, &start, &end);
 
-	gtk_label_get(GTK_LABEL(GTK_BIN(w)->child), &newword);
-	get_curword(GTK_TEXT(d), buf, &start, &end);
+	offset = gtk_text_iter_get_offset(&start);
 
 	newword_len = strlen(newword);
 
-	gtk_text_set_point(GTK_TEXT(d), end);
-	gtk_text_backward_delete(GTK_TEXT(d), end-start);
-	gtk_text_insert(GTK_TEXT(d), NULL, NULL, NULL, newword, newword_len);
-
-	gtk_text_thaw(GTK_TEXT(d));
-
-	gtk_editable_set_position(GTK_EDITABLE(d), start+newword_len);
+	gtk_text_buffer_delete(GTK_TEXT_BUFFER(d), &start, &end);
+	
+	gtk_text_buffer_get_iter_at_offset(GTK_TEXT_BUFFER(d), &start, offset);
+	gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(d), &start);
+	gtk_text_buffer_insert(GTK_TEXT_BUFFER(d), &start, newword, newword_len);
 }
 
-static GtkMenu *make_menu(GList *l, GtkText *gtktext) 
+/*
+ * Add spelling suggestions into a menu.
+ */
+static GtkMenu *make_menu(GList *l, GtkTextBuffer *gtktext) 
 {
 	GtkWidget *menu, *item;
 	char *caption;
@@ -243,17 +261,17 @@ static GtkMenu *make_menu(GList *l, GtkText *gtktext)
 		 * the menu titles in the GNOME panel... unfortunately, the GNOME
 		 * panel creates their own custom widget to do this! */
 		gtk_widget_show(item);
-		gtk_menu_append(GTK_MENU(menu), item);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
 		item = gtk_menu_item_new();
 		gtk_widget_show(item);
-		gtk_menu_append(GTK_MENU(menu), item);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
 		l = l->next;
 		if (l == NULL) {
 			item = gtk_menu_item_new_with_label(_("(no suggestions)"));
 			gtk_widget_show(item);
-			gtk_menu_append(GTK_MENU(menu), item);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 		} else {
 			GtkWidget *curmenu = menu;
 			int count = 0;
@@ -264,21 +282,21 @@ static GtkMenu *make_menu(GList *l, GtkText *gtktext)
 					item = gtk_menu_item_new_with_label(_("Other Possibilities..."));
 					gtk_widget_show(item);
 					gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), curmenu);
-					gtk_menu_append(GTK_MENU(curmenu), item);
+					gtk_menu_shell_append(GTK_MENU_SHELL(curmenu), item);
 					l = l->next;
 				} else if (count > MENUCOUNT) {
 					count -= MENUCOUNT;
 					item = gtk_menu_item_new_with_label("More...");
 					gtk_widget_show(item);
-					gtk_menu_append(GTK_MENU(curmenu), item);
+					gtk_menu_shell_append(GTK_MENU_SHELL(curmenu), item);
 					curmenu = gtk_menu_new();
 					gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), curmenu);
 				}
 				item = gtk_menu_item_new_with_label((char*)l->data);
-				gtk_signal_connect(GTK_OBJECT(item), "activate",
-						GTK_SIGNAL_FUNC(replace_word), gtktext);
+				g_signal_connect(item, "activate",
+						G_CALLBACK(replace_word), gtktext);
 				gtk_widget_show(item);
-				gtk_menu_append(GTK_MENU(curmenu), item);
+				gtk_menu_shell_append(GTK_MENU_SHELL(curmenu), item);
 				count++;
 			} while ((l = l->next) != NULL);
 		}
@@ -286,19 +304,81 @@ static GtkMenu *make_menu(GList *l, GtkText *gtktext)
 	return GTK_MENU(menu);
 }
 
-static void popup_menu(GtkText *gtktext, GdkEventButton *eb) 
+/*
+ * Position the popup menu at the cursor
+ */
+void position_popup_menu(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer data)
+{
+	GdkEventButton *eb = data;
+
+	if(eb) {
+		*x = eb->x_root;
+		*y = eb->y_root;
+	}
+	else {
+		GdkRectangle location;
+		GtkTextIter cur_pos;
+		int wx, wy;
+
+		GtkTextView *text_view = g_object_get_data(G_OBJECT(menu), "parent_textview");
+		GtkTextBuffer *gtktext = gtk_text_view_get_buffer(text_view);
+		GdkWindow *parent = gtk_widget_get_parent_window(GTK_WIDGET(text_view));
+
+		gdk_window_get_position(parent, &wx, &wy);
+
+		gtk_text_buffer_get_iter_at_mark(gtktext, &cur_pos,
+				gtk_text_buffer_get_insert(gtktext));
+
+		gtk_text_view_get_iter_location(text_view, &cur_pos, &location);
+
+		gtk_text_view_buffer_to_window_coords(text_view, GTK_TEXT_WINDOW_WIDGET,
+				location.x, location.y, x, y);
+
+		*x += GTK_WIDGET(text_view)->allocation.x + wx + location.width/2;
+		*y += GTK_WIDGET(text_view)->allocation.y + wy + location.height/2;
+	}
+}
+
+/*
+ * Popup a menu filled with spelling suggestions
+ */
+static void popup_menu(GtkTextView *text_view, GdkEventButton *eb) 
 {
 	char buf[BUFSIZE]={0};
-	GList *list;
+	GtkTextBuffer *gtktext = gtk_text_view_get_buffer(text_view);
+	GtkTextIter pos;
+	int bx, by, trailing;
+	int button, event_time;
 
-	get_curword(gtktext, buf, NULL, NULL);
+	GList *list;
+	
+	if(eb) {
+		button = eb->button;
+		event_time = eb->time;
+
+		gtk_text_view_window_to_buffer_coords(text_view, GTK_TEXT_WINDOW_TEXT,
+				eb->x, eb->y, &bx, &by);
+		gtk_text_view_get_iter_at_position(text_view, &pos, &trailing, bx, by);
+		gtk_text_buffer_place_cursor(gtktext, &pos);
+
+		get_word_from_pos(gtktext, pos, buf, NULL, NULL);
+	}
+	else {
+		button = 0;
+		event_time = gtk_get_current_event_time();
+		get_curword(gtktext, buf, NULL, NULL);
+	}
+
+
 	if(ay_spell_check(buf))
 		return;
 
 	list = llist_to_glist( ay_spell_check_suggest(buf), 1 );
 	list = g_list_prepend(list, strdup(buf));
 	if (list != NULL) {
-		gtk_menu_popup(make_menu(list, gtktext), NULL, NULL, NULL, NULL, eb->button, eb->time);
+		GtkMenu *menu = make_menu(list, gtktext);
+		g_object_set_data(G_OBJECT(menu), "parent_textview", text_view);
+		gtk_menu_popup(menu, NULL, NULL, position_popup_menu, eb, button, event_time);
 		while (list) {
 			GList * l = g_list_next(list);
 			g_free(list->data);
@@ -316,71 +396,65 @@ static void popup_menu(GtkText *gtktext, GdkEventButton *eb)
  * so what do we do?  forge rightclicks as leftclicks, then popup the menu. 
  * HACK HACK HACK. 
  */
-static gint button_press_intercept_cb(GtkText *gtktext, GdkEvent *e, gpointer d) {
-	GdkEventButton *eb;
-	gboolean retval;
+/*
+ * UPDATE: Nothing whacky about it anymore. Move along.
+ */
 
-	if (e->type != GDK_BUTTON_PRESS)
-		return FALSE;
-	eb = (GdkEventButton*) e;
+static gboolean button_press_intercept_cb(GtkTextView *gtktext, GdkEventButton *event, gpointer d) {
 
-	if (eb->button != 3)
-		return FALSE;
+	if(event->button == 3 && event->type == GDK_BUTTON_PRESS) {
+		popup_menu(gtktext, event);
+		return TRUE;
+	}
 
-	/* forge the leftclick */
-	eb->button = 1;
+	return FALSE;
+}
 
-	gtk_signal_handler_block_by_func(GTK_OBJECT(gtktext), 
-			GTK_SIGNAL_FUNC(button_press_intercept_cb), d);
-	gtk_signal_emit_by_name(GTK_OBJECT(gtktext), "button-press-event",
-			e, &retval);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(gtktext), 
-			GTK_SIGNAL_FUNC(button_press_intercept_cb), d);
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(gtktext), "button-press-event");
-
-	/* now do the menu wackiness */
-	popup_menu(gtktext, eb);
+static gboolean popup_menu_callback(GtkTextView *text_view)
+{
+	popup_menu(text_view, NULL);
 	return TRUE;
 }
 
-void gtkspell_uncheck_all(GtkText *gtktext) 
+/*
+ * Get rid of all the spelling error notifications
+ */
+void gtkspell_uncheck_all(GtkTextBuffer *gtktext) 
 {
-	int origpos;
-	char *text;
-	float adj_value;
+	GtkTextIter start, end;
 
-	adj_value = gtktext->vadj->value;
-	gtk_text_freeze(gtktext);
-	origpos = gtk_editable_get_position(GTK_EDITABLE(gtktext));
-	text = gtk_editable_get_chars(GTK_EDITABLE(gtktext), 0, -1);
-	gtk_text_set_point(gtktext, 0);
-	gtk_text_forward_delete(gtktext, gtk_text_get_length(gtktext));
-	gtk_text_insert(gtktext, NULL, NULL, NULL, text, strlen(text));
-	gtk_text_thaw(gtktext);
-
-	gtk_editable_set_position(GTK_EDITABLE(gtktext), origpos);
-	gtk_adjustment_set_value(gtktext->vadj, adj_value);
+	gtk_text_buffer_get_bounds(gtktext, &start, &end);
+	gtk_text_buffer_remove_tag(gtktext, error_tag, &start, &end);
 }
 
-void gtkspell_attach(GtkText *gtktext) 
+/*
+ * The fun starts here.
+ */
+void gtkspell_attach(GtkTextView *text_view) 
 {
-	gtk_signal_connect(GTK_OBJECT(gtktext), "insert-text",
-		GTK_SIGNAL_FUNC(entry_insert_cb), NULL);
-	gtk_signal_connect_after(GTK_OBJECT(gtktext), "delete-text",
-		GTK_SIGNAL_FUNC(entry_delete_cb), NULL);
-	gtk_signal_connect(GTK_OBJECT(gtktext), "button-press-event",
-			GTK_SIGNAL_FUNC(button_press_intercept_cb), NULL);
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
+	error_tag = gtk_text_buffer_create_tag(buffer, "error_tag",
+			"underline", PANGO_UNDERLINE_ERROR, NULL);
+
+	g_signal_connect(buffer, "insert-text", G_CALLBACK(entry_insert_cb), NULL);
+	g_signal_connect_after(buffer, "delete-range", G_CALLBACK(entry_delete_cb), NULL);
+	g_signal_connect(text_view, "button-press-event",
+			G_CALLBACK(button_press_intercept_cb), NULL);
+	g_signal_connect(text_view, "popup-menu",
+			G_CALLBACK(popup_menu_callback), NULL);
 }
 
-void gtkspell_detach(GtkText *gtktext) 
+/*
+ * The fun ends here.
+ */
+void gtkspell_detach(GtkTextView *gtktext) 
 {
-	gtk_signal_disconnect_by_func(GTK_OBJECT(gtktext),
-		GTK_SIGNAL_FUNC(entry_insert_cb), NULL);
-	gtk_signal_disconnect_by_func(GTK_OBJECT(gtktext),
-		GTK_SIGNAL_FUNC(entry_delete_cb), NULL);
-	gtk_signal_disconnect_by_func(GTK_OBJECT(gtktext), 
-			GTK_SIGNAL_FUNC(button_press_intercept_cb), NULL);
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(gtktext);
+	
+	g_signal_handlers_disconnect_by_func(buffer, G_CALLBACK(entry_insert_cb), NULL);
+	g_signal_handlers_disconnect_by_func(buffer, G_CALLBACK(entry_delete_cb), NULL);
+	g_signal_handlers_disconnect_by_func(gtktext, G_CALLBACK(button_press_intercept_cb), NULL);
 
-	gtkspell_uncheck_all(gtktext);
+	gtkspell_uncheck_all(buffer);
 }
 

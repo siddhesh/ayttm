@@ -38,7 +38,7 @@
 #include "mem_util.h"
 #include "chat_window.h"
 #include "dialog.h"
-#include "gtk/gtk_eb_html.h"
+#include "gtk/html_text_buffer.h"
 #include "gtk/gtkutils.h"
 
 #ifdef HAVE_LIBPSPELL
@@ -57,7 +57,7 @@
 #define GET_CHAT_ROOM(cur_cw) {\
 	if( iGetLocalPref("do_tabbed_chat") ) { \
 		eb_chat_room *bck = cur_cw; \
-		if (cur_cw->notebook) \
+		if (cur_cw && cur_cw->notebook) \
 			cur_cw = find_tabbed_chat_room_index(gtk_notebook_get_current_page(GTK_NOTEBOOK(cur_cw->notebook))); \
 		if (cur_cw == NULL) \
 			cur_cw = bck; \
@@ -71,15 +71,13 @@
 
 LList * chat_rooms = NULL;
 
-static LList * get_contacts( eb_chat_room * room );
-static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
+static void get_contacts( eb_chat_room * room );
+static gboolean handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
 static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_message);
 
 static void init_chat_room_log_file(eb_chat_room *chat_room);
 static void	destroy_chat_room_log_file( eb_chat_room *chat_room );
 
-static char *last_clicked_fellow = NULL;
-static guint32 last_time_clicked = 0;
 
 /* Not used yet */
 /*
@@ -116,7 +114,6 @@ static void	free_chat_room( eb_chat_room *chat_room )
 	
 	l_list_free( chat_room->history );
 	
-	memset( chat_room, 0, sizeof( eb_chat_room ) );
 	g_free( chat_room );
 }
 
@@ -151,41 +148,37 @@ static void handle_fellow_click (char *name, eb_chat_room *cr)
 	eb_chat_window_display_account(ea);
 }
 
-static void fellows_click( GtkWidget * widget, int row, int column,
-			   GdkEventButton *evt, gpointer data )
+static void fellows_activated( GtkTreeView * tree_view, GtkTreePath *path,
+		GtkTreeViewColumn *column, gpointer data )
 {
 	eb_chat_room * ecr = (eb_chat_room *)data;
 	char *name = NULL;
-	gtk_clist_unselect_all(GTK_CLIST(ecr->fellows_widget));
-	if (gtk_clist_get_text(GTK_CLIST(ecr->fellows_widget), row, column, &name)) {
-		if (last_clicked_fellow) {
-			if (evt->time - last_time_clicked < 2000
-			&& !strcmp(last_clicked_fellow, name)) {
-				/* double-click ! */
-				handle_fellow_click(name, ecr);
-				free(last_clicked_fellow);
-				last_clicked_fellow = NULL;
-				return;
-			}
-			free(last_clicked_fellow);
-		}
-		last_clicked_fellow = strdup(name);
-		last_time_clicked = evt->time;
-	} else {
-		if (last_clicked_fellow) {
-			free(last_clicked_fellow);
-		}
-		last_clicked_fellow = NULL;
-	}
+
+	GtkTreeIter iter;
+
+	printf("activated_callback\n");
+
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(ecr->fellows_model), &iter, path);
+	gtk_tree_model_get(GTK_TREE_MODEL(ecr->fellows_model), &iter,
+			0, &name,
+			-1);
+	
+	handle_fellow_click(name, ecr);
 }
 
 static void send_cr_message( GtkWidget * widget, gpointer data )
 {
-	eb_chat_room * ecr = (eb_chat_room *)data;
-	char *text = gtk_editable_get_chars(GTK_EDITABLE(ecr->entry), 0, -1);
+	GtkTextIter start, end;
+	char *text;
 #ifdef __MINGW32__
 	char *recoded;
 #endif
+
+	eb_chat_room * ecr = (eb_chat_room *)data;
+	GtkTextBuffer *buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(ecr->entry));
+
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+	text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 	
 	if (!text || strlen(text) == 0)
 		return;
@@ -219,7 +212,7 @@ static void send_cr_message( GtkWidget * widget, gpointer data )
 	g_free(text);
 	if(ecr->sound_enabled && ecr->send_enabled)
 		play_sound( SOUND_SEND );
-	gtk_editable_delete_text(GTK_EDITABLE (ecr->entry), 0, -1);
+	gtk_text_buffer_delete(buffer, &start, &end);
 }
 
 static void send_typing_status(eb_chat_room *cr)
@@ -241,11 +234,12 @@ void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num)
 	LList *w = NULL;
 	for (w = chat_rooms; w; w = w->next) {
 		eb_chat_room *cr = (eb_chat_room *)w->data;
-		if (cr->notebook_child == ((GtkNotebookPage *)page)->child) {
+		if (gtk_notebook_page_num(GTK_NOTEBOOK(notebook), cr->notebook_child) == page_num) {
+			ENTRY_FOCUS(cr);
 			printf("crnotebook %p child %p \n", cr->notebook, cr->notebook_child);
 			set_tab_normal(cr);
 			eb_chat_room_update_window_title(cr, FALSE);
-			gtk_widget_grab_focus(cr->entry);
+
 			return;
 		}
 	}	
@@ -281,10 +275,10 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	{
 	  chat_auto_complete_insert(cr->entry, event);	
 	  /*Prevents a newline from being printed*/
-	  gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+	  g_signal_stop_emission_by_name(G_OBJECT(widget), "key-press-event");
 
 	  send_cr_message(NULL, cr);
-	  return gtk_true();
+	  return TRUE;
     	}
     }
   else if (event->keyval == GDK_Up && (modifiers == 0) )
@@ -315,18 +309,18 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
   {
 	  // check tab changes if this is a tabbed chat window
 	  if ( check_tab_accelerators( widget, cr, modifiers, event ) )
-		  return( gtk_true() );
+		  return TRUE;
   }
 
   if(modifiers)
-  { return gtk_false(); }
+  { return FALSE; }
 
   if(!modifiers)
   {
     send_typing_status(cr);
   }
 
-  return gtk_false();
+  return FALSE;
 }
 
 static void set_sound_on_toggle(GtkWidget * sound_button, gpointer userdata)
@@ -335,7 +329,7 @@ static void set_sound_on_toggle(GtkWidget * sound_button, gpointer userdata)
    
   /*Set the sound_enable variable depending on the toggle button*/
    
-  if (GTK_TOGGLE_BUTTON (sound_button)->active)
+  if ( gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON (sound_button)) )
     cr->sound_enabled = TRUE;
   else
     cr->sound_enabled = FALSE;
@@ -478,20 +472,20 @@ static void eb_remove_auto_chatroom(eb_local_account *ela, const char *name, int
 
 static void set_reconnect_on_toggle(GtkWidget * reconnect_button, gpointer userdata)
 {
-  eb_chat_room * cr = (eb_chat_room *)userdata;
-      
-  if (GTK_TOGGLE_BUTTON (reconnect_button)->active)
-    eb_add_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
-  else
-    eb_remove_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
+	eb_chat_room * cr = (eb_chat_room *)userdata;
+
+	if ( gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON (reconnect_button)) )
+		eb_add_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
+	else
+		eb_remove_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
 }
 
-static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
-{
-	return strcasecmp((const char *)a, (const char *)b);
-}
+//static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
+//{
+//	return strcasecmp((const char *)a, (const char *)b);
+//}
 
-static GList * chat_service_list()
+static GList * chat_service_list(GtkComboBox *service_list)
 {
 	GList * list = NULL;
 	LList * walk = NULL;
@@ -500,7 +494,7 @@ static GList * chat_service_list()
 		eb_local_account *ela = (eb_local_account *)walk->data;
 		if (ela && ela->connected && can_group_chat(eb_services[ela->service_id])) {
 			char *str = g_strdup_printf("[%s] %s", get_service_name(ela->service_id), ela->handle);
-			list = g_list_insert_sorted(list, str, strcasecmp_glist);
+			gtk_combo_box_append_text(service_list, str);
 		}
 	}
 	return list;
@@ -510,7 +504,7 @@ static void invite_callback( GtkWidget * widget, gpointer data )
 {
 	eb_chat_room * ecr = data;
 	char *acc = NULL;
-	char * invited = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(ecr->invite_buddy)->entry),0,-1);
+	char * invited = gtk_combo_box_get_active_text(GTK_COMBO_BOX(ecr->invite_buddy));
 	if (!strstr(invited, "(") || !strstr(invited, ")"))
 		return;
 	if (ecr->preferred) {
@@ -550,7 +544,6 @@ void do_invite_window(void *widget, eb_chat_room * room )
 	GtkWidget * table;
 	GtkWidget * frame;
 	GtkWidget * separator;
-	GList * list;
 		
 	if( !room || room->invite_window_is_open)
 		return;
@@ -562,8 +555,9 @@ void do_invite_window(void *widget, eb_chat_room * room )
 		ay_do_error(_("Chatroom error"), _("Cannot invite a third party until a protocol has been chosen."));
 		return;
 	}
-	
-	room->invite_window = gtk_window_new(GTK_WINDOW_DIALOG);
+
+	room->invite_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
 	gtk_window_set_transient_for(GTK_WINDOW(room->invite_window), GTK_WINDOW(room->window));
 	gtk_window_set_position(GTK_WINDOW(room->invite_window), GTK_WIN_POS_MOUSE);
 	gtk_window_set_title(GTK_WINDOW(room->invite_window), _("Invite a contact"));
@@ -586,11 +580,9 @@ void do_invite_window(void *widget, eb_chat_room * room )
 	gtk_table_attach(GTK_TABLE(table), mbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(label);
 
-	room->invite_buddy = gtk_combo_new();
-	list = llist_to_glist(get_contacts(room), 1);
-	gtk_combo_set_popdown_strings(GTK_COMBO(room->invite_buddy), list);
-	g_list_free(list);
-	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(room->invite_buddy)->entry), "");
+	room->invite_buddy = gtk_combo_box_new_text();
+	get_contacts(room);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(room->invite_buddy), -1);
 	gtk_widget_show(room->invite_buddy);
 
 	gtk_table_attach(GTK_TABLE(table), room->invite_buddy, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
@@ -621,12 +613,13 @@ void do_invite_window(void *widget, eb_chat_room * room )
 	label = gtkut_create_icon_button( _("Invite"), invite_btn_xpm, room->invite_window );
 	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
-	gtk_signal_connect(GTK_OBJECT(label), "clicked", invite_callback, room);
+	g_signal_connect(label, "clicked", G_CALLBACK(invite_callback), room);
 
 	label = gtkut_create_icon_button( _("Cancel"), cancel_xpm, room->invite_window );
 	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
-	gtk_signal_connect_object(GTK_OBJECT(label), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), GTK_OBJECT(room->invite_window));
+	g_signal_connect_swapped(label, "clicked", G_CALLBACK(gtk_widget_destroy),
+			room->invite_window);
 	mbox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_end(GTK_BOX(mbox), box2, FALSE, FALSE, 0);
 
@@ -640,8 +633,7 @@ void do_invite_window(void *widget, eb_chat_room * room )
 
 	gtk_widget_show(room->invite_window);
 	
-	gtk_signal_connect( GTK_OBJECT(room->invite_window), "destroy",
-						GTK_SIGNAL_FUNC(destroy_invite), room);
+	g_signal_connect( room->invite_window, "destroy", G_CALLBACK(destroy_invite), room);
 }
 
 	
@@ -688,6 +680,30 @@ static LList *get_chatroom_mru (void)
 	return mru;
 }
 
+static void load_chatroom_mru (GtkComboBox *combo)
+{
+	char buff [4096];
+	FILE *fp = NULL;
+	
+	snprintf(buff, 4095, "%s%cchatroom_mru", 
+				config_dir, 
+				G_DIR_SEPARATOR);
+	
+	fp = fopen(buff, "r");
+	memset (buff, 0, 4096);
+	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
+		char *name = strdup((char *)buff);
+		if (name[strlen(name)-1] == '\n')
+			name[strlen(name)-1] = '\0';
+		gtk_combo_box_append_text(combo, name);
+
+		eb_debug(DBG_CORE, "name='%s'\n",name);
+		memset (buff, 0, 4096);
+	}
+	if (fp)
+		fclose(fp);
+}
+
 static void add_chatroom_mru (const char * name)
 {
 	LList *mru = get_chatroom_mru();
@@ -723,16 +739,16 @@ static void add_chatroom_mru (const char * name)
 
 static void join_chat_callback(GtkWidget * widget, gpointer data )
 {
-	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
+	char *service = gtk_combo_box_get_active_text(GTK_COMBO_BOX(chat_room_type));
 	char *name = NULL;
 	char *mservice = NULL;
 	char *local_acc = NULL;
 	eb_local_account *ela = NULL;
 	int service_id = -1;
 	
-	name = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_name)->entry),0,-1);
-	
-	if (!strstr(service, "]") || !strstr(service," ")) {
+	name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(chat_room_name));
+
+	if (service==NULL || !strstr(service, "]") || !strstr(service," ")) {
 		ay_do_error(_("Cannot join"), _("No local account specified."));
 		g_free(service);
 		return;
@@ -760,7 +776,9 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 	add_chatroom_mru(name);
 	
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(reconnect_chkbtn)))
-		eb_add_auto_chatroom(ela, name, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(public_chkbtn)));
+		eb_add_auto_chatroom(ela, name,
+				gtk_toggle_button_get_active(
+					GTK_TOGGLE_BUTTON(public_chkbtn)));
 
 	eb_start_chat_room(ela, name, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(public_chkbtn)));
 	
@@ -769,13 +787,13 @@ static void join_chat_callback(GtkWidget * widget, gpointer data )
 }
 
 static void update_public_sensitivity(GtkWidget * widget, gpointer data ) {
-	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
+	char *service = gtk_combo_box_get_active_text(GTK_COMBO_BOX(chat_room_type));
 	char *mservice = NULL;
 	char *local_acc = NULL;
 	int service_id = -1;
 	int has_public = 0;
 	
-	if (!strstr(service, "]") || !strstr(service," ")) {
+	if (!service && (!strstr(service, "]") || !strstr(service," ")) ) {
 		g_free(service);
 		return;
 	}
@@ -796,16 +814,14 @@ static void update_public_sensitivity(GtkWidget * widget, gpointer data ) {
 }
 
 static void choose_list_cb(const char *text, gpointer data) {
-	int pos;
-	
-	gtk_editable_delete_text(GTK_EDITABLE(GTK_COMBO(chat_room_name)->entry), 0, -1);
-	gtk_editable_insert_text(GTK_EDITABLE(GTK_COMBO(chat_room_name)->entry), text, strlen(text), &pos);
+	gtk_combo_box_prepend_text(GTK_COMBO_BOX(chat_room_name), text);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(chat_room_name), 0);
 	
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(public_chkbtn), TRUE);
 }
 
 static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
-	char *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(chat_room_type)->entry),0,-1);
+	char *service = gtk_combo_box_get_active_text(GTK_COMBO_BOX(chat_room_type));
 	char *mservice = NULL;
 	char *local_acc = NULL;
 	int service_id = -1;
@@ -865,8 +881,6 @@ void open_join_chat_window()
 	GtkWidget * button;
 	GtkWidget * separator;
 	
-	GList * list = NULL;
-
 	if(join_service_is_open)
 	{
 		return;
@@ -890,11 +904,9 @@ void open_join_chat_window()
 	gtk_widget_show(label);
 
 	/* mru */
-	chat_room_name = gtk_combo_new();
-	list = llist_to_glist(get_chatroom_mru(), 1);
-	list = g_list_prepend(list, strdup(""));
-	gtk_combo_set_popdown_strings(GTK_COMBO(chat_room_name), list);
-	g_list_free(list);
+	chat_room_name = gtk_combo_box_entry_new_text();
+	load_chatroom_mru(GTK_COMBO_BOX(chat_room_name));
+	
 	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_name, 1, 2, 0, 1);
 	gtk_widget_show(chat_room_name);
 
@@ -902,11 +914,9 @@ void open_join_chat_window()
 	gtk_table_attach_defaults (GTK_TABLE(table), label, 0, 1, 1, 2);
 	gtk_widget_show(label);
 
-	chat_room_type = gtk_combo_new();
-	list = chat_service_list();
-	list = g_list_prepend(list, strdup(""));
-	gtk_combo_set_popdown_strings(GTK_COMBO(chat_room_type), list);
-	g_list_free(list);
+	chat_room_type = gtk_combo_box_new_text();
+	chat_service_list(GTK_COMBO_BOX(chat_room_type));
+	
 	gtk_table_attach_defaults (GTK_TABLE(table), chat_room_type, 1, 2, 1, 2);
 	gtk_widget_show(chat_room_type);
 
@@ -944,7 +954,7 @@ void open_join_chat_window()
 	
 	/* Window resize BAD, Same size GOOD */
 
-	gtk_window_set_policy (GTK_WINDOW(join_chat_window), FALSE, FALSE, TRUE);
+	gtk_window_set_resizable (GTK_WINDOW(join_chat_window), FALSE);
 	gtk_window_set_position(GTK_WINDOW(join_chat_window), GTK_WIN_POS_MOUSE);
 	
 	/* Show the frame and window */
@@ -961,22 +971,18 @@ void open_join_chat_window()
 
 	hbox2 = gtk_hbox_new(TRUE, 5);
 
-	gtk_widget_set_usize(hbox2, 200, 25);
+	gtk_widget_set_size_request(hbox2, 200, 25);
 	
 	/* stuff for the join button */
 	
 	button = gtkut_create_icon_button( _("Join"), ok_xpm, join_chat_window );
 
-	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-					GTK_SIGNAL_FUNC(join_chat_callback),
-					NULL);
+	g_signal_connect(button, "clicked", G_CALLBACK(join_chat_callback), NULL);
 
-	gtk_signal_connect(GTK_OBJECT(public_list_btn), "clicked",
-					GTK_SIGNAL_FUNC(list_public_chatrooms),
-					NULL);
+	g_signal_connect(public_list_btn, "clicked", G_CALLBACK(list_public_chatrooms), NULL);
 
-	gtk_signal_connect(GTK_OBJECT(GTK_COMBO(chat_room_type)->list), "selection-changed",
-					GTK_SIGNAL_FUNC(update_public_sensitivity),
+	g_signal_connect(GTK_COMBO_BOX(chat_room_type), "changed",
+					G_CALLBACK(update_public_sensitivity),
 					NULL);
 
 	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
@@ -986,9 +992,8 @@ void open_join_chat_window()
 
 	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, join_chat_window );
 
-	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-						GTK_SIGNAL_FUNC(gtk_widget_destroy),
-						GTK_OBJECT(join_chat_window));
+	g_signal_connect_swapped(button, "clicked",G_CALLBACK(gtk_widget_destroy),
+			join_chat_window);
 	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 	gtk_widget_show(button);
 
@@ -1009,8 +1014,7 @@ void open_join_chat_window()
 
 	gtk_widget_grab_focus(chat_room_name);
 	
-	gtk_signal_connect( GTK_OBJECT(join_chat_window), "destroy",
-				GTK_SIGNAL_FUNC(join_chat_destroy), NULL );
+	g_signal_connect( join_chat_window, "destroy", G_CALLBACK(join_chat_destroy), NULL );
 }
 
 void destroy_chat_room (GtkWidget *widget, gpointer data) 
@@ -1054,8 +1058,7 @@ static void destroy(GtkWidget * widget, gpointer data)
 	if ( ecr == NULL )
 		return;
 
-	gtk_signal_disconnect_by_func(GTK_OBJECT(ecr->window),
-			   GTK_SIGNAL_FUNC(handle_focus), ecr);
+	g_signal_handlers_disconnect_by_func(ecr->window, G_CALLBACK(handle_focus), ecr);
 
 	while (l_list_find(chat_rooms, data)) {
 		chat_rooms = l_list_remove(chat_rooms, data);
@@ -1117,13 +1120,18 @@ eb_chat_room *find_tabbed_chat_room_index (int current_page)
 void eb_chat_room_refresh_list(eb_chat_room * room )
 {
 	LList * node;
-	gtk_clist_clear(GTK_CLIST(room->fellows_widget));
+	gtk_list_store_clear(room->fellows_model);
+	printf("refresh list\n");
 
 	for( node = room->fellows; node; node = node->next )
 	{
+		GtkTreeIter insert;
 		eb_chat_room_buddy * ecrb = node->data;
-		gchar * list[1] = {ecrb->alias};
-		gtk_clist_append(GTK_CLIST(room->fellows_widget), list);
+		gchar * list = ecrb->alias;
+		gtk_list_store_append(room->fellows_model, &insert);
+		gtk_list_store_set(room->fellows_model, &insert,
+				0, list,
+				-1);
 	}
 }
 
@@ -1224,18 +1232,19 @@ void eb_chat_room_buddy_leave( eb_chat_room * room, gchar * handle )
 	eb_chat_room_refresh_list(room);
 }
 
-static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata)
+static gboolean handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata)
 {
 	eb_chat_room * cr = (eb_chat_room *)userdata;
 	if (iGetLocalPref("do_tabbed_chat")) {
 		int tab_number = gtk_notebook_page_num (GTK_NOTEBOOK(cr->notebook), cr->notebook_child);
 		if (tab_number != gtk_notebook_get_current_page(GTK_NOTEBOOK(cr->notebook)))
-			return;
+			return FALSE;
 	}	
 	eb_chat_room_update_window_title(cr, FALSE);
 	set_tab_normal (cr);
 	if(cr->entry)
 		ENTRY_FOCUS(cr);
+	return FALSE;
 
 }
 
@@ -1295,8 +1304,8 @@ eb_chat_room* eb_start_chat_room( eb_local_account *ela, gchar * name, int is_pu
 
 void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, gchar * message)
 {
-	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), message,0,0,0 );
-	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), "\n",0,0,0 );
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), message, HTML_IGNORE_NONE );
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), "\n", HTML_IGNORE_NONE );
 	ay_log_file_message( chat_room->logfile, "", message );
 }
 
@@ -1399,10 +1408,12 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 	link_message = recoded;
 #endif
 	
-	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), buff,0,0,0 );
-	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), link_message,
-		iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
-	gtk_eb_html_add(EXT_GTK_TEXT(chat_room->chat), "\n",0,0,0 );
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), buff, HTML_IGNORE_NONE );
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), link_message,
+		(iGetLocalPref("do_ignore_back")?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
+		(iGetLocalPref("do_ignore_fore")?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
+		(iGetLocalPref("do_ignore_font")?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), "\n", HTML_IGNORE_NONE );
 	
 	ay_log_file_message( chat_room->logfile, buff, link_message );
 	
@@ -1427,11 +1438,11 @@ static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 	if ( !data )
 		return;
 
-	if(scd->c_window->smiley_window ) {
+/* if(scd->c_window->smiley_window != NULL ) {
 		gtk_widget_destroy(scd->c_window->smiley_window);
 		scd->c_window->smiley_window = NULL;
 	}
-	
+*/	
 	g_free( scd );
 }
 
@@ -1455,8 +1466,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	GtkWidget * label;
 	GtkWidget * scrollwindow = gtk_scrolled_window_new(NULL, NULL);
 	GtkWidget * toolbar;
-	GdkPixmap * icon;
-	GdkBitmap * mask;
+	GdkPixbuf * icon;
 	GtkWidget * iconwid;
 	GtkWidget * send_button;
 	GtkWidget * close_button;
@@ -1464,7 +1474,12 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	GtkWidget * separator;
 	GtkWidget * entry_box;
 	gboolean    enableSoundButton = FALSE;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
 	char      * room_title = NULL;
+	GtkWidget *chat_frame;
+	GtkWidget *entry_frame;
+	GtkWidget *scrollwindow2;
 	
 	/*if we are already here, just leave*/
 	if(chat_room->connected)
@@ -1479,57 +1494,63 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	vbox = gtk_vbox_new(FALSE, 1);
 	hbox = gtk_hpaned_new();
 
-	gtk_paned_set_gutter_size(GTK_PANED(hbox), 20);
-	
-	chat_room->fellows_widget = gtk_clist_new(1);
-	gtk_clist_set_column_title(GTK_CLIST(chat_room->fellows_widget), 0, _("Online"));
-	gtk_widget_set_usize(chat_room->fellows_widget, 100, 20 );
-	chat_room->chat = ext_gtk_text_new(NULL, NULL);
-	gtk_widget_set_usize(chat_room->chat, 400, 200);
-	gtk_eb_html_init(EXT_GTK_TEXT(chat_room->chat));
+	/* The Textviews want beautiful borders after all... */
+	chat_frame = gtk_frame_new(NULL);
+	entry_frame = gtk_frame_new(NULL);
+	gtk_frame_set_shadow_type(GTK_FRAME(chat_frame), GTK_SHADOW_IN);
+	gtk_frame_set_shadow_type(GTK_FRAME(entry_frame), GTK_SHADOW_IN);
+
+	chat_room->fellows_model = gtk_list_store_new(1, G_TYPE_STRING);
+	chat_room->fellows_widget = gtk_tree_view_new_with_model(GTK_TREE_MODEL(chat_room->fellows_model));
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(_("Online"), renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(chat_room->fellows_widget), column);
+
+	gtk_widget_set_size_request(chat_room->fellows_widget, 100, 20 );
+
+	chat_room->chat = gtk_text_view_new();
+	gtk_widget_set_size_request(chat_room->chat, 400, 200);
+	html_text_view_init(GTK_TEXT_VIEW(chat_room->chat), HTML_IGNORE_NONE);
 	gtk_container_add(GTK_CONTAINER(scrollwindow), chat_room->chat);
+	gtk_container_add(GTK_CONTAINER(chat_frame), scrollwindow);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
 								   GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
-	gtk_signal_connect(GTK_OBJECT(chat_room->fellows_widget), "select_row",
-					GTK_SIGNAL_FUNC(fellows_click), chat_room );
+	g_signal_connect(chat_room->fellows_widget, "row-activated",
+					G_CALLBACK(fellows_activated), chat_room );
 	/*make ourselves something to type into*/
 	entry_box = gtk_vbox_new(FALSE,0);
-	if ( iGetLocalPref("do_multi_line") ) {
-		GtkWidget *scrollwindow2 = gtk_scrolled_window_new(NULL, NULL);
-		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrollwindow2), 
-					     GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-		
-		chat_room->entry = gtk_text_new(NULL, NULL);
+	
+	scrollwindow2 = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrollwindow2), 
+				     GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	
+	chat_room->entry = gtk_text_view_new();
 
-		gtk_widget_set_usize(chat_room->entry, -1, 50);
+	gtk_widget_set_size_request(chat_room->entry, -1, 50);
 
-		gtk_text_set_editable(GTK_TEXT(chat_room->entry), TRUE);
-		gtk_text_set_word_wrap(GTK_TEXT(chat_room->entry), TRUE);
-		gtk_text_set_line_wrap(GTK_TEXT(chat_room->entry), TRUE);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(chat_room->entry), TRUE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat_room->entry), GTK_WRAP_WORD);
 
 #ifdef HAVE_LIBPSPELL
-		if( iGetLocalPref("do_spell_checking") )
-			gtkspell_attach(GTK_TEXT(chat_room->entry));
+	if( iGetLocalPref("do_spell_checking") )
+		gtkspell_attach(GTK_TEXT_VIEW(chat_room->entry));
 #endif
 
-		gtk_container_add(GTK_CONTAINER(scrollwindow2),chat_room->entry);
-		gtk_widget_show(scrollwindow2);
-		gtk_box_pack_start(GTK_BOX(entry_box), scrollwindow2, TRUE, TRUE, 3);
-	} else {
-		chat_room->entry = gtk_entry_new();
-
-		gtk_signal_connect(GTK_OBJECT(chat_room->entry), "activate",
-						GTK_SIGNAL_FUNC(send_cr_message), chat_room );
-		gtk_box_pack_start(GTK_BOX(entry_box), chat_room->entry, TRUE, TRUE, 3);
-	}
+	gtk_container_add(GTK_CONTAINER(scrollwindow2),chat_room->entry);
+	gtk_container_add(GTK_CONTAINER(entry_frame),scrollwindow2);
+	gtk_widget_show(scrollwindow2);
+	gtk_widget_show(entry_frame);
+	gtk_box_pack_start(GTK_BOX(entry_box), entry_frame, TRUE, TRUE, 3);
 	
-	gtk_signal_connect(GTK_OBJECT(chat_room->entry), "key_press_event",
-			 GTK_SIGNAL_FUNC(cr_key_press),
+	g_signal_connect(chat_room->entry, "key-press-event",
+			 G_CALLBACK(cr_key_press),
 			 chat_room);
 	
-	gtk_paned_add1(GTK_PANED(hbox), scrollwindow);
+	gtk_paned_add1(GTK_PANED(hbox), chat_frame);
 	gtk_widget_show(scrollwindow);
+	gtk_widget_show(chat_frame);
 
 	vbox2 = gtk_vbox_new(FALSE, 5);
 
@@ -1545,8 +1566,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_widget_show(scrollwindow);
 
 	label = gtk_button_new_with_label(_("Invite User"));
-	gtk_signal_connect(GTK_OBJECT(label), "clicked", invite_button_callback, 
-						chat_room);
+	g_signal_connect(label, "clicked", G_CALLBACK(invite_button_callback), chat_room);
 
 	gtk_box_pack_start(GTK_BOX(vbox2), label, FALSE, FALSE, 3);
 	gtk_widget_show(label);
@@ -1565,7 +1585,6 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_widget_show(entry_box);
 	gtk_widget_show(chat_room->entry);
 
-	gtk_widget_realize(chat_room->window);
 	if (chat_room->local_user)
 		room_title = g_strdup_printf("%s [%s]", chat_room->room_name, 
 					get_service_name(chat_room->local_user->service_id));
@@ -1577,33 +1596,45 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_window_set_title(GTK_WINDOW(chat_room->window), room_title);
 	g_free(room_title);
 
-	gtkut_set_window_icon(chat_room->window->window, NULL);
-	gtk_signal_connect(GTK_OBJECT(chat_room->window), "focus_in_event",
-					   GTK_SIGNAL_FUNC(handle_focus), chat_room);
+	g_signal_connect(chat_room->window, "focus-in-event", G_CALLBACK(handle_focus), chat_room);
 
 	
 	/* start a toolbar here */
 	
 	hbox2 = gtk_hbox_new(FALSE, 0);
-	gtk_widget_set_usize(hbox2, 200, 25);
+	gtk_widget_set_size_request(hbox2, 200, 40);
 	
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NONE);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
+        gtk_toolbar_set_show_arrow(GTK_TOOLBAR(toolbar), FALSE);
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 	gtk_container_set_border_width(GTK_CONTAINER(toolbar), 0);
-	gtk_toolbar_set_space_size(GTK_TOOLBAR(toolbar), 5);
+
+
+
+#define TOOLBAR_APPEND_SPACE() {\
+	separator = GTK_WIDGET(gtk_separator_tool_item_new());\
+	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator), TRUE);\
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(separator) , -1);\
+	gtk_widget_show(separator); }
+#define TOOLBAR_APPEND_TOGGLE_BUTTON(tool_btn,txt,tip,pvt_tip,icn,cbk,cwx) {\
+	tool_btn = GTK_WIDGET( gtk_toggle_tool_button_new() );\
+	gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(tool_btn), icn);\
+	gtk_tool_button_set_label(GTK_TOOL_BUTTON(tool_btn),txt);\
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(tool_btn),-1);\
+	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(tool_btn),gtk_tooltips_new(),tip,pvt_tip);\
+	g_signal_connect(tool_btn,"clicked",G_CALLBACK(cbk),cwx);\
+        gtk_widget_show(tool_btn); }
 	
-#define TOOLBAR_APPEND(txt,icn,cbk,cwx) \
-	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),txt,txt,txt,icn,GTK_SIGNAL_FUNC(cbk),cwx); 
-#define TOOLBAR_SEPARATOR() {\
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));\
-	separator = gtk_vseparator_new();\
-	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);\
-	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL, NULL);\
-	gtk_widget_show(separator);\
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); }
+#define TOOLBAR_APPEND(tool_btn,txt,icn,cbk,cwx) {\
+	tool_btn = GTK_WIDGET(gtk_tool_button_new(icn,txt));\
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(tool_btn),-1);\
+	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(tool_btn),gtk_tooltips_new(),txt,txt);\
+	g_signal_connect(tool_btn,"clicked",G_CALLBACK(cbk),cwx); \
+	gtk_widget_show(tool_btn); }
 #define ICON_CREATE(icon,iconwid,xpm) {\
-	icon = gdk_pixmap_create_from_xpm_d(chat_room->window->window, &mask, NULL, xpm); \
-	iconwid = gtk_pixmap_new(icon, mask); \
+	icon = gdk_pixbuf_new_from_xpm_data( (const char **) xpm); \
+	iconwid = gtk_image_new_from_pixbuf(icon); \
 	gtk_widget_show(iconwid); }
 
 	/* smileys */
@@ -1611,41 +1642,37 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		smiley_callback_data * scd = g_new0(smiley_callback_data,1);
 		scd->c_window = chat_room;
 		ICON_CREATE(icon, iconwid, smiley_button_xpm);
-		chat_room->smiley_button = 
-			TOOLBAR_APPEND(_("Insert Smiley"), iconwid, _show_smileys_cb, scd);
+		TOOLBAR_APPEND(chat_room->smiley_button, _("Insert Smiley"),
+				iconwid, _show_smileys_cb, scd);
 	
-		gtk_signal_connect(GTK_OBJECT(chat_room->smiley_button), "destroy",
-					   GTK_SIGNAL_FUNC(destroy_smiley_cb_data), scd);
+		g_signal_connect(chat_room->smiley_button, "destroy",
+					   G_CALLBACK(destroy_smiley_cb_data), scd);
 		/*Create the separator for the toolbar*/
 
-		TOOLBAR_SEPARATOR();
 	}
 
 	ICON_CREATE(icon, iconwid, reconnect_xpm);
-	
-  	chat_room->reconnect_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-						GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
-						NULL,
-						_("Reconnect at login"),
-						_("Reconnect at login"),
-						_("Reconnect at login"),
-						iconwid,
-						GTK_SIGNAL_FUNC(set_reconnect_on_toggle),
-						chat_room);
-	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON( chat_room->reconnect_button ), 
+	TOOLBAR_APPEND_TOGGLE_BUTTON(chat_room->reconnect_button,
+			_("Reconnect at login"),
+			_("Reconnect at login"),
+			_("Reconnect at login"),
+			iconwid,
+			set_reconnect_on_toggle,
+			chat_room
+			);
+
+	gtk_toggle_tool_button_set_active( GTK_TOGGLE_TOOL_BUTTON( chat_room->reconnect_button ), 
 				     eb_is_chatroom_auto(chat_room) );
 	
 	ICON_CREATE(icon, iconwid, tb_volume_xpm);
-
-  	chat_room->sound_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-						GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
-						NULL,
-						_("Sound"),
-						_("Enable Sounds"),
-						_("Sound"),
-						iconwid,
-						GTK_SIGNAL_FUNC(set_sound_on_toggle),
-						chat_room);
+	TOOLBAR_APPEND_TOGGLE_BUTTON(chat_room->sound_button,
+			_("Sound"),
+			_("Enable Sounds"),
+			_("Sound"),
+			iconwid,
+			set_sound_on_toggle,
+			chat_room
+			);
 
 	/* Toggle the sound button based on preferences */
 	if ( iGetLocalPref("do_play_send") )
@@ -1665,23 +1692,19 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		chat_room->first_enabled = TRUE;
 		enableSoundButton = TRUE;
 	}
-	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON( chat_room->sound_button ), 
+	gtk_toggle_tool_button_set_active( GTK_TOGGLE_TOOL_BUTTON( chat_room->sound_button ), 
 				     enableSoundButton );
 
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
+	TOOLBAR_APPEND_SPACE();
 	ICON_CREATE(icon, iconwid, action_xpm);
-	print_button = TOOLBAR_APPEND(_("Actions..."), iconwid, action_callback, chat_room);
-
-	TOOLBAR_SEPARATOR();
+	TOOLBAR_APPEND(print_button, _("Actions..."), iconwid, action_callback, chat_room);
 
 	ICON_CREATE(icon, iconwid, tb_mail_send_xpm);
-	send_button = TOOLBAR_APPEND(_("Send Message"), iconwid, send_cr_message, chat_room);
+	TOOLBAR_APPEND(send_button, _("Send Message"), iconwid, send_cr_message, chat_room);
 	
 	ICON_CREATE(icon, iconwid, cancel_xpm);
 
-	TOOLBAR_SEPARATOR();
-	
-	close_button = TOOLBAR_APPEND(_("Close"), iconwid, destroy_chat_room, chat_room);
+	TOOLBAR_APPEND(close_button,_("Close"), iconwid, destroy_chat_room, chat_room);
 	
 	chat_room->status_label = gtk_label_new(" ");
 	gtk_box_pack_start(GTK_BOX(hbox2), chat_room->status_label, FALSE, FALSE, 0);
@@ -1698,8 +1721,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 
 	gtk_container_set_border_width(GTK_CONTAINER(chat_room->window), 5);
 	
-	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
-					   GTK_SIGNAL_FUNC(destroy), chat_room );
+	g_signal_connect(vbox, "destroy", G_CALLBACK(destroy), chat_room );
 	gtk_widget_show(chat_room->window);
 	gdk_window_raise(chat_room->window->window);
 	
@@ -1708,7 +1730,8 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 
 #undef TOOLBAR_APPEND
 #undef ICON_CREATE
-#undef TOOLBAR_SEPARATOR
+#undef TOOLBAR_APPEND_TOGGLE_BUTTON
+#undef TOOLBAR_APPEND_SPACE 
 	
 	/* actually call the callback :P .... */
 	if (!chat_room) {
@@ -1736,7 +1759,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 		int page_num = gtk_notebook_page_num (GTK_NOTEBOOK
 				     (chat_room->notebook),
 				     chat_room->notebook_child);
-		gtk_notebook_set_page (GTK_NOTEBOOK(chat_room->notebook), page_num);		
+		gtk_notebook_set_current_page (GTK_NOTEBOOK(chat_room->notebook), page_num);		
 	}
 }
 
@@ -1767,9 +1790,9 @@ static void	destroy_chat_room_log_file( eb_chat_room *chat_room )
 	ay_log_file_destroy( &(chat_room->logfile) );
 }
 
-static LList * get_group_contacts(gchar *group, eb_chat_room * room)
+static void get_group_contacts(gchar *group, eb_chat_room * room)
 {
-	LList *node = NULL, *newlist = NULL, *accounts = NULL;
+	LList *node = NULL, *accounts = NULL;
 	grouplist *g;
 	
 	g = find_grouplist_by_name(group);
@@ -1783,30 +1806,26 @@ static LList * get_group_contacts(gchar *group, eb_chat_room * room)
 		accounts = contact->accounts;
 		while (accounts) {
 			if( ((struct account *)accounts->data)->ela == room->local_user
-			&&  ((struct account *)accounts->data)->online) {
+					&&  ((struct account *)accounts->data)->online) 
+			{
 				char *buf = g_strdup_printf("%s (%s)", contact->nick, 
 						((struct account *)accounts->data)->handle);
-				newlist = l_list_append(newlist, buf);	
+				gtk_combo_box_append_text(GTK_COMBO_BOX(room->invite_buddy), buf);
 			}
 			accounts = accounts->next;
 		}
 		node = node->next;
 	}
-	
-	return newlist;
 }
 
-static LList * get_contacts(eb_chat_room * room)
+static void get_contacts(eb_chat_room * room)
 {
 	LList *node = groups;
-	LList *newlist = NULL;
 	while(node)
 	{
-		LList * g = get_group_contacts(node->data, room);
-		newlist = l_list_concat(newlist, g);	
+		get_group_contacts(node->data, room);
 		node = node->next;
 	}
-	return newlist;
 }
 
 void eb_chat_room_display_status (eb_account *remote, char *message)

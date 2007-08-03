@@ -18,3 +18,5 @@ libicq_la_SOURCES = libicq.c	\
 	util.h			\
 	icqfile.c
 
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

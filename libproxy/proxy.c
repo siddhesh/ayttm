@@ -311,7 +311,7 @@ int proxy_recv( int s, void * buff, int len, unsigned int flags )
 #else
 	int type;
 #endif
-	int size;
+	unsigned int size;
 
 	
 	if( proxy_type == PROXY_SOCKS5 )
@@ -343,7 +343,7 @@ int proxy_send( int s, const void *msg, int len, unsigned int flags )
 #else
 	int type;
 #endif
-	int size;
+	unsigned int size;
 
 	printf("proxy_send\n");
 	
@@ -392,13 +392,13 @@ struct hostent *proxy_gethostbyname( const char *host )
 	if ( proxy_type == PROXY_NONE || proxy_type == PROXY_SOCKS5 )
 		return( gethostbyname( host ) );
 
-    if ( proxy_realhost != NULL )
+	if ( proxy_realhost != NULL )
 		free( proxy_realhost );
 
-    /* we keep the real host name for the Connect command */
-    proxy_realhost = strdup( host );
+	/* we keep the real host name for the Connect command */
+	proxy_realhost = strdup( host );
         
-    return( gethostbyname( proxy_host ) );
+	return( gethostbyname( proxy_host ) );
 }
 
 struct hostent *proxy_gethostbyname2( const char *host, int type )
@@ -504,7 +504,7 @@ static int socks5_connect( int sockfd, struct sockaddr *serv_addr, int addrlen )
 #else
    int type;
 #endif
-   int size = sizeof(int);
+   unsigned int size = sizeof(int);
    int tcplink = 0;
    struct sockaddr_in bind_addr;
    struct sockaddr_in sin;
@@ -818,8 +818,8 @@ int proxy_connect_host( const char *host, int port, void *cb, void *data, void *
 	struct sockaddr_in sin;
 	if ((hp = proxy_gethostbyname((char *)host)) == NULL) 
 	{
-		ay_do_error( _("Proxy Error"), _("Could not resolve host.") );
-		perror("ghbn");
+//		ay_do_error( _("Proxy Error"), _("Could not resolve host.") );
+		perror("proxy_connect_host");
 		return -1;
 	}
 	sin.sin_addr.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;

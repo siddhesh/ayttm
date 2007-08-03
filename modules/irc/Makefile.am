@@ -10,3 +10,5 @@ endif
 irc_la_SOURCES = irc.c
 irc_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 irc_la_LIBADD = $(WIN32_LIBADD)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

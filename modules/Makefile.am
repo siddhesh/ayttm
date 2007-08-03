@@ -4,3 +4,6 @@ livejournal utility aycryption smileys \
 image_filter
 
 SUBDIRS = @OPTIONAL_PLUG_DIR@ importers utility smileys image_filter
+
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

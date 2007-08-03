@@ -44,6 +44,9 @@ else
 	@echo default_module_path=${libdir}/@PACKAGE@ >> @PACKAGE@rc
 endif
 
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@
+
 win32-install:
 	cd mingw32; make install
 

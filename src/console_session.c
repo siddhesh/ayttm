@@ -128,7 +128,7 @@ void console_session_init(void *data, int source, eb_input_condition condition)
 {
 #ifndef __MINGW32__
 	struct sockaddr_un remote;
-	int len;
+	unsigned int len;
 	int sock;
 	int * listener = g_new0(int, 1);
 	

@@ -68,7 +68,7 @@ void (*icqtoc_file_offer)( toc_conn * conn, char * nick, char * ip, short port,
 
 void (*icqtoc_user_info)(toc_conn  * conn, char * user, char * message );
 void (*icqtoc_logged_in)(toc_conn *conn);
-int  (*icqtoc_async_socket)(char *host, int port, void *cb, void *data);
+int  (*icqtoc_async_socket)(const char *host, int port, void *cb, void *data);
 
 void icqtoc_callback( toc_conn * conn );
 int icqtoc_signon( const char * username, const char * password,

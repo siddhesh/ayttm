@@ -1,13 +1,15 @@
 noinst_LTLIBRARIES = libayttmgtk.la
 
 libayttmgtk_la_SOURCES = \
-	about_window.c extgtktext.c  file_selection_dlg.C \
-	gtk_eb_html.c gtkspell.c gtkutils.c \
-	log_window.C message_windows.c prefs_window.C
+	html_text_buffer.c about_window.c \
+	gtkspell.c gtkutils.c gtk_tree_view_tooltip.c \
+	log_window.C prefs_window.C
 
-noinst_HEADERS = \
-	extgtktext.h \
-	gtk_eb_html.h gtkspell.h gtkutils.h
+noinst_HEADERS = html_text_buffer.h gtkspell.h gtkutils.h \
+		 gtk_tree_view_tooltip.h
 
 INCLUDES = -I.. $(GTK_CFLAGS)
 AM_CXXFLAGS = $(CFLAGS)
+
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

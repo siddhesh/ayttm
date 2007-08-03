@@ -440,7 +440,7 @@ static char* auscale(char* infile, char*outfile, float scaling)
 		return(infile);
 	}
 
-	if (strncmp(auheader.magic,".snd",4)) {
+	if (strncmp((const char *)auheader.magic,".snd",4)) {
 		eb_debug(DBG_CORE, "Not .au file,file type=%X%X%X%X\n",auheader.magic[0],auheader.magic[1],auheader.magic[2],auheader.magic[3]);
 		fclose(fd_in);
 		return(infile);

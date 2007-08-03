@@ -142,8 +142,6 @@ struct service_callbacks * query_callbacks();
 //char * msn_create_mail_initial_notify (int unread_ibc, int unread_fold);
 //char * msn_create_new_mail_notify (char * from, char * subject);
 static void msn_new_mail_run_script(eb_local_account *ela);
-static char *Utf8ToStr(const char *in);
-static char *StrToUtf8(const char *in);
 static void eb_msn_format_message (message * msg);
 static char *eb_msn_get_color(void) { static char color[]="#aa0000"; return color; }
 static void close_conn(msnconn *conn);
@@ -172,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.79 $",
-	"$Date: 2005/10/22 19:48:22 $",
+	"$Revision: 1.80 $",
+	"$Date: 2007/08/03 20:38:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -860,7 +858,6 @@ static void eb_msn_send_im( eb_local_account * from, eb_account * account_to,
 					 gchar * mess)
 {
 	message * msg = new message;
-	char *tmp = StrToUtf8(mess);
 	msg->header = NULL;
 	msg->font = NULL;
 	msg->colour = NULL;
@@ -889,8 +886,7 @@ static void eb_msn_send_im( eb_local_account * from, eb_account * account_to,
 	  
 	  return;
         }
-	msg->body = g_strndup(tmp, 1098);
-	free(tmp);
+	msg->body = g_strndup(mess, 1098);
         eb_msn_local_account_data * mlad;
 	mlad = (eb_msn_local_account_data *)from->protocol_local_account_data;
 
@@ -1055,7 +1051,7 @@ static void eb_msn_set_current_state( eb_local_account * account, gint state )
 	mlad->status=state;
 }
 
-static char * eb_msn_check_login(char * user, char * pass)
+static char * eb_msn_check_login(const char * user, const char * pass)
 {
    if(strchr(user,'@') == NULL) {
       return strdup(_("MSN logins must have @domain.tld part."));
@@ -1125,7 +1121,7 @@ static void eb_msn_filetrans_callback( gpointer data, int response )
 
   if(response) {
     eb_debug(DBG_MSN, "accepting transfer\n");
-    ay_do_file_selection(filepath, _("Save file as"), eb_msn_filetrans_accept, (void *)inv);
+    ay_do_file_selection_save(filepath, _("Save file as"), eb_msn_filetrans_accept, (void *)inv);
   }
   else {
     eb_debug(DBG_MSN, "rejecting transfer\n");
@@ -1359,7 +1355,6 @@ static void eb_msn_set_away( eb_local_account * account, char * message, int awa
 static void eb_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
 {
 	message * msg=new message;
-	char *tmp = StrToUtf8(mess);
         if(strlen(mess)>1100)
         {
           char *begin = NULL;
@@ -1385,8 +1380,7 @@ static void eb_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
 	  return;
         }
 	
-	msg->body = g_strndup(tmp, 1098);
-	free(tmp);
+	msg->body = g_strndup(mess, 1098);
 	msg->font=NULL;
 	msg->content=msn_permstring("text/plain; charset=UTF-8");
 
@@ -1445,17 +1439,15 @@ static int eb_msn_authorize_user( eb_local_account *ela, char * username, char *
 	  return 0;
   }
   if(!is_waiting_auth(username)) {
-	  char *tmp = Utf8ToStr(friendlyname);
 	  authorize_cb_data *cbd = g_new0(authorize_cb_data, 1);
 	  eb_debug(DBG_MSN, "** %s (%s) has added you to their list.\n", friendlyname, username);
 	  snprintf(dialog_message, sizeof(dialog_message), _("%s, the MSN user %s (%s) would like to add you to their contact list.\n\nDo you want to allow them to see when you are online?"), 
-			  ela->handle, tmp, username);
+			  ela->handle, friendlyname, username);
   	  uname = msn_permstring(username);
 	  msn_add_to_llist(waiting_auth_callbacks, (llist_data *)uname);
 	  cbd->username = uname;
 	  cbd->ela = ela;
-	  cbd->fname = strdup(tmp);
-	  free(tmp);
+	  cbd->fname = strdup(friendlyname);
 	  eb_do_dialog(dialog_message, _("Authorize MSN User"), eb_msn_authorize_callback, (gpointer)cbd );
 	  return 1;
   } else return 0;	 
@@ -1478,7 +1470,7 @@ static eb_chat_room * eb_msn_make_chat_room( gchar * name, eb_local_account * ac
 }
 
 static void eb_msn_send_invite( eb_local_account * account, eb_chat_room * room,
-						  char * user, char * message )
+						  char * user, const char * message )
 {
 	if (!room->protocol_local_chat_room_data) {
 		ay_do_warning( _("MSN Warning"), _("Cannot invite user: connection to the chatroom has been closed."));
@@ -1558,22 +1550,19 @@ void ext_got_group(msnconn *conn, char *id, char *name)
 			t = NULL;
 		}
 	} 
-	eb_name = Utf8ToStr(name);
-	t = value_pair_get_value(mlad->msn_grouplist, eb_name);
+	t = value_pair_get_value(mlad->msn_grouplist, name);
 	if (!t || !strcmp("-1", t)) {
-		mlad->msn_grouplist = value_pair_add (mlad->msn_grouplist, eb_name, id);
-		eb_debug(DBG_MSN,"got group id %s, %s\n",id,eb_name);
+		mlad->msn_grouplist = value_pair_add (mlad->msn_grouplist, name, id);
+		eb_debug(DBG_MSN,"got group id %s, %s\n",id,name);
 	}
 	if (t) {
 		free(t);
 		t = NULL;
 	}
 	
-	if(strcmp(name,"~") && !find_grouplist_by_name(eb_name)
-	&& !group_mgmt_check_moved(eb_name)) /* if we won't remove it in ten seconds */
-		add_group(eb_name);
-	
-	free(eb_name);
+	if(strcmp(name,"~") && !find_grouplist_by_name(name)
+	&& !group_mgmt_check_moved(name)) /* if we won't remove it in ten seconds */
+		add_group(name);
 }
 
 typedef struct _movecb_data
@@ -1607,10 +1596,8 @@ static void eb_msn_real_change_group(eb_local_account *ela, eb_account * ea, con
 	if (newid == NULL || !strcmp("-1",newid)) {
 		movecb_data *tomove = g_new0(movecb_data, 1);
 		if (newid == NULL) {
-			char *enc = StrToUtf8(int_new_group);
-			msn_add_group(mlad->mc, enc);
-			ext_got_group(mlad->mc, "-1",enc);
-			free(enc);
+			msn_add_group(mlad->mc, (char *)int_new_group);
+			ext_got_group(mlad->mc, "-1",(char *)int_new_group);
 		}
 		else
 		{
@@ -1706,10 +1693,8 @@ static void eb_msn_add_group(eb_local_account *ela, const char *group)
 	id = value_pair_get_value(mlad->msn_grouplist, group);
 	
 	if (!id && mlad->mc) {
-		char *enc = StrToUtf8(group);
-		msn_add_group(mlad->mc, enc);
-		ext_got_group(mlad->mc, "-1", enc);
-		free(enc);
+		msn_add_group(mlad->mc, (char *)group);
+		ext_got_group(mlad->mc, "-1", (char *)group);
 	}
 	
 	if ( id != NULL )
@@ -1727,11 +1712,9 @@ static void eb_msn_rename_group(eb_local_account *ela, const char *ogroup, const
 	id = value_pair_get_value(mlad->msn_grouplist, ogroup);
 	
 	if (id && strcmp("-1",id) && mlad->mc) {
-		char *enc = StrToUtf8(ngroup);
-		msn_rename_group(mlad->mc, id, enc);
+		msn_rename_group(mlad->mc, id, (char *)ngroup);
 		mlad->msn_grouplist = value_pair_remove(mlad->msn_grouplist, ogroup);
 		mlad->msn_grouplist = value_pair_add (mlad->msn_grouplist, ngroup, id);
-		free(enc);
 	}
 	
 	if ( id != NULL )
@@ -1975,15 +1958,13 @@ void ext_got_friendlyname(msnconn * conn, char * friendlyname)
 {
   eb_local_account * ela = NULL;
   char * local_account_name = NULL;
-  char * tmp = Utf8ToStr(friendlyname);
   eb_debug(DBG_MSN, "Your friendlyname is now: %s\n", friendlyname);
   local_account_name=((authdata_NS *)conn->auth)->username;
   ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
   eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)ela->protocol_local_account_data;
-  strncpy(ela->alias, tmp, 255);
+  strncpy(ela->alias, friendlyname, 255);
   if(mlad->fname_pref[0]=='\0')
-  { strncpy(mlad->fname_pref, tmp, MAX_PREF_LEN); }
-  free(tmp);
+  { strncpy(mlad->fname_pref, friendlyname, MAX_PREF_LEN); }
 
   if(!ela->connected && !ela->connecting) {
 	  eb_debug(DBG_MSN,"not connected, shouldn't get it\n");
@@ -2009,9 +1990,7 @@ void ext_got_info(msnconn * conn, syncinfo * info)
   }
   
   if(mlad->fname_pref[0]!='\0') { 
-	  char * tmp = StrToUtf8(mlad->fname_pref);
-	  msn_set_friendlyname(conn, tmp); 
-	  free(tmp);
+	  msn_set_friendlyname(conn, mlad->fname_pref); 
   }
   
   /* hack to check conn status */
@@ -2094,7 +2073,6 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
     eb_msn_account_data *mad;
     /* UNUSED char *newHandle = NULL; */
     int state=0;
-    char *tmp = Utf8ToStr(friendlyname);
     state=get_status_num(status);
     eb_debug(DBG_MSN, "searching for %s in %s...", buddy, ela->handle);
     ea = find_account_with_ela(buddy, ela);
@@ -2103,7 +2081,7 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
         mad = (eb_msn_account_data *)ea->protocol_account_data;
 	if ((do_rename_contacts && l_list_length(ea->account_contact->accounts) == 1)
 	|| !strcmp(buddy, ea->account_contact->nick)) {	
-	   rename_contact(ea->account_contact, tmp);	
+	   rename_contact(ea->account_contact, friendlyname);	
 	}
     } else {
 	    eb_debug(DBG_MSN, "not found, creating new account\n");
@@ -2111,7 +2089,7 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
             mad = (eb_msn_account_data *)ea->protocol_account_data;
 	    if(!find_grouplist_by_name(_("Buddies")))
 		    add_group(_("Buddies"));
-	    add_unknown_with_name(ea, tmp);
+	    add_unknown_with_name(ea, friendlyname);
 	    move_contact(_("Buddies"), ea->account_contact);
 	    update_contact_list();
 	    write_contact_list();
@@ -2125,10 +2103,8 @@ void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * sta
 	    mad->status = state;
 	    buddy_update_status_and_log(ea);
 	    eb_debug(DBG_MSN, "Buddy->online=%i\n", ea->online);
-	    eb_debug(DBG_MSN, "%s (%s) is now %s\n", tmp, buddy, status);
+	    eb_debug(DBG_MSN, "%s (%s) is now %s\n", friendlyname, buddy, status);
     }
-    
-    free(tmp);
 }
 
 void ext_buddy_offline(msnconn * conn, char * buddy)
@@ -2314,11 +2290,7 @@ void ext_got_IM(msnconn * conn, char * username, char * friendlyname, message * 
     char *lmess;
     eb_local_account *ela=NULL;
 
-    /* handle utf8 */
-    if (msg->content != NULL && !strcmp(msg->content, "text/plain; charset=UTF-8"))
-    	 lmess = Utf8ToStr(msg->body);
-    else 
-	 lmess = strdup(msg->body);
+	lmess = strdup(msg->body);
     /* The username element is always valid, even if it's not an SB */
     local_account_name=((authdata_SB *)conn->auth)->username;
     ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
@@ -2384,10 +2356,8 @@ void ext_IM_failed(msnconn * conn)
 void ext_filetrans_invite(msnconn * conn, char * from, char * friendlyname, invitation_ftp * inv)
 {
   char dialog_message[1025];
-  char *tmp = Utf8ToStr(friendlyname);
   snprintf(dialog_message, sizeof(dialog_message), _("The MSN user %s (%s) would like to send you this file:\n\n   %s (%lu bytes).\n\nDo you want to accept this file ?"),
-  	  tmp, from, inv->filename, inv->filesize);
-  free(tmp);
+  	  friendlyname, from, inv->filename, inv->filesize);
   eb_debug(DBG_MSN, "got invitation : inv->filename:%s, inv->filesize:%lu\n",
   	 inv->filename,
 	 inv->filesize);
@@ -2445,10 +2415,8 @@ void ext_start_netmeeting(char *ip)
 void ext_netmeeting_invite(msnconn * conn, char * from, char * friendlyname, invitation_voice * inv)
 {
   char dialog_message[1025];
-  char *tmp = Utf8ToStr(friendlyname);
   snprintf(dialog_message, sizeof(dialog_message), _("The MSN user %s (%s) would like to speak with you using (Gnome|Net)Meeting.\n\nDo you want to accept ?"),
-  	  tmp, from);
-  free(tmp);
+  	  friendlyname, from);
   eb_debug(DBG_MSN, "got netmeeting invitation\n");
   eb_do_dialog(dialog_message, _("Accept invitation"), eb_msn_netmeeting_callback, (gpointer) inv );
 
@@ -2720,66 +2688,6 @@ char * msn_create_new_mail_notify (char * from, char * subject)
 	return retval;
 }
 */
-/*
-** Name:    Str2Utf8
-** Purpose: convert a string in UTF-8 format
-** Input:   in     - the string to convert
-** Output:  a new string in UTF-8 format
-*/
-static char *StrToUtf8(const char *in)
-{
-    unsigned int n, i = 0;
-    char *result = NULL;
-
-    result = (char *) malloc(strlen(in) * 2 + 1);
-
-    /* convert a string to UTF-8 Format */
-    for (n = 0; n < strlen(in); n++) {
-        unsigned char c = (unsigned char)in[n];
-
-        if (c < 128) {
-            result[i++] = (char) c;
-        }
-        else {
-            result[i++] = (char) ((c >> 6) | 192);
-            result[i++] = (char) ((c & 63) | 128);
-        }
-    }
-    result[i] = '\0';
-    return result;
-}
-
-/*
-** Name:    Utf8ToStr
-** Purpose: revert UTF-8 string conversion
-** Input:   in     - the string to decode
-** Output:  a new decoded string
-*/
-static char *Utf8ToStr(const char *in)
-{
-    int i = 0;
-    unsigned int n;
-    char *result = NULL;
-
-    if(in == NULL)
-	    return "";
-    
-    result = (char *) malloc(strlen(in) + 1);
-
-    /* convert a string from UTF-8 Format */
-    for (n = 0; n < strlen(in); n++) {
-        unsigned char c = in[n];
-
-        if (c < 128) {
-			result[i++] = (char) c;
-        }
-        else {
-            result[i++] = (c << 6) | (in[++n] & 63);
-        }
-    }
-    result[i] = '\0';
-    return result;
-}
 
 /*
 ** Name: eb_msn_format_message

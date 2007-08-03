@@ -10,6 +10,7 @@
 	#include "value_pair.h"
 	#include "service.h"
 	#include "trigger.h"
+        #include "charconv.h"
 
 	extern int Line_contact;
 	#define contacterror(error) printf("Parse error on line %d: %s\n", Line_contact, error );
@@ -84,7 +85,7 @@ contact:
 	{
 		char * c;
 		cur_contact = calloc(1, sizeof(struct contact));
-		c = value_pair_get_value( $2, "NAME" );
+		c = StrToUtf8(value_pair_get_value( $2, "NAME" ));
 		strncpy( cur_contact->nick, c , sizeof(cur_contact->nick));
 		free(c);
 		c = value_pair_get_value( $2, "TRIGGER_TYPE" );

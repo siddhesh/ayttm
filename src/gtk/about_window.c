@@ -27,8 +27,7 @@
 #include "intl.h"
 
 #include "ui_about_window.h"
-
-#include "gtkutils.h"
+# include "gtkutils.h"
 
 #include "pixmaps/ayttmlogo.xpm"
 
@@ -89,8 +88,7 @@ void	ay_ui_about_window_create( const tAboutInfo *inAboutInfo )
 	GtkBox		*vbox = NULL;
 	GtkBox		*vbox2 = NULL;
 	GtkStyle	*style = NULL;
-	GdkPixmap	*pm = NULL;
-	GdkBitmap	*bm = NULL;
+	GdkPixbuf	*pm = NULL;
 	GtkWidget	*scroll = NULL;
 
 
@@ -106,19 +104,18 @@ void	ay_ui_about_window_create( const tAboutInfo *inAboutInfo )
 	sAboutWindow = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	gtk_widget_realize( sAboutWindow );
 	gtk_window_set_position( GTK_WINDOW(sAboutWindow), GTK_WIN_POS_MOUSE );
-	gtk_window_set_policy( GTK_WINDOW(sAboutWindow), FALSE, FALSE, TRUE );
+	gtk_window_set_resizable( GTK_WINDOW(sAboutWindow), FALSE );
 	gtk_window_set_title( GTK_WINDOW(sAboutWindow), _("About Ayttm") );
-	gtkut_set_window_icon( sAboutWindow->window, NULL );
-	gtk_container_border_width( GTK_CONTAINER(sAboutWindow), 5 );
+	gtk_container_set_border_width( GTK_CONTAINER(sAboutWindow), 5 );
 
 	vbox = GTK_BOX( gtk_vbox_new(FALSE, 0) );
 	gtk_widget_show( GTK_WIDGET(vbox) );
 
 	/* logo */
 	style = gtk_widget_get_style( sAboutWindow );
-	pm = gdk_pixmap_create_from_xpm_d( sAboutWindow->window, &bm,
-                 &style->bg[GTK_STATE_NORMAL], (gchar **)ayttmlogo_xpm );
-	logo = gtk_pixmap_new( pm, bm );
+	pm = gdk_pixbuf_new_from_xpm_data( (const char **)ayttmlogo_xpm );
+
+	logo = gtk_image_new_from_pixbuf( pm );
 	gtk_box_pack_start( vbox, logo, FALSE, FALSE, 5 );
 	gtk_widget_show( logo );
 
@@ -194,20 +191,18 @@ void	ay_ui_about_window_create( const tAboutInfo *inAboutInfo )
 			 
 	/* close button */
 	ok = gtk_button_new_with_label( _("Close") );
-	gtk_signal_connect_object( GTK_OBJECT(ok), "clicked",
-		                  GTK_SIGNAL_FUNC(destroy_about), GTK_OBJECT(sAboutWindow) );
+	g_signal_connect_swapped( ok, "clicked", G_CALLBACK(destroy_about), sAboutWindow );
 
 	gtk_box_pack_start( vbox, ok, FALSE, FALSE, 0 );
 	GTK_WIDGET_SET_FLAGS( ok, GTK_CAN_DEFAULT );
-	gtk_widget_grab_default( ok );
 	gtk_widget_show( ok );
 	
-	gtk_signal_connect_object( GTK_OBJECT(sAboutWindow), "destroy",
-                                  GTK_SIGNAL_FUNC(destroy_about), GTK_OBJECT(sAboutWindow) );
+	g_signal_connect_swapped(sAboutWindow, "destroy", G_CALLBACK(destroy_about), sAboutWindow);
 
 	gtk_container_add( GTK_CONTAINER(sAboutWindow), GTK_WIDGET(vbox) );
 
-	gtk_widget_set_usize( sAboutWindow, -1, 400 );
+	gtk_widget_set_size_request( sAboutWindow, -1, 400 );
 	gtk_widget_show( sAboutWindow );
+	gtk_widget_grab_default( ok );
 	gtk_widget_grab_focus( ok );
 }

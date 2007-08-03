@@ -26,7 +26,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-
+#include "account.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,8 +53,9 @@ GtkWidget	*gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent );
 */
 GtkWidget	*gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent );
 
-void gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap **outPixmap );
+void gtkut_set_pixbuf_from_xpm( char **inXPM, GdkPixbuf **outPixbuf );
 
+void gtkut_set_pixbuf( eb_local_account *ela, char **inXPM, GdkPixbuf **outPixbuf );
 
 /** Get a widget's position.
 
@@ -72,7 +73,7 @@ void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos
 	
 	@returns	the new button
 */
-GtkWidget	*gtkut_create_label_button( const char *inButtonText, GtkSignalFunc inSignalFunc, void *inCallbackData );
+GtkWidget	*gtkut_create_label_button( const char *inButtonText, GCallback inSignalFunc, void *inCallbackData );
 
 /** Create a radio button and add it to a group.
 
@@ -87,7 +88,7 @@ GtkWidget	*gtkut_create_label_button( const char *inButtonText, GtkSignalFunc in
 */
 GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox,
 			const char *inButtonText, int inIsSelected,
-			GtkSignalFunc inSignalFunc, void *inCallbackData );
+			GCallback inSignalFunc, void *inCallbackData );
 
 /** Create a check button.
 
@@ -100,7 +101,7 @@ GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox
 	@returns	the new button
 */
 GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText, int inIsSelected,
-	GtkSignalFunc inSignalFunc, void *inCallbackData );
+	GCallback inSignalFunc, void *inCallbackData );
 
 /** Create a menu button and append it to a menu.
 
@@ -112,7 +113,7 @@ GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText,
 	@returns	the new button
 */
 GtkWidget	*gtkut_create_menu_button( GtkMenu *inMenu, const char *inLabel,
-	GtkSignalFunc inSignalFunc, void *inCallbackData );
+	GCallback inSignalFunc, void *inCallbackData );
 
 /** Create a menu button, append it to a menu, and attach a submenu to it.
 
@@ -131,7 +132,7 @@ GtkWidget	*gtkut_attach_submenu( GtkMenu *inMenu, const char *inLabel,
 	@param	inWindow		the window whose icon we are setting
 	@param	inXPM			the xpm we are setting it to [if NULL then use standard ayttm icon]
 */
-void	gtkut_set_window_icon( GdkWindow *inWindow, gchar **inXPM );
+void	gtkut_set_window_icon( GtkWindow *inWindow, gchar **inXPM );
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -1,0 +1,148 @@
+This document describes the procedure I think we should follow for porting
+ayttm to gtk2.
+
+When updating this document, change the status of the section you're working
+on, update the status description, and sign your name at the end of the
+description
+
+
+
+1. Upgrade code to work with latest gtk-1.2 version (status: DONE)
+
+Task:
+When we built ayttm, it worked with a really old version of gtk-1.2, and some
+features have been added to gtk-1.2 since then.  The main change would be
+the use of gtk_text where we previously used ext_gtk_text.  There may be
+other changes too.
+
+Status:
+I've changed all ext_gtk_text to gtk_text, and changed
+gtk_window_new(GTK_WINDOW_DIALOG) calls to gtk_dialog_new calls.
+
+   -- Philip
+
+
+2. Stop using private gtk variables as far as possible (status: MOSTLY DONE)
+
+Task:
+Some code in ayttm tends to use private member variables from various gtk
+and gdk widget structures.  This most likely crept in because we didn't know
+any better.
+
+Status:
+I've managed to change some places to use functions and public
+constants/macros rather than private members.  I've concentrated only on
+areas that broke compilation.  Sometimes I've had to replace one private
+member with another because the name changed.  One of the main changes was
+to wrap callback functions within GTK_SIGNAL_FUNC and GTK_FUNC calls.
+
+   -- Philip
+
+
+3. Tell configure.ac to use gtk2 with GTK_ENABLE_BROKEN defined (status: DONE)
+
+Task:
+This one is easy.  Upgrade all references to gtk and gdk from 1.2 to 2.0,
+and also define the C preprocessor constant GTK_ENABLE_BROKEN.
+
+Status:
+I've done this, but I chose to define GTK_ENABLE_BROKEN in an environment
+variable rather than in config.h.in.  I did this because we'll need to drop
+it eventually, and it doesn't make sense to change config.h so often.
+
+   -- Philip
+
+
+4. Try to build code with gtk2 (status: DONE non-breaking)
+
+Task:
+This is a tougher job, but mostly because it's boring and drudging.  It
+involves running make on the code repeatedly, fixing issues that come up
+until everything compiles.
+
+Status:
+This involved changing references to gtk_toolbar_new, some fixes for
+gtk_notebook and a bunch of header files that needed to be included.  Some
+return values of gtk functions have changed from char * to const char *, so
+internal data types and some function prototypes had to be changed to take
+this into account.
+
+All non-breaking changes have been made, however some warnings remain due to
+casts from const char * to char *.  These need to be fixed.
+
+   -- Philip
+
+All warnings have been fixed, including the --datarootdir warning by configure
+   -- Siddhesh
+
+
+5. Fix any UI issues that creep up (status: STARTED)
+
+Task:
+At this point we will have to execute the code and look through all UIs,
+fixing anything that broke.  This could be tough.
+
+Status:
+Dropped deprecated progress bar usage in favour of simpler API
+   -- Philip
+Fixed UI issues with toolbars
+   -- Siddhesh
+Much of the gtk2 code will have to be re-written since the approach itself
+is quite different. Of course, we can hack it up now and then clean up later.
+All widgets now use the MVC architecture due to which the data and view of 
+the widget are in separate classes.
+
+I've now started porting widgets one by one, starting with the tree in the
+preferences window. The GTK_DISABLE_DEPRECATED approach would not have allowed
+me to work with the code piece by piece so I've simply decided to go by the
+reference manual to tell me which widgets are out. Later builds with
+GTK_DISABLE_DEPRECATED will be easier to work with.
+  -- Siddhesh
+
+HTML rendering was broken due to the port. It is now finally working on all windows
+that use HTML. html_text_buffer.c replaces the combo of extgtktext.c and
+gtk_eb_html.c as the new html parser. The following are still broken:
+* Smileys and icons are not clear.
+* Body tag is parsed but the width attribute is ignored.
+* HR is of fixed width, which is the initial width of the textview.
+ -- Siddhesh, Tue Jan 30 22:05:04 IST 2007
+
+Fixed transparency issue ith smileys and icons.
+ -- Siddhesh, Wed Jan 31 00:51:12 IST 2007
+
+Ported the contacts tree view on the main window to gtk2. Everything works except
+auto-scroll.
+ -- Siddhesh, Sat Feb 10 23:50:32 IST 2007
+
+We are now using 'good' widgets. Minor fixes like button sizes, etc need to be done.
+ -- Siddhesh, Mon Feb 19 00:19:37 IST 2007
+
+
+6. Build code with GTK_DISABLE_DEPRECATED (status: DONE)
+
+Task:
+The next step is to drop all deprecated gtk usage.  Add
+-DGTK_DISABLE_DEPRECATED to CFLAGS, compile and fix everything.
+
+Status:
+
+The code now builds with the -DGTK_DISABLE_DEPRECATED flag enabled.
+ -- Siddhesh, Fri Mar 9 00:14:14 IST 2007
+
+
+7. Build the code without GTK_ENABLE_BROKEN (status: DONE)
+
+Task:
+Finally, we build without GTK_ENABLE_BROKEN.  This will involve going
+through the gtk and gnome porters guide to figure out what widgets have to
+be replaced and with what.  This will be the biggest step.  I already know
+that gtk_text and gtk_tree will have to be replaced.  The gdk_input_add
+functions also have to be replaced.  Signal handling code has to be
+replaced.  Many stock dialogs can be used.
+
+Status:
+
+The code builds successfully without GTK_ENABLE_BROKEN.
+
+ -- Siddhesh, Mon Feb 19 00:19:37 IST 2007
+

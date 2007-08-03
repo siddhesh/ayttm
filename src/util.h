@@ -90,21 +90,21 @@ eb_account * find_suitable_remote_account( eb_account * first,
 eb_account * find_suitable_file_transfer_account( eb_account * first,
 						  struct contact * rest );
 grouplist * find_grouplist_by_nick(char * nick);
-grouplist * find_grouplist_by_name(char * name);
+grouplist * find_grouplist_by_name(const char * name);
 struct contact * find_contact_by_handle( char * handle );
 struct contact * find_contact_by_nick( const char * nick);
-struct contact * find_contact_in_group_by_nick( char * nick, grouplist *gl );
+struct contact * find_contact_in_group_by_nick( const char * nick, grouplist *gl );
 eb_account * find_account_by_handle( const char * handle, int type );
 eb_account * find_account_with_ela( const char * handle, eb_local_account *ela );
 eb_local_account * find_local_account_by_handle( const char * handle, int type );
 void strip_html(char * text);
 int remove_account( eb_account * a );
 void remove_contact( struct contact * c );
-void rename_contact( struct contact * c, char *newname);
+void rename_contact( struct contact * c, const char *newname);
 void remove_group( grouplist * g );
-void add_group( char * name );
-void rename_group( grouplist *g, char * new_name );
-struct contact * add_new_contact( char * group, char * con, int type );
+void add_group( const char * name );
+void rename_group( grouplist *g, const char * new_name );
+struct contact * add_new_contact( const char * group, const char * con, int type );
 struct contact * add_dummy_contact( char * con, eb_account * account );
 void clean_up_dummies(void);
 void add_unknown( eb_account * ea );
@@ -112,15 +112,15 @@ void add_unknown_with_name( eb_account * ea, char * name );
 void add_account( char * contact, eb_account * account );
 void add_account_silent( char * contact, eb_account * account );
 struct contact * move_account( struct contact * c, eb_account *account );
-void move_contact( char * group, struct contact * c);
-void make_safe_filename(char *buff, char *name, char *group);
+void move_contact( const char * group, struct contact * c);
+void make_safe_filename(char *buff, const char *name, const char *group);
 int connected_local_accounts(void);
 
 pid_t create_lock_file(char* fname);
 void delete_lock_file(char* fname);
 void eb_generic_menu_function(void *add_button, void * userdata);
 LList * get_groups();
-void rename_nick_log(char *oldgroup, char *oldnick, char *newgroup, char *newnick);
+void rename_nick_log(char *oldgroup, char *oldnick, const char *newgroup, const char *newnick);
 
 eb_account *find_account_for_protocol(struct contact *c, int service);
 GList * llist_to_glist(LList * l, int free_old);

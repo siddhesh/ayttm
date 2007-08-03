@@ -153,7 +153,7 @@ static LList * eb_nomodule_get_states()
 /* return an error string in case this login is syntaxically 
  * bad, NULL if everything is OK.
  */
-static char * eb_nomodule_check_login(char * login, char * pass)
+static char * eb_nomodule_check_login(const char * login, const char * pass)
 {
 	return NULL;
 }

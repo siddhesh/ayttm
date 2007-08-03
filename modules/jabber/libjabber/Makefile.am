@@ -12,3 +12,5 @@ libjabber_la_SOURCES = \
 	rate.c \
     jpacket.c \
     jconn.c
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

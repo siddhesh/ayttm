@@ -14,3 +14,5 @@ msn2_la_SOURCES = msn.C
 
 msn2_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 msn2_la_LIBADD = libmsn2/*.lo -lstdc++ $(WIN32_LIBADD)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

@@ -56,8 +56,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"ICQ99 Contact List", 
 	"Imports your ICQ99 contact list into Ayttm", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/07 14:25:12 $",
+	"$Revision: 1.8 $",
+	"$Date: 2007/08/03 20:38:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -319,7 +319,7 @@ guint32 get_contact(int idx, int dat,struct groups groups[], struct my_details *
 		if((stored==1) || (stored==2))
 		{
 			lseek(dat,4,SEEK_CUR);
-				read(dat,&type,1);
+			read(dat,&type,1);
 			if(type==0xe5)
 			{
 				lseek(dat,21,SEEK_CUR);
@@ -329,15 +329,17 @@ guint32 get_contact(int idx, int dat,struct groups groups[], struct my_details *
 					read(dat,&folder,4);
 					my_details->folder=((stored==1)?folder:IGNORE_FOLDER);
 					parse_my_details(dat,my_details);
-					while((groups[i].number!=LAST_FOLDER) && (groups[i].number!=my_details->folder))
+					while((groups[i].number!=LAST_FOLDER) && (groups[i].number!=my_details->folder)) {
 						i++;
-	
+					}
+					
 					group_name=groups[i].name;
 					i=0;
-					while(group_name!=0 && i<30)
+					while(group_name!=0 && i<30) {
 						my_details->group[i++]=*group_name++;
+					}
 					my_details->group[i++]=0;
-				return 1;
+					return 1;
 				}	
 			}
 		}
@@ -347,33 +349,33 @@ guint32 get_contact(int idx, int dat,struct groups groups[], struct my_details *
 }	
 
 
-void import_icq99_ok( GtkWidget  *w,GtkFileSelection *fs )
+void import_icq99_ok( GtkFileChooser *fs )
 {
-    char * selected, *fileext, uin[11];
-    gint	dat,idx;
+	char * selected, *fileext, uin[11];
+	gint	dat,idx;
 	struct groups *groups_ptr;
 	struct	my_details contact;
 	struct idxEntry entry={0,0,0,0,0};
 	eb_account * ea;
 	gint ICQ_ID=-1;
+	
+	ICQ_ID=get_service_id("ICQ");
+	// Is there an ICQ service loaded?
+	if(ICQ_ID < 0) {
+		return;
+	}
 
-     ICQ_ID=get_service_id("ICQ");
-    // Is there an ICQ service loaded?
-    if(ICQ_ID < 0) {
-        return;
-    }
-
-     selected=gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
-
-     fileext=strrchr(selected,'.');
-     if(*(fileext+4)!=0)
-          return;
-     memcpy(fileext,".idx",4);
-    if( !(idx = open(selected, O_RDONLY)) )
-        return;
-     memcpy(fileext,".dat",4);
-	if( !(dat = open(selected, O_RDONLY)) )
-        return;
+	selected=(char *)gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fs));
+	
+	fileext=strrchr(selected,'.');
+	if(!fileext || strlen(fileext) !=3)
+		return;
+	memcpy(fileext,".idx",4);
+	if( (idx = open(selected, O_RDONLY)) == -1 )
+		return;
+	memcpy(fileext,".dat",4);
+	if( (dat = open(selected, O_RDONLY)) == -1 )
+		return;
 	groups_ptr=g_malloc(sizeof(groups)*50);
 	icq_get_groups(idx, dat, groups_ptr, &contact);
 	contact.uin=0;
@@ -384,45 +386,48 @@ void import_icq99_ok( GtkWidget  *w,GtkFileSelection *fs )
 			add_group(contact.group);
 		if(find_account_by_handle(uin, ICQ_ID))
 			continue;
-        if((!find_contact_by_nick(contact.nick_name)) && (!find_contact_by_nick(contact.user_name)))
+		if((!find_contact_by_nick(contact.nick_name)) && (!find_contact_by_nick(contact.user_name)))
 		{
 			if(contact.nick_name[0]!=0)
 				add_new_contact(contact.group, contact.nick_name, ICQ_ID );
 			else
 			{
 				if(contact.user_name[0]==0)
-				     memcpy(contact.user_name,"NoName",7);					
+					memcpy(contact.user_name,"NoName",7);					
 				add_new_contact(contact.group, contact.user_name, ICQ_ID );
 			}
 		}
 		ea = eb_services[ICQ_ID].sc->new_account(NULL,uin);
-
+		
 		if(find_contact_by_nick(contact.user_name))
-               add_account( contact.user_name, ea );
-          else
-               add_account( contact.nick_name, ea );
-
+			add_account( contact.user_name, ea );
+		else
+			add_account( contact.nick_name, ea );
+		
 //          RUN_SERVICE(ea)->add_user(ea);
-     }
+	}
 	update_contact_list ();
 	write_contact_list();
 	g_free(groups_ptr);
 	close(idx);
 	close(dat);
-	gtk_widget_destroy(GTK_WIDGET(fs));
 }
+
 void import_icq99_contacts(ebmCallbackData *data)
 {
      GtkWidget *filew;
 
-     filew = gtk_file_selection_new ("ICQ99 IDX file to import");
+     filew = gtk_file_chooser_dialog_new ("ICQ99 IDX file to import",
+					  NULL,
+					  GTK_FILE_CHOOSER_ACTION_OPEN,
+					  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					  NULL);
 
-     gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
-                              "clicked", (GtkSignalFunc) import_icq99_ok, filew );
+     if(gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
+	     import_icq99_ok(GTK_FILE_CHOOSER(filew));
+     }
 
-     gtk_signal_connect_object (GTK_OBJECT(GTK_FILE_SELECTION(filew)->cancel_button),
-          "clicked", (GtkSignalFunc) gtk_widget_destroy, GTK_OBJECT (filew));
-
-     gtk_widget_show(filew);
+     gtk_widget_destroy(filew);
 }
 

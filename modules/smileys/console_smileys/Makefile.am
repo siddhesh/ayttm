@@ -1,5 +1,7 @@
-THEME_NAME=Console\ Smileys
+# Escape space with a backslash. make install would otherwise fail
+THEME_NAME= Console\ Smileys
 smileydir = ${pkgdatadir}smileys/${THEME_NAME}
+
 smiley_DATA = aysmile.rc \
 	blank.xpm blush.xpm confused.xpm cooldude.xpm \
 	grin.xpm heyy.xpm kiss.xpm laugh.xpm \
@@ -10,3 +12,5 @@ smiley_DATA = aysmile.rc \
 INSTALL = install -D
 
 EXTRA_DIST = $(smiley_DATA)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

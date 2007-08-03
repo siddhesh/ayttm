@@ -30,13 +30,6 @@
 #include "gtk_globals.h"
 #include "account.h"
 
-#include "pixmaps/ayttm.xpm"
-
-
-/* saves ayttm icon info so we don't have to redo it every time */
-static GdkPixmap *s_ayttm_icon_pm = NULL;
-static GdkBitmap *s_ayttm_icon_bm = NULL;
-
 
 static void	s_set_option( GtkWidget *inWidget, int *ioData )
 {
@@ -45,38 +38,28 @@ static void	s_set_option( GtkWidget *inWidget, int *ioData )
 
 GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage, GtkAccelGroup *inAccelGroup )
 {
-	GtkWidget	*button = gtk_check_button_new_with_label( "" );
-	int		key	= gtk_label_parse_uline(GTK_LABEL(GTK_BIN(button)->child), inText);
+	GtkWidget	*button = gtk_check_button_new_with_mnemonic( inText );
 	
 	assert( inValue != NULL );
 	
-	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(button), *inValue );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(button), *inValue );
 	gtk_box_pack_start( GTK_BOX(inPage), button, FALSE, FALSE, 0 );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_set_option), inValue );
+	g_signal_connect( button, "clicked", G_CALLBACK(s_set_option), inValue );
 	gtk_widget_show( button );
 
-	gtk_widget_add_accelerator(button, "grab_focus", inAccelGroup,
-			key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
-
-	
 	return( button );
 }
 
 GtkWidget *gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent )
 {
 	GtkWidget	*iconwid = NULL;
-	GdkPixmap	*icon = NULL;
-	GdkBitmap	*mask = NULL;
-	GtkStyle	*style = NULL;
-
-		
-	style = gtk_widget_get_style( inParent );
+	GdkPixbuf 	*buf = NULL;
 	
-	icon = gdk_pixmap_create_from_xpm_d( inParent->window, &mask, &style->bg[GTK_STATE_NORMAL], inXPM );
-	iconwid = gtk_pixmap_new( icon, mask );
-	gtk_widget_show( iconwid );
-		
-	return( iconwid );
+	buf = gdk_pixbuf_new_from_xpm_data((const char **)inXPM);
+	iconwid = gtk_image_new_from_pixbuf(buf);
+	gtk_widget_show(iconwid);
+
+	return (iconwid);
 }
 
 GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent )
@@ -87,10 +70,10 @@ GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidge
 	GtkWidget	*iconwid = NULL;
 	GtkStyle	*style = NULL;
 	const int	min_width = 80;
-	int			width = min_width;
-	int			using_label = (inLabel != NULL);
+	int		width = min_width;
+	int		height = -1;
+	int		using_label = (inLabel != NULL);
 
-	
 	if ( using_label )
 	{
 		hbox = gtk_hbox_new( FALSE, 0 );
@@ -100,6 +83,7 @@ GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidge
 	style = gtk_widget_get_style( inParent );
 	
 	iconwid = gtkut_create_icon_widget( inXPM, inParent );
+	height = gdk_pixbuf_get_height( gtk_image_get_pixbuf(GTK_IMAGE(iconwid)) )+5;
 	
 	if ( using_label )
 	{
@@ -117,7 +101,7 @@ GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidge
 		
 		if ( button->requisition.width > width )
 			width = button->requisition.width;
-		gtk_widget_set_usize( button, width, -1 );
+		gtk_widget_set_size_request( button, width, height );
 	}
 	else
 	{
@@ -129,62 +113,26 @@ GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidge
 	return( button );
 }
 
-void    gtkut_set_pixmap( eb_local_account *ela, char **inXPM, GtkPixmap **outPixmap ) 
+void    gtkut_set_pixbuf( eb_local_account *ela, char **inXPM, GdkPixbuf **outPixbuf ) 
 {
-	LList *x;
-	struct dd {
-		char **inXPM;
-		GdkPixmap *tpx;
-		GdkBitmap *tbx;
-	} *d;
 
-	if (ela == NULL)
+	if ( (inXPM == NULL) || (*outPixbuf == NULL) )
 		return;
-
-	if ( (inXPM == NULL) || (*outPixmap == NULL) )
-		return;
-	
-	x = ela->status_pix;
-	while(x != NULL) {
-		d = (struct dd *)x->data;
-		if(d->inXPM == inXPM) {
-			if ((*outPixmap)->pixmap != d->tpx)
-				gtk_pixmap_set( *outPixmap, d->tpx, d->tbx );
-			return;
-		}
-		x = x->next;
-	}
-	if (!x) {
-		GdkPixmap *tpx;
-		GdkBitmap *tbx;
-		d = (struct dd *) g_new0 (struct dd, 1);
-		if (!d)
-			return;
-
-		tpx = gdk_pixmap_create_from_xpm_d( statuswindow->window, 
-			&tbx, NULL, inXPM );
-
-		d->inXPM=inXPM;
-		d->tpx=tpx;
-		d->tbx=tbx;
-		gtk_pixmap_set( *outPixmap, d->tpx, d->tbx );
-		x = l_list_append(ela->status_pix, d);
-		ela->status_pix = x;
-	}
+	/*
+	 * FIXME: This is slowing things down for now as it compulsarily
+	 * reloads the pixbuf everytime regardless of whether it has changed
+	 * or not
+	 */
+	*outPixbuf = gdk_pixbuf_new_from_xpm_data((const char **)inXPM);
 }
 
-void	gtkut_set_pixmap_from_xpm( char **inXPM, GtkPixmap **outPixmap )
+void	gtkut_set_pixbuf_from_xpm( char **inXPM, GdkPixbuf **outPixbuf )
 {
-	GdkPixmap	*tpx = NULL;
-	GdkBitmap	*tbx = NULL;
-	
-	
-	if ( (inXPM == NULL) || (*outPixmap == NULL) )
+	if ( (inXPM == NULL) || (*outPixbuf == NULL) )
 		return;
 		
 #ifndef __MINGW32__
-	tpx = gdk_pixmap_create_from_xpm_d( statuswindow->window, &tbx, NULL, inXPM );
-	gtk_pixmap_set( *outPixmap, tpx, tbx );
+	*outPixbuf = gdk_pixbuf_new_from_xpm_data( (const char **) inXPM );
 #endif
 }
 
@@ -225,37 +173,21 @@ void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos
 		*outYpos = y;
 }
 
-GtkWidget	*gtkut_create_label_button( const char *inButtonText, GtkSignalFunc inSignalFunc, void *inCallbackData )
+GtkWidget	*gtkut_create_label_button( const char *inButtonText, GCallback inSignalFunc, void *inCallbackData )
 {
-	GtkWidget	*label_hbox = NULL;
-	GtkWidget	*label = NULL;
 	GtkWidget	*button = NULL;
-	int			button_width = 100;	// minimum width for the button
-	
-	
-	label_hbox = gtk_hbox_new( FALSE, 0 );
-	gtk_widget_show( label_hbox );
-	
-	label = gtk_label_new( inButtonText );
-	gtk_widget_show( label );
-	gtk_box_pack_start( GTK_BOX(label_hbox), label, TRUE, TRUE, 0 );
-		
-	button = gtk_button_new();
-	gtk_container_add( GTK_CONTAINER(button), label_hbox );
+
+	button = gtk_button_new_with_mnemonic(inButtonText);
 	gtk_widget_show( button );
 		
-	if ( button->requisition.width > button_width )
-		button_width = button->requisition.width;
-		
-	gtk_widget_set_usize( button, button_width, -1 );
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", inSignalFunc, inCallbackData );
+	g_signal_connect( button, "clicked", inSignalFunc, inCallbackData );
 	
 	return( button );
 }
 
 GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox,
 			const char *inButtonText, int inIsSelected,
-			GtkSignalFunc inSignalFunc, void *inCallbackData )
+			GCallback inSignalFunc, void *inCallbackData )
 {
 	GtkWidget	*radio = NULL;
 
@@ -267,18 +199,18 @@ GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox
 	
 	gtk_widget_show( radio );
 
-	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(radio), inIsSelected );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(radio), inIsSelected );
 
 	gtk_box_pack_start( GTK_BOX(inParentBox), radio, FALSE, FALSE, 0 );
 
-	gtk_signal_connect( GTK_OBJECT(radio), "clicked", inSignalFunc, inCallbackData );
+	g_signal_connect( radio, "clicked", inSignalFunc, inCallbackData );
 
-	return( gtk_radio_button_group( GTK_RADIO_BUTTON(radio) ) );
+	return( gtk_radio_button_get_group( GTK_RADIO_BUTTON(radio) ) );
 }
 
 
 GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText, int inIsSelected,
-	GtkSignalFunc inSignalFunc, void *inCallbackData )
+	GCallback inSignalFunc, void *inCallbackData )
 {
 	GtkWidget *button = NULL;
 
@@ -286,25 +218,24 @@ GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText,
 	if ( inButtonText == NULL )
 		button = gtk_check_button_new();
 	else
-		button = gtk_check_button_new_with_label( inButtonText );
+		button = gtk_check_button_new_with_mnemonic( inButtonText );
 	
 	gtk_widget_show( button );
 	
-	gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(button), inIsSelected );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(button), inIsSelected );
 	
 	gtk_box_pack_start( GTK_BOX(inParentBox), button, FALSE, FALSE, 0 );
 	
-	gtk_signal_connect( GTK_OBJECT(button), "clicked", inSignalFunc, inCallbackData );
+	g_signal_connect( GTK_OBJECT(button), "clicked", inSignalFunc, inCallbackData );
 	
 	return( button );
 }
 
 
 GtkWidget	*gtkut_create_menu_button( GtkMenu *inMenu, const char *inLabel,
-	GtkSignalFunc inSignalFunc, void *inCallbackData )
+	GCallback inSignalFunc, void *inCallbackData )
 {
 	GtkWidget *button = NULL;
-
 	
 	assert( inMenu != NULL );
 	
@@ -314,9 +245,9 @@ GtkWidget	*gtkut_create_menu_button( GtkMenu *inMenu, const char *inLabel,
 		button = gtk_menu_item_new_with_label( inLabel ) ;
 		
 	if ( inSignalFunc != NULL )
-		gtk_signal_connect( GTK_OBJECT(button), "activate", inSignalFunc, inCallbackData );
+		g_signal_connect( button, "activate", inSignalFunc, inCallbackData );
 		
-	gtk_menu_append( inMenu, button );
+	gtk_menu_shell_append( GTK_MENU_SHELL(inMenu), button );
 	gtk_widget_show( button );
 
 	return( button );
@@ -335,7 +266,7 @@ GtkWidget	*gtkut_attach_submenu( GtkMenu *inMenu, const char *inLabel,
 	
 	gtk_widget_set_sensitive( button, inActive );
 
-	gtk_menu_append( GTK_MENU(inMenu), button );
+	gtk_menu_shell_append( GTK_MENU_SHELL(inMenu), button );
 
 	gtk_menu_item_set_submenu( GTK_MENU_ITEM(button), inSubmenu );
 	gtk_widget_show( button );
@@ -343,40 +274,13 @@ GtkWidget	*gtkut_attach_submenu( GtkMenu *inMenu, const char *inLabel,
 	return( button );
 }
 
-void	gtkut_set_window_icon( GdkWindow *inWindow, gchar **inXPM )
+void	gtkut_set_window_icon( GtkWindow *inWindow, gchar **inXPM )
 {
-	GdkAtom		icon_atom;
-	glong		data[2];
-	GdkPixmap	*the_pixmap = s_ayttm_icon_pm;
-	GdkBitmap	*the_bitmap = s_ayttm_icon_bm;
-
+	GdkPixbuf	*the_pixbuf = NULL;
 		
 	if ( inXPM != NULL )
 	{
-		the_pixmap = gdk_pixmap_create_from_xpm_d( inWindow, &the_bitmap,
-					NULL, inXPM );
+		the_pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **) inXPM );
+		gtk_window_set_icon( inWindow, the_pixbuf);
 	}
-	else
-	{
-		if ( s_ayttm_icon_pm == NULL )
-		{
-			s_ayttm_icon_pm = gdk_pixmap_create_from_xpm_d( inWindow, &s_ayttm_icon_bm,
-						NULL, (gchar **)ayttm_xpm );
-			
-			the_pixmap = s_ayttm_icon_pm;
-			the_bitmap = s_ayttm_icon_bm;
-		}
-	}
-
-#ifndef __MINGW32__
-	data[0] = ((GdkPixmapPrivate *)the_pixmap)->xwindow;
-	data[1] = ((GdkPixmapPrivate *)the_bitmap)->xwindow;
-
-	icon_atom = gdk_atom_intern( "KWM_WIN_ICON", FALSE);
-	gdk_property_change( inWindow, icon_atom, icon_atom,
-			32, GDK_PROP_MODE_REPLACE,
-			(guchar *)data, 2);
-#endif
-	
-	gdk_window_set_icon( inWindow, NULL, the_pixmap, the_bitmap );
 }

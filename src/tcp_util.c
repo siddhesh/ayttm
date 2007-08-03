@@ -220,7 +220,8 @@ static void destroy_pending_connect(struct connect_callback_data * ccd)
 static void connect_complete(void *data, int source, eb_input_condition condition)
 {
 	struct connect_callback_data *ccd = data;
-	int error, err_size = sizeof(error);
+	int error;
+	unsigned int err_size = sizeof(error);
 	const ay_socket_callback callback = ccd->callback;
 	void * callback_data = ccd->callback_data;
 

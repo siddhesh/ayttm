@@ -6,3 +6,5 @@ pkglib_LTLIBRARIES = workwizu.la
 workwizu_la_SOURCES = workwizu.c
 
 workwizu_la_LDFLAGS = -module -avoid-version
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

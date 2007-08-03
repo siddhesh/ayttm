@@ -405,9 +405,9 @@ smiley * get_smiley_by_name_and_service( const char *name, const char *service )
 	LList * l;
 	for(l=smileys; l; l=l_list_next(l)) {
 		psmile = (smiley *)(l->data);
-		if(strcmp(psmile->name,name) != 0) 
+		if(strcasecmp(psmile->name,name) != 0) 
 			continue;
-		if(!service || (psmile->service && !strcmp(psmile->service, service)))
+		if(!service || (psmile->service && !strcasecmp(psmile->service, service)))
 			return psmile;
 		if(!possibility)
 			possibility = psmile;
@@ -417,26 +417,20 @@ smiley * get_smiley_by_name_and_service( const char *name, const char *service )
 
 static void insert_smiley_cb (GtkWidget * widget, smiley_callback_data *data) 
 {
-	GtkEditable *entry = NULL;
-	int pos;
+	GtkTextBuffer *entry = NULL;
+
 	if (data && data->c_window)
-		entry = GTK_EDITABLE(data->c_window->entry);
+		entry = gtk_text_view_get_buffer( GTK_TEXT_VIEW(data->c_window->entry) );
 	else {
 		eb_debug(DBG_CORE, "smiley_callback_data has no chat* !\n");
 		return;
 	}
 	
 	if(entry) {
-		char *content = NULL;
-		char *smiley = gtk_widget_get_name(widget);
+		const char *smiley = gtk_widget_get_name(widget);
 		if (smiley) {
-			pos=entry->current_pos;
-			gtk_editable_insert_text(entry, 
-					smiley, strlen(smiley),
-					&pos);
-			content = gtk_editable_get_chars(entry, 0, -1);
-			gtk_editable_set_position(entry, pos<strlen(content)?pos:strlen(content));
-			g_free(content);
+			gtk_text_buffer_insert_at_cursor(entry, 
+					smiley, strlen(smiley));
 		}
 	}
 	
@@ -466,8 +460,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 	GtkWidget * smileys_table = NULL;
 	GtkWidget * button = NULL;
 	GtkWidget *iconwid;
-	GdkPixmap *icon;
-	GdkBitmap *mask;
+	GdkPixbuf *icon;
 	GtkWidget *smiley_window;
 	LList     *done = NULL;
 	LList * l;
@@ -525,8 +518,9 @@ void show_smileys_cb (smiley_callback_data *data) {
 			GtkWidget *parent = NULL;
 			if (data && data->c_window)
 				parent = data->c_window->window;
-			icon = gdk_pixmap_create_from_xpm_d(parent->window, &mask, NULL, dsmile->pixmap);
-			iconwid = gtk_pixmap_new(icon, mask);
+			icon = gdk_pixbuf_new_from_xpm_data( (const char **) dsmile->pixmap);
+			iconwid = gtk_image_new_from_pixbuf(icon);
+
 			sscanf (dsmile->pixmap [0], "%d %d", &w, &h);
 			if(x<rows) {
 				x++;
@@ -544,8 +538,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 			gtk_container_add(GTK_CONTAINER(button), iconwid);
 			gtk_widget_show(button);
 			gtk_widget_set_name(button,msmiley->text);
-			gtk_signal_connect (GTK_OBJECT (button), "clicked",
-			GTK_SIGNAL_FUNC (insert_smiley_cb), data);
+			g_signal_connect(button, "clicked", G_CALLBACK(insert_smiley_cb), data);
 			gtk_table_attach(GTK_TABLE(smileys_table),
 			button,
 			y,y+1,
@@ -557,16 +550,16 @@ void show_smileys_cb (smiley_callback_data *data) {
 	l_list_free(done);
 	done = NULL;
 
-	smiley_window = gtk_window_new(GTK_WINDOW_DIALOG);
+	smiley_window = gtk_window_new(GTK_WINDOW_POPUP);
 	gtk_window_set_transient_for(GTK_WINDOW(smiley_window), GTK_WINDOW(data->c_window->window));
 	gtk_window_set_modal(GTK_WINDOW(smiley_window), FALSE);
 	gtk_window_set_wmclass(GTK_WINDOW(smiley_window), "ayttm-chat", "Ayttm");
 	gtk_window_set_title(GTK_WINDOW(smiley_window), "Smileys");
-	gtk_window_set_policy(GTK_WINDOW(smiley_window), FALSE, FALSE, FALSE);
+	gtk_window_set_resizable(GTK_WINDOW(smiley_window), FALSE);
 	gtk_widget_realize(smiley_window);
 
-	gtk_signal_connect(GTK_OBJECT(smiley_window), "delete_event",
-			   GTK_SIGNAL_FUNC(delete_event_cb), (gpointer)data);
+	g_signal_connect(smiley_window, "delete-event",
+			G_CALLBACK(delete_event_cb), (gpointer)data);
 
 	gtk_container_add(GTK_CONTAINER(smiley_window), smileys_table);
 	gtk_widget_show(smileys_table);
@@ -578,8 +571,7 @@ void show_smileys_cb (smiley_callback_data *data) {
 		win_x -= 20;
 	while ((win_y)+win_h > gdk_screen_height() - 30)
 		win_y -= 20;
-	gtk_widget_set_uposition(smiley_window, win_x, win_y);
-/*	gtk_widget_set_usize(smiley_window, win_w, win_h);*/
+	gtk_window_move(GTK_WINDOW(smiley_window), win_x, win_y);
 	
 	if (data && data->c_window)
 		data->c_window->smiley_window = smiley_window;

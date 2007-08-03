@@ -642,7 +642,7 @@ LList * find_chatrooms_with_remote_account(eb_account *remote)
 	return result;
 }
 
-grouplist * find_grouplist_by_name(char * name)
+grouplist * find_grouplist_by_name(const char * name)
 {
 	LList * l1;
 
@@ -707,7 +707,7 @@ struct contact * find_contact_by_nick( const char * nick )
 	return NULL;
 }
 
-struct contact * find_contact_in_group_by_nick( char * nick , grouplist *gl )
+struct contact * find_contact_in_group_by_nick( const char * nick , grouplist *gl )
 {
 	LList * l;
 
@@ -944,7 +944,7 @@ void remove_group( grouplist * g )
 	g_free(g);
 }
 
-void add_group( char * name )
+void add_group( const char * name )
 {
 	LList *node = NULL;
 	grouplist *eg;
@@ -973,15 +973,14 @@ void add_group( char * name )
 	write_contact_list();
 }
 
-void rename_group( grouplist *current_group, char * new_name )
+void rename_group( grouplist *current_group, const char * new_name )
 {
 	LList *node = NULL;
 	char oldname[NAME_MAX];
 
 	strncpy (oldname, current_group->name, sizeof(oldname));
 	strncpy (current_group->name, new_name, sizeof(current_group->name));
-	gtk_label_set_text(GTK_LABEL(current_group->label),
-				   current_group->name);
+	update_group_line(current_group);
 	update_contact_list();
 	write_contact_list();
 
@@ -1119,7 +1118,7 @@ void add_account( char * contact, eb_account * ea )
 	add_account_verbose(contact, ea, TRUE);
 }
 
-static void add_contact( char * group, struct contact * user )
+static void add_contact( const char * group, struct contact * user )
 {
 	grouplist * grp = find_grouplist_by_name(group);
 
@@ -1146,7 +1145,7 @@ static struct contact * create_contact( const char * con, int type )
 	return( c );
 }
 
-struct contact * add_new_contact( char * group, char * con, int type )
+struct contact * add_new_contact( const char * group, const char * con, int type )
 {
 	struct contact * c = create_contact(con, type);
 
@@ -1220,7 +1219,7 @@ void add_unknown( eb_account * ea )
 	add_unknown_with_name(ea, NULL);
 }
 
-static void handle_group_change(eb_account *ea, char *og, char *ng)
+static void handle_group_change(eb_account *ea, char *og, const char *ng)
 {
 	/* if the groups are same, do nothing */
 	if(!strcasecmp(ng, og))
@@ -1298,7 +1297,7 @@ struct contact * move_account (struct contact * new_con, eb_account *ea)
 	return old_con;
 }
 
-void move_contact (char * group, struct contact * c)
+void move_contact (const char * group, struct contact * c)
 {
 	grouplist * g = c->group;
 	struct contact *con;
@@ -1344,7 +1343,7 @@ void move_contact (char * group, struct contact * c)
 	}
 }
 
-void rename_contact( struct contact * c, char *newname) 
+void rename_contact( struct contact * c, const char *newname) 
 {
 	LList *l = NULL;
 	struct contact *con=NULL;
@@ -1373,8 +1372,10 @@ void rename_contact( struct contact * c, char *newname)
         	rename_nick_log(c->group->name, c->nick, c->group->name, newname);
         	strncpy(c->nick, newname, sizeof(c->nick)-1);
         	c->nick[sizeof(c->nick)-1] = '\0';
-		if (c->label)
-			gtk_label_set_text(GTK_LABEL(c->label), newname);
+
+		c->label = strdup(newname);
+		update_contact_line(c);
+
 		l = c->accounts;
 		while(l) {
 			eb_account *ea = l->data;
@@ -1426,7 +1427,7 @@ void invite_dialog( eb_local_account * ela, char * user, char * chat_room,
 	g_free(message);
 }
 
-void make_safe_filename(char *buff, char *name, char *group)  {
+void make_safe_filename(char *buff, const char *name, const char *group)  {
 	
 	/* i'm pretty sure the only illegal character is '/', but maybe 
 	 * there are others i'm forgetting */
@@ -1556,16 +1557,16 @@ LList * get_groups()
 	for(node=groups; node; node = l_list_next(node))
 		newlist=l_list_insert_sorted(newlist, ((grouplist *)node->data)->name,
 #ifdef _AIX
-				g_strcasecmp
+				(LListCompFunc) g_strcasecmp
 #else
-				strcasecmp
+				(LListCompFunc) strcasecmp
 #endif
 				);
 	
 	return newlist;
 }
 
-void rename_nick_log(char *oldgroup, char *oldnick, char *newgroup, char *newnick)
+void rename_nick_log(char *oldgroup, char *oldnick, const char *newgroup, const char *newnick)
 {
 	/* bug 929347 */
         LList * utility_walk;
@@ -1609,7 +1610,7 @@ void rename_nick_log(char *oldgroup, char *oldnick, char *newgroup, char *newnic
 	}
 	/* bug 929347 */
 	for(utility_walk = nick_modify_utility; utility_walk; utility_walk=utility_walk->next) {
-                void (*ifilter)(char *onick, char *nnick);
+                void (*ifilter)(char *onick, const char *nnick);
 
                 ifilter=utility_walk->data;
                 ifilter(oldnick,newnick);

@@ -24,3 +24,5 @@ libxode_la_SOURCES = \
 
 
 EXTRA_DIST = xmltok_impl.c xmltok_ns.c
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

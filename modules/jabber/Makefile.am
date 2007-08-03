@@ -14,3 +14,5 @@ jabber_la_SOURCES = jabber.c libEBjabber.c
 
 jabber_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 jabber_la_LIBADD = libjabber/*.lo libxode/*.lo $(WIN32_LIBADD)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

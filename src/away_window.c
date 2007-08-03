@@ -96,6 +96,7 @@ static void show_away(gchar *a_message, void *unused)
 	if (!is_away) {
 		GtkWidget *label;
 		GtkWidget *vbox;
+		GtkTextBuffer *buffer;
 
 		awaybox = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_widget_realize(awaybox);
@@ -113,34 +114,34 @@ static void show_away(gchar *a_message, void *unused)
 		gtk_widget_show(label);
 
 
-		away_message_text_entry = gtk_text_new(NULL,NULL);
-		gtk_text_set_editable(GTK_TEXT(away_message_text_entry), TRUE);
-		gtk_widget_set_usize(away_message_text_entry, 300, 60);
-		gtk_text_insert(GTK_TEXT(away_message_text_entry), NULL,NULL,NULL,
-				a_message, strlen(a_message));
+		away_message_text_entry = gtk_text_view_new();
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(away_message_text_entry), TRUE);
+		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(away_message_text_entry));
+
+		gtk_text_buffer_insert_at_cursor(buffer, a_message, strlen(a_message));
 		
 		gtk_box_pack_start(GTK_BOX(vbox), away_message_text_entry, TRUE, TRUE, 5);
+		gtk_widget_set_size_request(away_message_text_entry, 300, 60);
 		gtk_widget_show(away_message_text_entry);
 
 		label = gtk_button_new_with_label(_("I'm Back"));
-		gtk_signal_connect_object(GTK_OBJECT(label), "clicked",
-				  GTK_SIGNAL_FUNC(away_window_set_back), GTK_OBJECT(awaybox));
+		g_signal_connect_swapped(label, "clicked",
+				G_CALLBACK(away_window_set_back), awaybox);
 
 		gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, FALSE, 0);
-		GTK_WIDGET_SET_FLAGS(label, GTK_CAN_DEFAULT);
-		gtk_widget_grab_default(label);
 		gtk_widget_show(label);
 
-		gtk_signal_connect_object(GTK_OBJECT(awaybox), "destroy",
-				  GTK_SIGNAL_FUNC(destroy_away), GTK_OBJECT(awaybox));
+		g_signal_connect_swapped(awaybox, "destroy",
+				G_CALLBACK(destroy_away),awaybox);
 
 		gtk_container_add(GTK_CONTAINER(awaybox), vbox);
+		GTK_WIDGET_SET_FLAGS(label, GTK_CAN_DEFAULT);
+		gtk_widget_grab_default(label);
 		gtk_widget_show(vbox);
 	}
 
 	gtk_window_set_title(GTK_WINDOW(awaybox), _("Away"));
-	gtkut_set_window_icon(awaybox->window, NULL);
-	gtk_container_border_width(GTK_CONTAINER(awaybox), 2);
+	gtk_container_set_border_width(GTK_CONTAINER(awaybox), 2);
 	gtk_widget_show(awaybox);
 	is_away = 1;
     
@@ -154,6 +155,10 @@ static void show_away(gchar *a_message, void *unused)
 
 char * get_away_message()
 {
-	return gtk_editable_get_chars(GTK_EDITABLE(away_message_text_entry),0,-1);
+	GtkTextIter start, end;
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(away_message_text_entry));
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+
+	return gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 }
 

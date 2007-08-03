@@ -36,6 +36,7 @@
 #include "globals.h"
 #include "file_select.h"
 #include "ui_message_windows.h"
+#include "messages.h"
 
 #include "gtk/gtkutils.h"
 
@@ -49,14 +50,14 @@ static GtkWidget *account_name;
 static GtkWidget *parameter;
 static GtkWidget *action_name;
 
-static GList *triggers = NULL;
-static GList *actions = NULL;
+//static GList *triggers = NULL;
+//static GList *actions = NULL;
 
 static void quick_message(const char *contact, int online, const char *message) {
 
   char buf[1024];
   snprintf(buf, 1024, _("%s just came %s.\n\n%s"), contact, online?_("online"):_("offline"), message);
-  ay_ui_info_window_create (_("Online trigger"), buf);
+  ay_do_info (_("Online trigger"), buf);
 }
 
 static void pounce_contact(struct contact *con, char *str) 
@@ -158,10 +159,8 @@ static void set_button_callback(GtkWidget* widget, struct contact * con)
 {
   strncpy( con->trigger.param, gtk_entry_get_text(GTK_ENTRY(parameter)),
 		sizeof(con->trigger.param));
-  con -> trigger.type = g_list_index(GTK_LIST(GTK_COMBO(trigger_list)->list)->children, 
-				     GTK_LIST(GTK_COMBO(trigger_list)->list)->selection->data);
-  con -> trigger.action = g_list_index(GTK_LIST(GTK_COMBO(action_name)->list)->children, 
-				       GTK_LIST(GTK_COMBO(action_name)->list)->selection->data);
+  con -> trigger.type = gtk_combo_box_get_active(GTK_COMBO_BOX(trigger_list));
+  con -> trigger.action = gtk_combo_box_get_active(GTK_COMBO_BOX(action_name));
 
   write_contact_list();
 	
@@ -252,28 +251,21 @@ gchar* get_trigger_action_text(trigger_action action)
     return "UNKNOWN";
 }
 
-static GList *get_trigger_list()
+static void get_trigger_list(GtkComboBox *entrybox)
 {
-  triggers = NULL;
-
-  triggers = g_list_append(triggers, _("None"));
-  triggers = g_list_append(triggers, _("User goes online"));
-  triggers = g_list_append(triggers, _("User goes offline"));
-  triggers = g_list_append(triggers, _("User goes on or offline"));
-	
-  return triggers;
+	gtk_combo_box_append_text(entrybox, _("None"));
+	gtk_combo_box_append_text(entrybox, _("User goes online"));
+	gtk_combo_box_append_text(entrybox, _("User goes offline"));
+	gtk_combo_box_append_text(entrybox, _("User goes on or offline"));
 }
 
-static GList *get_action_list()
+static void get_action_list(GtkComboBox *actions)
 {
-  actions = NULL;
-
-  actions = g_list_append(actions, _("None"));
-  actions = g_list_append(actions, _("Play sound"));
-  actions = g_list_append(actions, _("Execute command"));
-  actions = g_list_append(actions, _("Show alert dialog"));
-  actions = g_list_append(actions, _("Send message"));
-  return actions;
+	gtk_combo_box_append_text(actions, _("None"));
+	gtk_combo_box_append_text(actions, _("Play sound"));
+	gtk_combo_box_append_text(actions, _("Execute command"));
+	gtk_combo_box_append_text(actions, _("Show alert dialog"));
+	gtk_combo_box_append_text(actions, _("Send message"));
 }
 
 
@@ -288,16 +280,14 @@ void show_trigger_window(struct contact * con)
   GtkWidget *table;
   GtkWidget *frame;
   GtkWidget *separator;
-  GList *list;
-  GdkPixmap *icon;
-  GdkBitmap *mask;
+  GdkPixbuf *icon;
   GtkWidget *hbox_param;
   GtkWidget *browse_button;
      
   if(window_open) return;
   window_open = 1;
 
-  edit_trigger_window = gtk_window_new(GTK_WINDOW_DIALOG);
+  edit_trigger_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_position(GTK_WINDOW(edit_trigger_window), GTK_WIN_POS_MOUSE);
   gtk_widget_realize(edit_trigger_window);
   gtk_container_set_border_width(GTK_CONTAINER(edit_trigger_window), 5);      
@@ -333,13 +323,10 @@ void show_trigger_window(struct contact * con)
      
   /*List of trigger types*/
      
-  trigger_list = gtk_combo_new();
-  list = get_trigger_list();
-  gtk_combo_set_popdown_strings(GTK_COMBO(trigger_list), list );
-  gtk_list_select_item(GTK_LIST(GTK_COMBO(trigger_list)->list), con->trigger.type);
+  trigger_list = gtk_combo_box_new_text();
+  get_trigger_list(GTK_COMBO_BOX(trigger_list));
+  gtk_combo_box_set_active(GTK_COMBO_BOX(trigger_list), con->trigger.type);
 	
-  gtk_editable_set_editable(GTK_EDITABLE(GTK_COMBO(trigger_list)->entry), 0);
-  g_list_free(list);
   gtk_table_attach(GTK_TABLE(table), trigger_list, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
   gtk_widget_show(trigger_list);
      
@@ -354,13 +341,11 @@ void show_trigger_window(struct contact * con)
   gtk_widget_show(hbox);
      
   /*List of available actions*/
-  action_name = gtk_combo_new();
-  list = get_action_list();
-  gtk_combo_set_popdown_strings(GTK_COMBO(action_name), list );
+  action_name = gtk_combo_box_new_text();
+  get_action_list(GTK_COMBO_BOX(action_name));
 
-  gtk_list_select_item(GTK_LIST(GTK_COMBO(action_name)->list), con->trigger.action);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(action_name), con->trigger.action);
 
-  g_list_free(list);
   gtk_table_attach(GTK_TABLE(table), action_name, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
   gtk_widget_show(action_name);
       
@@ -382,9 +367,7 @@ void show_trigger_window(struct contact * con)
   gtk_box_pack_start(GTK_BOX(hbox_param), parameter, FALSE, FALSE, 0);
 	
   browse_button = gtk_button_new_with_label(_("Browse"));
-  gtk_signal_connect(GTK_OBJECT(browse_button), "clicked",
-		     GTK_SIGNAL_FUNC(browse_file),
-		     con);
+  g_signal_connect(browse_button, "clicked", G_CALLBACK(browse_file), con);
   gtk_box_pack_start(GTK_BOX(hbox_param), browse_button, FALSE, FALSE, 0);
 	
   gtk_table_attach(GTK_TABLE(table), hbox_param, 1, 2, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
@@ -412,10 +395,10 @@ void show_trigger_window(struct contact * con)
   hbox2 = gtk_hbox_new(TRUE, 5);
      
   /*Add Button*/
-  gtk_widget_set_usize(hbox2, 200,25);
+  gtk_widget_set_size_request(hbox2, 200,25);
       
-  icon = gdk_pixmap_create_from_xpm_d(edit_trigger_window->window, &mask, NULL, tb_preferences_xpm);
-  iconwid = gtk_pixmap_new(icon, mask);
+  icon = gdk_pixbuf_new_from_xpm_data( (const char **) tb_preferences_xpm);
+  iconwid = gtk_image_new_from_pixbuf(icon);
   label = gtk_label_new(_("Update"));
       
   gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 2);
@@ -426,9 +409,7 @@ void show_trigger_window(struct contact * con)
       
   button = gtk_button_new();
       
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-		     GTK_SIGNAL_FUNC(set_button_callback),
-		     con);
+  g_signal_connect(button, "clicked", G_CALLBACK(set_button_callback), con);
   gtk_widget_show(hbox);     
      
   gtk_container_add(GTK_CONTAINER(button), hbox);		
@@ -439,8 +420,8 @@ void show_trigger_window(struct contact * con)
   /*Cancel Button*/
       
   hbox = gtk_hbox_new(FALSE, 5);
-  icon = gdk_pixmap_create_from_xpm_d(edit_trigger_window->window, &mask, NULL, cancel_xpm);
-  iconwid = gtk_pixmap_new(icon, mask);
+  icon = gdk_pixbuf_new_from_xpm_data( (const char **) cancel_xpm);
+  iconwid = gtk_image_new_from_pixbuf(icon);
   label = gtk_label_new(_("Cancel"));
      
   gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 2);
@@ -451,9 +432,8 @@ void show_trigger_window(struct contact * con)
      
   button = gtk_button_new();
      
-  gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-			    GTK_SIGNAL_FUNC(gtk_widget_destroy),
-			    GTK_OBJECT(edit_trigger_window));
+  g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_widget_destroy),
+		  edit_trigger_window);
   gtk_widget_show(hbox);     
      
   gtk_container_add(GTK_CONTAINER (button), hbox);		
@@ -483,11 +463,9 @@ void show_trigger_window(struct contact * con)
       
 
   gtk_window_set_title(GTK_WINDOW(edit_trigger_window), _("Ayttm - Edit Trigger"));
-  gtkut_set_window_icon(edit_trigger_window->window, NULL); 
   gtk_widget_show(edit_trigger_window);
      
-  gtk_signal_connect(GTK_OBJECT(edit_trigger_window), "destroy",
-		     GTK_SIGNAL_FUNC(destroy_window), NULL);
+  g_signal_connect(edit_trigger_window, "destroy", G_CALLBACK(destroy_window), NULL);
       
   window_open = 1;
 }

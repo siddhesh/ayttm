@@ -31,8 +31,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.7 $",
-	"$Date: 2004/03/02 19:57:56 $",
+	"$Revision: 1.8 $",
+	"$Date: 2007/08/03 20:38:38 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
@@ -91,7 +91,7 @@ static int plugin_finish()
 
 static unsigned char * img_2_img(const unsigned char *in_img, long *size, int outfmt, const char *soutfmt, const char *enc_opts)
 {
-	char * out_img = NULL;
+	unsigned char * out_img = NULL;
 	jas_stream_t *in, *out;
 	jas_image_t *image;
 	int infmt;
@@ -112,7 +112,7 @@ static unsigned char * img_2_img(const unsigned char *in_img, long *size, int ou
 		return ay_memdup(in_img, *size);
 	}
 
-	if(!(in = jas_stream_memopen((unsigned char *)in_img, *size))) {
+	if(!(in = jas_stream_memopen((char *)in_img, *size))) {
 		eb_debug(DBG_MOD, "Could not open jasper input stream\n");
 		return ay_memdup(in_img, *size);
 	}
@@ -132,13 +132,13 @@ static unsigned char * img_2_img(const unsigned char *in_img, long *size, int ou
 		return ay_memdup(in_img, *size);
 	}
 
-	if(!(out = jas_stream_memopen(out_img, 0))) {
+	if(!(out = jas_stream_memopen((char *)out_img, 0))) {
 		eb_debug(DBG_MOD, "Could not open output stream\n");
 		return ay_memdup(in_img, *size);
 	}
 
 	eb_debug(DBG_MOD, "Encoding to format: %d %s\n", outfmt, soutfmt);
-	if((jas_image_encode(image, out, outfmt, enc_opts))) {
+	if((jas_image_encode(image, out, outfmt, (char *) enc_opts))) {
 		eb_debug(DBG_MOD, "Could not encode image format\n");
 		return ay_memdup(in_img, *size);
 	}

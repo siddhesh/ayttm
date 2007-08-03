@@ -21,6 +21,8 @@ VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 datadir = @datadir@
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@
 localedir = $(datadir)/locale
 gettextsrcdir = $(datadir)/gettext/po
 

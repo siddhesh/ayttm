@@ -12,3 +12,5 @@ noinst_HEADERS =  \
 	xmlparse.h \
 	libxode.h \
 	lib.h
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.94 $",
-	"$Date: 2005/11/25 08:02:43 $",
+	"$Revision: 1.95 $",
+	"$Date: 2007/08/03 20:38:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -773,6 +773,14 @@ static void ext_yahoo_got_buddies(int id, YList * buds)
 	eb_account *ea = NULL;
 	int changed = 0;
 
+	eb_debug(DBG_MOD, "Got buddies from yahoo\n");
+
+	/* This happens when I sign off immediately after signing in */
+	if(!ela || !ela->connected) {
+		LOG(("Service Disconnected"));
+		return;
+	}
+
 	for(; buds; buds=buds->next) {
 		struct yahoo_buddy *bud = buds->data;
 		char *contact_name;
@@ -831,6 +839,12 @@ static void ext_yahoo_got_ignore(int id, YList * ign)
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_account *ea = NULL;
 	int changed = 0;
+
+	/* This happens when I sign off immediately after signing in */
+	if(!ela || !ela->connected) {
+		LOG(("Service Disconnected"));
+		return ;
+	}
 
 	for(; ign; ign = ign->next) {
 		struct yahoo_buddy *bud = ign->data;
@@ -1048,7 +1062,7 @@ static void eb_yahoo_accept_file(gpointer data, int result)
 
 		LOG(("yahoo told us file is: %s\n", filepath));
 		if(do_prompt_save_file)
-			ay_do_file_selection(filepath, _("Save file as"), eb_yahoo_save_file, yftd);
+			ay_do_file_selection_save(filepath, _("Save file as"), eb_yahoo_save_file, yftd);
 		else
 			eb_yahoo_save_file(filepath, yftd);
 
@@ -1234,9 +1248,10 @@ static void ext_yahoo_conf_userleave(int id, char *who, char *room)
 	for(l = ycrd->members; l; l=l->next) {
 		char * handle = l->data;
 		if(!strcmp(handle, who)) {
+			YList *yl = (YList *)l;
 			ycrd->members = y_list_remove_link(ycrd->members, l);
 			FREE(handle);
-			FREE((YList *)l);
+			FREE(yl);
 			break;
 		}
 	}
@@ -1418,7 +1433,7 @@ static void ext_yahoo_conf_message(int id, char *who, char *room, char *msg, int
 	}
 	umsg[j]='\0';
 
-	eb_chat_room_show_message(chat_room, who, umsg);
+	eb_chat_room_show_message(chat_room, who, (char *)umsg);
 }
 
 static void eb_yahoo_send_chat_room_message(eb_chat_room * room, char * message)
@@ -1486,7 +1501,7 @@ static void eb_yahoo_leave_chat_room(eb_chat_room * room)
 	yahoo_conference_logoff(ycrd->id, ylad->act_id, ycrd->members, ycrd->room);
 }
 
-static void eb_yahoo_send_invite(eb_local_account * ela, eb_chat_room * ecr, char *who, char *message)
+static void eb_yahoo_send_invite(eb_local_account * ela, eb_chat_room * ecr, char *who, const char *message)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_yahoo_local_account_data *ylad;
@@ -2304,9 +2319,9 @@ static void ext_yahoo_login_response(int id, int succ, char *url)
 	ylad = ela->protocol_local_account_data;
 
 	if(succ == YAHOO_LOGIN_OK) {
+		ylad->status = yahoo_current_status(id);
 		ela->connecting = 0;
 		ela->connected = 1;
-		ylad->status = yahoo_current_status(id);
 
 		ay_activity_bar_update_label(ylad->connect_progress_tag, _("Fetching buddies..."));
 		is_setting_state = 1;
@@ -2572,14 +2587,16 @@ static LList *eb_yahoo_get_states()
 	return states;
 }
 
-static char * eb_yahoo_check_login(char * user, char * pass)
+static char * eb_yahoo_check_login(const char * user, const char * pass)
 {
-	char *s = strchr(user, '@');
-	if(s) {
-		char ret[1024];
-		snprintf(ret, sizeof(ret), _("Yahoo logins do NOT have the %s part."), s);
-		return strdup(ret);
-	}
+	// Allow @ in yahoo usernames as well. See Feature Request #959812
+//	char *s = strchr(user, '@');
+//	if(s) {
+//		char ret[1024];
+//		snprintf(ret, sizeof(ret), _("Yahoo logins do NOT have the %s part."), s);
+//		return strdup(ret);
+//	}
+
 	return NULL;
 }
 
@@ -2974,11 +2991,11 @@ static void eb_yahoo_set_idle(eb_local_account * ela, int idle)
 	LOG(("eb_yahoo_set_idle: %d", idle));
 
 	ylad = ela->protocol_local_account_data;
-	if (idle == 0 && eb_yahoo_get_current_state(ela) == YAHOO_STATUS_IDLE) {
+	if (idle == 0 && eb_yahoo_get_current_state(ela) == EB_DISPLAY_YAHOO_IDLE) {
 		if (ela->status_menu) {
 			eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_ONLINE);
 		}
-	} else if ((idle >= 600) && (eb_yahoo_get_current_state(ela) == YAHOO_STATUS_AVAILABLE)) {
+	} else if ((idle >= 600) && (eb_yahoo_get_current_state(ela) == EB_DISPLAY_YAHOO_ONLINE)) {
 		if (ela->status_menu) {
 			eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_IDLE);
 		}

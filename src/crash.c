@@ -232,8 +232,8 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwindow1),
 				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
-	text1 = gtk_text_new(NULL, NULL);
-	gtk_text_set_editable(GTK_TEXT(text1), FALSE);
+	text1 = gtk_text_view_new();
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(text1), FALSE);
 	gtk_widget_show(text1);
 	gtk_container_add(GTK_CONTAINER(scrolledwindow1), text1);
 	
@@ -254,7 +254,8 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 		debug_output
 	);
 
-	gtk_text_insert(GTK_TEXT(text1), NULL, NULL, NULL, crash_report, -1);
+	gtk_text_buffer_insert_at_cursor(gtk_text_view_get_buffer(GTK_TEXT_VIEW(text1)),
+			crash_report, -1);
 
 	hbuttonbox3 = gtk_hbutton_box_new();
 	gtk_widget_show(hbuttonbox3);
@@ -274,21 +275,15 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_container_add(GTK_CONTAINER(hbuttonbox4), button4);
 	GTK_WIDGET_SET_FLAGS(button4, GTK_CAN_DEFAULT);
 
-	gtk_signal_connect(GTK_OBJECT(window1), "delete_event",
-			   GTK_SIGNAL_FUNC(gtk_main_quit), NULL);
-	gtk_signal_connect(GTK_OBJECT(button3),   "clicked",
-			   GTK_SIGNAL_FUNC(gtk_main_quit), NULL);
-	gtk_signal_connect(GTK_OBJECT(button4), "clicked",
-			   GTK_SIGNAL_FUNC(crash_save_crash_log),
-			   crash_report);
+	g_signal_connect(window1, "delete-event", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(button3, "clicked", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(button4, "clicked", G_CALLBACK(crash_save_crash_log), crash_report);
 	if (!version || !strcmp(version, VERSION)) {
 		button5 = gtk_button_new_with_label(_("Create bug report"));
 		gtk_widget_show(button5);
 		gtk_container_add(GTK_CONTAINER(hbuttonbox4), button5);
 		GTK_WIDGET_SET_FLAGS(button5, GTK_CAN_DEFAULT);
-		gtk_signal_connect(GTK_OBJECT(button5), "clicked",
-				   GTK_SIGNAL_FUNC(crash_create_bug_report),
-				   NULL);
+		g_signal_connect(button5, "clicked", G_CALLBACK(crash_create_bug_report), NULL);
 	}
 	
 	gtk_widget_show(window1);
@@ -456,9 +451,6 @@ static const gchar *get_compiled_in_features(void)
 #endif
 #ifdef HAVE_LIBPSPELL
 		   " pspell"
-#endif
-#ifdef HAVE_LIBXFT
-		   " Xft"
 #endif
 	"");
 }

@@ -49,7 +49,7 @@ jid jid_safe(jid id)
         return NULL;
 
     /* lowercase the hostname, make sure it's valid characters */
-    for(str = id->server; *str != '\0'; str++)
+    for(str = (unsigned char *)id->server; *str != '\0'; str++)
     {
         *str = tolower(*str);
         if(!(isalnum(*str) || *str == '.' || *str == '-' || *str == '_')) return NULL;
@@ -61,7 +61,7 @@ jid jid_safe(jid id)
 
     /* check for low and invalid ascii characters in the username */
     if(id->user != NULL)
-        for(str = id->user; *str != '\0'; str++)
+        for(str = (unsigned char *)id->user; *str != '\0'; str++)
             if(*str <= 32 || *str == ':' || *str == '@' || *str == '<' || *str == '>' || *str == '\'' || *str == '"' || *str == '&') return NULL;
 
     return id;

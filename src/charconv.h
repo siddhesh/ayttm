@@ -1,8 +1,8 @@
 /*
- * Ayttm 
+ * Ayttm
  *
  * Copyright (C) 2003, the Ayttm team
- * 
+ *
  * Ayttm is derivative of Everybuddy
  * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
  *
@@ -22,33 +22,30 @@
  *
  */
 
-#ifndef __GTK_EB_HTML_H__
-#define __GTK_EB_HTML_H__
+/* 
+ * Moved out of msn module since msn doesn't need it anymore.
+ * UTF good, everything else bad ;)
+ */
 
-#include "extgtktext.h"
+#ifndef _CHAR_CONV_C_
+#define _CHAR_CONV_C_
 
 
-#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-#define extern __declspec(dllimport)
-#endif
+/*
+** Name:    Str2Utf8
+** Purpose: convert a string in UTF-8 format
+** Input:   in     - the string to convert
+** Output:  a new string in UTF-8 format
+*/
+char *StrToUtf8(const char *in);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/*
+** Name:    Utf8ToStr
+** Purpose: revert UTF-8 string conversion
+** Input:   in     - the string to decode
+** Output:  a new decoded string
+*/
+char *Utf8ToStr(const char *in);
 
-void gtk_eb_html_init(ExtGtkText* widget);
-
-extern void gtk_eb_html_add(ExtGtkText * widget, char * text,
-		int ignore_bgcolor, int ignore_fgcolor, int ignore_font );
-
-void	gtk_eb_html_log_parse_and_add( ExtGtkText *widget, const char *log );
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
-#if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-#define extern extern
-#endif
 
 #endif

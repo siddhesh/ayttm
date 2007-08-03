@@ -45,6 +45,13 @@
 #define MIN(x, y)	((x)<(y)?(x):(y))
 #endif
 
+enum {
+	CLIST_TITLE,
+	CLIST_DATA_TYPE,
+	CLIST_DATA,
+	CLIST_COL_COUNT
+};
+
 /* types */
 typedef struct _data {
         char title[2048];
@@ -55,11 +62,13 @@ typedef struct _data {
 static char mbuf[1024];
 
 static GtkWidget *text_entry = NULL;
+static GtkTextBuffer *buffer = NULL;
 static GtkWidget *window = NULL;
 static GtkWidget *title = NULL;
 static GtkWidget *save = NULL;
 static LList *datalist = NULL;
 static GtkWidget *data_clist = NULL;
+static GtkListStore *data_clist_model = NULL;
 
 static gint data_open = 0;
 
@@ -74,8 +83,6 @@ static void (*mycallback)(char * msg, void *cbdata);
 static void *mycbdata;
 
 static void write_data();
-static void select_data_cb(GtkCList *clist, gint row, gint column,
-                   GdkEventButton *event, gpointer user_data);
 
 static void build_data_clist();
 
@@ -129,104 +136,191 @@ static void load_data(char *file)
 	fclose(fp);
 }
 
+/* Callback for Delete popup menu item */
 static void delete_data_cb(GtkWidget * menuitem, gpointer d)
 {
-	data *my_data = (data *)d;
-	int i=0;
-	data *ldata = NULL;
-	
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(data_clist));
+	GtkTreeIter selected;
+	data *my_data = NULL;
+
+	if(!gtk_tree_selection_get_selected(selection, NULL, &selected))
+		return;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(data_clist_model), &selected,
+			CLIST_DATA, &my_data,
+			-1);
+
+
 	datalist = l_list_remove(datalist, my_data);
 	write_data(myfile);
-	while(NULL != (ldata = (data*)gtk_clist_get_row_data(
-			GTK_CLIST(data_clist),i))) {
-		if (ldata == my_data) {
-			gtk_clist_remove(GTK_CLIST(data_clist), i);
-			break;
-		}
-		i++;
-	}
+
+	gtk_list_store_remove(data_clist_model, &selected);
 }
 
-static void deselect_data_cb(GtkCList *clist, gint row, gint column,
-                   GdkEventButton *event, gpointer user_data) 
+/* Selection callback */
+static void select_data_cb(GtkTreeSelection *selection, gpointer user_data) 
 {
-	if (event && event->button == 3) {
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(clist),
-				   "unselect-row");
-		select_data_cb(clist, row, column,
-				event, user_data);
-	}
-}
-
-static void select_data_cb(GtkCList *clist, gint row, gint column,
-                   GdkEventButton *event, gpointer user_data) 
-{
+	GtkTreeIter iter;
 	data *my_data;
-	
-	my_data = (data *)gtk_clist_get_row_data(GTK_CLIST(data_clist),
-				row);
-	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
-			select_data_cb, NULL);
-	gtk_signal_handler_block_by_func(GTK_OBJECT(clist),
-			deselect_data_cb, NULL);
-	gtk_clist_select_row(clist, row, column);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(clist),
-			select_data_cb, NULL);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(clist),
-			deselect_data_cb, NULL);
-	if (!event)
+	char *s_title;
+	char *message;
+	GtkTextIter start, end;
+
+	if(!gtk_tree_selection_get_selected(selection, NULL, &iter)) {
+		gtk_editable_delete_text(GTK_EDITABLE(title), 0, -1);
+		gtk_text_buffer_get_bounds(buffer, &start, &end);
+		gtk_text_buffer_delete(buffer, &start, &end);
+
 		return;
-	switch (event->button) {
-	case 1:
-		if (my_data) {
-			int dummy;
-			gtk_entry_set_text(GTK_ENTRY(title), my_data->title);
-			gtk_editable_delete_text(GTK_EDITABLE(text_entry), 0, -1);
-			gtk_editable_insert_text(GTK_EDITABLE(text_entry), 
-						my_data->message->str,
-						strlen(my_data->message->str), &dummy);
-		}
-		break;
-	case 3: {
-		GtkWidget *menu = gtk_menu_new();
-		gtkut_create_menu_button (GTK_MENU(menu), _("Delete"),
-			GTK_SIGNAL_FUNC(delete_data_cb), my_data);
-		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
-				event->button, event->time );
-		}
-		break;
+	}
+
+	gtk_tree_model_get(GTK_TREE_MODEL(data_clist_model), &iter,
+			CLIST_DATA, &my_data,
+			-1);
+
+	s_title = my_data->title;
+	message = my_data->message->str;
+	
+	gtk_entry_set_text(GTK_ENTRY(title), s_title);
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+
+	gtk_text_buffer_delete(buffer, &start, &end);
+	gtk_text_buffer_insert_at_cursor(buffer, 
+				message,
+				strlen(message));
+}
+
+/* This positions the popup menu on the list */
+void set_popup_menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer data)
+{
+	GdkEventButton *event = data;
+
+	if(event) {
+		*x = event->x_root;
+		*y = event->y_root;
+	}
+	else {
+		int wx, wy;
+		GdkRectangle rectangle, visible_rect;
+		GtkTreeIter selected;
+		GtkTreeSelection *selection;
+		GtkTreePath *path;
+
+                GdkWindow *parent = gtk_widget_get_parent_window(data_clist);
+
+                gdk_window_get_position(parent, &wx, &wy);
+
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(data_clist));
+		gtk_tree_selection_get_selected(selection, NULL, &selected);
+		path = gtk_tree_model_get_path(GTK_TREE_MODEL(data_clist_model), &selected);
+
+		gtk_tree_view_get_cell_area(GTK_TREE_VIEW(data_clist), path, NULL, &rectangle);
+		gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(data_clist), &visible_rect);
+
+		*x = wx + data_clist->allocation.x + visible_rect.x + visible_rect.width/2;
+		*y = wy + data_clist->allocation.y + rectangle.y + rectangle.height/2;
 	}
 }
 
+/* Popup a menu on the list */
+void do_popup_menu(GtkTreeView *tree_view, GdkEventButton *event)
+{
+	int event_time, button;
+	GtkWidget *menu = gtk_menu_new();
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(tree_view);
+
+	if(event) {
+		GtkTreePath *path;
+
+		button = event->button;
+		event_time = event->time;
+
+		gtk_tree_view_get_path_at_pos(tree_view, event->x, event->y, &path,
+				NULL, NULL, NULL);
+		g_signal_handlers_block_by_func(tree_view, G_CALLBACK(select_data_cb), NULL);
+		gtk_tree_selection_select_path(selection, path);
+		g_signal_handlers_unblock_by_func(tree_view, G_CALLBACK(select_data_cb), NULL);
+
+		gtk_tree_path_free(path);
+	}
+	else {
+		button = 0;
+		event_time = gtk_get_current_event_time();
+	}
+	
+	gtkut_create_menu_button (GTK_MENU(menu), _("Delete"),
+		G_CALLBACK(delete_data_cb), NULL);
+
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, set_popup_menu_position, event,
+			button, event_time );
+}
+
+/* Right click callback on the list */
+static gboolean right_click_cb(GtkWidget *widget, GdkEventButton *event)
+{
+	if(event->button == 3 && event->type == GDK_BUTTON_PRESS) {
+		do_popup_menu(GTK_TREE_VIEW(widget), event);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+/* Popup using context menu button */
+static gboolean popup_menu_cb(GtkWidget *widget)
+{
+	do_popup_menu(GTK_TREE_VIEW(widget), NULL);
+	return TRUE;
+}
+
+/* Row activate event callback of list */
 static void clicked_data_cb (GtkWidget *widget, GdkEventButton *event,
 			    gpointer d)
 {
-	if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
-		save_data();
+	save_data();
 }
 
+/* Build the list */
 static void build_data_clist()
 {
+	char rdata[8];
 	LList * data_list = datalist;
+	GtkTreeViewColumn *column;
+	GtkCellRenderer *renderer;
 	data * my_data = NULL;
 	int i = 0;
 	char *aw[2];
+	GtkTreeSelection *selection;
+
 	aw[0] = _("Title");
-	aw[1] = datatype; 
-	data_clist = gtk_clist_new_with_titles(2, aw);
+	aw[1] = datatype;
+	data_clist_model = gtk_list_store_new(CLIST_COL_COUNT,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_POINTER);
+
+	data_clist = gtk_tree_view_new_with_model(GTK_TREE_MODEL(data_clist_model));
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(aw[0], renderer,
+			"text", CLIST_TITLE,
+			NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(data_clist), column);
 	
-	gtk_clist_freeze(GTK_CLIST(data_clist));
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(aw[1], renderer,
+			"text", CLIST_DATA_TYPE,
+			NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(data_clist), column);
 			
-	gtk_clist_set_column_auto_resize(GTK_CLIST(data_clist),
-					0, TRUE);
 	while (data_list) {
+		GtkTreeIter insert;
 		my_data = (data *)data_list->data;
 		
 		aw[0] = g_strdup(my_data->title);
 		aw[1] = g_strdup(my_data->message->str);
 		
 		if (strlen(aw[0]) > 30) {
-			aw[0][27]=aw[1][28]=aw[1][29]='.';
+			aw[0][27]=aw[0][28]=aw[0][29]='.';
 			aw[0][30]='\0';
 		}
 		
@@ -242,28 +336,27 @@ static void build_data_clist()
 			
 		}
 		
-		gtk_clist_append(GTK_CLIST(data_clist), aw);
+		gtk_list_store_append(data_clist_model, &insert);
+		gtk_list_store_set(data_clist_model, &insert,
+				CLIST_TITLE, aw[0],
+				CLIST_DATA_TYPE, aw[1],
+				CLIST_DATA, my_data,
+				-1);
+
+		sprintf(rdata, "rowdata%d", i);
 		
-		gtk_clist_set_row_data(GTK_CLIST(data_clist), i, my_data);
 		i++;
 		data_list = data_list->next;
 	}
 	gtk_widget_show(data_clist);
-	gtk_clist_set_button_actions(GTK_CLIST(data_clist), 1, 
-			GTK_BUTTON_SELECTS);
-	gtk_clist_set_button_actions(GTK_CLIST(data_clist), 2, 
-			GTK_BUTTON_SELECTS);
-	gtk_clist_set_button_actions(GTK_CLIST(data_clist), 3, 
-			GTK_BUTTON_SELECTS);
 	
-	gtk_signal_connect(GTK_OBJECT(data_clist), "select-row",
-			   GTK_SIGNAL_FUNC(select_data_cb), NULL);
-	gtk_signal_connect(GTK_OBJECT(data_clist), "unselect-row",
-			   GTK_SIGNAL_FUNC(deselect_data_cb), NULL);
-	gtk_signal_connect(GTK_OBJECT(data_clist), "button_press_event",
-			   GTK_SIGNAL_FUNC(clicked_data_cb), NULL);
-	gtk_widget_set_usize(data_clist, -1, 100);
-	gtk_clist_thaw(GTK_CLIST(data_clist));
+	selection= gtk_tree_view_get_selection(GTK_TREE_VIEW(data_clist));
+
+	g_signal_connect(selection, "changed", G_CALLBACK(select_data_cb), NULL);
+	g_signal_connect(data_clist, "row-activated", G_CALLBACK(clicked_data_cb), NULL);
+	g_signal_connect(data_clist, "button-press-event", G_CALLBACK(right_click_cb), NULL);
+	g_signal_connect(data_clist, "popup-menu", G_CALLBACK(popup_menu_cb), NULL);
+	gtk_widget_set_size_request(data_clist, -1, 100);
 }
 
 static void write_data()
@@ -319,9 +412,9 @@ static LList * replace_data(LList *list, data *msg)
 static void check_title( GtkWidget * widget, gpointer d)
 {
 	LList *w = datalist;
-	char *txt = gtk_entry_get_text(GTK_ENTRY(title));
+	const char *txt = gtk_entry_get_text(GTK_ENTRY(title));
 	int replace = FALSE;
-	GList *ch = gtk_container_children(GTK_CONTAINER(save));
+	GList *ch = gtk_container_get_children(GTK_CONTAINER(save));
 	while (w) {
 		data * omsg = (data *)w->data;
 		if (!strcmp(omsg->title, txt)) {
@@ -333,8 +426,8 @@ static void check_title( GtkWidget * widget, gpointer d)
 	
 	while(ch) {
 		if (GTK_IS_LABEL(ch->data)) {
-			char *lab = NULL;
-			gtk_label_get(GTK_LABEL(ch->data), &lab);
+			const char *lab;
+			lab = gtk_label_get_text(GTK_LABEL(ch->data));
 			if(replace && !strcmp(lab,_("Save"))) 
 				gtk_label_set_text(GTK_LABEL(ch->data), 
 						_("Replace saved"));
@@ -354,6 +447,7 @@ static void ok_callback( GtkWidget * widget, gpointer data)
 
 static void save_data (void)
 {
+	GtkTextIter start, end;
 	GString * a_title = g_string_sized_new(1024);
 	GString * a_message = g_string_sized_new(1024);
 	gint dosave = GTK_TOGGLE_BUTTON(save)->active;
@@ -364,7 +458,8 @@ static void save_data (void)
 	buff = strdup(gtk_entry_get_text(GTK_ENTRY(title)));
 
 	if (!buff || strlen(buff) == 0) {
-		buff= gtk_editable_get_chars(GTK_EDITABLE(text_entry),0,-1);
+		gtk_text_buffer_get_bounds(buffer, &start, &end);
+		buff= gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 		if (strchr(buff,'\n') != NULL) {
 			char *t = strchr(buff,'\n');
 			*t = 0;
@@ -378,8 +473,9 @@ static void save_data (void)
 	g_string_append(a_title, buff); 
 
 	free(buff);
-	
-	buff = gtk_editable_get_chars(GTK_EDITABLE(text_entry),0,-1);
+
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+	buff= gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 	
 	if (!buff || strlen(buff) == 0) /* in this case title can't be empty */
 		buff = strdup(a_title->str);
@@ -445,7 +541,7 @@ void show_data_choicewindow(
 		snprintf(evalue, 1024, "</%s>", valuename);
 		
 		window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		gtk_window_set_policy(GTK_WINDOW(window), TRUE, TRUE, TRUE);
+		gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
 		gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(window);
 
@@ -466,8 +562,7 @@ void show_data_choicewindow(
 				 GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(title);
 		
-		gtk_signal_connect(GTK_OBJECT(title), "changed",
-				GTK_SIGNAL_FUNC(check_title), NULL);
+		g_signal_connect(title, "changed", G_CALLBACK(check_title), NULL);
 		
 		hbox = gtk_hbox_new(FALSE, 5);
 		label = gtk_label_new(_("Value:"));
@@ -489,13 +584,13 @@ void show_data_choicewindow(
 			gtk_box_pack_start(GTK_BOX(vbox2), label, TRUE, TRUE, 0);
 		}
 
-		text_entry = gtk_text_new(NULL,NULL);
-		gtk_widget_set_usize(text_entry, 300, -1);
-		gtk_text_set_editable(GTK_TEXT(text_entry), TRUE);
-		gtk_widget_set_usize(text_entry, 300, 60);
+		text_entry = gtk_text_view_new();
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(text_entry), TRUE);
+		gtk_widget_set_size_request(text_entry, 300, 60);
 		gtk_box_pack_start(GTK_BOX(vbox2), text_entry, TRUE, TRUE, 0);
 		gtk_table_attach_defaults(GTK_TABLE(table), vbox2, 1, 2, 1, 2);
 		gtk_widget_show(text_entry);
+		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_entry));
 
 		save = gtk_check_button_new_with_label(_("Save"));
 		gtk_table_attach(GTK_TABLE(table), save, 1, 2, 2, 3,
@@ -543,14 +638,13 @@ void show_data_choicewindow(
 
 		hbox2 = gtk_hbox_new(TRUE, 5);
 
-		gtk_widget_set_usize(hbox2, 200, 25);
+		gtk_widget_set_size_request(hbox2, 200, 25);
 
 		/* put in the pixmap and label for the 'OK' button */
 
 		button = gtkut_create_icon_button( ok_button_label, ok_xpm, window ); 
 
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				GTK_SIGNAL_FUNC(ok_callback), NULL);
+		g_signal_connect(button, "clicked", G_CALLBACK(ok_callback), NULL);
 
 		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
@@ -559,8 +653,7 @@ void show_data_choicewindow(
 
 		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, window );
 
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				GTK_SIGNAL_FUNC(cancel_callback), NULL);
+		g_signal_connect(button, "clicked", G_CALLBACK(cancel_callback), NULL);
 
 		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
@@ -582,8 +675,6 @@ void show_data_choicewindow(
 	}
 	snprintf(mbuf, 1024, _("Edit %ss"), datatype);
 	gtk_window_set_title(GTK_WINDOW(window), mbuf);
-	gtkut_set_window_icon(window->window, NULL);
-	gtk_signal_connect(GTK_OBJECT(window), "destroy",
-			GTK_SIGNAL_FUNC(destroy), NULL);
+	g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
 	data_open = 1; 
 }

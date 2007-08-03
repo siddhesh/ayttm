@@ -23,3 +23,5 @@ video_capture_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 video_capture_la_LIBADD = $(WIN32_LIBADD)
 
 EXTRA_DIST = $(bin_SCRIPTS)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

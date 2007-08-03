@@ -13,3 +13,5 @@ msntest:
 	@$(CC) -lssl -lcrypto -o msntest ssl.c msn_interface.C msn_core.C msn_bittybits.C md5.c
 
 
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

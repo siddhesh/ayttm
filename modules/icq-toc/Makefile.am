@@ -14,3 +14,5 @@ pkglib_LTLIBRARIES = icq-toc.la
 icq_toc_la_SOURCES = icq-toc.c
 icq_toc_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 icq_toc_la_LIBADD = libtoc/libtoc.lo $(WIN32_LIBADD)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

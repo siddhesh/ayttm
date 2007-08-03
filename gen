@@ -48,8 +48,13 @@ check_gettext()
 }
 
 libtoolize --copy --force --ltdl --automake
+if test $? != 0; then
+	echo "Libtool not found. You will need libtool and libltdl3 packages to continue."
+	return 1
+fi
+
 check_gettext
-aclocal -I m4 -I libltdl $ACLOCAL_FLAGS
+aclocal $ACLOCAL_FLAGS -I m4 -I libltdl 
 autoheader
-automake -a -c
 autoconf
+automake -a -c

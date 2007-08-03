@@ -46,7 +46,7 @@ static GtkWidget *nick = NULL;
 static GtkWidget *laccount = NULL;
 static GtkWidget *group = NULL;
 
-#define COMBO_TEXT(x) gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(x)->entry))
+#define COMBO_TEXT(x) gtk_entry_get_text(GTK_ENTRY(GTK_BIN(x)->child))
 
 static void destroy(GtkWidget *widget, gpointer data)
 {
@@ -57,7 +57,7 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 {
 	grouplist *gl;
 	struct contact *con;
-	gchar *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_COMBO(laccount)->entry),0,-1);
+	gchar *service = gtk_editable_get_chars(GTK_EDITABLE(GTK_BIN(laccount)->child),0,-1);
 	gint service_id = -1;
 	gchar *local_acc = strstr(service, " ") +1;
 	eb_local_account *ela = NULL;
@@ -127,7 +127,7 @@ static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
 	return strcasecmp((const char *)a, (const char *)b);
 }
 
-static LList * get_contacts(gchar * group)
+static LList * get_contacts(const gchar * group)
 {
 	LList * node = NULL, *newlist = NULL;
 	grouplist * g;
@@ -149,14 +149,16 @@ static LList * get_contacts(gchar * group)
 static void  group_changed(GtkEditable *editable, gpointer user_data)
 {
 	GList * list = llist_to_glist(get_contacts(COMBO_TEXT(group)), 1);
-	gtk_combo_set_popdown_strings(GTK_COMBO(nick), list );
+	GList *gwalker;
+	for(gwalker=list; gwalker; gwalker=g_list_next(gwalker))
+		gtk_combo_box_append_text(GTK_COMBO_BOX(nick), gwalker->data);
 	g_list_free(list);
 
 	if(account->account_contact)
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(nick)->entry), 
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(nick)->child), 
 				account->account_contact->nick);
 	else
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(nick)->entry), 
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(nick)->child), 
 				account->handle);
 }
 
@@ -177,8 +179,9 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 		GtkWidget *separator = NULL;
 		GList *list = NULL;
 		LList *walk = NULL;
+		GList *gwalker;
 		
-		edit_account_window = gtk_window_new(GTK_WINDOW_DIALOG);
+		edit_account_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_window_set_transient_for(GTK_WINDOW(edit_account_window), GTK_WINDOW(statuswindow));
 		gtk_window_set_position(GTK_WINDOW(edit_account_window), GTK_WIN_POS_MOUSE);
 		gtk_widget_realize(edit_account_window);
@@ -201,7 +204,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(hbox);
 
-		nick = gtk_combo_new();
+		nick = gtk_combo_box_entry_new_text();
 		g_list_free(list);
 		gtk_table_attach(GTK_TABLE(table), nick, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(nick);
@@ -216,13 +219,14 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(hbox);
 
-		group = gtk_combo_new();
+		group = gtk_combo_box_entry_new_text();
 		list = llist_to_glist(get_groups(), 1);
-		gtk_combo_set_popdown_strings(GTK_COMBO(group), list);
+
+		for(gwalker=list; gwalker; gwalker = g_list_next(gwalker))
+			gtk_combo_box_append_text(GTK_COMBO_BOX(group), gwalker->data);
 
 		g_list_free(list);
-		gtk_signal_connect(GTK_OBJECT(GTK_COMBO(group)->entry), "changed",
-				GTK_SIGNAL_FUNC(group_changed), NULL);
+		g_signal_connect(group, "changed", G_CALLBACK(group_changed), NULL);
 		gtk_table_attach(GTK_TABLE(table), group, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(group);
 
@@ -236,21 +240,23 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(hbox);
 
-		laccount = gtk_combo_new();
+		laccount = gtk_combo_box_entry_new_text();
 		list = NULL;
 		for (walk = accounts; walk; walk = walk->next) {
 			eb_local_account *ela = (eb_local_account *)walk->data;
 			if (ela) {
 				char *str = g_strdup_printf("[%s] %s", get_service_name(ela->service_id), ela->handle);
+				gtk_combo_box_append_text(GTK_COMBO_BOX(laccount), str);
 				list = g_list_insert_sorted(list, str, strcasecmp_glist);
 				
 				if (ela == ea->ela)
 					cur_la = strdup(str);
 			}
 		}
-		if (cur_la == NULL) 
+		if (cur_la == NULL) { 
+			gtk_combo_box_append_text(GTK_COMBO_BOX(laccount), _("[None]"));
 			list = g_list_prepend(list, _("[None]"));
-		gtk_combo_set_popdown_strings(GTK_COMBO(laccount), list);
+		}
 		g_list_free(list);
 		gtk_table_attach(GTK_TABLE(table), laccount, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(laccount);
@@ -267,7 +273,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 		hbox = gtk_hbox_new(FALSE, 5);
 		hbox2 = gtk_hbox_new(TRUE, 5);
-		gtk_widget_set_usize(hbox2, 200,25 );
+		gtk_widget_set_size_request(hbox2, 200,25 );
 
 		/*Lets try adding a seperator*/
 
@@ -279,8 +285,7 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 		button = gtkut_create_icon_button( add_label, tb_preferences_xpm, edit_account_window );
 		
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				GTK_SIGNAL_FUNC(ok_callback), NULL);
+		g_signal_connect(button, "clicked", G_CALLBACK(ok_callback), NULL);
 
 		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
@@ -289,9 +294,8 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_account_window );
 		
-		gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-				GTK_SIGNAL_FUNC(gtk_widget_destroy),
-				GTK_OBJECT(edit_account_window));
+		g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_widget_destroy),
+				edit_account_window);
 
 		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
@@ -310,31 +314,30 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 		gtk_container_add(GTK_CONTAINER (edit_account_window), vbox);
 
-		gtk_signal_connect(GTK_OBJECT(edit_account_window), "destroy",
-				GTK_SIGNAL_FUNC(destroy), NULL);
+		g_signal_connect(edit_account_window, "destroy", G_CALLBACK(destroy), NULL);
 	}
 
 	if(account->account_contact) {
 		if(strncmp(account->account_contact->group->name, "__Ayttm_Dummy_Group__",
 			   strlen("__Ayttm_Dummy_Group__"))) {
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group)->entry), 
+			gtk_entry_set_text(GTK_ENTRY(GTK_BIN(group)->child), 
 				account->account_contact->group->name);
 		}
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(nick)->entry), 
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(nick)->child), 
 				account->account_contact->nick);
 	} else {
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group)->entry), 
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(group)->child), 
 				_("Unknown"));
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(nick)->entry), 
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(nick)->child), 
 				account->handle);
 	}
 	
 	if (cur_la) {
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(laccount)->entry), 
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(laccount)->child), 
 				cur_la);
 		free(cur_la);	
 	} else {
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(laccount)->entry),
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(laccount)->child),
 				_("[None]"));
 	}
 	
@@ -342,7 +345,6 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 
 	g_snprintf(buff,1024,_("%s - Account edition"), account->handle);
 	gtk_window_set_title(GTK_WINDOW(edit_account_window), buff ); 
-	gtkut_set_window_icon(edit_account_window->window, NULL);
 	
 	gtk_widget_show(edit_account_window);
 

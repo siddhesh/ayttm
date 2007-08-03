@@ -31,15 +31,16 @@
 
 /* Ayttm developers */
 
-#define	AYTTM_TEAM_SIZE	(5)
+#define	AYTTM_TEAM_SIZE	(6)
 
 static tDeveloperInfo sAyttmDevTeam[AYTTM_TEAM_SIZE] =
 {
 	{"Colin Leroy", 		"<colin@colino.net>", 			"Lead Developer"},
 	{"Andy S. Maloney", 	"<a_s_maloney@yahoo.com>", 		"Code Monkey"},
-	{"Philip S. Tellis", 	"<philip.tellis@iname.com>", 	"Yahoo!"},
+	{"Philip S. Tellis", 	"<philip.tellis@gmail.com>", 	"Yahoo!"},
 	{"Edward L. Haletky", 	"<elh@astroarch.com>",			"Windows Port"},
-	{"Tahir Hashmi", 		"<code_martial@softhome.net>",	"Documentation"}
+	{"Tahir Hashmi", 		"<code_martial@softhome.net>",	"Documentation"},
+	{"Siddhesh Poyarekar", 		"<siddhesh.poyarekar@gmail.com>",	"Gtk2 Port"}
 };
 
 /* Kudos */

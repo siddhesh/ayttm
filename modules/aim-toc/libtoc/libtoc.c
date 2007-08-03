@@ -139,6 +139,7 @@ static int connect_address(unsigned int addy, unsigned short port, void *cb, voi
 	}
 }
 
+/* Unused
 static char char_decode( char c )
 {
 	if( c >= 'A' && c <= 'Z' )
@@ -163,13 +164,15 @@ static char char_decode( char c )
 	}
 	return 0;
 }
+*/
 
 static const char alphabet[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	"0123456789+/";
 
+// Unused
 /* This was borrowed from the Kame source, and then tweaked to our needs */
-static char *base64_encode(const unsigned char *buf, size_t len)
+/*static char *base64_encode(const unsigned char *buf, size_t len)
 {
 	char *s = NULL, *rv = NULL;
 	unsigned long tmp;
@@ -187,9 +190,9 @@ static char *base64_encode(const unsigned char *buf, size_t len)
 		buf += 3;
 		s += 4;
 	}
-
+*/
 	/* RFC 1521 enumerates these three possibilities... */
-	switch(len) {
+/*	switch(len) {
 		case 2:
 			tmp = buf[0] << 16 | buf[1] << 8;
 			s[0] = alphabet[(tmp >> 18) & 077];
@@ -212,7 +215,7 @@ static char *base64_encode(const unsigned char *buf, size_t len)
 
 	return rv;
 }
-
+*/
 
 static char * base64_decode(const char *text)
 {
@@ -424,13 +427,13 @@ static char *aim_normalize(const char *s)
 static unsigned char *roast_password(const char *pass)
 {
 	/* Trivial "encryption" */
-	static char rp[256];
+	static unsigned char rp[256];
 	static char *roast = ROAST;
 	int pos=2;
 	int x;
-	strcpy(rp, "0x");
+	strcpy((char *)rp, "0x");
 	for (x=0;(x<150) && pass[x]; x++)
-		pos+=snprintf(&rp[pos], 256, "%02x", pass[x] ^ roast[x % strlen(roast)]);
+		pos+=snprintf((char *)&rp[pos], 256, "%02x", pass[x] ^ roast[x % strlen(roast)]);
 	rp[pos]='\0';
 	return rp;
 }
@@ -1158,7 +1161,7 @@ if(DEBUG)
 		while( buff[i] )
 		{
 			char type[10];
-			int size;
+
 			i++;
 			for(j=0; buff[i] != ':'; i++, j++ )
 			{

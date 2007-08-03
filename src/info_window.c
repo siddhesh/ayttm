@@ -35,7 +35,7 @@
 #include "info_window.h"
 #include "dialog.h"
 
-#include "gtk/gtk_eb_html.h"
+#include "gtk/html_text_buffer.h"
 #include "gtk/gtkutils.h"
 
 #include "pixmaps/cancel.xpm"
@@ -73,8 +73,7 @@ info_window * eb_info_window_new(eb_local_account * local, struct account * remo
         GtkWidget *label;
 	GtkWidget *ok_button;
         GtkWidget *iconwid;
-	GdkPixmap *icon;
-        GdkBitmap *mask;
+	GdkPixbuf *icon;
 	info_window * iw;
 
         vbox = gtk_vbox_new(FALSE,0);
@@ -89,18 +88,17 @@ info_window * eb_info_window_new(eb_local_account * local, struct account * remo
 
 	iw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_position(GTK_WINDOW(iw->window), GTK_WIN_POS_MOUSE);
-        gtk_window_set_policy(GTK_WINDOW(iw->window), TRUE, TRUE, TRUE);
+        gtk_window_set_resizable(GTK_WINDOW(iw->window), TRUE);
         gtk_widget_realize(iw->window);
 
-	iw->info = ext_gtk_text_new(NULL,NULL);
-	gtk_eb_html_init(EXT_GTK_TEXT(iw->info));
+	iw->info = gtk_text_view_new();
+	html_text_view_init( GTK_TEXT_VIEW(iw->info), HTML_IGNORE_NONE );
         iw->scrollwindow = gtk_scrolled_window_new(NULL,NULL);
 
         gtk_widget_realize(iw->window);	
 	gtk_window_set_title(GTK_WINDOW(iw->window), remote->handle);
-	gtkut_set_window_icon(iw->window->window, NULL);
 
-        gtk_widget_set_usize(iw->scrollwindow, 375, 150);
+        gtk_widget_set_size_request(iw->scrollwindow, 375, 150);
 	gtk_container_add(GTK_CONTAINER(iw->scrollwindow),iw->info);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(iw->scrollwindow),GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
@@ -109,14 +107,14 @@ info_window * eb_info_window_new(eb_local_account * local, struct account * remo
 
         gtk_container_set_border_width(GTK_CONTAINER(iw->window), 5);
 
-        gtk_signal_connect (GTK_OBJECT (iw->window), "destroy", GTK_SIGNAL_FUNC (iw_destroy_event), iw);
+        g_signal_connect(iw->window, "destroy", G_CALLBACK(iw_destroy_event), iw);
 
-        icon = gdk_pixmap_create_from_xpm_d(iw->window->window, &mask, NULL, cancel_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
+        icon = gdk_pixbuf_new_from_xpm_data( (const char **) cancel_xpm);
+	iconwid = gtk_image_new_from_pixbuf(icon);
 	gtk_widget_show(iconwid);
 
         ok_button = gtk_button_new ();
-        gtk_signal_connect (GTK_OBJECT (ok_button), "clicked", GTK_SIGNAL_FUNC (iw_close_win), iw);
+        g_signal_connect(ok_button, "clicked", G_CALLBACK(iw_close_win), iw);
 
         gtk_box_pack_start (GTK_BOX (buttonbox), iconwid,TRUE,TRUE,0);
         label = gtk_label_new(_("Close"));
@@ -150,7 +148,10 @@ void eb_info_window_add_info( eb_account * remote_account, gchar* text, gint ign
 	
 	if(remote_account->infowindow)
 	{
-		gtk_eb_html_add(EXT_GTK_TEXT(remote_account->infowindow->info), text,ignore_bg,ignore_fg,ignore_font);
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_account->infowindow->info), text,
+				(ignore_bg?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
+				(ignore_fg?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
+				(ignore_font?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );
 	}
 }
 

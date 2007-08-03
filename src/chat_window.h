@@ -87,7 +87,8 @@ typedef struct _chat_window
 
 	char room_name[1024];  /* what is this chat room called */
 	LList * fellows;   /* who is in the chat room */
-	GtkWidget *fellows_widget;  /* CList of online folks */
+	GtkWidget *fellows_widget;  /* GtkTreeView of online folks */
+	GtkListStore *fellows_model;  /* Model for fellows_widget */
 	LList * typing_fellows;
 	int total_arrivals;
 	int is_public;
@@ -129,7 +130,7 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name);
 chat_window *find_tabbed_chat_window_index (int current_page);
 void set_tab_red(chat_window *cw);
 void set_tab_normal(chat_window *cw);
-void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, char *msg);
+void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, const char *msg);
 gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *inCW, GdkModifierType inModifiers, const GdkEventKey *inEvent );
 void cw_remove_tab(struct contact *ct);
 void cw_close_win (GtkWidget * close_button, gpointer userdata);

@@ -70,8 +70,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP",
 	"Provides Simple Mail Transfer Protocol (SMTP) support",
-	"$Revision: 1.21 $",
-	"$Date: 2005/02/13 13:36:06 $",
+	"$Revision: 1.22 $",
+	"$Date: 2007/08/03 20:38:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -603,7 +603,7 @@ static void eb_smtp_send_im(eb_local_account * account_from,
 	pending_connects = l_list_append(pending_connects, (void *)d->tag);
 }
 
-static char * eb_smtp_check_login(char * user, char * pass)
+static char * eb_smtp_check_login(const char * user, const char * pass)
 {
    if(strchr(user,'@') == NULL) {
       return strdup(_("SMTP logins must have @domain.tld part."));

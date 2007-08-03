@@ -28,6 +28,8 @@ EXTRA_DIST = penguin_talk.xpm ayttm.xpm ayttmlogo.xpm ayttm_32x32.xpm \
 
 Utilitiesdir = $(datadir)/pixmaps
 Utilities_DATA = ayttm.png
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@
 
 dist-hook:
 	for pixmap_dir in $(PIXMAP_DIRS); do \

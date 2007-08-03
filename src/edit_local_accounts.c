@@ -45,35 +45,30 @@
 #include "pixmaps/tb_trash.xpm"
 #include "pixmaps/tb_edit.xpm"
 #include "pixmaps/tb_preferences.xpm"
-#include "pixmaps/checkbox_on.xpm"
-#include "pixmaps/checkbox_off.xpm"
+
 #include "pixmaps/help.xpm"
+
 
 enum {
 	CONNECT,
 	USER_NAME,
 	PASSWORD,
-	SERVICE_TYPE
+	SERVICE_TYPE,
+	COL_COUNT
 };
 
-typedef char *account_row[4];
-
 static GtkWidget *account_list;
+static GtkListStore *account_list_store;
 static GtkWidget *account_window = NULL;
 static GtkWidget *username;
 static GtkWidget *password;
 static GtkWidget *service_type;
-static GtkWidget *mod_button;
-static GtkWidget *del_button;
+static GtkToolItem *mod_button;
+static GtkToolItem *del_button;
 static GtkWidget *connect_at_startup;
-static gint selected_row = -1;
+static GtkTreeIter selected_row;
 static gboolean is_open = FALSE;
 static gint num_accounts = 0;
-
-static GdkPixmap *checkboxonxpm = NULL;
-static GdkPixmap *checkboxonxpmmask = NULL;
-static GdkPixmap *checkboxoffxpm = NULL;
-static GdkPixmap *checkboxoffxpmmask = NULL;
 
 static void rebuild_set_status_menu(void)
 {
@@ -84,102 +79,101 @@ static void destroy(GtkWidget * widget, gpointer data)
 {
 	is_open = FALSE;
 	num_accounts = 0;
-	selected_row = -1;
 }
 
 static void read_contacts()
 {
-	account_row text;
 	LList *node;
-
-	if (checkboxonxpm == NULL)
-		checkboxonxpm = gdk_pixmap_create_from_xpm_d(account_window->window,
-						 &checkboxonxpmmask, NULL,
-						 checkbox_on_xpm);
-	if (checkboxoffxpm == NULL)
-		checkboxoffxpm = gdk_pixmap_create_from_xpm_d(account_window->window,
-						 &checkboxoffxpmmask, NULL,
-						 checkbox_off_xpm);
-
-	gtk_clist_set_column_auto_resize(GTK_CLIST(account_list), 0, TRUE);
-	gtk_clist_set_column_auto_resize(GTK_CLIST(account_list), 1, TRUE);
+	GtkTreeIter insert;
 
 	for (node = accounts; node; node = node->next) {
 		eb_local_account *ela = node->data;
-		int row = 0;
+
 		LList *pairs = RUN_SERVICE(ela)->write_local_config(ela);
 
-		text[CONNECT] = "";
-
-		text[SERVICE_TYPE] = eb_services[ela->service_id].name;
-
-		text[USER_NAME] = value_pair_get_value(pairs, "SCREEN_NAME");
-
-		text[PASSWORD] = value_pair_get_value(pairs, "PASSWORD");
-
-		/* gtk_clist_append copies our strings, so we don't need to */
-		row = gtk_clist_append(GTK_CLIST(account_list), text);
-
+		gtk_list_store_append(account_list_store, &insert);
+		gtk_list_store_set(account_list_store, &insert,
+				SERVICE_TYPE,	eb_services[ela->service_id].name,
+				USER_NAME,	value_pair_get_value(pairs, "SCREEN_NAME"),
+				PASSWORD,	value_pair_get_value(pairs, "PASSWORD"),
+				-1);
+		
 		if (ela->connect_at_startup)
-			gtk_clist_set_pixmap(GTK_CLIST(account_list), row,
-					     CONNECT, checkboxonxpm,
-					     checkboxonxpmmask);
+			gtk_list_store_set(account_list_store, &insert,
+					CONNECT, TRUE,
+					-1);
 		else
-			gtk_clist_set_pixmap(GTK_CLIST(account_list), row,
-					     CONNECT, checkboxoffxpm,
-					     checkboxoffxpmmask);
-		free(text[USER_NAME]);
-		free(text[PASSWORD]);
+			gtk_list_store_set(account_list_store, &insert,
+					CONNECT, FALSE,
+					-1);
 
 		value_pair_free(pairs);
 		num_accounts++;
 	}
 }
 
-static void selection_unmade(GtkWidget * clist,
-			     gint row,
-			     gint column,
-			     GdkEventButton * event, gpointer data)
+/* List Selection Callback */
+static gboolean selection_made_callback(GtkTreeSelection * selection, gpointer data)
 {
-	gtk_entry_set_text(GTK_ENTRY(username), "");
-	gtk_entry_set_text(GTK_ENTRY(password), "");
-
-}
-
-static void selection_made(GtkWidget * clist,
-			   gint row,
-			   gint column,
-			   GdkEventButton * event, gpointer data)
-{
-
 	gchar *entry_name;
 	gchar *entry_pass;
 	gchar *entry_service;
-	GdkPixmap *pix = NULL;
-	GdkBitmap *bmp = NULL;
+	gboolean autoconnect;
+	int x,y;
+	GtkTreeViewColumn *column = NULL;
+	GtkTreeIter sel;
+	GList *path_list;
 
-	selected_row = row;
+	gint sel_count = gtk_tree_selection_count_selected_rows(selection);
 
-	/* Put data in selected row into the entry boxes for revision */
+	if(sel_count<1 || sel_count>1) {
+		gtk_entry_set_text(GTK_ENTRY(username), "");
+		gtk_entry_set_text(GTK_ENTRY(password), "");
+	
+		if(sel_count>1) {
+			gtk_widget_set_sensitive(GTK_WIDGET(mod_button), FALSE);
+			gtk_widget_set_sensitive(GTK_WIDGET(del_button), TRUE);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(service_type), -1);
+		}
+		else {
+			gtk_widget_set_sensitive(GTK_WIDGET(mod_button), FALSE);
+			gtk_widget_set_sensitive(GTK_WIDGET(del_button), FALSE);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(service_type), -1);
+		}
 
-	gtk_clist_get_text(GTK_CLIST(clist), row, USER_NAME, &entry_name);
-	gtk_clist_get_text(GTK_CLIST(clist), row, PASSWORD, &entry_pass);
-	gtk_clist_get_text(GTK_CLIST(clist), row, SERVICE_TYPE,
-			   &entry_service);
-	gtk_clist_get_pixmap(GTK_CLIST(clist), row, CONNECT, &pix, &bmp);
-
-	if (column == CONNECT) {
-		if (pix == checkboxonxpm)
-			gtk_clist_set_pixmap(GTK_CLIST(clist), row,
-					     CONNECT, checkboxoffxpm,
-					     checkboxoffxpmmask);
-		else
-			gtk_clist_set_pixmap(GTK_CLIST(clist), row,
-					     CONNECT, checkboxonxpm,
-					     checkboxonxpmmask);
-		return;
+		return FALSE;
 	}
 
+	path_list = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(account_list_store), &sel, path_list->data);
+
+	g_list_foreach(path_list, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(path_list);
+
+	selected_row = sel;
+
+	gtk_widget_get_pointer(account_list, &x, &y);
+	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(account_list),
+			x, y, NULL, &column, NULL, NULL);
+
+	if(column && !strcmp(gtk_tree_view_column_get_title(column), _("C")) ) {
+		gboolean autoconnect;
+	
+		gtk_tree_model_get(GTK_TREE_MODEL(account_list_store), &selected_row,
+				CONNECT, &autoconnect,
+				-1);
+
+		gtk_list_store_set(account_list_store, &selected_row,
+				CONNECT, !autoconnect);
+	}
+
+	gtk_tree_model_get(GTK_TREE_MODEL(account_list_store), &sel,
+			CONNECT, &autoconnect,
+			USER_NAME, &entry_name,
+			PASSWORD, &entry_pass,
+			SERVICE_TYPE, &entry_service,
+			-1);
 
 	gtk_entry_set_text(GTK_ENTRY(username), entry_name);
 	gtk_entry_set_text(GTK_ENTRY(password), entry_pass);
@@ -189,7 +183,7 @@ static void selection_made(GtkWidget * clist,
 		for(l=list, i=0; l; l=l_list_next(l), i++) {
 			char *name = l->data;
 			if(!strcmp(name, entry_service)) {
-				gtk_option_menu_set_history(GTK_OPTION_MENU(service_type), i);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(service_type), i);
 				break;
 			}
 		}
@@ -197,44 +191,66 @@ static void selection_made(GtkWidget * clist,
 
 	}
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup),
-				     (pix == checkboxonxpm));
+				     autoconnect);
 
-	gtk_widget_set_sensitive(mod_button, TRUE);
-	gtk_widget_set_sensitive(del_button, TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(mod_button), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(del_button), TRUE);
 
-	return;
+	return FALSE;
 }
 
+/* ForEach function. Removes each row in a single/multiple delete */
+void remove_each(GtkTreeRowReference *reference, gpointer data)
+{
+	GtkTreeIter iter;
+	GtkTreePath *path = gtk_tree_row_reference_get_path(reference);
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(account_list_store), &iter, path);
+	gtk_list_store_remove(account_list_store, &iter);
+	num_accounts--;
+}
+
+/* ForEach function. Adds corresponding GtkTreeRowReference to a GList for a GtkTreePath */
+void path_to_row_reference(GtkTreePath *path, GList **reference)
+{
+	*reference = g_list_append(*reference, gtk_tree_row_reference_new(GTK_TREE_MODEL(account_list_store), path));
+}
+
+/* Callback for Delete button */
 static void remove_callback(GtkWidget * widget, gpointer data)
 {
-	if (selected_row != -1) {
-		gtk_clist_remove(GTK_CLIST(account_list), selected_row);
-		num_accounts--;
-		selected_row = -1;
-	}
+	GList *reference_list=NULL;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(account_list));
+
+	GList *path_list = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+	g_list_foreach(path_list, (GFunc)path_to_row_reference, &reference_list);
+	g_list_foreach(reference_list, (GFunc)remove_each, NULL);
+
+	g_list_foreach(reference_list, (GFunc)gtk_tree_row_reference_free, NULL);
+	g_list_foreach(path_list, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(path_list);
+	g_list_free(reference_list);
 }
 
-static char *check_login_validity(char *text[])
+static char *check_login_validity(const gchar *text[])
 {
 	LList *services = get_service_list();
 	LList *l = services;
-	/* 
-	 * okay, this should really be text[SERVICE_TYPE], text[USER_NAME] ...
-	 * change it if you think this is confusing
-	 */
-	if (USER_NAME[text] == NULL || strlen(USER_NAME[text]) == 0)
+
+	if (text[USER_NAME] == NULL || strlen(text[USER_NAME]) == 0)
 		return strdup(_("You have to enter an account."));
 
 	while (l) {
-		if (!strcmp(l->data, SERVICE_TYPE[text]))
+		if (!strcmp(l->data, text[SERVICE_TYPE]))
 			return eb_services[get_service_id(l->data)].sc->
-			    check_login(USER_NAME[text], PASSWORD[text]);
+			    check_login(text[USER_NAME], text[PASSWORD]);
 		l = l->next;
 	}
 
 	return NULL;
 }
 
+/* Callback for Help Button */
 static void help_callback(GtkWidget * widget, gpointer data)
 {
 	ay_do_info(_("Help"),
@@ -256,16 +272,54 @@ static void help_callback(GtkWidget * widget, gpointer data)
 			"isn't supported yet."));
 }
 
+/* ForEach function. Checks if the new account service has already been added */
+gboolean service_exists = FALSE;
+gboolean find_existing_account_mod(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+{
+	gpointer serv;
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(account_list));
+
+	gtk_tree_model_get(model, iter,
+			SERVICE_TYPE, &serv,
+			-1);
+
+	if( !gtk_tree_selection_path_is_selected(selection, path) && !strcasecmp(serv, data) &&
+			!can_multiaccount(eb_services[ get_service_id( data ) ] ))
+	{
+		return (service_exists=TRUE);
+	}
+
+	return (service_exists=FALSE);
+}
+
+/* ForEach function. Checks if the modified account service except the selected one already exists */
+gboolean find_existing_account_add(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+{
+	gpointer serv;
+	gtk_tree_model_get(model, iter,
+			SERVICE_TYPE, &serv,
+			-1);
+
+	if( !strcasecmp(serv, data) )
+	{
+		return (service_exists=TRUE);
+	}
+
+	return (service_exists=FALSE);
+}
+
+/* Callback for Add Button */
 static void add_callback(GtkWidget * widget, gpointer data)
 {
-	char *text[4];
+	const gchar *text[4];
 	char *error_message = NULL;
-	int i, row;
+	GtkTreeIter insert;
 
 	text[CONNECT] = "";
 	text[USER_NAME] = gtk_entry_get_text(GTK_ENTRY(username));
 	text[PASSWORD] = gtk_entry_get_text(GTK_ENTRY(password));
-	text[SERVICE_TYPE] = gtk_widget_get_name(gtk_menu_get_active(GTK_MENU(gtk_option_menu_get_menu(GTK_OPTION_MENU(service_type)))));
+	text[SERVICE_TYPE] = gtk_combo_box_get_active_text( GTK_COMBO_BOX(service_type) );
 
 	error_message = check_login_validity(text);
 	if (error_message) {
@@ -278,47 +332,47 @@ static void add_callback(GtkWidget * widget, gpointer data)
 	}
 
 	if( !can_multiaccount( eb_services[ get_service_id( text[SERVICE_TYPE] ) ] ) ) {
-		for (i = 0; i < num_accounts; i++) {
-			char *service;
-			gtk_clist_get_text(GTK_CLIST(account_list), i, SERVICE_TYPE, &service);
-			if (!strcmp(service, text[SERVICE_TYPE])) {
-				char *buf = g_strdup_printf(_("You already have an account for %s service.\n\n"
-						    "Multiple accounts on this service aren't supported yet."),
-					 	   text[SERVICE_TYPE]);
-				ay_do_error( _("Invalid Account"), buf );
-				g_free(buf);
-				return;
-			}
+		service_exists = FALSE;
+		gtk_tree_model_foreach(GTK_TREE_MODEL(account_list_store), find_existing_account_add,
+				(gchar *)text[SERVICE_TYPE]);
+
+		if (service_exists) {
+			char *buf = g_strdup_printf(_("You already have an account for %s service.\n\n"
+					    "Multiple accounts on this service aren't supported yet."),
+				 	   text[SERVICE_TYPE]);
+			ay_do_error( _("Invalid Account"), buf );
+			g_free(buf);
+			return;
 		}
 	}
 
-	row = gtk_clist_append(GTK_CLIST(account_list), text);
-	if (gtk_toggle_button_get_active
-	    (GTK_TOGGLE_BUTTON(connect_at_startup)))
-		gtk_clist_set_pixmap(GTK_CLIST(account_list), row, CONNECT,
-				     checkboxonxpm, checkboxonxpmmask);
-	else
-		gtk_clist_set_pixmap(GTK_CLIST(account_list), row, CONNECT,
-				     checkboxoffxpm, checkboxoffxpmmask);
+	gtk_list_store_append(account_list_store, &insert);
+	gtk_list_store_set(account_list_store, &insert,
+			CONNECT,	gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(connect_at_startup)),
+			SERVICE_TYPE,	text[SERVICE_TYPE],
+			USER_NAME,	text[USER_NAME],
+			PASSWORD,	text[PASSWORD],
+			-1);
 
 	num_accounts++;
 	eb_debug(DBG_CORE, "num_accounts %d\n", num_accounts);
 	gtk_entry_set_text(GTK_ENTRY(username), "");
 	gtk_entry_set_text(GTK_ENTRY(password), "");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(service_type), -1);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup),
 				     FALSE);
 }
 
+/* Callback for Modify button */
 static void modify_callback(GtkWidget * widget, gpointer data)
 {
-	char *text[4];
+	const gchar *text[4];
 	char *error_message = NULL;
-	int i;
 
 	text[CONNECT] = "";
 	text[USER_NAME] = gtk_entry_get_text(GTK_ENTRY(username));
 	text[PASSWORD] = gtk_entry_get_text(GTK_ENTRY(password));
-	text[SERVICE_TYPE] = gtk_widget_get_name(gtk_menu_get_active(GTK_MENU(gtk_option_menu_get_menu(GTK_OPTION_MENU(service_type)))));
+	text[SERVICE_TYPE] = gtk_combo_box_get_active_text( GTK_COMBO_BOX(service_type) );
 
 	error_message = check_login_validity(text);
 	if (error_message) {
@@ -330,49 +384,37 @@ static void modify_callback(GtkWidget * widget, gpointer data)
 		return;
 	}
 
-	for (i = 0; i < num_accounts; i++) {
-		char *service;
-		gtk_clist_get_text(GTK_CLIST(account_list), i, SERVICE_TYPE, &service);
-		if (i != selected_row && !strcmp(service, text[SERVICE_TYPE])
-		&& !can_multiaccount(eb_services[ get_service_id( text[SERVICE_TYPE] ) ] )) {
-			char *buf = g_strdup_printf(_("You already have an account for %s service.\n\n"
-						    "Multiple accounts on this service aren't supported yet."), 
-					    text[SERVICE_TYPE]);
-			ay_do_error( _("Invalid Account"), buf );
-			g_free(buf);
-			return;
-		}
+	service_exists = FALSE;
+	gtk_tree_model_foreach(GTK_TREE_MODEL(account_list_store), find_existing_account_mod,
+			(gchar *)text[SERVICE_TYPE]);
+	if (service_exists) {
+		char *buf = g_strdup_printf(_("You already have an account for %s service.\n\n"
+					    "Multiple accounts on this service aren't supported yet."), 
+				    text[SERVICE_TYPE]);
+		ay_do_error( _("Invalid Account"), buf );
+		g_free(buf);
+		return;
 	}
 
 	/* update selected row in list */
 
-	if (gtk_toggle_button_get_active
-	    (GTK_TOGGLE_BUTTON(connect_at_startup)))
-		gtk_clist_set_pixmap(GTK_CLIST(account_list), selected_row,
-				     CONNECT, checkboxonxpm,
-				     checkboxonxpmmask);
-	else
-		gtk_clist_set_pixmap(GTK_CLIST(account_list), selected_row,
-				     CONNECT, checkboxoffxpm,
-				     checkboxoffxpmmask);
-
-	gtk_clist_set_text(GTK_CLIST(account_list),
-			   selected_row, USER_NAME, text[USER_NAME]);
-
-	gtk_clist_set_text(GTK_CLIST(account_list),
-			   selected_row, PASSWORD, text[PASSWORD]);
-
-	gtk_clist_set_text(GTK_CLIST(account_list),
-			   selected_row, SERVICE_TYPE, text[SERVICE_TYPE]);
+	gtk_list_store_set(account_list_store, &selected_row,
+			CONNECT,	gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(connect_at_startup)),
+			SERVICE_TYPE,	text[SERVICE_TYPE],
+			USER_NAME,	text[USER_NAME],
+			PASSWORD,	text[PASSWORD],
+			-1);
 
 	/* reset the entry fields */
 
 	gtk_entry_set_text(GTK_ENTRY(username), "");
 	gtk_entry_set_text(GTK_ENTRY(password), "");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(service_type), -1);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(connect_at_startup),
 				     FALSE);
 }
 
+/* Callback for Cancel button */
 static void cancel_callback(GtkWidget * widget, gpointer data)
 {
 	gtk_widget_destroy(account_window);
@@ -380,19 +422,79 @@ static void cancel_callback(GtkWidget * widget, gpointer data)
 		gtk_main_quit();
 }
 
+/* ForEach Function. Saves details of an account to a file */
+LList *pairs = NULL;
+LList *existing_accounts = NULL, *new_accounts = NULL;
+eb_local_account *ela = NULL;
+static gboolean save_accounts(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+{
+	FILE *fp = data;
+
+	int tmp_connect = 0;
+	char *service, *user, *pass;
+	int id;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(account_list_store), iter,
+			CONNECT,	&tmp_connect,
+			SERVICE_TYPE,	&service,
+			USER_NAME,	&user,
+			PASSWORD,	&pass,
+			-1);
+	
+	id = get_service_id(service);
+	if (accounts && (ela = find_local_account_by_handle(user, id))) {
+		LList *config = NULL;
+		config = eb_services[id].sc->write_local_config(ela);
+		config = value_pair_remove(config, "SCREEN_NAME");
+		config = value_pair_add(config, "SCREEN_NAME", user);
+		config = value_pair_remove(config, "PASSWORD");
+		config = value_pair_add(config, "PASSWORD", pass);
+		config = value_pair_remove(config, "CONNECT");
+		config = value_pair_add(config, "CONNECT",
+				   tmp_connect ? "1" : "0");
+		fprintf(fp, "<ACCOUNT %s>\n", service);
+		value_pair_print_values(config, fp, 1);
+		fprintf(fp, "</ACCOUNT>\n");
+		existing_accounts = l_list_append(existing_accounts, ela);
+	} else {
+		LList *config = NULL;
+		eb_debug(DBG_CORE,
+			 "Adding new account %s service %s\n",
+			 user, service);
+		pairs = value_pair_add(NULL, "SCREEN_NAME", user);
+		pairs = value_pair_add(pairs, "PASSWORD", pass);
+		save_account_info(service, pairs);
+		ela = eb_services[id].sc->read_local_account_config(pairs);
+		//prevent segfault
+		if (ela != NULL) {
+			// Is this an account for which a module is not loaded?
+			if (ela->service_id == -1)
+				ela->service_id = id;
+			new_accounts = l_list_append(new_accounts, ela);
+			config = eb_services[id].sc->
+			    write_local_config(ela);
+			config = value_pair_remove(config, "CONNECT");
+			config = value_pair_add(config, "CONNECT",
+					   tmp_connect ? "1" :
+					   "0");
+
+			fprintf(fp, "<ACCOUNT %s>\n", service);
+			value_pair_print_values(config, fp, 1);
+			fprintf(fp, "</ACCOUNT>\n");
+		} else
+			ay_do_error( _("Invalid Service"), _("Can't add account : unknown service") );
+	}
+
+	return FALSE;
+}
+
+/* Callback for OK button */
 static void ok_callback(GtkWidget * widget, gpointer data)
 {
 	FILE *fp;
 	char buff[1024];
-	char *service, *user, *pass;
-	int i;
-	int id;
-	LList *pairs = NULL;
-	LList *existing_accounts = NULL, *new_accounts = NULL,
-	    *acc_walk = NULL, *to_remove = NULL;
-	eb_local_account *ela = NULL;
-	
-	LList *saved_acc_info = NULL;
+	LList *saved_acc_info = NULL,
+	      *acc_walk = NULL, *to_remove = NULL;
 	
 	if (gtk_entry_get_text(GTK_ENTRY(username)) != NULL 
 			&& strlen(gtk_entry_get_text(GTK_ENTRY(username))) > 0 
@@ -411,69 +513,7 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 
 	eb_sign_off_all();
 
-	for (i = 0; i < num_accounts; i++) {
-		int tmp_connect = 0;
-		GdkPixmap *pix;
-		GdkBitmap *bmp;
-
-		gtk_clist_get_text(GTK_CLIST(account_list), i,
-				   SERVICE_TYPE, &service);
-		gtk_clist_get_text(GTK_CLIST(account_list), i, USER_NAME,
-				   &user);
-		gtk_clist_get_text(GTK_CLIST(account_list), i, PASSWORD,
-				   &pass);
-
-		gtk_clist_get_pixmap(GTK_CLIST(account_list), i, CONNECT,
-				     &pix, &bmp);
-		if (pix == checkboxonxpm)
-			tmp_connect = 1;
-
-		id = get_service_id(service);
-		if (accounts
-		    && (ela = find_local_account_by_handle(user, id))) {
-			LList *config = NULL;
-			config = eb_services[id].sc->write_local_config(ela);
-			config = value_pair_remove(config, "SCREEN_NAME");
-			config = value_pair_add(config, "SCREEN_NAME", user);
-			config = value_pair_remove(config, "PASSWORD");
-			config = value_pair_add(config, "PASSWORD", pass);
-			config = value_pair_remove(config, "CONNECT");
-			config = value_pair_add(config, "CONNECT",
-					   tmp_connect ? "1" : "0");
-			fprintf(fp, "<ACCOUNT %s>\n", service);
-			value_pair_print_values(config, fp, 1);
-			fprintf(fp, "</ACCOUNT>\n");
-			existing_accounts = l_list_append(existing_accounts, ela);
-		} else {
-			LList *config = NULL;
-			eb_debug(DBG_CORE,
-				 "Adding new account %s service %s\n",
-				 user, service);
-			pairs = value_pair_add(NULL, "SCREEN_NAME", user);
-			pairs = value_pair_add(pairs, "PASSWORD", pass);
-			save_account_info(service, pairs);
-			ela = eb_services[id].sc->read_local_account_config(pairs);
-			//prevent segfault
-			if (ela != NULL) {
-				// Is this an account for which a module is not loaded?
-				if (ela->service_id == -1)
-					ela->service_id = id;
-				new_accounts = l_list_append(new_accounts, ela);
-				config = eb_services[id].sc->
-				    write_local_config(ela);
-				config = value_pair_remove(config, "CONNECT");
-				config = value_pair_add(config, "CONNECT",
-						   tmp_connect ? "1" :
-						   "0");
-
-				fprintf(fp, "<ACCOUNT %s>\n", service);
-				value_pair_print_values(config, fp, 1);
-				fprintf(fp, "</ACCOUNT>\n");
-			} else
-				ay_do_error( _("Invalid Service"), _("Can't add account : unknown service") );
-		}
-	}
-
+	gtk_tree_model_foreach(GTK_TREE_MODEL(account_list_store), save_accounts, fp);
 
 	fclose(fp);
 
@@ -517,7 +557,8 @@ static void ok_callback(GtkWidget * widget, gpointer data)
 	ay_restore_account_information(saved_acc_info);
 	l_list_free(saved_acc_info);
 }
-		
+
+
 void	ay_edit_local_accounts( void )
 {
 	char *text[] = { _("C"),
@@ -533,12 +574,18 @@ void	ay_edit_local_accounts( void )
 	guint label_key;
 	GtkWidget *iconwid;
 	GtkWidget *toolbar;
-	GtkWidget *toolitem;
+	GtkToolItem *toolitem;
+	GtkToolItem *tool_sep;
 	GtkWidget *separator;
 	LList *list;
-	GdkPixmap *icon;
-	GdkBitmap *mask;
+	LList *l;
+
+	GdkPixbuf *icon;
+
 	GtkAccelGroup *accel_group;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkTreeSelection *selection;
 
 	if (is_open)
 		return;
@@ -551,14 +598,40 @@ void	ay_edit_local_accounts( void )
 	gtk_window_set_position(GTK_WINDOW(account_window),
 				GTK_WIN_POS_MOUSE);
 	gtk_widget_realize(account_window);
-	account_list = gtk_clist_new_with_titles(4, text);
-	gtk_clist_set_column_visibility(GTK_CLIST(account_list), PASSWORD,
-					FALSE);
+
+	account_list_store = gtk_list_store_new(COL_COUNT,
+			G_TYPE_BOOLEAN,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING);
+
+	account_list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(account_list_store));
+
+	renderer = gtk_cell_renderer_toggle_new();
+	column = gtk_tree_view_column_new_with_attributes(text[CONNECT], renderer, 
+			"active", CONNECT, 
+			NULL);
+
+	gtk_tree_view_append_column(GTK_TREE_VIEW(account_list), column);
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(text[USER_NAME], renderer,
+			"text", USER_NAME,
+			NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(account_list), column);
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(text[SERVICE_TYPE], renderer,
+			"text", SERVICE_TYPE,
+			NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(account_list), column);
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(account_list));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
+
 	gtk_container_set_border_width(GTK_CONTAINER(account_window), 5);
-	gtk_signal_connect(GTK_OBJECT(account_list), "select_row",
-			   GTK_SIGNAL_FUNC(selection_made), NULL);
-	gtk_signal_connect(GTK_OBJECT(account_list), "unselect_row",
-			   GTK_SIGNAL_FUNC(selection_unmade), NULL);
+	g_signal_connect(selection, "changed", G_CALLBACK(selection_made_callback), NULL);
 
 	box = gtk_vbox_new(FALSE, 0);
 	window_box = gtk_vbox_new(FALSE, 5);
@@ -567,8 +640,8 @@ void	ay_edit_local_accounts( void )
 
 	/*Screen Name Section */
 
-	label = gtk_label_new("");
-	label_key = gtk_label_parse_uline(GTK_LABEL(label), _("Screen _Name:"));
+	label = gtk_label_new_with_mnemonic(_("Screen _Name:"));
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
@@ -580,8 +653,8 @@ void	ay_edit_local_accounts( void )
 
 	/*Password Section */
 
-	label = gtk_label_new("");
-	label_key = gtk_label_parse_uline(GTK_LABEL(label), _("_Password:"));
+	label = gtk_label_new_with_mnemonic(_("_Password:"));
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
@@ -594,38 +667,31 @@ void	ay_edit_local_accounts( void )
 
 	/*Service Type Section */
 
-	label = gtk_label_new("");
-	label_key = gtk_label_parse_uline(GTK_LABEL(label), _("Service _Type:"));
+	label = gtk_label_new_with_mnemonic(_("Service _Type:"));
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 	gtk_widget_show(label);
-	{
-		GtkWidget *widget = gtk_menu_new();
-		LList *l;
-		service_type = gtk_option_menu_new();
-		gtk_widget_show(widget);
-		list = get_service_list();
-		for(l=list; l; l=l_list_next(l)) {
-			char *label = l->data;
-			GtkWidget *w = gtk_menu_item_new_with_label(label);
-			gtk_widget_show(w);
-			gtk_widget_set_name(w, label);
-			gtk_menu_append(GTK_MENU(widget), w);
-		}
-		l_list_free(list);
 
-		gtk_option_menu_set_menu(GTK_OPTION_MENU(service_type), widget);
-		gtk_option_menu_set_history(GTK_OPTION_MENU(service_type), 0);
+	service_type = gtk_combo_box_new_text();
+	
+	list = get_service_list();
+	for(l=list; l; l=l_list_next(l)) {
+		char *label = l->data;
+		gtk_combo_box_append_text(GTK_COMBO_BOX(service_type), label);
 	}
+	l_list_free(list);
+
 	gtk_widget_show(service_type);
+
 	gtk_box_pack_start(GTK_BOX(box), service_type, FALSE, FALSE, 2);
 	gtk_widget_add_accelerator(service_type, "grab_focus", accel_group,
 			label_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
 
 	/*Connect at startup Section */
 
-	connect_at_startup = gtk_check_button_new_with_label("");
-	label_key = gtk_label_parse_uline(GTK_LABEL(GTK_BIN(connect_at_startup)->child), _("_Connect at startup"));
+	connect_at_startup = gtk_check_button_new_with_mnemonic(_("_Connect at startup"));
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(GTK_BIN(connect_at_startup)->child));
 	gtk_widget_show(connect_at_startup);
 	gtk_widget_add_accelerator(connect_at_startup, "clicked", accel_group,
 			label_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
@@ -653,116 +719,71 @@ void	ay_edit_local_accounts( void )
 
 	/*Initialize Toolbar */
 
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_BOTH);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar),
-				      GTK_RELIEF_NONE);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_BOTH);
+	gtk_toolbar_set_show_arrow(GTK_TOOLBAR(toolbar), FALSE);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), 
+			GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_set_border_width(GTK_CONTAINER(toolbar), 0);
-	gtk_toolbar_set_space_size(GTK_TOOLBAR(toolbar), 5);
 
 	/*Add Button */
 
-	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
-					 NULL, help_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
-	toolitem = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-					   _("Help"),
-					   _("Help"),
-					   _("Help"),
-					   iconwid,
-					   GTK_SIGNAL_FUNC(help_callback),
-					   NULL);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
-	separator = gtk_vseparator_new();
-	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);
-	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL,
-				  NULL);
-	gtk_widget_show(separator);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
-	
-	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
-					 NULL, tb_preferences_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
-	toolitem = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-					   _("Add"),
-					   _("Add Account"),
-					   _("Add"),
-					   iconwid,
-					   GTK_SIGNAL_FUNC(add_callback),
-					   NULL);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+#define TOOLBAR_APPEND(titem,in_xpm,label,tip,p_tip,callback,cb_data) { \
+	icon = gdk_pixbuf_new_from_xpm_data((const char **) in_xpm); \
+	iconwid = gtk_image_new_from_pixbuf(icon); \
+	gtk_widget_show(iconwid); \
+	titem = gtk_tool_button_new(iconwid, label); \
+	gtk_tool_item_set_tooltip(titem, gtk_tooltips_new(), tip, p_tip); \
+	g_signal_connect(titem, "clicked", G_CALLBACK(callback), cb_data); \
+	gtk_widget_show(GTK_WIDGET(titem)); \
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), titem, -1); \
+}
+
+/* line will tell whether to draw the separator line or not */
+#define TOOLBAR_APPEND_SEPARATOR(line) { \
+	tool_sep = gtk_separator_tool_item_new(); \
+	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(tool_sep), line); \
+	gtk_widget_show(GTK_WIDGET(tool_sep)); \
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_sep, -1); \
+}
+
+	TOOLBAR_APPEND(toolitem, help_xpm, _("Help"), _("Help"), _("Help"), help_callback, NULL);
+
+	TOOLBAR_APPEND_SEPARATOR(TRUE);
+
+	TOOLBAR_APPEND(toolitem, tb_preferences_xpm, _("Add"), _("Add Account"), _("Add"), add_callback, NULL);
+
+	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/*Delete Button */
 
-	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
-					 NULL, tb_trash_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
-	del_button = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-					     _("Delete"),
-					     _("Delete Account"),
-					     _("Delete"),
-					     iconwid,
-					     GTK_SIGNAL_FUNC
-					     (remove_callback), NULL);
-	gtk_widget_set_sensitive(del_button, FALSE);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+	TOOLBAR_APPEND(del_button, tb_trash_xpm, _("Delete"), _("Delete Account"), _("Delete"), remove_callback, NULL);
+	
+	gtk_widget_set_sensitive(GTK_WIDGET(del_button), FALSE);
+	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/* Modify Button */
 
-	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
-					 NULL, tb_edit_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
-	mod_button = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-					     _("Modify"),
-					     _("Modify Account"),
-					     _("Modify"),
-					     iconwid,
-					     GTK_SIGNAL_FUNC
-					     (modify_callback), NULL);
-	gtk_widget_set_sensitive(mod_button, FALSE);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+	TOOLBAR_APPEND(mod_button, tb_edit_xpm, _("Modify"), _("Modify Account"), _("Modify"), modify_callback, NULL);
+	
+	gtk_widget_set_sensitive(GTK_WIDGET(mod_button), FALSE);
 
-	separator = gtk_vseparator_new();
-	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);
-	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL,
-				  NULL);
-	gtk_widget_show(separator);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+	TOOLBAR_APPEND_SEPARATOR(TRUE);
 
 	/*Okay Button */
 
-	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
-					 NULL, ok_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
-	toolitem = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-					   _("Ok"),
-					   _("Ok"),
-					   _("Ok"),
-					   iconwid,
-					   GTK_SIGNAL_FUNC(ok_callback),
-					   NULL);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+	TOOLBAR_APPEND(toolitem, ok_xpm, _("Ok"), _("Ok"), _("Ok"), ok_callback, NULL);
+	
+	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/*Cancel Button */
 
-	icon = gdk_pixmap_create_from_xpm_d(account_window->window, &mask,
-					 NULL, cancel_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
-	gtk_widget_show(iconwid);
-	toolitem = gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),
-					   _("Cancel"),
-					   _("Cancel"),
-					   _("Cancel"),
-					   iconwid,
-					   GTK_SIGNAL_FUNC
-					   (cancel_callback), NULL);
+	TOOLBAR_APPEND(toolitem, cancel_xpm, _("Cancel"), _("Cancel"), _("Cancel"), cancel_callback, NULL);
 
+#undef TOOLBAR_APPEND_SEPARATOR
+#undef TOOLBAR_APPEND
 	/*Buttons End */
-
+	
 	button_box = gtk_hbox_new(FALSE, 0);
 
 	gtk_box_pack_end(GTK_BOX(button_box), toolbar, FALSE, FALSE, 0);
@@ -777,10 +798,8 @@ void	ay_edit_local_accounts( void )
 	gtk_container_add(GTK_CONTAINER(account_window), window_box);
    
 	gtk_window_set_title(GTK_WINDOW(account_window), _("Ayttm Account Editor"));
-	gtkut_set_window_icon(account_window->window, NULL);
 
-	gtk_signal_connect(GTK_OBJECT(account_window), "destroy",
-			   GTK_SIGNAL_FUNC(destroy), NULL);
+	g_signal_connect(account_window, "destroy", G_CALLBACK(destroy), NULL);
 
 	gtk_window_add_accel_group(GTK_WINDOW(account_window), accel_group);
 

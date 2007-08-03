@@ -9,6 +9,7 @@
         #include "globals.h"
         #include "value_pair.h"
         #include "service.h"
+        #include "charconv.h"
 
 
 	extern int Line;
@@ -103,7 +104,7 @@ account:
 value_list:
 		COMMENT value_list { $$ = $2; }
 	|	IDENTIFIER '=' STRING value_list { 
-			char *tmp = unescape_string($3);
+			char *tmp = StrToUtf8(unescape_string($3));
 			free($3);
 			$$ = value_pair_add($4, $1, tmp);
 			free($1);

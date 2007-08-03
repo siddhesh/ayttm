@@ -20,20 +20,39 @@
  */ 
  
 #include "messages.h"
-#include "ui_message_windows.h"
+#include <gtk/gtk.h>
 
 
 void	ay_do_info( const char *inTitle, const char *inMessage )
 {
-	ay_ui_info_window_create( inTitle, inMessage );
+	GtkWidget *dialog;
+
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_MESSAGE_INFO, GTK_BUTTONS_OK, inMessage);
+	gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
+	gtk_widget_show(dialog);
+
+	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
 }
 
 void	ay_do_warning( const char *inTitle, const char *inMessage )
 {
-	ay_ui_warning_window_create( inTitle, inMessage );
+	GtkWidget *dialog;
+
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, inMessage);
+	gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
+	gtk_widget_show(dialog);
+	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
 }
 
 void	ay_do_error( const char *inTitle, const char *inMessage )
 {
-	ay_ui_error_window_create( inTitle, inMessage );
+	GtkWidget *dialog;
+
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+			GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, inMessage);
+	gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
+	gtk_widget_show(dialog);
+	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
 }

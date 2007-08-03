@@ -62,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"Everybuddy Settings", 
 	"Imports your Everybuddy settings into Ayttm", 
-	"$Revision: 1.11 $",
-	"$Date: 2003/07/05 13:18:32 $",
+	"$Revision: 1.12 $",
+	"$Date: 2007/08/03 20:38:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -234,7 +234,7 @@ void import_eb_accounts(ebmCallbackData *data)
 {
 	if (!eb_imp_window_open) {
 		eb_imp_window_open = 1;
-		window = gtk_window_new(GTK_WINDOW_DIALOG);
+		window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_MOUSE);
 		gtk_window_set_title(GTK_WINDOW(window), _("Import parameters"));
 		gtk_widget_realize(window);
@@ -269,12 +269,9 @@ void import_eb_accounts(ebmCallbackData *data)
 		gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 2);
 		
 		gtk_container_add (GTK_CONTAINER(window), vbox);
-		gtk_signal_connect(GTK_OBJECT(okbutton), "clicked",
-				GTK_SIGNAL_FUNC(ok_callback), NULL);
-		gtk_signal_connect(GTK_OBJECT(cancelbutton), "clicked",
-				GTK_SIGNAL_FUNC(cancel_callback), NULL);
-		gtk_signal_connect(GTK_OBJECT(window), "destroy",
-			   	GTK_SIGNAL_FUNC(destroy_callback), NULL);
+		g_signal_connect(okbutton, "clicked", G_CALLBACK(ok_callback), NULL);
+		g_signal_connect(cancelbutton, "clicked", G_CALLBACK(cancel_callback), NULL);
+		g_signal_connect(window, "destroy", G_CALLBACK(destroy_callback), NULL);
 		
 		gtk_widget_show(vbox);
 		gtk_widget_show(hbox);

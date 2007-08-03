@@ -10,3 +10,5 @@ AM_CPPFLAGS = -DUSE_STRUCT_CALLBACKS=1
 libyahoo2_la_SOURCES = libyahoo2.c crypt.c md5.c sha.c \
 	yahoo_httplib.c yahoo_util.c yahoo_list.c yahoo_fn.c
 
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

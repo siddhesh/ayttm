@@ -28,3 +28,5 @@ autotrans_la_LIBADD = $(WIN32_LIBADD)
 custmsg_la_SOURCES = custom_message.c
 custmsg_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 custmsg_la_LIBADD = 
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

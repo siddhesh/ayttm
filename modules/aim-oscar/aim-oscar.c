@@ -47,7 +47,6 @@ typedef unsigned long ulong;
 #include "activity_bar.h"
 /* #include "eb_aim.h" */
 #include "away_window.h"
-#include "gtk/gtk_eb_html.h"
 #include "service.h"
 #include "llist.h"
 #include "chat_window.h"
@@ -93,8 +92,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM Oscar",
 	"Provides AOL Instant Messenger support via the Oscar protocol",
-	"$Revision: 1.21 $",
-	"$Date: 2005/02/13 13:31:11 $",
+	"$Revision: 1.22 $",
+	"$Date: 2007/08/03 20:38:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2101,7 +2100,7 @@ ay_aim_get_status_string (eb_account *account)
 
 
 static char *
-ay_aim_check_login (char *user, char *pass)
+ay_aim_check_login (const char *user, const char *pass)
 {
 	return NULL;
 }
@@ -2218,7 +2217,7 @@ ay_oscar_send_chat_room_message (eb_chat_room *room, char * message)
 
 static void
 ay_oscar_send_invite (eb_local_account *account, eb_chat_room *room,
-		      char *user, char *message)
+		      char *user, const char *message)
 {
 	struct eb_aim_local_account_data * alad;
 	struct oscar_chat_room *ocr;

@@ -14,3 +14,5 @@ pkglib_LTLIBRARIES = aim-toc.la
 aim_toc_la_SOURCES = aim-toc.c
 aim_toc_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 aim_toc_la_LIBADD = libtoc/libtoc.lo $(WIN32_LIBADD)
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

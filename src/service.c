@@ -24,6 +24,7 @@
 
 #include "intl.h"
 
+#include <gdk/gdkx.h>
 #include <gdk/gdkprivate.h>
 
 #include <string.h>
@@ -280,7 +281,7 @@ static int check_idle()
 	if (scrnsaver_ext) {
 		static XScreenSaverInfo * mit_info = NULL;
 		mit_info = XScreenSaverAllocInfo();
-		XScreenSaverQueryInfo(gdk_display, DefaultRootWindow(gdk_display), mit_info);
+		XScreenSaverQueryInfo(GDK_DISPLAY(), DefaultRootWindow(GDK_DISPLAY()), mit_info);
 		idle_time = mit_info->idle/1000;
 		free(mit_info);
 	} else
@@ -309,7 +310,7 @@ static int check_idle()
 		is_idle = 1;
 	} else if ((idle_time < 600) && sendIdleTime && (is_idle == 1)) {
 		if (idle_reporter != -1)
-			gtk_idle_remove(idle_reporter);
+			g_source_remove(idle_reporter);
 		serv_touch_idle();
 	}
 	return TRUE;
@@ -324,7 +325,7 @@ void add_idle_check()
 		int	eventnum;
 		int	errornum;
 		
-		if (XScreenSaverQueryExtension(gdk_display, &eventnum, &errornum))
+		if (XScreenSaverQueryExtension(GDK_DISPLAY(), &eventnum, &errornum))
 			scrnsaver_ext = 1;
 	}
 #endif

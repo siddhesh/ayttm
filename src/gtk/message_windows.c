@@ -74,7 +74,7 @@ static void	s_handle_key( GtkWidget *inWidget, GdkEventAny *inEvent, gpointer in
 			case GDK_Escape:
 			case GDK_KP_Enter:
 			case GDK_Return:
-				gtk_signal_emit_by_name( GTK_OBJECT(ok_button), "clicked" );
+				g_signal_emit_by_name( ok_button, "clicked", NULL);
 				break;
 				
 			default:
@@ -99,7 +99,7 @@ static void	s_do_message_dialog( tMessageType inType, const char *inTitle, const
 	
 	
 	label = gtk_label_new( inMessage );
-	gtk_widget_set_usize( label, 240, -1 );
+	gtk_widget_set_size_request( label, 240, -1 );
 	gtk_misc_set_alignment( GTK_MISC(label), 0.1, 0.5 );
 	gtk_label_set_line_wrap( GTK_LABEL(label), TRUE );
 	gtk_widget_show( label );
@@ -143,8 +143,8 @@ static void	s_do_message_dialog( tMessageType inType, const char *inTitle, const
 	gtk_widget_show( hbox2 );
 	
 	ok_button = gtkut_create_icon_button( _("OK"), ok_xpm, dlg );
-	gtk_signal_connect_object( GTK_OBJECT(ok_button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), GTK_OBJECT(dlg) );
-	gtk_signal_connect( GTK_OBJECT(dlg), "key_press_event", GTK_SIGNAL_FUNC(s_handle_key), ok_button );
+	g_signal_connect_swapped( ok_button, "clicked", G_CALLBACK(gtk_widget_destroy), dlg );
+	g_signal_connect( dlg, "key-press-event", G_CALLBACK(s_handle_key), ok_button );
 	gtk_box_pack_end( GTK_BOX(hbox2), ok_button, FALSE, FALSE, 0 );
 	
 	gtk_box_pack_start( GTK_BOX(GTK_DIALOG(dlg)->action_area), hbox2, TRUE, TRUE, 0 );

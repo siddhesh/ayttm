@@ -72,8 +72,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.14 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.15 $",
+	"$Date: 2007/08/03 20:38:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -149,7 +149,7 @@ static int reload_prefs()
  *                             End Module Code
  ******************************************************************************/
 
-static int log(char *fmt,...)
+static int smiley_log(char *fmt,...)
 {
 	if(do_smiley_debug) {
 		va_list ap;
@@ -163,9 +163,9 @@ static int log(char *fmt,...)
 	return 0;
 }
 
-#define LOG(x) if(do_smiley_debug) { log("%s:%d: ", __FILE__, __LINE__); \
-	log x; \
-	log("\n"); }
+#define LOG(x) if(do_smiley_debug) { smiley_log("%s:%d: ", __FILE__, __LINE__); \
+	smiley_log x; \
+	smiley_log("\n"); }
 
 struct smiley_theme {
 	char *name;

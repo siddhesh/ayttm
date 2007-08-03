@@ -58,7 +58,7 @@
 #include "mem_util.h"
 #include "chat_room.h"
 
-#include "gtk/gtk_eb_html.h"
+#include "gtk/html_text_buffer.h"
 #include "gtk/gtkutils.h"
 
 #ifdef HAVE_LIBPSPELL
@@ -86,7 +86,7 @@
 #define GET_CHAT_WINDOW(cur_cw) {\
 	if( iGetLocalPref("do_tabbed_chat") ) { \
 		chat_window *bck = cur_cw; \
-		if (cur_cw->notebook) \
+		if (cur_cw && cur_cw->notebook) \
 			cur_cw = find_tabbed_chat_window_index(gtk_notebook_get_current_page(GTK_NOTEBOOK(cur_cw->notebook))); \
 		if (cur_cw == NULL) \
 			cur_cw = bck; \
@@ -101,7 +101,7 @@ LList *session_words = NULL;
 /* forward declaration */
 static void eb_update_window_title(chat_window * cw, gboolean new_message);
 static void eb_update_window_title_to_tab(int tab, gboolean new_message);
-static void handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
+static gboolean handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
 static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
 LList *outgoing_message_filters=NULL;
 LList *incoming_message_filters=NULL;
@@ -112,7 +112,9 @@ static LList *chat_window_list = NULL;
 			 GET_CHAT_WINDOW(x2); \
 			 gtk_widget_grab_focus(x2->entry); \
 }
-#define ENTRY_FORCE_FOCUS(x) { gtk_widget_grab_focus(x->entry); }
+#define ENTRY_FORCE_FOCUS(x) { chat_window *x2 = x; \
+			GET_CHAT_WINDOW(x2);\
+			gtk_widget_grab_focus(x2->entry); }
 
 #ifdef HAVE_ICONV_H
 
@@ -212,18 +214,13 @@ static char	*recode_if_needed( const char *source_text, int direction)
 #ifdef __MINGW32__
 static void redraw_chat_window(GtkWidget *text)
 {
-	GdkRectangle update_rect;
-	update_rect.x = 0;
-	update_rect.y = 0;
-	update_rect.width = text->allocation.width;
-	update_rect.height = text->allocation.height;
-	gtk_widget_draw(text,&update_rect);
+	gtk_widget_queue_draw_area( text, 0, 0, text->allocation.width,
+			text->allocation.height );
 }
 #endif
 
 void set_tab_red(chat_window *cw)
 {
-	GtkStyle *style;
 	GdkColor color;
 	GtkWidget *notebook = NULL;
 	GtkWidget *child = NULL;
@@ -241,22 +238,12 @@ void set_tab_red(chat_window *cw)
 
 	gtk_widget_realize(label);
 
-	color.red = 65000;
-	color.green = 0;
-	color.blue = 0;
-
-
-	style = gtk_style_new();
-	gdk_font_unref(style->font);
-	style->font = gdk_font_ref(label->style->font);
-	style->fg[0] = color;
-
-	gtk_widget_set_style(label, style);
+	gdk_color_parse("red", &color);
+	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, &color);
 }
 
 void set_tab_normal(chat_window *cw)
 {
-	GtkStyle *style;
 	GdkColor color;
 
 	GtkWidget *notebook = NULL;
@@ -274,17 +261,8 @@ void set_tab_normal(chat_window *cw)
 	label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(notebook), child);
 	gtk_widget_realize(label);
 
-	color.red = 0;
-	color.green = 0;
-	color.blue = 0;
-
-	style = gtk_style_new();
-	gdk_font_unref(style->font);
-	style->font = gdk_font_ref(label->style->font);
-	style->fg[0] = GTK_WIDGET(notebook)->style->fg[0];
-
-	gtk_widget_set_style(label, style);
-	gtk_style_unref(style);
+	gdk_color_parse("black", &color);
+	gtk_widget_modify_fg(label, GTK_STATE_NORMAL, &color);
 }
 
 
@@ -357,8 +335,8 @@ static void destroy_event(GtkWidget *widget, gpointer userdata)
 {
 	chat_window* cw = (chat_window*)userdata;
 	/* gotta clean up all of the people we're talking with */
-	gtk_signal_disconnect_by_func(GTK_OBJECT(cw->window),
-			   GTK_SIGNAL_FUNC(handle_focus), cw);
+	g_signal_handlers_disconnect_by_func(cw->window,
+			   G_CALLBACK(handle_focus), cw);
 	remove_smiley_window(cw);
 
 	end_conversation(cw);
@@ -374,11 +352,11 @@ void cw_remove_tab(struct contact *ct)
 	eb_debug(DBG_CORE, "getting tab_number for %p\n",notebook);
 	tab_number = gtk_notebook_page_num (GTK_NOTEBOOK(notebook), ct->chatwindow->notebook_child);
 	eb_debug(DBG_CORE, "tab_number = %d (%p)\n",tab_number, notebook);
-	gtk_signal_handler_block_by_func(GTK_OBJECT(notebook),
-                                         chat_notebook_switch_callback, NULL);
+	g_signal_handlers_block_by_func(notebook,
+			G_CALLBACK(chat_notebook_switch_callback), NULL);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), tab_number);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(notebook),
-                                         chat_notebook_switch_callback, NULL);
+	g_signal_handlers_unblock_by_func(notebook, 
+			G_CALLBACK(chat_notebook_switch_callback), NULL);
 	eb_debug(DBG_CORE, "removed page\n");
 	if (gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0) == NULL) {
 		gtk_widget_destroy(window);
@@ -397,7 +375,10 @@ static void close_tab_callback(GtkWidget *button, gpointer userdata)
 	chat_window *cw = (chat_window*)userdata;
 	
 	remove_smiley_window(cw);
-	cw_remove_tab (cw->contact);
+
+	/* Why bother if there's none... */
+	if(cw->contact)
+		cw_remove_tab (cw->contact);
 }
 
 static void add_unknown_callback(GtkWidget * add_button, gpointer userdata)
@@ -431,25 +412,36 @@ static void add_unknown_callback(GtkWidget * add_button, gpointer userdata)
 
 static char *cw_get_message(chat_window *cw)
 {
-	return gtk_editable_get_chars(GTK_EDITABLE (cw->entry), 0, -1);	
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry));
+	GtkTextIter start, end;
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+
+	return gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 }
 
 static int cw_set_message(chat_window *cw, char *msg)
 {
-	int p=0;
-	gtk_editable_insert_text(GTK_EDITABLE (cw->entry), msg, strlen(msg), &p);
-	return p;
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry));
+	GtkTextIter end;
+
+	gtk_text_buffer_set_text(buffer, msg, strlen(msg));
+	gtk_text_buffer_get_end_iter(buffer, &end);
+	
+	return gtk_text_iter_get_offset(&end);
 	
 }
 
 static void cw_reset_message(chat_window *cw)
 {
-	gtk_editable_delete_text(GTK_EDITABLE (cw->entry), 0, -1);	
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry));
+	GtkTextIter start, end;
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+	gtk_text_buffer_delete(buffer, &start, &end);
 }
 
 static void cw_put_message(chat_window *cw, char *text, int fore, int back, int font)
 {
-	gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), text, fore, back, font);
+	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), text, fore | back | font);
 }
 
 void send_message(GtkWidget *widget, gpointer d)
@@ -704,11 +696,9 @@ static void set_sound_callback(GtkWidget * sound_button, gpointer userdata);
 static void cw_set_sound_active(chat_window *cw, int active)
 {
 	cw->sound_enabled = active;
-	gtk_signal_handler_block_by_func(GTK_OBJECT(cw->sound_button),
-                                         set_sound_callback, cw);
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(cw->sound_button), active);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(cw->sound_button),
-                                         set_sound_callback, cw);
+	g_signal_handlers_block_by_func(cw->sound_button, G_CALLBACK(set_sound_callback), cw);
+	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(cw->sound_button), active);
+	g_signal_handlers_unblock_by_func(cw->sound_button, G_CALLBACK(set_sound_callback), cw);
 }
 
 static int cw_get_sound_active(chat_window *cw)
@@ -741,11 +731,11 @@ static void allow_offline_callback(GtkWidget * offline_button, gpointer userdata
 static void cw_set_offline_active(chat_window *cw, int active)
 {
 	cw->contact->send_offline = active;
-	gtk_signal_handler_block_by_func(GTK_OBJECT(cw->offline_button),
-                                         allow_offline_callback, cw);
-	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(cw->offline_button), active);
-	gtk_signal_handler_unblock_by_func(GTK_OBJECT(cw->offline_button),
-                                         allow_offline_callback, cw);
+	g_signal_handlers_block_by_func(cw->offline_button,
+			G_CALLBACK(allow_offline_callback), cw);
+	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(cw->offline_button), active);
+	g_signal_handlers_unblock_by_func(cw->offline_button,
+			G_CALLBACK(allow_offline_callback), cw);
 }
 
 static int cw_get_offline_active(chat_window *cw)
@@ -765,7 +755,7 @@ static void change_local_account_on_click (GtkWidget * button, gpointer userdata
 	GtkLabel *label= GTK_LABEL (GTK_BIN (button)->child);
 	chat_window_account *cwa = (chat_window_account *)userdata;
 	chat_window * cw;
-	gchar *account;
+	const gchar *account;
 	eb_local_account *ela=NULL;
 
 	/* Should never happen */
@@ -775,7 +765,7 @@ static void change_local_account_on_click (GtkWidget * button, gpointer userdata
 	ela=(eb_local_account *)cwa->data;
 	cw->local_user=ela;
 	/* don't free it */
-	gtk_label_get(label, &account);
+	account = gtk_label_get_text(label);
 	eb_debug(DBG_CORE, "change_local_account_on_click: %s\n", account);
 }
 
@@ -812,12 +802,12 @@ static GtkWidget *get_local_accounts(chat_window *cw)
 		snprintf(buff, sizeof(buff), "%s:%s", 
 			get_service_name(subsequent_act->service_id), subsequent_act->handle);
 		button = gtk_menu_item_new_with_label(buff);
-		gtk_menu_append(GTK_MENU(submenu), button);
+		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), button);
 		cwa = g_new0(chat_window_account, 1);
 		cwa->cw=cw;
 		cwa->data=subsequent_act;
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-		GTK_SIGNAL_FUNC(change_local_account_on_click), cwa);
+		g_signal_connect(button, "activate",
+			G_CALLBACK(change_local_account_on_click), cwa);
 		gtk_widget_show(button);
 	} while( (subsequent_act = find_local_account_for_remote(NULL, TRUE)));
 	
@@ -827,18 +817,21 @@ static GtkWidget *get_local_accounts(chat_window *cw)
 	return(label);
 }
 
-static void handle_focus(GtkWidget *widget, GdkEventFocus * event, 
+static gboolean handle_focus(GtkWidget *widget, GdkEventFocus * event, 
 			 gpointer userdata)
 {
 	chat_window * cw = (chat_window *)userdata;
 	eb_update_window_title(cw, FALSE);
+
 	if(cw->entry)
 		ENTRY_FOCUS(cw);
+
+	return FALSE;
 }
 
 /*This handles the right mouse button clicks*/
 
-static void handle_click(GtkWidget *widget, GdkEventButton * event, 
+static gboolean handle_click(GtkWidget *widget, GdkEventButton * event, 
 			 gpointer userdata)
 {
 	chat_window * cw = (chat_window*)userdata;
@@ -849,17 +842,16 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		menu_data *md=NULL;
 
 		
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(widget),
-					       "button_press_event");
+		g_signal_stop_emission_by_name(GTK_OBJECT(widget), "button-press-event");
 		menu = gtk_menu_new();
 
 		/*Add Contact Selection*/
 		if(!strcmp(cw->contact->group->name, _("Unknown"))
 		|| !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
 			button = gtk_menu_item_new_with_label(_("Add Contact"));
-			gtk_signal_connect(GTK_OBJECT(button), "activate",
-				     GTK_SIGNAL_FUNC(add_unknown_callback), cw);
-			gtk_menu_append(GTK_MENU(menu), button);
+			g_signal_connect(button, "activate",
+				     G_CALLBACK(add_unknown_callback), cw);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 			gtk_widget_show(button);
 		}
 
@@ -867,16 +859,16 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 
 		if(can_offline_message(cw->contact)) {	
 			button = gtk_menu_item_new_with_label(_("Offline Messaging"));
-			gtk_signal_connect(GTK_OBJECT(button), "activate",
-				     GTK_SIGNAL_FUNC(allow_offline_callback), cw);
-			gtk_menu_append(GTK_MENU(menu), button);
+			g_signal_connect(button, "activate",
+				     G_CALLBACK(allow_offline_callback), cw);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 			gtk_widget_show(button);
 		}
 
 		/*Allow account selection when there are multiple accounts for the same protocl */
 		button = get_local_accounts(cw);
 		if(button)
-			gtk_menu_append(GTK_MENU(menu), button);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 
 		/*Sound Selection*/
 
@@ -885,24 +877,24 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		else
 			button = gtk_menu_item_new_with_label(_("Enable Sounds"));
 
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(set_sound_callback), cw);
-		gtk_menu_append(GTK_MENU(menu), button);
+		g_signal_connect(button, "activate",
+				 G_CALLBACK(set_sound_callback), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 
 		/*View log selection*/
 
 		button = gtk_menu_item_new_with_label(_("View Log"));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(view_log_callback), cw);
-		gtk_menu_append(GTK_MENU(menu), button);
+		g_signal_connect(button, "activate",
+				 G_CALLBACK(view_log_callback), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 
 #ifndef __MINGW32__
 		button = gtk_menu_item_new_with_label(_("Actions..."));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(action_callback), cw);
-		gtk_menu_append(GTK_MENU(menu), button);
+		g_signal_connect(button, "activate",
+				 G_CALLBACK(action_callback), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 #endif
 
@@ -911,33 +903,33 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		/*Send File Selection*/
 
 		button = gtk_menu_item_new_with_label(_("Send File"));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(send_file), cw);
-		gtk_menu_append(GTK_MENU(menu), button);
+		g_signal_connect(button, "activate",
+				 G_CALLBACK(send_file), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 
 		/*Invite Selection*/
 
 		button = gtk_menu_item_new_with_label(_("Invite"));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(do_invite_window), cw);
-		gtk_menu_append(GTK_MENU(menu), button);
+		g_signal_connect(button, "activate",
+				 G_CALLBACK(do_invite_window), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 
 		/*Ignore Section*/
 
 		button = gtk_menu_item_new_with_label(_("Ignore Contact"));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(ignore_callback), cw);
-		gtk_menu_append(GTK_MENU(menu), button);
+		g_signal_connect(button, "activate",
+				 G_CALLBACK(ignore_callback), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 
 		/*Send message Section*/
 
 		button = gtk_menu_item_new_with_label(_("Send Message"));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-				 GTK_SIGNAL_FUNC(send_message), cw);
-		gtk_menu_append(GTK_MENU(menu), button);
+		g_signal_connect(button, "activate",
+				 G_CALLBACK(send_message), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);	
 
 		/*Add Plugin Menus*/
@@ -957,18 +949,20 @@ static void handle_click(GtkWidget *widget, GdkEventButton * event,
 		button = gtk_menu_item_new_with_label(_("Close"));
 
 		if ( iGetLocalPref("do_tabbed_chat") )
-			gtk_signal_connect(GTK_OBJECT(button), "activate",
-					 GTK_SIGNAL_FUNC(close_tab_callback), cw);
+			g_signal_connect(button, "activate",
+					 G_CALLBACK(close_tab_callback), cw);
 		else
-			gtk_signal_connect(GTK_OBJECT(button), "activate",
-					 GTK_SIGNAL_FUNC(cw_close_win), cw);
+			g_signal_connect(button, "activate",
+					 G_CALLBACK(cw_close_win), cw);
 
-		gtk_menu_append(GTK_MENU(menu), button);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
 			event->button, event->time );
 	}
+
+	return FALSE;
 }
 
 static void send_typing_status(chat_window *cw)
@@ -1014,33 +1008,33 @@ gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *i
 		*/
 		if ((inModifiers == accel_prev_tab.modifiers) && (inEvent->keyval == accel_prev_tab.keyval))
 		{
-			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
+			g_signal_stop_emission_by_name(G_OBJECT(inWidget), "key-press-event");
 			gtk_notebook_prev_page( GTK_NOTEBOOK(inCW->notebook) );
-			return( gtk_true() );
+			return TRUE;
 		}
 		else if ((inModifiers == accel_next_tab.modifiers) && (inEvent->keyval == accel_next_tab.keyval))
 		{
-			gtk_signal_emit_stop_by_name(GTK_OBJECT(inWidget), "key_press_event");
+			g_signal_stop_emission_by_name(G_OBJECT(inWidget), "key-press-event");
 			gtk_notebook_next_page( GTK_NOTEBOOK(inCW->notebook) );
-			return( gtk_true() );
+			return TRUE;
 		}
 	}
 	
-	return( gtk_false() );
+	return FALSE;
 }
 
-static gboolean chat_singleline_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
-{
-	chat_window				*cw = (chat_window *)data;
-	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
-	
-	if( !modifiers )
-		send_typing_status(cw);
-	else
-		check_tab_accelerators( widget, cw, modifiers, event );
-	
-	return gtk_true();
-}
+//static gboolean chat_singleline_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
+//{
+//	chat_window				*cw = (chat_window *)data;
+//	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+//	
+//	if( !modifiers )
+//		send_typing_status(cw);
+//	else
+//		check_tab_accelerators( widget, cw, modifiers, event );
+//	
+//	return TRUE;
+//}
 
 static void chat_away_set_back(void *data, int value)
 {
@@ -1124,9 +1118,19 @@ char * complete_word( LList * l, const char *begin, int *choice)
 
 int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 {
-	int x = gtk_editable_get_position(GTK_EDITABLE (entry));
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
+	GtkTextIter insert_iter;
+	GtkTextIter start, sel_start_iter, sel_end_iter, b_iter;
+	int x;
+	gboolean selected;
+	const GdkModifierType	modifiers = event->state & 
+		(GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
-	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+	GtkTextMark *insert_mark = gtk_text_buffer_get_insert(buffer);
+
+	gtk_text_buffer_get_iter_at_mark(buffer, &insert_iter, insert_mark);
+
+	x = gtk_text_iter_get_offset(&insert_iter);
 
 	if (modifiers && modifiers != GDK_SHIFT_MASK)
 		return FALSE;		
@@ -1135,11 +1139,17 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 		return FALSE;
 	}
 	
-	if (GTK_EDITABLE(entry)->selection_start_pos > 0
-	&& GTK_EDITABLE(entry)->selection_start_pos < x)
-		x=GTK_EDITABLE(entry)->selection_start_pos;
-	if (x > 0) {
-		char * word= gtk_editable_get_chars(GTK_EDITABLE (entry), 0, x);
+	selected = gtk_text_buffer_get_selection_bounds(buffer,
+			&sel_start_iter, &sel_end_iter);
+	gtk_text_buffer_get_start_iter(buffer, &start);
+
+	if ( selected && gtk_text_iter_compare(&sel_start_iter, &start) > 0 &&
+			gtk_text_iter_compare(&sel_start_iter, &insert_iter) < 0 )
+	{
+		insert_iter = sel_start_iter;
+	}
+	if ( x > 0 ) {
+		char * word= gtk_text_buffer_get_text(buffer, &start, &insert_iter, FALSE);
 		char * last_word = strrchr(word, ' ');
 		char * comp_word = NULL;
 		char * nick = NULL;
@@ -1164,17 +1174,35 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 
 		if (nick != NULL) {
 			int b = strlen(word) - strlen(last_word);
+			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
+
 			/*int inserted=b;*/
-			if (GTK_EDITABLE(entry)->selection_start_pos > 0)
-				gtk_editable_delete_selection(GTK_EDITABLE(entry));
-			gtk_editable_delete_text(GTK_EDITABLE (entry), b, x);
+			if (gtk_text_iter_compare(&start, &sel_start_iter) < 0 ) { 
+				gtk_text_buffer_delete_selection(buffer, FALSE, TRUE);
+				gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
+				gtk_text_buffer_get_iter_at_offset(buffer, &insert_iter, x);
+			}
+
+			gtk_text_buffer_delete(buffer, &b_iter, &insert_iter);
+			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
+
 			eb_debug(DBG_CORE, "insert %s at %d\n",nick, b);
-			gtk_editable_insert_text(GTK_EDITABLE (entry), nick, strlen(nick), &b);
-			if (!choice)
-				gtk_editable_insert_text(GTK_EDITABLE (entry), " ", strlen(" "), &b);
-			gtk_editable_set_position(GTK_EDITABLE (entry), b);
-			gtk_editable_select_region(GTK_EDITABLE (entry), x+1, b);
-			gtk_signal_emit_stop_by_name(GTK_OBJECT(entry), "key_press_event");
+			gtk_text_buffer_insert(buffer, &b_iter, nick, strlen(nick));
+			b+=strlen(nick);
+			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
+			gtk_text_buffer_get_iter_at_offset(buffer, &insert_iter, x);
+			
+			if (!choice) {
+				gtk_text_buffer_insert(buffer, &b_iter, " ", strlen(" "));
+				b++;
+				gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
+			}
+		
+			gtk_text_buffer_place_cursor(buffer, &b_iter);
+			gtk_text_buffer_get_iter_at_offset(buffer, &insert_iter, x+1);
+
+			gtk_text_buffer_select_range(buffer, &insert_iter, &b_iter);
+			g_signal_stop_emission_by_name(G_OBJECT(entry), "key-press-event");
 			return TRUE;
 		}
 	}
@@ -1183,17 +1211,33 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 
 void chat_auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 {
-	int x = gtk_editable_get_position(GTK_EDITABLE (entry));
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
+	GtkTextIter insert_iter;
+	GtkTextIter start, end, sel_start_iter, sel_end_iter;
+	int x;
+	gboolean selected;
 
+	GtkTextMark *insert_mark = gtk_text_buffer_get_insert(buffer);
+
+	gtk_text_buffer_get_iter_at_mark(buffer, &insert_iter, insert_mark);
+
+	x = gtk_text_iter_get_offset(&insert_iter);
+	
 	if ((event->keyval >= GDK_Shift_L && event->keyval <= GDK_Meta_R) ) {
 		return;
 	}
 	
-	if (GTK_EDITABLE(entry)->selection_start_pos > 0
-	&& GTK_EDITABLE(entry)->selection_start_pos < x)
-		x=GTK_EDITABLE(entry)->selection_start_pos;
-	if (x > 0) {
-		char * word= gtk_editable_get_chars(GTK_EDITABLE (entry), 0, x);
+	selected = gtk_text_buffer_get_selection_bounds(buffer,
+			&sel_start_iter, &sel_end_iter);
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+
+	if ( selected && gtk_text_iter_compare(&sel_start_iter, &start) > 0 &&
+			gtk_text_iter_compare(&sel_start_iter, &insert_iter) < 0 )
+	{
+		insert_iter = sel_start_iter;
+	}
+	if ( x > 0 ) {
+		char * word= gtk_text_buffer_get_text(buffer, &start, &insert_iter, FALSE);
 		char * last_word = NULL;
 		/*char * nick = NULL;*/
 		/*int choice = TRUE;*/
@@ -1238,14 +1282,20 @@ void chat_auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 
 void chat_history_up (chat_window *cw)
 {
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry));
+	GtkTextIter start, end;
+
 	int p=0;
+
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+
 	if ( cw->history == NULL ) 
 		return;
 
 	if ( cw->hist_pos == NULL )
 	{
 		LList	*node = NULL;
-		char	*s = gtk_editable_get_chars(GTK_EDITABLE (cw->entry), 0, -1);
+		char	*s = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 
 		for ( node = cw->history; node != NULL ; node = node->next )
 			cw->hist_pos = node;
@@ -1271,19 +1321,24 @@ void chat_history_up (chat_window *cw)
 		}
 	}
 
-	gtk_editable_delete_text(GTK_EDITABLE (cw->entry), 0, -1);
+	gtk_text_buffer_delete(buffer, &start, &end);
 	p = cw_set_message(cw, cw->hist_pos->data);
 }
 
 void chat_history_down(chat_window *cw) 
 {
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry));
+	GtkTextIter start, end;
 	int p=0;
+
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+	
 	if ( cw->history == NULL || cw->hist_pos == NULL ) 
 		return;
 
 	cw->hist_pos = cw->hist_pos->next;
 
-	gtk_editable_delete_text(GTK_EDITABLE (cw->entry), 0, -1);
+	gtk_text_buffer_delete(buffer, &start, &end);
 
 	if ( cw->hist_pos != NULL )
 		p=cw_set_message(cw, cw->hist_pos->data);
@@ -1317,38 +1372,51 @@ void chat_scroll(chat_window *cw, GdkEventKey *event)
 
 void chat_auto_complete_validate (GtkWidget *entry)
 {
-	int x = gtk_editable_get_position(GTK_EDITABLE (entry));
-	if (x)
-		gtk_editable_select_region(GTK_EDITABLE (entry), x, x);		
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(entry), "key_press_event");	
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
+	GtkTextMark *insert_mark = gtk_text_buffer_get_insert(buffer);
+	GtkTextIter insert_iter;
+	GtkTextIter word_end_iter;
+
+	gtk_text_buffer_get_iter_at_mark(buffer, &insert_iter, insert_mark);
+	word_end_iter = insert_iter;
+
+	gtk_text_iter_forward_word_end(&word_end_iter);
+        /* We want the space at the end of the autocomplete as well, so... */ 
+	gtk_text_iter_forward_char(&word_end_iter);     
+
+	gtk_text_buffer_select_range(buffer, &word_end_iter, &word_end_iter);
+	g_signal_stop_emission_by_name(G_OBJECT(entry), "key-press-event");
 }
 
-static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
+gboolean chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
 {
-	chat_window				*cw = (chat_window *)data;
-	const GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+	static gboolean complete_mode = FALSE;
+	chat_window	*cw = (chat_window *)data;
+	const GdkModifierType modifiers = event->state & 
+		(GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
-	
 	eb_update_window_title( cw, FALSE );
 
 	if ( event->keyval == GDK_Return )
 	{
 		/* Just print a newline on Shift-Return */
-		if ( event->state & GDK_SHIFT_MASK )
+		/* But only if we are told to do multiline... */
+		if ( event->state & GDK_SHIFT_MASK && iGetLocalPref("do_multi_line") )
 		{
 			event->state = 0;
 		}
-		else if ( iGetLocalPref("do_enter_send") )
+		/* ... otherwise simply print out the grub */
+		else if ( !iGetLocalPref("do_multi_line") || iGetLocalPref("do_enter_send") )
 		{
 			chat_auto_complete_insert(cw->entry, event);
 			
 			/*Prevents a newline from being printed*/
-			gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "key_press_event" );
+			g_signal_stop_emission_by_name( GTK_OBJECT(widget), "key-press-event" );
 
 			chat_warn_if_away(cw);
 			send_message( NULL, cw );
 			
-			return( gtk_true() );
+			return TRUE;
 		}
 	}
 	else if ( (event->keyval == GDK_Up) && (modifiers == 0) )
@@ -1365,29 +1433,51 @@ static gboolean	chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer 
 	} 
 	else if (iGetLocalPref("do_auto_complete"))
 	{	
-		if ((event->keyval >= GDK_a && event->keyval <= GDK_z)
-		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) {
-			return chat_auto_complete(cw->entry, session_words, event);
-		} else if (event->keyval == GDK_Tab 
-	/* #980589 Right Arrow Key not avail || event->keyval == GDK_Right */) {
-			chat_auto_complete_validate(cw->entry);
-			return TRUE;
-		} else if (event->keyval==GDK_space || ispunct(event->keyval)) {
+		if (event->keyval==GDK_space || ispunct(event->keyval)) {
+			eb_debug(DBG_CORE, "AUTO COMPLETE INSERT\n");
 			chat_auto_complete_insert(cw->entry, event);
+			complete_mode=FALSE;
+		} 
+		else if (event->keyval == GDK_Tab) {
+			eb_debug(DBG_CORE, "AUTO COMPLETE VALIDATE\n");
+			chat_auto_complete_validate(cw->entry);
+			complete_mode=FALSE;
+			return TRUE;
 		}
+		else if (event->keyval == GDK_Right || event->keyval == GDK_Left) {
+			GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry));
+			GtkTextIter start, end;
+
+			if( gtk_text_buffer_get_selection_bounds(buffer, &start, &end) && complete_mode ) {
+				complete_mode = FALSE;
+				gtk_text_buffer_select_range(buffer, &start, &start);
+				return TRUE;
+			}
+			else {
+				complete_mode = FALSE;
+				return FALSE;
+			}
+		}
+		else if	( (event->keyval >= GDK_a && event->keyval <= GDK_z)
+			  || (event->keyval >= GDK_A && event->keyval <= GDK_Z) )
+		{
+			eb_debug(DBG_CORE, "AUTO COMPLETE\n");
+			complete_mode=TRUE;
+			return chat_auto_complete(cw->entry, session_words, event);
+		} 
 	}
 	
 	if (cw->notebook != NULL)
 	{
 		// check tab changes if this is a tabbed chat window
 		if ( check_tab_accelerators( widget, cw, modifiers, event ) )
-			return( gtk_true() );
+			return( TRUE );
 	} 
 	
 	if ( (cw->preferred != NULL) && (modifiers == 0) )
 		send_typing_status(cw);
 
-	return( gtk_false() );
+	return FALSE;
 }
 
 static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data)
@@ -1397,7 +1487,7 @@ static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage
 
 	while (l1 && l1->data) {
 		chat_window *cw = (chat_window *)l1->data;
-		if (cw->notebook_child == page->child) {
+		if (gtk_notebook_page_num(notebook, cw->notebook_child) == page_num) {
 			eb_debug(DBG_CORE, "notebook %p child %p \n", cw->notebook, cw->notebook_child);
 			set_tab_normal(cw);
 			ENTRY_FORCE_FOCUS(cw);
@@ -1466,10 +1556,12 @@ void eb_chat_window_display_error(eb_account * remote, gchar * message)
 	struct contact * remote_contact = remote->account_contact;
 
 	if(remote_contact->chatwindow) {
-		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat),
-			      _("<b>Error: </b>"), 0,0,0);
-		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), message, 0,0,0);
-		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), "<br>", 0,0,0);
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat),
+			      _("<b>Error: </b>"), HTML_IGNORE_NONE );
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), message, 
+				HTML_IGNORE_NONE);
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), "<br>",
+				HTML_IGNORE_NONE);
 #ifdef __MINGW32__
 		redraw_chat_window(remote_contact->chatwindow->chat);
 #endif
@@ -1486,9 +1578,11 @@ void eb_chat_window_do_timestamp(struct contact * c, gboolean online)
 	if( !iGetLocalPref("do_convo_timestamp") )
 		return;
 	
-	g_snprintf(buff, BUF_SIZE,_("<body bgcolor=#F9E589 width=*><b> %s is logged %s @ %s.\n</b></body>"),
-	     c->nick, (online?_("in"):_("out")), g_strchomp(asctime(localtime(&my_time))));
-	gtk_eb_html_add(EXT_GTK_TEXT(c->chatwindow->chat), buff, 0,0,0);
+	g_snprintf(buff, BUF_SIZE,
+			_("<body bgcolor=#F9E589 width=*><b> %s is logged %s @ %s.\n</b></body>"),
+			c->nick, (online?_("in"):_("out")),
+			g_strchomp(asctime(localtime(&my_time))));
+	html_text_buffer_append(GTK_TEXT_VIEW(c->chatwindow->chat), buff, HTML_IGNORE_NONE);
 }
 
 
@@ -1659,10 +1753,15 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 
 	g_snprintf(buff, BUF_SIZE, "<B>%s </B>",buff2);
 
-	gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), buff,0,0,0);
-	gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), message,
-	iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
-	gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), "<BR>",0,0,0);
+	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), buff,
+			HTML_IGNORE_NONE);
+	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), message,
+		(iGetLocalPref("do_ignore_back")?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
+		(iGetLocalPref("do_ignore_fore")?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
+		(iGetLocalPref("do_ignore_font")?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );
+
+	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), "<BR>",
+			HTML_IGNORE_NONE);
 #ifdef __MINGW32__
 	redraw_chat_window(remote_contact->chatwindow->chat);
 #endif
@@ -1684,10 +1783,15 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		g_snprintf(buff, BUF_SIZE, "<FONT COLOR=\"#0000ff\"><B>%d:%.2d:%.2d %s: </B></FONT>",
 			 cur_time->tm_hour, cur_time->tm_min, cur_time->tm_sec,
 			 account->alias);
-		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), buff,0,0,0);
-		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), awaymsg,
-				iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
-		gtk_eb_html_add(EXT_GTK_TEXT(remote_contact->chatwindow->chat), "<br>", 0,0,0);
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), buff,
+				HTML_IGNORE_NONE);
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), awaymsg,
+			(iGetLocalPref("do_ignore_back")?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
+			(iGetLocalPref("do_ignore_fore")?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
+			(iGetLocalPref("do_ignore_font")?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );
+		
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), "<br>", 
+				HTML_IGNORE_NONE);
 
 		/* Note that the time the last away message has been sent */
 
@@ -1752,23 +1856,31 @@ void eb_chat_window_display_contact(struct contact * remote_contact)
 			GET_CHAT_WINDOW(current);
 		
 		eb_debug(DBG_CORE, "blocking or %p\n",remote_contact->chatwindow->notebook);
-		gtk_signal_handler_block_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
-                                         chat_notebook_switch_callback, NULL);
+		g_signal_handlers_block_by_func(remote_contact->chatwindow->notebook,
+				G_CALLBACK(chat_notebook_switch_callback), NULL);
 		if (current && current!=remote_contact->chatwindow) {
-			char *text = gtk_editable_get_chars(GTK_EDITABLE(current->entry),0,-1);
+			/* Why don't we simply do a cw_get_message() ? */
+			GtkTextBuffer *buffer = gtk_text_view_get_buffer(
+					GTK_TEXT_VIEW(current->entry));
+			GtkTextIter start, end;
+			char *text;
+
+			gtk_text_buffer_get_bounds(buffer, &start, &end);
+			text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+
 			if (strlen(text) == 0) {
-				gtk_notebook_set_page (GTK_NOTEBOOK
+				gtk_notebook_set_current_page (GTK_NOTEBOOK
 					   (remote_contact->chatwindow->notebook), page_num);
 				ENTRY_FOCUS(remote_contact->chatwindow);
 			}
 			g_free(text);
 		} else {
-			gtk_notebook_set_page (GTK_NOTEBOOK
+			gtk_notebook_set_current_page (GTK_NOTEBOOK
 				   (remote_contact->chatwindow->notebook), page_num);
 			ENTRY_FOCUS(remote_contact->chatwindow);
 		}
-		gtk_signal_handler_unblock_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
-                                         chat_notebook_switch_callback, NULL);
+		g_signal_handlers_unblock_by_func(remote_contact->chatwindow->notebook,
+                                         G_CALLBACK(chat_notebook_switch_callback), NULL);
 	}
 }
 
@@ -1821,23 +1933,30 @@ void eb_chat_window_display_account(eb_account * remote_account)
 
 		current = find_tabbed_chat_window();
 		GET_CHAT_WINDOW(current);
-		gtk_signal_handler_block_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
-                                         chat_notebook_switch_callback, NULL);
+		g_signal_handlers_block_by_func(remote_contact->chatwindow->notebook,
+				G_CALLBACK(chat_notebook_switch_callback), NULL);
 		if (current && current!=remote_contact->chatwindow) {
-			char *text = gtk_editable_get_chars(GTK_EDITABLE(current->entry),0,-1);
+			GtkTextBuffer *buffer = gtk_text_view_get_buffer(
+					GTK_TEXT_VIEW(current->entry));
+			GtkTextIter start, end;
+			char *text;
+
+			gtk_text_buffer_get_bounds(buffer, &start, &end);
+			text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+			
 			if (strlen(text) == 0) {
-				gtk_notebook_set_page (GTK_NOTEBOOK
+				gtk_notebook_set_current_page (GTK_NOTEBOOK
 					   (remote_contact->chatwindow->notebook), page_num);
 				ENTRY_FOCUS(remote_contact->chatwindow);
 			}
 			g_free(text);
 		} else {
-			gtk_notebook_set_page (GTK_NOTEBOOK
+			gtk_notebook_set_current_page (GTK_NOTEBOOK
 				   (remote_contact->chatwindow->notebook), page_num);
 			ENTRY_FOCUS(remote_contact->chatwindow);
 		}
-		gtk_signal_handler_unblock_by_func(GTK_OBJECT(remote_contact->chatwindow->notebook),
-                                         chat_notebook_switch_callback, NULL);
+		g_signal_handlers_unblock_by_func(remote_contact->chatwindow->notebook,
+                                         G_CALLBACK(chat_notebook_switch_callback), NULL);
 	}
 	remote_contact->chatwindow->preferred = remote_account;
 }
@@ -1916,8 +2035,6 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 	
 	/* now we display the log */
 
-	ext_gtk_text_freeze(EXT_GTK_TEXT(cw->chat));
-  
 	while(!feof(fp)) {
 		fgets(buff,1024,fp);
 		if(feof(fp))
@@ -1931,23 +2048,27 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 				char buff2[1024];
 				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						buff+strlen("<HR WIDTH=\"100%\">"));
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2, 
+						HTML_IGNORE_NONE);
 			} else if(!strncmp(buff,"<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">", strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">"))) {
 				char buff2[1024];
 				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						buff+strlen("<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\">"));
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2,
+						HTML_IGNORE_NONE);
 			} else if(!strncmp(buff,"<P ALIGN=\"CENTER\">", strlen("<P ALIGN=\"CENTER\">"))) {
 				char buff2[1024];
 				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						buff+strlen("<P ALIGN=\"CENTER\">"));
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2,
+						HTML_IGNORE_NONE);
 			} else if(strlen(buff) > strlen(_("<B>Conversation ")) 
 			     && !strncmp(buff+strlen(_("<B>Conversation ")),_("ended on"),8)) {
 				char buff2[1024];
 				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"), 
 						buff);
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2,
+						HTML_IGNORE_NONE);
 				endreached = TRUE;	
 				break;
 			} else if(strlen(buff) > strlen(_("<P ALIGN=\"CENTER\"><B>Conversation "))
@@ -1955,7 +2076,8 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 				char buff2[1024];
 				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"), 
 						buff+strlen("<P ALIGN=\"CENTER\">"));
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2,
+						HTML_IGNORE_NONE);
 				endreached = TRUE;	
 				break;
 			} else if (strlen(buff) > strlen(_("<P><hr><b>"))
@@ -1968,22 +2090,25 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 				*strstr(itemp, "<hr>") = '\0';
 				snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), 
 						itemp);
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2,
+						HTML_IGNORE_NONE);
 				free(temp);
 			} else {
-				gtk_eb_html_log_parse_and_add( EXT_GTK_TEXT(cw->chat), buff );
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff,
+						HTML_IGNORE_NONE);
 			}
 
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);
+			html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), "<br>",
+					HTML_IGNORE_NONE);
 		} else if(!strncmp(buff,_("Conversation started"),strlen(_("Conversation started")))) {
 			char buff2[1024];
 			snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), buff);
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+			html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2, HTML_IGNORE_NONE);
 
 		} else if(!strncmp(buff,_("Conversation ended"),strlen(_("Conversation ended")))) {
 			char buff2[1024];
 			snprintf(buff2, 1024, _("<body bgcolor=#F9E589 width=*><b> %s</b></body>"), buff);
-			gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff2, 0,0,0);
+			html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff2, HTML_IGNORE_NONE);
 			endreached = TRUE;	    
 			break;
 		} else {
@@ -2030,19 +2155,22 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 				strncpy(name,buff,buff3-buff2);
 				name[buff3-buff2] = '\0';
 				g_snprintf(buff, BUF_SIZE, "<FONT COLOR=\"%s\"><B>%s </B></FONT>",color, name);
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff,0,0,0);
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), buff3,
-						iGetLocalPref("do_ignore_back"), 
-						iGetLocalPref("do_ignore_fore"), 
-						iGetLocalPref("do_ignore_font"));
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff,
+						HTML_IGNORE_NONE);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), buff3,
+					(iGetLocalPref("do_ignore_back")?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
+					(iGetLocalPref("do_ignore_fore")?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
+					(iGetLocalPref("do_ignore_font")?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), "<br>",
+						HTML_IGNORE_NONE);
 			} else {
 				/* hmm, no ':' must be a non start/blank line */
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat),buff,	
-						iGetLocalPref("do_ignore_back"), 
-						iGetLocalPref("do_ignore_fore"), 
-						iGetLocalPref("do_ignore_font"));
-				gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), "<br>",0,0,0);
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat),buff,	
+					(iGetLocalPref("do_ignore_back")?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
+					(iGetLocalPref("do_ignore_fore")?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
+					(iGetLocalPref("do_ignore_font")?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );
+				html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), "<br>",
+						HTML_IGNORE_NONE);
 			}
    		}
 	}
@@ -2050,12 +2178,9 @@ void eb_restore_last_conv(gchar *file_name, chat_window* cw)
 		char *endbuf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*>%sConversation ended%s</body>\n"),
 			(iGetLocalPref("do_strip_html") ? "" : "<B>"),
 			(iGetLocalPref("do_strip_html") ? "" : "</B>")); 
-		gtk_eb_html_add(EXT_GTK_TEXT(cw->chat), endbuf,0,0,0);
+		html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), endbuf, HTML_IGNORE_NONE);
 		g_free(endbuf);
 	}  
-	ext_gtk_text_thaw(EXT_GTK_TEXT(cw->chat));
-	gtk_editable_set_position(GTK_EDITABLE(cw->chat), 
-		  ext_gtk_text_get_length(EXT_GTK_TEXT(cw->chat)));
 	fclose(fp);
 }
 
@@ -2168,7 +2293,7 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 			/* none exists, create one */
 			cw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 			gtk_window_set_wmclass(GTK_WINDOW(cw->window), "ayttm-chat", "Ayttm");
-			gtk_window_set_policy(GTK_WINDOW(cw->window), TRUE, TRUE, TRUE);
+			gtk_window_set_resizable(GTK_WINDOW(cw->window), TRUE);
 			gtk_widget_realize(cw->window);
 
 			cw->notebook = gtk_notebook_new();
@@ -2193,14 +2318,14 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 			gtk_container_add(GTK_CONTAINER(cw->window), cw->notebook);
 
 			/* setup a signal handler for the notebook to handle page switches */
-			gtk_signal_connect(GTK_OBJECT(cw->notebook), "switch-page",
-				       GTK_SIGNAL_FUNC(chat_notebook_switch_callback),
+			g_signal_connect(cw->notebook, "switch-page",
+				       G_CALLBACK(chat_notebook_switch_callback),
 				       NULL);
 
 			gtk_widget_show(cw->notebook);
 			
-			gtk_signal_connect(GTK_OBJECT(cw->window), "delete_event",
-			   GTK_SIGNAL_FUNC(cw_close_win), (gpointer)cw);
+			g_signal_connect(cw->window, "delete-event",
+			   G_CALLBACK(cw_close_win), (gpointer)cw);
 		} else {
 			cw->window = tab_cw->window;
 			cw->notebook = tab_cw->notebook;
@@ -2220,15 +2345,15 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 
 		/* we use vbox as our child. */
 		gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
+		gtk_notebook_append_page(GTK_NOTEBOOK(cw->notebook), vbox, contact_label);
 		cw->notebook_child = vbox;
-		gtk_notebook_append_page(GTK_NOTEBOOK(cw->notebook), cw->notebook_child, contact_label);
-		gtk_widget_show(cw->notebook_child);
+		gtk_widget_show(vbox);
 	} else {
 		/* setup like normal */
 		cw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
 		gtk_window_set_wmclass(GTK_WINDOW(cw->window), "ayttm-chat", "Ayttm");
-		gtk_window_set_policy(GTK_WINDOW(cw->window), TRUE, TRUE, TRUE);
+		gtk_window_set_resizable(GTK_WINDOW(cw->window), TRUE);
 		gtk_widget_realize(cw->window);
 
 		cw->notebook = NULL;
@@ -2251,17 +2376,18 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	GtkWidget *print_button;
 	GtkWidget *close_button;
 	GtkWidget *ignore_button;
+	GtkWidget *invite_button;
 	GtkWidget *iconwid;
-	GdkPixmap *icon;
-	GdkBitmap *mask;
+	GdkPixbuf *icon;
 	GtkAccelGroup *accel_group;
-	GtkWidget *menu;
-	GtkWidget *button;
+
 	GtkWidget *separator;
 	GtkWidget *resize_bar;
 	gchar buff[NAME_MAX];
 	chat_window *cw;
 	chat_window *tab_cw=NULL;
+	GtkWidget *chat_frame;
+	GtkWidget *entry_frame;
 	/*GtkPositionType pos;*/
 	/*GtkWidget *contact_label;*/
 	gboolean	enableSoundButton = FALSE;
@@ -2276,9 +2402,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	cw->away_msg_sent = (time_t)NULL;
 	cw->away_warn_displayed = (time_t)NULL;
 	cw->preferred = NULL;
-	/* This was incorrectly initialized to NULL. It caused the smiley
-	 * window to not be displayed until a message was sent
-	 */
+
 	cw->local_user = NULL;
 	cw->smiley_window = NULL;
 
@@ -2287,20 +2411,23 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	layout_chatwindow(cw, vbox, remote->nick);
 	
 	/* Next line allows making window smaller than orig. size */
-	cw->chat = ext_gtk_text_new(NULL,NULL);
-	gtk_eb_html_init(EXT_GTK_TEXT(cw->chat));
-	scrollwindow = gtk_scrolled_window_new(NULL, EXT_GTK_TEXT(cw->chat)->vadj);
+	chat_frame = gtk_frame_new(NULL);
+	entry_frame = gtk_frame_new(NULL);
+	gtk_frame_set_shadow_type(GTK_FRAME(chat_frame), GTK_SHADOW_IN);
+	gtk_frame_set_shadow_type(GTK_FRAME(entry_frame), GTK_SHADOW_IN);
+
+	cw->chat = gtk_text_view_new();
+	html_text_view_init(GTK_TEXT_VIEW(cw->chat), HTML_IGNORE_NONE);
+	scrollwindow = gtk_scrolled_window_new(NULL, NULL);
 
 	gtk_window_set_title(GTK_WINDOW(cw->window), remote->nick);    
 
-	gtkut_set_window_icon(cw->window->window, NULL);	
-
 	if (tab_cw)
-		gtk_widget_set_usize(cw->chat, 
+		gtk_widget_set_size_request(cw->chat, 
 					tab_cw->chat->allocation.width, 
 					tab_cw->chat->allocation.height);
 	else
-		gtk_widget_set_usize(cw->chat, 400, 150);
+		gtk_widget_set_size_request(cw->chat, 400, 150);
 
 	gtk_container_add(GTK_CONTAINER(scrollwindow), cw->chat);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
@@ -2311,240 +2438,122 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	/*Add stuff for multi-line*/
 
-	if( iGetLocalPref("do_multi_line") ) {
-		resize_bar = gtk_vpaned_new();
-		gtk_paned_set_gutter_size(GTK_PANED(resize_bar), 20);
-		gtk_paned_pack1(GTK_PANED(resize_bar), scrollwindow, TRUE, TRUE);
-		gtk_widget_show(scrollwindow);
+	resize_bar = gtk_vpaned_new();
+	gtk_container_add(GTK_CONTAINER(chat_frame), scrollwindow);
+	gtk_paned_pack1(GTK_PANED(resize_bar), chat_frame, TRUE, TRUE);
+	gtk_widget_show(chat_frame);
+	gtk_widget_show(scrollwindow);
 
-		scrollwindow = gtk_scrolled_window_new(NULL, NULL);
-		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrollwindow), 
-			   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	scrollwindow = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrollwindow), 
+		   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
-		cw->entry = gtk_text_new(NULL, NULL);
+	cw->entry = gtk_text_view_new();
 
-		if (tab_cw)
-			gtk_widget_set_usize(cw->entry, 
-						tab_cw->entry->allocation.width, 
-						tab_cw->entry->allocation.height);
-		else
-			gtk_widget_set_usize(cw->entry, 400, 50);
-		gtk_container_add(GTK_CONTAINER(scrollwindow), cw->entry);
+	if (tab_cw)
+		gtk_widget_set_size_request(cw->entry, 
+					tab_cw->entry->allocation.width, 
+					tab_cw->entry->allocation.height);
+	else
+		gtk_widget_set_size_request(cw->entry, 400, 50);
+	gtk_container_add(GTK_CONTAINER(scrollwindow), cw->entry);
 
-		gtk_text_set_editable(GTK_TEXT(cw->entry), TRUE);
-		gtk_text_set_word_wrap(GTK_TEXT(cw->entry), TRUE);
-		gtk_text_set_line_wrap(GTK_TEXT(cw->entry), TRUE);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(cw->entry), TRUE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(cw->entry), GTK_WRAP_WORD);
 
 #ifdef HAVE_LIBPSPELL
-		if( iGetLocalPref("do_spell_checking") ) {
-			gtkspell_attach(GTK_TEXT(cw->entry));
-		}
+	if( iGetLocalPref("do_spell_checking") ) {
+		gtkspell_attach(GTK_TEXT_VIEW(cw->entry));
+	}
 #endif
 
-		gtk_signal_connect(GTK_OBJECT(cw->entry), "key_press_event",
-		GTK_SIGNAL_FUNC(chat_key_press), cw);
+	g_signal_connect(cw->entry, "key-press-event",
+			G_CALLBACK(chat_key_press), cw);
 
-		gtk_paned_pack2(GTK_PANED(resize_bar), scrollwindow, FALSE, FALSE);
-		gtk_widget_show(scrollwindow);
-		gtk_box_pack_start(GTK_BOX(vbox),resize_bar, TRUE, TRUE, 5);
-		gtk_widget_show(resize_bar);
-	}
+	gtk_container_add(GTK_CONTAINER(entry_frame), scrollwindow);
+	gtk_paned_pack2(GTK_PANED(resize_bar), entry_frame, TRUE, TRUE);
 
-	/*Or not multi-line*/
-
-	else {
-		cw->entry = gtk_entry_new();
-		gtk_signal_connect(GTK_OBJECT(cw->entry), "key_press_event",
-			       GTK_SIGNAL_FUNC(chat_singleline_key_press),
-			       cw);
-
-		gtk_box_pack_start(GTK_BOX(vbox), scrollwindow, TRUE,TRUE, 5);
-		gtk_box_pack_start(GTK_BOX(vbox), cw->entry, FALSE,FALSE, 5);
-	}
+	gtk_widget_show(scrollwindow);
+	gtk_box_pack_start(GTK_BOX(vbox),resize_bar, TRUE, TRUE, 5);
+	gtk_widget_show(resize_bar);
+	gtk_widget_show(entry_frame);
 
 	gtk_container_set_border_width(GTK_CONTAINER(cw->window), tabbedChat ? 2 : 5);
 
-	gtk_signal_connect(GTK_OBJECT(cw->entry), "activate",
-			   GTK_SIGNAL_FUNC(send_message), cw);
-
-	gtk_signal_connect(GTK_OBJECT(cw->chat), "button_press_event",
-			   GTK_SIGNAL_FUNC(handle_click), cw);                     	
-	gtk_signal_connect(GTK_OBJECT(cw->window), "focus_in_event",
-			   GTK_SIGNAL_FUNC(handle_focus), cw);
+	g_signal_connect(cw->chat, "button-press-event",
+			   G_CALLBACK(handle_click), cw);                     	
+	g_signal_connect(cw->window, "focus-in-event",
+			   G_CALLBACK(handle_focus), cw);
 
 	hbox = gtk_hbox_new(FALSE, 0);
-	gtk_widget_set_usize(hbox, 200, 25);
+	gtk_widget_set_size_request(hbox, 275, 40);
 
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NONE);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_show_arrow(GTK_TOOLBAR(toolbar), FALSE);
 	gtk_container_set_border_width(GTK_CONTAINER(toolbar), 0);
-	gtk_toolbar_set_space_size(GTK_TOOLBAR(toolbar), 5);
 
 	/* Adding accelerators to windows*/
 
 	accel_group = gtk_accel_group_new();
 	gtk_window_add_accel_group(GTK_WINDOW(cw->window), accel_group);
-	menu = gtk_menu_new();
 
-	/* This is the same as handle_clicks, without showing the menu for
-	   accelerators to hopefully work better now. 
-	*/
-
-	/*Add Contact Selection*/
-
-	if(!strcmp(cw->contact->group->name, _("Unknown"))
-	|| !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
-		button = gtk_menu_item_new_with_label(_("Add Contact"));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-			       GTK_SIGNAL_FUNC(add_unknown_callback),
-			       cw);
-		gtk_menu_append(GTK_MENU(menu), button);
-	}
-
-	/*Allow Offline Messaging Selection*/
-
-	if(can_offline_message(cw->contact)) {	
-		button = gtk_menu_item_new_with_label(_("Offline Messaging"));
-		gtk_signal_connect(GTK_OBJECT(button), "activate",
-			       GTK_SIGNAL_FUNC(allow_offline_callback),
-			       cw);
-		gtk_widget_add_accelerator(button, "activate", accel_group, 
-				       GDK_o, GDK_CONTROL_MASK,
-				       GTK_ACCEL_VISIBLE);
-		gtk_menu_append(GTK_MENU(menu), button);
-	}
-
-	/*Sound Selection*/
-
-	if (cw->sound_enabled)
-		button = gtk_menu_item_new_with_label(_("Disable Sounds"));
-	else
-		button = gtk_menu_item_new_with_label(_("Enable Sounds"));
-
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(set_sound_callback),
-			   cw); 
-	gtk_widget_add_accelerator(button, "activate", accel_group, 
-				   GDK_s, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);
-
-	/* Ignore button section */
-
-	button = gtk_menu_item_new_with_label(_("Ignore Contact"));
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(ignore_callback), cw);
-	gtk_widget_add_accelerator(button, "activate", accel_group,
-				   GDK_g, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);
-
-	/*Send File Selection*/ 
-
-	button = gtk_menu_item_new_with_label(_("Send File"));
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(send_file),
-			   cw);
-	gtk_widget_add_accelerator(button, "activate", accel_group, 
-				   GDK_t, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);
-
-	/*Invite Selection*/ 
-
-	button = gtk_menu_item_new_with_label(_("Invite"));
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(do_invite_window),
-			   cw);
-	gtk_widget_add_accelerator(button, "activate", accel_group, 
-				   GDK_i, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);
-
-	/*Send Selection*/
-
-	button = gtk_menu_item_new_with_label(_("Send Message"));
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(send_message),
-			   cw);
-	gtk_widget_add_accelerator(button, "activate", accel_group, 
-				   GDK_r, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);
-
-	button = gtk_menu_item_new_with_label(_("View log"));
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(view_log_callback),
-			   cw);
-
-	gtk_widget_add_accelerator(button, "activate", accel_group, 
-				   GDK_l, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);
-
-#ifndef __MINGW32__
-	button = gtk_menu_item_new_with_label(_("Actions..."));
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(action_callback),
-			   cw);
-
-	gtk_widget_add_accelerator(button, "activate", accel_group, 
-				   GDK_p, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);
-#endif
-	
-	/*Close Selection*/
-
-	button = gtk_menu_item_new_with_label(_("Close"));
-
-	gtk_signal_connect(GTK_OBJECT(button), "activate",
-			   GTK_SIGNAL_FUNC(cw_close_win),
-			   cw);
-
-	gtk_widget_add_accelerator(button, "activate", accel_group,
-				   GDK_q, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);
-	gtk_menu_append(GTK_MENU(menu), button);  
-
-	/*This is we decide whether or not the add button should be displayed*/
-
-#define TOOLBAR_APPEND(txt,icn,cbk,cwx) \
-	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar),txt,txt,txt,icn,GTK_SIGNAL_FUNC(cbk),cwx); 
-#define TOOLBAR_SEPARATOR() {\
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));\
-	separator = gtk_vseparator_new();\
-	gtk_widget_set_usize(GTK_WIDGET(separator), 0, 20);\
-	gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), separator, NULL, NULL);\
-	gtk_widget_show(separator);\
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); }
+#define TOOLBAR_APPEND(tool_btn,txt,icn,cbk,cwx) {\
+	tool_btn = GTK_WIDGET(gtk_tool_button_new(icn,txt));\
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(tool_btn),-1);\
+	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(tool_btn),gtk_tooltips_new(),txt,txt);\
+	g_signal_connect(tool_btn,"clicked",G_CALLBACK(cbk),cwx); \
+	gtk_widget_show(tool_btn); }
 #define ICON_CREATE(icon,iconwid,xpm) {\
-	icon = gdk_pixmap_create_from_xpm_d(cw->window->window, &mask, NULL, xpm); \
-	iconwid = gtk_pixmap_new(icon, mask); \
+	icon = gdk_pixbuf_new_from_xpm_data( (const char **) xpm); \
+	iconwid = gtk_image_new_from_pixbuf(icon); \
 	gtk_widget_show(iconwid); }
 
+/* line will tell whether to draw the separator line or not */
+#define TOOLBAR_APPEND_SPACE(line) { \
+	separator = GTK_WIDGET(gtk_separator_tool_item_new()); \
+	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator), line); \
+	gtk_widget_show(separator); \
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(separator), -1); \
+}
+
+	/*This is where we decide whether or not the add button should be displayed*/
 
 	if (!strcmp(cw->contact->group->name, _("Unknown"))
 	|| !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
 		ICON_CREATE(icon, iconwid, tb_book_red_xpm);
-		add_button = TOOLBAR_APPEND(_("Add Contact"),iconwid,add_unknown_callback,cw);
-		gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+		TOOLBAR_APPEND(add_button, _("Add Contact"),iconwid,add_unknown_callback,cw);
+	
+		TOOLBAR_APPEND_SPACE(TRUE);
 	}
 
 	/*Decide whether the offline messaging button should be displayed*/
 
 	if(can_offline_message(remote)) {
 		ICON_CREATE(icon, iconwid, tb_edit_xpm);
-		cw->offline_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-							  GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
-							  NULL,
-							  _("Allow"),
-							  _("Allow Offline Messaging CTRL+O"),
-							  _("Allow"),
-							  iconwid,
-							  GTK_SIGNAL_FUNC(allow_offline_callback),
-							  cw);
-		gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+		cw->offline_button = GTK_WIDGET( gtk_toggle_tool_button_new() );
+		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(cw->offline_button), iconwid);
+		gtk_tool_button_set_label(GTK_TOOL_BUTTON(cw->offline_button), _("Allow"));
+
+		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(cw->offline_button),-1);
+		
+		gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(cw->offline_button),
+				gtk_tooltips_new(),_("Allow"),
+				_("Allow Offline Messaging Ctrl+O"));
+
+		g_signal_connect(cw->offline_button,"clicked",
+				G_CALLBACK(allow_offline_callback),cw);
+		gtk_widget_show(cw->offline_button);
+
+		gtk_widget_add_accelerator(cw->offline_button, "clicked", accel_group, 
+				       GDK_o, GDK_CONTROL_MASK,
+				       GTK_ACCEL_VISIBLE);
+
+		separator = GTK_WIDGET(gtk_separator_tool_item_new());
+		
+		TOOLBAR_APPEND_SPACE(TRUE);
+		
 		cw_set_offline_active(cw, FALSE);
 	}
 
@@ -2554,26 +2563,35 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 		scd->c_window = cw;
 
 		ICON_CREATE(icon, iconwid, smiley_button_xpm);
-		cw->smiley_button = TOOLBAR_APPEND(_("Insert Smiley"), iconwid, _show_smileys_cb, scd);
-		gtk_signal_connect(GTK_OBJECT(cw->smiley_button), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_smiley_cb_data), scd);
+		TOOLBAR_APPEND(cw->smiley_button, _("Insert Smiley"), iconwid,
+				_show_smileys_cb, scd);
+		g_signal_connect(cw->smiley_button, "destroy",
+			   G_CALLBACK(destroy_smiley_cb_data), scd);
 		/*Create the separator for the toolbar*/
+		TOOLBAR_APPEND_SPACE(FALSE);
 
-		TOOLBAR_SEPARATOR();
 	}
 	/*This is the sound toggle button*/
 
 	ICON_CREATE(icon, iconwid, tb_volume_xpm);
-	cw->sound_button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-						      GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
-						      NULL,
-						      _("Sound"),
-						      _("Enable Sounds CTRL+S"),
-						      _("Sound"),
-						      iconwid,
-						      GTK_SIGNAL_FUNC(set_sound_callback),
-						      cw);
+	
+	cw->sound_button = GTK_WIDGET( gtk_toggle_tool_button_new() );
+	gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(cw->sound_button), iconwid);
+	gtk_tool_button_set_label(GTK_TOOL_BUTTON(cw->sound_button), _("Sound"));
 
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(cw->sound_button),-1);
+	
+	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(cw->sound_button),
+			gtk_tooltips_new(),_("Sound"),
+			_("Enable Sounds Ctrl+S"));
+
+	g_signal_connect(cw->sound_button,"clicked",
+			G_CALLBACK(set_sound_callback),cw);
+	gtk_widget_show(cw->sound_button);
+	gtk_widget_add_accelerator(cw->sound_button, "clicked", accel_group, 
+				   GDK_s, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
+	
 	/* Toggle the sound button based on preferences */
 	cw->send_enabled    = iGetLocalPref("do_play_send");
 	cw->receive_enabled = iGetLocalPref("do_play_receive");
@@ -2586,57 +2604,79 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	cw_set_sound_active(cw, enableSoundButton);
 
 	ICON_CREATE(icon, iconwid, tb_search_xpm);
-	view_log_button = TOOLBAR_APPEND(_("View Log CTRL+L"), iconwid, view_log_callback, cw);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
+	TOOLBAR_APPEND(view_log_button, _("View Log CTRL+L"), iconwid, view_log_callback, cw);
+	gtk_widget_add_accelerator(view_log_button, "clicked", accel_group, 
+				   GDK_l, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
+	
+	TOOLBAR_APPEND_SPACE(TRUE);
 
 #ifndef __MINGW32__
 	ICON_CREATE(icon, iconwid, action_xpm);
-	print_button = TOOLBAR_APPEND(_("Actions..."), iconwid, action_callback, cw);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
+	TOOLBAR_APPEND(print_button, _("Actions..."), iconwid, action_callback, cw);
+	gtk_widget_add_accelerator(print_button, "clicked", accel_group, 
+				   GDK_p, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
+	
+	TOOLBAR_APPEND_SPACE(TRUE);
 #endif
 	
-	TOOLBAR_SEPARATOR();
-
 	/*This is the send file button*/
 
 	ICON_CREATE(icon, iconwid, tb_open_xpm);
-	sendf_button = TOOLBAR_APPEND(_("Send File CTRL+T"), iconwid, send_file, cw);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
-
+	TOOLBAR_APPEND(sendf_button, _("Send File CTRL+T"), iconwid, send_file, cw);
+	gtk_widget_add_accelerator(sendf_button, "clicked", accel_group, 
+				   GDK_t, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
+	
+	TOOLBAR_APPEND_SPACE(TRUE);
+	
 	/*This is the invite button*/
 
 	ICON_CREATE(icon, iconwid, invite_btn_xpm);
-	sendf_button = TOOLBAR_APPEND(_("Invite CTRL+I"), iconwid, do_invite_window, cw);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
-
+	TOOLBAR_APPEND(invite_button, _("Invite CTRL+I"), iconwid, do_invite_window, cw);
+	gtk_widget_add_accelerator(invite_button, "clicked", accel_group, 
+				   GDK_i, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
+	
+	TOOLBAR_APPEND_SPACE(TRUE);
+	
 	/*This is the ignore button*/
 
 	ICON_CREATE(icon, iconwid, tb_no_xpm);
-	ignore_button = TOOLBAR_APPEND(_("Ignore CTRL+G"), iconwid, ignore_callback, cw);
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar)); 
+	TOOLBAR_APPEND(ignore_button, _("Ignore CTRL+G"), iconwid, ignore_callback, cw);
+	gtk_widget_add_accelerator(ignore_button, "clicked", accel_group,
+				   GDK_g, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
 
+	TOOLBAR_APPEND_SPACE(TRUE);
+	
 	/*This is the send button*/
 
 	ICON_CREATE(icon, iconwid, tb_mail_send_xpm);
-	send_button = TOOLBAR_APPEND(_("Send Message CTRL+R"), iconwid, send_message, cw);
-
-	TOOLBAR_SEPARATOR();
+	TOOLBAR_APPEND(send_button, _("Send Message CTRL+R"), iconwid, send_message, cw);
+	gtk_widget_add_accelerator(send_button, "clicked", accel_group, 
+				   GDK_r, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
 
 	/*This is the close button*/
 
 	ICON_CREATE(icon, iconwid, cancel_xpm);
 
 	if ( tabbedChat ) {
-		close_button = TOOLBAR_APPEND(_("Close CTRL+Q"), iconwid, close_tab_callback, cw);
+		TOOLBAR_APPEND(close_button, _("Close CTRL+Q"), iconwid, close_tab_callback, cw);
 	} else {
-		close_button = TOOLBAR_APPEND(_("Close CTRL+Q"), iconwid, cw_close_win, cw);
+		TOOLBAR_APPEND(close_button, _("Close CTRL+Q"), iconwid, cw_close_win, cw);
 	}
+	gtk_widget_add_accelerator(close_button, "clicked", accel_group,
+				   GDK_q, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);
 	
 #undef TOOLBAR_APPEND
+#undef TOOLBAR_APPEND_SPACE
 #undef ICON_CREATE
-#undef TOOLBAR_SEPARATOR
 	
-	cw->status_label = gtk_label_new(" ");
+	cw->status_label = gtk_label_new("          ");
 	gtk_box_pack_start(GTK_BOX(hbox), cw->status_label, FALSE, FALSE, 0);
 	gtk_widget_show(cw->status_label);
 
@@ -2654,8 +2694,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	gtk_widget_show(cw->chat);
 	gtk_widget_show(cw->entry);
 
-	gtk_signal_connect(GTK_OBJECT(vbox), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_event), cw);	
+	g_signal_connect(vbox, "destroy",
+			   G_CALLBACK(destroy_event), cw);	
 
 	return cw;
 }
@@ -2683,7 +2723,7 @@ int wait_chatroom_connected(cr_wait *crw)
 	}		
 }
 
-void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, char *msg)
+void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, const char *msg)
 {
 	eb_account *second_party = cw->preferred;
 	eb_local_account *ela = cw->local_user;

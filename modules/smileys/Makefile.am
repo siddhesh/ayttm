@@ -18,3 +18,5 @@ smiley_themer_la_SOURCES = smiley-themer.c
 smiley_themer_la_LDFLAGS = -module -avoid-version $(WIN32_LDFLAGS)
 smiley_themer_la_LIBADD = -lXpm -L/usr/X11R6/lib $(WIN32_LIBADD)
 
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

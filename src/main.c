@@ -63,6 +63,8 @@
 #include "edit_local_accounts.h"
 #include "spellcheck.h"
 
+#include <pixmaps/ayttm.xpm>
+
 /* globals */
 char geometry[256];
 
@@ -154,6 +156,10 @@ char config_dir[1024] = "";
 
 static void start_login(gboolean new)
 {
+	/* Setting the default icon for un-iconed windows */
+	GdkPixbuf *default_icon = gdk_pixbuf_new_from_xpm_data((const char **)ayttm_xpm);
+	gtk_window_set_default_icon(default_icon);
+
 	eb_status_window();
 
    	if (new)
@@ -475,7 +481,11 @@ int main(int argc, char *argv[])
 
 	write_contact_list();
 	
-	unload_modules(); // Need to unload what we load
+	/*
+	 * Moved unload_modules() call to window delete event in status.c
+	 */
+	/*unload_modules(); */ // Need to unload what we load
+
 	eb_debug(DBG_CORE, "Shutting sound down\n");
 	sound_shutdown();
 	eb_debug(DBG_CORE, "Removing lock file\n");
@@ -486,5 +496,6 @@ int main(int argc, char *argv[])
         delete_lock_file(buff);
 	eb_debug(DBG_CORE, "Removed lock file\n");
 #endif
+
 	return 0;
 }

@@ -59,17 +59,16 @@ typedef struct _text_input_window
 } text_input_window;
 
 
-static void list_dialog_callback(GtkWidget *widget,
-			gint row,
-			gint column,
-			GdkEventButton *event,
-			void *data)
+static void list_dialog_callback(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, void *data)
 {
 	gchar *text;
 	list_dialog_data *ldd = data;
+	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+	gtk_tree_model_get_iter(model, &iter, path);
 
-	gtk_clist_get_text(GTK_CLIST(widget), row, column, &text);
-	ldd->callback(strdup(text), ldd->data);
+	gtk_tree_model_get(model, &iter, 0, &text, -1);
+	ldd->callback(text, ldd->data);
 	free(ldd);
 }
 
@@ -91,55 +90,17 @@ void do_list_dialog( const char *message, const char *title, const char **list, 
 	}
 }
 
-static int sig1 = 0, sig2 = 0;
-static GtkWidget *s_scwin = NULL;
-static gboolean list_dialog_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
-{
-	char c;
-	GtkWidget *clist = GTK_WIDGET(data);
-	int i = 0;
-	GdkModifierType	modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
-
-	if (modifiers == 0) {
-		c = event->keyval;
-		if (c >= GDK_A && c <= GDK_Z) {
-			c += (GDK_a - GDK_A);
-		}
-		
-		if (c >= GDK_a && c <= GDK_z) {
-			char *text=NULL;
-			while (gtk_clist_get_text(GTK_CLIST(clist), i, 0, &text)) {
-				if (s_scwin && text && (text[0] == c
-				|| (text[0]=='#' && text[1]==c) /*irc hack*/ )) {
-					GtkAdjustment *ga;
-					eb_debug(DBG_CORE, "found %s with %c\n", text, c);
-
-					gtk_signal_handler_block(GTK_OBJECT(clist), sig1);
-					gtk_signal_handler_block(GTK_OBJECT(clist), sig2);
-					gtk_clist_select_row(GTK_CLIST(clist), i, 0);
-					
-					gtk_clist_moveto(GTK_CLIST(clist), i, 0, 0.5, 0.5);
-					ga = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(s_scwin));
-					gtk_adjustment_set_value(ga, (GTK_CLIST(clist)->row_height + 1) * i);
-					gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(s_scwin), ga);
-								
-					gtk_signal_handler_unblock(GTK_OBJECT(clist), sig1);
-					gtk_signal_handler_unblock(GTK_OBJECT(clist), sig2);
-					return TRUE;
-				}
-				i++;
-			}
-		}
-	}
-	return TRUE;
-}
 
 void do_llist_dialog( const char *message, const char *title, const LList *list, void (*action)(const char *text, void *data), void *data )
 {
 	GtkWidget * dialog_window;
 	GtkWidget * label;
 	GtkWidget * clist;
+	GtkListStore *clist_store;
 	GtkWidget * scwin;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkTreeSelection *selection;
 	
 	/*  UNUSED GtkWidget * button_box; */
 	char *Row[2]={NULL, NULL};
@@ -161,12 +122,23 @@ void do_llist_dialog( const char *message, const char *title, const LList *list,
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->vbox),
 		label, FALSE, FALSE, 5);
 
-	clist = gtk_clist_new(1);	/* Only 1 column */
-	gtk_clist_set_selection_mode(GTK_CLIST(clist), GTK_SELECTION_SINGLE);
-	gtk_clist_set_column_width (GTK_CLIST(clist), 0, 200);
+	clist_store = gtk_list_store_new(1, G_TYPE_STRING);
+	clist = gtk_tree_view_new_with_model(GTK_TREE_MODEL(clist_store));
+	g_object_set(clist, "headers-visible", FALSE, NULL);
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(NULL, renderer,
+			"text", 0,
+			NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(clist), column);
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(clist));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
+
 	while(t_list) {
+		GtkTreeIter append;
 		Row[0]=strdup(t_list->data);
-		gtk_clist_append(GTK_CLIST(clist), Row);
+		gtk_list_store_append(clist_store, &append);
+		gtk_list_store_set(clist_store, &append, 0, Row[0], -1);
 		free(Row[0]);
 		t_list = t_list->next;
 	}
@@ -174,28 +146,17 @@ void do_llist_dialog( const char *message, const char *title, const LList *list,
 	ldata=calloc(1, sizeof(list_dialog_data));
 	ldata->callback=action;
 	ldata->data=data;
-	gtk_signal_connect(GTK_OBJECT(dialog_window),
-			"key_press_event",
-			GTK_SIGNAL_FUNC(list_dialog_key_press),
-			clist);
-	sig1 = gtk_signal_connect(GTK_OBJECT(clist),
-		"select_row",
-		GTK_SIGNAL_FUNC(list_dialog_callback),
-		ldata);
-	sig2 = gtk_signal_connect_object(GTK_OBJECT(clist),
-		"select_row",
-		GTK_SIGNAL_FUNC(gtk_widget_destroy),
-		(gpointer)dialog_window);
+	g_signal_connect(clist, "row-activated", G_CALLBACK(list_dialog_callback), ldata);
+	g_signal_connect_swapped(clist, "row-activated", G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
 	gtk_widget_show(clist);
 	/* End list construction */
 
 	scwin = gtk_scrolled_window_new(NULL, NULL);
-	s_scwin = scwin;
-	gtk_scrolled_window_add_with_viewport
-		(GTK_SCROLLED_WINDOW(scwin),clist);
+	gtk_container_add
+		(GTK_CONTAINER(scwin),clist);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),
                 GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_usize(scwin, 250, 350);
+	gtk_widget_set_size_request(scwin, 250, 350);
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->action_area), 
 						scwin, FALSE, FALSE, 5 );
 
@@ -213,11 +174,11 @@ static void dialog_close(GtkWidget *widget, GdkEventAny *event, gpointer data)
 	dialog_buttons *b = (dialog_buttons *)data;
 	if (event->type == GDK_KEY_PRESS) {
 		if (((GdkEventKey *)event)->keyval == GDK_Escape) {
-			gtk_signal_emit_by_name(GTK_OBJECT(b->no), "clicked");
+			g_signal_emit_by_name(b->no, "clicked", NULL);
 		} else if (((GdkEventKey *)event)->keyval == GDK_KP_Enter) {
-			gtk_signal_emit_by_name(GTK_OBJECT(b->yes), "clicked");
+			g_signal_emit_by_name(b->yes, "clicked", NULL);
 		} else if (((GdkEventKey *)event)->keyval == GDK_Return) {
-			gtk_signal_emit_by_name(GTK_OBJECT(b->yes), "clicked");
+			g_signal_emit_by_name(b->yes, "clicked", NULL);
 		}
 	}
 }
@@ -227,7 +188,7 @@ static void eb_gtk_dialog_callback(GtkWidget *widget, gpointer data)
 	callback_data *cd = (callback_data *)data;
 	int result=0;
 
-	result=(int)gtk_object_get_user_data(GTK_OBJECT(widget));
+	result=(int)g_object_get_data(G_OBJECT(widget), "userdata");
 	cd->action(cd->data, result);
 	free(cd);
 }
@@ -238,8 +199,7 @@ static void do_dialog( const char *message, const char *title, void (*action)(Gt
 	GtkWidget *label;
 	GtkWidget *hbox2, *hbox_xpm;
 	GtkWidget *iconwid;
-	GdkPixmap *icon;
-	GdkBitmap *mask;
+	GdkPixbuf *icon;
 	GtkWidget *button;
 	dialog_buttons *buttons = g_new0(dialog_buttons, 1);
 	
@@ -249,14 +209,14 @@ static void do_dialog( const char *message, const char *title, void (*action)(Gt
 	label = gtk_label_new(message);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
 	gtk_widget_show(label);
-	gtk_widget_set_usize(label, 240, -1);
+	gtk_widget_set_size_request(label, 240, -1);
 
 	gtk_misc_set_alignment (GTK_MISC (label), 0.1, 0.5);
 
 	hbox_xpm = gtk_hbox_new(FALSE,5);
 	
-	icon = gdk_pixmap_create_from_xpm_d(statuswindow?statuswindow->window:NULL, &mask, NULL, question_xpm);
-	iconwid = gtk_pixmap_new(icon, mask);
+	icon = gdk_pixbuf_new_from_xpm_data( (const char **) question_xpm);
+	iconwid = gtk_image_new_from_pixbuf(icon);
 	
 	gtk_box_pack_start(GTK_BOX(hbox_xpm), iconwid, TRUE, TRUE, 20);
 	gtk_box_pack_start(GTK_BOX(hbox_xpm), label, TRUE, TRUE, 5);
@@ -268,11 +228,10 @@ static void do_dialog( const char *message, const char *title, void (*action)(Gt
 		
 	button = gtkut_create_icon_button( _("No"), tb_no_xpm, dialog_window );
 	
-	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(action), data );
-	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-			                  GTK_SIGNAL_FUNC(gtk_widget_destroy),
-							  (gpointer)dialog_window);
-	gtk_object_set_user_data(GTK_OBJECT(button), (gpointer)0);
+	g_signal_connect(button, "clicked", G_CALLBACK(action), data );
+	g_signal_connect_swapped(button, "clicked",
+			G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
+	g_object_set_data(G_OBJECT(button), "userdata", (gpointer)0);
 	gtk_widget_show(button);
 	
 	buttons->no = button;
@@ -282,17 +241,15 @@ static void do_dialog( const char *message, const char *title, void (*action)(Gt
 
 	button = gtkut_create_icon_button( _("Yes"), tb_yes_xpm, dialog_window );
 	
-	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(action), data );
-	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-			                  GTK_SIGNAL_FUNC(gtk_widget_destroy),
-							  (gpointer)dialog_window);
-	gtk_object_set_user_data(GTK_OBJECT(button), (gpointer)1);
+	g_signal_connect(button, "clicked", G_CALLBACK(action), data );
+	g_signal_connect_swapped(button, "clicked",
+			G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
+	g_object_set_data(G_OBJECT(button), "userdata", (gpointer)1);
 	gtk_widget_show(button);
 
 	buttons->yes = button;
 	
-	gtk_signal_connect(GTK_OBJECT(dialog_window), "key_press_event",
-			   GTK_SIGNAL_FUNC(dialog_close), buttons);
+	g_signal_connect(dialog_window, "key-press-event", G_CALLBACK(dialog_close), buttons);
 	
 	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 5);
 
@@ -305,10 +262,10 @@ static void do_dialog( const char *message, const char *title, void (*action)(Gt
 	gtk_widget_realize(dialog_window);
 	gtk_window_set_title(GTK_WINDOW(dialog_window), title );
 	gtk_window_set_position(GTK_WINDOW(dialog_window), GTK_WIN_POS_MOUSE);
-	gtk_widget_set_usize(dialog_window, 350, 150);
+	gtk_widget_set_size_request(dialog_window, 350, 150);
 	gtk_widget_show(dialog_window);
 	if (dialog_window->requisition.height > 150)
-		gtk_widget_set_usize(dialog_window, 350, -1);
+		gtk_widget_set_size_request(dialog_window, 350, -1);
 }
 
 void eb_do_dialog(const char *message, const char *title, void (*action)(void *, int), void *data)
@@ -352,8 +309,19 @@ static void input_window_cancel(GtkWidget * widget, gpointer data)
 
 static void input_window_ok(GtkWidget * widget, gpointer data)
 {
+	char *text;
 	text_input_window * window = (text_input_window*)data;
-	char * text = gtk_editable_get_chars(GTK_EDITABLE(window->text), 0, -1);
+
+	if(GTK_IS_TEXT_VIEW(window->text)) {
+		GtkTextIter start, end;
+		GtkTextBuffer *buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(window->text));
+		gtk_text_buffer_get_bounds(buffer, &start, &end);
+
+		text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+	}
+	else {
+		text = gtk_editable_get_chars(GTK_EDITABLE(window->text), 0, -1);
+	}
 	window->callback(text, window->data);
 	g_free(text);
 }
@@ -363,8 +331,9 @@ static gboolean	enter_pressed( GtkWidget *widget, GdkEventKey *event, gpointer d
 	if (event->keyval == GDK_Return) {
 		input_window_ok(NULL, data);
 		gtk_widget_destroy(((text_input_window*)data)->window);
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
 void do_text_input_window(const char *title, const char *value, 
@@ -401,7 +370,7 @@ void do_text_input_window_multiline(const char *title, const char *value,
 	input_window->callback = action;
 	input_window->data = data;
 
-	input_window->window = gtk_window_new(GTK_WINDOW_DIALOG);
+	input_window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_position(GTK_WINDOW(input_window->window), GTK_WIN_POS_MOUSE);
 	gtk_widget_realize(input_window->window);
 
@@ -409,20 +378,28 @@ void do_text_input_window_multiline(const char *title, const char *value,
 	label = gtk_label_new(title);
 
 	if (ismulti)
-		input_window->text = gtk_text_new(NULL, NULL);
+		input_window->text = gtk_text_view_new();
 	else {
 		input_window->text = gtk_entry_new();
-		gtk_signal_connect(GTK_OBJECT(input_window->text), "key_press_event",
-			GTK_SIGNAL_FUNC(enter_pressed), input_window);
+		gtk_editable_set_editable(GTK_EDITABLE(input_window->text), TRUE);
+		g_signal_connect(input_window->text, "key-press-event",
+				G_CALLBACK(enter_pressed), input_window);
 	}
 	if (ispassword)
 		gtk_entry_set_visibility(GTK_ENTRY(input_window->text), FALSE);
 	
-	gtk_widget_set_usize(input_window->text, 400, ismulti?200:-1);
-	gtk_editable_insert_text(GTK_EDITABLE(input_window->text),
-				 value, strlen(value), &dummy);
-	gtk_editable_set_editable(GTK_EDITABLE(input_window->text),
-			TRUE);
+	gtk_widget_set_size_request(input_window->text, 400, ismulti?200:-1);
+
+	if(!ismulti) {
+		gtk_editable_insert_text(GTK_EDITABLE(input_window->text),
+					 value, strlen(value), &dummy);
+		gtk_editable_set_editable(GTK_EDITABLE(input_window->text),
+				TRUE);
+	}
+	else {
+		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input_window->text));
+		gtk_text_buffer_insert_at_cursor(buffer, value, strlen(value));
+	}
 
 	gtk_widget_show(label);
 	gtk_widget_show(input_window->text);
@@ -439,24 +416,21 @@ void do_text_input_window_multiline(const char *title, const char *value,
 
 	hbox2 = gtk_hbox_new(TRUE, 5);
 
-  	gtk_widget_set_usize(hbox2, 200,25);
+  	gtk_widget_set_size_request(hbox2, 200,25);
 
 	button = gtkut_create_icon_button( _("OK"), ok_xpm, input_window->window );
 		     
-	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_ok,
-			input_window);
+	g_signal_connect(button, "clicked", G_CALLBACK(input_window_ok), input_window);
 
-	gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-				  GTK_SIGNAL_FUNC(gtk_widget_destroy),
-				  GTK_OBJECT(input_window->window));
+	g_signal_connect_swapped(button, "clicked",
+			G_CALLBACK(gtk_widget_destroy),input_window->window);
 	     
 	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 	gtk_widget_show(button);
 
 	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, input_window->window );
 	     
-	gtk_signal_connect(GTK_OBJECT(button), "clicked", input_window_cancel,
-			input_window);
+	g_signal_connect(button, "clicked", G_CALLBACK(input_window_cancel), input_window);
 
 	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
 	gtk_widget_show(button);
@@ -478,10 +452,9 @@ void do_text_input_window_multiline(const char *title, const char *value,
 		window_title = g_strdup(title);
     	gtk_window_set_title(GTK_WINDOW(input_window->window), window_title);
 	g_free(window_title);
-	gtkut_set_window_icon(input_window->window->window, NULL);
 
-	gtk_signal_connect(GTK_OBJECT(input_window->window), "destroy",
-			GTK_SIGNAL_FUNC(input_window_destroy), input_window);
+	g_signal_connect(input_window->window, "destroy",
+			G_CALLBACK(input_window_destroy), input_window);
 
 	gtk_widget_grab_focus(input_window->text);
 	gtk_widget_show(input_window->window);

@@ -34,7 +34,6 @@
 #include "trigger.h"
 #include "logs.h"
 
-
 struct contact {
 	char nick[255];
 	char language[3];

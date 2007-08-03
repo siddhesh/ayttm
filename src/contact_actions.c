@@ -39,7 +39,7 @@ static void send_file_callback( const char *selected_filename, void *data )
     
 	if ( (selected_filename == NULL) || (ea == NULL) )
 		return;
-        
+	
 	x_fer_account = find_suitable_file_transfer_account(ea, ea->account_contact);
 
 	if ( x_fer_account != NULL ) {

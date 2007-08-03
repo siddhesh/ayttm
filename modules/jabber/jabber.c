@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.46 $",
-	"$Date: 2005/10/22 20:05:13 $",
+	"$Revision: 1.47 $",
+	"$Date: 2007/08/03 20:38:39 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -189,7 +189,7 @@ static void jabber_info_data_cleanup(info_window *iw);
 static int is_setting_state = 0;
 
 static void jabber_dialog_callback( gpointer data, int result );
-static void jabber_list_dialog_callback( char * text, gpointer data );
+static void jabber_list_dialog_callback( const char * text, gpointer data );
 void JABBERInstantMessage(void *data);
 void JABBERStatusChange(void *data);
 void JABBERDialog(void *data);
@@ -249,14 +249,14 @@ static void jabber_dialog_callback( gpointer data, int response )
 	free(jd);
 }
 
-static void jabber_list_dialog_callback( char * text, gpointer data )
+static void jabber_list_dialog_callback( const char * text, gpointer data )
 {
 	JABBER_Dialog_PTR jd;
 
 	eb_debug(DBG_JBR, ">\n");
 	jd = (JABBER_Dialog_PTR)data;
 	eb_debug(DBG_JBR, "**** response: %s\n", text);
-	jd->response=text;
+	jd->response=strdup(text);
 	jd->callback(data);
 	free(jd->message);
 	free(jd->requestor);
@@ -574,7 +574,7 @@ static LList * eb_jabber_get_states()
 	return list;
 }
 
-static char * eb_jabber_check_login(char * user, char * pass)
+static char * eb_jabber_check_login(const char * user, const char * pass)
 {
 	return NULL;
 }
@@ -783,7 +783,7 @@ static eb_chat_room * eb_jabber_make_chat_room( char * name, eb_local_account * 
 }
 
 static void eb_jabber_send_invite( eb_local_account * account, eb_chat_room * room,
-					char * user, char * message )
+					char * user, const char * message )
 {
 	eb_debug(DBG_JBR, "Empty function\n");
 }
@@ -1170,7 +1170,7 @@ void JABBERListDialog(const char **list, void *data)
 
 	jd = (JABBER_Dialog_PTR)data;
 	eb_debug(DBG_JBR, "Calling do_list_dialog\n");
-	do_list_dialog(jd->message, jd->heading, list, jabber_list_dialog_callback, (gpointer)jd);
+	do_list_dialog(jd->message, jd->heading, list, jabber_list_dialog_callback, (void *)jd);
 	eb_debug(DBG_JBR, "Returned from do_list_dialog\n");
 }
 

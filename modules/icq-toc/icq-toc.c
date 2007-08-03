@@ -60,6 +60,7 @@ typedef unsigned long ulong;
 #include "messages.h"
 #include "dialog.h"
 #include "offline_queue_mgmt.h"
+#include "libproxy/libproxy.h"
 
 #include "pixmaps/icq_online.xpm"
 #include "pixmaps/icq_away.xpm"
@@ -95,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.47 $",
-	"$Date: 2005/02/13 13:31:12 $",
+	"$Revision: 1.48 $",
+	"$Date: 2007/08/03 20:38:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -218,7 +219,7 @@ static void icq_info_update(eb_account *sender);
  * don't let the corresponding set_current_state get called again
  */
 
-static char * eb_icq_check_login(char * user, char * pass)
+static char * eb_icq_check_login(const char * user, const char * pass)
 {
 	return NULL;
 }
@@ -241,7 +242,8 @@ static eb_local_account * icq_find_local_account_by_conn(toc_conn * conn)
 	return NULL;
 }
 
-static void icq_set_profile_callback(char * value, void * data)
+/* Unused
+static void icq_set_profile_callback(const char * value, void * data)
 {
 	eb_local_account * account = (eb_local_account*)data;
 	struct eb_icq_local_account_data * alad 
@@ -250,6 +252,7 @@ static void icq_set_profile_callback(char * value, void * data)
 	strncpy(alad->icq_info, value, MAX_PREF_LEN);
 	write_account_list();
 }
+
 
 static void icq_set_profile_window(ebmCallbackData *data)
 {
@@ -260,8 +263,8 @@ static void icq_set_profile_window(ebmCallbackData *data)
 	if(IS_ebmProfileData(data))
 		account = (eb_local_account*)data->user_data;
 	else 
-	{	/* This should never happen, unless something is horribly wrong */
-		fprintf(stderr, "data->CDType %d\n", data->CDType);
+	{*/	/* This should never happen, unless something is horribly wrong */
+/*		fprintf(stderr, "data->CDType %d\n", data->CDType);
 		fprintf(stderr, "Error! not of profile type!\n");
 		return;
 	}
@@ -270,6 +273,7 @@ static void icq_set_profile_window(ebmCallbackData *data)
 	g_snprintf(buff, 256, _("Profile for account %s"), account->handle); 
 	do_text_input_window(buff, alad->icq_info, icq_set_profile_callback, account); 
 }
+*/
 
 static void eb_icq_disconnect( toc_conn * conn )
 {
@@ -863,7 +867,7 @@ static void eb_icq_logged_in (toc_conn *conn)
 }
 
 static void eb_icq_send_invite( eb_local_account * account, eb_chat_room * room,
-						 char * user, char * message)
+						 char * user, const char * message)
 {
 	struct eb_icq_local_account_data * alad;
 	alad = (struct eb_icq_local_account_data *)account->protocol_local_account_data;
@@ -933,7 +937,7 @@ static void ay_toc_connect_status(const char *msg, void *data)
 }
 
 
-static int eb_icq_async_socket(char *host, int port, void *cb, void *data)
+static int eb_icq_async_socket(const char *host, int port, void *cb, void *data)
 {
   int tag = proxy_connect_host(host, port, cb, data, (void *)ay_toc_connect_status);
   

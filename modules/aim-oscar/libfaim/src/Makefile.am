@@ -40,3 +40,5 @@ libfaim_la_SOURCES = \
 	util.c
 
 AM_CFLAGS = -I../include
+# Gets rid of the datarootdir warning
+datarootdir=@datarootdir@

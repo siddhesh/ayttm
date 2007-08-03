@@ -540,7 +540,7 @@ static void rebuild_smiley_menu( void )
 	}
 	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(smiley_submenuitem));
 	eb_smiley_window(smiley_submenuitem);
-	gtk_widget_draw(GTK_WIDGET(smiley_submenuitem), NULL);
+//	gtk_widget_draw(GTK_WIDGET(smiley_submenuitem), NULL);
 }
 
 static void rebuild_import_menu( void )
@@ -554,7 +554,7 @@ static void rebuild_import_menu( void )
 	}
 	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(import_submenuitem));
 	eb_import_window(import_submenuitem);
-	gtk_widget_draw(GTK_WIDGET(import_submenuitem), NULL);
+//	gtk_widget_draw(GTK_WIDGET(import_submenuitem), NULL);
 }
 
 static void rebuild_profile_menu( void )
@@ -568,7 +568,7 @@ static void rebuild_profile_menu( void )
 	}
 	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(profile_submenuitem));
 	eb_profile_window(profile_submenuitem);
-	gtk_widget_draw(GTK_WIDGET(profile_submenuitem), NULL);
+//	gtk_widget_draw(GTK_WIDGET(profile_submenuitem), NULL);
 }
 
 /* Set up information about how menus are redrawn and what kind of data should be sent to callbacks */

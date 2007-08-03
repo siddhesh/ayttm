@@ -28,8 +28,9 @@ struct select_keys_s {
     void *toplabel;
     void *clist;
     const char *pattern;
-    GpgmeRecipients rset;
-    GpgmeCtx select_ctx;
+    gpgme_key_t *kset;
+    unsigned int num_keys;
+    gpgme_ctx_t select_ctx;
     char *key;
     int sort_type;
     int sort_column;
@@ -41,6 +42,6 @@ extern char *aycrypt_last_pass;
 extern int aycrypt_pass_ack;
 
 struct select_keys_s gpgmegtk_recipient_selection (GSList *recp_names, int crypt, int sign);
-const char *passphrase_mbox (const char *desc);
+const char *passphrase_mbox (const char *desc, int prev_was_bad);
 
 #endif /* GPGMEGTK_SELECT_KEYS_H */

@@ -200,7 +200,7 @@ class authdata_FTP : public authdata
   unsigned long bytes_done;
   unsigned long last_done;
   int num_ignore;
-  int must_read;
+  unsigned int must_read;
   int direction;
   int connected;
 

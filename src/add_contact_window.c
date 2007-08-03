@@ -34,7 +34,6 @@
 #include "gtk/gtkutils.h"
 #include <gdk/gdkkeysyms.h>
 
-#include "pixmaps/tb_edit.xpm"
 #include "pixmaps/tb_preferences.xpm"
 #include "pixmaps/cancel.xpm"
 
@@ -50,10 +49,10 @@ static GtkWidget *service_list;
 static GtkWidget *account_name;
 static GtkWidget *contact_name;
 static GtkWidget *group_name;
-static int flag;
+
 static int contact_input_handler;
 
-#define COMBO_TEXT(x) gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(x)->entry))
+#define COMBO_TEXT(x) gtk_combo_box_get_active_text(GTK_COMBO_BOX(x))
 
 static void destroy(GtkWidget *widget, gpointer data)
 {
@@ -71,7 +70,7 @@ static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
 * with this information
 */
 
-static LList * get_contacts(gchar *group)
+static LList * get_contacts(const gchar *group)
 {
 	LList *node = NULL, *newlist = NULL;
 	grouplist *g;
@@ -89,6 +88,22 @@ static LList * get_contacts(gchar *group)
 	}
 	
 	return newlist;
+}
+
+/* We ought to have something like this in gtk2 */
+void gtk_combo_box_set_active_text( GtkComboBox *combo, gchar *nick, gint list_size )
+{
+	int i=0;
+
+	for(i=0; i<list_size; i++) {
+		char *cur;
+		gtk_combo_box_set_active(combo, i);
+		cur = gtk_combo_box_get_active_text(combo);
+
+		if(cur && !strcmp(cur, nick))
+			return;
+	}
+	gtk_combo_box_set_active(combo, -1);
 }
 
 LList * get_all_contacts()
@@ -150,56 +165,66 @@ LList * get_all_accounts(int serviceid)
 	return newlist;
 }
 
-static void  dif_group(GtkEditable *editable, gpointer user_data)
+static void  dif_group(GtkWidget *widget, gpointer user_data)
 {
-		GList * list = llist_to_glist(get_contacts(COMBO_TEXT(group_name)), 1);
-		
-		char *tmp = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(contact_name)->entry));
-		
-		gtk_signal_handler_block(GTK_OBJECT(GTK_COMBO(contact_name)->entry),
-				contact_input_handler);
-		
-		list = g_list_prepend(list, tmp?tmp:"");
-		
-		gtk_combo_set_popdown_strings(GTK_COMBO(contact_name), list);
-		g_list_free(list);
-		gtk_signal_handler_unblock(GTK_OBJECT(GTK_COMBO(contact_name)->entry),
-				contact_input_handler);
+	GList *gwalker = NULL;
+
+	GList * list = llist_to_glist(
+			get_contacts(COMBO_TEXT(group_name)), 1);
+	
+	const char *tmp = gtk_entry_get_text(GTK_ENTRY(GTK_BIN(contact_name)->child));
+
+	if(g_signal_handler_is_connected(contact_name, contact_input_handler))
+		g_signal_handler_block(contact_name, contact_input_handler);
+
+	/* Clear the combo box. Sadly, we don't have a method for this */
+	gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(contact_name))));
+
+	list = g_list_prepend(list, (gpointer)(tmp?tmp:""));
+
+	for(gwalker=list; gwalker; gwalker = g_list_next(gwalker))
+		gtk_combo_box_append_text(GTK_COMBO_BOX(contact_name), (char *) gwalker->data);
+	
+	g_list_free(list);
+
+	if(g_signal_handler_is_connected(contact_name, contact_input_handler))
+		g_signal_handler_unblock(contact_name, contact_input_handler);
 }
 
 /*This is the function for changing the contact entry*/
 
 static void set_con(GtkEditable *editable, gpointer user_data)
 {
-	if(flag == 0){ 
-		gtk_signal_handler_block(GTK_OBJECT(GTK_COMBO(contact_name)->entry),
-				contact_input_handler);
-		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(contact_name)->entry), 
-				gtk_entry_get_text(GTK_ENTRY(account_name)));
-		gtk_signal_handler_unblock(GTK_OBJECT(GTK_COMBO(contact_name)->entry),
-				contact_input_handler);
-	}
+	g_signal_handler_block(GTK_COMBO_BOX(contact_name), contact_input_handler);
+	gtk_entry_set_text(GTK_ENTRY(GTK_BIN(contact_name)->child), 
+			gtk_entry_get_text(GTK_ENTRY(account_name)));
+	g_signal_handler_unblock(GTK_COMBO_BOX(contact_name), contact_input_handler);
 }
 
 /*callback that sets the flag if the contact name has been modified*/
 
 static void con_modified(GtkEditable *editable, gpointer user_data)
 {
-	flag = 1;
+	g_signal_handlers_disconnect_by_func(account_name, G_CALLBACK(set_con), NULL);
+	g_signal_handlers_disconnect_by_func(contact_name, G_CALLBACK(con_modified), NULL);
 }
 
 static void add_button_callback(GtkButton *button, gpointer userdata)
 {
 	grouplist *gl;
 	struct contact *con;
-	gchar *service = strdup(gtk_widget_get_name(gtk_menu_get_active(GTK_MENU(gtk_option_menu_get_menu(GTK_OPTION_MENU(service_list))))));
-	gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
+	gchar *service = gtk_combo_box_get_active_text( GTK_COMBO_BOX(service_list) );
+	const gchar *account = gtk_entry_get_text(GTK_ENTRY(account_name));
 	gchar *mservice = NULL;
 	gint service_id = -1;
 	gchar *local_acc = strstr(service, " ") +1;
 	eb_local_account *ela = NULL;
 	eb_account *ea = NULL;
 
+	if (!strcmp(account, "")) {
+		ay_do_error(_("Account error"), _("No Account Name specified."));
+		return;
+	}
 	if (!strstr(service, "]") || !strstr(service," ")) {
 		ay_do_error(_("Account error"), _("No local account specified."));
 		g_free(service);
@@ -263,296 +288,228 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 * Create a Add contact window and put it on the screen
 */
 
-static void show_add_defined_contact_window(struct contact * cont, grouplist *grp, struct contact *con )
+// FIXME Someone please tell me why the third argument exists.
+// I'll remove it otherwise as it's not being used in any case.
+static void show_add_defined_contact_window(struct contact *cont, grouplist *grp, struct contact *con)
 {
-	/*
-	 * if the add contact window is already open, we don't want to 
-	 * do anything
-	 */
+	GtkWidget *hbox;
+	GtkWidget *hbox2;
+	GtkWidget *vbox;
+	GtkWidget *label;
+	guint label_key;
+	GtkWidget *button;
+	GtkWidget *table;
+	GtkWidget *frame;
+	GtkAccelGroup *accel_group;
+	GList *list;
+	GList *gwalker = NULL;
 
-	if(!window_open) {
-		GtkWidget *hbox;
-		GtkWidget *hbox2;
-		GtkWidget *vbox;
-		GtkWidget *label;
-		guint label_key;
-		GtkWidget *button;
-		GtkWidget *table;
-		GtkWidget *frame;
-		GtkAccelGroup *accel_group;
-		GList *list;
-		LList *walk;
-		char buff[1024];
+	LList *walk;
 
-		accel_group = gtk_accel_group_new();
+	if(window_open)
+		return;
 
-		add_contact_window = gtk_window_new(GTK_WINDOW_DIALOG);
-		gtk_window_set_transient_for(GTK_WINDOW(add_contact_window), GTK_WINDOW(statuswindow));
-		gtk_window_set_position(GTK_WINDOW(add_contact_window), GTK_WIN_POS_MOUSE);
-		gtk_widget_realize(add_contact_window);
-		gtk_container_set_border_width(GTK_CONTAINER(add_contact_window), 5);      
-
-		table = gtk_table_new(4, 2, FALSE);
-		gtk_table_set_row_spacings(GTK_TABLE(table), 5);
-		gtk_table_set_row_spacings(GTK_TABLE(table), 5);
-		gtk_container_set_border_width(GTK_CONTAINER(table), 5);
-		vbox = gtk_vbox_new(FALSE, 5);
-		hbox = gtk_hbox_new(FALSE, 0);
-
-		/*Section for adding account*/
-
-		if(!con)
-		{
-			label = gtk_label_new("");
-			label_key = gtk_label_parse_uline(GTK_LABEL(label), _("_Account: "));
-			gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-			gtk_widget_show(label);
-			gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-			gtk_widget_show(hbox);
-	
-			account_name = gtk_entry_new();
-			if (cont == NULL)
-				gtk_signal_connect(GTK_OBJECT(GTK_ENTRY(account_name)), "changed",
-						GTK_SIGNAL_FUNC(set_con), NULL);
-			gtk_table_attach(GTK_TABLE(table), account_name, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-			gtk_widget_show(account_name);
-			gtk_widget_add_accelerator(account_name, "grab_focus", accel_group,
-					label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-	
-			/*Section for declaring the protocol & local account*/
-		      
-			hbox = gtk_hbox_new(FALSE, 0);
-	
-			label = gtk_label_new("");
-			label_key = gtk_label_parse_uline(GTK_LABEL(label), _("_Local account: "));
-			gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-			gtk_widget_show(label);
-			gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
-			gtk_widget_show(hbox);
-	
-			/*List of Local accounts*/
-	
-			{
-				GtkWidget *widget = gtk_menu_new();
-				service_list = gtk_option_menu_new();
-				gtk_widget_show(widget);
-				for (walk = accounts; walk; walk = walk->next) {
-					eb_local_account *ela = (eb_local_account *)walk->data;
-					if (ela) {
-						char str[255];
-						GtkWidget *w;
-						snprintf(str, sizeof(str), "[%s] %s", get_service_name(ela->service_id), ela->handle);
-						w = gtk_menu_item_new_with_label(str);
-						gtk_widget_show(w);
-						gtk_widget_set_name(w, str);
-						gtk_menu_append(GTK_MENU(widget), w);
-					}
-				}
-	
-				gtk_option_menu_set_menu(GTK_OPTION_MENU(service_list), widget);
-				gtk_option_menu_set_history(GTK_OPTION_MENU(service_list), 0);
-			}
-			gtk_table_attach(GTK_TABLE(table), service_list, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
-			gtk_widget_show(service_list);
-			gtk_widget_add_accelerator(service_list, "grab_focus", accel_group,
-					label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-		}
-	
-		/*Section for Contact Name*/
-
-		hbox = gtk_hbox_new(FALSE, 0);
-
-		label = gtk_label_new("");
-		label_key = gtk_label_parse_uline(GTK_LABEL(label), _("_Contact: "));
-		gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-		gtk_widget_show(label);
-		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(hbox);
-
-		/*List of available contacts*/
-
-		contact_name = gtk_combo_new();
-		list = llist_to_glist(get_all_contacts(), 1);
-		gtk_combo_set_popdown_strings(GTK_COMBO(contact_name), list );
-		if(cont != NULL)
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(contact_name)->entry), cont->nick);
-		else
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(contact_name)->entry), "");
-		g_list_free(list);
-		contact_input_handler = gtk_signal_connect(GTK_OBJECT(GTK_ENTRY(GTK_COMBO(contact_name)->entry)), "changed",
-													GTK_SIGNAL_FUNC(con_modified), NULL);
-		gtk_table_attach(GTK_TABLE(table), contact_name, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(contact_name);
-		gtk_widget_add_accelerator(GTK_COMBO(contact_name)->entry, "grab_focus", accel_group,
-				label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-
-
-		/*Section for Group declaration*/
-
-		hbox = gtk_hbox_new(FALSE, 0);
-
-		label = gtk_label_new("");
-		label_key = gtk_label_parse_uline(GTK_LABEL(label), _("_Group: "));
-		gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-		gtk_widget_show(label);
-		gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(hbox);
-
-		/*List of available groups*/
-
-		group_name = gtk_combo_new();
-		list = llist_to_glist(get_groups(), 1);
-		gtk_combo_set_popdown_strings(GTK_COMBO(group_name), list );
-
-		if(strlen(COMBO_TEXT(group_name)) == 0) {
-			if(cont != NULL)
-				gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group_name)->entry), cont->group->name);
-			else if (grp != NULL)
-				gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group_name)->entry), grp->name);
-			else				
-				gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group_name)->entry), _("Buddies"));
-		} else if(cont != NULL) {
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group_name)->entry), cont->group->name);
-	        } else if (grp != NULL) {
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(group_name)->entry), grp->name);
-		}
-		g_list_free(list);
-		gtk_signal_connect(GTK_OBJECT(GTK_COMBO(group_name)->entry), "changed",
-		  			GTK_SIGNAL_FUNC(dif_group), NULL);
-		gtk_table_attach(GTK_TABLE(table), group_name, 1, 2, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(group_name);
-		gtk_widget_add_accelerator(GTK_COMBO(group_name)->entry, "grab_focus", accel_group,
-				label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-
-
-		if(con)
-		{
-			/* Default service */
-			
-			label = gtk_label_new("");
-			label_key = gtk_label_parse_uline(GTK_LABEL(label), _("Default _Protocol: "));
-			gtk_box_pack_end(GTK_BOX(hbox),label, FALSE, FALSE, 5);
-			gtk_widget_show(label);
-			gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3, GTK_FILL, GTK_FILL,
-					0, 0);
-			gtk_widget_show(hbox);
-	
-			
-			{
-				GtkWidget *widget = gtk_menu_new();
-				LList *l, *l2;
-				int i, def=0;
-				service_list = gtk_option_menu_new();
-				gtk_widget_show(widget);
-				l2 = get_service_list();
-				for(i=0, l=l2; l; i++, l=l_list_next(l)) {
-					char *label = l->data;
-					GtkWidget *w = gtk_menu_item_new_with_label(label);
-					gtk_widget_show(w);
-					gtk_widget_set_name(w, label);
-					gtk_menu_append(GTK_MENU(widget), w);
-					if(!strcmp(eb_services[con->default_chatb].name, label))
-						def=i;
-				}
-				l_list_free(l2);
-	
-				gtk_option_menu_set_menu(GTK_OPTION_MENU(service_list), widget);
-				gtk_option_menu_set_history(GTK_OPTION_MENU(service_list), def);
-			}
-			gtk_table_attach(GTK_TABLE(table), service_list, 1, 2, 2, 3,
-					GTK_FILL, GTK_FILL, 0, 0);
-			gtk_widget_show(service_list);
-			gtk_widget_add_accelerator(service_list, "grab_focus", accel_group,
-					label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-		}
-
-		/*Lets create a frame to put all of this in*/
-
-		frame = gtk_frame_new(NULL);
-		if(con) {
-			g_snprintf(buff, sizeof(buff), _("Edit Properties for %s"), con->nick);
-			gtk_frame_set_label(GTK_FRAME(frame), buff);
-		} else {
-			gtk_frame_set_label(GTK_FRAME(frame), _("Add Contact"));
-		}
-
-		gtk_container_add(GTK_CONTAINER(frame), table);
-		gtk_widget_show(table);
-
-		gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
-		gtk_widget_show(frame);
-
-		hbox = gtk_hbox_new(FALSE, 5);
-		hbox2 = gtk_hbox_new(TRUE, 5);
-
-		gtk_widget_set_usize(hbox2, 200,25);
-
-		/*Add/Save Button*/
-		if(con) {
-			button = gtkut_create_icon_button( _("Save"), tb_edit_xpm, add_contact_window );
-
-			gtk_signal_connect(GTK_OBJECT(button), "clicked", 
-					GTK_SIGNAL_FUNC(add_button_callback), NULL );
-		} else {
-			button = gtkut_create_icon_button( _("Add"), tb_preferences_xpm, add_contact_window );
-
-			gtk_signal_connect(GTK_OBJECT(button), "clicked", 
-					GTK_SIGNAL_FUNC(add_button_callback), NULL);
-		}
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-		gtk_widget_add_accelerator(button, "clicked", accel_group,
-				GDK_Return, 0, GTK_ACCEL_VISIBLE);
-		gtk_widget_add_accelerator(button, "clicked", accel_group,
-				GDK_KP_Enter, 0, GTK_ACCEL_VISIBLE);
-
-		/*Cancel Button*/
-		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, add_contact_window );
-
-		gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-						GTK_SIGNAL_FUNC(gtk_widget_destroy),
-						GTK_OBJECT(add_contact_window));
-	 	gtk_widget_show(hbox);     
-		gtk_widget_add_accelerator(button, "clicked", accel_group,
-				GDK_Escape, 0, GTK_ACCEL_VISIBLE);
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-
-		/*Buttons End*/
-
-		hbox = gtk_hbox_new(FALSE, 0);
-		table = gtk_table_new(1, 1, FALSE);
-
-		gtk_box_pack_end(GTK_BOX(hbox),hbox2, FALSE, FALSE, 0);
-		gtk_widget_show(hbox2);      
-
-		gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-		gtk_widget_show(hbox);
-
-		gtk_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(vbox);
-
-		gtk_container_add(GTK_CONTAINER(add_contact_window), table);
-		gtk_widget_show(table);
-
-		if(con) {
-			g_snprintf(buff, sizeof(buff), _("%s - Edit Contact"), con->nick);
-			gtk_window_set_title(GTK_WINDOW(add_contact_window), buff ); 
-		} else {
-			gtk_window_set_title(GTK_WINDOW(add_contact_window), _("Ayttm - Add Contact"));
-			gtk_widget_grab_focus(account_name);
-		}
-		gtkut_set_window_icon( add_contact_window->window, NULL );
-		gtk_window_add_accel_group(GTK_WINDOW(add_contact_window), accel_group);
-		gtk_widget_show(add_contact_window);
-
-		gtk_signal_connect(GTK_OBJECT(add_contact_window), "destroy",
-					GTK_SIGNAL_FUNC(destroy), NULL);
-
-		window_open = 1;
+	if (!accounts) {
+		ay_do_error(_("No Local Accounts"), _("Cannot add contacts. You have not added any chat accounts yet"));
+		return;
 	}
+
+	accel_group = gtk_accel_group_new();
+
+	add_contact_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_transient_for(GTK_WINDOW(add_contact_window), GTK_WINDOW(statuswindow));
+	gtk_window_set_position(GTK_WINDOW(add_contact_window), GTK_WIN_POS_MOUSE);
+	gtk_widget_realize(add_contact_window);
+	gtk_container_set_border_width(GTK_CONTAINER(add_contact_window), 5);      
+
+	table = gtk_table_new(4, 2, FALSE);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(table), 5);
+	vbox = gtk_vbox_new(FALSE, 5);
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	/*Section for adding account*/
+
+	label = gtk_label_new_with_mnemonic( _("_Account: ") );
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
+	gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	gtk_widget_show(label);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(hbox);
+
+	account_name = gtk_entry_new();
+	if (cont == NULL)
+		g_signal_connect(account_name, "changed", G_CALLBACK(set_con), NULL);
+
+	gtk_table_attach(GTK_TABLE(table), account_name, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(account_name);
+	gtk_widget_add_accelerator(account_name, "grab_focus", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
+
+	/*Section for declaring the protocol & local account*/
+      
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	label = gtk_label_new_with_mnemonic(_("_Local account: "));
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
+	gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	gtk_widget_show(label);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(hbox);
+
+	/*List of Local accounts*/
+
+	service_list = gtk_combo_box_new_text();
+	for (walk = accounts; walk; walk = walk->next) {
+		eb_local_account *ela = (eb_local_account *)walk->data;
+		if (ela) {
+			char str[255];
+			snprintf(str, sizeof(str), "[%s] %s", 
+					get_service_name(ela->service_id), ela->handle);
+
+			gtk_combo_box_append_text(GTK_COMBO_BOX(service_list), str);
+		}
+	}
+	gtk_combo_box_set_active(GTK_COMBO_BOX(service_list), 0);
+
+	gtk_table_attach(GTK_TABLE(table), service_list, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(service_list);
+	gtk_widget_add_accelerator(service_list, "grab_focus", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
+
+	/*Section for Contact Name*/
+
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	label = gtk_label_new_with_mnemonic(_("Contact: "));
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
+	gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	gtk_widget_show(label);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(hbox);
+
+	/*List of available contacts*/
+
+	contact_name = gtk_combo_box_entry_new_text();
+	list = llist_to_glist(get_all_contacts(), 1);
+
+	for(gwalker = list; gwalker; gwalker = g_list_next(gwalker))
+		gtk_combo_box_append_text( GTK_COMBO_BOX(contact_name), (char *) gwalker->data );
+
+	if(cont != NULL)
+		gtk_combo_box_set_active_text(GTK_COMBO_BOX(contact_name), cont->nick, g_list_length(list));
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(contact_name), -1);
+	g_list_free(list);
+
+	contact_input_handler = g_signal_connect(contact_name, "changed", G_CALLBACK(con_modified), NULL);
+	gtk_table_attach(GTK_TABLE(table), contact_name, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(contact_name);
+	gtk_widget_add_accelerator(contact_name, "grab_focus", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
+
+
+	/*Section for Group declaration*/
+
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	label = gtk_label_new_with_mnemonic(_("_Group: "));
+	label_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(label));
+	gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+	gtk_widget_show(label);
+	gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(hbox);
+
+	/*List of available groups*/
+
+	group_name = gtk_combo_box_entry_new_text();
+	list = llist_to_glist(get_groups(), 1);
+
+	for(gwalker = list; gwalker; gwalker = g_list_next(gwalker))
+		gtk_combo_box_append_text( GTK_COMBO_BOX(group_name), (char *) gwalker->data );
+
+	if( cont != NULL ) 
+		gtk_combo_box_set_active_text(GTK_COMBO_BOX(group_name), cont->group->name, g_list_length(list));
+	else if( grp != NULL ) 
+		gtk_combo_box_set_active_text(GTK_COMBO_BOX(group_name), grp->name, g_list_length(list));
+	else 
+		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(group_name)->child), _("Buddies"));
+
+	g_list_free(list);
+
+	g_signal_connect(group_name, "changed", G_CALLBACK(dif_group), NULL);
+	gtk_table_attach(GTK_TABLE(table), group_name, 1, 2, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(group_name);
+	gtk_widget_add_accelerator(group_name, "grab_focus", accel_group,
+			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
+
+
+	/*Lets create a frame to put all of this in*/
+
+	frame = gtk_frame_new(NULL);
+	gtk_frame_set_label(GTK_FRAME(frame), _("Add Contact"));
+
+	gtk_container_add(GTK_CONTAINER(frame), table);
+	gtk_widget_show(table);
+
+	gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
+	gtk_widget_show(frame);
+
+	hbox = gtk_hbox_new(FALSE, 5);
+	hbox2 = gtk_hbox_new(TRUE, 5);
+
+	gtk_widget_set_size_request(hbox2, 200,25);
+
+	/*Add/Save Button*/
+	button = gtkut_create_icon_button( _("Add"), tb_preferences_xpm, add_contact_window );
+	g_signal_connect(button, "clicked", G_CALLBACK(add_button_callback), NULL);
+
+	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
+	gtk_widget_show(button);
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+			GDK_Return, 0, GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+			GDK_KP_Enter, 0, GTK_ACCEL_VISIBLE);
+
+	/*Cancel Button*/
+	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, add_contact_window );
+
+	g_signal_connect_swapped(button, "clicked",
+			G_CALLBACK(gtk_widget_destroy),	add_contact_window);
+ 	gtk_widget_show(hbox);     
+	gtk_widget_add_accelerator(button, "clicked", accel_group,
+			GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+
+	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
+	gtk_widget_show(button);
+
+	/*Buttons End*/
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	table = gtk_table_new(1, 1, FALSE);
+
+	gtk_box_pack_end(GTK_BOX(hbox),hbox2, FALSE, FALSE, 0);
+	gtk_widget_show(hbox2);      
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_show(hbox);
+
+	gtk_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(vbox);
+
+	gtk_container_add(GTK_CONTAINER(add_contact_window), table);
+	gtk_widget_show(table);
+
+	gtk_window_set_title(GTK_WINDOW(add_contact_window), _("Ayttm - Add Contact"));
+	gtk_widget_grab_focus(account_name);
+	
+	gtk_window_add_accel_group(GTK_WINDOW(add_contact_window), accel_group);
+	gtk_widget_show(add_contact_window);
+
+	g_signal_connect(add_contact_window, "destroy", G_CALLBACK(destroy), NULL);
+
+	window_open = 1;
 }
 
 void show_add_contact_window()

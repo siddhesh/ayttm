@@ -74,6 +74,7 @@ typedef struct account {
         void * protocol_account_data;
 	void * list_item; /* GtkWidget */
 	void * status; /* GtkWidget */
+	char * tiptext;
 	void * pix; /* GtkWidget */
 	int icon_handler;
 	int online;

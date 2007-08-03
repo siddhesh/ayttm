@@ -60,6 +60,7 @@ typedef unsigned long ulong;
 #include "messages.h"
 #include "dialog.h"
 #include "offline_queue_mgmt.h"
+#include "libproxy/libproxy.h"
 
 #include "pixmaps/aim_online.xpm"
 #include "pixmaps/aim_away.xpm"
@@ -95,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.59 $",
-	"$Date: 2005/02/13 13:31:10 $",
+	"$Revision: 1.60 $",
+	"$Date: 2007/08/03 20:38:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -293,7 +294,7 @@ static LList *eb_toc_get_smileys(void)
 	return psmileys;
 }
 
-static char * eb_aim_check_login(char * user, char * pass)
+static char * eb_aim_check_login(const char * user, const char * pass)
 {
 	return NULL;
 }
@@ -858,7 +859,7 @@ static void ay_toc_connect_status(const char *msg, void *data)
 }
 
 
-static int eb_aim_async_socket(char *host, int port, void *cb, void *data)
+static int eb_aim_async_socket(const char *host, int port, void *cb, void *data)
 {
   int tag = proxy_connect_host(host, port, cb, data, (void *)ay_toc_connect_status);
   
@@ -962,7 +963,7 @@ static void eb_aim_logged_in (toc_conn *conn)
 }
 
 static void eb_aim_send_invite( eb_local_account * account, eb_chat_room * room,
-						 char * user, char * message)
+						 char * user, const char * message)
 {
 	struct eb_aim_local_account_data * alad;
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;

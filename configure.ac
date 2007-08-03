@@ -1,15 +1,15 @@
 # Process this file with autoconf to produce a configure script.
 dnl We use the new format of AC_INIT
 dnl info --file=autoconf.info --node="Initializing configure" for more info
-AC_INIT([Ayttm], [0.4.6], [ayttm-users@lists.sourceforge.net])
+AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=35
+RELEASE=0
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
-CORE_VERSION=20
+CORE_VERSION=21
 
 AM_CONFIG_HEADER(config.h)
 
@@ -59,8 +59,6 @@ LIBS="$LIBS -L/usr/local/lib"
 # Checks for libraries.
 AC_CHECK_LIB([audiofile], [_af_ulaw2linear])
 AC_CHECK_LIB([ltdl], [lt_dlopen])
-AC_CHECK_LIB([pspell], [pspell_manager_check])
-AC_CHECK_LIB([pspell], [aspell_speller_check])
 
 # Checks for header files.
 AC_PATH_XTRA
@@ -68,9 +66,18 @@ AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
-AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h pspell/pspell.h])
+AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h strings.h unistd.h iconv.h])
 AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
 AC_CHECK_HEADERS([sys/utsname.h])
+
+#Checking for pspell
+AC_CHECK_HEADER([pspell/pspell.h], [have_pspell_header=yes], [have_pspell_header=no])
+AC_CHECK_LIB([pspell], [pspell_manager_check], [have_pspell=yes], [have_pspell=no])
+AC_CHECK_LIB([pspell], [aspell_speller_check], [have_aspell=yes], [have_aspell=no])
+
+if test "$have_pspell_header" = "no" || test "$have_aspell" = "no" && test "$have_pspell" = "no"; then
+	AC_MSG_WARN([PSpell not found. Ayttm will be built without spell check.])
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
@@ -93,7 +100,7 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([atexit bzero dcgettext dup2 getcwd gethostbyname gethostname gettimeofday getwd hstrerror inet_ntoa isascii memchr memmove mempcpy memset mkdir modf munmap nl_langinfo pow select setlocale socket stpcpy strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul uname snprintf])
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify getopt_long getopt])
 
-ALL_LINGUAS="fr en_GB pt_BR de es nl sv"
+ALL_LINGUAS="fr en_GB pt_BR de es nl sv hi"
 AM_GNU_GETTEXT([external])
 
 ###############################################################################
@@ -186,10 +193,10 @@ if test "$arts" = yes ; then
     EB_LIBS="$EB_LIBS $ARTS_LIBS"
 fi
 
-AM_PATH_GLIB(1.2.0, [AC_DEFINE(HAVE_GLIB, 1, [Define if you have glib])],
-	AC_MSG_ERROR([Unable to find glib-devel version 1.2.0 or higher]))
-AM_PATH_GTK(1.2.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
-	AC_MSG_ERROR([Unable to find gtk-devel version 1.2.0 or higher]))
+AM_PATH_GLIB_2_0( , [AC_DEFINE(HAVE_GLIB, 1, [Define if you have glib])],
+	AC_MSG_ERROR([Unable to find glib-devel version 2.0.0 or higher]))
+AM_PATH_GTK_2_0( 2.6.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
+	AC_MSG_ERROR([Unable to find gtk-devel version 2.6.0 or higher]))
 
 AC_ARG_ENABLE(webcam, AC_HELP_STRING([--disable-webcam],
 		[Do not build webcam support]))
@@ -200,8 +207,6 @@ AC_ARG_ENABLE(jasper-filter, AC_HELP_STRING([--disable-jasper-filter],
 		[Do not build a jasper based jpeg2000 filter]))
 
 if test "$enable_webcam" != "no"; then
-    AM_PATH_GDK_PIXBUF(, [AC_DEFINE(HAVE_GDK_PIXBUF, 1, [Define if you have gdk-pixbuf])],
-        [AC_MSG_WARN([Unable to find gdk-pixbuf-devel, you won't be able to view webcams])])
 
     AC_MSG_CHECKING(for jasper)
     ac_check_lib_save_LIBS=$LIBS
@@ -239,18 +244,26 @@ ac_check_lib_save_CFLAGS=$CFLAGS
 CFLAGS="$SSL_INCLUDES $CFLAGS"
 AC_TRY_LINK([#include <openssl/opensslv.h>],
     [ return OPENSSL_VERSION_NUMBER; ],
-    [EB_LIBS="$EB_LIBS $SSL_LIBDIR -lssl -lcrypto"
-     EB_CFLAGS="$EB_CFLAGS $SSL_INCLUDES"
-    AC_DEFINE(HAVE_OPENSSL, 1, [Define if you have openssl])
-    AC_MSG_RESULT(yes)],
-    [enable_msn="no"
-    AC_MSG_RESULT(no)
-    AC_MSG_WARN([Unable to find openssl, you won't have MSN plugin])])
+    [have_openssl=yes], [have_openssl=no])
+
+if test "$have_openssl" = yes; then
+	EB_LIBS="$EB_LIBS $SSL_LIBDIR -lssl -lcrypto"
+	EB_CFLAGS="$EB_CFLAGS $SSL_INCLUDES"
+	AC_DEFINE(HAVE_OPENSSL, 1, [Define if you have openssl])
+	AC_MSG_RESULT([yes])
+else
+	enable_msn="no"
+	AC_MSG_RESULT(no)
+	AC_MSG_WARN([Unable to find openssl, you won't have MSN plugin])
+fi
+
+
 LIBS=$ac_check_lib_save_LIBS 
 CFLAGS=$ac_check_lib_save_CFLAGS
 
-EB_CFLAGS="$EB_CFLAGS $GLIB_CFLAGS $GTK_CFLAGS $GDK_PIXBUF_CFLAGS"
-EB_LIBS="$EB_LIBS $GLIB_LIBS $GTK_LIBS $GDK_PIXBUF_LIBS"
+GTK_CFLAGS="$GTK_CFLAGS -DGTK_DISABLE_DEPRECATED"
+EB_CFLAGS="$EB_CFLAGS $GLIB_CFLAGS $GTK_CFLAGS"
+EB_LIBS="$EB_LIBS $GLIB_LIBS $GTK_LIBS"
 
 
 ###############################################################################
@@ -291,28 +304,12 @@ if test "$have_xss" = yes; then
 	fi
 fi
 
-###########################################################################
-# Check for Xft stuff
-###########################################################################
-AC_ARG_ENABLE(xft, AC_HELP_STRING([--enable-xft],
-		[compile with anti-aliased font support]))
-if test "$enable_xft" = yes ; then
-	have_xft=no
-    XFT_CFLAGS=`xft-config --cflags`
-    XFT_LDFLAGS=`xft-config --libs`
-    CFLAGS="$CFLAGS $XFT_CFLAGS"
-    LDFLAGS="$LDFLAGS $XFT_LDFLAGS"
-    AC_CHECK_HEADER(X11/Xft/Xft.h, [
-	AC_CHECK_LIB(Xft, XftFontOpen, 
-            have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS"], 
-            [AC_CHECK_LIB(fontconfig, XftFontOpen,
-                have_xft=yes;[EB_LIBS="$EB_LIBS $XFT_LDFLAGS -lfontconfig"], ,
-                -L/usr/X11R6/lib -lX11 -lXft)],
-            -L/usr/X11R6/lib -lX11)
-    ])
-  if test "$have_xft" = yes; then
-    AC_DEFINE(HAVE_LIBXFT, , Define if we are to use AA)
-  fi
+AC_CHECK_HEADER(X11/xpm.h, [have_xpm=yes], [have_xpm=no], )
+
+if test "$have_xpm" = yes; then
+	AC_DEFINE(HAVE_XPM, , Define if we have XPM file support)
+else
+	AC_MSG_RESULT([Smiley support will not be built. Install the libxpm-dev package to get smiley support])
 fi
 
 ###########################################################################
@@ -330,7 +327,7 @@ AC_ARG_ENABLE(smtp, AC_HELP_STRING([--enable-smtp],
 AC_ARG_ENABLE(lj, AC_HELP_STRING([--enable-lj],
 		[include livejournal service]))
 AC_ARG_ENABLE(aycryption, AC_HELP_STRING([--disable-aycryption],
-		[exclude encryption utility]))
+ 		[exclude encryption utility]))
 AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
 		[exclude aim-toc service]))
 AC_ARG_ENABLE(icq_toc, AC_HELP_STRING([--disable-icq-toc],
@@ -393,7 +390,7 @@ if test "$enable_icq_toc" != no; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq-toc"
 fi
 if test "$enable_aycryption" != no; then
-	AM_PATH_GPGME(, [OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aycryption"], 
+	AM_PATH_GPGME(1.0.0, [OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aycryption"], 
 		AC_MSG_WARN(You need gpgme to compile the aycryption module))
 fi
 
@@ -427,6 +424,74 @@ AC_SUBST(EB_LDFLAGS)
 AC_SUBST(JASPER_LIBS)
 AC_SUBST(OPTIONAL_PLUG_DIR)
 AC_SUBST(DEBUG_LIBMSN)
+
+
+dnl ##########################################################################
+# Checking for an installed web browser
+
+printf "Looking for a Web browser... "
+
+if [ test -e /usr/bin/x-www-browser ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["x-www-browser"], [x-www-browser] )
+	AC_MSG_RESULT([x-www-browser])
+elif [ test -e /usr/bin/mozilla ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["mozilla"], [Mozilla])
+	AC_MSG_RESULT([mozilla])
+elif [ test -e /usr/bin/firefox ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["firefox"], [Firefox])
+	AC_MSG_RESULT([firefox])
+elif [ test -e /usr/bin/iceweasel ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["iceweasel"], [Iceweasel])
+	AC_MSG_RESULT([iceweasel])
+elif [ test -e /usr/bin/iceape ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["iceape"], [Iceape])
+	AC_MSG_RESULT([iceape])
+elif [ test -e /usr/bin/epiphany ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["epiphany"], [Epiphany])
+	AC_MSG_RESULT([epiphany])
+elif [ test -e /usr/bin/dillo ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["dillo"], [Dillo])
+	AC_MSG_RESULT([dillo])
+elif [ test -e /usr/bin/konqueror ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["konqueror"], [Konqueror])
+	AC_MSG_RESULT([konqueror])
+elif [ test -e /usr/bin/galeon ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["galeon"], [Galeon])
+	AC_MSG_RESULT([galeon])
+elif [ test -e /usr/bin/opera ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["opera"], [Opera])
+	AC_MSG_RESULT([opera])
+elif [ test -e /usr/bin/lynx ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["lynx"], [Lynx])
+	AC_MSG_RESULT([lynx])
+elif [ test -e /usr/bin/links ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["links"], [Links])
+	AC_MSG_RESULT([links])
+elif [ test -e /usr/bin/elinks ]; then
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["elinks"], [ELinks])
+	AC_MSG_RESULT([elinks])
+else
+	AC_MSG_WARN([Could not find any of the following browsers:
+		     x-www-browser 
+		     mozilla 
+		     firefox 
+		     iceape 
+		     iceweasel 
+		     epiphany 
+		     dillo 
+		     konqueror 
+		     galeon 
+		     opera 
+		     lynx 
+		     links 
+		     elinks
+Defaulting to x-www-browser since I don't know better. You can change it later from the Preferences menu])
+
+	AC_DEFINE(DEFAULT_WWW_BROWSER, ["x-www-browser"], [x-www-browser])
+fi
+
+dnl ##########################################################################
+
 
 HOST=`echo $host | sed -e 's/^[[^-]]*-[[^-]]*-\([[^-]]*\).*/\1/'`
 HOST=`echo $ECHO_N "${HOST%${HOST#?}} $ECHO_C" | tr a-z A-Z; echo ${HOST#?} | tr A-Z a-z`
@@ -465,7 +530,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  modules/jabber/libxode/include/Makefile
                  modules/msn2/Makefile
                  modules/msn2/libmsn2/Makefile
-		 modules/aycryption/Makefile
+                 modules/aycryption/Makefile
                  modules/utility/Makefile
                  modules/yahoo2/Makefile
                  modules/yahoo2/libyahoo2/Makefile
