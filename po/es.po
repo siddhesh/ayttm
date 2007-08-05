@@ -1,16 +1,16 @@
 # Ayttm Spanish Translation.
 # Copyright (C) 2003 Free Software Foundation, Inc.
-# Ricardo Mones <mones@aic.uniovi.es>, 2003.
+# Ricardo Mones <ricardo@mones.org>, 2003.
 #
 #: modules/aycryption/select-keys.c:593
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-04 01:16+0530\n"
-"PO-Revision-Date: 2003-12-02 17:22+0100\n"
-"Last-Translator: Ricardo Mones <mones@aic.uniovi.es>\n"
-"Language-Team: Ricardo Mones <mones@aic.uniovi.es>\n"
+"POT-Creation-Date: 2007-08-05 01:14+0200\n"
+"PO-Revision-Date: 2007-08-05 01:22+0100\n"
+"Last-Translator: Ricardo Mones <ricardo@mones.org>\n"
+"Language-Team: Ricardo Mones <ricardo@mones.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -199,12 +199,11 @@ msgstr "Obtenido un mensaje "
 
 #: modules/aycryption/aycryption.c:546
 msgid "encrypted"
-msgstr "encriptado"
+msgstr "cifrado"
 
 #: modules/aycryption/aycryption.c:546
-#, fuzzy
 msgid "unencrypted"
-msgstr "encriptado"
+msgstr "sin cifrar"
 
 #: modules/aycryption/aycryption.c:550
 msgid ", unsigned message."
@@ -224,7 +223,7 @@ msgstr " sin clave."
 
 #: modules/aycryption/aycryption.c:566
 msgid " message ; signature is valid but  the signing key has been revoked"
-msgstr ""
+msgstr " mensaje ; la firma es válida pero la clave de firma ha sido revocada"
 
 #: modules/aycryption/aycryption.c:569 modules/aycryption/aycryption.c:574
 msgid " correctly signed (by "
@@ -240,7 +239,7 @@ msgstr "), pero la clave ha caducado."
 
 #: modules/aycryption/aycryption.c:579
 msgid ") message, but there was an error verifying the signature"
-msgstr ""
+msgstr ") mensaje, pero hubo un error verificando la firma"
 
 #: modules/aycryption/aycryption.c:582
 msgid " message - Unknown signature status (file a bugreport)!"
@@ -315,16 +314,15 @@ msgid "[no user id]"
 msgstr "[sin id de usuario]"
 
 #: modules/aycryption/select-keys.c:641
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%sPlease enter the passphrase for:\n"
 "\n"
 "  %.*s  \n"
 msgstr ""
-"%sPor favor entre la frase contraseña para:\n"
+"%sPor favor introduzca la frase contraseña para:\n"
 "\n"
 "  %.*s  \n"
-"(%.*s)\n"
 
 #: modules/aycryption/select-keys.c:643
 msgid ""
@@ -698,9 +696,8 @@ msgid "_Username:"
 msgstr "_Usuario: "
 
 #: modules/jabber/jabber.c:473
-#, fuzzy
 msgid "Co_nnect Server:"
-msgstr "Servidor por defecto:"
+msgstr "Servidor de co_nexión:"
 
 #: modules/jabber/jabber.c:495
 msgid "Use _SSL"
@@ -741,7 +738,7 @@ msgstr "¿Registrarse? No está autorizado"
 #, c-format
 msgid ""
 "Do you want to try to create the account \"%s\" on the jabber server %s?"
-msgstr "¿Quiere intentar crear la cuenta \"%s\" en el servidor jabber %s?"
+msgstr "¿Quiere intentar crear la cuenta «%s» en el servidor jabber %s?"
 
 #: modules/jabber/libEBjabber.c:1070
 #, c-format
@@ -1290,58 +1287,59 @@ msgstr "Conexión con webcam cerrada"
 #: modules/yahoo2/yahoo.c:1837 modules/yahoo2/yahoo.c:1906
 #, c-format
 msgid "My webcam (%d viewer%s)"
-msgstr ""
+msgstr "Mi cámara web (%d observador%s)"
 
 #: modules/yahoo2/yahoo.c:1882
-#, fuzzy, c-format
+#, c-format
 msgid "%s, the yahoo user %s has stopped viewing your webcam."
-msgstr ""
-"%s, el usuario yahoo %s le ha invitado a ver su webcam. ¿Desea aceptar?"
+msgstr "%s, el usuario de yahoo %s ha dejado de ver su cámara web."
 
 #: modules/yahoo2/yahoo.c:1887
-#, fuzzy, c-format
+#, c-format
 msgid "%s, the yahoo user %s is viewing your webcam."
-msgstr "%s, el usuario de yahoo %s le ha añadido a su lista de contactos"
+msgstr "%s, el usuario de yahoo %s está viendo su cámara web."
 
 #: modules/yahoo2/yahoo.c:1892
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s, the yahoo user %s wants to view your webcam.\n"
 "Do you want to allow this?"
 msgstr ""
-"%s, el usuario yahoo %s le ha invitado a ver su webcam. ¿Desea aceptar?"
+"%s, el usuario de yahoo %s quiere ver su cámara web.\n"
+"¿Desea permitir ésto?"
 
 #: modules/yahoo2/yahoo.c:1896
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s, the yahoo user %s wants to %d your webcam.  Tell the ayttm devels about "
 "this."
-msgstr "%s, el usuario de yahoo %s le ha añadido a su lista de contactos"
+msgstr ""
+"%s, el usuario de yahoo %s quiere %d en su cámara web. Notifique a los "
+"desarrolladores de ayttm sobre esto."
 
 #: modules/yahoo2/yahoo.c:1904 modules/yahoo2/yahoo.c:1930
-#, fuzzy
 msgid "Yahoo Webcam"
-msgstr "Invitación de webcam Yahoo"
+msgstr "Cámara web Yahoo"
 
 #: modules/yahoo2/yahoo.c:1914
-#, fuzzy
 msgid "Yahoo Webcam Request"
-msgstr "Invitación de webcam Yahoo"
+msgstr "Petición de cámara web Yahoo"
 
 #: modules/yahoo2/yahoo.c:1930
 msgid "Could not read images from your webcam, could not find a video grabber."
 msgstr ""
+"No se pudieron leer imágenes de su cámara web, no se encontró un capturador "
+"de vídeo."
 
 #: modules/yahoo2/yahoo.c:1984
-#, fuzzy, c-format
+#, c-format
 msgid "%s, the yahoo user %s has declined your invitation to view your webcam."
 msgstr ""
-"%s, el usuario yahoo %s le ha invitado a ver su webcam. ¿Desea aceptar?"
+"%s, el usuario de yahoo %s ha declinado su invitación a ver su cámara web."
 
 #: modules/yahoo2/yahoo.c:1985
-#, fuzzy
 msgid "Webcam invite declined"
-msgstr "Conexión con webcam cerrada"
+msgstr "Invitación de cámara web declinada"
 
 #: modules/yahoo2/yahoo.c:2049
 #, c-format
@@ -1498,9 +1496,8 @@ msgid "Yahoo write error: Server closed socket"
 msgstr "Error de escritura Yahoo: el servidor cerró el socket"
 
 #: modules/yahoo2/yahoo.c:3575 modules/yahoo2/yahoo.c:3580
-#, fuzzy
 msgid "Invite to view Webcam"
-msgstr "Ver cámara web"
+msgstr "Invitar para ver cámara web"
 
 #: modules/yahoo2/yahoo.c:3589 modules/yahoo2/yahoo.c:3594
 msgid "View Webcam"
@@ -1570,9 +1567,8 @@ msgid "Account error"
 msgstr "Error en la cuenta"
 
 #: src/add_contact_window.c:225
-#, fuzzy
 msgid "No Account Name specified."
-msgstr "No se especificó la cuenta local."
+msgstr "No se especificó el nombre de la cuenta."
 
 #: src/add_contact_window.c:229 src/chat_room.c:752
 msgid "No local account specified."
@@ -1614,13 +1610,12 @@ msgid "Invalid Account"
 msgstr "Cuenta inválida"
 
 #: src/add_contact_window.c:313
-#, fuzzy
 msgid "No Local Accounts"
-msgstr "Cambiar cuenta local"
+msgstr "No hay cuentas locales"
 
 #: src/add_contact_window.c:313
 msgid "Cannot add contacts. You have not added any chat accounts yet"
-msgstr ""
+msgstr "No puedo añadir contactos. Aún no ha añadido ninguna cuenta de charla"
 
 #: src/add_contact_window.c:334
 msgid "_Account: "
@@ -1631,9 +1626,8 @@ msgid "_Local account: "
 msgstr "Cuenta _local: "
 
 #: src/add_contact_window.c:385
-#, fuzzy
 msgid "Contact: "
-msgstr "_Contacto: "
+msgstr "Contacto: "
 
 #: src/add_contact_window.c:417 src/edit_contact_window.c:126
 msgid "_Group: "
@@ -1663,7 +1657,7 @@ msgstr "Ausentarse"
 
 #: src/away_window.c:106
 msgid "You are currently away, click \"I'm back\" to return"
-msgstr "Esta actualmente ausente, pulse \"He vuelto\" para regresar"
+msgstr "Esta actualmente ausente, pulse «He vuelto» para regresar"
 
 #: src/away_window.c:111
 msgid ""
@@ -1965,16 +1959,13 @@ msgstr "<body bgcolor=#F9E589 width=*>%sConversación finalizada%s</body>\n"
 msgid "Allow"
 msgstr "Permitir"
 
-# $mones$ FIXME
 #: src/chat_window.c:2543
-#, fuzzy
 msgid "Allow Offline Messaging Ctrl+O"
-msgstr "Permitir mensajes sin conexión CTRL+O"
+msgstr "Permitir mensajes sin conexión Ctrl+O"
 
 #: src/chat_window.c:2586
-#, fuzzy
 msgid "Enable Sounds Ctrl+S"
-msgstr "Habilitar sonidos CTRL+S"
+msgstr "Habilitar sonidos Ctrl+S"
 
 #: src/chat_window.c:2607
 msgid "View Log CTRL+L"
@@ -2106,9 +2097,8 @@ msgid "Save"
 msgstr "Guardar"
 
 #: src/edit_contact_window.c:105
-#, fuzzy
 msgid "_Contact:"
-msgstr "_Contacto: "
+msgstr "_Contacto:"
 
 #: src/edit_contact_window.c:156
 msgid "Default _Protocol: "
@@ -2156,7 +2146,7 @@ msgstr "Reemplazar guardado"
 #: src/edit_list_window.c:469
 #, c-format
 msgid "You have to fill in \"%s\"."
-msgstr "Debe rellenar \"%s\"."
+msgstr "Debe rellenar «%s»."
 
 #: src/edit_list_window.c:470
 msgid "Input missing"
@@ -2218,10 +2208,10 @@ msgstr ""
 "a través de la página web.\n"
 "- para MSN: Utilice el nombre completo (usuario@dominio.com). Ha de "
 "registrar la cuenta a través de la página web.\n"
-"- para IRC. Utilice \"alias@servidor.com\" para conectar como alias a "
+"- para IRC. Utilice «alias@servidor.com» para conectar como alias a "
 "servidor.com. Deberá teclear la contraseña si la cuenta esta reservada en el "
 "servidor.\n"
-"- para Jabber: Utilice \"alias@servidor.com\" para conectar como alias a "
+"- para Jabber: Utilice «alias@servidor.com» para conectar como alias a "
 "servidor.com. Si la cuenta no existe se le preguntará si desea registrarse.\n"
 "- para SMTP: Utilice la dirección de correo que desee como remitente. "
 "Indique el servidor a usar en las preferencias. Aún no hay soporte para "
@@ -2304,7 +2294,7 @@ msgstr "Ayttm es realizado por:"
 
 #: src/gtk/about_window.c:157
 msgid "\"With a little help from\":"
-msgstr "\"Con la pequeña ayuda de\":"
+msgstr "«Con la pequeña ayuda de»:"
 
 #: src/gtk/about_window.c:178
 msgid "Ayttm is based on Everybuddy 0.4.3 which was brought to you by:"
@@ -2852,12 +2842,12 @@ msgstr "Error de módulo"
 
 #: src/plugin.c:207
 msgid "Cannot resolve symbol \"plugin_info\"."
-msgstr "No puedo resolver el símbolo \"plugin_info\"."
+msgstr "No puedo resolver el símbolo «plugin_info»."
 
 #: src/plugin.c:281
 #, c-format
 msgid "Cannot open module directory \"%s\"."
-msgstr "No puedo abrir el directorio de los módulos \"%s\"."
+msgstr "No puedo abrir el directorio de los módulos «%s»."
 
 #: src/plugin.c:282 src/plugin.c:422
 msgid "Plugin Warning"
@@ -2926,7 +2916,7 @@ msgstr ""
 #: src/status.c:287
 #, c-format
 msgid "Do you really want to delete group \"%s\"?"
-msgstr "¿Realmente quiere borrar el grupo \"%s\"?"
+msgstr "¿Realmente quiere borrar el grupo «%s»?"
 
 #: src/status.c:288 src/status.c:563
 msgid "Delete Group"
@@ -2935,7 +2925,7 @@ msgstr "Borrar grupo"
 #: src/status.c:311
 #, c-format
 msgid "Do you really want to delete contact \"%s\"?"
-msgstr "¿Realmente quiere borrar el contacto \"%s\"?"
+msgstr "¿Realmente quiere borrar el contacto «%s»?"
 
 #: src/status.c:312 src/status.c:661
 msgid "Delete Contact"
@@ -2944,21 +2934,19 @@ msgstr "Borrar contacto"
 #: src/status.c:333
 #, c-format
 msgid "Do you really want to delete account \"%s\"?"
-msgstr "¿Realmente quiere borrar la cuenta \"%s\"?"
+msgstr "¿Realmente quiere borrar la cuenta «%s»?"
 
 #: src/status.c:388
 msgid "Ayttm - history"
 msgstr "Ayttm - historia"
 
 #: src/status.c:555
-#, fuzzy
 msgid "Add contact to group"
-msgstr "Añadir contacto a un grupo..."
+msgstr "Añadir contacto a un grupo"
 
 #: src/status.c:560
-#, fuzzy
 msgid "Edit Group"
-msgstr "Editar grupo..."
+msgstr "Editar grupo"
 
 #: src/status.c:566
 msgid "Sort"
@@ -2970,14 +2958,12 @@ msgid "%s options"
 msgstr "%s opciones"
 
 #: src/status.c:655
-#, fuzzy
 msgid "Add Account to Contact"
-msgstr "Añadir cuenta a contacto..."
+msgstr "Añadir cuenta a contacto"
 
 #: src/status.c:658
-#, fuzzy
 msgid "Edit Contact"
-msgstr "Editar contacto..."
+msgstr "Editar contacto"
 
 #: src/status.c:669 src/trigger.c:381
 msgid "Edit Trigger"
@@ -3080,127 +3066,104 @@ msgid "eb_profile_function: calling callback\n"
 msgstr "eb_profile_function: llamando callback\n"
 
 #: src/status.c:2288
-#, fuzzy
 msgid "Sign o_n all"
-msgstr "/Charla/Conectar a todas"
+msgstr "Co_nectar a todas"
 
 #: src/status.c:2288
-#, fuzzy
 msgid "Sign onto all accounts"
-msgstr "Importar cuentas locales"
+msgstr "Conectar a todas las cuentas"
 
 #: src/status.c:2290
-#, fuzzy
 msgid "Sign o_ff all"
-msgstr "/Charla/Desconectar de todas"
+msgstr "De_sconectar de todas"
 
 #: src/status.c:2290
-#, fuzzy
 msgid "Sign off all accounts"
-msgstr "Importar cuentas locales"
+msgstr "Desconectar de todas las cuentas"
 
 #: src/status.c:2292
-#, fuzzy
 msgid "New group chat"
-msgstr "/Charla/Nuevo grupo de charla..."
+msgstr "Nuevo grupo de charla"
 
 #: src/status.c:2292
 msgid "Start a chat room for a group chat"
-msgstr ""
+msgstr "Iniciar una sala de charla para un grupo"
 
 #: src/status.c:2294
-#, fuzzy
 msgid "Set as _away"
-msgstr "Ausentarse"
+msgstr "Ponerse ausente"
 
 #: src/status.c:2294
 msgid "Set a Custom \"Away\" status"
-msgstr ""
+msgstr "Poner un estado «Ausente» de usuario"
 
 #: src/status.c:2296
-#, fuzzy
 msgid "_Quit"
-msgstr "/Charla/_Salir"
+msgstr "_Salir"
 
 #: src/status.c:2296
-#, fuzzy
 msgid "Close Ayttm"
-msgstr "Bienvenido a Ayttm"
+msgstr "Cerrar Ayttm"
 
 #: src/status.c:2298
-#, fuzzy
 msgid "_Preferences"
-msgstr "Preferencias de Ayttm"
+msgstr "_Preferencias"
 
 #: src/status.c:2298
-#, fuzzy
 msgid "Customize your Ayttm"
-msgstr "Bienvenido a Ayttm"
+msgstr "Configurar su Ayttm"
 
 #: src/status.c:2300
-#, fuzzy
 msgid "Add or _delete accounts"
-msgstr "/Editar/Aña_dir o borrar cuentas..."
+msgstr "Aña_dir o borrar cuentas"
 
 #: src/status.c:2301
-#, fuzzy
 msgid "Add or Delete chat accounts"
-msgstr "/Editar/Aña_dir o borrar cuentas..."
+msgstr "Aña_dir o borrar cuentas de charla"
 
 #: src/status.c:2303
-#, fuzzy
 msgid "Edit _accounts"
-msgstr "Editar cuenta"
+msgstr "Editar cuent_as"
 
 #: src/status.c:2303
-#, fuzzy
 msgid "Edit your account details"
-msgstr "Error: la cuenta existe"
+msgstr "Editar los detalles de la cuenta"
 
 #: src/status.c:2305
-#, fuzzy
 msgid "Add a _contact account"
-msgstr "/Editar/Añadir cuenta de _contacto..."
+msgstr "Añadir una cuenta de _contacto"
 
 #: src/status.c:2306
-#, fuzzy
 msgid "Add an account for a contact"
-msgstr "Añadir cuenta a contacto..."
+msgstr "Añadir una cuenta para un contacto"
 
 #: src/status.c:2308
-#, fuzzy
 msgid "Add a _group"
-msgstr "Añadir grupo"
+msgstr "Añadir un _grupo"
 
 #: src/status.c:2308
-#, fuzzy
 msgid "Add a contact group"
-msgstr "Añadir contacto a un grupo..."
+msgstr "Añadir un grupo de contactos"
 
 #: src/status.c:2311
-#, fuzzy
 msgid "_Web site"
-msgstr "/Ayuda/Página _web..."
+msgstr "Página _web"
 
 #: src/status.c:2313
-#, fuzzy
 msgid "_Manual"
-msgstr "/Ayuda/_Manual..."
+msgstr "_Manual"
 
 #: src/status.c:2316
-#, fuzzy
 msgid "_About Ayttm"
-msgstr "Acerca de Ayttm"
+msgstr "_Acerca de Ayttm"
 
 #: src/status.c:2318
-#, fuzzy
 msgid "Check for new _release"
-msgstr "/Ayuda/Comprobar si hay nueva ve_rsión"
+msgstr "Comprobar si hay una nueva ve_rsión"
 
 #: src/status.c:2322
-#, fuzzy
 msgid "Dump structures"
-msgstr "/Ayuda/Volcar estructuras"
+msgstr "Volcar estructuras"
 
 #: src/status.c:2526
 msgid "Contacts"
@@ -3318,7 +3281,7 @@ msgid ""
 "\n"
 "Should I move it?"
 msgstr ""
-"La cuenta \"%s\" ya existe en su lista de\n"
+"La cuenta «%s» ya existe en su lista de\n"
 "contactos en la siguiente ubicación\n"
 "\tGrupo: %s\n"
 "\tContacto: %s\n"
@@ -3368,105 +3331,3 @@ msgstr "No puedo conectar"
 #: src/util.c:1949
 msgid "Connection to the server failed."
 msgstr "Conexión con el servidor fallida."
-
-#~ msgid "Could not resolve host."
-#~ msgstr "No se pudo hallar el nombre del host."
-
-#~ msgid "aycryption error"
-#~ msgstr "error de aycryption"
-
-#~ msgid "You need gpgme version 0.3 for aycryption to work."
-#~ msgstr "Necesita gpgme versión 0.3 para que funcione aycryption."
-
-#~ msgid "uncrypted"
-#~ msgstr "desencriptado"
-
-#~ msgid " message with no signature."
-#~ msgstr " sin firma."
-
-#~ msgid " message ; error happened while checking signature."
-#~ msgstr " ; ocurrió un error al comprobar la firma."
-
-#~ msgid " message with more than one signature (their status differ)."
-#~ msgstr " con más de una firma (sus estados difieren)."
-
-#~ msgid "Profile for account %s"
-#~ msgstr "Perfil para la cuenta %s"
-
-#~ msgid "Yahoo logins do NOT have the %s part."
-#~ msgstr "Los nombres de Yahoo NO tienen parte %s."
-
-#~ msgid "View log"
-#~ msgstr "Ver traza"
-
-#~ msgid "Delete Group..."
-#~ msgstr "Borrar grupo..."
-
-#~ msgid "Delete Contact..."
-#~ msgstr "Borrar contacto..."
-
-#~ msgid "Edit Trigger..."
-#~ msgstr "Editar evento..."
-
-#~ msgid "View Log..."
-#~ msgstr "Ver traza..."
-
-#~ msgid "/_Chat"
-#~ msgstr "/_Charla"
-
-#~ msgid "/Chat/Set _status"
-#~ msgstr "/Charla/Establecer e_stado"
-
-#~ msgid "/Chat/---"
-#~ msgstr "/Charla/---"
-
-#~ msgid "/Chat/New _group chat..."
-#~ msgstr "/Charla/Nuevo _grupo de charla..."
-
-#~ msgid "/Chat/Set as _away..."
-#~ msgstr "/Charla/Ponerse ausente..."
-
-#~ msgid "/Chat/_Smileys"
-#~ msgstr "/Charla/_Sonrisas"
-
-#~ msgid "/_Edit"
-#~ msgstr "/_Editar"
-
-#~ msgid "/Edit/_Preferences..."
-#~ msgstr "/Editar/_Preferencias..."
-
-#~ msgid "/Edit/Edit _accounts..."
-#~ msgstr "/Editar/Editar cuent_as..."
-
-#~ msgid "/Edit/---"
-#~ msgstr "/Editar/---"
-
-#~ msgid "/Edit/Add a _group..."
-#~ msgstr "/Editar/Añadir a _grupo..."
-
-#~ msgid "/Edit/_Import"
-#~ msgstr "/Editar/_Importar"
-
-#~ msgid "/Edit/Set profi_le"
-#~ msgstr "/Editar/Establecer perfi_l"
-
-#~ msgid "/_Help"
-#~ msgstr "/_Ayuda"
-
-#~ msgid "/Help/---"
-#~ msgstr "/Ayuda/---"
-
-#~ msgid "/Help/_About Ayttm..."
-#~ msgstr "/Ayuda/_Acerca de Ayttm..."
-
-#~ msgid "/Chat/Set status"
-#~ msgstr "/Charla/Establecer estado"
-
-#~ msgid "/Chat/Set as away..."
-#~ msgstr "/Charla/Ponerse ausente..."
-
-#~ msgid "/Chat/Sign off all"
-#~ msgstr "/Charla/Desconectar de todas"
-
-#~ msgid "/Chat/Sign on all"
-#~ msgstr "/Charla/Conectar a todas"
