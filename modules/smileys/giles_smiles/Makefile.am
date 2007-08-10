@@ -1,6 +1,6 @@
 # Escaped the space with a backslash. make install would otherwise fail
 THEME_NAME= Giles\ Smileys
-smileydir = ${pkgdatadir}smileys/${THEME_NAME}
+smileydir = ${pkgdatadir}/smileys/"${THEME_NAME}"
 
 smiley_DATA = aysmile.rc \
 	dead.xpm embarrased.xpm grin.xpm indifferent.xpm \

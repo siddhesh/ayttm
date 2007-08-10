@@ -1,6 +1,6 @@
 # Escape space with a backslash. make install would otherwise fail
 THEME_NAME= Console\ Smileys
-smileydir = ${pkgdatadir}smileys/${THEME_NAME}
+smileydir = ${pkgdatadir}/smileys/"${THEME_NAME}"
 
 smiley_DATA = aysmile.rc \
 	blank.xpm blush.xpm confused.xpm cooldude.xpm \
