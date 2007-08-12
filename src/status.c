@@ -1870,7 +1870,9 @@ void drag_begin_callback
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 
-	gtk_tree_selection_get_selected(selection, &model, &iter);
+	if ( !gtk_tree_selection_get_selected(selection, &model, &iter) )
+		return;
+
 	path = gtk_tree_model_get_path(model, &iter);
 
 	pix = gtk_tree_view_create_row_drag_icon(GTK_TREE_VIEW(widget), path);
