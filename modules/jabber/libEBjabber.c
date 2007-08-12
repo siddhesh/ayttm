@@ -826,11 +826,14 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 						xmlnode_put_attrib(x, "id", "Roster");
 						jab_send (conn, x);
 						xmlnode_free(x);
-						eb_debug (DBG_JBR, "requesting agent list\n");
-						x = jutil_iqnew (JPACKET__GET, NS_AGENTS);
-						xmlnode_put_attrib(x, "id", "Agent List");
-						jab_send (conn, x);
-						xmlnode_free(x);
+
+						// Looks like this is deprecated
+//						eb_debug (DBG_JBR, "requesting agent list\n");
+//						x = jutil_iqnew (JPACKET__GET, NS_AGENTS);
+//						xmlnode_put_attrib(x, "id", "Agent List");
+//						jab_send (conn, x);
+//						xmlnode_free(x);
+
 						eb_debug(DBG_JBR,  "<Requested roster and agent list\n");
 						return;
 					}
