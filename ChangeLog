@@ -1,16 +1,123 @@
-* Wed Jul 25 2007 19:24  siddheshp  0.5.0-0
+Sun Aug 19 2007 06:29 UTC [siddheshp]
+
+- configure.ac:
+Added Strict checks for flex, bison and g++
+
+Sun Aug 12 2007 20:02 UTC [siddheshp]
+
+- modules/jabber/libEBjabber.c:
+"Agent List" seems to be deprecated
+(http://mailman.linuxpl.org/cicq/2006-March/004571.html) and
+hence gives a 501 error with gtalk.
+
+Sun Aug 12 2007 19:51 UTC [siddheshp]
+
+- src/status.c:
+Fixed crash when trying to drag nothing in status window
+
+Fri Aug 10 2007 20:10 UTC [siddheshp]
+
+- modules/smileys/: console_smileys/Makefile.am,
+- giles_smiles/Makefile.am:
+Fixed output directory names for smileys. I thought I had fixed
+this...
+
+Sun Aug 05 2007 11:38 UTC [siddheshp]
+
+- po/es.po:
+Updated Spanish Translation by Ricardo Mones
+
+Fri Aug 03 2007 20:38 UTC [siddheshp]
+
+- ChangeLog, ChangeLog-0.4.6-35, ChangeLog.cvs2cl, Makefile.am,
+- README, README.LINUX, configure.ac, gen, doc/Makefile.am,
+- doc/gtk2-porting.txt, libproxy/Makefile.am, libproxy/proxy.c,
+- m4/Makefile.am, mingw32/Makefile.am, modules/Makefile.am,
+- modules/aim-oscar/Makefile.am, modules/aim-oscar/aim-oscar.c,
+- modules/aim-oscar/libfaim/Makefile.am,
+- modules/aim-oscar/libfaim/include/Makefile.am,
+- modules/aim-oscar/libfaim/src/Makefile.am,
+- modules/aim-oscar/libfaim/src/rxhandlers.c,
+- modules/aim-toc/Makefile.am, modules/aim-toc/aim-toc.c,
+- modules/aim-toc/libtoc/Makefile.am,
+- modules/aim-toc/libtoc/libtoc.c, modules/aim-toc/libtoc/libtoc.h,
+- modules/aycryption/Makefile.am, modules/aycryption/aycryption.c,
+- modules/aycryption/select-keys.c,
+- modules/aycryption/select-keys.h, modules/icq/Makefile.am,
+- modules/icq/libicq/Makefile.am, modules/icq-toc/Makefile.am,
+- modules/icq-toc/icq-toc.c, modules/icq-toc/libtoc/Makefile.am,
+- modules/icq-toc/libtoc/libtoc.c, modules/icq-toc/libtoc/libtoc.h,
+- modules/image_filter/Makefile.am, modules/image_filter/img2jpc.c,
+- modules/importers/Makefile.am,
+- modules/importers/import_everybuddy.c,
+- modules/importers/importicq.c, modules/irc/Makefile.am,
+- modules/irc/irc.c, modules/jabber/Makefile.am,
+- modules/jabber/jabber.c, modules/jabber/libjabber/Makefile.am,
+- modules/jabber/libjabber/jid.c,
+- modules/jabber/libjabber/include/Makefile.am,
+- modules/jabber/libjabber/include/jabber/Makefile.am,
+- modules/jabber/libxode/Makefile.am,
+- modules/jabber/libxode/include/Makefile.am,
+- modules/livejournal/Makefile.am, modules/msn2/Makefile.am,
+- modules/msn2/msn.C, modules/msn2/libmsn2/Makefile.am,
+- modules/msn2/libmsn2/msn_bittybits.C,
+- modules/msn2/libmsn2/msn_core.h, modules/smileys/Makefile.am,
+- modules/smileys/smiley-themer.c,
+- modules/smileys/console_smileys/Makefile.am,
+- modules/smileys/giles_smiles/Makefile.am,
+- modules/smtp/Makefile.am, modules/smtp/smtp.c,
+- modules/utility/Makefile.am, modules/workwizu/Makefile.am,
+- modules/yahoo2/Makefile.am, modules/yahoo2/yahoo.c,
+- modules/yahoo2/libyahoo2/Makefile.am,
+- modules/yahoo2/libyahoo2/libyahoo2.c, pixmaps/Makefile.am,
+- po/LINGUAS, po/Makefile.in.in, po/de.po, po/en_GB.po, po/es.po,
+- po/fr.po, po/hi.po, po/nl.po, po/pt_BR.po, po/sv.po,
+- sounds/BuddyArrive.au, sounds/BuddyLeave.au, sounds/Makefile.am,
+- sounds/Receive.au, sounds/Send.au, src/Makefile.am, src/about.c,
+- src/account.h, src/account_parser.y, src/activity_bar.C,
+- src/add_contact_window.c, src/away_window.c, src/browser.c,
+- src/charconv.c, src/charconv.h, src/chat_room.c,
+- src/chat_window.c, src/chat_window.h, src/console_session.c,
+- src/contact.h, src/contact_actions.c, src/contact_parser.y,
+- src/crash.c, src/dialog.c, src/edit_account_window.c,
+- src/edit_contact_window.c, src/edit_group_window.c,
+- src/edit_list_window.c, src/edit_local_accounts.c,
+- src/file_select.c, src/file_select.h, src/image_window.c,
+- src/info_window.c, src/main.c, src/messages.c, src/nomodule.c,
+- src/plugin.c, src/plugin_api.c, src/service.c, src/service.h,
+- src/smileys.c, src/sound.c, src/status.c, src/status.h,
+- src/tcp_util.c, src/trigger.c, src/usercount.c, src/util.c,
+- src/util.h, src/gtk/Makefile.am, src/gtk/about_window.c,
+- src/gtk/extgtktext.c, src/gtk/extgtktext.h,
+- src/gtk/file_selection_dlg.C, src/gtk/gtk_eb_html.c,
+- src/gtk/gtk_eb_html.h, src/gtk/gtk_tree_view_tooltip.c,
+- src/gtk/gtk_tree_view_tooltip.h, src/gtk/gtkspell.c,
+- src/gtk/gtkspell.h, src/gtk/gtkutils.c, src/gtk/gtkutils.h,
+- src/gtk/html_text_buffer.c, src/gtk/html_text_buffer.h,
+- src/gtk/log_window.C, src/gtk/message_windows.c,
+- src/gtk/prefs_window.C:
+Merged gtk2-port into HEAD
+
+* Fri Aug 03 2007 16:47 UTC [siddheshp]
+
+- ChangeLog.cvs2cl:
+Sample Changelog using cvs2cl. Command `cvs2cl -b --gmt -f
+ChangeLog.cvs2cl`
+
+
+* Wed Jul 25 2007 19:24 UTC [siddheshp]  0.5.0-0
 
 - configure.ac, gen, modules/aim-oscar/aim-oscar.c,
 - modules/msn2/libmsn2/msn_core.h:
 Cleaned up some warnings
 
-* Sun Jul 22 2007 17:01  siddheshp
+* Sun Jul 22 2007 17:01 UTC [siddheshp]
 
 - sounds/: BuddyArrive.au, BuddyLeave.au, Receive.au, Send.au:
 Converted audio files to Sun/NEXT format. The old ones were wma
 audio files renamed to .au
 
-* Tue Jul 17 2007 18:25  siddheshp
+* Tue Jul 17 2007 18:25 UTC [siddheshp]
 
 - configure.ac, gen, po/LINGUAS, po/hi.po,
 - src/gtk/html_text_buffer.c:
@@ -20,12 +127,12 @@ Multiple changes and fixes:
 * Fixes in HTML parsing. Added html, title, pre and p tags to the parser.
 Also fixed case when upper case </A> tag is ignored
 
-* Mon Jul 09 2007 16:10  siddheshp
+* Mon Jul 09 2007 16:10 UTC [siddheshp]
 
 - src/gtk/html_text_buffer.c:
 Moved variable to start of block
 
-* Sun Jul 08 2007 18:51  siddheshp
+* Sun Jul 08 2007 18:51 UTC [siddheshp]
 
 - src/chat_window.c:
 Chat Autocompletion updates: 
@@ -33,7 +140,7 @@ Chat Autocompletion updates:
 * Use Right and left arrows to stop the autocompletion without changing
 cursor position
 
-* Thu Jul 05 2007 18:17  siddheshp
+* Thu Jul 05 2007 18:17 UTC [siddheshp]
 
 - src/gtk/html_text_buffer.c:
 Fixes for multiple bugs in the html parser:  
@@ -41,13 +148,13 @@ Fixes for multiple bugs in the html parser:
 * Apply unclosed tags in the end  
 * A stray < or > should not break the rest of the html following it
 
-* Mon Jun 25 2007 18:52  siddheshp
+* Mon Jun 25 2007 18:52 UTC [siddheshp]
 
 - configure.ac, src/browser.c:
 Look for installed browsers on ./configure instead of blindly
 defaulting to mozilla.
 
-* Sun Jun 17 2007 19:18  siddheshp
+* Sun Jun 17 2007 19:18 UTC [siddheshp]
 
 - modules/: aim-toc/aim-toc.c, aim-toc/libtoc/libtoc.c,
 - aycryption/aycryption.c, icq-toc/icq-toc.c,
@@ -56,7 +163,7 @@ defaulting to mozilla.
 - yahoo2/libyahoo2/libyahoo2.c:
 Got rid of some build warnings
 
-* Sun Jun 17 2007 19:10  siddheshp
+* Sun Jun 17 2007 19:10 UTC [siddheshp]
 
 - modules/yahoo2/yahoo.c:
 Logging out immediately after login would cause ayttm to lock up
@@ -73,35 +180,35 @@ Removing dead debian/ directory
 - mkinstalldirs:
 Added missing mkinstalldirs needed to build po/
 
-* Sun Apr 29 2007 18:27  siddheshp
+* Sun Apr 29 2007 18:27 UTC [siddheshp]
 
 - modules/aycryption/aycryption.c, src/contact.h (gtk2-port):
 Removed dependency of core on gpgme.
 
-* Sat Apr 28 2007 20:54  siddheshp
+* Sat Apr 28 2007 20:54 UTC [siddheshp]
 
 - src/gtk/html_text_buffer.c:
 Fixed bug where anything between a & and ; gets deleted in chat
 text
 
-* Sat Apr 28 2007 20:19  siddheshp
+* Sat Apr 28 2007 20:19 UTC [siddheshp]
 
 - modules/aycryption/Makefile.am, modules/aycryption/aycryption.c,
 - modules/aycryption/select-keys.c,
 - modules/aycryption/select-keys.h, src/contact.h, configure.ac:
 GPGME port from 0.x to 1.x
 
-* Wed Apr 25 2007 17:50  siddheshp
+* Wed Apr 25 2007 17:50 UTC [siddheshp]
 
 - src/charconv.c:
 Moved variable declarations to start of block
 
-* Tue Apr 24 2007 22:08  siddheshp
+* Tue Apr 24 2007 22:08 UTC [siddheshp]
 
 - configure.ac, src/Makefile.am:
 Removed check for GDK_PIXBUF since its part of gtk now.
 
-* Tue Apr 24 2007 21:57  siddheshp
+* Tue Apr 24 2007 21:57 UTC [siddheshp]
 
 - src/: Makefile.am, account_parser.y, charconv.c, charconv.h,
 - contact_parser.y:
@@ -109,34 +216,34 @@ Convert non-utf8 buddy name strings to utf8. This will also
 automatically import the old contact and account files if they're
 in some other non-utf8 charset.
 
-* Tue Apr 24 2007 21:50  siddheshp
+* Tue Apr 24 2007 21:50 UTC [siddheshp]
 
 - modules/msn2/msn.C:
 We don't need UTF-8 to native charset conversion -- gtk2 does
 UTF-8
 
-* Thu Apr 19 2007 18:45  siddheshp
+* Thu Apr 19 2007 18:45 UTC [siddheshp]
 
 - src/status.c:
 Sort contact list alphabetically -- patch by Philip Tellis
 
-* Sun Apr 15 2007 21:42  siddheshp
+* Sun Apr 15 2007 21:42 UTC [siddheshp]
 
 - modules/msn2/libmsn2/msn_bittybits.C:
 Allow special characters in msn friendly names
 
-* Sat Apr 14 2007 21:05  siddheshp
+* Sat Apr 14 2007 21:05 UTC [siddheshp]
 
 - src/gtk/prefs_window.C:
 The X should destroy the window; Joe user expects that.
 
-* Sat Apr 14 2007 20:27  siddheshp
+* Sat Apr 14 2007 20:27 UTC [siddheshp]
 
 - src/: chat_window.c, status.c:
 Fixed keyboard shortcuts for the chat window and the main window
 menu.
 
-* Thu Apr 12 2007 18:05  siddheshp
+* Thu Apr 12 2007 18:05 UTC [siddheshp]
 
 - modules/smtp/smtp.c, src/about.c:
 Corrected my email address
@@ -146,7 +253,7 @@ Corrected my email address
 - src/about.c: 
 added siddhesh's name to developers list
 
-* Thu Apr 05 2007 12:55  siddheshp
+* Thu Apr 05 2007 12:55 UTC [siddheshp]
 
 - src/: add_contact_window.c, away_window.c, chat_room.c,
 - chat_window.c, dialog.c, edit_account_window.c,
@@ -155,18 +262,18 @@ added siddhesh's name to developers list
 - gtk/html_text_buffer.c:
 Moved variable declarations to start of code blocks
 
-* Tue Apr 03 2007 21:37  siddheshp
+* Tue Apr 03 2007 21:37 UTC [siddheshp]
 
 - modules/importers/importicq.c:
 Fixed icqimport crash
 
-* Tue Apr 03 2007 20:57  siddheshp
+* Tue Apr 03 2007 20:57 UTC [siddheshp]
 
 - modules/: aim-oscar/libfaim/src/rxhandlers.c,
 - importers/import_everybuddy.c, importers/importicq.c:
 More issues caught by -Wall and also by --enable-smtp
 
-* Mon Apr 02 2004 20:41  siddheshp
+* Mon Apr 02 2004 20:41 UTC [siddheshp]
 
 - libproxy/proxy.c, modules/aycryption/select-keys.c,
 - modules/yahoo2/yahoo.c, src/add_contact_window.c,
@@ -182,7 +289,7 @@ More issues caught by -Wall and also by --enable-smtp
 Mother of all Oops'es -- I was not building with -Wall. NOW most
 of the port is done... I hope :)
 
-* Mon Mar 26 2007 20:27  siddheshp
+* Mon Mar 26 2007 20:27 UTC [siddheshp]
 
 - ChangeLog, ChangeLog-0.4.6-35, README, README.LINUX, configure.ac:
 Updated ChangeLog and corrected some references to gtk1.2
