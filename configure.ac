@@ -18,10 +18,28 @@ AM_MAINTAINER_MODE
 # Checks for programs.
 AC_PROG_CC
 AC_ISC_POSIX
+
 AM_PROG_LEX
+# Got this from http://www.winehq.org/pipermail/wine-devel/2001-June/001254.html
+AC_CHECK_PROGS(XLEX, $LEX lex flex,none )
+if test "$XLEX" = "none"; then
+	AC_MSG_ERROR([No suitable scanner found. Please install 'lex' or 'flex' package])
+fi
+
 AC_PROG_YACC
+AC_CHECK_PROGS(XYACC, $YACC bison byacc yacc, none)
+if test "$XYACC" = "none"; then
+	AC_MSG_ERROR([No suitable parser found. Please install 'bison', 'yacc' or 'byacc' package])
+fi
+
 AC_PROG_CPP
+
 AC_PROG_CXX
+AC_CHECK_PROGS(XCXX, g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC, none)
+if test "$XCXX" = "none"; then
+	AC_MSG_ERROR([No suitable c++ compiler found. Please install an appropriate c++ compiler for your system])
+fi
+
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
