@@ -12,7 +12,6 @@ libfaim_la_SOURCES = \
 	chat.c \
 	chatnav.c \
 	conn.c \
-	CVS \
 	email.c \
 	ft.c \
 	icq.c \
