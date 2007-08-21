@@ -22,7 +22,6 @@ CLEANFILES = $(Utilities_DATA) $(gnome_DATA) $(sysconf_DATA)
 	@echo Name=@PACKAGE@ >> @PACKAGE@.desktop;
 	@echo Exec=${bindir}/@PACKAGE@ >> @PACKAGE@.desktop;
 	@echo Icon=${datadir}/pixmaps/ayttm.png >> @PACKAGE@.desktop;
-	@echo Info=@PACKAGE@ >> @PACKAGE@.desktop;
 	@echo Comment=\"The GTK Unified Messaging Client\">>@PACKAGE@.desktop;
 	@echo Terminal=0 >> @PACKAGE@.desktop;
 	@echo Type=Application >> @PACKAGE@.desktop;

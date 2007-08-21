@@ -1,59 +1,66 @@
-.\" Copyright (c) 2003, Tahir Hashmi
+.\" Copyright (C) 2003, Tahir Hashmi
+.\" Copyright (C) 2007, Kartik Mistry <kartik.mistry@gmail.com>
 .\"
-.\" This is free documentation; you can redistribute it and/or
-.\" modify it under the terms of the GNU General Public License as
-.\" published by the Free Software Foundation; either version 2 of
-.\" the License, or (at your option) any later version.
+.\" This is free documentation; you can redistribute it and/or modify it under
+.\" the terms of the GNU General Public License as published by the Free Software
+.\" Foundation; either version 2 of the License, or (at your option) any later
+.\" version.
 .\"
-.\" The GNU General Public License's references to "object code"
-.\" and "executables" are to be interpreted as the output of any
-.\" document formatting or typesetting system, including
-.\" intermediate and printed output.
+.\" The GNU General Public License's references to "object code" and "executables"
+.\" are to be interpreted as the output of any document formatting or typesetting
+.\" system, including intermediate and printed output.
 .\"
-.\" This manual is distributed in the hope that it will be useful,
-.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
-.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-.\" GNU General Public License for more details.
+.\" This manual is distributed in the hope that it will be useful, but WITHOUT
+.\" ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+.\" FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+.\" details.
 .\"
-.\" You should have received a copy of the GNU General Public
-.\" License along with this manual; if not, write to the Free
-.\" Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
-.\" USA.
+.\" You should have received a copy of the GNU General Public License along with
+.\" this manual; if not, write to the Free Software Foundation, Inc., 51 Franklin
+.\" St, Fifth Floor, Boston, MA  02110-1301 USA
 .TH Ayttm 1
 .SH NAME
 Ayttm \- Universal Instant Messaging client
 .SH SYNOPSIS
-.TP 5
-\fBayttm\fR [options]
+.B ayttm
+[\fIoptions\fR]...
+.SH DESCRIPTION
+.PP
+Ayttm is an instant messaging (aka chat) client that provides all-in-one chat
+functionality for several major instant messaging services from one simple
+program. Ayttm "Contacts" allow you to refer to several accounts of the same
+person from a single contact name, making it one of the cleanest and simplest
+clients to use.
 .SH OPTIONS
 .TP
-.B -h | --help  
+\fB\-h\fR, \fB\-\-help\fR
 Display help and exit
 .TP
-.B  -v | --version  
+\fB\-v\fR, \fB\-\-version\fR
 Output version information and exit
 .TP
-.B  -g | --geometry  
+\fB\-g\fR, \fB\-\-geometry\fR
 Set position of main window
 .TP
-.B  -d | --config-dir  
+\fB\-d, \fB\-\-config-dir\fR
 Specify configuration directory
 .TP
-.B  -D | --disable-server  
+\fB\-D, \fB-\-disable-server\fR
 Disable console message server
 .TP
-.B  -c | --contact  
+\fB\-c, \fB\-\-contact\fR
 Specify contact to send a message to via console server
 .TP
-.B  -m | --message  
-Specify the message to send via console server (Note:  -c and -m must be used toegether)
+\fB\-m\fR, \fB\-\-message\fR
+Specify the message to send via console server (Note:  \-c and \-m must be used
+together)
 .SH DESCRIPTION
-\fBAyttm\fR is a unified multi-protocol Instant Messaging client that
-allows you to stay in touch with your contacts across multiple
-protocols through one conventient interface.
+\fBAyttm\fR is a unified multi-protocol Instant Messaging client that allows you
+to stay in touch with your contacts across multiple protocols through one
+conventient interface.
 .PP
-Currently \fBAyttm\fR supports AIM, ICQ, IRC, Jabber, MSN and
-Yahoo!. A detailed list of features is available at:
+Currently \fBAyttm\fR supports AIM, ICQ, IRC, Jabber, MSN and Yahoo!. A detailed
+list of features is available at:
 .br
 \fIhttp://ayttm.sourceforge.net/features.shtml\fR
 .SH FILES
@@ -65,32 +72,32 @@ $(HOME)/.ayttm/logs/ \- conversation logs
 .br
 $(HOME)/.ayttm/prefs \- preferences
 .SH FEEDBACK
-For submitting bug reports, patches, feature requests and support
-requests, please use the Sourceforge.net tracker for \fBAyttm\fR at
+For submitting bug reports, patches, feature requests and support requests, please
+use the Sourceforge.net tracker for \fBAyttm\fR at
 \fIhttp://sourceforge.net/tracker/?group_id=77614\fR
 .PP
-Before sending a bug report, please verify that you have the latest 
-version of \fBAyttm\fR.  Many bugs (major and minor) are fixed 
-at each release, and if yours is out of date, the problem may already 
-have been solved.
+Before sending a bug report, please verify that you have the latest version of
+\fBAyttm\fR.  Many bugs (major and minor) are fixed at each release, and if
+yours is out of date, the problem may already have been solved.
 .SH SEE ALSO
 Ayttm Home Page: \fIhttp://ayttm.sourceforge.net\fR
 .br
 Ayttm User Manual: \fIhttp://ayttm.sourceforge.net/ayttm-manual\fR
 .SH LICENCE
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
 .PP
 This program is distributed in the hope that it will be useful, but
-\fBWITHOUT ANY WARRANTY\fR; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
-General Public License for more details.
+\fBWITHOUT ANY WARRANTY\fR; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+more details.
 .PP
-You should have received a copy of the GNU General Public License 
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
+St, Fifth Floor, Boston, MA  02110-1301 USA
+
 .SH AUTHORS
 The authors of \fBAyttm\fR are:
 .PP
@@ -103,13 +110,14 @@ Philip S. Tellis <philip.tellis@iname.com> Yahoo!
 Edward L. Haletky <elh@astroarch.com> Windows Port
 .br
 Tahir Hashmi <code_martial@softhome.net> Manual, Doc.
+.br
+Siddhesh Poyarekar <siddhesh.poyarekar@gmail.com>
 .PP
-This manpage was adapted from one written by Laurel Fan
-<lf25@andrew.cmu.edu> for \fBEveryBuddy\fR.
+This manpage was adapted from one written by Laurel Fan <lf25@andrew.cmu.edu>
+for \fBEveryBuddy\fR.
 .SH ACKNOWLEDGEMENTS
-\fBAyttm\fR is an heir of \fBEveryBuddy\fR
-(\fIhttp://www.everybuddy.com\fR). We would like to thank the
-EveryBuddy development team for their contribution.
+\fBAyttm\fR is an heir of \fBEveryBuddy\fR (\fIhttp://www.everybuddy.com\fR).
+We would like to thank the EveryBuddy development team for their contribution.
 .PP
-Special thanks to Mark Spencer, initial creator of GAIM, for all of the
-tremendous support he has given.
+Special thanks to Mark Spencer, initial creator of GAIM, for all of the tremendous
+support he has given.
