@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.95 $",
-	"$Date: 2007/08/03 20:38:40 $",
+	"$Revision: 1.96 $",
+	"$Date: 2007/08/28 20:57:47 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -474,7 +474,7 @@ static int yahoo_to_eb_state_translation(int state)
 
 #define YAHOO_DEBUGLOG ext_yahoo_log
 
-static int ext_yahoo_log(char *fmt,...)
+static int ext_yahoo_log(const char *fmt,...)
 {
 	if(do_yahoo_debug) {
 		va_list ap;
@@ -696,7 +696,7 @@ static void eb_yahoo_decode_yahoo_colors(char *buffer, const char *msg)
 	LOG(("post-color buffer: %s", buffer));
 }
 
-static void ext_yahoo_status_changed(int id, char *who, int stat, char *msg, int away)
+static void ext_yahoo_status_changed(int id, const char *who, int stat, const char *msg, int away, int idle, int mobile)
 {
 	eb_account *ea;
 	eb_yahoo_account_data *yad;
@@ -895,7 +895,7 @@ static void ext_yahoo_got_cookies(int id)
 	yahoo_get_yab(id);
 }
 
-static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, int utf8)
+static void ext_yahoo_got_im(int id, const char *me, const char *who, const char *msg, long tm, int stat, int utf8)
 {
 	if(stat == 2) {
 		LOG(("Error sending message to %s", who));
@@ -907,7 +907,7 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 		eb_local_account *receiver = NULL;
 		char buff[2048];
 
-		char *umsg = msg;
+		char *umsg = (char *) msg;
 		if(utf8)
 			umsg = y_utf8_to_str(msg);
 
@@ -944,6 +944,13 @@ static void ext_yahoo_got_im(int id, char *who, char *msg, long tm, int stat, in
 			FREE(umsg);
 	}
 }
+
+
+static void ext_yahoo_got_ping ( int id, const char *errormsg )
+{
+	/* Not implemented yet */
+}
+
 
 /*************************************
  * File transfer code starts here
@@ -1076,7 +1083,10 @@ static void eb_yahoo_accept_file(gpointer data, int result)
 	}
 }
 
-static void ext_yahoo_got_file(int id, char *from, char *url, long expires, char *msg, char *fname, unsigned long fsize)
+static void ext_yahoo_got_file(int id, const char *me, const char *from, 
+			       const char *url, long expires, 
+			       const char *msg, const char *fname, 
+			       unsigned long fsize)
 {
 	char buff[1024];
 	eb_yahoo_file_transfer_data *yftd = g_new0(eb_yahoo_file_transfer_data, 1);
@@ -1194,7 +1204,8 @@ static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *fil
 /********************************
  * Conference code starts here
  */
-static void ext_yahoo_conf_userjoin(int id, char *who, char *room)
+static void ext_yahoo_conf_userjoin(int id, const char *me, const char *who, 
+				    const char *room)
 {
 	eb_chat_room *chat_room = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
@@ -1228,7 +1239,8 @@ static void ext_yahoo_conf_userjoin(int id, char *who, char *room)
 	ycrd->members = y_list_append(ycrd->members, strdup(who));
 }
 
-static void ext_yahoo_conf_userleave(int id, char *who, char *room)
+static void ext_yahoo_conf_userleave(int id, const char *me, const char *who, 
+				     const char *room)
 {
 	eb_chat_room *chat_room = find_chat_room_by_id(room);
 	eb_yahoo_chat_room_data *ycrd;
@@ -1258,7 +1270,8 @@ static void ext_yahoo_conf_userleave(int id, char *who, char *room)
 	/* if no more users, then destroy? */
 }
 
-static void ext_yahoo_conf_userdecline(int id, char *who, char *room, char *msg)
+static void ext_yahoo_conf_userdecline(int id, const char*me, const char *who, 
+				       const char *room, const char *msg)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data * ylad = ela->protocol_local_account_data;
@@ -1303,7 +1316,8 @@ static void eb_yahoo_accept_conference(gpointer data, int result)
 	}
 }
 
-static void ext_yahoo_got_conf_invite(int id, char *who, char *room, char *msg, YList *members)
+static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who, 
+				      const char *room, const char *msg, YList *members)
 {
 	char buff[1024];
 	eb_yahoo_chat_room_data *ycrd = g_new0(eb_yahoo_chat_room_data, 1);
@@ -1378,7 +1392,8 @@ static void eb_yahoo_decline_invite(eb_local_account *ela, void * data)
 	yahoo_conference_decline(ycrd->id, ylad->act_id, ycrd->members, ycrd->room, _("Thanks, but no thanks"));
 }
 
-static void ext_yahoo_got_conf_invite(int id, char *who, char *room, char *msg, YList *members)
+static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who, 
+				      const char *room, const char *msg, YList *members)
 {
 	eb_chat_room * chat_room = NULL;
 	eb_yahoo_chat_room_data *ycrd = NULL;
@@ -1406,7 +1421,9 @@ static void ext_yahoo_got_conf_invite(int id, char *who, char *room, char *msg, 
 }
 #endif
 
-static void ext_yahoo_conf_message(int id, char *who, char *room, char *msg, int utf8)
+static void ext_yahoo_conf_message(int id, const char *me,
+				   const char *who, const char *room, 
+				   const char *msg, int utf8)
 {
 	int i=0, j=0;
 	unsigned char * umsg = (unsigned char *)msg;
@@ -1570,23 +1587,28 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela,
 /******************************
  * Yahoo Chat code starts here
  */
-static void ext_yahoo_chat_cat_xml(int id, char *xml) 
+static void ext_yahoo_chat_cat_xml(int id, const char *xml) 
 {
 }
 
-static void ext_yahoo_chat_join(int id, char *room, char * topic, YList *members, int fd)
+static void ext_yahoo_chat_join(int id, const char *me, const char *room, 
+				const char * topic, YList *members, int fd)
 {
 }
 
-static void ext_yahoo_chat_userjoin(int id, char *room, struct yahoo_chat_member *who)
+static void ext_yahoo_chat_userjoin(int id, const char *me, const char *room, 
+				    struct yahoo_chat_member *who)
 {
 }
 
-static void ext_yahoo_chat_userleave(int id, char *room, char *who)
+static void ext_yahoo_chat_userleave(int id, const char *me, const char *room, 
+				     const char *who)
 {
 }
 
-static void ext_yahoo_chat_message(int id, char *who, char *room, char *msg, int msgtype, int utf8)
+static void ext_yahoo_chat_message(int id, const char *me, const char *who, 
+				   const char *room, const char *msg, 
+				   int msgtype, int utf8)
 {
 }
 
@@ -1626,8 +1648,8 @@ static void _image_window_closed(int tag, void *data)
 }
 
 static void ext_yahoo_got_webcam_image(int id, const char *who,
-		const unsigned char *image, unsigned int image_size, unsigned int real_size,
-		unsigned int timestamp)
+				       const unsigned char *image, unsigned int image_size, 
+				       unsigned int real_size, unsigned int timestamp)
 {
 	struct webcam_feed *wf = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
@@ -1728,7 +1750,7 @@ static void ay_yahoo_view_users_webcam(ebmCallbackData *data)
 	yahoo_webcam_get_feed(ylad->id, who);
 }
 
-static void ext_yahoo_webcam_invite(int id, char *who)
+static void ext_yahoo_webcam_invite(int id, const char*me, const char *who)
 {
 	char buff[1024];
 	struct yahoo_authorize_data *wd = g_new0(struct yahoo_authorize_data, 1);
@@ -1756,7 +1778,7 @@ static void eb_yahoo_close_webcam_window(gpointer data, int result)
 	}
 }
 
-static void ext_yahoo_webcam_closed(int id, char *who, int reason)
+static void ext_yahoo_webcam_closed(int id, const char *who, int reason)
 {
 	struct webcam_feed *wf = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
@@ -1866,7 +1888,7 @@ static void ay_yahoo_authorise_webcam(gpointer data, int result)
 	free(wf);
 }
 
-static void ext_yahoo_webcam_viewer(int id, char *who, int connect)
+static void ext_yahoo_webcam_viewer(int id, const char *who, int connect)
 {
 	eb_local_account *ela;
 	eb_yahoo_local_account_data *yla;
@@ -1974,7 +1996,8 @@ static void ext_yahoo_webcam_data_request(int id, int send)
 	}
 }
 
-static void ext_yahoo_webcam_invite_reply(int id, char *from, int accept)
+static void ext_yahoo_webcam_invite_reply(int id, const char *me,
+					  const char *from, int accept)
 {
 	eb_local_account *ela;
 
@@ -2043,7 +2066,7 @@ static void eb_yahoo_authorize_callback(gpointer data, int result)
 		FREE(ay->who);
 	FREE(ay);
 }
-static void ext_yahoo_rejected(int id, char *who, char *msg)
+static void ext_yahoo_rejected(int id, const char *who, const char *msg)
 {
 	char buff[1024];
 	snprintf(buff, sizeof(buff), _("%s has rejected your request to be added as a buddy%s%s"),
@@ -2051,7 +2074,8 @@ static void ext_yahoo_rejected(int id, char *who, char *msg)
 	ay_do_warning( _("Yahoo Error"), buff );
 }
 
-static void ext_yahoo_contact_added(int id, char *myid, char *who, char *msg)
+static void ext_yahoo_contact_added(int id, const char *myid,
+				    const char *who, const char *msg)
 {
 	char buff[1024];
 	struct yahoo_authorize_data *ay = g_new0(struct yahoo_authorize_data, 1);
@@ -2124,7 +2148,8 @@ static int eb_yahoo_send_typing(eb_local_account *from, eb_account *to)
 	return 20;
 }
 
-static void ext_yahoo_typing_notify(int id, char *who, int stat)
+static void ext_yahoo_typing_notify(int id, const char *me, 
+				    const char *who, int stat)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	
@@ -2138,16 +2163,19 @@ static void ext_yahoo_typing_notify(int id, char *who, int stat)
 	}
 }
 
-static void ext_yahoo_got_search_result(int id, 
-		int found, int start, int total, YList *contacts)
+static void ext_yahoo_got_search_result(int id, int found,
+					int start, int total,
+					YList *contacts)
 {
 }
 
-static void ext_yahoo_game_notify(int id, char *who, int stat)
+static void ext_yahoo_game_notify(int id, const char *me, 
+				  const char *who, int stat)
 {
 }
 
-static void ext_yahoo_mail_notify(int id, char *from, char *subj, int cnt)
+static void ext_yahoo_mail_notify(int id, const char *from, 
+				  const char *subj, int cnt)
 {
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
@@ -2175,7 +2203,7 @@ static void ext_yahoo_mail_notify(int id, char *from, char *subj, int cnt)
 		ay_do_info( _("Yahoo Mail"), buff );
 }
 
-static void ext_yahoo_system_message(int id, char *msg)
+static void ext_yahoo_system_message(int id, const char *msg)
 {
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
@@ -2186,7 +2214,8 @@ static void ext_yahoo_system_message(int id, char *msg)
 	ay_do_info( _("Yahoo System Message"), msg );
 }
 
-static void ext_yahoo_error(int id, char *err, int fatal)
+static void ext_yahoo_error(int id, const char *err,
+			    int fatal, int num)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 
@@ -2307,7 +2336,7 @@ static void eb_yahoo_login(eb_local_account * ela)
 	}
 }
 
-static void ext_yahoo_login_response(int id, int succ, char *url)
+static void ext_yahoo_login_response(int id, int succ, const char *url)
 {
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad;
@@ -2459,7 +2488,7 @@ static void eb_yahoo_send_im(eb_local_account * account_from,
 
 	LOG(("eb_yahoo_send_im: %s => %s: %s", account_from->handle,
 	     account_to->handle, message));
-	yahoo_send_im(ylad->id, ylad->act_id, account_to->handle, encoded, 1);
+	yahoo_send_im(ylad->id, ylad->act_id, account_to->handle, encoded, 1, 0);
 
 	FREE(encoded);
 }
@@ -2778,7 +2807,9 @@ static void eb_yahoo_add_user(eb_account * ea)
 		yahoo_ignore_buddy(ylad->id, ea->handle, FALSE);
 	else {
 		struct yahoo_buddy b = {NULL, ea->handle, NULL, NULL };
-		yahoo_add_buddy(ylad->id, ea->handle, ea->account_contact->group->name);
+
+		// TODO: add the custom invite message
+		yahoo_add_buddy(ylad->id, ea->handle, ea->account_contact->group->name, NULL);
 		eb_yahoo_set_buddy_nick(ylad, &b, ea->account_contact->nick);
 	}
 	yahoo_refresh(ylad->id);
@@ -2883,7 +2914,8 @@ static void eb_yahoo_unignore_user(eb_account * ea, const char *new_group)
 
 			/* add him only if he was moved to another group */
 			if(new_group)
-				yahoo_add_buddy(ylad->id, ea->handle, new_group);
+				// TODO: Add custom invite message
+				yahoo_add_buddy(ylad->id, ea->handle, new_group, NULL);
 
 			yahoo_get_list(ylad->id);
 			return;
@@ -3131,7 +3163,8 @@ static void ay_yahoo_connect_status(const char *msg, void *data)
 	ay_activity_bar_update_label(ylad->connect_progress_tag, msg);
 }
 
-static int ext_yahoo_connect_async(int id, char *host, int port, yahoo_connect_callback callback, void *data)
+static int ext_yahoo_connect_async(int id, const char *host, int port, 
+				   yahoo_connect_callback callback, void *data)
 {
 #ifdef __MINGW32__
 	int fd = ay_socket_new(host,port);
@@ -3164,7 +3197,7 @@ static int ext_yahoo_connect_async(int id, char *host, int port, yahoo_connect_c
 #endif
 }
 
-static int ext_yahoo_connect(char *host, int port)
+static int ext_yahoo_connect(const char *host, int port)
 {
 	return ay_socket_new(host, port);
 }
@@ -3662,6 +3695,7 @@ static void register_callbacks()
 	yc.ext_yahoo_webcam_data_request = ext_yahoo_webcam_data_request;
 	yc.ext_yahoo_webcam_viewer = ext_yahoo_webcam_viewer;
 	yc.ext_yahoo_webcam_closed = ext_yahoo_webcam_closed;
+	yc.ext_yahoo_got_ping = ext_yahoo_got_ping;
 
 	yahoo_register_callbacks(&yc);
 	

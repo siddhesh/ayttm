@@ -35,7 +35,7 @@
 grouplist * find_grouplist_by_name(const char *name);
 struct contact * find_contact_in_group_by_nick(const char *nick, grouplist *group);
 struct contact * find_contact_by_nick(const char *nick);
-struct contact * find_contact_by_handle( char * handle );
+struct contact * find_contact_by_handle( const char * handle );
 eb_account * find_account_by_handle(const char *handle, const eb_local_account * ela);
 eb_account * find_account_by_handle_and_service(const char * handle, int service_id);
 

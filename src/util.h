@@ -91,7 +91,7 @@ eb_account * find_suitable_file_transfer_account( eb_account * first,
 						  struct contact * rest );
 grouplist * find_grouplist_by_nick(char * nick);
 grouplist * find_grouplist_by_name(const char * name);
-struct contact * find_contact_by_handle( char * handle );
+struct contact * find_contact_by_handle( const char * handle );
 struct contact * find_contact_by_nick( const char * nick);
 struct contact * find_contact_in_group_by_nick( const char * nick, grouplist *gl );
 eb_account * find_account_by_handle( const char * handle, int type );
@@ -105,7 +105,7 @@ void remove_group( grouplist * g );
 void add_group( const char * name );
 void rename_group( grouplist *g, const char * new_name );
 struct contact * add_new_contact( const char * group, const char * con, int type );
-struct contact * add_dummy_contact( char * con, eb_account * account );
+struct contact * add_dummy_contact( const char * con, eb_account * account );
 void clean_up_dummies(void);
 void add_unknown( eb_account * ea );
 void add_unknown_with_name( eb_account * ea, char * name );

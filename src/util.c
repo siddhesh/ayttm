@@ -596,7 +596,7 @@ eb_account * find_suitable_file_transfer_account( eb_account * first, struct con
 	return possibility;
 }
 	
-eb_chat_room * find_chat_room_by_id( char * id )
+eb_chat_room * find_chat_room_by_id( const char * id )
 {
 	LList * node = chat_rooms;
 	for( node= chat_rooms; node; node=node->next) {
@@ -672,7 +672,7 @@ grouplist * find_grouplist_by_nick(char * nick)
 	
 }
 
-struct contact * find_contact_by_handle( char * handle )
+struct contact * find_contact_by_handle( const char * handle )
 {
 	LList *l1, *l2, *l3;
 
@@ -1155,7 +1155,7 @@ struct contact * add_new_contact( const char * group, const char * con, int type
 }
 
 /* used to chat with someone without adding him to your buddy list */
-struct contact * add_dummy_contact(char * con, eb_account * ea)
+struct contact * add_dummy_contact(const char * con, eb_account * ea)
 {
 	struct contact * c = create_contact(con, ea->service_id);
 
@@ -1413,7 +1413,7 @@ static void process_invite( void *data, int result )
 }
 
 
-void invite_dialog( eb_local_account * ela, char * user, char * chat_room,
+void invite_dialog( eb_local_account * ela, const char * user, const char * chat_room,
 					void * id )
 {
 	char * message = g_strdup_printf(

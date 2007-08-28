@@ -1069,7 +1069,7 @@ static void destroy(GtkWidget * widget, gpointer data)
 	
 }
 
-static LList * find_chat_room_buddy( eb_chat_room * room, gchar * user )
+static LList * find_chat_room_buddy( eb_chat_room * room, const gchar * user )
 {
 	LList * node;
 	for( node = room->fellows; node; node = node->next)
@@ -1140,7 +1140,7 @@ gboolean eb_chat_room_buddy_connected(eb_chat_room * room, gchar * user)
 	return find_chat_room_buddy(room, user) != NULL;
 }
 
-static void eb_chat_room_private_log_reference(eb_chat_room *room, char *alias, char *handle)
+static void eb_chat_room_private_log_reference(eb_chat_room *room, const char *alias, const char *handle)
 {
 	struct contact	*con = find_contact_by_handle(handle);
 	const int		buff_size = 1024;
@@ -1179,7 +1179,7 @@ static void eb_chat_room_private_log_reference(eb_chat_room *room, char *alias, 
 	ay_log_file_destroy( &log );
 }
 
-void eb_chat_room_buddy_arrive( eb_chat_room * room, gchar * alias, gchar * handle )
+void eb_chat_room_buddy_arrive( eb_chat_room * room, const gchar * alias, const gchar * handle )
 {
 	eb_chat_room_buddy * ecrb = NULL;
         gchar *buf;
@@ -1207,7 +1207,7 @@ void eb_chat_room_buddy_arrive( eb_chat_room * room, gchar * alias, gchar * hand
 	eb_chat_room_refresh_list(room);
 }
 
-void eb_chat_room_buddy_leave( eb_chat_room * room, gchar * handle )
+void eb_chat_room_buddy_leave( eb_chat_room * room, const gchar * handle )
 {
 	LList * node = find_chat_room_buddy(room, handle);
 
@@ -1310,7 +1310,7 @@ void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, gchar * message)
 }
 
 void eb_chat_room_show_message( eb_chat_room * chat_room,
-				gchar * user, gchar * message )
+				const gchar * user, const gchar * message )
 {
 	gchar buff[2048];
 	gchar *temp_message, *link_message;

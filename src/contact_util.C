@@ -252,7 +252,7 @@ struct contact * find_contact_by_nick(const char *nick)
  *
  * @return	the contact or NULL if not found
  */
-struct contact * find_contact_by_handle( char * handle )
+struct contact * find_contact_by_handle( const char * handle )
 {
 	eb_account * account = hash.find(handle);
 	if(account)

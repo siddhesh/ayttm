@@ -46,10 +46,10 @@ extern "C" {
 
 void eb_join_chat_room( eb_chat_room * chat_room );
 void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, char * message);
-void eb_chat_room_show_message( eb_chat_room * chat_room, char * user, char * message );
+void eb_chat_room_show_message( eb_chat_room * chat_room, const char * user, const char * message );
 eb_chat_room* eb_start_chat_room( eb_local_account *ela, char * name , int is_public);
-void eb_chat_room_buddy_arrive( eb_chat_room * room, char * alias, char * handle );
-void eb_chat_room_buddy_leave( eb_chat_room * room, char * handle );
+void eb_chat_room_buddy_arrive( eb_chat_room * room, const char * alias, const char * handle );
+void eb_chat_room_buddy_leave( eb_chat_room * room, const char * handle );
 void eb_chat_room_refresh_list(eb_chat_room * room );
 int eb_chat_room_buddy_connected( eb_chat_room * room, char * user );
 void open_join_chat_window();
@@ -61,10 +61,10 @@ eb_chat_room* find_tabbed_chat_room(void);
 eb_chat_room *find_tabbed_chat_room_index (int current_page);
 void do_invite_window(void *widget, eb_chat_room * room );
 void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num);
-eb_chat_room * find_chat_room_by_id( char * id );
+eb_chat_room * find_chat_room_by_id( const char * id );
 eb_chat_room * find_chat_room_by_name( char * name, int service_id );
 LList * find_chatrooms_with_remote_account(eb_account *remote);
-void invite_dialog( eb_local_account * ela, char * user, char * chat_room,
+void invite_dialog( eb_local_account * ela, const char * user, const char * chat_room,
 		    void * id );
 void start_auto_chatrooms(eb_local_account *ela);
 
