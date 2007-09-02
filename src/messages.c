@@ -27,7 +27,7 @@ void	ay_do_info( const char *inTitle, const char *inMessage )
 {
 	GtkWidget *dialog;
 
-	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
+	dialog = gtk_message_dialog_new_with_markup(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
 			GTK_MESSAGE_INFO, GTK_BUTTONS_OK, inMessage);
 	gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
 	gtk_widget_show(dialog);

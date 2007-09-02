@@ -60,7 +60,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gnome/apps/Internet/@PACKAGE@.desktop
 %{_datadir}/applnk/Internet/@PACKAGE@.desktop
 # Install the modules
-%{_libdir}/@PACKAGE@/*.a   
 %{_libdir}/@PACKAGE@/*.la  
 %{_libdir}/@PACKAGE@/*.so 
 # Install translations

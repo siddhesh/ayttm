@@ -253,8 +253,26 @@ static char *check_login_validity(const gchar *text[])
 /* Callback for Help Button */
 static void help_callback(GtkWidget * widget, gpointer data)
 {
-	ay_do_info(_("Help"),
-		_("How to create and register accounts:\n"
+	const char *msg = _("<b><big>How to create and register accounts:</big></b>\n\n"
+				"<b>AIM, ICQ and Yahoo: </b>Use your screenname. "
+				"You have to register your account via website.\n\n"
+				"<b>MSN: </b>Use your complete login (user@host.com). "
+				"You have to register your account via website.\n\n"
+				"<b>IRC: </b>Use <i>login@server.com</i> in order to "
+				"connect as <i>login</i> to <i>server.com</i>. You have "
+				"to type in a password if the account is reserved on the "
+				"server.\n\n"
+				"<b>Jabber: </b>Use <i>login@server.com</i> in order to "
+				"login as <i>login</i> to <i>server.com</i>. If the "
+				"account does not exist, you'll be asked whether you want "
+				"to register.\n\n"
+				"<b>SMTP: </b>Use the email address you want as From address. "
+				"Set the server to use from the <i>Preferences</i> menu. "
+				"Passwords are not supported yet.");
+
+	ay_do_info(_("Help"), msg ) ;
+
+/*		_("How to create and register accounts:\n"
 			"- for AIM, ICQ and Yahoo: Use your screenname. "
 			"You have to register your account via website.\n"
 			"- for MSN: Use your complete login (user@host.com). "
@@ -269,7 +287,7 @@ static void help_callback(GtkWidget * widget, gpointer data)
 			"register.\n"
 			"- for SMTP: Use the email address you want as From "
 			"address. Set the server to use in prefs. Password "
-			"isn't supported yet."));
+			"isn't supported yet."));*/
 }
 
 /* ForEach function. Checks if the new account service has already been added */
