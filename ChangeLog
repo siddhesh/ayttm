@@ -1,3 +1,8 @@
+Sun Sep 9 2007 17:17 UTC [siddheshp]   0.5.0-13
+- ChangeLog, configure.ac, src/gtk/prefs_window.C:
+Replaced deprecated function. Patch by Scott Kitterman 
+on Debian bug report.
+
 Sun Sep 2 2007 19:06 UTC [siddheshp]   0.5.0-12
 
 - ChangeLog, ayttm.spec.in, src/edit_local_accounts.c,

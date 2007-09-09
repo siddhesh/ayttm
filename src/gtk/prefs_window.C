@@ -1134,7 +1134,7 @@ void	ay_prefs_window_panel::AddTopFrame( const char *in_text )
 	GtkWidget	*useless_event_box_because_of_stupid_gtk_colour_handling = gtk_event_box_new();
 	gtk_widget_show( useless_event_box_because_of_stupid_gtk_colour_handling );
 	gtk_widget_modify_style( useless_event_box_because_of_stupid_gtk_colour_handling, rc_style );
-	gtk_rc_style_unref( rc_style );
+	g_object_unref( rc_style );
 	gtk_container_add( GTK_CONTAINER(frame), useless_event_box_because_of_stupid_gtk_colour_handling );
 	
 	GtkWidget	*label = gtk_label_new( in_text );
