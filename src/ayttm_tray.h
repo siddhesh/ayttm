@@ -1,7 +1,7 @@
 /*
  * Ayttm 
  *
- * Copyright (C) 2003, the Ayttm team
+ * Copyright (C) 2007, the Ayttm team
  * 
  * Ayttm is derivative of Everybuddy
  * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
@@ -22,23 +22,15 @@
  *
  */
 
-#ifndef _DEBUG_H
-#define _DEBUG_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#ifndef __INCLUDE_AYTTM_TRAY_H__
+#define __INCLUDE_AYTTM_TRAY_H__
 
-#define eb_debug(type, format, args...) {if(type) {EB_DEBUG(__FUNCTION__, __FILE__, __LINE__, format, ##args);}}
-#ifdef __STDC__
-int EB_DEBUG(const char *func, char *file, int line, const char *fmt, ...);
-#else
-int EB_DEBUG(const char *func, char *file, int line, const char *fmt, va_alist);
-#endif
+GtkStatusIcon *ayttm_status_icon;
 
-#ifdef __cplusplus
-}  /* end extern "C" */
-#endif
+void ay_load_tray_icon ( GdkPixbuf *default_icon ) ;
+void ayttm_end_app(GtkWidget *widget, GdkEvent *event, gpointer data);
+void set_tray_menu_sensitive(gboolean online, unsigned int account_count);
 
 #endif
+

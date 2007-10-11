@@ -170,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.80 $",
-	"$Date: 2007/08/03 20:38:39 $",
+	"$Revision: 1.81 $",
+	"$Date: 2007/10/11 20:37:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -474,56 +474,56 @@ static void msn_init_account_prefs(eb_local_account *ela)
 	ela->prefs = il;
 	
 	il->widget.entry.value = ela->handle;
-	il->name = "SCREEN_NAME";
+	il->name = (char *)"SCREEN_NAME";
 	il->label= _("_MSN Login:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = mlad->password;
-	il->name = "PASSWORD";
+	il->name = (char *)"PASSWORD";
 	il->label= _("_Password:");
 	il->type = EB_INPUT_PASSWORD;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->prompt_password;
-	il->name = "prompt_password";
+	il->name = (char *)"prompt_password";
 	il->label= _("_Ask for password at Login time");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &ela->connect_at_startup;
-	il->name = "CONNECT";
+	il->name = (char *)"CONNECT";
 	il->label= _("_Connect at startup");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->login_invisible;
-	il->name = "LOGIN_INVISIBLE";
+	il->name = (char *)"LOGIN_INVISIBLE";
 	il->label= _("_Login invisible");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;	
 	il->widget.entry.value = mlad->fname_pref;
-	il->name = "fname_pref";
+	il->name = (char *)"fname_pref";
 	il->label = _("Friendly Name:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->do_mail_notify;
-	il->name = "do_mail_notify";
+	il->name = (char *)"do_mail_notify";
 	il->label = _("Tell me about new Hotmail/MSN mail");
 	il->type = EB_INPUT_CHECKBOX;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->do_mail_notify_folders;
-	il->name = "do_mail_notify_folders";
+	il->name = (char *)"do_mail_notify_folders";
 	il->label = _("Notify me about new mail even if it isn't in my Inbox");
 	il->type = EB_INPUT_CHECKBOX;
 
@@ -1281,7 +1281,7 @@ static void eb_msn_unignore_user(eb_account *ea, const char *new_group)
 	}
 }
 
-static char **eb_msn_get_status_pixmap( eb_account * account)
+static const char **eb_msn_get_status_pixmap( eb_account * account)
 {
 	eb_msn_account_data * mad = (eb_msn_account_data *)account->protocol_account_data;
 

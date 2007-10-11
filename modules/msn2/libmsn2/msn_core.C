@@ -230,7 +230,7 @@ void msn_send_typing(msnconn * conn)
   write(conn->sock, buf, strlen(buf));
 }
 
-void msn_add_to_list(msnconn * conn, char * list, char * username)
+void msn_add_to_list(msnconn * conn, const char * list, char * username)
 {
   snprintf(buf, sizeof(buf), "ADD %d %s %s %s\r\n", next_trid++, list, username, username);
 if(DEBUG)
@@ -540,7 +540,7 @@ void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_
 		 char *url = strdup(args[4]);
 		 https_data *hdata = (https_data *)malloc(sizeof(https_data));
 		 
-		 char *remote_host = "nexus.passport.com";
+		 char *remote_host = strdup("nexus.passport.com");
 	
 		 snprintf(buf, sizeof(buf), "GET /rdr/pprdr.asp HTTP/1.0\r\n\r\n");
 		 
@@ -1194,7 +1194,7 @@ void msn_handle_MSG(msnconn * conn, char ** args, int numargs)
   free(msg);
 }
 
-char * msn_find_in_mime(char * mime, char * header)
+char * msn_find_in_mime(char * mime, const char * header)
 {
   char * retval;
   int pos;
@@ -2388,7 +2388,7 @@ void msn_SB_ans(msnconn * conn, int trid, char ** args, int numargs, callback_da
   }
 }
 
-void msn_set_state(msnconn * conn, char * state)
+void msn_set_state(msnconn * conn, const char * state)
 {
   snprintf(buf, sizeof(buf), "CHG %d %s\r\n", next_trid, state);
   write(conn->sock, buf, strlen(buf));

@@ -80,7 +80,8 @@ class ay_log_window
 	
 	private:
 		void		Init( const char *inTitle );
-		void		AddIconToToolbar(char **inXPM, const char *inText, GCallback inSignal, GtkToolbar *ioToolbar);
+		void		AddIconToToolbar(const char **inXPM, const char *inText, 
+						 GCallback inSignal, GtkToolbar *ioToolbar);
 		
 		void		SetHTMLText( GSList* gl );
 		void		LoadInfo( void );
@@ -307,7 +308,7 @@ ay_log_window::~ay_log_window( void )
 }
 
 // AddIconToToolbar
-void	ay_log_window::AddIconToToolbar( char **inXPM, const char *inText, GCallback inSignal, GtkToolbar *ioToolbar )
+void	ay_log_window::AddIconToToolbar( const char **inXPM, const char *inText, GCallback inSignal, GtkToolbar *ioToolbar )
 {
 	GdkPixbuf	*icon = gdk_pixbuf_new_from_xpm_data( (const char **) inXPM );
 	GtkWidget	*iconwid = gtk_image_new_from_pixbuf(icon);

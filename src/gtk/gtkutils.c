@@ -50,19 +50,19 @@ GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage, Gt
 	return( button );
 }
 
-GtkWidget *gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent )
+GtkWidget *gtkut_create_icon_widget( const char **inXPM, GtkWidget *inParent )
 {
 	GtkWidget	*iconwid = NULL;
 	GdkPixbuf 	*buf = NULL;
 	
-	buf = gdk_pixbuf_new_from_xpm_data((const char **)inXPM);
+	buf = gdk_pixbuf_new_from_xpm_data(inXPM);
 	iconwid = gtk_image_new_from_pixbuf(buf);
 	gtk_widget_show(iconwid);
 
 	return (iconwid);
 }
 
-GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent )
+GtkWidget *gtkut_create_icon_button( const char *inLabel,  const char **inXPM, GtkWidget *inParent )
 {
 	GtkWidget	*button = NULL;
 	GtkWidget	*label = NULL;
@@ -113,7 +113,7 @@ GtkWidget *gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidge
 	return( button );
 }
 
-void    gtkut_set_pixbuf( eb_local_account *ela, char **inXPM, GdkPixbuf **outPixbuf ) 
+void    gtkut_set_pixbuf( eb_local_account *ela, const char **inXPM, GdkPixbuf **outPixbuf ) 
 {
 
 	if ( (inXPM == NULL) || (*outPixbuf == NULL) )
@@ -123,16 +123,16 @@ void    gtkut_set_pixbuf( eb_local_account *ela, char **inXPM, GdkPixbuf **outPi
 	 * reloads the pixbuf everytime regardless of whether it has changed
 	 * or not
 	 */
-	*outPixbuf = gdk_pixbuf_new_from_xpm_data((const char **)inXPM);
+	*outPixbuf = gdk_pixbuf_new_from_xpm_data(inXPM);
 }
 
-void	gtkut_set_pixbuf_from_xpm( char **inXPM, GdkPixbuf **outPixbuf )
+void	gtkut_set_pixbuf_from_xpm( const char **inXPM, GdkPixbuf **outPixbuf )
 {
 	if ( (inXPM == NULL) || (*outPixbuf == NULL) )
 		return;
 		
 #ifndef __MINGW32__
-	*outPixbuf = gdk_pixbuf_new_from_xpm_data( (const char **) inXPM );
+	*outPixbuf = gdk_pixbuf_new_from_xpm_data( inXPM );
 #endif
 }
 
@@ -274,13 +274,13 @@ GtkWidget	*gtkut_attach_submenu( GtkMenu *inMenu, const char *inLabel,
 	return( button );
 }
 
-void	gtkut_set_window_icon( GtkWindow *inWindow, gchar **inXPM )
+void	gtkut_set_window_icon( GtkWindow *inWindow, const gchar **inXPM )
 {
 	GdkPixbuf	*the_pixbuf = NULL;
 		
 	if ( inXPM != NULL )
 	{
-		the_pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **) inXPM );
+		the_pixbuf = gdk_pixbuf_new_from_xpm_data( inXPM );
 		gtk_window_set_icon( inWindow, the_pixbuf);
 	}
 }

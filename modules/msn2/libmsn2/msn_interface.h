@@ -14,7 +14,7 @@ void ext_register_sock(msnconn *conn, int s, int read, int write);
 void ext_unregister_sock(msnconn *conn, int s);
 int ext_is_sock_registered(msnconn *conn, int s);
 
-void ext_show_error(msnconn * conn, char * msg);
+void ext_show_error(msnconn * conn, const char * msg);
 
 void ext_buddy_set(msnconn * conn, char * buddy, char * friendlyname, char * state);
 
@@ -56,9 +56,9 @@ void ext_filetrans_invite(msnconn * conn, char * username, char * friendlyname, 
 void ext_netmeeting_invite(msnconn * conn, char * username, char * friendlyname, invitation_voice * inv);
 void ext_start_netmeeting(char *ip);
 
-void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long recv, unsigned long total);
+void ext_filetrans_progress(invitation_ftp * inv, const char * status, unsigned long recv, unsigned long total);
 
-void ext_filetrans_failed(invitation_ftp * inv, int error, char * message);
+void ext_filetrans_failed(invitation_ftp * inv, int error, const char * message);
 
 void ext_filetrans_success(invitation_ftp * inv);
 

@@ -63,6 +63,8 @@
 #include "edit_local_accounts.h"
 #include "spellcheck.h"
 
+#include "ayttm_tray.h"
+
 #include <pixmaps/ayttm.xpm>
 
 /* globals */
@@ -160,7 +162,8 @@ static void start_login(gboolean new)
 	GdkPixbuf *default_icon = gdk_pixbuf_new_from_xpm_data((const char **)ayttm_xpm);
 	gtk_window_set_default_icon(default_icon);
 
-	eb_status_window();
+	ay_load_tray_icon(default_icon);
+//	eb_status_window();
 
    	if (new)
 		ay_edit_local_accounts();
@@ -484,7 +487,7 @@ int main(int argc, char *argv[])
 	/*
 	 * Moved unload_modules() call to window delete event in status.c
 	 */
-	/*unload_modules(); */ // Need to unload what we load
+	unload_modules();  // Need to unload what we load
 
 	eb_debug(DBG_CORE, "Shutting sound down\n");
 	sound_shutdown();

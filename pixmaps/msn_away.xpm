@@ -1,5 +1,5 @@
 /* XPM */
-static char * msn_away_xpm[] = {
+static const char * msn_away_xpm[] = {
 "12 13 47 1",
 " 	c None",
 ".	c #929292",

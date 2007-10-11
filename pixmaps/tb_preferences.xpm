@@ -1,5 +1,5 @@
 /* XPM */
-static char * tb_preferences_xpm[] = {
+static const char * tb_preferences_xpm[] = {
 "24 24 53 1",
 " 	c None",
 ".	c #000000",

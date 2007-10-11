@@ -1,3 +1,22 @@
+Sun Oct 11 2007 20:38 UTC [siddheshp]   0.5.0-14
+- ChangeLog configure.ac modules/msn2/msn.C,
+- modules/msn2/libmsn2/msn_core.C,
+- modules/msn2/libmsn2/msn_core.h,
+- modules/msn2/libmsn2/msn_interface.C,
+- modules/msn2/libmsn2/msn_interface.h, pixmaps/action.xpm,
+- pixmaps/ayttm.xpm, pixmaps/cancel.xpm, pixmaps/error.xpm,
+- pixmaps/invite_btn.xpm, pixmaps/msn_away.xpm,
+- pixmaps/msn_online.xpm, pixmaps/ok.xpm, pixmaps/tb_edit.xpm
+- pixmaps/tb_no.xpm, pixmaps/tb_preferences.xpm,
+- pixmaps/tb_yes.xpm, src/Makefile.am, src/debug.h,
+- src/gtk_globals.h, src/main.c, src/plugin_api.c, src/plugin_api.h,
+- src/service.h, src/status.c, src/status.h, src/gtk/gtkutils.c,
+- src/gtk/gtkutils.h, src/gtk/html_text_buffer.c,
+- src/gtk/log_window.C, src/gtk/prefs_window.C, src/ayttm_tray.c,
+- src/ayttm_tray.h:
+* Fixed some warnings
+* We have a Tray Icon now :D
+
 Sun Sep 9 2007 17:17 UTC [siddheshp]   0.5.0-13
 - ChangeLog, configure.ac, src/gtk/prefs_window.C:
 Replaced deprecated function. Patch by Scott Kitterman 

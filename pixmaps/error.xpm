@@ -1,5 +1,5 @@
 /* XPM */
-static char *error_xpm[]={
+static const char *error_xpm[]={
 "48 48 395 2",
 "Qt c None",
 "dS c #33100e",

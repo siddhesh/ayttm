@@ -1,5 +1,5 @@
 /* XPM */
-static char * msn_online_xpm[] = {
+static const char * msn_online_xpm[] = {
 "12 13 75 1",
 " 	c None",
 ".	c #000000",

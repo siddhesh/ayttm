@@ -59,6 +59,8 @@
 #include "edit_local_accounts.h"
 #include "messages.h"
 
+#include "ayttm_tray.h"
+
 #include "gtk/gtkutils.h"
 #include "gtk/html_text_buffer.h"
 #include "gtk/gtk_tree_view_tooltip.h"
@@ -123,6 +125,7 @@ struct acctStatus
 
 
 /* globals - referenced in gtk_globals.h */
+GtkUIManager *ui_manager = NULL;
 GtkWidget *statuswindow = NULL;
 GtkWidget *away_menu = NULL;
 
@@ -174,31 +177,33 @@ void focus_statuswindow (void)
 	gdk_window_raise(statuswindow->window);
 }
 
-void delete_event( GtkWidget *widget,
-				   GdkEvent *event,
-				   gpointer data )
+gboolean delete_event( GtkWidget *widget, GdkEvent *event, gpointer data )
 {
 //	gchar *userrc = NULL;
 	
-	eb_debug(DBG_CORE, "Signing out...\n");
-	eb_sign_off_all();	
-	eb_debug(DBG_CORE, "Signed out\n");
-	
+
 	eb_save_size(statuswindow, NULL);
+	gtk_widget_hide(statuswindow);
+
+	return TRUE;
 
 	/* Moved call to unload_modules() here from main() since we're 
 	 * giving all modules functionality to add/delete submenus. With 
 	 * the window already gone in main(), unloads were spewing a lot
 	 * of warnings
 	 */
-	unload_modules(); // Need to unload what we load
-
 //	userrc = g_strconcat(config_dir, G_DIR_SEPARATOR_S, "menurc", NULL);
 //	gtk_item_factory_dump_rc(userrc, NULL, TRUE);
 //	g_free(userrc);
-	gtk_main_quit();
+//	gtk_main_quit();
 }
 
+void ayttm_end_app_from_menu( GtkWidget *widget, GdkEvent *event, gpointer data )
+{
+	delete_event(widget, event, data);
+
+	ayttm_end_app(widget, event, data);
+}
 
 static void send_file_callback(GtkWidget * w, eb_account * ea )
 {
@@ -1495,7 +1500,7 @@ void contact_update_status(struct contact * ec)
 		tmp = GDK_PIXBUF(ec->pix);
 
 		gtkut_set_pixbuf(ea->ela, 
-			RUN_SERVICE(ea)->get_status_pixmap(ea), 
+			(const char **)RUN_SERVICE(ea)->get_status_pixmap(ea), 
 			&tmp);
 
 		ec->pix = tmp;
@@ -1569,7 +1574,7 @@ void buddy_update_status(eb_account * ea)
 		tmpbuf = GDK_PIXBUF(ea->pix);
 		if (RUN_SERVICE(ea) && RUN_SERVICE(ea)->get_status_pixmap && ea->pix) {
 			gtkut_set_pixbuf(ea->ela, 
-				RUN_SERVICE(ea)->get_status_pixmap(ea), 
+				(const char **) RUN_SERVICE(ea)->get_status_pixmap(ea), 
 				&tmpbuf);
 
 			ea->pix = tmpbuf;
@@ -2273,7 +2278,6 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 	gtk_widget_show(set_status_submenuitem);
 }
 
-GtkUIManager *ui_manager;
 
 static char *main_menu_xml;
 
@@ -2296,7 +2300,7 @@ static GtkActionEntry action_items[] = {
 	{"SetAway", NULL, N_("Set as _away"), NULL, N_("Set a Custom \"Away\" status"),
 		G_CALLBACK(show_away_choicewindow)},
 	{"Quit", NULL, N_("_Quit"),	"<control>Q", N_("Close Ayttm"),
-		G_CALLBACK(delete_event)},
+		G_CALLBACK(ayttm_end_app_from_menu)},
 	{"Prefs", NULL, N_("_Preferences"), NULL, N_("Customize your Ayttm"),
 		G_CALLBACK(build_prefs_callback)},
 	{"AddDelAccounts", NULL, N_("Add or _delete accounts"), NULL,
@@ -2353,6 +2357,7 @@ void set_menu_sensitivity(void)
 	menu_set_sensitive(ui_manager, "ui/menubar/Chat/SignonAll",
 			(online != l_list_length(accounts)));
 	
+	set_tray_menu_sensitive(online, l_list_length(accounts));
 }
 
 static gchar *menu_translate(const gchar *path, gpointer data)

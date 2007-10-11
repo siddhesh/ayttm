@@ -261,7 +261,7 @@ void ext_del_list_entry(msnconn * conn, char * list, char * username)
   printf("%s has been removed from your %s\n", username, list);
 }
 
-void ext_show_error(msnconn * conn, char * msg)
+void ext_show_error(msnconn * conn, const char * msg)
 {
   printf("MSN: Error: %s\n", msg);
 }
@@ -336,12 +336,12 @@ void ext_start_netmeeting(char *ip)
 	printf("run `gnomemeeting -c callto://%s`\n",ip);
 }
 
-void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long sent, unsigned long total)
+void ext_filetrans_progress(invitation_ftp * inv, const char * status, unsigned long sent, unsigned long total)
 {
   printf("File transfer: %s\t(%lu/%lu bytes sent)\n", status, sent, total);
 }
 
-void ext_filetrans_failed(invitation_ftp * inv, int error, char * message)
+void ext_filetrans_failed(invitation_ftp * inv, int error, const char * message)
 {
   printf("File transfer failed: %s\n", message);
 }

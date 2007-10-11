@@ -2628,7 +2628,8 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 					col = 0;
 				}
 
-				GtkWidget	*icon = gtkut_create_icon_widget( de_smile->pixmap, m_parent_window );
+				GtkWidget	*icon = gtkut_create_icon_widget( (const char **)de_smile->pixmap, 
+										 m_parent_window );
 				gtk_widget_set_name( icon, de_smile->name );
 
 				gtk_table_attach( GTK_TABLE(smilies_table),

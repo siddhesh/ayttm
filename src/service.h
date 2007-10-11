@@ -131,7 +131,7 @@ struct service_callbacks {
 	  this will get used on the Contact List, if statuses
 	  are not available, this should return the empty string */
 
-	char **(*get_status_pixmap)(eb_account * account);
+	const char **(*get_status_pixmap)(eb_account * account);
 
 	/*set the idle time (set this to null if N/A)*/
 

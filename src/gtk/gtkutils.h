@@ -41,7 +41,7 @@ GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage, Gt
 	
 	@returns the new widget
 */
-GtkWidget	*gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent );
+GtkWidget	*gtkut_create_icon_widget( const char **inXPM, GtkWidget *inParent );
 
 /** Create a button with an xpm and optional label.
 
@@ -51,11 +51,11 @@ GtkWidget	*gtkut_create_icon_widget( char **inXPM, GtkWidget *inParent );
 	
 	@returns the new button
 */
-GtkWidget	*gtkut_create_icon_button( const char *inLabel, char **inXPM, GtkWidget *inParent );
+GtkWidget	*gtkut_create_icon_button( const char *inLabel, const char **inXPM, GtkWidget *inParent );
 
-void gtkut_set_pixbuf_from_xpm( char **inXPM, GdkPixbuf **outPixbuf );
+void gtkut_set_pixbuf_from_xpm( const char **inXPM, GdkPixbuf **outPixbuf );
 
-void gtkut_set_pixbuf( eb_local_account *ela, char **inXPM, GdkPixbuf **outPixbuf );
+void gtkut_set_pixbuf( eb_local_account *ela, const char **inXPM, GdkPixbuf **outPixbuf );
 
 /** Get a widget's position.
 
@@ -132,7 +132,7 @@ GtkWidget	*gtkut_attach_submenu( GtkMenu *inMenu, const char *inLabel,
 	@param	inWindow		the window whose icon we are setting
 	@param	inXPM			the xpm we are setting it to [if NULL then use standard ayttm icon]
 */
-void	gtkut_set_window_icon( GtkWindow *inWindow, gchar **inXPM );
+void	gtkut_set_window_icon( GtkWindow *inWindow, const gchar **inXPM );
 
 #ifdef __cplusplus
 } /* extern "C" */

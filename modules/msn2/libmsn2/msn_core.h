@@ -308,7 +308,7 @@ int msn_set_friendlyname(msnconn * conn, char * friendlyname);
 void msn_send_ping(msnconn * conn);
 
 void msn_sync_lists(msnconn * conn, int version);
-void msn_add_to_list(msnconn * conn, char * list, char * user);
+void msn_add_to_list(msnconn * conn, const char * list, char * user);
 void msn_del_from_list(msnconn * conn, char * list, char * user);
 void msn_set_GTC(msnconn * conn, char c);
 void msn_set_BLP(msnconn * conn, char c);
@@ -317,7 +317,7 @@ void msn_check_rl(msnconn * conn, syncinfo * info);
 
 void msn_connect_and_send(msnconn * nsconn, char * dest, char * msg);
 
-void msn_set_state(msnconn * conn, char * state);
+void msn_set_state(msnconn * conn, const char * state);
 
 // Intermediate steps in switchboard connection:
 class conninfo_SB : public callback_data
@@ -348,7 +348,7 @@ void msn_handle_new_invite(msnconn * conn, char * from, char * friendly, char * 
 
 void msn_recv_file(invitation_ftp * inv, char * dest);
 
-char * msn_find_in_mime(char * mime, char * header);
+char * msn_find_in_mime(char * mime, const char * header);
 
 void msn_send_file(invitation_ftp * inv, char * msg_body);
 
