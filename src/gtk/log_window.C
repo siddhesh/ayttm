@@ -350,9 +350,13 @@ void	ay_log_window::SetHTMLText( GSList *gl )
 
 	while ( line != NULL )
 	{
-		if ( line->data != NULL ) 
-			html_text_buffer_append( GTK_TEXT_VIEW(m_html_display), (char *)line->data,
+		if ( line->data != NULL ) {
+			char *msg = linkify((char *)line->data);
+			html_text_buffer_append( GTK_TEXT_VIEW(m_html_display), msg,
 					HTML_IGNORE_NONE);
+
+			g_free(msg);
+		}
 
 		line = g_slist_next( line );
 	}

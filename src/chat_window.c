@@ -441,7 +441,10 @@ static void cw_reset_message(chat_window *cw)
 
 static void cw_put_message(chat_window *cw, char *text, int fore, int back, int font)
 {
-	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), text, fore | back | font);
+	char *msg = linkify(text);
+	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), msg, fore | back | font);
+
+	g_free(msg);
 }
 
 void send_message(GtkWidget *widget, gpointer d)
@@ -450,8 +453,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	gchar buff[BUF_SIZE];
 	gchar buff2[BUF_SIZE];
 	gchar * text, *o_text = NULL;
-	gchar * link_message;
-	gchar * temp_message;
+	gchar * message;
 	struct tm * cur_time;
 	time_t t;
 	LList * filter_walk;
@@ -518,12 +520,11 @@ void send_message(GtkWidget *widget, gpointer d)
 
 	/* TODO make these two filters */
 	if(RUN_SERVICE(data->local_user)->get_smileys)
-		temp_message = eb_smilify(text, RUN_SERVICE(data->local_user)->get_smileys(), 
+		message = eb_smilify(text, RUN_SERVICE(data->local_user)->get_smileys(), 
 				get_service_name(data->local_user->service_id));
 	else
-		temp_message = g_strdup(text);
-	link_message = linkify(temp_message);
-	g_free(temp_message);
+		message = g_strdup(text);
+
 	eb_update_window_title(data, FALSE);
 
 	eb_debug(DBG_CORE, "Starting to run outgoing filters\n");
@@ -597,7 +598,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	g_snprintf(buff, BUF_SIZE, "<FONT COLOR=\"#0000ff\"><B>%s: </B></FONT>", buff2);
 
 	cw_put_message(data, buff, 1, 0, 0);
-	cw_put_message(data, link_message, iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
+	cw_put_message(data, message, iGetLocalPref("do_ignore_back"), iGetLocalPref("do_ignore_fore"), iGetLocalPref("do_ignore_font"));
 	cw_put_message(data, "<br>", 0, 0, 0);
 
 	/* If an away message had been sent to this person, reset the away message tracker */
@@ -610,10 +611,10 @@ void send_message(GtkWidget *widget, gpointer d)
 	/* Log the message */
 
 	if ( iGetLocalPref("do_logging") ) 
-		ay_log_file_message( data->logfile, buff, link_message );
+		ay_log_file_message( data->logfile, buff, message );
 
 	cw_reset_message(data);
-	g_free(link_message);
+	g_free(message);
 	g_free(text);
 #ifdef __MINGW32__
 	redraw_chat_window(data->chat);
@@ -1655,10 +1656,9 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 				get_service_name(account->service_id));
 	else
 		temp_message = g_strdup(message);
-	link_message = linkify(temp_message);
-	g_free(temp_message);
+
 	g_free(message);
-	message = link_message;
+	message = temp_message;
 
 	if(!remote_contact->chatwindow || !remote_contact->chatwindow->window) {
 		if(remote_contact->chatwindow)
@@ -1750,12 +1750,13 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 		message = recoded;
 	}
 #endif
+	link_message = linkify(message);
 
 	g_snprintf(buff, BUF_SIZE, "<B>%s </B>",buff2);
 
 	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), buff,
 			HTML_IGNORE_NONE);
-	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), message,
+	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), link_message,
 		(iGetLocalPref("do_ignore_back")?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
 		(iGetLocalPref("do_ignore_fore")?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
 		(iGetLocalPref("do_ignore_font")?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );
@@ -1808,6 +1809,7 @@ void eb_chat_window_display_remote_message(eb_local_account * account,
 	redraw_chat_window(remote_contact->chatwindow->chat);
 #endif
 	g_free(message);
+	g_free(link_message);
 }
 
 void eb_chat_window_display_contact(struct contact * remote_contact)
