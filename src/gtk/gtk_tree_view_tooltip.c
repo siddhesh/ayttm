@@ -78,15 +78,15 @@ void tooltip_show_tip(GtkTreeViewTooltip *tooltip, int x, int y)
 		iconwid = gtk_image_new_from_pixbuf(tooltip->tip_icon);
 		gtk_widget_show(iconwid);
 	
-		gtk_box_pack_start(GTK_BOX(vbox), tooltip->tip_title_label, TRUE, FALSE, 0);
-		gtk_box_pack_end(GTK_BOX(vbox), tooltip->tip_tiptext_label, TRUE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(vbox), tooltip->tip_title_label, TRUE, FALSE, 2);
+		gtk_box_pack_end(GTK_BOX(vbox), tooltip->tip_tiptext_label, TRUE, FALSE, 2);
 		
 		gtk_widget_show(tooltip->tip_title_label);
 		gtk_widget_show(tooltip->tip_tiptext_label);
 		gtk_widget_show(vbox);
 		
 		gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 5);
-		gtk_box_pack_end(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
+		gtk_box_pack_end(GTK_BOX(hbox), vbox, TRUE, TRUE, 5);
 		gtk_widget_show(hbox);
 
 		tooltip->window = gtk_window_new(GTK_WINDOW_POPUP);
@@ -174,10 +174,12 @@ static void treeview_tooltip_event_handler(GtkTreeView *treeview, GdkEvent *even
 			gtk_tree_model_get(model, &iter,
 					   tooltip->tiptext_column, &tiptext, -1);
 			
-			if(!tooltip->tip_tiptext_label)
+			if(!tooltip->tip_tiptext_label) {
 				tooltip->tip_tiptext_label = gtk_label_new(NULL);
+				gtk_label_set_line_wrap(GTK_LABEL(tooltip->tip_tiptext_label), TRUE);
+			}
 			
-			gtk_label_set_text(GTK_LABEL(tooltip->tip_tiptext_label), tiptext);
+			gtk_label_set_markup(GTK_LABEL(tooltip->tip_tiptext_label), tiptext);
 		}
 		
 		/* Now to get the coordinates of the popup */

@@ -1,6 +1,11 @@
+Sat Oct 13 2007 19:40 UTC [siddheshp]   0.5.0-16
+- ChangeLog, configure.ac, src/status.c, src/gtk/gtk_tree_view_tooltip.c:
+Tooltip beautification; wrap long status messages
+
 Sat Oct 13 2007 17:45 UTC [siddheshp]   0.5.0-15
 - ChangeLog, configure.ac, src/chat_window.c, src/gtk/log_window.C:
 Changed linkification behaviour. Now we don't force html links on others.
+Closes Debian bug #198979
 
 Thu Oct 11 2007 20:38 UTC [siddheshp]   0.5.0-14
 - ChangeLog configure.ac modules/msn2/msn.C,

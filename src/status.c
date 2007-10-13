@@ -1174,12 +1174,22 @@ static void set_status_label(eb_account *ea, int update_contact)
 	char * c = NULL, *tmp = NULL;
 	int need_tooltip_update = 0;
 	
-	tmp = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 20);
-	c = g_strdup_printf("%s%s%s",
-			strlen(tmp)?"(":"",
-			tmp,
-			strlen(tmp)?")":"");
-	
+	c = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 40);
+
+	while (strchr(c,'\n') != NULL) {
+		char *t = strchr(c,'\n');
+		*t = ' ';
+	}
+
+	if(strlen(c) == 40) {
+		c[39] = c[38] = c[37] = '.';
+	}
+
+	tmp = g_strdup_printf("%s%s%s",
+			strlen(c)?"(":"",
+			c,
+			strlen(c)?")":"");
+
 	if (ea->status) {
 		char *current = NULL;
 		current = g_strdup(ea->status);
@@ -1188,20 +1198,12 @@ static void set_status_label(eb_account *ea, int update_contact)
 			char buff[1024];
 			g_snprintf(buff, 1024, _("%s is now %s"), 
 					ea->account_contact->nick,
-					strlen(tmp)?tmp:"Online");
+					strlen(c)?c:"Online");
 			update_status_message(buff);
 		}
 	}
 	
-	while (strchr(c,'\n') != NULL) {
-		char *t = strchr(c,'\n');
-		*t = ' ';
-	}
-
-	if(strlen(c) == 20) {
-		c[19] = c[18] = c[17] = '.';
-	}
-	ea->status = g_strdup(c);
+	ea->status = strdup(tmp);
 	ea->tiptext = ea->status;
 	
 	if (update_contact) {
@@ -1211,7 +1213,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 
 		if(ea->account_contact->status)
 			g_free(ea->account_contact->status);
-		ea->account_contact->status = g_strdup(c);
+		ea->account_contact->status = strdup(tmp);
 
 		need_tooltip_update = (ea->account_contact->last_status && strcmp(c, ea->account_contact->last_status));
 	
@@ -1221,14 +1223,14 @@ static void set_status_label(eb_account *ea, int update_contact)
 			time(&ea->account_contact->last_status_change);
 			if (ea->account_contact->last_status)
 				free(ea->account_contact->last_status);
-			ea->account_contact->last_status = strdup(c);
+			ea->account_contact->last_status = strdup(tmp);
 		}
 			
 		if (ea->account_contact->last_status_change != 0) {
 			mytime = localtime(&ea->account_contact->last_status_change);
 			strftime(buff, 128, "%H:%M (%b %d)", mytime);
 			ea->tiptext = g_strdup_printf(
-					_("%s since %s"),
+					_("%s\n<span size=\'small\'>Since %s</span>"),
 					strlen(status)?status:"Online", buff);
 		}
 	}
