@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.96 $",
-	"$Date: 2007/08/28 20:57:47 $",
+	"$Revision: 1.97 $",
+	"$Date: 2007/10/16 20:25:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2968,7 +2968,7 @@ static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * acco
 	return ea;
 }
 
-static char **eb_yahoo_get_status_pixmap(eb_account * ea)
+static const char **eb_yahoo_get_status_pixmap(eb_account * ea)
 {
 	eb_yahoo_account_data *yad;
 
@@ -3284,6 +3284,33 @@ static void ext_yahoo_remove_handler(int id, int tag)
 		}
 	}
 }
+
+
+static void ext_yahoo_got_buddyicon(int id, const char *me, const char *who, const char *url, int checksum)
+{
+
+}
+
+
+static void ext_yahoo_got_buddyicon_checksum(int id, const char *me,const char *who, int checksum)
+{
+
+}
+
+
+static void ext_yahoo_got_buddyicon_request(int id, const char *me, const char *who)
+{
+
+}
+
+
+static void ext_yahoo_buddyicon_uploaded(int id, const char *url)
+{
+
+}
+
+
+
 /*
  * Callback handling code ends here
  ***********************************/
@@ -3696,6 +3723,11 @@ static void register_callbacks()
 	yc.ext_yahoo_webcam_viewer = ext_yahoo_webcam_viewer;
 	yc.ext_yahoo_webcam_closed = ext_yahoo_webcam_closed;
 	yc.ext_yahoo_got_ping = ext_yahoo_got_ping;
+
+	yc.ext_yahoo_got_buddyicon = ext_yahoo_got_buddyicon;
+	yc.ext_yahoo_got_buddyicon_checksum = ext_yahoo_got_buddyicon_checksum;
+	yc.ext_yahoo_got_buddyicon_request = ext_yahoo_got_buddyicon_request;
+	yc.ext_yahoo_buddyicon_uploaded = ext_yahoo_buddyicon_uploaded;
 
 	yahoo_register_callbacks(&yc);
 	

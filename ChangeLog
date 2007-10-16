@@ -1,3 +1,7 @@
+Tue Oct 16 2007 22:25 UTC [siddheshp]   0.5.0-17
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
+Put in stubs for buddyicon related callbacks to prevent crashes
+
 Sat Oct 13 2007 19:40 UTC [siddheshp]   0.5.0-16
 - ChangeLog, configure.ac, src/status.c, src/gtk/gtk_tree_view_tooltip.c:
 Tooltip beautification; wrap long status messages
