@@ -1,5 +1,5 @@
 /* XPM */
-static char * yahoo_sms_xpm[] = {
+static const char * yahoo_sms_xpm[] = {
 "12 13 53 1",
 " 	c None",
 ".	c #0F0901",
