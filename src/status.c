@@ -179,23 +179,9 @@ void focus_statuswindow (void)
 
 gboolean delete_event( GtkWidget *widget, GdkEvent *event, gpointer data )
 {
-//	gchar *userrc = NULL;
-	
-
-	eb_save_size(statuswindow, NULL);
-	gtk_widget_hide(statuswindow);
+	hide_status_window();
 
 	return TRUE;
-
-	/* Moved call to unload_modules() here from main() since we're 
-	 * giving all modules functionality to add/delete submenus. With 
-	 * the window already gone in main(), unloads were spewing a lot
-	 * of warnings
-	 */
-//	userrc = g_strconcat(config_dir, G_DIR_SEPARATOR_S, "menurc", NULL);
-//	gtk_item_factory_dump_rc(userrc, NULL, TRUE);
-//	g_free(userrc);
-//	gtk_main_quit();
 }
 
 void ayttm_end_app_from_menu( GtkWidget *widget, GdkEvent *event, gpointer data )
@@ -1193,8 +1179,8 @@ static void set_status_label(eb_account *ea, int update_contact)
 	if (ea->status) {
 		char *current = NULL;
 		current = g_strdup(ea->status);
-		eb_debug(DBG_CORE,"current %s c %s\n",current,c);
-		if (current && strcmp(current, c)) {
+		eb_debug(DBG_CORE,"current %s c %s\n",current,tmp);
+		if (current && strcmp(current, tmp)) {
 			char buff[1024];
 			g_snprintf(buff, 1024, _("%s is now %s"), 
 					ea->account_contact->nick,
@@ -2475,6 +2461,13 @@ void ay_set_submenus(void)
 	submenuitem = gtk_ui_manager_get_widget(ui_manager, "ui/menubar/Chat/Set status");
 	eb_set_status_window(submenuitem);
 	SetPref("widget::set_status_submenuitem", submenuitem);
+}
+
+
+void hide_status_window()
+{
+	eb_save_size(statuswindow, NULL);
+	gtk_widget_hide(statuswindow);
 }
 
 
