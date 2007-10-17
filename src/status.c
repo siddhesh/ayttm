@@ -2477,6 +2477,52 @@ void ay_set_submenus(void)
 	SetPref("widget::set_status_submenuitem", submenuitem);
 }
 
+
+void show_status_window()
+{
+	int win_x, win_y;
+	unsigned int win_w, win_h;
+	int flags;
+
+	/* handle geometry - ivey */
+#ifndef __MINGW32__
+	if (geometry[0] != 0) { 
+		flags = XParseGeometry(geometry, &win_x, &win_y, &win_w, &win_h);
+		gtk_window_set_position(GTK_WINDOW(statuswindow), GTK_WIN_POS_NONE); 
+		gtk_window_move(GTK_WINDOW(statuswindow), win_x, win_y);
+		gtk_window_set_default_size(GTK_WINDOW(statuswindow), win_w, win_h);
+	} else 
+#endif
+	{
+		if (iGetLocalPref("x_contact_window") > 0
+		&&  iGetLocalPref("y_contact_window") > 0)
+			gtk_window_move(GTK_WINDOW(statuswindow), 
+					iGetLocalPref("x_contact_window"),
+					iGetLocalPref("y_contact_window"));
+	}	
+
+	gtk_widget_show(statuswindow);
+#ifndef __MINGW32__
+	if (geometry[0] == 0)
+#endif
+	{
+		/* Force a move */
+		if (iGetLocalPref("x_contact_window") > 0
+		&&  iGetLocalPref("y_contact_window") > 0) {
+			/* Clear up any events which will map the window */
+			/* Until the item is mapped you can not move
+			   the window. */
+			while(gtk_events_pending())
+				gtk_main_iteration();
+			/* Move only after cleanup */
+	                gtk_window_move(GTK_WINDOW(statuswindow), 
+					iGetLocalPref("x_contact_window"),
+					iGetLocalPref("y_contact_window"));
+		}
+	}	
+}
+
+
 void eb_status_window()
 {
 	GtkWidget *statusbox;
@@ -2487,9 +2533,6 @@ void eb_status_window()
 	GtkWidget *hbox;
 	GtkWidget *radioonline, *radiocontact, *radioaccount;
 //	char * userrc = NULL;
-	int win_x, win_y;
-	unsigned int win_w, win_h;
-	int flags;
 
 	statuswindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	/* The next line allows you to make the window smaller than the orig. size */
@@ -2602,45 +2645,7 @@ void eb_status_window()
 	iconlogoff_pb = gdk_pixbuf_new_from_xpm_data( (const char **) logoff_icon_xpm );
 	iconblank_pb = gdk_pixbuf_new_from_xpm_data( (const char **) blank_icon_xpm );
 
-	/* handle geometry - ivey */
-#ifndef __MINGW32__
-	if (geometry[0] != 0) { 
-		flags = XParseGeometry(geometry, &win_x, &win_y, &win_w, &win_h);
-		gtk_window_set_position(GTK_WINDOW(statuswindow), GTK_WIN_POS_NONE); 
-		gtk_window_move(GTK_WINDOW(statuswindow), win_x, win_y);
-		gtk_window_set_default_size(GTK_WINDOW(statuswindow), win_w, win_h);
-	} else 
-#endif
-	{
-		if (iGetLocalPref("x_contact_window") > 0
-		&&  iGetLocalPref("y_contact_window") > 0)
-			gtk_window_move(GTK_WINDOW(statuswindow), 
-					iGetLocalPref("x_contact_window"),
-					iGetLocalPref("y_contact_window"));
-//	                gdk_window_move(statuswindow->window, 
-//					iGetLocalPref("x_contact_window"),
-//					iGetLocalPref("y_contact_window"));
-	}	
-
-	gtk_widget_show(statuswindow);
-#ifndef __MINGW32__
-	if (geometry[0] == 0)
-#endif
-	{
-		/* Force a move */
-		if (iGetLocalPref("x_contact_window") > 0
-		&&  iGetLocalPref("y_contact_window") > 0) {
-			/* Clear up any events which will map the window */
-			/* Until the item is mapped you can not move
-			   the window. */
-			while(gtk_events_pending())
-				gtk_main_iteration();
-			/* Move only after cleanup */
-	                gtk_window_move(GTK_WINDOW(statuswindow), 
-					iGetLocalPref("x_contact_window"),
-					iGetLocalPref("y_contact_window"));
-		}
-	}	
+	show_status_window();
 	
 	update_contact_list ();
 

@@ -1,3 +1,12 @@
+Wed Oct 17 2007 19:05 UTC [siddheshp]   0.5.0-19
+- ChangeLog, configure.ac, src/ayttm_tray.c, src/status.c, src/status.h:
+Status window should restore to previous size and screen position when
+opened by clicking on the tray icon
+
+Tue Oct 16 2007 22:27 UTC [siddheshp]   0.5.0-18
+- pixmaps/yahoo_online.xpm, pixmaps/yahoo_sms.xpm, pixmaps/yahoo_away.xpm:
+Fixed some warnings
+
 Tue Oct 16 2007 22:25 UTC [siddheshp]   0.5.0-17
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
 Put in stubs for buddyicon related callbacks to prevent crashes

@@ -85,6 +85,8 @@ void set_tooltips_active(int);
 
 void do_events(void);
 
+void show_status_window();
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
