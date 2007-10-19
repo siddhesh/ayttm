@@ -1,3 +1,7 @@
+Fri Oct 19 2007 20:15 UTC [siddheshp]   0.5.0-21
+- ChangeLog, configure.ac, modules/msn2/msn.C:
+Fixed signature mismatch for ext_show_error with msn_interface.h
+
 Wed Oct 17 2007 19:40 UTC [siddheshp]   0.5.0-20
 - ChangeLog, configure.ac, src/ayttm_tray.c, src/status.c, src/status.h:
 * More window size and position related fixes.

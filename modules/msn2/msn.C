@@ -170,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.81 $",
-	"$Date: 2007/10/11 20:37:19 $",
+	"$Revision: 1.82 $",
+	"$Date: 2007/10/19 20:13:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2049,7 +2049,7 @@ void ext_del_list_entry(msnconn * conn, char * list, char * username)
   eb_debug(DBG_MSN, "%s has been removed from your %s\n", username, list);
 }
 
-void ext_show_error(msnconn * conn, char * msg)
+void ext_show_error(msnconn * conn, const char * msg)
 {
 	char *m = strdup(msg);
 	ay_do_warning( "MSN Error", m );
