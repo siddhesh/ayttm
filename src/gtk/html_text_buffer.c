@@ -322,7 +322,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 
 			_extract_parameter(param, attr_val, 255);
 
-			if(!attr_val) {
+			if(attr_val == NULL) {
 				/* Do nothing */
 			}
 			else if(*attr_val=='+') {

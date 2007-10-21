@@ -99,8 +99,12 @@ static eb_local_account * eb_nomodule_read_local_config(LList * pairs)
 	eb_debug(DBG_CORE, "eb_nomodule_read_local_config: entering\n");	
 	/*you know, eventually error handling should be put in here*/
 	ptr = value_pair_get_value(pairs, "SCREEN_NAME");
-	strncpy(ela->handle, ptr, sizeof(ela->handle));
-	free(ptr);
+
+	if(ptr) {
+		strncpy(ela->handle, ptr, sizeof(ela->handle));
+		free(ptr);
+	}
+
 	if(!ela->handle[0]) {
 		fprintf(stderr, "Error!  Invalid account config no SCREEN_NAME defined!\n");
 		return 0;

@@ -469,11 +469,8 @@ void eb_parse_incoming_message( eb_local_account * account,
 		}
 	}
 	else
-	{
-		char * message2 = linkify(message);
-		eb_chat_window_display_remote_message( account, remote, message2 );
-		free(message2);
-	}
+		eb_chat_window_display_remote_message( account, remote, message );
+	
 	free(buff);
 }
 

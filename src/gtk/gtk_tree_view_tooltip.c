@@ -90,9 +90,9 @@ void tooltip_show_tip(GtkTreeViewTooltip *tooltip, int x, int y)
 		gtk_widget_show(hbox);
 
 		tooltip->window = gtk_window_new(GTK_WINDOW_POPUP);
+		gtk_window_set_type_hint(GTK_WINDOW(tooltip->window), GDK_WINDOW_TYPE_HINT_TOOLTIP);
 		gtk_container_add(GTK_CONTAINER(tooltip->window), hbox);
 		gtk_container_set_border_width(GTK_CONTAINER(tooltip->window), 5);
-		gtk_window_set_type_hint(GTK_WINDOW(tooltip->window), GDK_WINDOW_TYPE_HINT_UTILITY);
 		gtk_window_set_resizable(GTK_WINDOW(tooltip->window), FALSE);
 	}
 	gtk_window_move(GTK_WINDOW(tooltip->window), x, y);
