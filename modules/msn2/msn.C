@@ -170,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.82 $",
-	"$Date: 2007/10/19 20:13:43 $",
+	"$Revision: 1.83 $",
+	"$Date: 2007/10/21 20:21:22 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1182,7 +1182,7 @@ void ext_filetrans_success(invitation_ftp * inv) {
 	}
 }
 
-void ext_filetrans_failed(invitation_ftp * inv, int err, char * msg)
+void ext_filetrans_failed(invitation_ftp * inv, int err, const char * msg)
 {
 	char buf[1024];
         snprintf(buf, sizeof(buf), "File transfer failed: %s%s", msg, err?"\n\n(The file sender must have a public IP, and his firewall must allow TCP connections to port 6891.)":"");
@@ -1194,7 +1194,7 @@ void ext_filetrans_failed(invitation_ftp * inv, int err, char * msg)
 	}
 }
 
-void ext_filetrans_progress(invitation_ftp * inv, char * status, unsigned long recv, unsigned long total)
+void ext_filetrans_progress(invitation_ftp * inv, const char * status, unsigned long recv, unsigned long total)
 {
         int tag=-1;
 	transfer_window * t_win = NULL;

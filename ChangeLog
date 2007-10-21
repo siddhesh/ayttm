@@ -1,3 +1,7 @@
+Sun Oct 21 2007 20:25 UTC [siddheshp]   0.5.0-23
+- Changelog, configure.ac, modules/msn2/msn.C:
+Fixed method signature mismatch with msn_interfaces.h
+
 Sun Oct 21 2007 05:35 UTC [siddheshp]   0.5.0-22
 - ChangeLog, configure.ac, src/message_parse.c, src/nomodule.c,
 src/gtk/gtk_tree_view_tooltip.c, src/gtk/html_text_buffer.c:
