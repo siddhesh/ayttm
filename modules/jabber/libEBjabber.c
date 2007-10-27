@@ -146,7 +146,10 @@ int JCremoveConn(JABBER_Conn *JConn)
 	{
 		if(JConn==current)
 		{
-			last->next=current->next;
+			if(last != current)
+				last->next=current->next;
+			else
+				Connections = current->next;
 			free(current);
 			return(0);
 		}
@@ -219,6 +222,12 @@ int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, i
 	char buff[4096];
 	char server[256], *ptr=NULL;
 	JABBER_Conn *JConn=NULL;
+
+	/* If a different connect server is not specified then atleast connect to the default */
+	if( !strcmp(connect_server, "") ) {
+		eb_debug(DBG_JBR, "connect_server is BLANK!\n\n");
+		strcpy(connect_server, host);
+	}
 
 	eb_debug(DBG_JBR,  "%s %s %i\n", handle, host, port);
 	/* Make sure the name is correct, support all formats
