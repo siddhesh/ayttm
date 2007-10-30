@@ -1,7 +1,13 @@
+Sat Oct 30 2007 18:50 UTC [siddheshp]   0.5.0-25
+- ChangeLog, configure.ac, src/chat_window.c:
+* Update window title upon closure of a tab
+* Reset the tab label alert status once it has been clicked upon
+Both close #912345 on sourceforge
+
 Sat Oct 27 2007 20:10 UTC [siddheshp]   0.5.0-24
 - ChangeLog, configure.ac, modules/jabber/libEBjabber.c:
 * Default to the "Default Server" setting if no "Connect Server"
-is mentioned
+is mentioned. Closes #885083 on sourceforge.
 * Deleting the first element in the Connections JABBER_Conn list would 
 result in a dangling pointer
 

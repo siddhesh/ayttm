@@ -226,6 +226,8 @@ void set_tab_red(chat_window *cw)
 	GtkWidget *child = NULL;
 	GtkWidget *label = NULL;
 
+	eb_debug(DBG_CORE, "Setting tab to red\n");
+
 	if (!cw)
 		return;
 	notebook = cw->notebook;
@@ -236,19 +238,18 @@ void set_tab_red(chat_window *cw)
 	
 	label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(notebook), child);
 
-	gtk_widget_realize(label);
-
 	gdk_color_parse("red", &color);
 	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, &color);
+//	gtk_widget_realize(label);
 }
 
 void set_tab_normal(chat_window *cw)
 {
-	GdkColor color;
-
 	GtkWidget *notebook = NULL;
 	GtkWidget *child = NULL;
 	GtkWidget *label = NULL;
+
+	eb_debug(DBG_CORE, "Setting tab to normal\n");
 
 	if (!cw)
 		return;
@@ -259,10 +260,9 @@ void set_tab_normal(chat_window *cw)
 		return;
 	
 	label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(notebook), child);
-	gtk_widget_realize(label);
 
-	gdk_color_parse("black", &color);
-	gtk_widget_modify_fg(label, GTK_STATE_NORMAL, &color);
+	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, NULL);
+//	gtk_widget_realize(label);
 }
 
 
@@ -347,7 +347,7 @@ void cw_remove_tab(struct contact *ct)
 	chat_window *cw = ct->chatwindow;
 	GtkWidget *window = ct->chatwindow->window;
 	GtkWidget *notebook = ct->chatwindow->notebook;
-	int tab_number;
+	int tab_number, pagenum;
 	
 	eb_debug(DBG_CORE, "getting tab_number for %p\n",notebook);
 	tab_number = gtk_notebook_page_num (GTK_NOTEBOOK(notebook), ct->chatwindow->notebook_child);
@@ -355,6 +355,10 @@ void cw_remove_tab(struct contact *ct)
 	g_signal_handlers_block_by_func(notebook,
 			G_CALLBACK(chat_notebook_switch_callback), NULL);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), tab_number);
+
+	if( (pagenum = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook))) != -1)
+		eb_update_window_title_to_tab(pagenum, FALSE);
+
 	g_signal_handlers_unblock_by_func(notebook, 
 			G_CALLBACK(chat_notebook_switch_callback), NULL);
 	eb_debug(DBG_CORE, "removed page\n");
