@@ -133,7 +133,7 @@ void set_tab_normal(chat_window *cw);
 void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, const char *msg);
 gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *inCW, GdkModifierType inModifiers, const GdkEventKey *inEvent );
 void cw_remove_tab(struct contact *ct);
-void cw_close_win (GtkWidget * close_button, gpointer userdata);
+gboolean cw_close_win (GtkWidget * close_button, gpointer userdata);
 void chat_auto_complete_validate (GtkWidget *entry);
 
 #endif

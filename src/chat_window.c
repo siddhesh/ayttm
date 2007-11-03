@@ -240,7 +240,6 @@ void set_tab_red(chat_window *cw)
 
 	gdk_color_parse("red", &color);
 	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, &color);
-//	gtk_widget_realize(label);
 }
 
 void set_tab_normal(chat_window *cw)
@@ -262,7 +261,6 @@ void set_tab_normal(chat_window *cw)
 	label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(notebook), child);
 
 	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, NULL);
-//	gtk_widget_realize(label);
 }
 
 
@@ -318,6 +316,7 @@ static void end_conversation(chat_window* cw)
 
 static void remove_smiley_window(chat_window *cw)
 {
+	eb_debug(DBG_CORE, "Removing Smiley Window\n");
 	GET_CHAT_WINDOW(cw);
 	if(cw->smiley_window != NULL) {
 		/* close smileys popup */
@@ -327,6 +326,18 @@ static void remove_smiley_window(chat_window *cw)
 	
 }
 
+
+void remove_from_chat_window_list(chat_window *cw)
+{
+	if (chat_window_list != NULL)
+		chat_window_list = l_list_remove(chat_window_list, cw);
+	if (!l_list_length(chat_window_list) || chat_window_list->data == NULL) {
+		chat_window_list = NULL;
+		eb_debug(DBG_CORE, "no more windows\n");
+	}
+}
+
+
 /*
  * They guy closed the chat window, so we need to clean up
  */
@@ -334,10 +345,14 @@ static void remove_smiley_window(chat_window *cw)
 static void destroy_event(GtkWidget *widget, gpointer userdata)
 {
 	chat_window* cw = (chat_window*)userdata;
+
+	eb_debug(DBG_CORE, "Destroyed VBox %p\n", widget);
+
 	/* gotta clean up all of the people we're talking with */
 	g_signal_handlers_disconnect_by_func(cw->window,
 			   G_CALLBACK(handle_focus), cw);
 	remove_smiley_window(cw);
+	remove_from_chat_window_list(cw);
 
 	end_conversation(cw);
 }
@@ -365,20 +380,13 @@ void cw_remove_tab(struct contact *ct)
 	if (gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0) == NULL) {
 		gtk_widget_destroy(window);
 	}
-	if (chat_window_list != NULL)
-		chat_window_list = l_list_remove(chat_window_list, cw);
-	if (!l_list_length(chat_window_list) || chat_window_list->data == NULL) {
-		chat_window_list = NULL;
-		eb_debug(DBG_CORE, "no more windows\n");
-	}
-	
+
+	remove_from_chat_window_list(cw);
 }
 
 static void close_tab_callback(GtkWidget *button, gpointer userdata)
 {
 	chat_window *cw = (chat_window*)userdata;
-	
-	remove_smiley_window(cw);
 
 	/* Why bother if there's none... */
 	if(cw->contact)
@@ -664,7 +672,6 @@ static void ignore_dialog_callback (gpointer userdata, int response)
 		update_contact_list ();
 		write_contact_list();
 	}
-
 }
 
 static void ignore_callback (GtkWidget *ignore_button, gpointer userdata)
@@ -719,18 +726,20 @@ static void set_sound_callback(GtkWidget * sound_button, gpointer userdata)
 }
 
 /*This is the callback for closing the window*/
-void cw_close_win (GtkWidget * close_button, gpointer userdata)
+gboolean cw_close_win (GtkWidget * close_button, gpointer userdata)
 {
-	chat_window * cw = (chat_window *)userdata;
+	chat_window *cw = (chat_window *)userdata;
 
-	if (iGetLocalPref("do_tabbed_chat")) {
-		while (chat_window_list != NULL) {
-			close_tab_callback(NULL, chat_window_list->data);
-		}
-		eb_destroy_all_chat_rooms();
-	} else 		
+	eb_debug(DBG_CORE, "Deleted window\n");
+
+	if(!GTK_IS_WINDOW(close_button))
 		gtk_widget_destroy(cw->window);
+
+	remove_from_chat_window_list (cw);
+
+	return FALSE;
 }
+
 
 static void allow_offline_callback(GtkWidget * offline_button, gpointer userdata);
 static void cw_set_offline_active(chat_window *cw, int active)
@@ -2284,6 +2293,7 @@ static void	destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 	g_free( scd );
 }
 
+
 void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 {
 	chat_window *tab_cw = NULL;
@@ -2329,9 +2339,6 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 				       NULL);
 
 			gtk_widget_show(cw->notebook);
-			
-			g_signal_connect(cw->window, "delete-event",
-			   G_CALLBACK(cw_close_win), (gpointer)cw);
 		} else {
 			cw->window = tab_cw->window;
 			cw->notebook = tab_cw->notebook;
@@ -2352,6 +2359,7 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 		/* we use vbox as our child. */
 		gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
 		gtk_notebook_append_page(GTK_NOTEBOOK(cw->notebook), vbox, contact_label);
+
 		cw->notebook_child = vbox;
 		gtk_widget_show(vbox);
 	} else {
@@ -2415,6 +2423,8 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	vbox = gtk_vbox_new(FALSE,0);	
 
 	layout_chatwindow(cw, vbox, remote->nick);
+	g_signal_connect(cw->window, "delete-event",
+	   		G_CALLBACK(cw_close_win), cw);
 	
 	/* Next line allows making window smaller than orig. size */
 	chat_frame = gtk_frame_new(NULL);

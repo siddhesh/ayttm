@@ -1,3 +1,8 @@
+Sat Nov 03 2007 20:30 UTC [siddheshp]   0.5.0-26
+- ChangeLog, configure.ac, src/chat_window.c, src/chat_window.h:
+Reworked logic to close chat windows and tabs. We were unnecessarily
+trying to destroy stuff multiple times. Closes #1077171 on sourceforge.
+
 Sat Oct 30 2007 18:50 UTC [siddheshp]   0.5.0-25
 - ChangeLog, configure.ac, src/chat_window.c:
 * Update window title upon closure of a tab
