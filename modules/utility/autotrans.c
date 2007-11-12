@@ -81,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.11 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.12 $",
+	"$Date: 2007/11/12 20:26:49 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
@@ -313,7 +313,7 @@ static int do_http_post(const char *host, const char *path, const char *enc_data
 	return fd;
 }
 
-#define START_POS "<input type=hidden  name=\"q\" value=\""
+#define START_POS "<input type=hidden name=\"q\" value=\""
 #define END_POS   "\">"
 static char *doTranslate(const char * ostring, const char * from, const char * to)
 {
@@ -349,7 +349,7 @@ static char *doTranslate(const char * ostring, const char * from, const char * t
 			
 	}
 	
-	eb_debug(DBG_MOD, "Translated %s to %s\n", string, buf);
+	eb_debug(DBG_MOD, "Translated %s to %s\n", ostring, string);
 
 	result = Utf8ToStr(string);
 	eb_debug(DBG_MOD, "%s\n", result);

@@ -74,7 +74,7 @@ int ay_socket_new(const char * host, int port)
 	if(last_host[0] || strcasecmp(last_host, host)!=0) {
 		if(!(server = gethostbyname(host))) {
 			errno=h_errno;
-			eb_debug(DBG_CORE, "failed to look up server (%s:%d)\n%d: %s", 
+			eb_debug(DBG_CORE, "failed to look up server (%s:%d)\n%d: %s\n", 
 						host, port, errno, strerror(errno));
 			return -1;
 		}
@@ -82,7 +82,7 @@ int ay_socket_new(const char * host, int port)
 	}
 
 	if((servfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		eb_debug(DBG_CORE, "Socket create error (%d): %s", errno, strerror(errno));
+		eb_debug(DBG_CORE, "Socket create error (%d): %s\n", errno, strerror(errno));
 		return -1;
 	}
 
@@ -95,7 +95,7 @@ int ay_socket_new(const char * host, int port)
 		memcpy(&serv_addr.sin_addr.s_addr, *p, server->h_length);
 		serv_addr.sin_port = htons(port);
 
-		eb_debug(DBG_CORE, "trying %s", *p);
+		eb_debug(DBG_CORE, "trying %u\n", *p);
 		if(connect(servfd, (struct sockaddr *) &serv_addr, 
 					sizeof(serv_addr)) == -1) {
 #ifdef __MINGW32__
@@ -110,12 +110,12 @@ int ay_socket_new(const char * host, int port)
 				break;
 			}
 		} else {
-			eb_debug(DBG_CORE, "connected");
+			eb_debug(DBG_CORE, "connected\n");
 			return servfd;
 		}
 	}
 
-	eb_debug(DBG_CORE, "Could not connect to %s:%d\n%d:%s", host, port, errno, strerror(errno));
+	eb_debug(DBG_CORE, "Could not connect to %s:%d\n%d:%s\n", host, port, errno, strerror(errno));
 	close(servfd);
 	return -1;
 }
@@ -161,6 +161,7 @@ int ay_tcp_readline(char *buff, int maxlen, int fd)
 	}
 
 	*buff = 0;
+
 	return (n);
 }
 
