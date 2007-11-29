@@ -234,6 +234,9 @@ void ay_activity_window::remove_pack(ay_activity_bar_pack *abp)
 
 	if(!s_packs)
 		close_window();
+	else 
+		/* This automatically blows up to accomodate the remaining progressbars */
+		gtk_window_resize(GTK_WINDOW(s_window), 1, 1);
 }
 
 ay_activity_bar_pack * ay_activity_window::get_pack_by_tag(int tag) const

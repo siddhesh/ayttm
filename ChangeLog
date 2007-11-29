@@ -1,3 +1,10 @@
+Sat Nov 29 2007 19:55 UTC [siddheshp]   0.5.0-28
+- ChangeLog, configure.ac, src/activity_bar.C, src/status.c:
+* Resize the 'Connecting' dialog when a progress bar closes. This
+closes #1838371 in Sourceforge
+* Reduced delay for updating status icons from 10 seconds to 5 seconds.
+Why do we need to wait so long?
+
 Sat Nov 12 2007 20:25 UTC [siddheshp]   0.5.0-27
 - ChangeLog, configure.ac, modules/utility/autotrans.c,
 modules/yahoo2/libyahoo2/yahoo_util.c, src/tcp_util.c:

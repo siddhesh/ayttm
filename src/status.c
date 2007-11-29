@@ -922,7 +922,7 @@ static void eb_status( GtkCheckMenuItem * widget, gpointer stats )
 	if (s->ela->mgmt_flush_tag == 0 
 	&& (s->ela->connecting || s->ela->connected)) {
 		s->ela->mgmt_flush_tag = 
-			eb_timeout_add(10000 + (1000*s->ela->service_id),
+			eb_timeout_add(5000 + (1000*s->ela->service_id),
 				 (GtkFunction)contact_mgmt_flush, (gpointer)s->ela);
 	}
 	if (s->ela->mgmt_flush_tag 
@@ -1649,7 +1649,7 @@ static void contact_login(struct contact * ec)
 		eb_timeout_remove(ec->icon_handler);
 		
 	/* timeout to set the contact icon in 10 seconds */
-	ec->icon_handler = eb_timeout_add(10000, (GtkFunction)set_contact_icon,
+	ec->icon_handler = eb_timeout_add(5000, (GtkFunction)set_contact_icon,
 		(gpointer) ec);
 
 	if((time(NULL) - last_sound_played > 0) && iGetLocalPref("do_online_sound")) {
@@ -1686,7 +1686,7 @@ static void contact_logoff(struct contact * ec)
 		eb_timeout_remove(ec->icon_handler);
 		
 	/* timeout to remove the contact from the list */
-	ec->icon_handler = eb_timeout_add(10000, (GtkFunction)hide_contact,
+	ec->icon_handler = eb_timeout_add(5000, (GtkFunction)hide_contact,
 		(gpointer) ec);
 
 	if((time(NULL) - last_sound_played > 0) && iGetLocalPref("do_online_sound")) {
@@ -1755,7 +1755,7 @@ void buddy_login(eb_account * ea)
 	/* set the timeout to remove the "open door" icon */
 	if (ea->icon_handler != -1)
 		eb_timeout_remove(ea->icon_handler);
-	ea->icon_handler = eb_timeout_add(10000, (GtkFunction)set_account_icon,
+	ea->icon_handler = eb_timeout_add(5000, (GtkFunction)set_account_icon,
 		(gpointer) ea);
 	
 	/* if there is only one account (this one) logged in under the
@@ -1815,7 +1815,7 @@ void buddy_logoff(eb_account * ea)
 			-1);
 
 	/* timeout to remove the "close door" icon */
-	ea->icon_handler = eb_timeout_add(10000, (GtkFunction)hide_account,
+	ea->icon_handler = eb_timeout_add(5000, (GtkFunction)hide_account,
 		(gpointer) ea);
 
 }
