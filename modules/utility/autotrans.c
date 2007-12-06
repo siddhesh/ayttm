@@ -59,8 +59,6 @@ void do_list_dialog(char * message, char * title, char **list,
 /* Function Prototypes */
 static char *translate_out(const eb_local_account * local, const eb_account * remote,
 			    const struct contact *contact, const char * s);
-static char *translate_in(const eb_local_account * local, const eb_account * remote,
-			   const struct contact *contact, const char * s);
 
 static int trans_init();
 static int trans_finish();
@@ -81,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.12 $",
-	"$Date: 2007/11/12 20:26:49 $",
+	"$Revision: 1.13 $",
+	"$Date: 2007/12/06 11:51:07 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
@@ -132,7 +130,7 @@ static int trans_init()
 	eb_debug(DBG_MOD, "Auto-trans initialised\n");
 
 	outgoing_message_filters = l_list_append(outgoing_message_filters, &translate_out);
-	incoming_message_filters = l_list_append(incoming_message_filters, &translate_in);
+	incoming_message_filters = l_list_append(incoming_message_filters, &translate_out);
 
 	/* the following is adapted from notes.c */
 
@@ -158,7 +156,7 @@ static int trans_finish()
 
 	eb_debug(DBG_MOD, "Auto-trans shutting down\n");
 	outgoing_message_filters = l_list_remove(outgoing_message_filters, &translate_out);
-	incoming_message_filters = l_list_remove(incoming_message_filters, &translate_in);
+	incoming_message_filters = l_list_remove(incoming_message_filters, &translate_out);
 	
 	while(plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
@@ -379,28 +377,3 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 	eb_debug(DBG_MOD, "%s translated to %s\n", s, p);
 	return p;
 }
-
-static char *translate_in(const eb_local_account * local, const eb_account * remote,
-			   const struct contact *contact, const char * s)
-{
-	char *p;
-	char l[3];
-	if (!doTrans) {
-		return strdup(s);
-	}
-
-	if (contact->language[0] == '\0') {
-		return strdup(s);
-	}			// no translation
-
-	strncpy(l, languages[myLanguage], 2);
-	l[2]=0;
-	if (!strcmp(contact->language, l)){
-		return strdup(s);
-	}			// speak same language
-
-	p = doTranslate(s, contact->language, l);
-	return p;
-}
-
-

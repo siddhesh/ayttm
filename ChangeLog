@@ -1,3 +1,7 @@
+Thu Dec 06 2007 11:48 UTC [bluesmoon]	0.5.0-29
+- Dropped translate_in from autotrans.c because it was the same as
+translate_out
+
 Sat Nov 29 2007 19:55 UTC [siddheshp]   0.5.0-28
 - ChangeLog, configure.ac, src/activity_bar.C, src/status.c:
 * Resize the 'Connecting' dialog when a progress bar closes. This
