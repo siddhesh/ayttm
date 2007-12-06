@@ -472,6 +472,7 @@ void send_message(GtkWidget *widget, gpointer d)
 #ifdef __MINGW32__
 	char *recoded;
 #endif
+	int pre_filter = 1;
 
 	GET_CHAT_WINDOW(data);
 
@@ -530,13 +531,6 @@ void send_message(GtkWidget *widget, gpointer d)
 		data->hist_pos=NULL;
 	}
 
-	/* TODO make these two filters */
-	if(RUN_SERVICE(data->local_user)->get_smileys)
-		message = eb_smilify(text, RUN_SERVICE(data->local_user)->get_smileys(), 
-				get_service_name(data->local_user->service_id));
-	else
-		message = g_strdup(text);
-
 	eb_update_window_title(data, FALSE);
 
 	eb_debug(DBG_CORE, "Starting to run outgoing filters\n");
@@ -547,6 +541,24 @@ void send_message(GtkWidget *widget, gpointer d)
 		eb_debug(DBG_CORE, "Running an outgoing filter:\n");
 
 		ifilter=filter_walk->data;
+
+		/* Once we see the NULL data marker, we switch from pre-render output filters to post-render output filters */
+		/* Pre-render output filters are displayed on the local screen as well as the remote screen */
+		/* Post-render output filters are only displayed on the remote screen */
+		if(ifilter == NULL)
+		{
+			pre_filter = 0;
+			continue;
+		}
+
+		
+		/* message is rendered on screen, text is sent to the remote user */
+		if(pre_filter)
+		{
+			o_text=ifilter(data->local_user, data->preferred, data->contact, message);
+			free(message);
+			message=o_text;
+		}
 
 		o_text=ifilter(data->local_user, data->preferred, data->contact, text);
 		free(text);
@@ -559,6 +571,13 @@ void send_message(GtkWidget *widget, gpointer d)
 	eb_debug(DBG_CORE, "Finished outgoing filters\n");
 
 	/*  end outbound filters */
+
+	/* TODO make this a filter */
+	if(RUN_SERVICE(data->local_user)->get_smileys)
+		message = eb_smilify(text, RUN_SERVICE(data->local_user)->get_smileys(), 
+				get_service_name(data->local_user->service_id));
+	else
+		message = g_strdup(text);
 
 	/* TODO: make this also a filter */
 	o_text = convert_eol(text);

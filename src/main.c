@@ -62,6 +62,7 @@
 #include "messages.h"
 #include "edit_local_accounts.h"
 #include "spellcheck.h"
+#include "externs.h"
 
 #include "ayttm_tray.h"
 
@@ -459,6 +460,9 @@ int main(int argc, char *argv[])
 	/* Initalize the menus that are available through the plugin_api */
 	init_menus();
 	
+	/* initialise outgoing_message_filters with the pre/post filter marker */
+	outgoing_message_filters = l_list_append(outgoing_message_filters, NULL);
+
 	ayttm_prefs_init();
 
 	ayttm_prefs_read();

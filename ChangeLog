@@ -1,3 +1,14 @@
+Thu Dec 06 2007 11:51 UTC [bluesmoon]	0.5.0-30
+- Add a marker to outgoing_message_filters so that all filters before
+the marker are applied to the local as well as remote message, while
+all filters after the marker are only applied to the remote message.
+To add a pre-render out filter, use l_list_prepend and to add a post-render
+out filter, use l_list_append on outgoing_message_filters.  The default
+behaviour is a post-render filter for backwards compatibility.
+- move smilify to after filter run so that filters can insert smileys
+
+- These last two updates come from the Hack Centre at FOSS.IN/2007
+
 Thu Dec 06 2007 11:48 UTC [bluesmoon]	0.5.0-29
 - Dropped translate_in from autotrans.c because it was the same as
 translate_out
