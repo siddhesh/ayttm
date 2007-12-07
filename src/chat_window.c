@@ -531,6 +531,8 @@ void send_message(GtkWidget *widget, gpointer d)
 		data->hist_pos=NULL;
 	}
 
+	message = strdup(text);
+
 	eb_update_window_title(data, FALSE);
 
 	eb_debug(DBG_CORE, "Starting to run outgoing filters\n");
@@ -574,10 +576,12 @@ void send_message(GtkWidget *widget, gpointer d)
 
 	/* TODO make this a filter */
 	if(RUN_SERVICE(data->local_user)->get_smileys)
-		message = eb_smilify(text, RUN_SERVICE(data->local_user)->get_smileys(), 
+	{
+		char *m = message;
+		message = eb_smilify(message, RUN_SERVICE(data->local_user)->get_smileys(), 
 				get_service_name(data->local_user->service_id));
-	else
-		message = g_strdup(text);
+		free(m);
+	}
 
 	/* TODO: make this also a filter */
 	o_text = convert_eol(text);
