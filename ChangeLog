@@ -1,3 +1,7 @@
+Fri Dec 14 2007 18:15 UTC [siddheshp]	0.5.0-32
+- autotrans.c middle.c
+* Fixed conflict with aycryption. Closes #874568 on sourceforge
+
 Fri Dec 07 2007 04:31 UTC [bluesmoon]	0.5.0-31
 - chat_window.c
 * Fix bug introduced by last commit.  Moving the smilify function meant that

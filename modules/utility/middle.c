@@ -64,8 +64,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_FILTER,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.9 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.10 $",
+	"$Date: 2007/12/14 18:16:51 $",
 	&s_ref_count,
 	middle_init,
 	middle_finish,
@@ -94,7 +94,7 @@ static int middle_init( void )
 
 	eb_debug(DBG_MOD, "L33tSp33k initialised\n");
 
-	outgoing_message_filters = l_list_append( outgoing_message_filters, &plstripHTML );
+	outgoing_message_filters = l_list_prepend( outgoing_message_filters, &plstripHTML );
 	incoming_message_filters = l_list_append( incoming_message_filters, &plstripHTML );
 
 	return( 0 );

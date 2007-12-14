@@ -79,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.13 $",
-	"$Date: 2007/12/06 11:51:07 $",
+	"$Revision: 1.14 $",
+	"$Date: 2007/12/14 18:16:51 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
@@ -129,7 +129,7 @@ static int trans_init()
 
 	eb_debug(DBG_MOD, "Auto-trans initialised\n");
 
-	outgoing_message_filters = l_list_append(outgoing_message_filters, &translate_out);
+	outgoing_message_filters = l_list_prepend(outgoing_message_filters, &translate_out);
 	incoming_message_filters = l_list_append(incoming_message_filters, &translate_out);
 
 	/* the following is adapted from notes.c */
