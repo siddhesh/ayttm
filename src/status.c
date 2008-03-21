@@ -1298,8 +1298,8 @@ void add_contact_line( struct contact * ec)
 	ec->list_item = gtk_tree_iter_copy(&iter);
 	
 	if (!ec->group->contacts_shown) {
-		
-		if(strcmp(_("Unknown"),ec->group->name) !=0 &&
+		if(ec->group->list_item &&
+		   strcmp(_("Unknown"),ec->group->name) !=0 &&
 		   strcmp(_("Ignore"),ec->group->name) !=0)
 			MAIN_VIEW_EXPAND_ROW(ec->group->list_item);
 	}

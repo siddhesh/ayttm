@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.41 $",
-	"$Date: 2007/08/03 20:38:39 $",
+	"$Revision: 1.42 $",
+	"$Date: 2008/03/21 16:55:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -516,7 +516,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 	if (strncmp(buff, "PING :", 6) == 0)
 	{
 		/* Keepalive ping from server - reply to avoid being disconnected */
-		buff2 = g_strsplit(buff, ":", 1);
+		buff2 = g_strsplit(buff, ":", 2);
 		g_strchomp(buff2[1]);
 
 		g_snprintf(buff, BUF_LEN, "PONG :%s\n", buff2[1]);
