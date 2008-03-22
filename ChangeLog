@@ -1,3 +1,8 @@
+Sat Mar 22 2008 08:35 UTC [siddheshp]	0.5.0-35
+- ChangeLog, configure.ac, modules/irc/irc.c:
+* Corrected command (/me, /quit, etc.) behaviour
+* More g_strsplit corrections
+
 Sat Mar 22 2008 06:31 UTC [siddheshp]	0.5.0-34
 - ChangeLog, configure.ac, modules/irc/irc.c, pixmaps/irc_away.xpm,
 pixmaps/irc_online.xpm, src/chat_room.c:

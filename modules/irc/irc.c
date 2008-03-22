@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.43 $",
-	"$Date: 2008/03/22 06:31:30 $",
+	"$Revision: 1.44 $",
+	"$Date: 2008/03/22 08:34:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -598,7 +598,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 			}
 			if (ea->infowindow != NULL )
 			{
-				char **priv_split_buff = g_strsplit(buff, " ", 3);
+				char **priv_split_buff = g_strsplit(buff, " ", 4);
 				
 				irc_info *ii = (irc_info *)ea->infowindow->info_data;
 				if (ii->whois_info != NULL) { free(ii->whois_info); }
@@ -937,7 +937,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 		}
 		else if (strstr(buff, "\001PING"))
 		{
-			buff2 = g_strsplit(buff, ":", 2);
+			buff2 = g_strsplit(buff, ":", 3);
 			g_snprintf(message, BUF_LEN, "NOTICE %s :%s\n", nick, buff2[2]);
 			g_strfreev (buff2);
 		}
@@ -975,7 +975,7 @@ static void irc_parse (eb_local_account * ela, char *buff)
 			}
 			message[i] = '\0';
 			
-			buff2 = g_strsplit(message, " ", 3);
+			buff2 = g_strsplit(message, " ", 4);
 			g_strchomp(buff2[2]);
 			strncpy(tempstring, buff2[2], BUF_LEN);
 			strncat(tempstring, "@", BUF_LEN-strlen(tempstring));
@@ -2152,10 +2152,10 @@ int irc_command_to_action(char* message, char* out, int max_out_len, char* targe
 		command_length = strlen(irc_ca_iterator->command);
 
 		if (g_strncasecmp((irc_ca_iterator->command), 
-					message, command_length) == 0) 
+					message, command_length-1) == 0) 
 		{
 			command_matched = 1;
-			strncpy(message, irc_ca_iterator->command, command_length);
+			strncpy(message, irc_ca_iterator->command, command_length-1);
 			break; /* break out of the loop. We found it. */
 		}
 
