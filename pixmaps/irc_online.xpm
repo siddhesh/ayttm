@@ -1,5 +1,5 @@
 /* XPM */
-static char * irc_online_xpm[] = {
+static const char * irc_online_xpm[] = {
 "12 13 67 1",
 " 	c None",
 ".	c #000000",

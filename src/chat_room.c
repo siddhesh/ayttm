@@ -1121,7 +1121,7 @@ void eb_chat_room_refresh_list(eb_chat_room * room )
 {
 	LList * node;
 	gtk_list_store_clear(room->fellows_model);
-	printf("refresh list\n");
+	eb_debug(DBG_CORE, "refresh list\n");
 
 	for( node = room->fellows; node; node = node->next )
 	{

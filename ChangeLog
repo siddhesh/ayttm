@@ -1,3 +1,11 @@
+Sat Mar 22 2008 06:31 UTC [siddheshp]	0.5.0-34
+- ChangeLog, configure.ac, modules/irc/irc.c, pixmaps/irc_away.xpm,
+pixmaps/irc_online.xpm, src/chat_room.c:
+* Incoming messages were being eaten up since we split incoming strings
+into 2 parts and were looking for the third part to display as message, which,
+as it turns out, is blank.
+* Cleaned up a couple of warnings as well.
+
 Fri Mar 21 2008 16:55 UTC [siddheshp]	0.5.0-33
 - ChangeLog, configure.ac, modules/irc/irc.c, src/status.c:
 

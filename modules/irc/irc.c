@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.42 $",
-	"$Date: 2008/03/21 16:55:23 $",
+	"$Revision: 1.43 $",
+	"$Date: 2008/03/22 06:31:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -233,7 +233,7 @@ static void irc_del_user( eb_account * account );
 static int irc_is_suitable (eb_local_account *local, eb_account *remote);
 static eb_account * irc_new_account(eb_local_account *ela, const char * account );
 static char * irc_get_status_string( eb_account * account );
-static char ** irc_get_status_pixmap( eb_account * account);
+static const char ** irc_get_status_pixmap( eb_account * account);
 static void irc_set_idle(eb_local_account * account, int idle );
 static void irc_set_away( eb_local_account * account, char * message, int away);
 static void irc_send_file( eb_local_account * from, eb_account * to, char * file );
@@ -379,7 +379,8 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 	/* remove the crlf */
 	g_strchomp(buff);
 
-	buff2 = g_strsplit(buff, " ", 3);
+	buff2 = g_strsplit(buff, " ", 4);
+
 	strncpy(nick, buff2[0]+1, 100);
 	/* according to RFC2812, channels can be marked by #, &, + or !, not only the conventional #. */
 	if ((*(buff2[2]) == '#') || (*(buff2[2]) == '&') || (*(buff2[2]) == '+') || (*(buff2[2]) == '!')) {
@@ -389,6 +390,7 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		strncat ((char *)tempstring, ila->server, sizeof(tempstring)-strlen((char *)tempstring));
 		g_strdown((char *)tempstring);
 		ecr = find_chat_room_by_id((char *)tempstring);
+
 		if (ecr) {
 			char *msg = NULL;
 			char mynick[100]="";
@@ -402,7 +404,7 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 			} else {
 				strncpy(mynick, ela->handle, strlen(ela->handle));
 				mynick[strlen(ela->handle)]='\0';
-		}
+			}
 			if (!strncmp((char *)tempstring2, (char *)mynick, strlen((char *)mynick))) {
 				msg = g_strdup_printf("<font color=\"#ff0000\">%s</font> %s",
 						mynick, (tempstring2+strlen(mynick)));
@@ -464,7 +466,7 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		buddy_update_status(ea);
 	}
 
-	buff2 = g_strsplit(buff, ":", 2);
+	buff2 = g_strsplit(buff, ":", 3);
 	if (buff2[2] != NULL) /* Is there any actual message out there? */
 	{
 		tempstring2 = strip_color((unsigned char *)buff2[2]);
@@ -1696,7 +1698,7 @@ static char * irc_get_status_string( eb_account * account )
 	return string;
 }
 
-static char ** irc_get_status_pixmap( eb_account * account)
+static const char ** irc_get_status_pixmap( eb_account * account)
 {
 	irc_account * ia;
 	
