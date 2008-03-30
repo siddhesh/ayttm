@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.44 $",
-	"$Date: 2008/03/22 08:34:56 $",
+	"$Revision: 1.45 $",
+	"$Date: 2008/03/30 13:24:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -253,6 +253,8 @@ static void irc_connect_cb(int fd, int error, void *data);
 static int irc_replace_string_args(char* source, char **ptarget, const char* match, const char* replacement);
 static int irc_command_to_action(char* message, char* out, int max_out_len, char* target_name);
 
+void irc_finish_login(irc_local_account *ila);
+
 /* taken from X-Chat 1.6.4: src/common/util.c */
 /* Added: stripping of CTCP/2 color/formatting attributes, which is
    everything between two '\006' = ctrl-F characters.
@@ -364,17 +366,19 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 {
 	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
 	char **buff2;
+	gboolean dummy = FALSE;
+
 	int is_nickserv = 0;
-	eb_account *ea = NULL;
-	irc_account *ia = NULL;
 
 	char orig_nick[256];
 	char nick[256];
 	char *alpha;
-	
 
 	unsigned char tempstring[BUF_LEN];
 	unsigned char *tempstring2 = NULL;
+
+	eb_account *ea = NULL;
+	irc_account *ia = NULL;
 
 	/* remove the crlf */
 	g_strchomp(buff);
@@ -453,12 +457,13 @@ static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
 		ea->protocol_account_data = ia;
 		ea->ela = ela;
 		add_dummy_contact(orig_nick, ea);
+		dummy=TRUE;
 	} else if (!ea->ela)
 		ea->ela = ela;
 
 	ia = (irc_account *)ea->protocol_account_data;
 
-	if (ia->status == IRC_OFFLINE)
+	if ( ia->status == IRC_OFFLINE && !dummy )
 	{
 		/* Okay, if someone msgs us, they are per definition online... */
 		buddy_login(ea);
@@ -765,8 +770,9 @@ static void irc_parse (eb_local_account * ela, char *buff)
 					(LListCompFunc) strcasecmp);
 		g_strfreev (buff2);
 	}
-	else if (!strncmp(split_buff[1], "322", 3)) /* RPL_LISTEND */
+	else if (!strncmp(split_buff[1], "323", 3)) /* RPL_LISTEND */
 	{
+		irc_finish_login(ila);
 	}
 	else if (!strncmp(split_buff[1], "JOIN", 4))
 	{
@@ -1289,6 +1295,8 @@ static void irc_connect_cb(int fd, int error, void *data)
 
 	/* get list of channels */
 	ret = sendall(ila->fd, "LIST\n", strlen("LIST\n"));
+	
+	ay_activity_bar_update_label(ila->activity_tag, _("Logged in, downloading Channel List..."));
 
 	/* Claim us to be online */
 	ela->connected = TRUE;
@@ -1300,10 +1308,14 @@ static void irc_connect_cb(int fd, int error, void *data)
 		eb_set_active_menu_status(ela->status_menu, IRC_ONLINE);
 	is_setting_state = 0;
 	
+	return;
+}
+
+void irc_finish_login(irc_local_account *ila)
+{
 	ay_activity_bar_remove(ila->activity_tag);
 	ila->connect_tag = 0;
 	ila->activity_tag = 0;
-	return;
 }
 
 static void irc_logout( eb_local_account * ela )

@@ -1,3 +1,12 @@
+Sun Mar 30 2008 13:24 UTC [siddheshp]	0.5.0-36
+- ChangeLog, configure.ac, modules/irc/irc.c, src/status.c:
+* RPL_LISTEND was being captured as 322. Corrected to 323
+* Prolonged Connecting progress bar for IRC logins till we finish receiving
+the channel list
+* Avoid adding dummy accounts to the status window. They don't belong to our
+contacts.
+* Write signoff messages to message log window when we do a 'Sign off All'
+
 Sat Mar 22 2008 08:35 UTC [siddheshp]	0.5.0-35
 - ChangeLog, configure.ac, modules/irc/irc.c:
 * Corrected command (/me, /quit, etc.) behaviour
