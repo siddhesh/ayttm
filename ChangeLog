@@ -1,3 +1,7 @@
+Tue Apr 08 2008 03:53 UTC [siddheshp]	0.5.0-37
+- ChangeLog, configure.ac, modules/yahoo2/libyahoo2/libyahoo2.c:
+Updated version number for yahoo plugin. Yahoo is now working again.
+
 Sun Mar 30 2008 13:24 UTC [siddheshp]	0.5.0-36
 - ChangeLog, configure.ac, modules/irc/irc.c, src/status.c:
 * RPL_LISTEND was being captured as 322. Corrected to 323
