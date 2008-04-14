@@ -150,7 +150,7 @@ int JCremoveConn(JABBER_Conn *JConn)
 				last->next=current->next;
 			else
 				Connections = current->next;
-			free(current);
+			g_free(current);
 			return(0);
 		}
 		last=current;
@@ -545,7 +545,7 @@ int JABBER_LeaveChatRoom(JABBER_Conn *JConn, char *room_name, char *nick)
 void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, int typing)
 {
 	char buffer[4096];
-	if (!JConn->conn) 
+	if (!JConn || !JConn->conn) 
 		return;
 	
 	if (typing) {

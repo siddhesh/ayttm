@@ -1,3 +1,12 @@
+Mon Apr 14 2008 17:30 UTC [siddheshp]	0.5.0-38
+
+- ChangeLog, configure.ac, src/plugin_api.c, src/plugin_api.h
+modules/jabber/libEBjabber.c:
+
+* Re-implemented eb_input_add and eb_input_remove to replace deprecated
+gdk_input_add and gdk_input_remove
+* Fixed crash in jabber when chatting with multiple accounts.
+
 Tue Apr 08 2008 03:53 UTC [siddheshp]	0.5.0-37
 - ChangeLog, configure.ac, modules/yahoo2/libyahoo2/libyahoo2.c:
 Updated version number for yahoo plugin. Yahoo is now working again.

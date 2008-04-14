@@ -27,6 +27,7 @@
 
 #include "input_list.h"
 #include "account.h"
+#include <glib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -102,6 +103,14 @@ typedef struct {
 
 typedef void (*eb_menu_callback) (ebmCallbackData *data);
 
+/* File */
+typedef enum {
+	EB_INPUT_READ = G_IO_IN | G_IO_HUP | G_IO_ERR,
+	EB_INPUT_WRITE =  G_IO_OUT | G_IO_ERR,
+	EB_INPUT_EXCEPTION = G_IO_PRI
+} eb_input_condition;
+
+
 ebmCallbackData *ebmProfileData_new(eb_local_account * ela);
 ebmImportData *ebmImportData_new();
 ebmSmileyData *ebmSmileyData_new();
@@ -122,13 +131,6 @@ int eb_activate_menu_item(char *menu_name, void *tag);
 int eb_remove_menu_item(char *menu_name, void *tag);
 void eb_menu_item_set_protocol(void *item, char * protocol);
 
-/* File */
-typedef enum {
-	EB_INPUT_READ = 1 << 0,
-	EB_INPUT_WRITE = 1 << 1,
-	EB_INPUT_EXCEPTION = 1 << 2
-} eb_input_condition;
-
 typedef void (*eb_input_function) (void *data, int source, eb_input_condition condition);
 typedef int (*eb_timeout_function) (void *data);
 
@@ -145,6 +147,13 @@ const char *eb_config_dir();
 
 extern void ay_set_submenus(void);
 extern void set_menu_sensitivity(void);
+
+typedef struct {
+	eb_input_function function;
+	GIOCondition condition;
+	gpointer data;
+} AyIOClosure;
+
 
 /* Service */
 

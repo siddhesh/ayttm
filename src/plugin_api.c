@@ -167,16 +167,53 @@ void eb_set_active_menu_status(LList *status_menu, int status)
 	set_menu_sensitivity();
 }
 
+
+static void ay_io_destroy(gpointer data)
+{
+	AyIOClosure *closure = data;
+	g_free(closure);
+}
+
+
+static gboolean ay_io_invoke(GIOChannel *source, GIOCondition condition, gpointer data)
+{
+	AyIOClosure *closure = data;
+
+	if(closure->condition & condition)
+		closure->function(closure->data, g_io_channel_unix_get_fd(source), condition);
+
+	return TRUE;
+}
+
+
 /* File */
+/* New implementation to replace deprecated gdk_input_add... 
+ * got from libzvt/zvtterm.c 
+ */
 int eb_input_add(int fd, eb_input_condition condition, eb_input_function function,
 		 void *callback_data)
 {
-	return(gdk_input_add(fd, condition, (GdkInputFunction)function, callback_data));
+	GIOChannel *channel;
+	guint result;
+
+	AyIOClosure *closure = g_new(AyIOClosure, 1);
+
+	closure->function = function;
+	closure->condition = condition;
+	closure->data = callback_data;
+
+	channel = g_io_channel_unix_new(fd);
+	result = g_io_add_watch_full(channel, G_PRIORITY_DEFAULT, condition, 
+					(GIOFunc)ay_io_invoke, closure, ay_io_destroy);
+
+	g_io_channel_unref(channel);
+
+	return result;
 }
 
 void eb_input_remove(int tag)
 {
-	gdk_input_remove(tag);
+	g_source_remove(tag);
 }
 
 int eb_timeout_add(int ms, eb_timeout_function function, void *callback_data)
