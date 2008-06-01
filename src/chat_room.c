@@ -1548,7 +1548,7 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 			 G_CALLBACK(cr_key_press),
 			 chat_room);
 	
-	gtk_paned_add1(GTK_PANED(hbox), chat_frame);
+	gtk_paned_pack1(GTK_PANED(hbox), chat_frame, TRUE, FALSE);
 	gtk_widget_show(scrollwindow);
 	gtk_widget_show(chat_frame);
 
@@ -1571,11 +1571,11 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	gtk_box_pack_start(GTK_BOX(vbox2), label, FALSE, FALSE, 3);
 	gtk_widget_show(label);
 
-	gtk_paned_add2(GTK_PANED(hbox), vbox2);
+	gtk_paned_pack2(GTK_PANED(hbox), vbox2, FALSE, FALSE);
 	gtk_widget_show(vbox2);
 
 
-	gtk_paned_add2(GTK_PANED(hbox), chat_room->fellows_widget);
+	gtk_paned_pack2(GTK_PANED(hbox), chat_room->fellows_widget, FALSE, FALSE);
 	gtk_widget_show(chat_room->chat);
 
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow),GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
