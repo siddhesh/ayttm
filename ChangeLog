@@ -1,3 +1,7 @@
+Mon Jun 02 2008 17:40 UTC [siddheshp]	0.5.0-40
+- ChangeLog, configure.ac:
+Removed libirc from configure.ac. It's not in yet (read as oops ;) ).
+
 sun Jun 01 2008 21:50 UTC [siddheshp]	0.5.0-39
 - ChangeLog, configure.ac, src/chat_room.c:
 Fixed buddy pane resize issue with chat rooms.
