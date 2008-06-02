@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.97 $",
-	"$Date: 2007/10/16 20:25:30 $",
+	"$Revision: 1.98 $",
+	"$Date: 2008/06/02 17:56:16 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -3257,11 +3257,26 @@ static YList * handlers = NULL;
 
 static int ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond, void *data)
 {
+	eb_input_condition eb_cond;
+
 	eb_yahoo_callback_data *d = g_new0(eb_yahoo_callback_data, 1);
 	d->id = id;
 	d->fd = fd;
 	d->data = data;
-	d->tag = eb_input_add(fd, cond, eb_yahoo_callback, d);
+
+	switch(cond) {
+		case YAHOO_INPUT_READ:
+			eb_cond = EB_INPUT_READ;
+			break;
+		case YAHOO_INPUT_WRITE:
+			eb_cond = EB_INPUT_WRITE;
+			break;
+		case YAHOO_INPUT_EXCEPTION:
+			eb_cond = EB_INPUT_EXCEPTION;
+			break;
+	}
+
+	d->tag = eb_input_add(fd, eb_cond, eb_yahoo_callback, d);
 	LOG(("client:%d added fd:%d for cond:%d; tag:%d", id, fd, cond, d->tag));
 
 	handlers = y_list_append(handlers, d);

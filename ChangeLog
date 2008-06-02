@@ -1,3 +1,7 @@
+Mon Jun 02 2008 18:00 UTC [siddheshp]	0.5.0-41
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
+Change in plugin_api input handler broke yahoo login. Fixed. Thanks philip.
+
 Mon Jun 02 2008 17:40 UTC [siddheshp]	0.5.0-40
 - ChangeLog, configure.ac:
 Removed libirc from configure.ac. It's not in yet (read as oops ;) ).
