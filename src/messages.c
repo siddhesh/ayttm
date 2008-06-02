@@ -18,41 +18,51 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */ 
- 
+
 #include "messages.h"
 #include <gtk/gtk.h>
 
+typedef enum _ay_message_type { AY_MESSAGE_INFO, AY_MESSAGE_WARNING, AY_MESSAGE_ERROR } ay_message_type;
 
-void	ay_do_info( const char *inTitle, const char *inMessage )
+static void ay_do_message( const char *inTitle, const char *inMessage, ay_message_type type)
 {
-	GtkWidget *dialog;
+       GtkWidget *dialog;
+       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+       GtkMessageType mtype = GTK_MESSAGE_INFO;
 
-	dialog = gtk_message_dialog_new_with_markup(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
-			GTK_MESSAGE_INFO, GTK_BUTTONS_OK, inMessage);
-	gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
-	gtk_widget_show(dialog);
+       switch(type)
+       {
+               case AY_MESSAGE_ERROR:
+                       flags |= GTK_DIALOG_MODAL;
+                       mtype = GTK_MESSAGE_ERROR;
+                       break;
+               case AY_MESSAGE_WARNING:
+                       mtype = GTK_MESSAGE_WARNING;
+                       break;
+               default:
+                       break;
+       }
 
-	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
+       dialog = gtk_message_dialog_new_with_markup(NULL, flags, mtype, GTK_BUTTONS_OK, inMessage);
+       gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
+       gtk_widget_show(dialog);
+
+       g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
 }
 
-void	ay_do_warning( const char *inTitle, const char *inMessage )
+void   ay_do_info( const char *inTitle, const char *inMessage )
 {
-	GtkWidget *dialog;
-
-	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
-			GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, inMessage);
-	gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
-	gtk_widget_show(dialog);
-	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
+       ay_do_message( inTitle, inMessage, AY_MESSAGE_INFO );
 }
 
-void	ay_do_error( const char *inTitle, const char *inMessage )
+void   ay_do_warning( const char *inTitle, const char *inMessage )
 {
-	GtkWidget *dialog;
-
-	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-			GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, inMessage);
-	gtk_window_set_title(GTK_WINDOW(dialog), inTitle);
-	gtk_widget_show(dialog);
-	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
+       ay_do_message( inTitle, inMessage, AY_MESSAGE_WARNING );
 }
+
+void   ay_do_error( const char *inTitle, const char *inMessage )
+{
+       ay_do_message( inTitle, inMessage, AY_MESSAGE_ERROR );
+}
+
+ 

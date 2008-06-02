@@ -1,3 +1,7 @@
+Mon Jun 02 2008 20:00 UTC [siddheshp]	0.5.0-44
+- ChangeLog, configure.ac, src/messages.c:
+bluesmoon - refactored ay_do_* code
+
 Mon Jun 02 2008 19:35 UTC [siddheshp]	0.5.0-43
 - ChangeLog, configure.ac:
 DOH! did it again. libirc doesn't belong here yet... strange how I can do
