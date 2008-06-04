@@ -1,3 +1,7 @@
+Mon Jun 04 2008 17:51 UTC [siddheshp]	0.5.0-45
+- ChangeLog:
+Tagged Release v0.5.0-45
+
 Mon Jun 04 2008 04:35 UTC [siddheshp]	0.5.0-45
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
 Added stubs for ext_yahoo_chat_yahoologout and ext_yahoo_chat_yahooerror
