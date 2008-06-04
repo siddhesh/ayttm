@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.98 $",
-	"$Date: 2008/06/02 17:56:16 $",
+	"$Revision: 1.99 $",
+	"$Date: 2008/06/04 04:48:18 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -3257,7 +3257,7 @@ static YList * handlers = NULL;
 
 static int ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond, void *data)
 {
-	eb_input_condition eb_cond;
+	eb_input_condition eb_cond = 0;
 
 	eb_yahoo_callback_data *d = g_new0(eb_yahoo_callback_data, 1);
 	d->id = id;
@@ -3324,6 +3324,15 @@ static void ext_yahoo_buddyicon_uploaded(int id, const char *url)
 
 }
 
+static void ext_yahoo_chat_yahooerror (int id, const char *me)
+{
+
+}
+
+static void ext_yahoo_chat_yahoologout (int id, const char *me)
+{
+
+}
 
 
 /*
@@ -3743,6 +3752,9 @@ static void register_callbacks()
 	yc.ext_yahoo_got_buddyicon_checksum = ext_yahoo_got_buddyicon_checksum;
 	yc.ext_yahoo_got_buddyicon_request = ext_yahoo_got_buddyicon_request;
 	yc.ext_yahoo_buddyicon_uploaded = ext_yahoo_buddyicon_uploaded;
+
+	yc.ext_yahoo_chat_yahoologout = ext_yahoo_chat_yahoologout;
+	yc.ext_yahoo_chat_yahooerror  = ext_yahoo_chat_yahooerror ;
 
 	yahoo_register_callbacks(&yc);
 	

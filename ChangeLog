@@ -1,3 +1,7 @@
+Mon Jun 04 2008 04:35 UTC [siddheshp]	0.5.0-45
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
+Added stubs for ext_yahoo_chat_yahoologout and ext_yahoo_chat_yahooerror
+
 Mon Jun 02 2008 20:00 UTC [siddheshp]	0.5.0-44
 - ChangeLog, configure.ac, src/messages.c:
 bluesmoon - refactored ay_do_* code
