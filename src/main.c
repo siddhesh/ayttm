@@ -65,6 +65,7 @@
 #include "externs.h"
 
 #include "ayttm_tray.h"
+#include "icons.h"
 
 #include <pixmaps/ayttm.xpm>
 
@@ -472,6 +473,8 @@ int main(int argc, char *argv[])
 	init_smileys();
 	
 	load_modules();
+
+	ay_register_icons ();
 
 	accounts_success = load_accounts();
 	//if (accounts_success)

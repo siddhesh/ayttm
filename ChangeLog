@@ -1,3 +1,12 @@
+Sat Aug 02 2008 21:00 UTC [siddheshp]   0.5.0-65
+- ChangeLog, configure.ac, src/main.c, src/icons.c, src/icons.h,
+src/Makefile.am, pixmaps/Makefile.am, pixmaps/buddy.png, pixmaps/buddy.xcf,
+pixmaps/away.png, pixmaps/away.xcf, pixmaps/group.png, pixmaps/group.xcf,
+pixmaps/group-chat.png, pixmaps/group-chat.xcf, pixmaps/smileys.png,
+pixmaps/smileys.xcf, src/status.c:
+Little icons for our menus. Also added a GtkIconFactory for ayttm so that we can
+put even more pwetty icons...
+
 Fri Aug 01 2008 22:05 UTC [siddheshp]   0.5.0-64
 - ChangeLog, configure.ac, modules/irc/irc.c:
 * A buddy leaving a chatroom doesn't mean that he has logged off.

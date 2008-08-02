@@ -23,11 +23,11 @@ EXTRA_DIST = penguin_talk.xpm ayttm.xpm ayttmlogo.xpm ayttm_32x32.xpm \
 	workwizu_online.xpm workwizu_away.xpm \
 	warning.xpm question.xpm action.xpm print.xpm \
 	checkbox_on.xpm checkbox_off.xpm info.xpm error.xpm \
-	invite_btn.xpm ayttm.ico reconnect.xpm help.xpm
+	invite_btn.xpm ayttm.ico reconnect.xpm help.xpm 
 
 
 Utilitiesdir = $(datadir)/pixmaps
-Utilities_DATA = ayttm.png
+Utilities_DATA = ayttm.png away.png buddy.png group.png group-chat.png smileys.png
 # Gets rid of the datarootdir warning
 datarootdir=@datarootdir@
 

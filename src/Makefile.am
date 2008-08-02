@@ -24,14 +24,14 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
 	offline_queue_mgmt.c tcp_util.c image_window.c action.c about.c \
-	messages.c edit_list_window.c flash_window_title.c ssl.c \
+	messages.c edit_list_window.c flash_window_title.c ssl.c icons.c \
 	ssl_certificate.c charconv.c ayttm_tray.c $(WIN32_SRC)
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
 	sound.h dialog.h prefs.h away_window.h spellcheck.h \
 	message_parse.h help_menu.h chat_room.h value_pair.h logs.h \
-	info_window.h trigger.h console_session.h video.h \
+	info_window.h trigger.h console_session.h video.h icons.h \
 	browser.h input_list.h plugin.h plugin_api.h debug.h \
 	nomodule.h file_select.h contact_actions.h activity_bar.h \
 	smileys.h intl.h account_parser.h contact_parser.h crash.h \
@@ -48,7 +48,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 LIBS = @LIBS@ $(EB_LIBS) -lproxy $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS) -L/usr/local/lib/pth/ $(WIN32_LIBS)
 ayttm_LDFLAGS = $(EB_LDFLAGS) -L$(top_srcdir)/libproxy -export-dynamic $(WIN32_LD)
 CLEANFILES = @CLEANFILES@ defaults.h
-DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\" -D_REENTRANT
+DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\" -D_REENTRANT -DIMG_DIR=\"${datadir}/pixmaps/\"
 
 ayttm_LDADD = \
 	gtk/libayttmgtk.la \

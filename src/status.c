@@ -375,6 +375,8 @@ static void create_log_window(void)
 	status_message_window_text = gtk_text_view_new();
 	
 	status_message_swindow = gtk_scrolled_window_new(NULL,NULL);
+
+	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(status_message_swindow), GTK_SHADOW_ETCHED_IN ) ;
 	
 	gtk_window_set_title(GTK_WINDOW(status_message_window), _("Ayttm - history"));
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(status_message_swindow), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
@@ -1976,6 +1978,9 @@ static GtkWidget* MakeContactList()
 	GtkTreeViewColumn *column;
 	
 	contact_window = gtk_scrolled_window_new(NULL, NULL);
+
+	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(contact_window), GTK_SHADOW_ETCHED_IN ) ;
+
 	contact_list_store = gtk_tree_store_new(
 				MAIN_VIEW_COL_COUNT,
 				GDK_TYPE_PIXBUF,
@@ -2275,45 +2280,45 @@ static char *main_menu_xml;
 
 static GtkActionEntry action_items[] = {
 	/* All the menus */
-	{"Chat",	NULL,	"_Chat"		},
-	{"Set status",	NULL,	"Se_t status"	},
-	{"Smileys",	NULL,	"_Smileys"	},
-	{"Edit",	NULL,	"_Edit"		},
-	{"Import",	NULL,	"_Import"	},
-	{"Set profile",	NULL,	"Set _profile"	},
-	{"Help",	NULL,	"_Help"		},
+	{"Chat",	NULL,			"_Chat"		},
+	{"Set status",	NULL,			"Se_t status"	},
+	{"Smileys",	"ayttm_smileys",	"_Smileys"	},
+	{"Edit",	NULL,			"_Edit"		},
+	{"Import",	NULL,			"_Import"	},
+	{"Set profile",	NULL,			"Set _profile"	},
+	{"Help",	NULL,			"_Help"		},
 	/* All the submenus */
-	{"SignonAll", NULL, N_("Sign o_n all"), "<control>A", N_("Sign onto all accounts"),
+	{"SignonAll", GTK_STOCK_CONNECT, N_("Sign o_n all"), "<control>A", N_("Sign onto all accounts"),
 		G_CALLBACK(eb_sign_on_all)},
-	{"SignoffAll", NULL, N_("Sign o_ff all"), "<control>F", N_("Sign off all accounts"),
+	{"SignoffAll", GTK_STOCK_DISCONNECT, N_("Sign o_ff all"), "<control>F", N_("Sign off all accounts"),
 		G_CALLBACK(eb_sign_off_all)},
-	{"GrpChat", NULL, N_("New group chat"), NULL, N_("Start a chat room for a group chat"),
+	{"GrpChat", "ayttm_group_chat", N_("New group chat"), NULL, N_("Start a chat room for a group chat"),
 		G_CALLBACK(launch_group_chat)},
-	{"SetAway", NULL, N_("Set as _away"), NULL, N_("Set a Custom \"Away\" status"),
+	{"SetAway", "ayttm_away", N_("Set as _away"), NULL, N_("Set a Custom \"Away\" status"),
 		G_CALLBACK(show_away_choicewindow)},
-	{"Quit", NULL, N_("_Quit"),	"<control>Q", N_("Close Ayttm"),
+	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),	"<control>Q", N_("Close Ayttm"),
 		G_CALLBACK(ayttm_end_app_from_menu)},
-	{"Prefs", NULL, N_("_Preferences"), NULL, N_("Customize your Ayttm"),
+	{"Prefs", GTK_STOCK_PREFERENCES, N_("_Preferences"), NULL, N_("Customize your Ayttm"),
 		G_CALLBACK(build_prefs_callback)},
-	{"AddDelAccounts", NULL, N_("Add or _delete accounts"), NULL,
+	{"AddDelAccounts", GTK_STOCK_ADD, N_("Add or _delete accounts"), NULL,
 		N_("Add or Delete chat accounts"),
 		G_CALLBACK(eb_add_accounts)},
-	{"EditAccounts", NULL, N_("Edit _accounts"), NULL, N_("Edit your account details"),
+	{"EditAccounts", GTK_STOCK_EDIT, N_("Edit _accounts"), NULL, N_("Edit your account details"),
 		G_CALLBACK(eb_edit_accounts)},
-	{"AddContactAccount", NULL, N_("Add a _contact account"), NULL,
+	{"AddContactAccount", "ayttm_contact", N_("Add a _contact account"), NULL,
 		N_("Add an account for a contact"),
 		G_CALLBACK(add_callback)},
-	{"AddGroup", NULL, N_("Add a _group"), NULL, N_("Add a contact group"),
+	{"AddGroup", "ayttm_group", N_("Add a _group"), NULL, N_("Add a contact group"),
 		G_CALLBACK(add_group_callback)},
 #ifndef __MINGW32__
 	{"Website", NULL, N_("_Web site"), NULL, NULL,
 		G_CALLBACK(show_website)},
-	{"Manual", NULL, N_("_Manual"), NULL, NULL,
+	{"Manual", GTK_STOCK_HELP, N_("_Manual"), NULL, NULL,
 		G_CALLBACK(show_manual)},
 #endif
-	{"About", NULL, N_("_About Ayttm"), NULL, NULL,
+	{"About", GTK_STOCK_ABOUT, N_("_About Ayttm"), NULL, NULL,
 		G_CALLBACK(ay_show_about)},
-	{"CheckRelease", NULL, N_("Check for new _release"), NULL, NULL,
+	{"CheckRelease", GTK_STOCK_REFRESH, N_("Check for new _release"), NULL, NULL,
 		G_CALLBACK(ay_check_release)}
 #if ADD_DEBUG_TO_MENU
 	,
