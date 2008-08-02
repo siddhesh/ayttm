@@ -216,7 +216,9 @@ struct service_callbacks {
 	
 	int (*handle_url)(const char *url);
 	
-	LList * (*get_public_chatrooms)(eb_local_account *ela);
+	void (*get_public_chatrooms)(eb_local_account *ela, 
+					void (*public_chatroom_callback) (LList *list, void *data),
+					void *data);
 };
 
 /*for every server you have the following: the name of the service,

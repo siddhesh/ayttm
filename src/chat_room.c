@@ -1,6 +1,11 @@
 /*
  * Ayttm 
  *
+ * Copyright (C) 2003, the Ayttm team
+ * 
+ * Ayttm is derivative of Everybuddy
+ * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -244,6 +249,7 @@ void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num)
 		}
 	}	
 }
+
 extern char * complete_word( LList * l, const char *begin, int *choice);
 extern int chat_auto_complete(GtkWidget *w, LList *l, GdkEventKey *event);
 extern void chat_auto_complete_insert(GtkWidget *w, GdkEventKey *event);
@@ -254,86 +260,80 @@ extern LList *session_words;
 
 static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-  eb_chat_room *cr = (eb_chat_room *)data;
-  GdkModifierType modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+	eb_chat_room *cr = (eb_chat_room *)data;
+	GdkModifierType modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
-  eb_chat_room_update_window_title(cr, FALSE);
-  set_tab_normal (cr);
+	eb_chat_room_update_window_title(cr, FALSE);
+	set_tab_normal (cr);
   
 
-  if (!iGetLocalPref("do_multi_line"))
-	  return FALSE;
+	if (!iGetLocalPref("do_multi_line"))
+		return FALSE;
   
-  if (event->keyval == GDK_Return)
-    {
-      /* Just print a newline on Shift-Return */
-      if (event->state & GDK_SHIFT_MASK)
-	{
-	  event->state = 0;
+	if (event->keyval == GDK_Return) {
+		/* Just print a newline on Shift-Return */
+		if (event->state & GDK_SHIFT_MASK) {
+			event->state = 0;
+		}
+		else if ( iGetLocalPref("do_enter_send") ) {
+			chat_auto_complete_insert(cr->entry, event);	
+
+			/*Prevents a newline from being printed*/
+			g_signal_stop_emission_by_name(G_OBJECT(widget), "key-press-event");
+
+			send_cr_message(NULL, cr);
+			return TRUE;
+		}
 	}
-      else if ( iGetLocalPref("do_enter_send") )
+	else if (event->keyval == GDK_Up && (modifiers == 0) ) {
+		chat_history_up(cr);
+	}
+	else if (event->keyval == GDK_Down && (modifiers == 0) ) {
+		chat_history_down(cr);
+	}
+	else if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down) {
+		chat_scroll(cr, event);
+	}
+	else if ( iGetLocalPref("do_auto_complete") && 
+			((event->keyval >= GDK_a && event->keyval <= GDK_z) 
+			 ||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) ) 
 	{
-	  chat_auto_complete_insert(cr->entry, event);	
-	  /*Prevents a newline from being printed*/
-	  g_signal_stop_emission_by_name(G_OBJECT(widget), "key-press-event");
+		return ( chat_auto_complete(cr->entry, cr->fellows, event) 
+				|| ( iGetLocalPref("do_auto_complete") 
+					&& chat_auto_complete(cr->entry, session_words, event)) );
 
-	  send_cr_message(NULL, cr);
-	  return TRUE;
-    	}
-    }
-  else if (event->keyval == GDK_Up && (modifiers == 0) )
-    {
-	    chat_history_up(cr);
-    }
-  else if (event->keyval == GDK_Down && (modifiers == 0) )
-    {
-	    chat_history_down(cr);
-    }
-  else if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down)
-  {
-	  chat_scroll(cr, event);
-  }
-  else if ( iGetLocalPref("do_auto_complete") && 
-	  	((event->keyval >= GDK_a && event->keyval <= GDK_z)
-		||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) ) {
-	  	return chat_auto_complete(cr->entry, cr->fellows, event)
-				|| (iGetLocalPref("do_auto_complete") && chat_auto_complete(cr->entry, session_words, event));
-  } else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab 
-	/* #980589 Right Arrow Key not avail  || event->keyval == GDK_Right */)) {
+	} else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab )) {
+	/* #980589 Right Arrow Key not avail  || event->keyval == GDK_Right )) { */
 		chat_auto_complete_validate(cr->entry);
 		return TRUE;
-  } else if (iGetLocalPref("do_auto_complete") && event->keyval == GDK_space) {
+	} else if (iGetLocalPref("do_auto_complete") && event->keyval == GDK_space) {
 		chat_auto_complete_insert(cr->entry, event);
-  }
-  else if (cr->notebook != NULL)
-  {
-	  // check tab changes if this is a tabbed chat window
-	  if ( check_tab_accelerators( widget, cr, modifiers, event ) )
-		  return TRUE;
-  }
+	}
+	else if (cr->notebook != NULL) {
+		/* check tab changes if this is a tabbed chat window */
+		if ( check_tab_accelerators( widget, cr, modifiers, event ) )
+			return TRUE;
+	}
 
-  if(modifiers)
-  { return FALSE; }
+	if(!modifiers)
+		send_typing_status(cr);
 
-  if(!modifiers)
-  {
-    send_typing_status(cr);
-  }
-
-  return FALSE;
+	return FALSE;
 }
+
 
 static void set_sound_on_toggle(GtkWidget * sound_button, gpointer userdata)
 {
-  eb_chat_room * cr = (eb_chat_room *)userdata;
-   
-  /*Set the sound_enable variable depending on the toggle button*/
-   
-  if ( gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON (sound_button)) )
-    cr->sound_enabled = TRUE;
-  else
-    cr->sound_enabled = FALSE;
+	eb_chat_room * cr = (eb_chat_room *)userdata;
+ 
+	/*Set the sound_enable variable depending on the toggle button*/
+
+	if ( gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON (sound_button)) )
+		cr->sound_enabled = TRUE;
+	else
+		cr->sound_enabled = FALSE;
 }
+
 
 void start_auto_chatrooms(eb_local_account *ela) 
 {
@@ -347,6 +347,11 @@ void start_auto_chatrooms(eb_local_account *ela)
 	
 	eb_debug(DBG_CORE, "buff %s\n",buff);
 	fp = fopen(buff, "r");
+
+	if(fp == NULL) {
+		eb_debug(DBG_CORE, "Could not open file %s\n", buff);
+		return;
+	}
 		
 	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
 		char **tokens = ay_strsplit(buff, "\t", -1);
@@ -376,10 +381,11 @@ static int eb_is_chatroom_auto(eb_chat_room *cr)
 		
 	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
 		char **tokens = ay_strsplit(buff, "\t", -1);
-		if (!strcmp(tokens[0], get_service_name(cr->local_user->service_id))
-		&&  !strcmp(tokens[1], cr->local_user->handle)
-		&&  !strcmp(tokens[2], cr->room_name)
-		&&  atoi(tokens[3]) == cr->is_public) {
+		if ( !strcmp ( tokens[0], get_service_name(cr->local_user->service_id) )
+				&&  !strcmp ( tokens[1], cr->local_user->handle )
+				&&  !strcmp ( tokens[2], cr->room_name )
+				&&  atoi ( tokens[3] ) == cr->is_public ) 
+		{
 			fclose(fp);
 			ay_strfreev(tokens);
 			return TRUE; /* already in */
@@ -388,6 +394,7 @@ static int eb_is_chatroom_auto(eb_chat_room *cr)
 	}
 	if (fp)
 		fclose(fp);
+
 	return FALSE;	
 }
 
@@ -406,10 +413,11 @@ static void eb_add_auto_chatroom(eb_local_account *ela, const char *name, int pu
 		
 	while (fp && fgets(buff, sizeof(buff), fp) != NULL) {
 		char **tokens = ay_strsplit(buff, "\t", -1);
-		if (!strcmp(tokens[0], get_service_name(ela->service_id))
-		&&  !strcmp(tokens[1], ela->handle)
-		&&  !strcmp(tokens[2], name)
-		&&  atoi(tokens[3]) == public) {
+		if (!strcmp ( tokens[0], get_service_name(ela->service_id ) )
+				&&  !strcmp ( tokens[1], ela->handle )
+				&&  !strcmp ( tokens[2], name )
+				&&  atoi ( tokens[3] ) == public ) 
+		{
 			fclose(fp);
 			ay_strfreev(tokens);
 			return; /* already in */
@@ -479,11 +487,6 @@ static void set_reconnect_on_toggle(GtkWidget * reconnect_button, gpointer userd
 	else
 		eb_remove_auto_chatroom(cr->local_user, cr->room_name, cr->is_public);
 }
-
-//static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
-//{
-//	return strcasecmp((const char *)a, (const char *)b);
-//}
 
 static GList * chat_service_list(GtkComboBox *service_list)
 {
@@ -820,13 +823,29 @@ static void choose_list_cb(const char *text, gpointer data) {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(public_chkbtn), TRUE);
 }
 
+
+static void got_chatroom_list(LList *list, void *data)
+{
+	if (!list) {
+		ay_do_error(_("Cannot list chatrooms"), _("No list available."));
+		return;			
+	}
+
+	do_llist_dialog(_("Select a chatroom."), _("Public chatrooms list"), list, choose_list_cb, NULL);
+	
+	gtk_button_set_label(GTK_BUTTON(data), _("List public chatrooms..."));
+	gtk_widget_set_sensitive(GTK_WIDGET(data), TRUE);
+
+	l_list_free(list);
+}
+
+
 static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
 	char *service = gtk_combo_box_get_active_text(GTK_COMBO_BOX(chat_room_type));
 	char *mservice = NULL;
 	char *local_acc = NULL;
 	int service_id = -1;
 	/*int has_public = 0;*/
-	LList *list = NULL;
 	eb_local_account *ela = NULL;
 	
 	if (!strstr(service, "]") || !strstr(service," ")) {
@@ -849,16 +868,11 @@ static void list_public_chatrooms (GtkWidget *widget, gpointer data) {
 		return;			
 	}
 
-	list = RUN_SERVICE(ela)->get_public_chatrooms(ela);
-	
-	if (!list) {
-		ay_do_error(_("Cannot list chatrooms"), _("No list available."));
-		return;			
-	}
+	gtk_button_set_label(GTK_BUTTON(widget), _("Loading List. This may take a while..."));
+	gtk_widget_set_sensitive(widget, FALSE);
 
-	do_llist_dialog(_("Select a chatroom."), _("Public chatrooms list"), list, choose_list_cb, NULL);
+	RUN_SERVICE(ela)->get_public_chatrooms(ela, got_chatroom_list, widget);
 	
-	l_list_free(list);
 }
 
 static void join_chat_destroy(GtkWidget * widget, gpointer data )
@@ -1214,9 +1228,11 @@ void eb_chat_room_buddy_leave( eb_chat_room * room, const gchar * handle )
         gchar *buf;
 	if (node) {
 		eb_chat_room_buddy * ecrb = node->data;
-	        buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat.</b></body>"), ecrb->alias, handle);
+	        buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat.</b></body>"), 
+				ecrb->alias, handle);
 	} else
-		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s has left the chat.</b></body>"), handle);
+		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s has left the chat.</b></body>"), 
+				handle);
         eb_chat_room_show_3rdperson(room, buf);
 	g_free(buf);
 
@@ -1280,6 +1296,8 @@ eb_chat_room* eb_start_chat_room( eb_local_account *ela, gchar * name, int is_pu
 {
 	eb_chat_room * ecb = NULL;	
 	
+	eb_debug(DBG_CORE, "Starting chatroom %s(%s)\n", name, (is_public?"public":"non-public"));
+
 	if ((ecb = find_chatroom_by_ela_and_name(ela, name, is_public)) != NULL) {
 		/* we have to destroy and recreate it in case we have been disconnected */
 		eb_destroy_chat_room(ecb);
@@ -1299,6 +1317,9 @@ eb_chat_room* eb_start_chat_room( eb_local_account *ela, gchar * name, int is_pu
 		eb_chat_room_update_window_title(ecb, FALSE);
 		set_tab_normal (ecb);
 	}
+
+	eb_debug(DBG_CORE, "Started chatroom %s(%s)\n", name, (is_public?"public":"non-public"));
+
 	return ecb;
 }
 
@@ -1457,7 +1478,7 @@ static void _show_smileys_cb(GtkWidget * widget, smiley_callback_data *data)
 	show_smileys_cb(data);
 }
 
-void eb_join_chat_room( eb_chat_room * chat_room )
+void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 {
 	GtkWidget * vbox;
 	GtkWidget * vbox2;
@@ -1752,7 +1773,10 @@ void eb_join_chat_room( eb_chat_room * chat_room )
 	}
 		
 	init_chat_room_log_file(chat_room);
-	RUN_SERVICE(chat_room->local_user)->join_chat_room(chat_room);
+
+	if(send_join)
+		RUN_SERVICE(chat_room->local_user)->join_chat_room(chat_room);
+
 	gtk_widget_grab_focus(chat_room->entry);
 	
 	if (iGetLocalPref("do_tabbed_chat")) {
@@ -1869,3 +1893,5 @@ void eb_chat_room_display_status (eb_account *remote, char *message)
 		g_free(tmp);
 	}
 }
+
+

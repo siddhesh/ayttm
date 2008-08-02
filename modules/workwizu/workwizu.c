@@ -113,8 +113,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu",
 	"Provides Workwizu Chat support",
-	"$Revision: 1.15 $",
-	"$Date: 2003/12/10 10:28:55 $",
+	"$Revision: 1.16 $",
+	"$Date: 2008/08/02 06:13:12 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1030,7 +1030,7 @@ eb_chat_room *eb_workwizu_make_chat_room(char *name, eb_local_account *account, 
 	eb_debug(DBG_WWZ,"ecr->local_user %p\n",ecr->local_user);
 	wad->chat_room = ecr;
 	
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 	eb_chat_room_buddy_arrive(ecr, account->handle, account->alias);
 	return ecr;
 }

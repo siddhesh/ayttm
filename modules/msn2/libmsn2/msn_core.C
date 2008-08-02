@@ -120,7 +120,7 @@ void msn_init(msnconn * conn, char * username, char * password)
 
 void msn_show_verbose_error(msnconn * conn, int errcode)
 {
-  if(errcode != 215 && errcode != 216 && errcode != 219
+  if(errcode != 208 && errcode != 215 && errcode != 216 && errcode != 219
 	&& errcode != 224 && errcode != 225) {
     snprintf(buf, 1024, "An error has occurred while communicating with the MSN Messenger server: \n\n %s (code %d).", errors[errcode], errcode);
     ext_show_error(conn, buf);
@@ -599,137 +599,143 @@ void msn_SBconn_2(msnconn * conn, int trid, char ** args, int numargs, callback_
 
 static void msn_https_cb1(int fd, int error, void *data) 
 {
-	 SockInfo *sock = (SockInfo*)malloc(sizeof(SockInfo));
-	 char *urlread = NULL;
-	 char *tmp = NULL;
-	 https_data *hdata = (https_data *)data;	
+	SockInfo *sock = (SockInfo*)malloc(sizeof(SockInfo));
+	char *urlread = NULL;
+	char *tmp = NULL;
+	https_data *hdata = (https_data *)data;	
 
-	 urlread = (char *)calloc(1, sizeof(char));
+	urlread = (char *)calloc(1, sizeof(char));
 	 
-	 sock->sock = fd;
-	 if (DEBUG) printf("sock->sock = %d\n",sock->sock);
-	 if (DEBUG) printf("entering msn_https_cb1\n");
-	 if(fd == -1 || error)
-	 {
-		 ext_show_error(hdata->conn, "Could not connect to https server.");
-		 return;
-	 }
+	sock->sock = fd;
+	if (DEBUG) printf("sock->sock = %d\n",sock->sock);
+	if (DEBUG) printf("entering msn_https_cb1\n");
+	if(fd == -1 || error)
+	{
+		ext_show_error(hdata->conn, "Could not connect to https server.");
+		return;
+	}
 
-	 ssl_init();
-	 if (!ssl_init_socket(sock, hdata->remote_host, 443)) {
-		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
-		 return;
-	 }
+	ssl_init();
+	if (!ssl_init_socket(sock, hdata->remote_host, 443)) {
+		ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (ssl error).");
+		return;
+	}
+	
+	ssl_write(sock->ssl, hdata->url, strlen(hdata->url));
 	 
-	 ssl_write(sock->ssl, hdata->url, strlen(hdata->url));
+	while (ssl_read(sock->ssl, buf, sizeof(buf))) {
+		size_t s = (size_t)strlen(buf) +1;
+		 
+		if (urlread) {
+			s += strlen(urlread);
+		}
+		 
+		urlread = (char *)realloc(urlread, s);
+		 
+		strcat(urlread, buf);
+		if(strstr(urlread, "\r\n\r\n"))
+			break;
+		bzero(buf, sizeof(buf));
+	}
 	 
-	 while (ssl_read(sock->ssl, buf, sizeof(buf))) {
-		 size_t s = (size_t)strlen(buf) +1;
-		 
-		 if (urlread) {
-			 s += strlen(urlread);
-		 } 
-		 
-		 urlread = (char *)realloc(urlread, s);
-		 
-		 strcat(urlread, buf);
-		 if(strstr(urlread, "\r\n\r\n"))
-			 break;
-		 bzero(buf, sizeof(buf));
-	 }
-	 
-	 if (DEBUG) printf("---ANSWER---\n%s\n---END---\n",urlread);
+	if (DEBUG) printf("---ANSWER---\n%s\n---END---\n",urlread);
 
-		if(strstr(hdata->remote_host, "nexus.passport.com"))
-		{
-			char *remote_host = strdup(strstr(urlread, "DALogin=")+8); 
-			*(strchr(remote_host, ',')) = 0;
-			char *realpath = strdup(strchr(remote_host, '/'));
-			*(strchr(remote_host, '/')) = 0;
-			char *url = hdata->lc;
-			hdata->lc=0;
+	if(!hdata->conn->auth)
+	{
+		if (DEBUG) printf("msn_core: Cancelled connect\n");
+		return;
+	}
 
-	 	char *ru = NULL, *realurl = NULL, *endurl = NULL, *finalurl = NULL;
-  	char *lc=NULL, *id=NULL, *tw=NULL;
+	if(strstr(hdata->remote_host, "nexus.passport.com"))
+	{
+		char *remote_host = strdup(strstr(urlread, "DALogin=")+8); 
+		*(strchr(remote_host, ',')) = 0;
+		char *realpath = strdup(strchr(remote_host, '/'));
+		*(strchr(remote_host, '/')) = 0;
+		char *url = hdata->lc;
+		hdata->lc=0;
+
+		char *ru = NULL, *realurl = NULL, *endurl = NULL, *finalurl = NULL;
+		char *lc=NULL, *id=NULL, *tw=NULL;
 	 
-		 lc = strdup(strstr(url, "lc=")+3);
-		 id = strdup(strstr(url, "id=")+3);
-		 tw = strdup(strstr(url, "tw=")+3);
-		 ru = strstr(url, "ru=")+3;
+		lc = strdup(strstr(url, "lc=")+3);
+		id = strdup(strstr(url, "id=")+3);
+		tw = strdup(strstr(url, "tw=")+3);
+		ru = strstr(url, "ru=")+3;
+		
+		*(strstr(lc, ",")) = 0;
+		*(strstr(id, ",")) = 0;
+		*(strstr(tw, ",")) = 0;
+		endurl = strstr(ru, ",");
 		 
-		 *(strstr(lc, ",")) = 0;
-		 *(strstr(id, ",")) = 0;
-		 *(strstr(tw, ",")) = 0;
-		 endurl = strstr(ru, ",");
+		realurl=strdup("http://messenger.msn.com"); // shouldn't be hardcoded, better translate ru= param 
 		 
-		 realurl=strdup("http://messenger.msn.com"); // shouldn't be hardcoded, better translate ru= param 
-		 
-		 finalurl = (char *)malloc(strlen(url)+strlen(realurl)+strlen(endurl)+1);
-		 snprintf(finalurl, strlen(url)+strlen(realurl)+strlen(endurl),
+		finalurl = (char *)malloc(strlen(url)+strlen(realurl)+strlen(endurl)+1);
+		snprintf(finalurl, strlen(url)+strlen(realurl)+strlen(endurl),
 				 "%s%s%s", url, realurl, endurl);
-
-		 snprintf(buf, sizeof(buf), "GET %s HTTP/1.1\r\n"
-									                     "Authorization: Passport1.4 OrgVerb=GET,OrgURL=http%%3A%%2F%%2Fmessenger%%2Emsn%%2Ecom,sign-in=%s,pwd=%s,%s\r\n"
-																														"Host: %s\r\n"
-																														"\r\n",
-																														realpath,
-																														msn_encode_URL(((authdata_NS *)hdata->conn->auth)->username),
-																														msn_encode_URL(((authdata_NS *)hdata->conn->auth)->password),
-																														url, remote_host);
+        
+		snprintf(buf, sizeof(buf), "GET %s HTTP/1.1\r\n"
+				"Authorization: Passport1.4 OrgVerb=GET,OrgURL=http%%3A%%2F%%2Fmessenger%%2Emsn%%2Ecom,sign-in=%s,pwd=%s,%s\r\n"
+				"Host: %s\r\n"
+				"\r\n",
+				realpath,
+				msn_encode_URL(((authdata_NS *)hdata->conn->auth)->username),
+				msn_encode_URL(((authdata_NS *)hdata->conn->auth)->password),
+				url, remote_host);
 		 
-		 if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
+		if (DEBUG) printf("---URL---\n%s\n---END---\n", buf);
 		 
-		 hdata->url = strdup(buf);
-		 hdata->remote_host = strdup(remote_host);
-		 hdata->lc = lc;
-		 hdata->id = id;
-		 hdata->tw = tw;
-		 hdata->conn = hdata->conn;
-		 hdata->info = hdata->info;
+		hdata->url = strdup(buf);
+		hdata->remote_host = strdup(remote_host);
+		hdata->lc = lc;
+		hdata->id = id;
+		hdata->tw = tw;
+		hdata->conn = hdata->conn;
+		hdata->info = hdata->info;
 		 
-		 ssl_done_socket(sock);
-		 free(sock->hostname);
+		ssl_done_socket(sock);
+		free(sock->hostname);
 	 	sock->ssl = NULL;
-		 close(sock->sock);
-
-		 if (ext_async_socket(remote_host, 443, (void *)msn_https_cb1, hdata) < 0) {
-			 if(DEBUG) printf("immediate connect failure to %s\n", remote_host);    
-			 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server.");
-			 ext_closing_connection(hdata->conn);
-		 }
-
-			free(remote_host);
-			free(url);
-			free(realpath);
-			free(urlread);
-
-			return;
+		close(sock->sock);
+        
+		if (ext_async_socket(remote_host, 443, (void *)msn_https_cb1, hdata) < 0) {
+			if(DEBUG) printf("immediate connect failure to %s\n", remote_host);    
+			ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server.");
+			ext_closing_connection(hdata->conn);
 		}
 
-	 if (!urlread || !strstr(urlread, "Authentication-Info:")) {
-		 ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (bad cookies).");
-		 ext_closing_connection(hdata->conn);
-		 return;
-	 }
-	 
-	 tmp = strstr(urlread, "Authentication-Info:");
-		char *tkt = strdup(strstr(tmp, "from-PP='") + strlen("from-PP='"));
-		*(strchr(tkt, '\'')) = 0;
-	 
-	 ssl_done_socket(sock);
-	 free(sock->hostname);
-	 sock->ssl = NULL;
-	 close(sock->sock);
-	 
-	 free (hdata->url); 
-  snprintf(buf, sizeof(buf), "USR %d TWN S %s\r\n", next_trid, tkt);
-		if(DEBUG) printf("ticket=%s\n", tkt);    
-  
-  write(hdata->conn->sock, buf, strlen(buf));
-  msn_add_callback(hdata->conn, msn_connect_4, next_trid, hdata->info);
+		free(remote_host);
+		free(url);
+		free(realpath);
+		free(urlread);
 
-  next_trid++;
-		free (hdata);
+		return;
+	}
+
+	if (!urlread || !strstr(urlread, "Authentication-Info:")) {
+		ext_show_error(hdata->conn, "Could not connect to MSN HTTPS server (bad cookies).");
+		ext_closing_connection(hdata->conn);
+		return;
+	}
+	 
+	tmp = strstr(urlread, "Authentication-Info:");
+	char *tkt = strdup(strstr(tmp, "from-PP='") + strlen("from-PP='"));
+	*(strchr(tkt, '\'')) = 0;
+	 
+	ssl_done_socket(sock);
+	free(sock->hostname);
+	sock->ssl = NULL;
+	close(sock->sock);
+	 
+	free (hdata->url); 
+	snprintf(buf, sizeof(buf), "USR %d TWN S %s\r\n", next_trid, tkt);
+	if(DEBUG) printf("ticket=%s\n", tkt);    
+  
+	write(hdata->conn->sock, buf, strlen(buf));
+	msn_add_callback(hdata->conn, msn_connect_4, next_trid, hdata->info);
+
+	next_trid++;
+	free (hdata);
 }
  	 
 /*

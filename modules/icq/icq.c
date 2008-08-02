@@ -98,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ", 
 	"Provides support for the ICQ protocol", 
-	"$Revision: 1.9 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.10 $",
+	"$Date: 2008/08/02 06:13:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1362,7 +1362,7 @@ static eb_chat_room * icq_make_chat_room( char * name, eb_local_account * accoun
 	ecr->connected = 0;
 	ecr->local_user = account;
 
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 	eb_chat_room_buddy_arrive( ecr, account->alias, account->handle );
 
 	return ecr;
@@ -1398,7 +1398,7 @@ static void icq_accept_invite( eb_local_account * account, void * invitation )
 	{
 		ecr = find_chat_room_by_id("ICQ");
 	}
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 	ICQ_Accept_Chat(uin);
 }
 

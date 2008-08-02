@@ -1171,9 +1171,10 @@ void ayttm_prefs_connect_account( t_account_pref *ioPrefs )
 {
 	eb_local_account *ela = find_local_account_by_handle( ioPrefs->screen_name, ioPrefs->service_id );
 	
-	RUN_SERVICE(ela)->login(ela);
-
-	s_fill_in_account_pref_info( ioPrefs, ela );
+	if ( ela ) {
+		RUN_SERVICE(ela)->login(ela);
+		s_fill_in_account_pref_info( ioPrefs, ela );
+	}
 	
 	return;
 }
@@ -1182,9 +1183,10 @@ void ayttm_prefs_disconnect_account( t_account_pref *ioPrefs )
 {
 	eb_local_account *ela = find_local_account_by_handle( ioPrefs->screen_name, ioPrefs->service_id );
 	
-	RUN_SERVICE(ela)->logout(ela);
-
-	s_fill_in_account_pref_info( ioPrefs, ela );
+	if ( ela ) {
+		RUN_SERVICE(ela)->logout(ela);
+		s_fill_in_account_pref_info( ioPrefs, ela );
+	}
 	
 	return;
 }

@@ -96,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"AIM TOC",
 	"Provides AOL Instant Messenger support via the TOC protocol",
-	"$Revision: 1.60 $",
-	"$Date: 2007/08/03 20:38:38 $",
+	"$Revision: 1.61 $",
+	"$Date: 2008/08/02 06:13:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -374,7 +374,7 @@ static void eb_aim_join_ack(toc_conn * conn, char * id, char * name)
 
 	strncpy( ecr->id, id , sizeof(ecr->id));
 
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 }
 
 static void eb_aim_join_error(toc_conn * conn, char * name)
@@ -771,7 +771,7 @@ static eb_chat_room * eb_aim_make_chat_room(char * name, eb_local_account * acco
 	ecr->fellows = NULL;
 	ecr->connected = FALSE;
 	ecr->local_user = account;
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 	
 
 	return ecr;

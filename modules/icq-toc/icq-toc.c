@@ -96,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.48 $",
-	"$Date: 2007/08/03 20:38:38 $",
+	"$Revision: 1.49 $",
+	"$Date: 2008/08/02 06:13:09 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -300,7 +300,7 @@ static void eb_icq_join_ack(toc_conn * conn, char * id, char * name)
 
 	strncpy( ecr->id, id , sizeof(ecr->id));
 
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 }
 
 static void eb_icq_join_error(toc_conn * conn, char * name)
@@ -703,7 +703,7 @@ static eb_chat_room * eb_icq_make_chat_room(char * name, eb_local_account * acco
 	ecr->fellows = NULL;
 	ecr->connected = FALSE;
 	ecr->local_user = account;
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 	
 
 	return ecr;

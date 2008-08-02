@@ -140,15 +140,29 @@ info_window * eb_info_window_new(eb_local_account * local, struct account * remo
 
 void eb_info_window_clear(info_window *iw) 
 {
-	gtk_editable_delete_text(GTK_EDITABLE(iw->info), 0, -1);
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(iw->info));
+	GtkTextIter start, end;
+
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+	gtk_text_buffer_delete(buffer, &start, &end);
 }
 
 
-void eb_info_window_add_info( eb_account * remote_account, gchar* text, gint ignore_bg, gint ignore_fg, gint ignore_font ) {
-	
-	if(remote_account->infowindow)
-	{
-		html_text_buffer_append(GTK_TEXT_VIEW(remote_account->infowindow->info), text,
+void eb_info_window_add_info( eb_account * remote_account, gchar* text, gint ignore_bg, gint ignore_fg, gint ignore_font ) 
+{
+	gchar msg[1024] ;
+	gchar *valid_end;
+
+	strncpy(msg, text, 1023);
+
+	if(!g_utf8_validate(msg, -1, (const gchar **)&valid_end)) {
+		*valid_end = '\0';
+
+		strncat(msg, _("<font color=red> (Invalid UTF-8 characters in response)</font>"), 1023 - strlen(msg));
+	}
+
+	if(remote_account->infowindow) {
+		html_text_buffer_append(GTK_TEXT_VIEW(remote_account->infowindow->info), msg,
 				(ignore_bg?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
 				(ignore_fg?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
 				(ignore_font?HTML_IGNORE_FONT:HTML_IGNORE_NONE) );

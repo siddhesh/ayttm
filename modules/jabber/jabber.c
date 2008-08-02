@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.47 $",
-	"$Date: 2007/08/03 20:38:39 $",
+	"$Revision: 1.48 $",
+	"$Date: 2008/08/02 06:13:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -777,7 +777,7 @@ static eb_chat_room * eb_jabber_make_chat_room( char * name, eb_local_account * 
 	ecr->fellows = NULL;
 	ecr->connected = FALSE;
 	ecr->local_user = account;
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 	eb_debug(DBG_JBR, "<\n");
 	return ecr;
 }
@@ -1237,7 +1237,7 @@ void JABBERLogout(void *data)
 
 void	JABBERError( char *message, char *title )
 {
-	ay_do_error( title, message );
+	ay_do_warning( title, message );
 }
 
 void JABBERBuddy_typing(JABBER_Conn *JConn, char *from, int typing) {

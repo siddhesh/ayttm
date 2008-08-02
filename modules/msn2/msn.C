@@ -170,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.83 $",
-	"$Date: 2007/10/21 20:21:22 $",
+	"$Revision: 1.84 $",
+	"$Date: 2008/08/02 06:13:11 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2153,7 +2153,7 @@ void ext_got_SB(msnconn * conn, void * tag)
 
   ecr->protocol_local_chat_room_data=conn;
 
-  eb_join_chat_room(ecr);
+  eb_join_chat_room(ecr, TRUE);
 
   eb_msn_local_account_data *mlad = (eb_msn_local_account_data *)(ecr->local_user->protocol_local_account_data);
   eb_chat_room_buddy_arrive(ecr, mlad->fname_pref[0]!=0 ? mlad->fname_pref:((authdata_SB *)conn->auth)->username,  
@@ -2191,7 +2191,7 @@ void ext_user_joined(msnconn * conn, char * username, char * friendlyname, int i
       ecr->local_user = (eb_local_account *)conn->ext_data;
       ecr->protocol_local_chat_room_data=conn;
 
-      eb_join_chat_room(ecr);
+      eb_join_chat_room(ecr, TRUE);
 
       llist * l=conn->users;
 

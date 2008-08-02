@@ -1,6 +1,9 @@
 /*
  * IRC protocol support for Ayttm
  *
+ * Copyright (C) 2008 Ayttm Team
+ *
+ * Derived from code which was:
  * Copyright (C) 2001, Erik Inge Bolso <knan@mo.himolde.no>
  *                     and others
  *
@@ -55,6 +58,11 @@
 #include "messages.h"
 #include "tcp_util.h"
 #include "activity_bar.h"
+#include "config.h"
+
+#include "libirc.h"
+#include "ctcp.h"
+#include "irc.h"
 
 #include "libproxy/libproxy.h"
 
@@ -78,19 +86,25 @@ static int plugin_init();
 static int plugin_finish();
 
 static int ref_count = 0;
+static int do_irc_debug=0;
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.45 $",
-	"$Date: 2008/03/30 13:24:43 $",
+	"$Revision: 1.46 $",
+	"$Date: 2008/08/02 06:13:10 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
 };
-struct service SERVICE_INFO = { "IRC", -1, SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL };
+struct service SERVICE_INFO = { "IRC", -1, 
+				SERVICE_CAN_MULTIACCOUNT 
+					| SERVICE_CAN_GROUPCHAT 
+					| SERVICE_CAN_ICONVERT
+					| SERVICE_CAN_OFFLINEMSG, 
+				NULL };
 /* End Module Exports */
 
 static char *eb_irc_get_color(void) { static char color[]="#880088"; return color; }
@@ -98,8 +112,17 @@ static char *eb_irc_get_color(void) { static char color[]="#880088"; return colo
 unsigned int module_version() {return CORE_VERSION;}
 static int plugin_init()
 {
+	input_list * il = g_new0(input_list, 1);
+
 	eb_debug(DBG_MOD, "IRC\n");
 	ref_count=0;
+
+	plugin_info.prefs = il;
+	il->widget.checkbox.value = &do_irc_debug;
+	il->name = "do_irc_debug";
+	il->label = _("Enable debugging");
+	il->type = EB_INPUT_CHECKBOX;
+
 	return(0);
 }
 
@@ -113,147 +136,6 @@ static int plugin_finish()
  *                             End Module Code
  ******************************************************************************/
 
-
-/* RFC1459 and RFC2812 defines max message size
-   including \n == 512 bytes, but being tolerant of
-   violations is nice nevertheless. */
-#define BUF_LEN 512*2
-
-typedef struct irc_local_account_type
-{
-	char		server[MAX_PREF_LEN];
-	char		password[MAX_PREF_LEN];
-	char 		port[MAX_PREF_LEN];
-	int 		fd;
-	int		fd_tag;
-	int		keepalive_tag;
-	int		connect_tag;
-	int		activity_tag;
-	GString *	buff;
-	int		status;
-	LList *		friends;
-	LList *		channel_list;
-	LList *	current_rooms;
-} irc_local_account;
-
-typedef struct irc_account_type
-{
-	char		server[255];
-	char		realserver[255];
-	int		status;
-	int		idle;
-} irc_account;
-
-typedef struct _irc_info
-{
-	char 		*whois_info;
-	eb_account 	*me;
-	char		*fullmessage;
-} irc_info;
-
-/* from util.c :
- *
- * The last state in the list of states will be the OFFLINE state
- * The first state in the list will be the ONLINE states
- * The rest of the states are the various AWAY states
- */
-
-enum {
-	IRC_ONLINE = 0,
-	IRC_AWAY,
-	IRC_OFFLINE
-};
-
-static char *irc_states[] =
-{
-	"",
-	"Away",
-	"Offline"
-};
-
-static int is_setting_state = 0;
-
-/* Denotes the end of list in irc_command_action array (irc_ca) ... */
-#define IRC_END_COMMAND         ""
-
-/* Max command and action strings length in an irc_command_action struct */
-#define MAX_IRC_COMMAND_LEN 255
-#define MAX_IRC_ACTION_LEN 255
-
-/* IRC_COMMAND_TYPE: type of command in an irc_command_action struct. */
-enum IRC_COMMAND_TYPE
-{
-    IRC_COMMAND_BUILTIN = 1,
-    IRC_COMMAND_USER_DEF = 2
-};
-
-typedef struct irc_command_action_type
-{
-    char command[MAX_IRC_COMMAND_LEN];
-    char action[MAX_IRC_ACTION_LEN];
-    enum IRC_COMMAND_TYPE command_type;
-} irc_command_action;
-
-/* Command-Action array of structs...
- * Spaces at the end of command-strings are important. 
- * IRC_END_COMMAND is the default action to take, if none of the commands match. */
-static irc_command_action irc_ca[] =
-{
-	{ "/ME ", "PRIVMSG %TARGET% :\1ACTION %ARGS%\1\n", IRC_COMMAND_BUILTIN },
-	{ "/MSG ", "PRIVMSG %ARGS1% :%ARGS2_ALL%\n", IRC_COMMAND_BUILTIN },
-	{ "/QUOTE ", "%ARGS%\n", IRC_COMMAND_BUILTIN },
-	{ "/QUIT ", "QUIT :%ARGS%\n", IRC_COMMAND_BUILTIN },
-	{ "/SAY ", "PRIVMSG %TARGET% :%ARGS%\n", IRC_COMMAND_BUILTIN },
-	{ "/KICK ", "KICK %TARGET% %ARGS1% :%ARGS2_ALL%\n", IRC_COMMAND_BUILTIN },
-	{ IRC_END_COMMAND, "PRIVMSG %TARGET% :%ARGS%\n", IRC_COMMAND_BUILTIN }
-};
-
-
-/* Local prototypes */
-static unsigned char *strip_color (unsigned char *text);
-static int sendall(int s, char *buf, int len);
-static int irc_query_connected (eb_account * account);
-static void irc_parse_incoming_message (eb_local_account * ela, char *buff);
-static void irc_parse (eb_local_account * ela, char *buff);
-static void irc_callback (void *data, int source, eb_input_condition condition);
-static void irc_ask_after_users ( eb_local_account * account );
-static int irc_keep_alive( gpointer data );
-static void irc_login( eb_local_account * account);
-static void irc_logout( eb_local_account * ela );
-static void irc_send_im( eb_local_account * account_from, eb_account * account_to,char *message );
-static eb_local_account * irc_read_local_config(LList * pairs);
-static LList * irc_write_local_config( eb_local_account * account );
-static eb_account * irc_read_config(eb_account *ea, LList *config );
-static LList * irc_get_states();
-static int irc_get_current_state(eb_local_account * account );
-static void irc_set_current_state(eb_local_account * account, int state );
-static char * irc_check_login(const char * user, const char * pass);
-static void irc_add_user( eb_account * account );
-static void irc_del_user( eb_account * account );
-static int irc_is_suitable (eb_local_account *local, eb_account *remote);
-static eb_account * irc_new_account(eb_local_account *ela, const char * account );
-static char * irc_get_status_string( eb_account * account );
-static const char ** irc_get_status_pixmap( eb_account * account);
-static void irc_set_idle(eb_local_account * account, int idle );
-static void irc_set_away( eb_local_account * account, char * message, int away);
-static void irc_send_file( eb_local_account * from, eb_account * to, char * file );
-static void irc_info_update(info_window * iw);
-static void irc_info_data_cleanup(info_window * iw);
-static void irc_get_info( eb_local_account * account_from, eb_account * account_to);
-static void irc_join_chat_room(eb_chat_room *room);
-static void irc_leave_chat_room(eb_chat_room *room);
-static void irc_send_chat_room_message(eb_chat_room *room, char *message);
-static void irc_send_invite( eb_local_account * account, eb_chat_room * room, char * user, const char * message);
-static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account, int is_public);
-static void irc_accept_invite( eb_local_account * account, void * invitation );
-static void irc_decline_invite( eb_local_account * account, void * invitation );
-static void eb_irc_read_prefs_config(LList * values);
-static LList * eb_irc_write_prefs_config();
-static void irc_connect_cb(int fd, int error, void *data);
-static int irc_replace_string_args(char* source, char **ptarget, const char* match, const char* replacement);
-static int irc_command_to_action(char* message, char* out, int max_out_len, char* target_name);
-
-void irc_finish_login(irc_local_account *ila);
 
 /* taken from X-Chat 1.6.4: src/common/util.c */
 /* Added: stripping of CTCP/2 color/formatting attributes, which is
@@ -272,7 +154,7 @@ static unsigned char *strip_color (unsigned char *text)
 		text[0] = '\0';
 
 	len = strlen ((char *)text);
-	new_str = malloc (len + 2);
+	new_str = calloc (len + 2, sizeof(char));
 
 	while (len > 0)
 	{
@@ -317,928 +199,93 @@ static unsigned char *strip_color (unsigned char *text)
 	return new_str;
 }
 
-/* Taken from Beej's Guide to Network Programming, and somewhat modified */
-static int sendall(int s, char *buf, int len)
+
+static int ay_irc_query_connected (eb_account * account)
 {
-    int total = 0;	  // how many bytes we've sent
-    int bytesleft = len; // how many we have left to send
-    int n = 0;
-    int errors = 0;
+	ay_irc_account * eia = NULL;
 
-    while(total < len) {
-	n = send(s, buf+total, bytesleft, 0);
-	if (n == -1)
-	{
-		errors++;
-		
-		/* sleep a little bit and try again, up to 10 times */
-		if ((errno == EAGAIN) && (errors < 10))
-		{
-			n = 0;
-			usleep(1); 
-		}
-		else
-		{
-			break;
-		}
-	}
-	total += n;
-	bytesleft -= n;
-    }
+	if (!account) 
+		return FALSE;
 
-    return n==-1?-1:total; // return -1 on failure, bytes sent on success
-}
-
-static int irc_query_connected (eb_account * account)
-{
-	irc_account * ia = NULL;
-
-	if (account == NULL) return FALSE;
-
-	ia = (irc_account *) account->protocol_account_data;
+	eia = (ay_irc_account *) account->protocol_account_data;
 	
-	return (ia->status != IRC_OFFLINE);
+	return ( eia->status != IRC_OFFLINE );
 }
 
-/* Handle a message-to-be-read here ... CTCP ACTION, PRIVMSG and NOTICE */
 
-static void irc_parse_incoming_message (eb_local_account * ela, char *buff)
+static void ay_irc_client_quit(irc_account *ia)
 {
-	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
-	char **buff2;
-	gboolean dummy = FALSE;
-
-	int is_nickserv = 0;
-
-	char orig_nick[256];
-	char nick[256];
-	char *alpha;
-
-	unsigned char tempstring[BUF_LEN];
-	unsigned char *tempstring2 = NULL;
-
-	eb_account *ea = NULL;
-	irc_account *ia = NULL;
-
-	/* remove the crlf */
-	g_strchomp(buff);
-
-	buff2 = g_strsplit(buff, " ", 4);
-
-	strncpy(nick, buff2[0]+1, 100);
-	/* according to RFC2812, channels can be marked by #, &, + or !, not only the conventional #. */
-	if ((*(buff2[2]) == '#') || (*(buff2[2]) == '&') || (*(buff2[2]) == '+') || (*(buff2[2]) == '!')) {
-		eb_chat_room * ecr = NULL;
-		strncpy((char *)tempstring, buff2[2], BUF_LEN/2);
-		strncat ((char *)tempstring, "@", sizeof(tempstring)-strlen((char *)tempstring));
-		strncat ((char *)tempstring, ila->server, sizeof(tempstring)-strlen((char *)tempstring));
-		g_strdown((char *)tempstring);
-		ecr = find_chat_room_by_id((char *)tempstring);
-
-		if (ecr) {
-			char *msg = NULL;
-			char mynick[100]="";
-			alpha = strchr(nick, '!');
-			if (alpha != NULL)
-				*alpha = '\0';
-			tempstring2 = strip_color((unsigned char *)buff2[3] + 1);
-			if (strstr(ela->handle,"@")) {
-				strncpy(mynick, ela->handle, strlen(ela->handle)-strlen(ila->server)-1);
-				mynick[strlen(ela->handle)-strlen(ila->server)-1]='\0';
-			} else {
-				strncpy(mynick, ela->handle, strlen(ela->handle));
-				mynick[strlen(ela->handle)]='\0';
-			}
-			if (!strncmp((char *)tempstring2, (char *)mynick, strlen((char *)mynick))) {
-				msg = g_strdup_printf("<font color=\"#ff0000\">%s</font> %s",
-						mynick, (tempstring2+strlen(mynick)));
-			} else {
-				msg = g_strdup((char *)tempstring2);
-			}
-			eb_chat_room_show_message( ecr, nick, msg);
-			g_free(msg);
-			free(tempstring2);
-		}
-		g_strfreev (buff2);
-		return;
-	}
-	g_strfreev (buff2);
-		
-	/* remove the hostmask part */
-	alpha = strchr(nick, '!');
-
-	/* If server-to-user notice, not user-to-user - ignore */
-	if (alpha == NULL) return; 
-
-	*alpha = '\0';
-	if(!strcasecmp(nick, "NickServ"))
-	{
-		is_nickserv = 1;
-	}
-
-	strncpy(orig_nick, nick, sizeof(orig_nick));
-
-	/* Add our internal @ircserver part */
-	strncat(nick, "@", 255-strlen(nick));
-	strncat(nick, ila->server, 255 - strlen(nick));
-
-	/* ... and search for the sender */
-	ea = find_account_with_ela(nick, ela);
-		
-	if (!ea)
-	{
-		/* Some unknown person is msging us - add him */
-		irc_account * ia = g_new0(irc_account, 1);
-		ea = g_new0(eb_account, 1);
-		strncpy(ea->handle, nick, 255);
-		ea->service_id = ela->service_id;
-		ia->status = IRC_OFFLINE;
-		strncpy(ia->server, ila->server, 255);
-		ea->protocol_account_data = ia;
-		ea->ela = ela;
-		add_dummy_contact(orig_nick, ea);
-		dummy=TRUE;
-	} else if (!ea->ela)
-		ea->ela = ela;
-
-	ia = (irc_account *)ea->protocol_account_data;
-
-	if ( ia->status == IRC_OFFLINE && !dummy )
-	{
-		/* Okay, if someone msgs us, they are per definition online... */
-		buddy_login(ea);
-		ia->status = IRC_ONLINE;
-		buddy_update_status(ea);
-	}
-
-	buff2 = g_strsplit(buff, ":", 3);
-	if (buff2[2] != NULL) /* Is there any actual message out there? */
-	{
-		tempstring2 = strip_color((unsigned char *)buff2[2]);
-	}
-	else
-	{
-		tempstring2 = (unsigned char *)strdup("");
-	}
-	g_strfreev (buff2);
-	if(is_nickserv && (strstr((char *)tempstring2,"This nickname") || 
-		(strstr((char *)tempstring2, "NickServ") && 
-		 (strstr((char *)tempstring2, "identify") ||
-		  strstr((char *)tempstring2, "IDENTIFY")))))
-	{
-	        int ret;
-		char ps[255];
-		if (strstr((char *)tempstring2,"/NickServ")) {
-		  g_snprintf(ps, 255, "NICKSERV :identify %s\n", ila->password);
-		  fprintf(stderr, "IRC: NICKSERV sending password to NickServ\n");
-		  ret = sendall(ila->fd, ps, strlen(ps));
-		  if (ret == -1) irc_logout(ela);
-		} else {
-		  g_snprintf(ps, 255, "IDENTIFY %s", ila->password);
-		  fprintf(stderr, "IRC: PRIVMSG sending password to NickServ\n");
-		  irc_send_im( ela, ea,ps);
-		}
-	} else if(!is_nickserv) {
-		eb_parse_incoming_message(ela, ea, (char *)tempstring2);
-	}
-	free(tempstring2);
-	return;
+	ay_irc_logout((eb_local_account *)ia->data);
 }
 
-/* The main IRC protocol parser */
 
-static void irc_parse (eb_local_account * ela, char *buff)
+static void ay_irc_error(const char *msg, void *data)
 {
-	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
-	char **buff2;
-	char **split_buff;
-	eb_account *ea = NULL;
-	irc_account *ia = NULL;
-	int ret = 0;
-
-	split_buff = g_strsplit(buff, " ", 2);
-
-	if (!split_buff[1]) { g_strfreev (split_buff); return; }
-
-	if (strncmp(buff, "PING :", 6) == 0)
-	{
-		/* Keepalive ping from server - reply to avoid being disconnected */
-		buff2 = g_strsplit(buff, ":", 2);
-		g_strchomp(buff2[1]);
-
-		g_snprintf(buff, BUF_LEN, "PONG :%s\n", buff2[1]);
-		g_strfreev (buff2);
-
-		ret = sendall(ila->fd, buff, strlen(buff)); 
-	}
-	else if ((!strncmp(split_buff[1], "376", 3)) || (!strncmp(split_buff[1], "422", 3)))
-	{
-		/* RPL_ENDOFMOTD(376) or ERR_NOMOTD(422) - okay, we're in and can start sending commands */
-		irc_ask_after_users(ela);
-	}
-	else if ((!strncmp(split_buff[1], "463", 3)) || (!strncmp(split_buff[1], "465", 3)))
-	{
-		/* ERR_NOPERMFORHOST(463) or ERR_YOUREBANNEDCREEP(465)
-		   - we're not allowed to connect, give up and logout */
-		irc_logout(ela);
-	}
-	else if (!strncmp(split_buff[1], "401", 3))
-	{
-		/* ERR_NOSUCHNICK(401) - set user to offline */
-		char nick[256];
-		
-		/* Get the nick */
-		buff2 = g_strsplit(buff, " ", 4);
-		strncpy(nick, buff2[3], 100);
-		g_strfreev (buff2);
-
-		/* Add our internal @ircserver part */
-		strncat(nick, "@", 255-strlen(nick));
-		strncat(nick, ila->server, 255 - strlen(nick));
-		
-		/* Search and set offline */
-		ea = find_account_with_ela(nick, ela);
-		if (ea)
-		{
-			ia = (irc_account *)ea->protocol_account_data;
-
-			if(ia->status != IRC_OFFLINE)
-			{
-				buddy_logoff(ea);
-				ia->status = IRC_OFFLINE;
-				buddy_update_status(ea);
-				ia->realserver[0] = '\0';
-			}
-			if (!ea->ela)
-				ea->ela = ela; 
-		}
-	}
-	else if (!strncmp(split_buff[1], "311", 3))
-	{
-		/* RPL_WHOISUSER(311) - okay, user is around - set user to online */
-		char nick[256];
-
-		/* Get the nick */
-		buff2 = g_strsplit(buff, " ", 4);
-		strncpy(nick, buff2[3], 100);
-		g_strfreev (buff2);
-
-		/* Add our internal @ircserver part */
-		strncat(nick, "@", 255-strlen(nick));
-		strncat(nick, ila->server, 255 - strlen(nick));
-		
-		/* Search and set online */
-		ea = find_account_with_ela(nick, ela);
-		if (ea)
-		{
-			if (!ea->ela)
-				ea->ela = ela;
-			
-			ia = (irc_account *)ea->protocol_account_data;
-			if (ia->status == IRC_OFFLINE)
-			{
-				buddy_login(ea);
-				ia->status = IRC_ONLINE;
-				buddy_update_status(ea);
-			}
-			if (ea->infowindow != NULL )
-			{
-				char **priv_split_buff = g_strsplit(buff, " ", 4);
-				
-				irc_info *ii = (irc_info *)ea->infowindow->info_data;
-				if (ii->whois_info != NULL) { free(ii->whois_info); }
-				ii->whois_info = malloc(BUF_LEN);
-			
-				strncpy(ii->whois_info, priv_split_buff[3], sizeof(ii->whois_info));
-				g_strfreev (priv_split_buff);
-				
-				irc_info_update(ea->infowindow);
-			}
-		}
-	}
-	else if (!strncmp(split_buff[1], "317", 3))
-	{
-		/* RPL_WHOISIDLE(317) - user is around but idle - record idle time */
-		char nick[256];
-
-		/* Get the nick */
-		buff2 = g_strsplit(buff, " ", 5);
-		strncpy(nick, buff2[3], 100);
-
-		/* Add our internal @ircserver part */
-		strncat(nick, "@", 255-strlen(nick));
-		strncat(nick, ila->server, 255 - strlen(nick));
-		
-		/* Search and set idle time */
-		ea = find_account_with_ela(nick, ela);
-		if (ea)
-		{
-			if (!ea->ela)
-				ea->ela = ela;
-			ia = (irc_account *)ea->protocol_account_data;
-			ia->idle = atoi(buff2[4]);
-			buddy_update_status(ea);
-			if (ea->infowindow)
-			{
-				irc_info_update(ea->infowindow);
-			}
-		}
-		g_strfreev (buff2);
-	}
-	else if (!strncmp(split_buff[1], "312", 3))
-	{
-		/* RPL_WHOISSERVER(312) - user is around, on some server
-		   - record server for later WHOISes */
-		char nick[256];
-
-		/* Get the nick */
-		buff2 = g_strsplit(buff, " ", 5);
-		strncpy(nick, buff2[3], 100);
-		/* Add our internal @ircserver part */
-		strncat(nick, "@", 255-strlen(nick));
-		strncat(nick, ila->server, 255 - strlen(nick));
-		
-		/* Search and set realserver */
-		ea = find_account_with_ela(nick, ela);
-		if (ea)
-		{
-			if (!ea->ela)
-				ea->ela = ela;
-			ia = (irc_account *)ea->protocol_account_data;
-			strncpy(ia->realserver, buff2[4], 255);
-			if (ea->infowindow)
-			{
-				irc_info_update(ea->infowindow);
-			}
-		}
-		g_strfreev (buff2);
-	}
-	else if (!strncmp(split_buff[1], "301", 3))
-	{
-		/* RPL_AWAY(301) - user is away */
-		char nick[256];
-
-		/* Get the nick */
-		buff2 = g_strsplit(buff, " ", 4);
-		strncpy(nick, buff2[3], 100);
-		g_strfreev (buff2);
-
-		/* Add our internal @ircserver part */
-		strncat(nick, "@", 255-strlen(nick));
-		strncat(nick, ila->server, 255 - strlen(nick));
-		
-		/* Search and set online */
-		ea = find_account_with_ela(nick, ela);
-		if (ea)
-		{
-			if (!ea->ela)
-				ea->ela = ela;
-			ia = (irc_account *)ea->protocol_account_data;
-			if (ia->status == IRC_OFFLINE)
-			{
-				/* Can this happen? */
-				buddy_login(ea);
-				ia->status = IRC_AWAY;
-				buddy_update_status(ea);
-			}
-			else if (ia->status == IRC_ONLINE)
-			{
-				ia->status = IRC_AWAY;
-				buddy_update_status(ea);
-			}
-			if (ea->infowindow)
-			{
-				irc_info_update(ea->infowindow);
-			}
-		}
-	}
-	else if (!strncmp(split_buff[1], "353", 3))
-	{
-		/* RPL_NAMEREPLY(353) - lists users in a channel */
-		eb_chat_room * ecr;
-		char *buddy;
-		char tempstring[BUF_LEN];
-		int i = 6;
-		g_strchomp(buff);
-		buff2 = g_strsplit(buff, " ", -1);
-		strncpy(tempstring, buff2[4], BUF_LEN);
-		strncat(tempstring, "@", BUF_LEN-strlen(tempstring));
-		strncat(tempstring, ila->server, BUF_LEN-strlen(tempstring));
-		g_strdown(tempstring);
-		ecr = find_chat_room_by_id(tempstring);
-		if (ecr) {
-			eb_chat_room_buddy * ecrb = NULL;
-			if ((*(buff2[5] + 1) == '@') || (*(buff2[5] + 1) == '+'))
-				buddy = buff2[5] + 2;
-			else 
-				buddy = buff2[5] + 1;
-			if (!eb_chat_room_buddy_connected( ecr, buddy )) {
-				ecrb = g_new0(eb_chat_room_buddy, 1 );
-				strncpy( ecrb->alias, buddy, sizeof(ecrb->alias));
-				strncpy( ecrb->handle, buddy, sizeof(ecrb->handle));
-				ecr->fellows = l_list_append(ecr->fellows, ecrb);
-			}
-			while (buff2[i] != NULL) {
-					if ((*(buff2[i]) == '@') || (*(buff2[i]) == '+'))
-						buddy = buff2[i] + 1;
-					else
-						buddy = buff2[i];
-					if (!eb_chat_room_buddy_connected( ecr, buddy )) {
-						ecrb = g_new0(eb_chat_room_buddy, 1 );
-						strncpy( ecrb->alias, buddy, sizeof(ecrb->alias));
-						strncpy( ecrb->handle, buddy, sizeof(ecrb->handle));
-						ecr->fellows = l_list_append(ecr->fellows, ecrb);
-					}
-					i++;
-			}
-			eb_chat_room_refresh_list(ecr);
-		} else {
-			eb_debug(DBG_MOD,"IRC: RPL_NAMEREPLY without joining channel %s on %s!\n", tempstring, ila->server);
-		}
-		g_strfreev (buff2);
-	}
-	else if (!strncmp(split_buff[1], "321", 3)) /* RPL_LISTSTART */
-	{
-		if (ila->channel_list)
-			l_list_free(ila->channel_list);
-		ila->channel_list = NULL;
-	}
-	else if (!strncmp(split_buff[1], "322", 3)) /* RPL_LIST */
-	{
-		buff2 = g_strsplit(buff, " ", -1);
-		ila->channel_list = l_list_insert_sorted(ila->channel_list, strdup(buff2[3]),
-					(LListCompFunc) strcasecmp);
-		g_strfreev (buff2);
-	}
-	else if (!strncmp(split_buff[1], "323", 3)) /* RPL_LISTEND */
-	{
-		irc_finish_login(ila);
-	}
-	else if (!strncmp(split_buff[1], "JOIN", 4))
-	{
-		/* Someone has joined the channel */
-		eb_chat_room * ecr;
-		char nick[256];
-		char tempstring[BUF_LEN];
-		char *alpha;
-
-		buff2 = g_strsplit(buff, " ", 3);
-		g_strchomp(buff2[2]);
-		strncpy(tempstring, buff2[2]+1, BUF_LEN);
-		strncat(tempstring, "@", BUF_LEN-strlen(tempstring));
-		strncat(tempstring, ila->server, BUF_LEN-strlen(tempstring));
-		g_strdown(tempstring);
-		ecr = find_chat_room_by_id(tempstring);
-
-		if (ecr) {
-			/* Get the nick */
-			strncpy(nick, buff2[0]+1, 100);
-			alpha = strchr(nick, '!');
-			if (alpha != NULL)
-				*alpha = '\0';
-
-			eb_chat_room_buddy_arrive( ecr, nick, nick );
-		}
-		g_strfreev (buff2);
-	}
-	else if (!strncmp(split_buff[1], "QUIT", 4))
-	{
-		/* Someone has left all the channels */
-		LList * node = chat_rooms;
-		eb_chat_room * ecr;
-		char nick[256];
-		char *alpha;
-
-		/* Get the nick */
-		strncpy(nick, split_buff[0]+1, 100);
-		alpha = strchr(nick, '!');
-		*alpha = '\0';
-
-		for(node = chat_rooms; node; node = node->next)
-		{
-			ecr = (eb_chat_room*)node->data;
-			if (ecr && ecr->local_user->service_id == SERVICE_INFO.protocol_id ) 
-			{
-				char ** buff3 = g_strsplit(ecr->id, "@", 2);
-				if(!strcmp(buff3[1], ila->server)
-					&& eb_chat_room_buddy_connected(ecr, nick))
-				{
-					eb_chat_room_buddy_leave( ecr, nick );
-				}
-				g_strfreev (buff3);
-			}
-		}
-	}
-	else if (!strncmp(split_buff[1], "PART", 4))
-	{
-		/* Someone has left the channel */
-		eb_chat_room * ecr;
-		char nick[256];
-		char tempstring[BUF_LEN];
-		char *alpha;
-
-		buff2 = g_strsplit(buff, " ", 3);
-		g_strchomp(buff2[2]);
-		strncpy(tempstring, buff2[2], BUF_LEN);
-		strncat(tempstring, "@", BUF_LEN-strlen(tempstring));
-		strncat(tempstring, ila->server, BUF_LEN-strlen(tempstring));
-		g_strdown(tempstring);
-		ecr = find_chat_room_by_id(tempstring);
-
-		if (ecr) {
-			/* Get the nick */
-			strncpy(nick, buff2[0]+1, 100);
-			alpha = strchr(nick, '!');
-			*alpha = '\0';
-
-			eb_chat_room_buddy_leave( ecr, nick );
-		}
-		g_strfreev (buff2);
-	}
-	else if (!strncmp(split_buff[1], "NICK", 4))
-	{
-		/* Someone has left the channel */
-		LList * node;
-		eb_chat_room * ecr;
-		char nick[256];
-		char tempstring[BUF_LEN];
-		char *alpha;
-
-		buff2 = g_strsplit(buff, " ", 3);
-		g_strchomp(buff2[2]);
-		strncpy(tempstring, buff2[2]+1, BUF_LEN);
-
-		/* Get the nick */
-		strncpy(nick, buff2[0]+1, 100);
-		alpha = strchr(nick, '!');
-		*alpha = '\0';
-
-		for(node = chat_rooms; node; node = node->next)
-		{
-			ecr = (eb_chat_room*)node->data;
-			if (ecr && ecr->local_user->service_id == SERVICE_INFO.protocol_id ) 
-			{
-				char ** buff3 = g_strsplit(ecr->id, "@", 2);
-				if(!strcmp(buff3[1], ila->server) 
-						&& eb_chat_room_buddy_connected(ecr, nick))
-				{
-					eb_chat_room_buddy_leave( ecr, nick );
-					eb_chat_room_buddy_arrive( ecr, tempstring, tempstring);
-				}
-				g_strfreev (buff3);
-			}
-		}
-		g_strfreev (buff2);
-	}
-	else if (!strncmp(split_buff[1], "INVITE", 6))
-	{
-		/* Someone wants you to come by their channel */
-		eb_chat_room * ecr;
-		char nick[256];
-		char tempstring[BUF_LEN];
-		char *alpha;
-		eb_debug(DBG_MOD,"got invite %s\n",buff);
-		g_strchomp(buff);
-		buff2 = g_strsplit(buff, " ", 4);
-		strncpy(tempstring, buff2[3]+1, BUF_LEN);
-		strncat(tempstring, "@", BUF_LEN-strlen(tempstring));
-		strncat(tempstring, ila->server, BUF_LEN-strlen(tempstring));
-		g_strdown(tempstring);
-		ecr = find_chat_room_by_id(tempstring);
-
-		if (!ecr) {
-			/* Get the nick */
-			strncpy(nick, buff2[0]+1, 100);
-			alpha = strchr(nick, '!');
-			*alpha = '\0';
-
-			invite_dialog( ela, nick, buff2[3] + 1, strdup(buff2[3] + 1) );
-		}
-		g_strfreev (buff2);
-	}
-	else if (((!strncmp(split_buff[1], "PRIVMSG", 7)) || (!strncmp(split_buff[1], "NOTICE", 6))) && (strstr(buff, "\001")))
-	{
-		/* CTCP - Client To Client Protocol */
-		char nick[256];
-		char message[BUF_LEN];
-		char *alpha;
-
-		buff2 = g_strsplit(buff, " ", 3);
-		strncpy(nick, buff2[0]+1, 100);
-		g_strfreev (buff2);
-		
-		/* remove the hostmask part */
-		alpha = strchr(nick, '!');
-		*alpha = '\0';
-
-		message[0] = '\0'; /* so that strlen(message) will work */
-
-		/* TODO:
-		   DCC SENDing files and receiving DCC SEND'ed files. */
-
-		/* Reply as per the CTCP pseudo-RFC with a NOTICE, not a PRIVMSG */
-		if (strstr(buff, "\001VERSION\001"))
-		{
-			g_snprintf(message, BUF_LEN, "NOTICE %s :\001VERSION Ayttm:%s:http://ayttm.sf.net/\001\n", nick, VERSION);
-		}
-		else if (strstr(buff, "\001PING"))
-		{
-			buff2 = g_strsplit(buff, ":", 3);
-			g_snprintf(message, BUF_LEN, "NOTICE %s :%s\n", nick, buff2[2]);
-			g_strfreev (buff2);
-		}
-		else if (strstr(buff, "\001ACTION"))
-		{
-			eb_chat_room * ecr;
-			char message[BUF_LEN];
-			char tempstring[BUF_LEN];
-			char *pointer = NULL;
-			int i = 0;
-			int nickcopied = 0;
-			message[0]='\0';
-			
-			pointer = buff;
-			while (*pointer != '\0')
-			{
-				if (*pointer == '\001' && nickcopied == 0)
-				{
-					pointer += 7;
-					
-					strncpy(message+ i, nick, BUF_LEN-i);
-					i += strlen(nick);
-					
-					nickcopied = 1;
-				}
-				else if (*pointer == '\001' && nickcopied == 1)
-				{
-					break;
-				}
-				else
-				{
-					message[i] = *pointer;
-					pointer++, i++;
-				}
-			}
-			message[i] = '\0';
-			
-			buff2 = g_strsplit(message, " ", 4);
-			g_strchomp(buff2[2]);
-			strncpy(tempstring, buff2[2], BUF_LEN);
-			strncat(tempstring, "@", BUF_LEN-strlen(tempstring));
-			strncat(tempstring, ila->server, BUF_LEN-strlen(tempstring));
-			g_strdown(tempstring);
-			ecr = find_chat_room_by_id(tempstring);
-			if(ecr)
-			{
-				char colorized_message[BUF_LEN];
-				unsigned char * tempstring2 = strip_color((unsigned char *)buff2[3]+1);
-				g_snprintf(colorized_message, BUF_LEN, 
-						"<font color=\"#00AA00\">*%s</font>",
-						tempstring2);
-				eb_chat_room_show_3rdperson(ecr, colorized_message);
-			}
-		}
-		else if (strstr(buff, "\001CLIENTINFO"))
-		{
-			if (strstr(buff, "\001CLIENTINFO\001"))
-			{
-				g_snprintf(message, BUF_LEN, _("NOTICE %s :\001CLIENTINFO ACTION CLIENTINFO PING VERSION :Use CLIENTINFO <COMMAND> to get more specific information\001\n"), nick);
-			}
-			else if (strstr(buff, " ACTION\001"))
-			{
-				g_snprintf(message, BUF_LEN, _("NOTICE %s :\001CLIENTINFO :ACTION contains action descriptions for atmosphere\001\n"), nick);
-			}
-			else if (strstr(buff, " CLIENTINFO\001"))
-			{
-				g_snprintf(message, BUF_LEN, _("NOTICE %s :\001CLIENTINFO :CLIENTINFO gives information about available CTCP commands\001\n"), nick);
-			}
-			else if (strstr(buff, "PING\001"))
-			{
-				g_snprintf(message, BUF_LEN, _("NOTICE %s :\001CLIENTINFO :PING echoes back whatever it receives\001\n"), nick);
-			}
-			else if (strstr(buff, " VERSION\001"))
-			{
-				g_snprintf(message, BUF_LEN, _("NOTICE %s :\001CLIENTINFO :VERSION shows client type, version and environment\001\n"), nick);
-			}
-		}
-
-		/* Actually send the reply chosen above
-		   w/sanity check - never reply to NOTICEs */
-		if (strlen(message) && strstr(buff, " PRIVMSG "))
-		{
-			ret = sendall(ila->fd, message, strlen(message));
-		}
-#ifdef DEBUG
- 		else { fprintf(stderr, "Unreplied CTCP command: %s", buff); }
-#endif
-	}
-	else if ((!strncmp(split_buff[1], "PRIVMSG", 7)) || (!strncmp(split_buff[1], "NOTICE", 6)))
-	{
-		irc_parse_incoming_message(ela, buff);
-	}
-#ifdef DEBUG
-	/* for debugging only - print unhandled messages */
- 	else { fprintf(stderr, "%s", buff); }
-#endif
-	g_strfreev (split_buff);
-
-	/* If we couldn't send replies... something's wrong. Logout. */
-	if (ret == -1) irc_logout(ela);
-
-	return;
+	ay_do_error( _("IRC Error"), msg );
+	ay_irc_logout((eb_local_account *)data);
 }
 
-static void irc_callback (void *data, int source, eb_input_condition condition)
+
+static void ay_irc_warning(const char *msg, void *data)
 {
-	eb_local_account * ela = (eb_local_account *) data;
-	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
-
-	eb_account * ea = NULL;
-	irc_account *ia = NULL;
-	LList * node;
-	static int i = 0;
-	int firstread = 1;
-	char c;
-	static char buff[BUF_LEN];
-	
-	if ((source == ila->fd) && (buff != NULL))
-	{
-		int status;
-
-		/* Read and null-terminate an IRC message string */
-		do
-		{
-			status = read(ila->fd, &c, 1);
-			if ((status < 0) && (errno == EAGAIN))
-			{
-				/* no data there */
-				status = 0;
-			}
-
-			if( status == -1 || (status == 0 && firstread == 1))
-			{
-				/* Connection closed by other side - log off */
-				char buff[1024]; 
-				snprintf(buff, sizeof(buff), _("Connection closed by %s."), ila->server);
-				ay_do_error( _("IRC Error"), buff );
-				fprintf(stderr, buff);
-				
-				ela->connected = 0;
-				if (ila->fd_tag) 	eb_input_remove(ila->fd_tag);
-				if (ila->keepalive_tag) eb_timeout_remove(ila->keepalive_tag);
-				ila->fd = 0;
-				ila->fd_tag = 0;
-				ila->keepalive_tag = 0;
-				ila->status = IRC_OFFLINE;
-				
-				is_setting_state = 1;
-	
-				if(ela->status_menu)
-					eb_set_active_menu_status(ela->status_menu, IRC_OFFLINE);
-				
-				is_setting_state = 0;
-				
-				/* Make sure relevant accounts get logged off */
-				for( node = ila->friends; node; node = node->next )
-				{
-					ea = (eb_account *)(node->data);
-					ia = (irc_account *)ea->protocol_account_data;
-			
-					if(ia->status != IRC_OFFLINE)
-					{
-						buddy_logoff(ea);
-						ia->status = IRC_OFFLINE;
-						buddy_update_status(ea);
-						ia->realserver[0] = '\0';
-					}
-				}
-				return;
-			}
-			firstread = 0;
-
-			if (status > 0)
-			{
-				buff[i] = c;
-				i++;
-
-				if ((c == '\n') || (i >= (BUF_LEN - 1)))
-				{
-					/* Got a complete message */
-					buff[i] = '\0';
-
-					/* parse and react to the IRC message */
-					irc_parse(ela, buff);
-
-					/* reset to start of buffer */
-					i = 0;
-				}
-			}
-#ifdef DEBUG
-			else
-			{
-				fprintf(stderr, "IRC: read returned %d\n", status);
-			}
-#endif
-		} while(status > 0);
-	}
-	return;
+	ay_do_warning( _("IRC Warning"), msg );
 }
 
-static void irc_ask_after_users ( eb_local_account * account )
-{
-	irc_local_account * ila = (irc_local_account *) account->protocol_local_account_data;
-	eb_account * ea = NULL;
-	irc_account * ia = NULL;
-	LList * node;
-	char buff[BUF_LEN];
-	char *nick = NULL;
-	char *alpha = NULL;
-	int ret = 0;
-
-	for( node = ila->friends; node; node = node->next )
-	{
-		ea = (eb_account *)(node->data);
-		ia = (irc_account *)ea->protocol_account_data;
-		
-		nick = strdup(ea->handle);
-		if (nick != NULL)
-		{
-			alpha = strchr(nick, '@');
-			if(alpha == NULL) return;
-			*alpha = '\0';
-		
-			if(strlen(ia->realserver) > 0)
-			{
-				g_snprintf(buff, BUF_LEN, "WHOIS %s %s\n", ia->realserver, nick);
-			}
-			else
-			{
-				g_snprintf(buff, BUF_LEN, "WHOIS %s\n", nick);
-			}
-			ret = sendall(ila->fd, buff, strlen(buff));
-			if (ret == -1) irc_logout(account);
-		
-			free(nick);
-		}
-	}
-	return;
-}
-
-/* Called once a minute, checks whether buddies still are online */
-
-static int irc_keep_alive( gpointer data )
-{
-	eb_local_account * ela = (eb_local_account *) data;
-
-	irc_ask_after_users(ela);
-
-	return TRUE;
-}
 
 static void ay_irc_cancel_connect(void *data)
 {
+
 	eb_local_account *ela = (eb_local_account *)data;
 	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
 	
 	ay_socket_cancel_async(ila->connect_tag);
-	ila->activity_tag=0;
-	irc_logout(ela);
+	ila->activity_tag = 0 ;
+	ay_irc_logout(ela);
 }
 
 static void ay_irc_connect_status(const char *msg, void *data)
 {
 	eb_local_account *ela = (eb_local_account *)data;
 
+
 	irc_local_account *ila =
 		(irc_local_account *)ela->protocol_local_account_data;
-	if (!ila) return;
+
+	if (!ila) 
+		return;
+
 	ay_activity_bar_update_label(ila->activity_tag, msg);
 }
 
-static void irc_login( eb_local_account * account)
+
+static void ay_irc_login( eb_local_account * account)
 {
 	irc_local_account * ila = (irc_local_account *) account->protocol_local_account_data;
 
 	char buff[BUF_LEN];
-	int port, tag;
+	int tag;
+
+	if ( account->connecting || account->connected )
+		return ;
+
+	account->connecting = 1 ;
+	account->connected  = 0 ;
 
 	/* Setup and connect */
-
 	snprintf(buff, sizeof(buff), _("Logging in to IRC account: %s"), account->handle);
 	ila->activity_tag = ay_activity_bar_add(buff, ay_irc_cancel_connect, account);
 
 	/* default to port 6667 if nothing specified */
-	if (ila->port[0] == '\0') 
-		port = 6667;
-	else 
-		port = atoi(ila->port);
-		
-	if ((tag = proxy_connect_host(ila->server, port, irc_connect_cb, account, (void *)ay_irc_connect_status)) < 0)
+	if (ila->ia->port[0] == '\0' )
+		strcpy(ila->ia->port, "6667") ;
+
+	if ((tag = proxy_connect_host(ila->ia->connect_address, atoi(ila->ia->port), irc_connect_cb, 
+					account, (void *)ay_irc_connect_status)) < 0)
 	{
 		char buff[1024]; 
-		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
+		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->ia->connect_address);
 		ay_do_error( _("IRC Error"), buff );
-		fprintf(stderr, buff);
+		eb_debug(DBG_IRC, "%s\n", buff);
 		ay_activity_bar_remove(ila->activity_tag);
 		ila->activity_tag = 0;
 		ay_irc_cancel_connect(account);
@@ -1250,151 +297,203 @@ static void irc_login( eb_local_account * account)
 
 static void irc_connect_cb(int fd, int error, void *data)
 {
+
 	eb_local_account *ela = (eb_local_account *)data;	
 	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
 
 	char buff[BUF_LEN];
-	int ret = 0;
-	char *nick = NULL;
-	char *alpha = NULL;
 
 	if(fd == -1 || error) {
-		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->server);
+		snprintf(buff, sizeof(buff), _("Cannot connect to %s."), ila->ia->connect_address);
 		ay_do_error( _("IRC Error"), buff );
-		fprintf(stderr, buff);
+		eb_debug(DBG_IRC, "%s\n", buff);
 		ay_activity_bar_remove(ila->activity_tag);
 		ila->activity_tag = 0;
 		ay_irc_cancel_connect(ela);
 		return;
 	}
 
-	/* Puzzle out the nick we're going to ask the server for */
-	nick = strdup(ela->handle);
-	if (nick == NULL) return;
-	alpha = strchr(nick, '@');
-	if(alpha != NULL) 
-		*alpha = '\0';
+	eb_debug(DBG_IRC, "Connected to IRC\n");
 
-	ila->fd = fd;
+	/* Puzzle out the nick we're going to ask the server for */
+	ila->ia->nick = strdup(ela->handle);
+	ila->ia->user = strdup(ela->handle);
+
+	if (ila->ia->nick == NULL)
+		return;
+
+	ila->ia->fd = fd;
 
 	/* Set up callbacks and timeouts */
 
-	ila->fd_tag = eb_input_add(ila->fd, EB_INPUT_READ, irc_callback, ela);
+	ila->fd_tag = eb_input_add(ila->ia->fd, EB_INPUT_READ, irc_recv, ila->ia);
 
-	/* Log in */
-	g_snprintf(buff, BUF_LEN, "NICK %s\nUSER %s 0 * :Ayttm user\n", nick, nick);
-	free (nick);
-
-	/* Try twice, then give up */
-	ret = sendall(ila->fd, buff, strlen(buff));
-	if (ret == -1) ret = sendall(ila->fd, buff, strlen(buff));
-	if (ret == -1) { irc_logout(ela); return; }
+	// Login
+	irc_login(ila->password, IRC_SIGNON_ONLINE, ila->ia);
 	
-	/* No use adding this one before we're in anyway */
-	ila->keepalive_tag = eb_timeout_add((guint32)60000, irc_keep_alive, (gpointer)ela );
-
-	/* get list of channels */
-	ret = sendall(ila->fd, "LIST\n", strlen("LIST\n"));
-	
-	ay_activity_bar_update_label(ila->activity_tag, _("Logged in, downloading Channel List..."));
-
 	/* Claim us to be online */
 	ela->connected = TRUE;
-	ila->status = IRC_ONLINE;
+	ila->ia->status = IRC_ONLINE;
 	ref_count++;
 
 	is_setting_state = 1;
 	if(ela->status_menu)
 		eb_set_active_menu_status(ela->status_menu, IRC_ONLINE);
+
 	is_setting_state = 0;
-	
-	return;
 }
 
-void irc_finish_login(irc_local_account *ila)
+
+static void ay_irc_got_welcome ( const char *nick, const char *message,
+				 irc_message_prefix *prefix, irc_account *ia)
 {
+	if (!strcmp(nick, ia->nick))
+		return ;
+
+	// Change my nickname if the server has truncated it.
+	if ( ia->nick )
+		free(ia->nick);
+
+	ia->nick = strdup(nick);
+}
+
+
+static void ay_irc_got_myinfo ( const char *servername, const char *version, 
+			irc_message_prefix *prefix, irc_account *ia )
+{
+	// TODO Log this message in the log window
+	
+	irc_finish_login(ia->data);
+}
+
+
+void irc_finish_login(eb_local_account *ela)
+{
+	irc_local_account *ila = (irc_local_account *)ela->protocol_local_account_data ;
+
 	ay_activity_bar_remove(ila->activity_tag);
 	ila->connect_tag = 0;
 	ila->activity_tag = 0;
+
+	ela->connecting = 0 ;
+	ela->connected  = 1 ;
 }
 
-static void irc_logout( eb_local_account * ela )
+static void ay_irc_logout( eb_local_account * ela )
 {
 	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
 
 	LList * node;
-	char buff[BUF_LEN];
 	eb_account * ea = NULL;
-	irc_account *ia = NULL;
+	ay_irc_account *eia = NULL;
+
+	if ( !(ela->connected || ela->connecting) ) {
+		return;
+	}
 
 	ela->connected = 0;
-	eb_input_remove(ila->fd_tag);
-	eb_timeout_remove(ila->keepalive_tag);
+	ela->connecting= 0;
+
+	/* Log off in a nice way */
+	if(ila->fd_tag>0) {
+		irc_logout(ila->ia);
+		eb_input_remove(ila->fd_tag);
+	}
+
 	ay_activity_bar_remove(ila->activity_tag);
 	ila->activity_tag = ila->connect_tag = 0;
-	/* Log off in a nice way */
-	g_snprintf(buff, BUF_LEN, "QUIT :Ayttm logging off\n");
-	sendall(ila->fd, buff, strlen(buff));
-	close(ila->fd);
 
-	ila->fd = 0;
+	close(ila->ia->fd);
+
+	ila->ia->fd = 0;
 	ila->fd_tag = 0;
-	ila->keepalive_tag = 0;
-	ila->status = IRC_OFFLINE;
-				
+	ila->ia->status = IRC_OFFLINE;
+	
 	is_setting_state = 1;
 	if(ela->status_menu)
 		eb_set_active_menu_status(ela->status_menu, IRC_OFFLINE);
 	is_setting_state = 0;
 
 	/* Make sure relevant accounts get logged off */
-	for( node = ila->friends; node; node = node->next )
+	for( node = ila->friends; node; )
 	{
 		ea = (eb_account *)(node->data);
-		ia = (irc_account *)ea->protocol_account_data;
+		eia = (ay_irc_account *)ea->protocol_account_data;
 
-		if(ia->status != IRC_OFFLINE)
+		eb_debug(DBG_IRC, "Logging off :: %s\n", ea->handle);
+
+		if( eia->status != IRC_OFFLINE )
 		{
-			buddy_logoff(ea);
-			ia->status = IRC_OFFLINE;
+			if( eia->dummy ) {
+				ea->account_contact->online--;
+				ea->online = FALSE;
+				if (ea->account_contact->online == 0)
+					ea->account_contact->group->contacts_online--;
+
+				eb_debug(DBG_IRC, "Dummy logoff :: %s\n", ea->handle);
+			}
+			else {
+				eb_debug(DBG_IRC, "Buddy logoff :: %s\n", ea->handle);
+				buddy_logoff(ea);
+			}
+
+			eia->status = IRC_OFFLINE;
 			buddy_update_status(ea);
-			ia->realserver[0] = '\0';
+			eia->realserver[0] = '\0';
 		}
+
+		if ( eia->dummy ) {
+			struct contact * c = ea->account_contact;
+
+			/* Stand back.... */
+			node = node->prev;
+			/* This one's gonna bloww!!! */
+			ay_irc_del_user(ea);
+
+			eb_debug(DBG_IRC, "Removed User :: %s\n", ea->handle);
+
+			c->accounts = l_list_remove(c->accounts, ea);
+			g_free(eia);
+			eia = NULL;
+			g_free(ea);
+			ea = NULL;
+		}
+
+		// If node ended up as NULL then we must have deleted from the start of the list
+		if(node)
+			node = node->next ;
+		else
+			node = ila->friends ;
 	}
 
 	ref_count--;
-	return;
 }
 
-static void irc_send_im( eb_local_account * account_from,
-                        eb_account * account_to,
-                              char *message )
+static void ay_irc_send_im( eb_local_account * account_from,
+                            eb_account * account_to,
+                            char *message )
 {
 	irc_local_account * ila = (irc_local_account *) account_from->protocol_local_account_data;
-	char buff[BUF_LEN];
 	char *nick = NULL;
 	char *alpha = NULL;
-	int ret = 0;
 
-	nick = strdup(account_to->handle);
-	if (nick != NULL)
+	if ( account_to->handle )
 	{
+		nick = strdup(account_to->handle);
 		alpha = strchr(nick, '@');
 		if (alpha == NULL) return;
 		*alpha = '\0';
 
-		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", nick, message);
-		ret = sendall(ila->fd, buff, strlen(buff));
-		if (ret == -1) irc_logout(account_from);
-		
-		free(nick);
-	}
+		irc_send_privmsg(nick, message, ila->ia);
 
-	return;
+		if(nick)
+			free(nick);
+	}
 }
 
 static void irc_init_account_prefs(eb_local_account *ela)
 {
+
 	irc_local_account *ila = ela->protocol_local_account_data;
 	input_list *il = g_new0(input_list, 1);
 
@@ -1421,33 +520,36 @@ static void irc_init_account_prefs(eb_local_account *ela)
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
-	il->widget.entry.value = ila->server;
+	il->widget.entry.value = ila->ia->connect_address;
 	il->name = "irc_host";
 	il->label= _("IRC _Host:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
-	il->widget.entry.value = ila->port;
+	il->widget.entry.value = ila->ia->port;
 	il->name = "irc_port";
 	il->label= _("IRC P_ort:");
 	il->type = EB_INPUT_ENTRY;
 
 }
 
-static eb_local_account * irc_read_local_config(LList * pairs)
+static eb_local_account * ay_irc_read_local_config(LList * pairs)
 {
 	eb_local_account * ela = g_new0(eb_local_account, 1);
 	irc_local_account * ila = g_new0(irc_local_account, 1);
+	ila->ia = g_new0(irc_account, 1);
+
+	ila->ia->callbacks = ay_irc_map_callbacks();
 
 	char *temp = NULL;
 	char *temp2 = NULL;
 	ela->protocol_local_account_data = ila;
-	ila->status = IRC_OFFLINE;
+	ila->ia->status = IRC_OFFLINE;
+	ila->ia->data = ela;
 
 	temp = ela->handle;
 
-	strncpy(ela->alias, ela->handle, MAX_PREF_LEN);
 	ela->service_id = SERVICE_INFO.protocol_id;
 
 	irc_init_account_prefs(ela);
@@ -1458,10 +560,10 @@ static eb_local_account * irc_read_local_config(LList * pairs)
 	{
 		*temp='\0';
 		temp++;
-		strncpy(ila->server, temp, sizeof(ila->server));
+		strncpy(ila->ia->connect_address, temp, strlen(temp));
 
-		/* Remove the port from ila->server */
-		temp2 = strrchr(ila->server, ':');
+		/* Remove the port from ila->ia->connect_address */
+		temp2 = strrchr(ila->ia->connect_address, ':');
 		if (temp2)
 			*temp2 = '\0';
 
@@ -1469,58 +571,63 @@ static eb_local_account * irc_read_local_config(LList * pairs)
 		if ((temp = strrchr(temp, ':')) != NULL)
 		{
 			temp++;
-			strncpy(ila->port, temp, 9);
+			strncpy(ila->ia->port, temp, sizeof(ila->ia->port)-1);
 		}
 	}
 
-	if(ela->handle[0] && ila->server[0])
+	strncpy(ela->alias, ela->handle, MAX_PREF_LEN);
+
+	if(ela->handle[0] && ila->ia->connect_address && ila->ia->connect_address[0])
 		return ela;
 	else
 		return NULL;
 }
 
-static LList * irc_write_local_config( eb_local_account * account )
+static LList * ay_irc_write_local_config( eb_local_account * account )
 {
 	return eb_input_to_value_pair(account->prefs);
 }
 
-static eb_account * irc_read_config(eb_account *ea, LList *config)
+static eb_account * ay_irc_read_config(eb_account *ea, LList *config)
 {
-	irc_account * ia = g_new0(irc_account, 1);
+	ay_irc_account * eia = g_new0(ay_irc_account, 1);
 	char * temp;
 
 		
-	ea->protocol_account_data = ia;
+	ea->protocol_account_data = eia;
 	
 	/* This func expects account names of the form Nick@server,
 	   for example Knan@irc.midgardsormen.net */
 
 	temp = strrchr(ea->handle, '@');
 	if(temp)
-		strncpy(ia->server, temp+1, sizeof(ia->server));
+		strncpy(eia->server, temp+1, sizeof(eia->server));
 	
-	ia->idle = 0;
-	ia->status = IRC_OFFLINE;
+	eia->idle = 0;
+	eia->status = IRC_OFFLINE;
 
 	if(ea->ela) {
 		irc_local_account * ila = ea->ela->protocol_local_account_data;
 
-		if (!strcmp(ila->server, ia->server))
+		if (!strcmp(ila->ia->connect_address, eia->server))
 			ila->friends = l_list_append( ila->friends, ea );
 	}
 	return ea;
 }
 
-static LList * irc_get_states()
+static LList * ay_irc_get_states()
 {
+	int i=0 ;
 	LList  * states = NULL;
-	states = l_list_append(states, "Online");
-	states = l_list_append(states, "Away");
-	states = l_list_append(states, "Offline");
+
+	for (;i<IRC_STATE_COUNT;i++) {
+		states = l_list_append(states, irc_states[i]);
+	}
+
 	return states;
 }
 
-static char * irc_check_login(const char * user, const char * pass)
+static char * ay_irc_check_login(const char * user, const char * pass)
 {
 	if (strrchr(user, '@') == NULL) {
 		return strdup(_("No hostname found in your login (which should be in user@host form)."));
@@ -1529,14 +636,14 @@ static char * irc_check_login(const char * user, const char * pass)
 }
 
 
-static int irc_get_current_state(eb_local_account * account )
+static int ay_irc_get_current_state(eb_local_account * account )
 {
 	irc_local_account * ila = (irc_local_account *) account->protocol_local_account_data;
 
-	return ila->status;
+	return ila->ia->status;
 }
 
-static void irc_set_current_state(eb_local_account * account, int state )
+static void ay_irc_set_current_state(eb_local_account * account, int state )
 {
 	irc_local_account * ila = (irc_local_account *) account->protocol_local_account_data;
 
@@ -1550,17 +657,18 @@ static void irc_set_current_state(eb_local_account * account, int state )
 	if( is_setting_state )
 		return;
 
-	if ((ila->status != IRC_OFFLINE) && state == IRC_OFFLINE) irc_logout(account);
-	else if ((ila->status == IRC_OFFLINE) && state != IRC_OFFLINE) irc_login(account);
+	if ((ila->ia->status != IRC_OFFLINE) && state == IRC_OFFLINE)
+		ay_irc_logout(account);
+	else if ((ila->ia->status == IRC_OFFLINE) && state != IRC_OFFLINE)
+		ay_irc_login(account);
 
-	ila->status = state;
-	return;
+	ila->ia->status = state;
 }
 
-static void irc_add_user( eb_account * account )
+static void ay_irc_add_user( eb_account * account )
 {
 	/* find the proper local account */
-	irc_account *ia = (irc_account *) account->protocol_account_data;
+	ay_irc_account *eia = (ay_irc_account *) account->protocol_account_data;
 	eb_local_account * ela = account->ela;
 
 	if (ela == NULL) {
@@ -1572,19 +680,17 @@ static void irc_add_user( eb_account * account )
 	{
 		irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
 
-		if (!strcmp(ila->server, ia->server))
+		if (!strcmp(ila->ia->connect_address, eia->server))
 		{
 			ila->friends = l_list_append( ila->friends, account );
 		}
 	}
-
-	return;
 }
 
-static void irc_del_user( eb_account * account )
+static void ay_irc_del_user( eb_account * account )
 {
 	/* find the proper local account */
-	irc_account *ia = (irc_account *) account->protocol_account_data;
+	ay_irc_account *eia = (ay_irc_account *) account->protocol_account_data;
 	eb_local_account * ela = account->ela;
 
 	if (ela == NULL) {
@@ -1595,18 +701,16 @@ static void irc_del_user( eb_account * account )
 	if (ela->service_id == SERVICE_INFO.protocol_id)
 	{
 		irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
-		if (ia && ia->server && !strcmp(ila->server, ia->server))
+		if (eia && eia->server && !strcmp(ila->ia->connect_address, eia->server))
 		{
 			ila->friends = l_list_remove( ila->friends, account );
 		}
 	}
-
-	return;
 }
 
-static int irc_is_suitable (eb_local_account *local, eb_account *remote)
+static int ay_irc_is_suitable (eb_local_account *local, eb_account *remote)
 {
-	irc_account *ia = NULL;
+	ay_irc_account *eia = NULL;
 	irc_local_account *ila = NULL;
 	
 	if (!local || !remote)
@@ -1615,29 +719,27 @@ static int irc_is_suitable (eb_local_account *local, eb_account *remote)
 	if (remote->ela == local)
 		return TRUE;
 		
-	ia = (irc_account *)remote->protocol_account_data; 
+	eia = (ay_irc_account *)remote->protocol_account_data; 
 	ila = (irc_local_account *)local->protocol_local_account_data;
 	
-	if (!ia || !ila)
+	if (!eia || !ila)
 		return FALSE;
 		
-	if (!strcmp(ia->server, ila->server)) 
+	if (!strcmp(eia->server, ila->ia->connect_address)) 
 		return TRUE;
 	
 	return FALSE;
 }
 
-/* This func expects account names of the form Nick@server,
-   for example Knan@irc.midgardsormen.net, and will return
-   NULL otherwise, very probably causing a crash. */
-static eb_account * irc_new_account(eb_local_account *ela, const char * account )
+/* Create a new account */
+static eb_account * ay_irc_new_account(eb_local_account *ela, const char * account )
 {
 	eb_account * ea = g_new0(eb_account, 1);
-	irc_account * ia = g_new0(irc_account, 1);
+	ay_irc_account * eia = g_new0(ay_irc_account, 1);
 	
 	strncpy(ea->handle, account, 254);
 	ea->ela = ela;
-	ea->protocol_account_data = ia;
+	ea->protocol_account_data = eia;
 	ea->service_id = SERVICE_INFO.protocol_id;
 	ea->list_item = NULL;
 	ea->online = 0;
@@ -1647,14 +749,14 @@ static eb_account * irc_new_account(eb_local_account *ela, const char * account 
 	ea->status_handler = -1;
 	ea->infowindow = NULL;
 
-	ia->idle = 0;
-	ia->status = IRC_OFFLINE;
+	eia->idle = 0;
+	eia->status = IRC_OFFLINE;
 
 	/* string magic - point to the first char after '@' */
 	if (strrchr(account, '@') != NULL)
 	{
 		account = strrchr(account, '@') + 1;
-		strncpy(ia->server, account, 254);
+		strncpy(eia->server, account, 254);
 	}
 	else
 	{
@@ -1662,29 +764,29 @@ static eb_account * irc_new_account(eb_local_account *ela, const char * account 
 		{
 			irc_local_account * ila = (irc_local_account *)ela->protocol_local_account_data;
 
-			strncpy(ia->server, ila->server, 254);
+			strncpy(eia->server, ila->ia->connect_address, 254);
 			strncat(ea->handle, "@", 254-strlen(ea->handle));
-			strncat(ea->handle, ia->server, 254-strlen(ea->handle));
+			strncat(ea->handle, eia->server, 254-strlen(ea->handle));
 		}
 	}
 
 	return ea;
 }
 
-static char * irc_get_status_string( eb_account * account )
+static char * ay_irc_get_status_string( eb_account * account )
 {
-	irc_account * ia = (irc_account *) account->protocol_account_data;
+	ay_irc_account * eia = (ay_irc_account *) account->protocol_account_data;
 	static char string[255];
 	static char buf[255];
 	
 	strcpy(string, "");
 	strcpy(buf, "");
 	
-	if(ia->idle >= 60)
+	if(eia->idle >= 60)
 	{
 		int days, hours, minutes;
 		
-		minutes = ia->idle / 60;
+		minutes = eia->idle / 60;
 		hours 	= minutes / 60;
 		minutes = minutes % 60;
 		days	= hours / 24;
@@ -1705,37 +807,36 @@ static char * irc_get_status_string( eb_account * account )
 	}
 	
 	strncat(string, buf, 255);
-	strncat(string, irc_states[ia->status], 255 - strlen(string));
+	strncat(string, irc_states[eia->status], 255 - strlen(string));
 
 	return string;
 }
 
-static const char ** irc_get_status_pixmap( eb_account * account)
+static const char ** ay_irc_get_status_pixmap( eb_account * account)
 {
-	irc_account * ia;
+	ay_irc_account * eia;
 	
 	/*if (!pixmaps)
 		irc_init_pixmaps();*/
 	
-	ia = account->protocol_account_data;
+	eia = account->protocol_account_data;
 	
-	if (ia->status == IRC_ONLINE)
+	if (eia->status == IRC_ONLINE)
 		return irc_online_xpm;
 	else
 		return irc_away_xpm;
 }
 
 /* Not needed with IRC, the server detects our idleness */
-static void irc_set_idle(eb_local_account * account, int idle )
+static void ay_irc_set_idle(eb_local_account * account, int idle )
 {
 	return;
 }
 
-static void irc_set_away( eb_local_account * account, char * message, int away)
+static void ay_irc_set_away( eb_local_account * account, char * message, int away)
 {
 	irc_local_account *ila = (irc_local_account *)account->protocol_local_account_data;
-	char buf[BUF_LEN];
-	int ret = 0;
+	char *out_msg = NULL ;
 
 	if (!account->connected)
 		return;
@@ -1746,35 +847,29 @@ static void irc_set_away( eb_local_account * account, char * message, int away)
 			eb_set_active_menu_status(account->status_menu, IRC_AWAY);
 		is_setting_state = 0;
 		/* Actually set away */
-        if(away)
-		{
-    		snprintf(buf, BUF_LEN, "AWAY :%s\n", message);
-			ret = sendall(ila->fd, buf, strlen(buf));
-		}
-        else
-		{
+		if(away)
+			irc_set_away(message, ila->ia);
+		else {
 			LList *l;
 			for(l=ila->current_rooms; l; l=l->next) {
-				snprintf(buf, BUF_LEN, "PRIVMSG %s :\1ACTION %s\1\n", ((eb_chat_room*)l->data)->room_name, message);
-				ret = sendall(ila->fd, buf, strlen(buf));
+				out_msg = ctcp_gen_extended_data_request(CTCP_ACTION, message);
+				irc_send_privmsg(((eb_chat_room*)l->data)->room_name, out_msg, ila->ia);
 			}
 		}
-		if (ret == -1) irc_logout(account);
-
 	} else {
 		is_setting_state = 1;
 		if(account->status_menu)
 			eb_set_active_menu_status(account->status_menu, IRC_ONLINE);
+
 		is_setting_state = 0;
 		/* Unset away */
-		snprintf(buf, BUF_LEN, "AWAY\n");
-		ret = sendall(ila->fd, buf, strlen(buf));
-		if (ret == -1) irc_logout(account);
+		irc_set_away(message, ila->ia);
 	}
-	return;
 }
 
-static void irc_send_file( eb_local_account * from, eb_account * to, char * file )
+
+/* TODO */
+static void ay_irc_send_file( eb_local_account * from, eb_account * to, char * file )
 {
 	return;
 }
@@ -1788,30 +883,46 @@ static void irc_info_update(info_window * iw)
 	irc_info *ii = (irc_info *)iw->info_data;
 
 	eb_account * ea = ii->me;
-	irc_account * ia = (irc_account *)ea->protocol_account_data;
+	ay_irc_account * eia = (ay_irc_account *)ea->protocol_account_data;
 
 	strncpy(temp, ea->handle, BUF_LEN);
 	alpha = strchr(temp, '@');
 	if (alpha != NULL) *alpha = '\0';
 
-	snprintf(message, sizeof(message), _("<b>User info for</b> %s<br>"), temp);
-	snprintf(temp, sizeof(temp), _("<b>Server:</b> %s<br>"), strlen(ia->realserver)>0 ? ia->realserver : ia->server);
-	strncat(message, temp, sizeof(message)-strlen(message));
-	snprintf(temp, sizeof(temp), _("<b>Idle time and online status:</b> %s<br>"), irc_get_status_string(ea));
-	strncat(message, temp, sizeof(message)-strlen(message));
+	if (!ii->fullmessage)
+	{
+		snprintf(message, sizeof(message), _("<b>User info for</b> %s<br>"), temp);
+		snprintf(temp, sizeof(temp), _("<b>Server:</b> %s<br>"), 
+				strlen(eia->realserver)>0 ? eia->realserver : eia->server);
+		strncat(message, temp, sizeof(message)-strlen(message));
+		snprintf(temp, sizeof(temp), _("<b>Idle time and online status:</b> %s<br>"), 
+				ay_irc_get_status_string(ea));
+		strncat(message, temp, sizeof(message)-strlen(message)-1);
+		strncat(message, _("<b>Whois info:</b><br><br>"), sizeof(message)-strlen(message)-1);
+	}
+	else
+	{
+		strncpy(message, ii->fullmessage, sizeof(message)-1) ;
+	}
+
 	if (ii->whois_info != NULL)
 	{
 		freeme = strip_color((unsigned char *)ii->whois_info);
-		snprintf(temp, sizeof(temp), _("<b>Whois info:</b> %s<br>"), freeme);
-		free(freeme);
-		strncat(message, temp, sizeof(message)-strlen(message));
+		strncat(message, (char *)freeme, sizeof(message)-strlen(message));
+
+		if(freeme) {
+			free(freeme);
+			freeme= NULL;
+		}
 	}
 
 	eb_info_window_clear(iw);
 
 	if (ii->fullmessage)
 	{
-		free(ii->fullmessage);
+		if(ii->fullmessage)
+			free(ii->fullmessage);
+
 		ii->fullmessage = NULL;
 	}
 	ii->fullmessage = strdup(message);
@@ -1819,47 +930,38 @@ static void irc_info_update(info_window * iw)
 	html_text_buffer_append(GTK_TEXT_VIEW(iw->info), ii->fullmessage,
 			HTML_IGNORE_BACKGROUND|HTML_IGNORE_FOREGROUND);
 	gtk_adjustment_set_value(gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(iw->scrollwindow)),0);
-	return;
 }
 
 static void irc_info_data_cleanup(info_window * iw)
 {
-	if (((irc_info *)(iw->info_data))->whois_info != NULL)
-	{
+	if (((irc_info *)iw->info_data)->whois_info)
 		free (((irc_info *)(iw->info_data))->whois_info);
-	}
-	free (((irc_info *)(iw->info_data))->fullmessage);
-	free (iw->info_data);
+
+	if (((irc_info *)(iw->info_data))->fullmessage)
+		free (((irc_info *)(iw->info_data))->fullmessage);
+
+	if (iw->info_data)
+		free (iw->info_data);
+
 	iw->info_data = NULL;
-	return;
 }
 
-static void irc_get_info( eb_local_account * account_from, eb_account * account_to)
+static void ay_irc_get_info( eb_local_account * account_from, eb_account * account_to)
 {
 	char	*nick;
 	char	*alpha;
-	char buff[BUF_LEN];
 
 	irc_local_account * ila =
 		(irc_local_account *) account_from->protocol_local_account_data;
 
-	irc_account * ia = (irc_account *)account_to->protocol_account_data;
+	ay_irc_account * eia = (ay_irc_account *)account_to->protocol_account_data;
 		
 	nick = strdup(account_to->handle);
 	alpha = strchr(nick, '@');
 	if (alpha != NULL) *alpha = '\0';
 
-	/* Send a WHOIS request */
-	if(strlen(ia->realserver) > 0)
-	{
-		g_snprintf(buff, BUF_LEN, "WHOIS %s %s\n", ia->realserver, nick);
-	}
-	else
-	{
-		g_snprintf(buff, BUF_LEN, "WHOIS %s\n", nick);
-	}
-	sendall(ila->fd, buff, strlen(buff));
-		
+	irc_send_whois(eia->realserver, nick, ila->ia);
+
 	/* Find the pointer to the info window */
 	if(account_to->infowindow == NULL )
 	{
@@ -1868,99 +970,968 @@ static void irc_get_info( eb_local_account * account_from, eb_account * account_
 		gtk_widget_show(account_to->infowindow->window);
 	}
 
-	account_to->infowindow->info_data = malloc(sizeof (irc_info));
-	memset(account_to->infowindow->info_data, 0, sizeof(irc_info));
+	account_to->infowindow->info_data = calloc(1, sizeof (irc_info));
+
 	((irc_info *)(account_to->infowindow->info_data))->me = account_to;
-	((irc_info *)(account_to->infowindow->info_data))->fullmessage = malloc(1);
-	*((irc_info *)(account_to->infowindow->info_data))->fullmessage = '\0';
 	account_to->infowindow->cleanup = irc_info_data_cleanup;
-	irc_info_update(account_to->infowindow);
- 
-	return;
 }
 
-static void irc_join_chat_room(eb_chat_room *room)
+
+// IRC Handler
+static void ay_got_whoisuser (const char *nick, const char *user, const char *host, 
+				const char *real_name, irc_message_prefix *prefix, irc_account *ia)
 {
-	char buff[BUF_LEN];
-	signed int ret;
-	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
+	eb_local_account *ela = (eb_local_account *)ia->data ;
+	char handle[MAX_PREF_LEN] ;
+	char whois_info[BUF_LEN] ;
 
-	g_snprintf(buff, BUF_LEN, "JOIN :%s\n", room->room_name);
-			
-	ret = sendall(ila->fd, buff, strlen(buff));
-	ila->current_rooms = l_list_prepend(ila->current_rooms, room);
-	if (ret == -1) irc_logout(room->local_user);
-	return;
-}
+	memset(whois_info, 0, sizeof(whois_info));
 
-static void irc_leave_chat_room(eb_chat_room *room)
-{
-	char buff[BUF_LEN];
-	signed int ret;
-	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
+	eb_account *ea = NULL;
+	ay_irc_account *eia = NULL;
 
-	g_snprintf(buff, BUF_LEN, "PART :%s\n", room->room_name);
-			
-	ret = sendall(ila->fd, buff, strlen(buff));
-	ila->current_rooms = l_list_remove(ila->current_rooms, room);
-	if (ret == -1) irc_logout(room->local_user);
-	return;
-}
+	AY_IRC_GET_HANDLE(handle, nick, ia->connect_address, MAX_PREF_LEN-1);
 
-static void irc_send_chat_room_message(eb_chat_room *room, char *message)
-{
-	char buff[BUF_LEN];
-	char nick[255];
-	char *alpha;
-	signed int ret;
+	snprintf(whois_info, sizeof(whois_info), 
+			_("<i><b>User Name: </b></i> %s<br><i><b>Real Name: </b></i> %s<br>"), 
+			user, real_name);
 
-	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
+	ea = find_account_by_handle(handle, ela->service_id);
 
-	if (message && (message[0]!='/'))
-	{
-		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", room->room_name, message);
-	}
+	if (ea)
+		eia = (ay_irc_account *)ea->protocol_account_data ;
 	else
 	{
-		irc_command_to_action(message, buff, BUF_LEN, room->room_name);
-	}
-			
-	ret = sendall(ila->fd, buff, strlen(buff));
-	if (ret == -1) irc_logout(room->local_user);
+		eia = g_new0(ay_irc_account, 1);
+		ea = g_new0(eb_account, 1);
 
-	strncpy(nick, room->local_user->alias, 255);
-	alpha = strchr(nick, '@');
-	if (alpha != NULL) *alpha = '\0';
-		
-	eb_chat_room_show_message( room, nick, message );
-	return;
+		strncpy(ea->handle, handle, 255);
+		ea->service_id = ela->service_id;
+		eia->status = IRC_OFFLINE;
+		strncpy(eia->server, ia->connect_address, 255);
+		ea->protocol_account_data = eia;
+		ea->ela = ela ;
+		eia->dummy = TRUE ;
+		add_dummy_contact(prefix->nick, ea);
+
+		eb_debug(DBG_IRC, "Created Dummy user :: %s\n", handle);
+
+		// set status of the dummy contact to online so that we can message them...
+		ea->account_contact->online++;
+		ea->online = TRUE;
+		if (ea->account_contact->online == 1)
+			ea->account_contact->group->contacts_online++;
+
+		buddy_update_status(ea);
+
+		eia->status = IRC_ONLINE;
+	}
+
+	strncpy(eia->realserver, host, sizeof(eia->realserver)-1) ;
+
+	/* Find the pointer to the info window */
+	if(ea->infowindow == NULL )
+	{
+		/* Create one */
+		ea->infowindow = eb_info_window_new(ela, ea);
+		gtk_widget_show(ea->infowindow->window);
+	}
+
+	if ( !ea->infowindow->info_data )
+		ea->infowindow->info_data = calloc(1, sizeof (irc_info));
+
+	((irc_info *)ea->infowindow->info_data)->whois_info = strdup(whois_info);;
+	((irc_info *)ea->infowindow->info_data)->me = ea;
+	ea->infowindow->cleanup = irc_info_data_cleanup;
+
+	irc_info_update(ea->infowindow);
 }
 
-static void irc_send_invite( eb_local_account * account, eb_chat_room * room,
+
+// IRC Handler
+static void ay_got_whoisidle (const char *from, int since, const char *message, 
+				irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_local_account *ela = (eb_local_account *)ia->data ;
+	char handle[MAX_PREF_LEN] ;
+
+	eb_account *ea ;
+	ay_irc_account *eia ;
+
+	AY_IRC_GET_HANDLE(handle, from, ia->connect_address, MAX_PREF_LEN-1);
+
+	ea = find_account_by_handle(handle, ela->service_id);
+
+	if (ea)
+		eia = (ay_irc_account *)ea->protocol_account_data ;
+	else
+	{
+		eia = g_new0(ay_irc_account, 1);
+		ea = g_new0(eb_account, 1);
+
+		strncpy(ea->handle, handle, 255);
+		ea->service_id = ela->service_id;
+		eia->status = IRC_OFFLINE;
+		strncpy(eia->server, ia->connect_address, 255);
+		ea->protocol_account_data = eia;
+		ea->ela = ela ;
+		eia->dummy = TRUE ;
+		add_dummy_contact(prefix->nick, ea);
+
+		eb_debug(DBG_IRC, "Created Dummy user :: %s\n", handle);
+
+		// set status of the dummy contact to online so that we can message them...
+		ea->account_contact->online++;
+		ea->online = TRUE;
+		if (ea->account_contact->online == 1)
+			ea->account_contact->group->contacts_online++;
+
+		eia->status = IRC_ONLINE;
+	}
+
+	/* Find the pointer to the info window */
+	if(ea->infowindow == NULL )
+	{
+		/* Create one */
+		ea->infowindow = eb_info_window_new(ela, ea);
+		gtk_widget_show(ea->infowindow->window);
+	}
+
+	if ( !ea->infowindow->info_data )
+		ea->infowindow->info_data = calloc(1, sizeof (irc_info));
+
+	eia->idle = since ;
+
+	buddy_update_status(ea);
+
+	irc_info_update(ea->infowindow);
+}
+
+
+// IRC Handler
+static void ay_got_whoisserver (const char *nick, const char *server, const char *info, 
+				irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_local_account *ela = (eb_local_account *)ia->data ;
+	char handle[MAX_PREF_LEN] ;
+	char whois_info[BUF_LEN] ;
+
+	memset(whois_info, 0, sizeof(whois_info));
+
+	eb_account *ea ;
+	ay_irc_account *eia ;
+
+	AY_IRC_GET_HANDLE(handle, nick, ia->connect_address, MAX_PREF_LEN-1);
+
+	ea = find_account_by_handle(handle, ela->service_id);
+
+	if (ea)
+		eia = (ay_irc_account *)ea->protocol_account_data ;
+	else
+	{
+		eia = g_new0(ay_irc_account, 1);
+		ea = g_new0(eb_account, 1);
+
+		strncpy(ea->handle, handle, 255);
+		ea->service_id = ela->service_id;
+		eia->status = IRC_OFFLINE;
+		strncpy(eia->server, ia->connect_address, 255);
+		ea->protocol_account_data = eia;
+		ea->ela = ela ;
+		eia->dummy = TRUE ;
+		add_dummy_contact(prefix->nick, ea);
+		
+		eb_debug(DBG_IRC, "Created Dummy user :: %s\n", handle);
+
+		// set status of the dummy contact to online so that we can message them...
+		ea->account_contact->online++;
+		ea->online = TRUE;
+		if (ea->account_contact->online == 1)
+			ea->account_contact->group->contacts_online++;
+
+		buddy_update_status(ea);
+
+		eia->status = IRC_ONLINE;
+	}
+
+	/* Find the pointer to the info window */
+	if(ea->infowindow == NULL )
+	{
+		/* Create one */
+		ea->infowindow = eb_info_window_new(ela, ea);
+		gtk_widget_show(ea->infowindow->window);
+	}
+
+	if ( !ea->infowindow->info_data )
+		ea->infowindow->info_data = calloc(1, sizeof (irc_info));
+
+	snprintf(whois_info, sizeof(whois_info), _("<i><b>Server Info: </b></i> %s<br>"), info);
+
+	strncpy(eia->realserver, server, sizeof(eia->realserver)-1) ;
+
+	((irc_info *)ea->infowindow->info_data)->whois_info = strdup(whois_info);;
+
+	irc_info_update(ea->infowindow);
+}
+
+
+
+
+// IRC Handler
+static void ay_got_away (const char *from, const char *message,
+				irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_local_account *ela = (eb_local_account *)ia->data ;
+	char handle[MAX_PREF_LEN] ;
+	char whois_info[BUF_LEN] ;
+
+	memset(whois_info, 0, sizeof(whois_info));
+
+	eb_account *ea ;
+	ay_irc_account *eia ;
+
+	AY_IRC_GET_HANDLE(handle, from, ia->connect_address, MAX_PREF_LEN-1);
+
+	ea = find_account_by_handle(handle, ela->service_id);
+
+	eia = (ay_irc_account *)ea->protocol_account_data ;
+
+	if (eia->status == IRC_OFFLINE) {
+		buddy_login(ea);
+		eia->status = IRC_AWAY;
+		buddy_update_status(ea);
+	}
+	else if (eia->status == IRC_ONLINE) {
+		eia->status = IRC_AWAY;
+		buddy_update_status(ea);
+	}
+
+	if (ea->infowindow)
+		irc_info_update(ea->infowindow);
+}
+
+
+// IRC Handler
+static void ay_buddy_join (const char *channel, irc_message_prefix *prefix, irc_account *ia)
+{
+	char room_name[BUF_LEN] ;
+	char buddy_name[BUF_LEN] ;
+	eb_chat_room *ecr ;
+	eb_account *ea ;
+	ay_irc_account *eia;
+	eb_local_account *ela = (eb_local_account *)ia->data;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", channel, ia->connect_address);
+
+	ecr = find_chat_room_by_id(room_name);
+
+	/* If the JOIN notification was generated by me, then ask for NAMES */
+	if ( prefix->nick && !strcmp(prefix->nick, ia->nick) ) {
+
+		if(!ecr)
+			ecr = ay_irc_make_chat_room_window(room_name, ela, FALSE, FALSE);
+
+		irc_get_names_list (channel, ia) ;
+	}
+
+	snprintf(buddy_name, sizeof(buddy_name), "%s@%s", prefix->nick, ia->connect_address);
+
+	/* See if there's anyone we recognize */
+	ea = find_account_with_ela(buddy_name, ela);
+
+	if (ea) {
+		eb_debug(DBG_IRC, "Logged in JOINed user :: %s\n", buddy_name);
+
+		eia = (ay_irc_account *)ea->protocol_account_data;
+
+		if ( eia->status == IRC_OFFLINE && !eia->dummy ) {
+
+			/* Okay, if someone msgs us, they are per definition online... */
+			buddy_login(ea);
+		}
+
+		buddy_update_status(ea);
+		eia->status = IRC_ONLINE;
+	}
+
+	if(ecr) {
+		eb_chat_room_buddy_arrive(ecr, prefix->nick, prefix->nick);
+	}
+}
+
+
+// IRC handler
+static void ay_got_namereply (irc_name_list *list, const char *channel,
+				irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_chat_room *ecr ;
+	eb_account *ea ;
+	eb_local_account *ela = (eb_local_account *)ia->data;
+	ay_irc_account *eia;
+
+	char room_name[BUF_LEN] ;
+	char buddy_name[BUF_LEN] ;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", channel, ia->connect_address);
+
+	ecr = find_chat_room_by_id(room_name);
+
+	if(ecr) {
+		eb_chat_room_buddy * ecrb = NULL;
+		
+		while(list) {
+			if(!eb_chat_room_buddy_connected(ecr, list->name)) {
+				ecrb = g_new0(eb_chat_room_buddy, 1 );
+				strncpy( ecrb->alias, list->name, sizeof(ecrb->alias));
+				strncpy( ecrb->handle, list->name, sizeof(ecrb->handle));
+				ecr->fellows = l_list_append(ecr->fellows, ecrb);
+
+				snprintf(buddy_name, sizeof(buddy_name), "%s@%s", list->name, ia->connect_address);
+
+				/* See if there's anyone we recognize */
+				ea = find_account_with_ela(buddy_name, ela);
+
+				if (ea) {
+					eb_debug(DBG_IRC, "Logged in NAMEREPLY user :: %s\n", buddy_name);
+
+					eia = (ay_irc_account *)ea->protocol_account_data;
+                        
+					if ( eia->status == IRC_OFFLINE ) {
+                        
+						/* Okay, if someone msgs us, they are per definition online... */
+						buddy_login(ea);
+					}
+                        
+					buddy_update_status(ea);
+					eia->status = IRC_ONLINE;
+				}
+			}
+
+			list = list -> next ;
+		}
+		eb_chat_room_refresh_list(ecr);
+	}
+}
+
+
+// IRC Handler
+static void ay_got_channel_list (const char *me, const char *channel, 
+				int users, const char *topic,
+				irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_local_account *ela = (eb_local_account *)ia -> data ;
+	irc_local_account *ila = (irc_local_account *)ela-> protocol_local_account_data ;
+
+	char *chnl = strdup(channel);
+
+	ila->channel_list = l_list_insert_sorted(ila->channel_list, chnl,
+						(LListCompFunc) strcasecmp);
+}
+
+
+static void ay_got_channel_listend (const char *message, irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_local_account *ela = (eb_local_account *)ia->data;
+        irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
+	
+	ila->got_public_chatrooms (l_list_copy(ila->channel_list), ila->public_chatroom_callback_data);
+
+	l_list_free(ila->channel_list);
+
+	ila->channel_list = NULL;
+}
+
+
+// IRC Handler
+static void ay_buddy_quit (const char *message, irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_chat_room *ecr ;
+	LList *node = chat_rooms ;
+	char buddy_name[BUF_LEN];
+
+	eb_account *ea ;
+	eb_local_account *ela = (eb_local_account *)ia->data;
+	ay_irc_account *eia;
+
+
+	for(node = chat_rooms; node; node = node->next) {
+		ecr = (eb_chat_room*)node->data;
+		if (ecr && ecr->local_user->service_id == SERVICE_INFO.protocol_id ) {
+			char ** buff3 = g_strsplit(ecr->id, "@", 2);
+
+			if (!strcmp(buff3[1], ia->connect_address) 
+					&& eb_chat_room_buddy_connected(ecr, prefix->nick))
+			{
+				snprintf(buddy_name, sizeof(buddy_name), "%s@%s", prefix->nick, ia->connect_address);
+                        
+				/* See if someone we recognize is going */
+				ea = find_account_with_ela(buddy_name, ela);
+                        
+				if (ea) {
+					eb_debug(DBG_IRC, "Logged off QUITed user :: %s\n", buddy_name);
+                        
+					eia = (ay_irc_account *)ea->protocol_account_data;
+                        
+					if ( eia->status == !IRC_OFFLINE ) {
+						if( eia->dummy ) {
+							ea->account_contact->online--;
+							ea->online = FALSE;
+							if (ea->account_contact->online == 0)
+								ea->account_contact->group->contacts_online--;
+                        
+							eb_debug(DBG_IRC, "Dummy logoff :: %s\n", ea->handle);
+						}
+						else {
+							eb_debug(DBG_IRC, "Buddy logoff :: %s\n", ea->handle);
+							buddy_logoff(ea);
+						}
+					}
+                        
+					buddy_update_status(ea);
+					eia->status = IRC_OFFLINE;
+				}
+
+				eb_chat_room_buddy_leave(ecr, prefix->nick);
+			}
+
+
+			if(buff3) {
+				g_strfreev(buff3);
+			}
+		}
+	}
+}
+
+
+// IRC Handler
+static void ay_buddy_part (const char *channel, irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_chat_room *ecr ;
+	char room_name[BUF_LEN] ;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", channel, ia->connect_address);
+
+	ecr = find_chat_room_by_id(room_name);
+
+	if(ecr) {
+		eb_chat_room_buddy_leave(ecr, prefix->nick);
+
+		// This means we sent a /PART or /LEAVE command
+		if ( !strcmp(prefix->nick, ia->nick) ) {
+			eb_destroy_chat_room(ecr);
+		}
+	}
+}
+
+
+// IRC Handler
+static void ay_buddy_nick_change (const char *newnick, irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_chat_room *ecr ;
+	char room_name[BUF_LEN];
+
+	LList *node = chat_rooms ;
+
+	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", 
+			ia->nick, ia->connect_address, ia->connect_address);
+
+	for(node = chat_rooms; node; node = node->next) {
+		ecr = (eb_chat_room*)node->data;
+
+		if (ecr && ecr->local_user->service_id == SERVICE_INFO.protocol_id ) {
+			char ** buff3 = g_strsplit(ecr->id, "@", 2);
+
+			// If it's me I've got to change my name too eh...
+			if(!strcmp(ia->nick, prefix->nick)) {
+				char colorized_msg[BUF_LEN];
+
+				snprintf(colorized_msg,BUF_LEN, 
+						"<font color=#008888><b>Your nickname is now %s</b></font>",
+						newnick);
+
+				eb_chat_room_show_3rdperson(ecr, colorized_msg);
+				strcpy(ia->nick, newnick);
+
+				// Rename my notices channel
+				if(!strcmp(ecr->id, room_name)) {
+					char *tmp=NULL;
+
+					snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", 
+						ia->nick, ia->connect_address, ia->connect_address);
+
+					strncpy(ecr->id, room_name, sizeof(ecr->id));
+					tmp=strchr(room_name, '@');
+					if(tmp)
+						*tmp='\0';
+
+					strncpy(ecr->room_name, room_name, sizeof(ecr->room_name));
+				}
+			}
+
+			if (!strcmp(buff3[1], ia->connect_address) 
+					&& eb_chat_room_buddy_connected(ecr, prefix->nick))
+			{
+				eb_chat_room_buddy_leave(ecr, prefix->nick);
+				eb_chat_room_buddy_arrive(ecr, newnick, newnick);
+			}
+
+			if(buff3) {
+				g_strfreev(buff3);
+			}
+		}
+	}
+}
+
+
+// IRC Handler
+static void ay_got_invite (const char *channel, const char *to, 
+		irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_chat_room *ecr ;
+	char room_name[BUF_LEN] ;
+
+	eb_local_account *ela = (eb_local_account *)ia->data ;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", channel, ia->connect_address);
+
+	ecr = find_chat_room_by_id(room_name);
+
+	if(!ecr) {
+		invite_dialog(ela, prefix->nick, strdup(room_name), strdup(room_name));
+	}
+}
+
+
+void ay_irc_process_incoming_message (const char *recipient, const char *message, 
+					irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_local_account *ela = (eb_local_account *)ia->data;
+	irc_local_account *ila = (irc_local_account *)ela->protocol_local_account_data;
+	ay_irc_account *eia = NULL ;
+	char *msg = NULL;
+
+	/* This was a personal message... for my eyes only */
+	if(!strcmp(recipient, ia->nick)) {
+		char sender_handle[BUF_LEN];
+		eb_account *ea;
+
+		if (prefix->nick) {
+			AY_IRC_GET_HANDLE(sender_handle, prefix->nick, ia->connect_address,MAX_PREF_LEN-1);
+		}
+		else {
+			AY_IRC_GET_HANDLE(sender_handle, prefix->servername, ia->connect_address,MAX_PREF_LEN-1);
+		}
+
+		ea = find_account_with_ela(sender_handle, ela);
+
+		if (!ea) {
+			/* Some unknown person is msging us - add him */
+			ay_irc_account * eia = g_new0(ay_irc_account, 1);
+
+			ea = g_new0(eb_account, 1);
+			strncpy(ea->handle, sender_handle, 255);
+			ea->service_id = ela->service_id;
+			eia->status = IRC_OFFLINE;
+			strncpy(eia->server, ia->connect_address, 255);
+			ea->protocol_account_data = eia;
+			ea->ela = ela ;
+			eia->dummy = TRUE ;
+			add_dummy_contact(prefix->nick, ea);
+
+			eb_debug(DBG_IRC, "Created Dummy user :: %s\n", ea->handle);
+
+			// add to friends list so that we can sign them off on logoff
+			ila->friends = l_list_append( ila->friends, ea );
+		}
+		else if (!ea->ela)
+			ea->ela = ela ;
+
+		eia = (ay_irc_account *)ea->protocol_account_data;
+
+		if ( eia->status == IRC_OFFLINE && !eia->dummy ) {
+			eb_debug(DBG_IRC, "Logging in user :: %s\n", ea->handle);
+
+			/* Okay, if someone msgs us, they are per definition online... */
+			buddy_login(ea);
+		}
+		else if ( eia->status == IRC_OFFLINE ) {
+			eb_debug(DBG_IRC, "Logging in dummy user :: %s\n", ea->handle);
+			// set status of the dummy contact to online so that we can message them...
+			ea->account_contact->online++;
+			ea->online = TRUE;
+			if (ea->account_contact->online == 1)
+				ea->account_contact->group->contacts_online++;
+		}
+
+		buddy_update_status(ea);
+		eia->status = IRC_ONLINE;
+
+		if (message) {
+			msg = (char *)strip_color((unsigned char *)message);
+		}
+		else {
+			msg = strdup("");
+		}
+
+		eb_parse_incoming_message(ela, ea, msg);
+	}
+	else {
+		char *out_msg = NULL ;
+		char room_name[BUF_LEN] ;
+		eb_chat_room *ecr = NULL ;
+
+		snprintf(room_name, sizeof(room_name), "%s@%s", recipient, ia->connect_address);
+
+		ecr = find_chat_room_by_id(room_name);
+
+		if (ecr) {
+			msg = (char *)strip_color((unsigned char *)message);
+
+			/* Highlight my nickname if someone has mentioned it */
+			if (!strncmp(msg, ia->nick, strlen(ia->nick))) {
+				out_msg = g_strdup_printf("<font color=\"#ff0000\">%s</font> %s",
+						ia->nick, msg+strlen(ia->nick));
+
+				eb_chat_room_show_message(ecr, prefix->nick, out_msg);
+
+				if(out_msg) {
+					free(out_msg);
+					out_msg = NULL;
+				}
+			}
+			else {
+				eb_chat_room_show_message(ecr, prefix->nick, msg);
+			}
+		}
+	}
+
+	if(msg) {
+		free(msg);
+		msg = NULL;
+	}
+}
+
+
+// IRC Handler
+static void ay_irc_got_privmsg (const char *recipient, const char *message, 
+			irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_chat_room *ecr ;
+	char room_name[BUF_LEN] ;
+	ctcp_extended_data_list *data_list = NULL ;
+	ctcp_extended_data *element = NULL ;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", recipient, ia->connect_address);
+
+	ecr = find_chat_room_by_id(room_name);
+
+	/* There's either a chatroom by the name or it was meant personally for me */
+	if(ecr || !strcmp(recipient, ia->nick)) {
+		data_list = ctcp_get_extended_data (message, strlen(message)) ;
+
+		while (data_list) {
+			element = (ctcp_extended_data *)data_list->ext_data;
+
+			switch (element->type) {
+				case CTCP_ACTION:
+				{
+					char colorized_message[BUF_LEN] ;
+					unsigned char *msg = strip_color((unsigned char *)element->data);
+
+					g_snprintf(colorized_message, BUF_LEN,  
+							"<font color=\"#00AA00\">*%s %s</font>",
+							prefix->nick, msg);
+
+					if (ecr)
+						eb_chat_room_show_3rdperson(ecr, colorized_message);
+					else {
+						ay_irc_process_incoming_message (recipient, 
+								colorized_message, prefix, ia) ;
+					}
+
+					if(msg) {
+						free(msg);
+						msg = NULL;
+					}
+
+					break;
+				}
+				case CTCP_VERSION:
+				{
+					/* Send Ayttm version info */
+					char *msg = ctcp_gen_version_response
+							(PACKAGE_NAME,  PACKAGE_VERSION "-" RELEASE, HOST);
+
+					irc_send_notice(prefix->nick, msg, ia);
+					break;
+				}
+				case CTCP_SOURCE:
+					break;
+				case CTCP_USERINFO:
+					break;
+				case CTCP_CLIENTINFO:
+					break;
+				case CTCP_TIME:
+				{
+					/* Send Current Time */
+					char *msg = ctcp_gen_time_response();
+					irc_send_notice(prefix->nick, msg, ia);
+					break;
+				}
+				case CTCP_PING:
+				{
+					/* Send CTCP PING response */
+					char *msg = ctcp_gen_ping_response(element->data);
+					irc_send_notice(prefix->nick, msg, ia);
+					break;
+				}
+				case CTCP_SED:
+					break;
+				case CTCP_DCC:
+					break;
+				case CTCP_FINGER:
+					break;
+				case CTCP_ERRMSG:
+					break;
+				default:
+				{
+					ay_irc_process_incoming_message (recipient, 
+							element->data, prefix, ia) ;
+				}
+			}
+
+			data_list = data_list->next ;
+		}
+	}
+}
+
+
+/* Got the channel Topic */
+static void ay_irc_got_topic (const char *channel, const char *topic,
+			irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_chat_room *ecr ;
+	char room_name[BUF_LEN] ;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", channel, ia->connect_address);
+
+	ecr = find_chat_room_by_id(room_name);
+
+	if(ecr) {
+		char colorized_message[BUF_LEN] ;
+		unsigned char *msg = strip_color((unsigned char *)topic);
+
+		g_snprintf(colorized_message, BUF_LEN, "<font color=\"#775500\">%s</font>", msg);
+
+		eb_chat_room_show_3rdperson(ecr, colorized_message);
+
+		if(msg) {
+			free(msg);
+			msg = NULL;
+		}
+	}
+}
+
+
+// IRC Handler
+static void ay_irc_got_notice (const char *recipient, const char *message, 
+			irc_message_prefix *prefix, irc_account *ia)
+{
+	char room_name[BUF_LEN];
+	ctcp_extended_data_list *data_list = NULL ;
+	ctcp_extended_data *element = NULL ;
+	eb_local_account *ela = (eb_local_account *)ia->data;
+	eb_chat_room *cr = NULL;
+
+	/* 
+	 * This is one of those AUTH NOTICEs... 
+	 * TODO: Put these in the message log 
+	 */
+	if (!prefix->nick && !prefix->servername)
+		return ;
+
+	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", 
+			recipient, ia->connect_address, ia->connect_address);
+
+	cr = find_chat_room_by_id(room_name);
+
+	if(!cr) {
+		cr = ay_irc_make_chat_room_window(room_name, ela, FALSE, FALSE);
+	}
+
+	data_list = ctcp_get_extended_data (message, strlen(message)) ;
+
+	while (data_list) {
+		element = (ctcp_extended_data *)data_list->ext_data;
+
+		switch (element->type) {
+			case CTCP_VERSION:
+			{
+				char notice[BUF_LEN] ;
+				ctcp_version *version = ctcp_got_version(element->data);
+
+				if(version && version->name) {
+					snprintf(notice, sizeof(notice), _("<font color=\"#00BBBB\">%s is running %s"), 
+							(prefix->nick?prefix->nick:prefix->servername), 
+							version->name) ;
+					if (version->version) {
+						strncat(notice, "-", sizeof(notice)-strlen(notice)-1);
+						strncat(notice, version->version, sizeof(notice)-strlen(notice)-1);
+					}
+
+					if (version->env) {
+						strncat(notice, _(" on "), sizeof(notice)-strlen(notice)-1) ;
+						strncat(notice, version->env, sizeof(notice)-strlen(notice)-1);
+					}
+					strncat(notice, "</font>", sizeof(notice)-strlen(notice)-1);
+				}
+
+				if(element->data) {
+					free(element->data);
+					element->data = NULL;
+				}
+
+				element->data = strdup(notice);
+
+				break;
+			}
+			case CTCP_SOURCE:
+				break;
+			case CTCP_USERINFO:
+				break;
+			case CTCP_CLIENTINFO:
+				break;
+			case CTCP_TIME:
+			{
+				char notice[BUF_LEN] ;
+
+				snprintf(notice, sizeof(notice), 
+						_("<font color=\"#AABB44\">%s has sent Time as <B>%s</B></font>"), 
+						(prefix->nick?prefix->nick:prefix->servername), element->data);
+
+				if(element->data) {
+					free(element->data);
+					element->data = NULL;
+				}
+
+				element->data = strdup(notice);
+
+				break;
+			}
+			case CTCP_PING:
+				break;
+			case CTCP_SED:
+				break;
+			case CTCP_DCC:
+				break;
+			case CTCP_FINGER:
+				break;
+			case CTCP_ERRMSG:
+				break;
+			default:
+			{
+				char notice[BUF_LEN] ;
+
+				snprintf(notice, sizeof(notice), 
+						_("<I><B><font color=\"#AA0000\">%s:</font></B> %s</I>"), 
+						(prefix->nick?prefix->nick:prefix->servername), element->data);
+
+				if(element->data) {
+					free(element->data);
+					element->data = NULL;
+				}
+
+				element->data = strdup(notice);
+			}
+		}
+
+
+		if (element->data && element->data[0]) {
+			if(prefix->nick) {
+				free(prefix->nick);
+				prefix->nick = strdup(room_name);
+			}
+			else if(prefix->servername) {
+				free(prefix->servername);
+				prefix->servername = strdup(room_name);
+			}
+
+			// We use chat room windows instead of normal chat windows since we want
+			// to be able to type commands in them.
+			eb_chat_room_show_3rdperson(cr, element->data);
+//			ay_irc_process_incoming_message(recipient, element->data, prefix, ia);
+		}
+
+		data_list = data_list->next ;
+	}
+
+	ctcp_free_extended_data(data_list);
+}
+
+
+static void ay_irc_join_chat_room(eb_chat_room *room)
+{
+	char room_name[BUF_LEN];
+
+	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
+
+	if (!room->local_user->connected)
+		return;
+
+	// UGLY HACK ALERT!! I'm explicitly checking for the notice window room name.
+	snprintf(room_name, sizeof(room_name), "#notices-%s-%s", ila->ia->nick, ila->ia->connect_address);
+
+	if(strcasecmp(room->room_name, room_name))
+		irc_join(room->room_name, ila->ia) ;
+
+	ila->current_rooms = l_list_prepend(ila->current_rooms, room);
+}
+
+static void ay_irc_leave_chat_room(eb_chat_room *room)
+{
+	char room_name[BUF_LEN];
+
+	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
+
+	if (!room->local_user->connected)
+		return;
+
+	// UGLY HACK ALERT!! I'm explicitly checking for the notice window room name.
+	snprintf(room_name, sizeof(room_name), "#notices-%s-%s", ila->ia->nick, ila->ia->connect_address);
+
+	if(strcasecmp(room->room_name, room_name))
+		irc_leave_chat_room(room->room_name, ila->ia) ;
+
+	ila->current_rooms = l_list_remove(ila->current_rooms, room);
+}
+
+static void ay_irc_send_chat_room_message(eb_chat_room *room, char *message)
+{
+	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
+
+	if (message)
+		irc_send_privmsg(room->room_name, message, ila->ia);
+
+	eb_chat_room_show_message( room, ila->ia->nick, message );
+}
+
+static void ay_irc_send_invite( eb_local_account * account, eb_chat_room * room,
 				char * user, const char * message)
 {
 	char buff[BUF_LEN];
-	signed int ret;
 	char *simple_user = strdup(user);
 	irc_local_account * ila = (irc_local_account *) room->local_user->protocol_local_account_data;
+
+	if (!room->local_user->connected)
+		return;
 
 	if (strstr(simple_user, "@"))
 		*(strstr(simple_user, "@")) = '\0';
 
-	if (*message) {
-		g_snprintf(buff, BUF_LEN, "PRIVMSG %s :%s\n", simple_user, message);
-			
-		ret = sendall(ila->fd, buff, strlen(buff));
-		if (ret == -1) irc_logout(room->local_user);
-	}
+	irc_send_invite(simple_user, room->room_name, message, ila->ia);
 
-	g_snprintf(buff, BUF_LEN, "INVITE %s :%s\n", simple_user, room->room_name);
-			
 	free(simple_user);
 	
-	ret = sendall(ila->fd, buff, strlen(buff));
-	if (ret == -1) irc_logout(room->local_user);
-		
 	if (*message) {
 		g_snprintf(buff, BUF_LEN, _(">>> Inviting %s [%s] <<<"), user, message);
 	} else {
@@ -1968,38 +1939,34 @@ static void irc_send_invite( eb_local_account * account, eb_chat_room * room,
 	}
 		
 	eb_chat_room_show_message( room, room->local_user->alias, buff);
-	return;
 }
 
-static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account, int is_public)
+
+static eb_chat_room *ay_irc_make_chat_room_window(char *name, eb_local_account *account, int is_public, int send_join)
 {
 	eb_chat_room * ecr;
-	char *chatroom_server = NULL;
+
+	int name_len = 0 ;
 	char *alpha = NULL;
-	char *channelname = g_new0(char, strlen(name)+100);
+	char *channelname = NULL;
+	
+	name_len = strlen(name)+100;
+
+	channelname = g_new0(char, name_len);
 
 	/* according to RFC2812, channels can be marked by #, &, + or !, not only the conventional #. */
 	if ((*name != '#') && (*name != '&') && (*name != '+') && (*name != '!')) {
 		strcpy(channelname, "#");
 	}
 
-	strncat(channelname, name, strlen(name)+100);
+	strncat(channelname, name, name_len);
 
-	if (strrchr(channelname, '@') != NULL)
+	if (strrchr(channelname, '@') == NULL && account->service_id == SERVICE_INFO.protocol_id)
 	{
-		chatroom_server = strrchr(channelname, '@') + 1;
-	}
-	else
-	{
-		if (account->service_id == SERVICE_INFO.protocol_id)
-		{
-			irc_local_account * ila = (irc_local_account *)account->protocol_local_account_data;
+		irc_local_account * ila = (irc_local_account *)account->protocol_local_account_data;
 
-			chatroom_server = strdup(ila->server);
-			strncat(channelname, "@", strlen(name)+100-strlen(channelname));
-			strncat(channelname, chatroom_server, strlen(name)+100-strlen(channelname));
-		} else 
-			return NULL;
+		strncat(channelname, "@", name_len-strlen(channelname));
+		strncat(channelname, ila->ia->connect_address, name_len-strlen(channelname));
 	}
 
 	g_strdown(channelname);
@@ -2008,7 +1975,7 @@ static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account
 	if( ecr )
 	{
 		g_free(channelname);
-		return NULL;
+		return ecr;
 	}
 
 	ecr = g_new0(eb_chat_room, 1);
@@ -2023,16 +1990,28 @@ static eb_chat_room * irc_make_chat_room(char * name, eb_local_account * account
 	ecr->connected = 0;
 	ecr->local_user = account;
 
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, send_join);
 
 	g_free(channelname);
+
 	return ecr;
 }
 
-static void irc_accept_invite( eb_local_account * account, void * invitation )
+
+static eb_chat_room * ay_irc_make_chat_room(char * name, eb_local_account * account, int is_public)
 {
-	eb_chat_room * ecr = irc_make_chat_room((char *) invitation, account, FALSE);
-	free(invitation);
+	return ay_irc_make_chat_room_window(name, account, is_public, TRUE);
+}
+
+
+static void ay_irc_accept_invite( eb_local_account * account, void * invitation )
+{
+	eb_chat_room * ecr = ay_irc_make_chat_room((char *) invitation, account, FALSE);
+	if(invitation) {
+		free(invitation);
+		invitation = NULL ;
+	}
+
 	if ( ecr )
 	{
 		//eb_join_chat_room(ecr);
@@ -2040,248 +2019,188 @@ static void irc_accept_invite( eb_local_account * account, void * invitation )
 	return;
 }
 
-static void irc_decline_invite( eb_local_account * account, void * invitation )
+static void ay_irc_decline_invite( eb_local_account * account, void * invitation )
 {
-	free(invitation);
+	if(invitation) {
+		free(invitation);
+		invitation = NULL;
+	}
+
 	return;
 }
 
 static void eb_irc_read_prefs_config(LList * values)
 {
+	char *c;
+
+	c = value_pair_get_value(values, "do_irc_debug");
+
+	if(c) {
+		do_irc_debug=atoi(c);
+		free(c);
+	}
+
 	return;
 }
 
 static LList * eb_irc_write_prefs_config()
 {
-	return (NULL);
+	LList * config = NULL;
+	char buffer[5];
+
+	sprintf(buffer, "%d", do_irc_debug);
+	config = value_pair_add(config, "do_irc_debug", buffer);
+
+	return config;
 }
 
-static LList * eb_irc_get_public_chatrooms(eb_local_account *ela)
+static void eb_irc_get_public_chatrooms(eb_local_account *ela, 
+		void (*public_chatroom_callback) (LList *list, void *data),
+		void *data )
 {
 	irc_local_account * ila = (irc_local_account *) ela->protocol_local_account_data;
 	
-	return l_list_copy(ila->channel_list);
+	ila->got_public_chatrooms = public_chatroom_callback;
+	ila->public_chatroom_callback_data = data;
+
+	irc_request_list(NULL, NULL, ila->ia);
 }
 
 
-/*
- * function: irc_replace_string_args
- * Minion function, utilized by irc_command_to_action()
- */
-int irc_replace_string_args(char* source, char **ptarget, const char* match,
-				const char* replacement)
+static void ay_got_motd(const char *motd, irc_message_prefix *prefix, irc_account *ia)
 {
-	char *last_matched, *replaced, *last_replaced;
-	int current_replaced_len, difference_len;
-	int match_len = strlen(match);
-	int replacement_len = strlen(replacement);
-	int source_len = strlen(source);
-	int replaced_count = 0;
+	eb_chat_room *ecr = NULL ;
+	char room_name[BUF_LEN] ;
+	char colorized_message[BUF_LEN] ;
+	eb_local_account *ela = (eb_local_account *)ia->data;
 
-	if ((NULL == match) || (NULL == replacement) || (match_len < 1)
-			|| (source_len < 1) )
-	{
-		return -1; /* Indicates nothing was done */
+	unsigned char *msg = strip_color((unsigned char *)motd);
+
+	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", ia->nick, ia->connect_address, ia->connect_address);
+
+	ecr = find_chat_room_by_id(room_name);
+
+	if(!ecr) {
+		ecr = ay_irc_make_chat_room_window(room_name, ela, FALSE, FALSE);
 	}
 
-	current_replaced_len = source_len;
-	difference_len = replacement_len - match_len;
+	g_snprintf(colorized_message, BUF_LEN, "<font color=\"#AA77AA\">%s</font>", msg);
 
-	last_matched = source; /* initialize lastMatch with source string */
+	eb_chat_room_show_3rdperson(ecr, colorized_message);
 
-	replaced = g_strdup(source);
-    
-	/* Loop through the string to make replacements,
-	 * as long as there's a match available */
-	while ((last_matched = strstr(last_matched, match)))
-   	{
-		last_replaced = replaced;
-		current_replaced_len += difference_len;
-		replaced = g_strndup(last_replaced, current_replaced_len);
-		g_free(last_replaced);
-
-		 strncpy(replaced, source, last_matched - source);
-		*(replaced + (last_matched - source) ) = '\0'; /* <= replaced length */
-		strcat(replaced, replacement);
-		last_matched += match_len;
-		strcat(replaced, last_matched);
-        
-		/* Keep track of how many replacements we're making */
-		++replaced_count;
-    	}
-
-	/* Don't leak memory ... */
-	if ((*ptarget) != NULL)
-	{
-		g_free(*ptarget);
-		*ptarget = NULL;
+	if(msg) {
+		free(msg);
+		msg = NULL;
 	}
-
-	/* Caller's responsibility to g_free() this, and set to NULL */
-	(*ptarget) = replaced;
-
-	/* Let the caller know how many replacements were made */
-	return replaced_count;
 }
 
 
-/*
- * Function: irc_command_to_action
- * Recognizes /-commands and replaces text for them in a given message... 
- * Arguments:
- *	message: source message
- *	out: output message buffer.
- *		Should've alrady been allocated memory by the calling function
- *	max_out_len: maximum length of output message buffer (out)
- *	target_name: target (Channel name if coming from irc_send_chat_room_message)
- */
+/* *************** *
+ * Error Responses *
+ * *************** */
 
-int irc_command_to_action(char* message, char* out, int max_out_len, char* target_name)
+
+static void ay_irc_nick_in_use(const char *nick, const char *message, 
+		irc_message_prefix *prefix, irc_account *ia)
 {
-	irc_command_action *irc_ca_iterator;
-	int command_matched = 0; /* 0 = no command matched, 1 = matched */
-	int command_length = 0; /* 0 if command_matched = 0 */
-	char *work_str; /* Temporary work-string used during calls to replace... */
-	/* replacement string holders */
-	char **args, *message_args, *args_1, *args_2, *args_2_all, *args_3_all;
+	char msg [ BUF_LEN ];
+	eb_local_account *ela = (eb_local_account *)ia->data;
 
-	/* if either of message or out is NULL, don't bother checking further.
-	 * Same goes for max_out_len being 0. */
-	if ((NULL == message) || (NULL == out) || (max_out_len == 0))
-	{
-		if (out != NULL)
-		{
-			out[0] = '\0';	
-		}
-		return -1;
-	}
+	strncpy(msg, nick, BUF_LEN - 1);
+	strncat(msg, ": ", BUF_LEN - 1 - strlen(msg));
+	strncat(msg, message, BUF_LEN - 1 - strlen(msg));
 
-	/* Initialize command_to_action iterator */
-	irc_ca_iterator = &irc_ca[0];
-
-	while (strcmp(irc_ca_iterator->command,IRC_END_COMMAND) != 0)
-	{
-		command_length = strlen(irc_ca_iterator->command);
-
-		if (g_strncasecmp((irc_ca_iterator->command), 
-					message, command_length-1) == 0) 
-		{
-			command_matched = 1;
-			strncpy(message, irc_ca_iterator->command, command_length-1);
-			break; /* break out of the loop. We found it. */
-		}
-
-		irc_ca_iterator++;
-	}
-
-	if (0 == command_matched)
-	{
-		command_length = 0;
-	}
-
-	/* %ARGS% is now (message + command_length) */
-	message_args = message + command_length;
-
-	args_1 = g_malloc0(1); /* first element after command */
-	args_2 = g_malloc0(1); /* second element */
-	args_2_all = g_malloc0(1); /* text after, and including second element */
-	args_3_all = g_malloc0(1); /* text after, and including third element */
-
-	if (strlen(message_args) > 0)  /* Use above values for empty %ARGS% */
-	{
-		/* To preserve multiple spaces between args, we'll extract
-		 * args_2_all, and args_3_all separately */
-		args = g_strsplit(message_args, " ", 2);
-		if (args && args[0])
-		{
-			g_free(args_1);		
-			args_1 = g_strdup(args[0]);
-			if (args[1])
-			{	
-				g_free(args_2_all);	
-				args_2_all = g_strdup(args[1]);
-			}
-		}
-
-		g_strfreev(args); /* Release whatever g_strsplit allocated for us */
-
-		args = g_strsplit(message_args, " ", 3);
- 
-		if (args && args[1])
-		{
-			g_free(args_2);
-			args_2 = g_strdup(args[1]);
- 
-			if (args[2])
-			{
-				g_free(args_3_all);
-				args_3_all = g_strdup(args[2]);
-			}
-		}
- 
-		g_strfreev(args); /* Again, release whatever g_strsplit allocated */
-		args = NULL;
-	} 
-
-	work_str = g_strdup(irc_ca_iterator->action); 
-
-	/* Replacement */
-	irc_replace_string_args(work_str, &work_str, "%TARGET%", target_name);
-	irc_replace_string_args(work_str, &work_str, "%ARGS%", message_args);
-	irc_replace_string_args(work_str, &work_str, "%ARGS1%", args_1);
-	irc_replace_string_args(work_str, &work_str, "%ARGS2%", args_2);
-	irc_replace_string_args(work_str, &work_str, "%ARGS2_ALL%", args_2_all);
-	irc_replace_string_args(work_str, &work_str, "%ARGS3_ALL%", args_3_all);
-
-	strncpy(out, work_str, max_out_len);
-	out[max_out_len - 1] = '\0';
-
-	g_free(args_1);
-	g_free(args_2);
-	g_free(args_2_all);
-	g_free(args_3_all);
-
-	g_free(work_str);
-	work_str = NULL;
-
-	return 0;
+	ay_irc_logout(ela);
+	ay_do_error(_("Nickname in Use"), msg);
 }
 
 
-struct service_callbacks * query_callbacks()
+static void ay_irc_no_such_server(const char *server, const char *message, 
+		irc_message_prefix *prefix, irc_account *ia)
+{
+	char msg [ BUF_LEN ];
+
+	strncpy(msg, server, BUF_LEN - 1);
+	strncat(msg, ": ", BUF_LEN - 1 - strlen(msg));
+	strncat(msg, message, BUF_LEN - 1 - strlen(msg));
+
+	ay_do_warning(_("No such Server"), msg);
+}
+
+
+static void ay_irc_no_such_channel(const char *channel, const char *message, 
+		irc_message_prefix *prefix, irc_account *ia)
+{
+	char msg [ BUF_LEN ];
+
+	strncpy(msg, channel, BUF_LEN - 1);
+	strncat(msg, ": ", BUF_LEN - 1 - strlen(msg));
+	strncat(msg, message, BUF_LEN - 1 - strlen(msg));
+
+	ay_do_warning(_("No such Channel"), msg);
+}
+
+
+static void ay_irc_no_such_nick(const char *nick, const char *message, 
+		irc_message_prefix *prefix, irc_account *ia)
+{
+	char msg [ BUF_LEN ];
+
+	strncpy(msg, nick, BUF_LEN - 1);
+	strncat(msg, ": ", BUF_LEN - 1 - strlen(msg));
+	strncat(msg, message, BUF_LEN - 1 - strlen(msg));
+
+	ay_do_warning(_("No such Nickname"), msg);
+}
+
+
+static void ay_irc_password_mismatch(const char *message, irc_message_prefix *prefix, irc_account *ia)
+{
+	eb_local_account *ela = (eb_local_account *)ia->data;
+
+	ay_irc_logout(ela);
+	ay_do_error(_("Nickname in Use"), message);
+}
+
+
+/* ********************************************** *
+ * Attach Service Callbacks and IRC Callbacks     *
+ * ********************************************** */
+
+struct service_callbacks * query_callbacks(void)
 {
 	struct service_callbacks * sc;
 
 	sc = g_new0( struct service_callbacks, 1 );
-	/* Done */ sc->query_connected = irc_query_connected;
-	/* Done */ sc->login = irc_login;
-	/* Done */ sc->logout = irc_logout;
-	/* Done */ sc->send_im = irc_send_im;
-	/* Done */ sc->read_local_account_config = irc_read_local_config;
-	/* Done */ sc->write_local_config = irc_write_local_config;
-	/* Done */ sc->read_account_config = irc_read_config;
-	/* Done */ sc->get_states = irc_get_states;
-	/* Done */ sc->get_current_state = irc_get_current_state;
-	/* Done */ sc->set_current_state = irc_set_current_state;
-	/* Done */ sc->check_login = irc_check_login;
-	/* Done */ sc->add_user = irc_add_user;
-	/* Done */ sc->del_user = irc_del_user;
-	/* Done */ sc->is_suitable = irc_is_suitable;
-	/* Done */ sc->new_account = irc_new_account;
-	/* Done */ sc->get_status_string = irc_get_status_string;
-	/* Done */ sc->get_status_pixmap = irc_get_status_pixmap;
-	/* Done */ sc->set_idle = irc_set_idle;
-	/* Done */ sc->set_away = irc_set_away;
-	sc->send_file = irc_send_file;
-	sc->get_info = irc_get_info;
+	/* Done */ sc->query_connected = ay_irc_query_connected;
+	/* Done */ sc->login = ay_irc_login;
+	/* Done */ sc->logout = ay_irc_logout;
+	/* Done */ sc->send_im = ay_irc_send_im;
+	/* Done */ sc->read_local_account_config = ay_irc_read_local_config;
+	/* Done */ sc->write_local_config = ay_irc_write_local_config;
+	/* Done */ sc->read_account_config = ay_irc_read_config;
+	/* Done */ sc->get_states = ay_irc_get_states;
+	/* Done */ sc->get_current_state = ay_irc_get_current_state;
+	/* Done */ sc->set_current_state = ay_irc_set_current_state;
+	/* Done */ sc->check_login = ay_irc_check_login;
+	/* Done */ sc->add_user = ay_irc_add_user;
+	/* Done */ sc->del_user = ay_irc_del_user;
+	/* Done */ sc->is_suitable = ay_irc_is_suitable;
+	/* Done */ sc->new_account = ay_irc_new_account;
+	/* Done */ sc->get_status_string = ay_irc_get_status_string;
+	/* Done */ sc->get_status_pixmap = ay_irc_get_status_pixmap;
+	/* Done */ sc->set_idle = ay_irc_set_idle;
+	/* Done */ sc->set_away = ay_irc_set_away;
+	sc->send_file = ay_irc_send_file;
+	sc->get_info = ay_irc_get_info;
 	
-	/* Done */ sc->make_chat_room = irc_make_chat_room;
-	/* Done */ sc->send_chat_room_message = irc_send_chat_room_message;
-	/* Done */ sc->join_chat_room = irc_join_chat_room;
-	/* Done */ sc->leave_chat_room = irc_leave_chat_room;
-	/* Done */ sc->send_invite = irc_send_invite;
-	/* Done */ sc->accept_invite = irc_accept_invite;
-	/* Done */ sc->decline_invite = irc_decline_invite;
+	/* Done */ sc->make_chat_room = ay_irc_make_chat_room;
+	/* Done */ sc->send_chat_room_message = ay_irc_send_chat_room_message;
+	/* Done */ sc->join_chat_room = ay_irc_join_chat_room;
+	/* Done */ sc->leave_chat_room = ay_irc_leave_chat_room;
+	/* Done */ sc->send_invite = ay_irc_send_invite;
+	/* Done */ sc->accept_invite = ay_irc_accept_invite;
+	/* Done */ sc->decline_invite = ay_irc_decline_invite;
 	
 	/* Done */ sc->read_prefs_config = eb_irc_read_prefs_config;
 	/* Done */ sc->write_prefs_config = eb_irc_write_prefs_config;
@@ -2292,5 +2211,82 @@ struct service_callbacks * query_callbacks()
 	sc->get_public_chatrooms = eb_irc_get_public_chatrooms;
 	
 	return sc;
+}
+
+
+static irc_callbacks *ay_irc_map_callbacks( void )
+{
+	irc_callbacks *cb = g_new0(irc_callbacks, 1);
+
+	/* Only these are implemented so far. More to come... */
+	cb->got_welcome      		= ay_irc_got_welcome ;
+	cb->incoming_notice		= ay_irc_got_notice ;
+	cb->buddy_quit			= ay_buddy_quit ;
+	cb->buddy_join			= ay_buddy_join ;
+	cb->buddy_part			= ay_buddy_part ;
+	cb->got_invite			= ay_got_invite ;
+	cb->nick_change			= ay_buddy_nick_change ;
+	cb->got_privmsg			= ay_irc_got_privmsg ;
+	cb->got_topic			= ay_irc_got_topic ;
+	cb->got_myinfo       		= ay_irc_got_myinfo ;
+	cb->got_away         		= ay_got_away ;
+	cb->got_whoisidle		= ay_got_whoisidle ;
+	cb->got_whoisuser		= ay_got_whoisuser ;
+	cb->got_whoisserver		= ay_got_whoisserver ;
+	cb->got_channel_list		= ay_got_channel_list ;
+	cb->got_channel_listend		= ay_got_channel_listend ;
+	cb->got_namelist		= ay_got_namereply ;
+	cb->irc_error			= ay_irc_error ;
+	cb->irc_warning			= ay_irc_warning ;
+	cb->client_quit			= ay_irc_client_quit ;
+	cb->got_motd         		= ay_got_motd ;
+                                
+	/* Errors */
+	cb->irc_no_such_nick		= ay_irc_no_such_nick ;
+	cb->irc_no_such_server		= ay_irc_no_such_server ;
+	cb->irc_no_such_channel		= ay_irc_no_such_channel ;
+	cb->irc_nick_in_use		= ay_irc_nick_in_use ;
+	cb->irc_password_mismatch	= ay_irc_password_mismatch ;
+/*	cb->irc_cant_sendto_chnl	= ay_irc_cant_sendto_chnl ;
+	cb->irc_was_no_such_nick	= ay_irc_was_no_such_nick ;
+	cb->irc_too_many_chnl		= ay_irc_too_many_chnl ;
+	cb->irc_too_many_targets	= ay_irc_too_many_targets ;
+	cb->irc_no_origin		= ay_irc_no_origin ;
+	cb->irc_no_recipient		= ay_irc_no_recipient ;
+	cb->irc_no_text_to_send		= ay_irc_no_text_to_send ;
+	cb->irc_no_toplevel		= ay_irc_no_toplevel ;
+	cb->irc_wild_toplevel		= ay_irc_wild_toplevel ;
+	cb->irc_unknown_cmd		= ay_irc_unknown_cmd ;
+	cb->irc_no_motd			= ay_irc_no_motd ;
+	cb->irc_no_admininfo		= ay_irc_no_admininfo ;
+	cb->irc_file_error		= ay_irc_file_error ;
+	cb->irc_no_nick_given		= ay_irc_no_nick_given ;
+	cb->irc_erroneous_nick		= ay_irc_erroneous_nick ;
+	cb->irc_nick_collision		= ay_irc_nick_collision ;
+	cb->irc_user_not_in_chnl	= ay_irc_user_not_in_chnl ;
+	cb->irc_not_on_chnl		= ay_irc_not_on_chnl ;
+	cb->irc_on_chnl			= ay_irc_on_chnl ;
+	cb->irc_nologin			= ay_irc_nologin ;
+	cb->irc_summon_disabled		= ay_irc_summon_disabled ;
+	cb->irc_user_disabled		= ay_irc_user_disabled ;
+	cb->irc_not_registered		= ay_irc_not_registered ;
+	cb->irc_need_more_params	= ay_irc_need_more_params ;
+	cb->irc_already_registered	= ay_irc_already_registered ;
+	cb->irc_no_perm_for_host	= ay_irc_no_perm_for_host ;
+	cb->irc_banned			= ay_irc_banned ;
+	cb->irc_chnl_key_set		= ay_irc_chnl_key_set ;
+	cb->irc_channel_full		= ay_irc_channel_full ;
+	cb->irc_unknown_mode		= ay_irc_unknown_mode ;
+	cb->irc_invite_only		= ay_irc_invite_only ;
+	cb->irc_banned_from_chnl	= ay_irc_banned_from_chnl ;
+	cb->irc_bad_chnl_key		= ay_irc_bad_chnl_key ;
+	cb->irc_no_privileges		= ay_irc_no_privileges ;
+	cb->irc_chnlop_privs_needed	= ay_irc_chnlop_privs_needed ;
+	cb->irc_cant_kill_server	= ay_irc_cant_kill_server ;
+	cb->irc_no_o_per_host		= ay_irc_no_o_per_host ;
+	cb->irc_mode_unknown		= ay_irc_mode_unknown ;
+	cb->irc_user_dont_match		= ay_irc_user_dont_match ;*/
+
+	return cb ;
 }
 

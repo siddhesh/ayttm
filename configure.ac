@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=45
+RELEASE=64
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -76,7 +76,7 @@ LIBS="$LIBS -L/usr/local/lib"
 
 # Checks for libraries.
 AC_CHECK_LIB([audiofile], [_af_ulaw2linear])
-AC_CHECK_LIB([ltdl], [lt_dlopen])
+AC_CHECK_LIB([ltdl], [lt_dlopen],,AC_MSG_ERROR([Could not find Libtool Libraries]))
 
 # Checks for header files.
 AC_PATH_XTRA
@@ -541,6 +541,7 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  modules/icq/libicq/Makefile
                  modules/importers/Makefile
                  modules/irc/Makefile
+		 modules/irc/libirc/Makefile
 		 modules/smtp/Makefile
                  modules/livejournal/Makefile
                  modules/jabber/Makefile

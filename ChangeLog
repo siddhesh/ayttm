@@ -1,3 +1,143 @@
+Fri Aug 01 2008 22:05 UTC [siddheshp]   0.5.0-64
+- ChangeLog, configure.ac, modules/irc/irc.c:
+* A buddy leaving a chatroom doesn't mean that he has logged off.
+* Store server-truncated nickname only for exchanges with the server, not for
+our records
+
+Thu Jul 31 2008 20:17 UTC [siddheshp]   0.5.0-63
+- ChangeLog, configure.ac, src/edit_local_accounts.c:
+NULL check on service type to prevent crash on account creation. NOW #2021862
+is closed.
+
+Sun Jul 27 2008 16:10 UTC [siddheshp]   0.5.0-62
+- ChangeLog, src/gtk/html_text_buffer.c, configure.ac:
+Fixed scrolling behaviour when long text is received.
+
+Sat Jul 26 2008 08:40 UTC [siddheshp]   0.5.0-61
+- ChangeLog, configure.ac, src/gtk/html_text_buffer.c:
+Finally, the chat window won't scroll back on new messages if you've scrolled
+up to see the previous messages.
+
+Sat Jul 26 2008 06:25 UTC [siddheshp]   0.5.0-60
+- ChangeLog, configure.ac,  modules/irc/irc.c,  modules/irc/libirc/libirc.h:
+* Recognize nickname that the server recognizes you as -- servers may truncate
+your nickname to a maxlen. Freenode limits nickname length to 16 characters
+* */me hits /me on the head* My nickname can be lower case as well as uppercase.
+* Comparing nickname to a blank string in PART. Should be assigned to the
+notices window.
+
+Sun Jul 20 2008 18:55 UTC [siddheshp]   0.5.0-59
+- ChangeLog, configure.ac, modules/irc/irc.c, /src/prefs.c:
+* Buddy Management changes: Set buddy status if he/she appears in any chatroom
+or even messages us.
+* Allow offline personal messaging so that we may 'discover' if our buddy is
+online by simply messaging him/her.
+* Fixed crash when a user adds an invalid account when the protocol module is
+unloaded and then tries to load the protocol module and subsequently tries to
+connect... Phew! In short, it closes #2021862 on SF.Net.
+
+Mon Jul 14 2008 20:35 UTC [siddheshp]   0.5.0-58
+- ChangeLog, configure.ac, modules/irc/irc.c,
+modules/irc/libirc/irc_message.c:
+* Allow /j command as a shortcut to /join
+* Fixed behaviour after nickname change. Change own nickname in our local
+account so that we can receive messages sent to our new nickname. Thanks
+to 'loot' of puppy linux for reporting this.
+
+Sat Jul 12 2008 18:55 UTC [siddheshp]   0.5.0-57
+- ChangeLog, configure.ac, src/util.c, src/gtk/html_text_buffer.c:
+* Allow mixed case URLs. This is important for URLs that contain
+case-sensitive GET data.
+* Replaced the standard strcmp with glib string compare functions.
+
+Sat Jul 12 2008 05:55 UTC [siddheshp]   0.5.0-56
+- ChangeLog, configure.ac, modules/msn2/libmsn2/msn_core:
+Fixed crash when user cancels msn connect request just as the server
+certificate is being authenticated.
+
+Tue Jul 08 2008 19:00 UTC [siddheshp]   0.5.0-55
+- ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/irc.h:
+* Show the MOTD that comes on login in the notices window
+* Somebody better change the topic on #ayttm because ayttm now recognizes
+topics :)
+
+Sun Jul 06 2008 19:09 UTC [siddheshp]   0.5.0-54
+- ChangeLog, configure.ac, modules/irc/irc.c, src/info_window.c:
+* Info window crash fix. A bug left behind in the gtk2 port where we missed
+porting a GtkEditable reference to GtkTextView/Buffer.
+* UTF-8 validation in the info_window. TDOD, we need to add this before all
+text appends.
+
+Sun Jul 06 2008 13:25 UTC [siddheshp]   0.5.0-53
+- ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/Attic/irc.h,
+modules/irc/libirc/Attic/irc_message.c, modules/irc/libirc/Attic/libirc.h:
+* Fixed buddy management for IRC
+* PRIVMSGs with individual members with /msg command
+* Fixed /whois crash
+* Added handlers for some errors
+
+Thu Jun 19 2008 02:15 UTC [siddheshp]   0.5.0-52
+- ChangeLog, configure.ac, src/offline_queue_mgmt.c:
+Trying to fclose a potentially NULL file pointer.
+
+Wed Jun 18 2008 20:10 UTC [siddheshp]   0.5.0-51
+- ChangeLog, configure.ac, src/offline_queue_mgmt.c:
+We don't need to return from contact_mgmt_flush if contact_actions_queue
+does not exist. We can proceed with creating a blank contact_actions_queue and
+also auto-starting chatrooms.
+
+Tue Jun 17 2008 19:45 UTC [siddheshp]   0.5.0-50
+- ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/irc.h,
+modules/irc/libirc/irc_message.c, modules/irc/libirc/libirc.h,
+src/chat_room.c, src/service.h:
+* Changed the public chatroom list download interface in service.h
+* Implemented channel list download.
+* irc_warning to show error messages and not log off. irc_error causes a
+logoff
+* Reject malformed messages sent by server. 
+* ChangeLog seemed to think it was Sunday for the past three days ;)
+
+Mon Jun 16 2008 15:20 UTC [siddheshp]   0.5.0-49
+- ChangeLog, configure.ac, modules/irc/irc.c:
+Ensure that ay_irc_make_chatroom_window returns a chatroom window.
+
+Sat Jun 14 2008 10:55 UTC [siddheshp]   0.5.0-48
+- ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c,
+modules/aim-toc/aim-toc.c, modules/icq/icq.c, modules/icq-toc/icq-toc.c,
+modules/irc/irc.c, modules/irc/irc.h, modules/irc/libirc/irc_message.c,
+modules/irc/libirc/libirc.c, modules/irc/libirc/Attic/libirc.h,
+modules/jabber/jabber.c, modules/msn2/msn.C, modules/workwizu/workwizu.c,
+modules/yahoo2/yahoo.c, po/de.po, po/en_GB.po, po/es.po, po/fr.po, po/hi.po,
+po/nl.po, po/pt_BR.po, po/sv.po, src/chat_room.c, src/chat_room.h:
+* buffer overrun protection - replace strcat, strcpy, etc with strncat,
+strncpy, etc respectively
+* Allow creation of a chatroom window without joining a room
+* Allow /commands like /me, /join, /part, /leave, /quit, /nick
+
+Sat Jun 14 2008 05:24 UTC [siddheshp]   0.5.0-47
+- ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/libirc/libirc.c,
+src/status.c:
+* Die if libltdl is not found during ./configure
+* Don't supply blank passwords during login
+* Reduce contact_mgmt_flush timeout by 4 seconds. 5 seconds seems too long at
+times
+* Chat room autoconnect is working now. We were not setting the
+ela->connecting and ela->connected flags during our login sequence. 
+
+Sun Jun 08 2008 21:30 UTC [siddheshp]   0.5.0-46
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
+modules/irc/libirc/libirc.h, modules/irc/libirc/libirc.c,
+modules/irc/libirc/irc_replies.h, modules/irc/libirc/irc_message.c,
+modules/irc/libirc/ctcp.h, modules/irc/libirc/ctcp.c, modules/irc/irc.c:
+* Fixed memory leak in CTCP decode.
+* Yahoo stubs for yahoologout and yahooerror from HEAD
+* Added server-to-server ERROR message into IRC command list. Freenode was
+sending me that on some connect timeouts -- it's not supposed to, but doesn't
+hurt to handle it.
+* Freeing some more memory (param list, CTCP extended data list)
+* Added some error reply handlers
+* Replaced NOTICE popups with a chat room window.
+
 Mon Jun 04 2008 17:51 UTC [siddheshp]	0.5.0-45
 - ChangeLog:
 Tagged Release v0.5.0-45
@@ -14,6 +154,18 @@ Mon Jun 02 2008 19:35 UTC [siddheshp]	0.5.0-43
 - ChangeLog, configure.ac:
 DOH! did it again. libirc doesn't belong here yet... strange how I can do
 these things without even being drunk...
+
+Mon Jun 02 2008 19:10 UTC [siddheshp]	0.5.0-42
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c, modules/irc/Makefile.am, 
+modules/irc/irc.c, modules/jabber/jabber.c, modules/msn2/libmsn2/msn_core.C,
+modules/irc/irc.h, modules/irc/libirc/Makefile.am, modules/irc/libirc/ctcp.c,
+modules/irc/libirc/ctcp.h, modules/irc/libirc/irc_message.c,
+modules/irc/libirc/irc_replies.h, modules/irc/libirc/libirc.c,
+modules/irc/libirc/libirc.h:
+* bluesmoon - ignore error code 208 in msn
+* bluesmoon - jabber error does not lead to disconnection, so we're better    
+off showing it as a warning than as an error
+* Whole new IRC Library - WARNING! this one loves to crash, so be careful...
 
 Mon Jun 02 2008 18:00 UTC [siddheshp]	0.5.0-41
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c:

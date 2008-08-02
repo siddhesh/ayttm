@@ -922,7 +922,7 @@ static void eb_status( GtkCheckMenuItem * widget, gpointer stats )
 	if (s->ela->mgmt_flush_tag == 0 
 	&& (s->ela->connecting || s->ela->connected)) {
 		s->ela->mgmt_flush_tag = 
-			eb_timeout_add(5000 + (1000*s->ela->service_id),
+			eb_timeout_add(1000 + (1000*s->ela->service_id),
 				 (GtkFunction)contact_mgmt_flush, (gpointer)s->ela);
 	}
 	if (s->ela->mgmt_flush_tag 

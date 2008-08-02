@@ -84,6 +84,10 @@ void group_mgmt_queue_add(const eb_local_account *ela, const char *old_group, in
 	fclose(fp);
 }
 
+/* 
+ * Sync contact related changes, i.e. ignore contact, move to different group, rename, etc. 
+ * with the service 
+ */
 int contact_mgmt_flush(eb_local_account *ela)
 {
 	FILE *queue, *temp;
@@ -101,7 +105,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 		eb_debug(DBG_CORE,"disconnected on %s (cancelling flush)\n",ela->handle);
 		return 0;
 	}
-			
+	
 	eb_debug(DBG_CORE,"connected on %s (flushing)\n",ela->handle);
 
 	/* flush groups, too */
@@ -112,8 +116,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 				G_DIR_SEPARATOR);
 	
 	queue = fopen(queue_name, "r");
-	if (!queue)
-		return 0;
+
 	snprintf(temp_name, NAME_MAX, "%s%ccontact_actions_queue.new", 
 				config_dir, 
 				G_DIR_SEPARATOR);
@@ -125,7 +128,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 		return 0;
 	}
 	
-	while( fgets(buff, sizeof(buff), queue)  != NULL )
+	while( queue && fgets(buff, sizeof(buff), queue)  != NULL )
 	{		
 		char buff_backup[NAME_MAX];
 		strncpy(buff_backup, buff, NAME_MAX);
@@ -196,7 +199,10 @@ int contact_mgmt_flush(eb_local_account *ela)
 	}
 	start_auto_chatrooms(ela);
 	fclose (temp);
-	fclose (queue);
+
+	if(queue)
+		fclose (queue);
+
 	rename (temp_name, queue_name);
 	return 0;
 }

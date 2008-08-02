@@ -292,7 +292,7 @@ static GString * get_next_token(char * input)
 			if( input[i] != '/' )
 				continue;
 			g_string_append_c(string, input[++i]);
-			if( tolower(input[i]) != 'a' )
+			if( input[i] != 'a' && input[i] != 'A' )
 				continue;
 			g_string_append_c(string, input[++i]);
 			break;

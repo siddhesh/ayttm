@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.99 $",
-	"$Date: 2008/06/04 04:48:18 $",
+	"$Revision: 1.100 $",
+	"$Date: 2008/08/02 06:13:12 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1305,7 +1305,7 @@ static void eb_yahoo_accept_conference(gpointer data, int result)
 
 		chat_room->local_user = ela;
 
-		eb_join_chat_room(chat_room);
+		eb_join_chat_room(chat_room, TRUE);
 		eb_chat_room_buddy_arrive(chat_room, 
 				(ea?ea->account_contact->nick:ycrd->host), 
 				ycrd->host);
@@ -1364,7 +1364,7 @@ static void eb_yahoo_accept_invite(eb_local_account *ela, void * data)
 
 	chat_room->local_user = ela;
 
-	eb_join_chat_room(chat_room);
+	eb_join_chat_room(chat_room, TRUE);
 /*	eb_chat_room_buddy_arrive(chat_room, 
 			(ea?ea->account_contact->nick:ycrd->host), 
 			ycrd->host);
@@ -1576,7 +1576,7 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela,
 	ycrd->members = members;
 	ycrd->connected = FALSE;
 	
-	eb_join_chat_room(ecr);
+	eb_join_chat_room(ecr, TRUE);
 	eb_chat_room_buddy_arrive(ecr, ela->alias, ylad->act_id);
 	return ecr;
 }

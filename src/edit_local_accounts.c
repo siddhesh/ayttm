@@ -238,7 +238,10 @@ static char *check_login_validity(const gchar *text[])
 	LList *l = services;
 
 	if (text[USER_NAME] == NULL || strlen(text[USER_NAME]) == 0)
-		return strdup(_("You have to enter an account."));
+		return strdup(_("Please enter an account name."));
+
+	if (text[SERVICE_TYPE] == NULL || strlen(text[SERVICE_TYPE]) == 0)
+		return strdup(_("Please select an account type."));
 
 	while (l) {
 		if (!strcmp(l->data, text[SERVICE_TYPE]))
@@ -342,7 +345,7 @@ static void add_callback(GtkWidget * widget, gpointer data)
 	error_message = check_login_validity(text);
 	if (error_message) {
 		char *buf = g_strdup_printf(_("This account is not a valid %s account: \n\n %s"), 
-				    text[SERVICE_TYPE], error_message);
+				    (text[SERVICE_TYPE]?text[SERVICE_TYPE]:""), error_message);
 		g_free(error_message);
 		ay_do_error( _("Invalid Account"), buf );
 		g_free(buf);
