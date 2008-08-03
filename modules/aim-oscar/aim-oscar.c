@@ -92,8 +92,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.24 $",
-	"$Date: 2008/08/03 16:04:55 $",
+	"$Revision: 1.25 $",
+	"$Date: 2008/08/03 20:26:46 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -101,7 +101,7 @@ PLUGIN_INFO plugin_info =
 	NULL
 };
 
-struct service SERVICE_INFO = { "AIM/ICQ", -1, SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_GROUPCHAT , NULL };
+struct service SERVICE_INFO = { "AIM-ICQ", -1, SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_GROUPCHAT , NULL };
 /* End Module Exports */
 
 static char *ay_aim_get_color(void) { static char color[]="#000088"; return color; }

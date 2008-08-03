@@ -1,3 +1,8 @@
+Sun Aug 03 2008 20:25 UTC [siddheshp]   0.5.0-67
+- ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c:
+Changed the Service Name from AIM/ICQ to AIM-ICQ. The / seems to confuse the
+parser.
+
 Sun Aug 03 2008 16:00 UTC [siddheshp]   0.5.0-66
 - ChangeLog, configure.ac, pixmaps/smileys.png, pixmaps/smileys.xcf,
 src/ayttm_tray.c, modules/aim-oscar/aim-oscar.c:
