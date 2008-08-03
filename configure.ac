@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=65
+RELEASE=66
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -337,8 +337,8 @@ EB_LIBS="$EB_LIBS $X_LIBS"
 # Begin Optional Modules
 ###########################################################################
 
-AC_ARG_ENABLE(oscar, AC_HELP_STRING([--enable-oscar],
-		[include oscar service]))
+AC_ARG_ENABLE(oscar, AC_HELP_STRING([--disable-oscar],
+		[exclude oscar service]))
 AC_ARG_ENABLE(workwizu, AC_HELP_STRING([--enable-workwizu],
 		[include workwizu service]))
 AC_ARG_ENABLE(broken_icq, AC_HELP_STRING([--enable-broken-icq],
@@ -349,10 +349,10 @@ AC_ARG_ENABLE(lj, AC_HELP_STRING([--enable-lj],
 		[include livejournal service]))
 AC_ARG_ENABLE(aycryption, AC_HELP_STRING([--disable-aycryption],
  		[exclude encryption utility]))
-AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--disable-aim-toc],
-		[exclude aim-toc service]))
-AC_ARG_ENABLE(icq_toc, AC_HELP_STRING([--disable-icq-toc],
-		[exclude icq-toc service]))
+AC_ARG_ENABLE(aim_toc, AC_HELP_STRING([--enable-aim-toc],
+		[include aim-toc service]))
+AC_ARG_ENABLE(icq_toc, AC_HELP_STRING([--enable-icq-toc],
+		[include icq-toc service]))
 AC_ARG_ENABLE(icq, AC_HELP_STRING([--disable-icq],
 		[exclude icq service]))
 AC_ARG_ENABLE(irc, AC_HELP_STRING([--disable-irc],
@@ -367,7 +367,7 @@ AC_ARG_ENABLE(yahoo, AC_HELP_STRING([--disable-yahoo],
 OPTIONAL_PLUG_DIR=""
 DEBUG_LIBMSN=""
 
-if test "$enable_oscar" = yes; then
+if test "$enable_oscar" != no; then
  	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aim-oscar"
 fi
 if test "$enable_msn" != no; then
@@ -404,10 +404,10 @@ fi
 if test "$enable_lj" = yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR livejournal"
 fi
-if test "$enable_aim_toc" != no; then
+if test "$enable_aim_toc" = yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR aim-toc"
 fi
-if test "$enable_icq_toc" != no; then
+if test "$enable_icq_toc" = yes; then
 	OPTIONAL_PLUG_DIR="$OPTIONAL_PLUG_DIR icq-toc"
 fi
 if test "$enable_aycryption" != no; then

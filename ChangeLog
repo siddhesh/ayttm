@@ -1,3 +1,10 @@
+Sun Aug 03 2008 16:00 UTC [siddheshp]   0.5.0-66
+- ChangeLog, configure.ac, pixmaps/smileys.png, pixmaps/smileys.xcf,
+src/ayttm_tray.c, modules/aim-oscar/aim-oscar.c:
+* Disabled aim-toc and icq-toc modules by default and enabled aim-oscar.
+* Made smiley's eyes a little bigger 8)
+* Updated protocol display name in aim-oscar to AIM/ICQ instead of AIM-oscar.
+
 Sat Aug 02 2008 21:00 UTC [siddheshp]   0.5.0-65
 - ChangeLog, configure.ac, src/main.c, src/icons.c, src/icons.h,
 src/Makefile.am, pixmaps/Makefile.am, pixmaps/buddy.png, pixmaps/buddy.xcf,

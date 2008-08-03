@@ -114,7 +114,7 @@ void build_popup_menu()
 	APPEND_MENU_ITEM (sign_off_menu_item, N_("Sign o_ff All"), 
 			  GTK_STOCK_DISCONNECT, G_CALLBACK(eb_sign_off_all));
 	APPEND_MENU_ITEM (set_away_menu_item, N_("Set as _away"), 
-			  GTK_STOCK_REMOVE, G_CALLBACK(show_away_choicewindow));
+			  "ayttm_away", G_CALLBACK(show_away_choicewindow));
 	APPEND_MENU_ITEM (prefs_menu_item, N_("_Preferences"), 
 			  GTK_STOCK_PREFERENCES, G_CALLBACK(build_prefs_callback));
 	APPEND_MENU_ITEM (separator_menu_item, NULL, 
