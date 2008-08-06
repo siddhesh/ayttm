@@ -1,3 +1,8 @@
+Wed Aug 06 2008 03:46 UTC [siddheshp]   0.5.0-68
+- ChangeLog, configure.ac, src/browser.c, modules/Makefile.am:
+* Removed workwizu from SUBDIRS
+* Fixed double free() when using an alternate browser. George is on a roll :)
+
 Sun Aug 03 2008 20:25 UTC [siddheshp]   0.5.0-67
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c:
 Changed the Service Name from AIM/ICQ to AIM-ICQ. The / seems to confuse the

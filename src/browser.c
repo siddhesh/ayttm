@@ -63,6 +63,8 @@ void open_url(void *w, char *url) {
 	char *url_pos = NULL;
 	char esc_url[1024];
 	int i=0,j=1;
+
+	int free_browser = 0 ;
 	
 	if (!strncmp("log://", url, 6))
 	{
@@ -101,6 +103,8 @@ void open_url(void *w, char *url) {
 		browser = (char *) malloc(strlen(DEFAULT_WWW_BROWSER)+4);
 		strcpy(browser, DEFAULT_WWW_BROWSER);
 		strncat(browser, " %s", 3);
+
+		free_browser = 1 ;
 	}
 	url_pos = strstr(browser, "%s");
 	/*
@@ -124,7 +128,7 @@ void open_url(void *w, char *url) {
 	eb_debug(DBG_CORE, "launching %s\n", command);
 	system(command);
 
-	if(browser)
+	if(free_browser && browser)
 		free(browser);
 }
 
