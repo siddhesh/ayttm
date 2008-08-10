@@ -74,6 +74,7 @@
 			 gtk_widget_grab_focus(x2->entry); \
 }
 
+
 LList * chat_rooms = NULL;
 
 static void get_contacts( eb_chat_room * room );
@@ -240,10 +241,11 @@ void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num)
 	for (w = chat_rooms; w; w = w->next) {
 		eb_chat_room *cr = (eb_chat_room *)w->data;
 		if (gtk_notebook_page_num(GTK_NOTEBOOK(notebook), cr->notebook_child) == page_num) {
-			ENTRY_FOCUS(cr);
 			printf("crnotebook %p child %p \n", cr->notebook, cr->notebook_child);
 			set_tab_normal(cr);
 			eb_chat_room_update_window_title(cr, FALSE);
+
+			ENTRY_FOCUS(cr);
 
 			return;
 		}
@@ -1498,10 +1500,10 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	char      * room_title = NULL;
-	GtkWidget *chat_frame;
-	GtkWidget *entry_frame;
 	GtkWidget *scrollwindow2;
 	
+	GList *focus_chain = NULL ;
+
 	/*if we are already here, just leave*/
 	if(chat_room->connected)
 		return;
@@ -1515,12 +1517,6 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	vbox = gtk_vbox_new(FALSE, 1);
 	hbox = gtk_hpaned_new();
 
-	/* The Textviews want beautiful borders after all... */
-	chat_frame = gtk_frame_new(NULL);
-	entry_frame = gtk_frame_new(NULL);
-	gtk_frame_set_shadow_type(GTK_FRAME(chat_frame), GTK_SHADOW_IN);
-	gtk_frame_set_shadow_type(GTK_FRAME(entry_frame), GTK_SHADOW_IN);
-
 	chat_room->fellows_model = gtk_list_store_new(1, G_TYPE_STRING);
 	chat_room->fellows_widget = gtk_tree_view_new_with_model(GTK_TREE_MODEL(chat_room->fellows_model));
 
@@ -1530,13 +1526,14 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 
 	gtk_widget_set_size_request(chat_room->fellows_widget, 100, 20 );
 
+	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(scrollwindow), GTK_SHADOW_ETCHED_IN ) ;
+
 	chat_room->chat = gtk_text_view_new();
 	gtk_widget_set_size_request(chat_room->chat, 400, 200);
 	html_text_view_init(GTK_TEXT_VIEW(chat_room->chat), HTML_IGNORE_NONE);
 	gtk_container_add(GTK_CONTAINER(scrollwindow), chat_room->chat);
-	gtk_container_add(GTK_CONTAINER(chat_frame), scrollwindow);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
-								   GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+					   GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
 	g_signal_connect(chat_room->fellows_widget, "row-activated",
 					G_CALLBACK(fellows_activated), chat_room );
@@ -1547,6 +1544,8 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrollwindow2), 
 				     GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	
+	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(scrollwindow2), GTK_SHADOW_ETCHED_IN ) ;
+
 	chat_room->entry = gtk_text_view_new();
 
 	gtk_widget_set_size_request(chat_room->entry, -1, 50);
@@ -1560,24 +1559,23 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 #endif
 
 	gtk_container_add(GTK_CONTAINER(scrollwindow2),chat_room->entry);
-	gtk_container_add(GTK_CONTAINER(entry_frame),scrollwindow2);
 	gtk_widget_show(scrollwindow2);
-	gtk_widget_show(entry_frame);
-	gtk_box_pack_start(GTK_BOX(entry_box), entry_frame, TRUE, TRUE, 3);
+	gtk_box_pack_start(GTK_BOX(entry_box), scrollwindow2, TRUE, TRUE, 3);
 	
 	g_signal_connect(chat_room->entry, "key-press-event",
 			 G_CALLBACK(cr_key_press),
 			 chat_room);
 	
-	gtk_paned_pack1(GTK_PANED(hbox), chat_frame, TRUE, FALSE);
+	gtk_paned_pack1(GTK_PANED(hbox), scrollwindow, TRUE, FALSE);
 	gtk_widget_show(scrollwindow);
-	gtk_widget_show(chat_frame);
 
 	vbox2 = gtk_vbox_new(FALSE, 5);
 
 	scrollwindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
-								   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+					   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(scrollwindow), GTK_SHADOW_ETCHED_IN ) ;
 
 	gtk_container_add(GTK_CONTAINER(scrollwindow), chat_room->fellows_widget );
 	gtk_widget_show(chat_room->fellows_widget);
@@ -1606,6 +1604,10 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	gtk_widget_show(entry_box);
 	gtk_widget_show(chat_room->entry);
 
+	focus_chain = g_list_append(focus_chain, chat_room->entry);
+	focus_chain = g_list_append(focus_chain, chat_room->chat);
+	focus_chain = g_list_append(focus_chain, chat_room->fellows_widget);
+
 	if (chat_room->local_user)
 		room_title = g_strdup_printf("%s [%s]", chat_room->room_name, 
 					get_service_name(chat_room->local_user->service_id));
@@ -1619,6 +1621,7 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 
 	g_signal_connect(chat_room->window, "focus-in-event", G_CALLBACK(handle_focus), chat_room);
 
+	gtk_container_set_focus_chain (GTK_CONTAINER(vbox), focus_chain) ;
 	
 	/* start a toolbar here */
 	

@@ -1,3 +1,9 @@
+Sun Aug 10 2008 09:00 UTC [siddheshp]   0.5.0-69
+- ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c:
+* Set focus on message entry widget when chaging tabs with mouseclick.
+* Removed frames from chat windows. Now scroll windows have the ability to
+draw pretty borders
+
 Wed Aug 06 2008 03:46 UTC [siddheshp]   0.5.0-68
 - ChangeLog, configure.ac, src/browser.c, modules/Makefile.am:
 * Removed workwizu from SUBDIRS

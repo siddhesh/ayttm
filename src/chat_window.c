@@ -112,9 +112,6 @@ static LList *chat_window_list = NULL;
 			 GET_CHAT_WINDOW(x2); \
 			 gtk_widget_grab_focus(x2->entry); \
 }
-#define ENTRY_FORCE_FOCUS(x) { chat_window *x2 = x; \
-			GET_CHAT_WINDOW(x2);\
-			gtk_widget_grab_focus(x2->entry); }
 
 #ifdef HAVE_ICONV_H
 
@@ -1517,6 +1514,7 @@ gboolean chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
 	return FALSE;
 }
 
+
 static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data)
 {
 	/* find the contact for the page we just switched to and turn off their talking penguin icon */
@@ -1527,7 +1525,7 @@ static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage
 		if (gtk_notebook_page_num(notebook, cw->notebook_child) == page_num) {
 			eb_debug(DBG_CORE, "notebook %p child %p \n", cw->notebook, cw->notebook_child);
 			set_tab_normal(cw);
-			ENTRY_FORCE_FOCUS(cw);
+			ENTRY_FOCUS(cw);
 			eb_update_window_title_to_tab (page_num, FALSE);
 			return;
 		}
@@ -2357,7 +2355,7 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 			gtk_container_add(GTK_CONTAINER(cw->window), cw->notebook);
 
 			/* setup a signal handler for the notebook to handle page switches */
-			g_signal_connect(cw->notebook, "switch-page",
+			g_signal_connect_after(cw->notebook, "switch-page",
 				       G_CALLBACK(chat_notebook_switch_callback),
 				       NULL);
 
@@ -2418,13 +2416,13 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	GdkPixbuf *icon;
 	GtkAccelGroup *accel_group;
 
+	GList *focus_chain = NULL ;
+
 	GtkWidget *separator;
 	GtkWidget *resize_bar;
 	gchar buff[NAME_MAX];
 	chat_window *cw;
 	chat_window *tab_cw=NULL;
-	GtkWidget *chat_frame;
-	GtkWidget *entry_frame;
 	/*GtkPositionType pos;*/
 	/*GtkWidget *contact_label;*/
 	gboolean	enableSoundButton = FALSE;
@@ -2449,15 +2447,12 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	g_signal_connect(cw->window, "delete-event",
 	   		G_CALLBACK(cw_close_win), cw);
 	
-	/* Next line allows making window smaller than orig. size */
-	chat_frame = gtk_frame_new(NULL);
-	entry_frame = gtk_frame_new(NULL);
-	gtk_frame_set_shadow_type(GTK_FRAME(chat_frame), GTK_SHADOW_IN);
-	gtk_frame_set_shadow_type(GTK_FRAME(entry_frame), GTK_SHADOW_IN);
 
 	cw->chat = gtk_text_view_new();
 	html_text_view_init(GTK_TEXT_VIEW(cw->chat), HTML_IGNORE_NONE);
 	scrollwindow = gtk_scrolled_window_new(NULL, NULL);
+
+	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(scrollwindow), GTK_SHADOW_ETCHED_IN ) ;
 
 	gtk_window_set_title(GTK_WINDOW(cw->window), remote->nick);    
 
@@ -2466,7 +2461,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 					tab_cw->chat->allocation.width, 
 					tab_cw->chat->allocation.height);
 	else
-		gtk_widget_set_size_request(cw->chat, 400, 150);
+		gtk_widget_set_size_request(cw->chat, 400, 200);
 
 	gtk_container_add(GTK_CONTAINER(scrollwindow), cw->chat);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
@@ -2478,14 +2473,14 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	/*Add stuff for multi-line*/
 
 	resize_bar = gtk_vpaned_new();
-	gtk_container_add(GTK_CONTAINER(chat_frame), scrollwindow);
-	gtk_paned_pack1(GTK_PANED(resize_bar), chat_frame, TRUE, TRUE);
-	gtk_widget_show(chat_frame);
+	gtk_paned_pack1(GTK_PANED(resize_bar), scrollwindow, TRUE, TRUE);
 	gtk_widget_show(scrollwindow);
 
 	scrollwindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrollwindow), 
 		   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(scrollwindow), GTK_SHADOW_ETCHED_IN ) ;
 
 	cw->entry = gtk_text_view_new();
 
@@ -2509,13 +2504,11 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	g_signal_connect(cw->entry, "key-press-event",
 			G_CALLBACK(chat_key_press), cw);
 
-	gtk_container_add(GTK_CONTAINER(entry_frame), scrollwindow);
-	gtk_paned_pack2(GTK_PANED(resize_bar), entry_frame, TRUE, TRUE);
+	gtk_paned_pack2(GTK_PANED(resize_bar), scrollwindow, TRUE, TRUE);
 
 	gtk_widget_show(scrollwindow);
 	gtk_box_pack_start(GTK_BOX(vbox),resize_bar, TRUE, TRUE, 5);
 	gtk_widget_show(resize_bar);
-	gtk_widget_show(entry_frame);
 
 	gtk_container_set_border_width(GTK_CONTAINER(cw->window), tabbedChat ? 2 : 5);
 
@@ -2523,6 +2516,11 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 			   G_CALLBACK(handle_click), cw);                     	
 	g_signal_connect(cw->window, "focus-in-event",
 			   G_CALLBACK(handle_focus), cw);
+
+        focus_chain = g_list_append(focus_chain, cw->entry);
+	focus_chain = g_list_append(focus_chain, cw->chat);
+
+	gtk_container_set_focus_chain (GTK_CONTAINER(vbox), focus_chain) ;
 
 	hbox = gtk_hbox_new(FALSE, 0);
 	gtk_widget_set_size_request(hbox, 275, 40);
