@@ -60,7 +60,7 @@ void eb_destroy_all_chat_rooms (void);
 eb_chat_room* find_tabbed_chat_room(void);
 eb_chat_room *find_tabbed_chat_room_index (int current_page);
 void do_invite_window(void *widget, eb_chat_room * room );
-void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num);
+int eb_chat_room_notebook_switch(void *notebook, int page_num);
 eb_chat_room * find_chat_room_by_id( const char * id );
 eb_chat_room * find_chat_room_by_name( char * name, int service_id );
 LList * find_chatrooms_with_remote_account(eb_account *remote);

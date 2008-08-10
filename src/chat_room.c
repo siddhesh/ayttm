@@ -237,21 +237,23 @@ static void send_typing_status(eb_chat_room *cr)
 	}
 }
 
-void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num)
+int eb_chat_room_notebook_switch(void *notebook, int page_num)
 {
 	LList *w = NULL;
 	for (w = chat_rooms; w; w = w->next) {
 		eb_chat_room *cr = (eb_chat_room *)w->data;
 		if (gtk_notebook_page_num(GTK_NOTEBOOK(notebook), cr->notebook_child) == page_num) {
-			printf("crnotebook %p child %p \n", cr->notebook, cr->notebook_child);
+			eb_debug(DBG_CORE, "crnotebook %p child %p \n", cr->notebook, cr->notebook_child);
 			set_tab_normal(cr);
 			eb_chat_room_update_window_title(cr, FALSE);
 
 			ENTRY_FOCUS(cr);
 
-			return;
+			return FALSE;
 		}
-	}	
+	}
+
+	return TRUE;
 }
 
 extern void chat_history_up (chat_window *cw);

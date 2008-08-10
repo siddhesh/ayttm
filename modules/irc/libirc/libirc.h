@@ -165,8 +165,8 @@ typedef struct _irc_callbacks {
 					irc_message_prefix *prefix, 
 					irc_account *ia);
 	                        	
-	void (*got_invite)		(const char *channel, 
-					const char *to, 
+	void (*got_invite)		(const char *to, 
+					const char *channel, 
 					irc_message_prefix *prefix, 
 					irc_account *ia);
 	                        	

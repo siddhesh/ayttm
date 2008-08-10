@@ -1,3 +1,10 @@
+Sun Aug 10 2008 20:20 UTC [siddheshp]   0.5.0-71
+- ChangeLog, modules/irc/irc.c, modules/irc/libirc/libirc.h,
+src/auto_complete.c, src/chat_room.c, src/chat_room.h, src/chat_window.c,
+configure.ac:
+* Fix Invite goof-up in IRC -- channel name and invitee got interchanged
+* Defer focus on notebook tab to chat room message entry box.
+
 Sun Aug 10 2008 15:10 UTC [siddheshp]   0.5.0-70
 - ChangeLog, src/auto_complete.c, src/auto_complete.h:
 Forgot to add the auto_complete sources..

@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.46 $",
-	"$Date: 2008/08/02 06:13:10 $",
+	"$Revision: 1.47 $",
+	"$Date: 2008/08/10 20:22:00 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1484,7 +1484,7 @@ static void ay_buddy_nick_change (const char *newnick, irc_message_prefix *prefi
 
 
 // IRC Handler
-static void ay_got_invite (const char *channel, const char *to, 
+static void ay_got_invite (const char *to, const char *channel, 
 		irc_message_prefix *prefix, irc_account *ia)
 {
 	eb_chat_room *ecr ;

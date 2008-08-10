@@ -103,7 +103,7 @@ void flash_title(GdkWindow *window);
 static void eb_update_window_title(chat_window * cw, gboolean new_message);
 static void eb_update_window_title_to_tab(int tab, gboolean new_message);
 static gboolean handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata);
-static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
+static gboolean chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
 LList *outgoing_message_filters=NULL;
 LList *incoming_message_filters=NULL;
 
@@ -1266,7 +1266,8 @@ gboolean chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
 }
 
 
-static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data)
+static gboolean chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, 
+						gint page_num, gpointer user_data)
 {
 	/* find the contact for the page we just switched to and turn off their talking penguin icon */
 	LList * l1 = chat_window_list;
@@ -1278,12 +1279,20 @@ static void chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage
 			set_tab_normal(cw);
 			ENTRY_FOCUS(cw);
 			eb_update_window_title_to_tab (page_num, FALSE);
-			return;
+			return FALSE;
 		}
 		l1 = l1->next;
 	}
 
-	eb_chat_room_notebook_switch(notebook, page, page_num);
+	return eb_chat_room_notebook_switch(notebook, page_num);
+}
+
+
+static void chat_notebook_tab_focus_callback(GtkNotebook *notebook, gpointer user_data)
+{
+	gint page_num = gtk_notebook_get_current_page(notebook) ;
+
+	chat_notebook_switch_callback(notebook, NULL, page_num, user_data);
 }
 
 
@@ -2106,8 +2115,12 @@ void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name)
 			gtk_container_add(GTK_CONTAINER(cw->window), cw->notebook);
 
 			/* setup a signal handler for the notebook to handle page switches */
-			g_signal_connect_after(cw->notebook, "switch-page",
+			g_signal_connect(cw->notebook, "switch-page",
 				       G_CALLBACK(chat_notebook_switch_callback),
+				       NULL);
+
+			g_signal_connect(cw->notebook, "focus-in-event",
+				       G_CALLBACK(chat_notebook_tab_focus_callback),
 				       NULL);
 
 			gtk_widget_show(cw->notebook);

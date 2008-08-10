@@ -23,10 +23,8 @@
  */
 
 /*
- * chat_window.c
- * implementation for the conversation window
- * This is the window where you will be doing most of your talking :)
- *
+ * auto_complete.c
+ * On the fly chat completion
  */
 
 #include "auto_complete.h"
