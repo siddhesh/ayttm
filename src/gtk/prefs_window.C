@@ -1208,6 +1208,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	_gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
 	_gtkut_button( _("Show timestamps in chat window"), &m_prefs.do_convo_timestamp, m_top_vbox );
 	_gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
+	_gtkut_button( _("Enable Smileys"), &m_prefs.do_smiley, m_top_vbox );
 	_gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
 	_gtkut_button( _("On the fly chat completion"), &m_prefs.do_auto_complete, m_top_vbox );
 	

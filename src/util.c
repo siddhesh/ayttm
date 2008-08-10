@@ -93,6 +93,8 @@ char * get_local_addresses()
 	struct hostent * hn;
 	FILE * f = NULL;
 
+	addresses[0]='\0';
+
 	gethostname(buff,sizeof(buff));
 
 	hn = gethostbyname(buff);
@@ -102,8 +104,7 @@ char * get_local_addresses()
 				quad[0], quad[1], quad[2], quad[3] );
 #ifndef __MINGW32__
 	} 
-	if((!hn || (addresses && !strcmp(addresses,"127.0.0.1"))) 
-	&& (f = popen(command, "r")) != NULL ) {
+	if((!hn || !strcmp(addresses,"127.0.0.1")) && (f = popen(command, "r")) != NULL ) {
 		int i=0;
 
 		do {

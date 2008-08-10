@@ -25,7 +25,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	contact_parser.y contact_scanner.l llist.c mem_util.c \
 	offline_queue_mgmt.c tcp_util.c image_window.c action.c about.c \
 	messages.c edit_list_window.c flash_window_title.c ssl.c icons.c \
-	ssl_certificate.c charconv.c ayttm_tray.c $(WIN32_SRC)
+	ssl_certificate.c charconv.c ayttm_tray.c auto_complete.c $(WIN32_SRC)
 
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
@@ -40,7 +40,7 @@ noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	edit_local_accounts.h  platform_defs.h edit_list_window.h \
 	ui_about_window.h ui_file_selection_dlg.h ui_log_window.h \
 	ui_message_windows.h ui_prefs_window.h ssl.h ssl_certificate.h \
-	charconv.h ayttm_tray.h
+	charconv.h ayttm_tray.h auto_complete.h
 
 AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)

@@ -59,6 +59,8 @@
 #include "pixmaps/invite_btn.xpm"
 #include "pixmaps/reconnect.xpm"
 
+#include "auto_complete.h"
+
 #define GET_CHAT_ROOM(cur_cw) {\
 	if( iGetLocalPref("do_tabbed_chat") ) { \
 		eb_chat_room *bck = cur_cw; \
@@ -252,13 +254,9 @@ void eb_chat_room_notebook_switch(void *notebook, void *page, int page_num)
 	}	
 }
 
-extern char * complete_word( LList * l, const char *begin, int *choice);
-extern int chat_auto_complete(GtkWidget *w, LList *l, GdkEventKey *event);
-extern void chat_auto_complete_insert(GtkWidget *w, GdkEventKey *event);
 extern void chat_history_up (chat_window *cw);
 extern void chat_history_down(chat_window *cw);
 extern void chat_scroll(chat_window *cw, GdkEventKey *event);
-extern LList *session_words;
 
 static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
@@ -278,7 +276,10 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 			event->state = 0;
 		}
 		else if ( iGetLocalPref("do_enter_send") ) {
-			chat_auto_complete_insert(cr->entry, event);	
+			gtk_text_buffer_delete_selection(
+					gtk_text_view_get_buffer(GTK_TEXT_VIEW(cr->entry)), FALSE, TRUE);
+
+			chat_auto_complete_insert(cr->entry, event);
 
 			/*Prevents a newline from being printed*/
 			g_signal_stop_emission_by_name(G_OBJECT(widget), "key-press-event");
@@ -302,7 +303,7 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	{
 		return ( chat_auto_complete(cr->entry, cr->fellows, event) 
 				|| ( iGetLocalPref("do_auto_complete") 
-					&& chat_auto_complete(cr->entry, session_words, event)) );
+					&& chat_auto_complete(cr->entry, auto_complete_session_words, event)) );
 
 	} else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab )) {
 	/* #980589 Right Arrow Key not avail  || event->keyval == GDK_Right )) { */
@@ -1415,7 +1416,7 @@ void eb_chat_room_show_message( eb_chat_room * chat_room,
 		}
 		 
 	}
-	if(RUN_SERVICE(chat_room->local_user)->get_smileys)
+	if(iGetLocalPref("do_smiley") && RUN_SERVICE(chat_room->local_user)->get_smileys)
 	 	temp_message = eb_smilify(message, RUN_SERVICE(chat_room->local_user)->get_smileys(), 
 				get_service_name(chat_room->local_user->service_id));
 	else

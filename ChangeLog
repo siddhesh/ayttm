@@ -1,3 +1,10 @@
+Sun Aug 10 2008 15:05 UTC [siddheshp]   0.5.0-70
+- src/Makefile.am, src/chat_room.c, src/chat_window.c, src/prefs.c,
+src/prefs.h, src/util.c, src/gtk/prefs_window.C, ChangeLog, configure.ac:
+* Added option to disable smileys in Preferences
+* Separated auto complete into a separate source file
+* Don't send the auto-completed version of a word on enter.
+
 Sun Aug 10 2008 09:00 UTC [siddheshp]   0.5.0-69
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c:
 * Set focus on message entry widget when chaging tabs with mouseclick.

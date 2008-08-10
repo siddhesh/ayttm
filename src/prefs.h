@@ -68,6 +68,7 @@ struct prefs
 		int		do_raise_window;
 		int		do_send_idle_time;
 		int		do_convo_timestamp;
+		int		do_smiley;
 		int		do_ignore_fore;
 		int		do_ignore_back;
 		int		do_ignore_font;
