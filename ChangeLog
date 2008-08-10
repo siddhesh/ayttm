@@ -1,3 +1,7 @@
+Sun Aug 10 2008 15:10 UTC [siddheshp]   0.5.0-70
+- ChangeLog, src/auto_complete.c, src/auto_complete.h:
+Forgot to add the auto_complete sources..
+
 Sun Aug 10 2008 15:05 UTC [siddheshp]   0.5.0-70
 - src/Makefile.am, src/chat_room.c, src/chat_window.c, src/prefs.c,
 src/prefs.h, src/util.c, src/gtk/prefs_window.C, ChangeLog, configure.ac:
