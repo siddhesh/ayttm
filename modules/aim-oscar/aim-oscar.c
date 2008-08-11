@@ -92,8 +92,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.25 $",
-	"$Date: 2008/08/03 20:26:46 $",
+	"$Revision: 1.26 $",
+	"$Date: 2008/08/11 04:50:44 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2042,7 +2042,7 @@ ay_aim_set_current_state (eb_local_account * account, gint state)
 	alad->status = state;
 }
 
-static char **
+static const char **
 ay_aim_get_status_pixmap (eb_account * account)
 {
 	struct eb_aim_account_data *aad;

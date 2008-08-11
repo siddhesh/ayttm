@@ -60,8 +60,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Custom Message", 
 	"Pick a custom away message from a file", 
-	"$Revision: 1.1 $",
-	"$Date: 2005/02/13 13:44:20 $",
+	"$Revision: 1.2 $",
+	"$Date: 2008/08/11 04:50:46 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -140,7 +140,7 @@ static int eb_custom_msg_timeout_callback(void *data)
    if(!enable_plugin)
       return 1;
 
-	if(!custom_away_msg || !custom_away_msg[0])
+	if( !custom_away_msg[0] )
 		return 1;
 
 	stat(custom_away_msg, &s);

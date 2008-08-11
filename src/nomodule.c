@@ -196,7 +196,7 @@ static char * eb_nomodule_get_status_string( eb_account * account )
 	return string;
 }
 
-static char **eb_nomodule_get_status_pixmap( eb_account * account)
+static const char **eb_nomodule_get_status_pixmap( eb_account * account)
 {
 	return nomodule_away_xpm;
 }

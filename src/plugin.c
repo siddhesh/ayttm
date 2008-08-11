@@ -538,9 +538,8 @@ static void rebuild_smiley_menu( void )
 		eb_debug(DBG_CORE, "Not rebuilding smiley menu, it's never been built.\n");
 		return;
 	}
-	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(smiley_submenuitem));
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(smiley_submenuitem), NULL);
 	eb_smiley_window(smiley_submenuitem);
-//	gtk_widget_draw(GTK_WIDGET(smiley_submenuitem), NULL);
 }
 
 static void rebuild_import_menu( void )
@@ -552,9 +551,8 @@ static void rebuild_import_menu( void )
 		eb_debug(DBG_CORE, "Not rebuilding import menu, it's never been built.\n");
 		return;
 	}
-	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(import_submenuitem));
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(import_submenuitem), NULL);
 	eb_import_window(import_submenuitem);
-//	gtk_widget_draw(GTK_WIDGET(import_submenuitem), NULL);
 }
 
 static void rebuild_profile_menu( void )
@@ -566,9 +564,8 @@ static void rebuild_profile_menu( void )
 		eb_debug(DBG_CORE, "Not rebuilding profile menu, it's never been built.\n");
 		return;
 	}
-	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(profile_submenuitem));
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(profile_submenuitem), NULL);
 	eb_profile_window(profile_submenuitem);
-//	gtk_widget_draw(GTK_WIDGET(profile_submenuitem), NULL);
 }
 
 /* Set up information about how menus are redrawn and what kind of data should be sent to callbacks */

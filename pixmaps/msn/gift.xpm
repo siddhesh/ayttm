@@ -1,5 +1,5 @@
 /* XPM */
-static char * gift_xpm[] = {
+static const char * gift_xpm[] = {
 "16 16 4 1",
 " 	c None",
 ".	c #F90707",

@@ -164,7 +164,7 @@ static void fellows_activated( GtkTreeView * tree_view, GtkTreePath *path,
 
 	GtkTreeIter iter;
 
-	printf("activated_callback\n");
+	eb_debug(DBG_CORE, "activated_callback\n");
 
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(ecr->fellows_model), &iter, path);
 	gtk_tree_model_get(GTK_TREE_MODEL(ecr->fellows_model), &iter,

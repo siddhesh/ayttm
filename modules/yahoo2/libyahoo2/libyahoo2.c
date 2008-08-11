@@ -3358,7 +3358,8 @@ static void yahoo_process_search_connection(struct yahoo_input_data *yid, int ov
 					yct->age = atoi(cp);
 					break;
 				case 5: 
-					if(cp != "\005")
+					// not worth the context switch for strcmp
+					if(cp[0] != '\005' || cp[1] != '\000')
 						yct->location = cp;
 					k = 0;
 					break;

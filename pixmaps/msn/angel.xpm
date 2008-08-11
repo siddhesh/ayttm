@@ -1,5 +1,5 @@
 /* XPM */
-static char * angel_xpm[] = {
+static const char * angel_xpm[] = {
 "16 16 18 1",
 " 	c None",
 ".	c #EFE700",

@@ -1,5 +1,5 @@
 /* XPM */
-static char * no_such_smiley_xpm[] = {
+static const char * no_such_smiley_xpm[] = {
 "16 16 18 1",
 " 	c None",
 ".	c #000000000000",

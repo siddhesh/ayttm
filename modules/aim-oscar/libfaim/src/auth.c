@@ -140,7 +140,7 @@ faim_export int aim_request_login(aim_session_t *sess, aim_conn_t *conn, const c
 	snacid = aim_cachesnac(sess, 0x0017, 0x0006, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0017, 0x0006, 0x0000, snacid);
 
-	aim_addtlvtochain_raw(&tl, 0x0001, strlen(sn), sn);
+	aim_addtlvtochain_raw(&tl, 0x0001, strlen(sn), (unsigned char *)sn);
 	aim_writetlvchain(&fr->data, &tl);
 	aim_freetlvchain(&tl);
 
@@ -160,7 +160,7 @@ static int goddamnicq2(aim_session_t *sess, aim_conn_t *conn, const char *sn, co
 	fu8_t *password_encoded;
 
 	passwdlen = strlen(password);
-	if (!(password_encoded = (char *)malloc(passwdlen+1)))
+	if (!(password_encoded = (fu8_t *)malloc(passwdlen+1)))
 		return -ENOMEM;
 	if (passwdlen > MAXICQPASSLEN)
 		passwdlen = MAXICQPASSLEN;
@@ -173,19 +173,19 @@ static int goddamnicq2(aim_session_t *sess, aim_conn_t *conn, const char *sn, co
 	aim_encode_password(password, password_encoded);
 
 	aimbs_put32(&fr->data, 0x00000001); /* FLAP Version */
-	aim_addtlvtochain_raw(&tl, 0x0001, strlen(sn), sn);
+	aim_addtlvtochain_raw(&tl, 0x0001, strlen(sn), (unsigned char *)sn);
 	aim_addtlvtochain_raw(&tl, 0x0002, passwdlen, password_encoded);
 
 	if (ci->clientstring)
-		aim_addtlvtochain_raw(&tl, 0x0003, strlen(ci->clientstring), ci->clientstring);
+		aim_addtlvtochain_raw(&tl, 0x0003, strlen(ci->clientstring), (unsigned char *)ci->clientstring);
 	aim_addtlvtochain16(&tl, 0x0016, (fu16_t)ci->clientid);
 	aim_addtlvtochain16(&tl, 0x0017, (fu16_t)ci->major);
 	aim_addtlvtochain16(&tl, 0x0018, (fu16_t)ci->minor);
 	aim_addtlvtochain16(&tl, 0x0019, (fu16_t)ci->point);
 	aim_addtlvtochain16(&tl, 0x001a, (fu16_t)ci->build);
 	aim_addtlvtochain32(&tl, 0x0014, (fu32_t)ci->distrib); /* distribution chan */
-	aim_addtlvtochain_raw(&tl, 0x000f, strlen(ci->lang), ci->lang);
-	aim_addtlvtochain_raw(&tl, 0x000e, strlen(ci->country), ci->country);
+	aim_addtlvtochain_raw(&tl, 0x000f, strlen(ci->lang), (unsigned char *)ci->lang);
+	aim_addtlvtochain_raw(&tl, 0x000e, strlen(ci->country), (unsigned char *)ci->country);
 
 	aim_writetlvchain(&fr->data, &tl);
 
@@ -251,7 +251,7 @@ faim_export int aim_send_login(aim_session_t *sess, aim_conn_t *conn, const char
 	snacid = aim_cachesnac(sess, 0x0017, 0x0002, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0017, 0x0002, 0x0000, snacid);
 
-	aim_addtlvtochain_raw(&tl, 0x0001, strlen(sn), sn);
+	aim_addtlvtochain_raw(&tl, 0x0001, strlen(sn), (unsigned char *)sn);
 
 	aim_encode_password_md5(password, key, digest);
 	aim_addtlvtochain_raw(&tl, 0x0025, 16, digest);
@@ -261,15 +261,15 @@ faim_export int aim_send_login(aim_session_t *sess, aim_conn_t *conn, const char
 	 */
 
 	if (ci->clientstring)
-		aim_addtlvtochain_raw(&tl, 0x0003, strlen(ci->clientstring), ci->clientstring);
+		aim_addtlvtochain_raw(&tl, 0x0003, strlen(ci->clientstring), (unsigned char *)ci->clientstring);
 	aim_addtlvtochain16(&tl, 0x0016, (fu16_t)ci->clientid);
 	aim_addtlvtochain16(&tl, 0x0017, (fu16_t)ci->major);
 	aim_addtlvtochain16(&tl, 0x0018, (fu16_t)ci->minor);
 	aim_addtlvtochain16(&tl, 0x0019, (fu16_t)ci->point);
 	aim_addtlvtochain16(&tl, 0x001a, (fu16_t)ci->build);
 	aim_addtlvtochain32(&tl, 0x0014, (fu32_t)ci->distrib);
-	aim_addtlvtochain_raw(&tl, 0x000e, strlen(ci->country), ci->country);
-	aim_addtlvtochain_raw(&tl, 0x000f, strlen(ci->lang), ci->lang);
+	aim_addtlvtochain_raw(&tl, 0x000e, strlen(ci->country), (unsigned char *)ci->country);
+	aim_addtlvtochain_raw(&tl, 0x000f, strlen(ci->lang), (unsigned char *)ci->lang);
 
 #ifndef NOSSI
 	/*

@@ -1,5 +1,5 @@
 /* XPM */
-static char * penguin_talk_xpm[] = {
+static const char * penguin_talk_xpm[] = {
 "27 27 94 2",
 "  	c None",
 ". 	c #272727",

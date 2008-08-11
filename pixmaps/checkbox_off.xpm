@@ -1,5 +1,5 @@
 /* XPM */
-static char * checkbox_off_xpm[] = {
+static const char * checkbox_off_xpm[] = {
 "13 13 4 1",
 " 	c None",
 ".	c #000000",

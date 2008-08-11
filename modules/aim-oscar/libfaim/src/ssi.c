@@ -410,7 +410,7 @@ faim_export char *aim_ssi_getalias(struct aim_ssi_item *list, const char *gn, co
 			aim_tlv_t *tlv = aim_gettlv(tlvlist, 0x0131, 1);
 			if (tlv && tlv->length) {
 				char *alias = (char *)malloc((tlv->length+1)*sizeof(char));
-				strncpy(alias, tlv->value, tlv->length);
+				memcpy(alias, tlv->value, tlv->length);
 				alias[tlv->length] = 0;
 				return alias;
 			}

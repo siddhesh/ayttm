@@ -1,5 +1,5 @@
 /* XPM */
-static char *jabber_online_xpm[] = {
+static const char *jabber_online_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "12 13 90 1",
 "  c Gray0",

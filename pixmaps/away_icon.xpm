@@ -1,5 +1,5 @@
 /* XPM */
-static char*away_icon[]={
+static const char*away_icon[]={
 "12 12 4 1",
 ". c None",
 "# c #a0a0a0",

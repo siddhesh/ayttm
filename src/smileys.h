@@ -36,9 +36,9 @@ typedef struct protocol_smiley_struct protocol_smiley;
 
 struct smiley_struct
 {
-	char    *service;
-	char	name[64];
-	gchar	**pixmap; // from an xpm file, you know the drill...
+	char    	*service;
+	char		name[64];
+	const gchar	**pixmap; // from an xpm file, you know the drill...
 };
 
 typedef struct smiley_struct smiley;
@@ -76,7 +76,7 @@ LList * eb_default_smileys( void );
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 __declspec(dllimport)
 #endif
-LList * add_smiley( LList *list, const char *name, char **data, const char *service );
+LList * add_smiley( LList *list, const char *name, const char **data, const char *service );
 
 LList * add_protocol_smiley( LList *list, const char *text, const char *name );
 

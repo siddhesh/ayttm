@@ -866,7 +866,7 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 }
 
 
-void irc_get_command_string(char *out, char *recipient, char *command, char *params, irc_account *ia)
+void irc_get_command_string(char *out, const char *recipient, char *command, char *params, irc_account *ia)
 {
 	if ( !strcasecmp(command, "ME") ) {
 		snprintf(out, BUF_LEN, "PRIVMSG %s :\001ACTION %s\001\n", recipient, params);

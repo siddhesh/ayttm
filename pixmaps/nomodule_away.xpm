@@ -1,5 +1,5 @@
 /* XPM */
-static char * nomodule_away_xpm[] = {
+static const char * nomodule_away_xpm[] = {
 "12 13 24 1",
 " 	c None",
 ".	c #A0A0A0",

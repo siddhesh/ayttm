@@ -1,5 +1,5 @@
 /* XPM */
-static char * reconnect_xpm[] = {
+static const char * reconnect_xpm[] = {
 "22 22 4 1",
 " 	c None",
 ".	c #000000",

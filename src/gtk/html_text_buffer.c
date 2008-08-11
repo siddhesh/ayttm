@@ -142,7 +142,7 @@ static void _extract_parameter (char *param, char *buffer, int buffer_size)
 /*
  * Inserts an xpm image into a textbuffer at the given iter
  */
-void insert_xpm_at_iter(GtkTextView *text_view, GtkTextIter *start, char **xpm)
+void insert_xpm_at_iter(GtkTextView *text_view, GtkTextIter *start, const char **xpm)
 {
 	GtkTextBuffer		*buffer = gtk_text_view_get_buffer(text_view);
 	GdkPixbuf		*icon = gdk_pixbuf_new_from_xpm_data( (const char **) xpm);

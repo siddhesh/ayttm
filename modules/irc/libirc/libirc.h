@@ -106,7 +106,6 @@ typedef struct _irc_param_list {
 	struct _irc_param_list *next;
 } irc_param_list ;
 
-
 static char irc_modes[] =
 {
 	'a',
@@ -117,6 +116,7 @@ static char irc_modes[] =
 	'O',
 	's'
 };
+
 
 struct _irc_callbacks;
 
@@ -604,7 +604,7 @@ void irc_recv (irc_account *ia, int source, int condition) ;
 
 void irc_send_data(void *buf, int len, irc_account *ia) ;
 
-void irc_get_command_string(char *out, char *recipient, char *command, char *params, irc_account *ia);
+void irc_get_command_string(char *out, const char *recipient, char *command, char *params, irc_account *ia);
 
 void irc_request_list ( const char *channel, const char *target, irc_account *ia );
 

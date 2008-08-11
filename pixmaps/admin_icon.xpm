@@ -1,5 +1,5 @@
 /* XPM */
-static char * admin_icon_xpm[] = {
+static const char * admin_icon_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "12 12 5 1",
 /* colors */

@@ -1,5 +1,5 @@
 /* XPM */
-static char * ayttm_xpm[] = {
+static const char * ayttm_xpm[] = {
 "64 64 305 2",
 "  	c None",
 ". 	c #B6B6B6",

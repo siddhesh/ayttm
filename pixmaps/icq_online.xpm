@@ -1,5 +1,5 @@
 /* XPM */
-static char * icq_online_xpm[] = {
+static const char * icq_online_xpm[] = {
 "12 13 93 2",
 "  	c None",
 ". 	c #020C02",

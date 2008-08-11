@@ -1,5 +1,5 @@
 /* XPM */
-static char * workwizu_online_xpm[] = {
+static const char * workwizu_online_xpm[] = {
 "12 13 67 1",
 " 	c None",
 ".	c #000000",

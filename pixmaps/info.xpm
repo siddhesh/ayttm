@@ -1,5 +1,5 @@
 /* XPM */
-static char *info_xpm[]={
+static const char *info_xpm[]={
 "48 48 294 2",
 "Qt c None",
 "bV c #000000",

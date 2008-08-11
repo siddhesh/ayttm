@@ -1,5 +1,5 @@
 /* XPM */
-static char * rainbow_xpm[] = {
+static const char * rainbow_xpm[] = {
 "16 16 8 1",
 " 	c None",
 ".	c #D4DB15",

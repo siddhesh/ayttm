@@ -1,5 +1,5 @@
 /* XPM */
-static char *ayttm_32x32[] = {
+static const char *ayttm_32x32[] = {
 /* columns rows colors chars-per-pixel */
 "32 32 13 1",
 "  c black",

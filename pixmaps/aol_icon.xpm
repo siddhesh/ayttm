@@ -1,5 +1,5 @@
 /* XPM */
-static char * aol_icon_xpm[] = {
+static const char * aol_icon_xpm[] = {
 "12 12 47 1",
 " 	c None",
 ".	c #9B9BD6",

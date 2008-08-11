@@ -1,5 +1,5 @@
 /* XPM */
-static char * angry_xpm[] = {
+static const char * angry_xpm[] = {
 "16 16 19 1",
 " 	c None",
 ".	c #000000000000",

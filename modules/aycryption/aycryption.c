@@ -95,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.22 $",
-	"$Date: 2007/08/03 20:38:38 $",
+	"$Revision: 1.23 $",
+	"$Date: 2008/08/11 04:50:44 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -650,7 +650,7 @@ pgp_encrypt ( gpgme_data_t plain, gpgme_data_t *cipher, gpgme_key_t *kset, int s
 	GSList *key_list = NULL;
 
 
-	if(sign && mykey && mykey[0]) {
+	if(sign && mykey[0]) {
 		key_list = create_signers_list(mykey);
 	}
 	

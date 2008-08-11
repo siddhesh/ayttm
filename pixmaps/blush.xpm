@@ -1,5 +1,5 @@
 /* XPM */
-static char * blush_xpm[] = {
+static const char * blush_xpm[] = {
 "16 16 38 1",
 " 	c None",
 ".	c #000000",

@@ -1,5 +1,5 @@
 /* XPM */
-static char * tb_volume_xpm[] = {
+static const char * tb_volume_xpm[] = {
 "24 24 17 1",
 " 	c None",
 ".	c #000000",

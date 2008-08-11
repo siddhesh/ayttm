@@ -375,7 +375,7 @@ LList * add_protocol_smiley(LList * list, const char * text, const char * name)
   return l_list_append(list, psmile);
 }
 
-LList * add_smiley( LList * list, const char *name, char **data, const char *service )
+LList * add_smiley( LList * list, const char *name, const char **data, const char *service )
 {
   smiley * psmile;
 
