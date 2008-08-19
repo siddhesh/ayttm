@@ -891,7 +891,7 @@ void html_text_view_init ( GtkTextView *text_view, int ignore_font )
 	str = cGetLocalPref("FontFace");
 
 	gtk_text_view_set_editable( text_view, FALSE );
-	gtk_text_view_set_wrap_mode( text_view, GTK_WRAP_WORD );
+	gtk_text_view_set_wrap_mode( text_view, GTK_WRAP_WORD_CHAR );
 	gtk_text_view_set_cursor_visible(text_view, FALSE);
 
 	g_signal_connect(text_view, "motion-notify-event",

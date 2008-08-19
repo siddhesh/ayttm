@@ -1554,7 +1554,7 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	gtk_widget_set_size_request(chat_room->entry, -1, 50);
 
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(chat_room->entry), TRUE);
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat_room->entry), GTK_WRAP_WORD);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat_room->entry), GTK_WRAP_WORD_CHAR);
 
 #ifdef HAVE_LIBPSPELL
 	if( iGetLocalPref("do_spell_checking") )

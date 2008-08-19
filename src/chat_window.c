@@ -2257,7 +2257,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	gtk_container_add(GTK_CONTAINER(scrollwindow), cw->entry);
 
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(cw->entry), TRUE);
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(cw->entry), GTK_WRAP_WORD);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(cw->entry), GTK_WRAP_WORD_CHAR);
 
 #ifdef HAVE_LIBPSPELL
 	if( iGetLocalPref("do_spell_checking") ) {
