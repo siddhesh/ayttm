@@ -92,8 +92,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.26 $",
-	"$Date: 2008/08/11 04:50:44 $",
+	"$Revision: 1.27 $",
+	"$Date: 2008/08/19 14:38:17 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2323,7 +2323,7 @@ query_callbacks ()
 	/* Not yet implemented */
 	sc->add_importers = NULL;
 
-	sc->get_smileys = NULL; /* eb_default_smileys; */
+	sc->get_smileys = eb_default_smileys;
 	sc->get_color = ay_aim_get_color;
 
 	/* Not yet implemented */

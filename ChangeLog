@@ -1,8 +1,11 @@
+Tue Aug 19 2008 14:35 UTC [siddheshp]   0.5.0-74
+- ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c:
+Attached to default smileys callback in aim-oscar.
+
 Tue Aug 19 2008 08:05 UTC [siddheshp]   0.5.0-73
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c,
 src/gtk/html_text_buffer.c:
 Fixed wrap behaviour for long words in the entry box and chat window.
-
 
 Mon Aug 11 2008 04:45 UTC [siddheshp]   0.5.0-72
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c,
