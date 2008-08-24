@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.100 $",
-	"$Date: 2008/08/02 06:13:12 $",
+	"$Revision: 1.101 $",
+	"$Date: 2008/08/24 18:59:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1167,6 +1167,7 @@ static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *fil
 {
 	struct stat stats;
 	int in;
+	char *tmp = NULL;
 	
 	eb_yahoo_local_account_data *ylad = from->protocol_local_account_data;
 	eb_yahoo_file_transfer_data *yftd;
@@ -1190,11 +1191,14 @@ static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *fil
 	if(yftd->fsize < 0)
 		yftd->fsize = stats.st_size;
 	yftd->file = in;
-	yftd->fname = strdup(file);
 
-	yahoo_send_file(ylad->id, to->handle, "", file, yftd->fsize,
+	if ((tmp=strrchr(file, '/')))
+		yftd->fname = strdup(tmp+1);
+	else
+		yftd->fname = strdup(file);
+
+	yahoo_send_file(ylad->id, to->handle, "", yftd->fname, yftd->fsize,
 			eb_yahoo_got_fd, yftd);
-
 }
 
 /*

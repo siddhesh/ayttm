@@ -750,7 +750,7 @@ static void yahoo_send_packet(struct yahoo_input_data *yid, struct yahoo_packet 
 	data = y_new0(unsigned char, len + 1);
 
 	memcpy(data + pos, "YMSG", 4); pos += 4;
-	pos += yahoo_put16(data + pos, 0x000c);
+	pos += yahoo_put16(data + pos, 0x000e);
 	pos += yahoo_put16(data + pos, 0x0000);
 	pos += yahoo_put16(data + pos, pktlen + extra_pad);
 	pos += yahoo_put16(data + pos, pkt->service);
@@ -3358,7 +3358,7 @@ static void yahoo_process_search_connection(struct yahoo_input_data *yid, int ov
 					yct->age = atoi(cp);
 					break;
 				case 5: 
-					// not worth the context switch for strcmp
+					/* not worth the context switch for strcmp */
 					if(cp[0] != '\005' || cp[1] != '\000')
 						yct->location = cp;
 					k = 0;
@@ -4797,27 +4797,22 @@ static void _yahoo_send_picture_connected(int id, int fd, int error, void *data)
 	}
 
 	yid->fd = fd;
-	yahoo_send_packet(yid, pkt, 8);
+	yahoo_send_packet(yid, pkt, 4);
 	yahoo_packet_free(pkt);
 
-	snprintf((char *)buff, sizeof(buff), "29");
+	buff[0] = 0x32;
+	buff[1] = 0x39;
 	buff[2] = 0xc0;
 	buff[3] = 0x80;
 	
 	write(yid->fd, buff, 4);
 
-	/*	YAHOO_CALLBACK(ext_yahoo_add_handler)(nyd->fd, YAHOO_INPUT_READ); */
+	yid->fd = 0 ;
 
 	sfd->callback(id, fd, error, sfd->user_data);
 	FREE(sfd);
 	inputs = y_list_remove(inputs, yid);
-	/*
-	while(yahoo_tcp_readline(buff, sizeof(buff), nyd->fd) > 0) {
-	if(!strcmp(buff, ""))
-	break;
-}
 
-	*/
 	yahoo_input_close(yid);
 }
 
@@ -4890,27 +4885,22 @@ static void _yahoo_send_file_connected(int id, int fd, int error, void *data)
 	}
 
 	yid->fd = fd;
-	yahoo_send_packet(yid, pkt, 8);
-	yahoo_packet_free(pkt);
+	yahoo_send_packet(yid, pkt, 4);
 
-	snprintf((char *)buff, sizeof(buff), "29");
+	buff[0] = 0x32;
+	buff[1] = 0x39;
 	buff[2] = 0xc0;
 	buff[3] = 0x80;
 	
 	write(yid->fd, buff, 4);
 
-/*	YAHOO_CALLBACK(ext_yahoo_add_handler)(nyd->fd, YAHOO_INPUT_READ); */
+	yid->fd = 0 ;
 
 	sfd->callback(id, fd, error, sfd->user_data);
 	FREE(sfd);
 	inputs = y_list_remove(inputs, yid);
-	/*
-	while(yahoo_tcp_readline(buff, sizeof(buff), nyd->fd) > 0) {
-		if(!strcmp(buff, ""))
-			break;
-	}
 
-	*/
+	yahoo_packet_free(pkt);
 	yahoo_input_close(yid);
 }
 
@@ -4943,23 +4933,26 @@ void yahoo_send_file(int id, const char *who, const char *msg,
 
 	yahoo_packet_hash(pkt, 0, yd->user);
 	yahoo_packet_hash(pkt, 5, who);
-	yahoo_packet_hash(pkt, 14, msg);
-	yahoo_packet_hash(pkt, 27, name);
 	yahoo_packet_hash(pkt, 28, size_str);
+	yahoo_packet_hash(pkt, 27, name);
+	yahoo_packet_hash(pkt, 14, msg);
 
-	content_length = YAHOO_PACKET_HDRLEN + yahoo_packet_length(pkt);
+	content_length = YAHOO_PACKET_HDRLEN + yahoo_packet_length(pkt)+size+4;
 
 	snprintf(url, sizeof(url), "http://%s:%d/notifyft", 
 			yss->filetransfer_host, yss->filetransfer_port);
-	snprintf((char *)buff, sizeof(buff), "Y=%s; T=%s",
-			yd->cookie_y, yd->cookie_t);
+
+	/* thanks to kopete dumpcap */
+	snprintf((char *)buff, sizeof(buff), "Y=%s; T=%s; C=%s ;B=fckeert1kk1nl&b=2",
+			yd->cookie_y, yd->cookie_t, yd->cookie_c);
 	inputs = y_list_prepend(inputs, yid);
 
 	sfd = y_new0(struct send_file_data, 1);
 	sfd->pkt = pkt;
 	sfd->callback = callback;
 	sfd->user_data = data;
-	yahoo_http_post(yid->yd->client_id, url, (char *)buff, content_length+4+size,
+
+	yahoo_http_post(yid->yd->client_id, url, (char *)buff, content_length,
 			_yahoo_send_file_connected, sfd);
 }
 

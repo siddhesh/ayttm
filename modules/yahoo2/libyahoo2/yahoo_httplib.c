@@ -319,16 +319,18 @@ void yahoo_http_post(int id, const char *url, const char *cookies, long content_
 	if(!url_to_host_port_path(url, host, &port, path))
 		return;
 
+	/* thanks to kopete dumpcap */
 	snprintf(buff, sizeof(buff), 
-			"POST %s HTTP/1.0\r\n"
-			"Content-length: %ld\r\n"
-			"User-Agent: Mozilla/4.5 [en] (" PACKAGE "/" VERSION ")\r\n"
-			"Host: %s:%d\r\n"
+			"POST %s HTTP/1.1\r\n"
 			"Cookie: %s\r\n"
+			"User-Agent: Mozilla/4.0 [en] (" PACKAGE "/" VERSION ")\r\n"
+			"Host: %s:%d\r\n"
+			"Content-length: %ld\r\n"
+			"Cache-Control: no-cache\r\n"
 			"\r\n",
-			path, content_length, 
+			url, cookies,
 			host, port,
-			cookies);
+			content_length);
 
 	yahoo_send_http_request(id, host, port, buff, callback, data);
 }

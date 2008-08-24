@@ -1,3 +1,12 @@
+Sun Aug 24 2008 18:55 UTC [siddheshp]   0.5.0-75
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
+modules/yahoo2/libyahoo2/libyahoo2.c,
+modules/yahoo2/libyahoo2/yahoo_httplib.c, src/chat_room.c, src/chat_window.c,
+src/plugin_api.h:
+* Fixed Yahoo file transfer.
+* Put a slight padding in text entry and chat box so that words don't stick to
+the borders.
+
 Tue Aug 19 2008 14:35 UTC [siddheshp]   0.5.0-74
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c:
 Attached to default smileys callback in aim-oscar.

@@ -2227,6 +2227,9 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	else
 		gtk_widget_set_size_request(cw->chat, 400, 200);
 
+	gtk_text_view_set_left_margin(GTK_TEXT_VIEW(cw->chat), 2);
+	gtk_text_view_set_right_margin(GTK_TEXT_VIEW(cw->chat), 5);
+
 	gtk_container_add(GTK_CONTAINER(scrollwindow), cw->chat);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
 				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
@@ -2254,6 +2257,10 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 					tab_cw->entry->allocation.height);
 	else
 		gtk_widget_set_size_request(cw->entry, 400, 50);
+
+	gtk_text_view_set_left_margin(GTK_TEXT_VIEW(cw->entry), 2);
+	gtk_text_view_set_right_margin(GTK_TEXT_VIEW(cw->entry), 5);
+
 	gtk_container_add(GTK_CONTAINER(scrollwindow), cw->entry);
 
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(cw->entry), TRUE);

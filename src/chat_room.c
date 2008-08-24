@@ -1533,6 +1533,10 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 
 	chat_room->chat = gtk_text_view_new();
 	gtk_widget_set_size_request(chat_room->chat, 400, 200);
+
+	gtk_text_view_set_left_margin(GTK_TEXT_VIEW(chat_room->chat), 2);
+	gtk_text_view_set_right_margin(GTK_TEXT_VIEW(chat_room->chat), 5);
+
 	html_text_view_init(GTK_TEXT_VIEW(chat_room->chat), HTML_IGNORE_NONE);
 	gtk_container_add(GTK_CONTAINER(scrollwindow), chat_room->chat);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow), 
@@ -1552,6 +1556,9 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	chat_room->entry = gtk_text_view_new();
 
 	gtk_widget_set_size_request(chat_room->entry, -1, 50);
+
+	gtk_text_view_set_left_margin(GTK_TEXT_VIEW(chat_room->entry), 2);
+	gtk_text_view_set_right_margin(GTK_TEXT_VIEW(chat_room->entry), 5);
 
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(chat_room->entry), TRUE);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat_room->entry), GTK_WRAP_WORD_CHAR);
