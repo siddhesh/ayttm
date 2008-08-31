@@ -56,6 +56,8 @@ void ay_do_file_selection_save( const char *inDefaultFile, const char *inWindowT
 {
 	const char *selected_file = NULL;
 	GtkWidget *dialog = NULL;
+	char url[255];
+	char *curr_folder = NULL;
 
 	dialog = gtk_file_chooser_dialog_new( inWindowTitle, NULL,
 			GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -63,8 +65,12 @@ void ay_do_file_selection_save( const char *inDefaultFile, const char *inWindowT
 			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
 			NULL);
 
-	if(inDefaultFile)
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), inDefaultFile);
+	if ( (curr_folder = gtk_file_chooser_get_current_folder ( GTK_FILE_CHOOSER(dialog) ) ) )
+		snprintf(url, sizeof(url), "%s/%s", curr_folder, (inDefaultFile?inDefaultFile:""));
+	else
+		snprintf(url, sizeof(url), "/%s", (inDefaultFile?inDefaultFile:""));
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), url);
 
 	if(gtk_dialog_run(GTK_DIALOG(dialog))  == GTK_RESPONSE_ACCEPT) 
 		selected_file = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER(dialog) );

@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.101 $",
-	"$Date: 2008/08/24 18:59:31 $",
+	"$Revision: 1.102 $",
+	"$Date: 2008/08/31 07:53:26 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2174,7 +2174,7 @@ static void ext_yahoo_got_search_result(int id, int found,
 }
 
 static void ext_yahoo_game_notify(int id, const char *me, 
-				  const char *who, int stat)
+				  const char *who, int stat, const char *msg)
 {
 }
 
@@ -2207,15 +2207,18 @@ static void ext_yahoo_mail_notify(int id, const char *from,
 		ay_do_info( _("Yahoo Mail"), buff );
 }
 
-static void ext_yahoo_system_message(int id, const char *msg)
+static void ext_yahoo_system_message(int id, const char *me, const char *who, const char *msg)
 {
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
+	char heading[255];
 
 	if(ylad->ignore_system)
 		return;
 
-	ay_do_info( _("Yahoo System Message"), msg );
+	snprintf(heading, sizeof(heading), _("%s: Yahoo System Message"), me);
+
+	ay_do_info( heading, msg );
 }
 
 static void ext_yahoo_error(int id, const char *err,
