@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.102 $",
-	"$Date: 2008/08/31 07:53:26 $",
+	"$Revision: 1.103 $",
+	"$Date: 2008/08/31 08:26:36 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -907,10 +907,6 @@ static void ext_yahoo_got_im(int id, const char *me, const char *who, const char
 		eb_local_account *receiver = NULL;
 		char buff[2048];
 
-		char *umsg = (char *) msg;
-		if(utf8)
-			umsg = y_utf8_to_str(msg);
-
 		receiver = yahoo_find_local_account_by_id(id);
 		sender = find_account_with_ela(who, receiver);
 		if (sender == NULL) {
@@ -927,21 +923,18 @@ static void ext_yahoo_got_im(int id, const char *me, const char *who, const char
 
 			snprintf(newmessage, sizeof(newmessage), 
 					_("<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"),
-					timestr, umsg);
+					timestr, msg);
 
-			LOG(("<incoming offline message: %s: %s>", who, umsg));
+			LOG(("<incoming offline message: %s: %s>", who, msg));
 			eb_yahoo_decode_yahoo_colors(buff, newmessage);
 
 		} else {
 
-			LOG(("<incoming message: %s: %s>", who, umsg));
-			eb_yahoo_decode_yahoo_colors(buff, umsg);
+			LOG(("<incoming message: %s: %s>", who, msg));
+			eb_yahoo_decode_yahoo_colors(buff, msg);
 
 		}
 		eb_parse_incoming_message(receiver, sender, buff);
-
-		if(utf8)
-			FREE(umsg);
 	}
 }
 
@@ -1461,8 +1454,7 @@ static void eb_yahoo_send_chat_room_message(eb_chat_room * room, char * message)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_yahoo_local_account_data *ylad;
-	char * encoded = y_str_to_utf8(message);
-		
+
 	if(!room) {
 		WARNING(("room is null"));
 		return;
@@ -1474,8 +1466,7 @@ static void eb_yahoo_send_chat_room_message(eb_chat_room * room, char * message)
 	ylad = room->local_user->protocol_local_account_data;
 	
 	ycrd = room->protocol_local_chat_room_data;
-	yahoo_conference_message(ycrd->id, ylad->act_id, ycrd->members, ycrd->room, encoded, 1);
-	FREE(encoded);
+	yahoo_conference_message(ycrd->id, ylad->act_id, ycrd->members, ycrd->room, message, 1);
 }
 
 static void eb_yahoo_join_chat_room(eb_chat_room * room)
@@ -2491,13 +2482,10 @@ static void eb_yahoo_send_im(eb_local_account * account_from,
 		      char * message)
 {
 	eb_yahoo_local_account_data *ylad = account_from->protocol_local_account_data;
-	char * encoded = y_str_to_utf8(message);
 
 	LOG(("eb_yahoo_send_im: %s => %s: %s", account_from->handle,
 	     account_to->handle, message));
-	yahoo_send_im(ylad->id, ylad->act_id, account_to->handle, encoded, 1, 0);
-
-	FREE(encoded);
+	yahoo_send_im(ylad->id, ylad->act_id, account_to->handle, message, 1, 0);
 }
 
 static void yahoo_init_account_prefs(eb_local_account * ela)
