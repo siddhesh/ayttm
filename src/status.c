@@ -2011,6 +2011,9 @@ static GtkWidget* MakeContactList()
 			NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(contact_list), column);
 
+	gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(contact_list_store), 
+			1, GTK_SORT_ASCENDING );
+
 	gtk_drag_source_set(contact_list,
 			GDK_BUTTON1_MASK | GDK_BUTTON2_MASK,
 			drag_types, 1,

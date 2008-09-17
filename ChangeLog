@@ -1,3 +1,7 @@
+Wed Sep 17 2008 19:38 UTC [siddheshp]   0.5.0-78
+- ChangeLog, configure.ac, src/status.c:
+Sort contacts and groups alphabetically
+
 Sun Aug 31 2008 08:20 UTC [siddheshp]   0.5.0-77
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
 No need to convert to/from UTF8; GTK2 does UTF8 by default.
