@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include <gdk/gdkkeysyms.h>
 
@@ -265,6 +266,8 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	eb_chat_room *cr = (eb_chat_room *)data;
 	GdkModifierType modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
+	static gboolean complete_mode = FALSE;
+
 	eb_chat_room_update_window_title(cr, FALSE);
 	set_tab_normal (cr);
   
@@ -299,22 +302,45 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	else if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down) {
 		chat_scroll(cr, event);
 	}
-	else if ( iGetLocalPref("do_auto_complete") && 
-			((event->keyval >= GDK_a && event->keyval <= GDK_z) 
-			 ||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) ) 
-	{
-		return ( chat_auto_complete(cr->entry, cr->fellows, event) 
-				|| ( iGetLocalPref("do_auto_complete") 
-					&& chat_auto_complete(cr->entry, auto_complete_session_words, event)) );
 
-	} else if (iGetLocalPref("do_auto_complete") && (event->keyval == GDK_Tab )) {
-	/* #980589 Right Arrow Key not avail  || event->keyval == GDK_Right )) { */
-		chat_auto_complete_validate(cr->entry);
-		return TRUE;
-	} else if (iGetLocalPref("do_auto_complete") && event->keyval == GDK_space) {
-		chat_auto_complete_insert(cr->entry, event);
+
+	else if (iGetLocalPref("do_auto_complete"))
+	{	
+		if (event->keyval==GDK_space || ispunct(event->keyval)) {
+			eb_debug(DBG_CORE, "AUTO COMPLETE INSERT\n");
+			chat_auto_complete_insert(cr->entry, event);
+			complete_mode=FALSE;
+		} 
+		else if (event->keyval == GDK_Tab) {
+			eb_debug(DBG_CORE, "AUTO COMPLETE VALIDATE\n");
+			chat_auto_complete_validate(cr->entry);
+			complete_mode=FALSE;
+			return TRUE;
+		}
+		else if ( (event->keyval == GDK_Right || event->keyval == GDK_Left) && !modifiers ) {
+			GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cr->entry));
+			GtkTextIter start, end;
+
+			if( gtk_text_buffer_get_selection_bounds(buffer, &start, &end) && complete_mode ) {
+				complete_mode = FALSE;
+				gtk_text_buffer_select_range(buffer, &start, &start);
+				return TRUE;
+			}
+			else {
+				complete_mode = FALSE;
+				return FALSE;
+			}
+		}
+		else if	( (event->keyval >= GDK_a && event->keyval <= GDK_z)
+			  || (event->keyval >= GDK_A && event->keyval <= GDK_Z) )
+		{
+			eb_debug(DBG_CORE, "AUTO COMPLETE\n");
+			complete_mode=TRUE;
+			return chat_auto_complete(cr->entry, auto_complete_session_words, event);
+		} 
 	}
-	else if (cr->notebook != NULL) {
+
+	if (cr->notebook != NULL) {
 		/* check tab changes if this is a tabbed chat window */
 		if ( check_tab_accelerators( widget, cr, modifiers, event ) )
 			return TRUE;
@@ -1136,21 +1162,39 @@ eb_chat_room *find_tabbed_chat_room_index (int current_page)
 	return NULL;
 }
 
-void eb_chat_room_refresh_list(eb_chat_room * room )
+void eb_chat_room_refresh_list(eb_chat_room * room, const char *buddy, ChatRoomRefreshType refresh )
 {
-	LList * node;
-	gtk_list_store_clear(room->fellows_model);
+	GtkTreeIter insert;
+
 	eb_debug(DBG_CORE, "refresh list\n");
 
-	for( node = room->fellows; node; node = node->next )
-	{
-		GtkTreeIter insert;
-		eb_chat_room_buddy * ecrb = node->data;
-		gchar * list = ecrb->alias;
+	if ( refresh == CHAT_ROOM_JOIN ) {
 		gtk_list_store_append(room->fellows_model, &insert);
 		gtk_list_store_set(room->fellows_model, &insert,
-				0, list,
+				0, buddy,
 				-1);
+	}
+	else {
+		GtkTreeIter del_iter ;
+
+		if ( !gtk_tree_model_get_iter_first(GTK_TREE_MODEL(room->fellows_model), &del_iter) )
+			return;
+
+		do {
+			char *name = NULL ;
+
+			gtk_tree_model_get(GTK_TREE_MODEL(room->fellows_model), &del_iter,
+					0, &name,
+					-1);
+	
+			if (name && !strcmp(name, buddy)) {
+				gtk_list_store_remove(room->fellows_model, &del_iter);
+				break;
+			}
+		}
+		while( gtk_tree_model_iter_next(GTK_TREE_MODEL(room->fellows_model), &del_iter) ) ;
+
+		gtk_list_store_remove(room->fellows_model, &del_iter);
 	}
 }
 
@@ -1223,7 +1267,7 @@ void eb_chat_room_buddy_arrive( eb_chat_room * room, const gchar * alias, const 
 
 	room->fellows = l_list_append(room->fellows, ecrb);
 
-	eb_chat_room_refresh_list(room);
+	eb_chat_room_refresh_list(room, handle, CHAT_ROOM_JOIN);
 }
 
 void eb_chat_room_buddy_leave( eb_chat_room * room, const gchar * handle )
@@ -1250,7 +1294,7 @@ void eb_chat_room_buddy_leave( eb_chat_room * room, const gchar * handle )
 		room->fellows = l_list_remove(room->fellows, ecrb);
 		g_free(ecrb);
 	}
-	eb_chat_room_refresh_list(room);
+	eb_chat_room_refresh_list(room, handle, CHAT_ROOM_LEAVE);
 }
 
 static gboolean handle_focus(GtkWidget *widget, GdkEventFocus * event, gpointer userdata)
@@ -1330,9 +1374,16 @@ eb_chat_room* eb_start_chat_room( eb_local_account *ela, gchar * name, int is_pu
 
 void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, gchar * message)
 {
-	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), message, HTML_IGNORE_NONE );
+	char *link_message = NULL ;
+
+	link_message = linkify(message);
+
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), link_message, HTML_IGNORE_NONE );
 	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), "\n", HTML_IGNORE_NONE );
-	ay_log_file_message( chat_room->logfile, "", message );
+	ay_log_file_message( chat_room->logfile, "", link_message );
+
+	if (link_message)
+		g_free(link_message);
 }
 
 void eb_chat_room_show_message( eb_chat_room * chat_room,
@@ -1498,7 +1549,6 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	GtkWidget * close_button;
 	GtkWidget * print_button;
 	GtkWidget * separator;
-	GtkWidget * entry_box;
 	gboolean    enableSoundButton = FALSE;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -1527,6 +1577,9 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	column = gtk_tree_view_column_new_with_attributes(_("Online"), renderer, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(chat_room->fellows_widget), column);
 
+	gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(chat_room->fellows_model),
+			0, GTK_SORT_ASCENDING );
+
 	gtk_widget_set_size_request(chat_room->fellows_widget, 100, 20 );
 
 	gtk_scrolled_window_set_shadow_type ( GTK_SCROLLED_WINDOW(scrollwindow), GTK_SHADOW_ETCHED_IN ) ;
@@ -1545,7 +1598,6 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	g_signal_connect(chat_room->fellows_widget, "row-activated",
 					G_CALLBACK(fellows_activated), chat_room );
 	/*make ourselves something to type into*/
-	entry_box = gtk_vbox_new(FALSE,0);
 	
 	scrollwindow2 = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrollwindow2), 
@@ -1570,7 +1622,6 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 
 	gtk_container_add(GTK_CONTAINER(scrollwindow2),chat_room->entry);
 	gtk_widget_show(scrollwindow2);
-	gtk_box_pack_start(GTK_BOX(entry_box), scrollwindow2, TRUE, TRUE, 3);
 	
 	g_signal_connect(chat_room->entry, "key-press-event",
 			 G_CALLBACK(cr_key_press),
@@ -1609,9 +1660,8 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow),GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE,TRUE, 3);
-	gtk_box_pack_start(GTK_BOX(vbox), entry_box, FALSE, FALSE, 1);
+	gtk_box_pack_start(GTK_BOX(vbox), scrollwindow2, FALSE, FALSE, 1);
 	gtk_widget_show(hbox);
-	gtk_widget_show(entry_box);
 	gtk_widget_show(chat_room->entry);
 
 	focus_chain = g_list_append(focus_chain, chat_room->entry);

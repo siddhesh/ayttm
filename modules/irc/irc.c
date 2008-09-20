@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.47 $",
-	"$Date: 2008/08/10 20:22:00 $",
+	"$Revision: 1.48 $",
+	"$Date: 2008/09/20 14:29:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1286,6 +1286,8 @@ static void ay_got_namereply (irc_name_list *list, const char *channel,
 				strncpy( ecrb->handle, list->name, sizeof(ecrb->handle));
 				ecr->fellows = l_list_append(ecr->fellows, ecrb);
 
+				eb_chat_room_refresh_list(ecr, list->name, CHAT_ROOM_JOIN);
+
 				snprintf(buddy_name, sizeof(buddy_name), "%s@%s", list->name, ia->connect_address);
 
 				/* See if there's anyone we recognize */
@@ -1309,7 +1311,6 @@ static void ay_got_namereply (irc_name_list *list, const char *channel,
 
 			list = list -> next ;
 		}
-		eb_chat_room_refresh_list(ecr);
 	}
 }
 

@@ -82,10 +82,10 @@ static char *ay_strcasestr(const char *haystack, const char *needle)
  */
 gboolean tag_is_valid(char *tag_string)
 {
-	if( !g_ascii_strncasecmp(tag_string, "head", strlen("head")) 
-	    || !g_ascii_strncasecmp(tag_string, "hr", strlen("hr")) 
-	    || !g_ascii_strncasecmp(tag_string, "br", strlen("br")) 
-	    || !g_ascii_strncasecmp(tag_string, "body", strlen("body")) 
+	if( !g_ascii_strncasecmp(tag_string, "head", 4) 
+	    || !g_ascii_strncasecmp(tag_string, "hr", 2) 
+	    || !g_ascii_strncasecmp(tag_string, "br", 2) 
+	    || !g_ascii_strncasecmp(tag_string, "body", 4)
 	    || !g_ascii_strcasecmp(tag_string, "p") 
 	    || !g_ascii_strcasecmp(tag_string, "html") 
 	    || !g_ascii_strcasecmp(tag_string, "title") 
@@ -93,11 +93,11 @@ gboolean tag_is_valid(char *tag_string)
 	    || !g_ascii_strcasecmp(tag_string, "b") 
 	    || !g_ascii_strcasecmp(tag_string, "u") 
 	    || !g_ascii_strcasecmp(tag_string, "i") 
-	    || !g_ascii_strncasecmp(tag_string, "font", strlen("font")) 
-	    || !g_ascii_strncasecmp(tag_string, "a ", strlen("a ")) 
+	    || !g_ascii_strncasecmp(tag_string, "font", 4) 
+	    || !g_ascii_strncasecmp(tag_string, "a ", 2) 
 	    || !g_ascii_strcasecmp(tag_string, "a")
-	    || !g_ascii_strncasecmp(tag_string, "smiley", strlen("smiley")) 
-	    || !g_ascii_strncasecmp(tag_string, "img", strlen("img")) )
+	    || !g_ascii_strncasecmp(tag_string, "smiley", 6) 
+	    || !g_ascii_strncasecmp(tag_string, "img", 3) )
 	{
 		return TRUE;
 	}
@@ -168,7 +168,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
 
 	/* HEAD */
-	if( !g_ascii_strncasecmp(in_tag.name, "head", strlen("head")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "head", 4) ) {
 
 		GtkTextIter start, end;
 		gtk_text_buffer_get_iter_at_mark(buffer, &start, &(in_tag.start));
@@ -180,14 +180,14 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 	}
 	
 	/* HORIZONTAL LINE */
-	if( !g_ascii_strncasecmp(in_tag.name, "hr", strlen("hr")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "hr", 4) ) {
 		GtkTextIter start;
 		GtkWidget *line;
 		GtkTextChildAnchor *anchor;
 		GtkRequisition r;
 
 		gtk_text_buffer_get_iter_at_mark(buffer, &start, &(in_tag.start));
-		gtk_text_buffer_insert(buffer, &start, "\n", strlen("\n"));
+		gtk_text_buffer_insert(buffer, &start, "\n", -1);
 
 		/* Reinitialized since the insert invalidates the iter */
 		gtk_text_buffer_get_iter_at_mark(buffer, &start, &(in_tag.start));
@@ -208,17 +208,17 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 	}
 	
 	/* BR */
-	if( !g_ascii_strncasecmp(in_tag.name, "br", strlen("br")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "br", 2) ) {
 
 		GtkTextIter start;
 		gtk_text_buffer_get_iter_at_mark(buffer, &start, &(in_tag.start));
-		gtk_text_buffer_insert(buffer, &start, "\n", strlen("\n"));
+		gtk_text_buffer_insert(buffer, &start, "\n", -1);
 		
 		return TRUE;
 	}
 
 	/* BODY */
-	if( !g_ascii_strncasecmp(in_tag.name, "body", strlen("body")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "body", 4) ) {
 		char *param = NULL;
 		char attr_val[255];
 		GtkTextIter start, end;
@@ -230,7 +230,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 		
 		if( (param = ay_strcasestr(in_tag.name, "bgcolor="))!=NULL )
 		{
-			param+=strlen("bgcolor=");
+			param+=8; /* length of bgcolor= */
 			_extract_parameter(param, attr_val, 255);
 			style = gtk_text_buffer_create_tag(buffer, in_tag.id, 
 					"background", attr_val,
@@ -285,7 +285,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 	}
 
 	/* FONT */
-	if( !g_ascii_strncasecmp(in_tag.name, "font", strlen("font")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "font", 4) ) {
 		GtkTextIter start, end;
 		char *param = NULL;
 		char attr_val[255];
@@ -301,7 +301,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 		if( !(ignore & HTML_IGNORE_FONT) &&
 				(param = ay_strcasestr(in_tag.name, "face="))!=NULL )
 		{
-			param+=strlen("face=");
+			param+=5; /* length of face= */
 			_extract_parameter(param, attr_val, 255);
 
 			g_object_set(style, "family", attr_val, NULL);
@@ -311,7 +311,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 		if( !(ignore & HTML_IGNORE_FOREGROUND) &&
 				(param = ay_strcasestr(in_tag.name, "color="))!=NULL )
 		{
-			param+=strlen("color=");
+			param+=6;/* length of color= */
 			_extract_parameter(param, attr_val, 255);
 			
 			g_object_set(style, "foreground", attr_val, NULL);
@@ -320,14 +320,14 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 		/* Font Size */
 		if( (param = ay_strcasestr(in_tag.name, "ptsize="))!=NULL )
 		{
-			param+=strlen("ptsize=");
+			param+=7;/*length of ptsize=*/
 			_extract_parameter(param, attr_val, 255);
 
 			g_object_set(style, "size-points", strtod(attr_val, NULL), NULL);
 		}
 		else if( (param = ay_strcasestr(in_tag.name, "absz="))!=NULL )
 		{
-			param+=strlen("absz=");
+			param+=5;/*length of absz=*/
 			_extract_parameter(param, attr_val, 255);
 
 			g_object_set(style, "size-points", strtod(attr_val, NULL), NULL);
@@ -341,7 +341,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 			PangoFontDescription *desc = pango_context_get_font_description(
 					context);
 
-			param+=strlen("size=");
+			param+=5; /*length of size=*/
 			
 			cur_size = pango_font_description_get_size(desc)/PANGO_SCALE;
 
@@ -374,7 +374,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 	}
 
 	/* ANCHOR */
-	if( !g_ascii_strncasecmp(in_tag.name, "a ", strlen("a ")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "a ", 2) ) {
 		GtkTextIter start, end;
 		char *param = NULL;
 		gchar *attr_val = (gchar *)malloc(1024);
@@ -387,7 +387,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 		/* Font Face */
 		if( (param = ay_strcasestr(in_tag.name, "href="))!=NULL )
 		{
-			param+=strlen("href=");
+			param+=5;/*length of href=*/
 			_extract_parameter(param, attr_val, 1024);
 
 			style = gtk_text_buffer_create_tag(buffer, in_tag.id, 
@@ -403,7 +403,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 
 	
 	/* SMILEY */
-	if( !g_ascii_strncasecmp(in_tag.name, "smiley", strlen("smiley")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "smiley", 6) ) {
 		GtkTextIter start;
 		
 		char *param = NULL;
@@ -417,11 +417,11 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 
 		if( (param = ay_strcasestr(in_tag.name, "name="))!=NULL ) {
 
-			param+=strlen("name=");
+			param+=5;/*length of name=*/
 			_extract_parameter(param, smiley_name, 64);
 
 			if( (param = ay_strcasestr(in_tag.name, "protocol="))!=NULL ) {
-				param+=strlen("protocol=");
+				param+=9;/*length of protocol=*/
 				_extract_parameter(param, smiley_protocol, 64);
 				smile = get_smiley_by_name_and_service(smiley_name,
 						smiley_protocol);
@@ -434,10 +434,10 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 				insert_xpm_at_iter(text_view, &start, smile->pixmap);
 			}
 			else if( (param = ay_strcasestr(in_tag.name, "alt=")) != NULL ) {
-				param+=strlen("alt=");
+				param+=4; /*length of alt=*/
 				_extract_parameter(param, smiley_name, 64);
 				gtk_text_buffer_insert(buffer, &start,
-						smiley_name, strlen(smiley_name));
+						smiley_name, -1);
 			}
 			else {
 				insert_xpm_at_iter(text_view, &start, no_such_smiley_xpm);
@@ -448,7 +448,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 	}
 	
 	/* IMAGE */
-	if( !g_ascii_strncasecmp(in_tag.name, "img", strlen("img")) ) {
+	if( !g_ascii_strncasecmp(in_tag.name, "img", 3) ) {
 		GtkTextIter start;
 		char *param = NULL;
 		char img_loc[1024];
@@ -459,7 +459,7 @@ gboolean apply_tag (GtkTextView *text_view, tag in_tag, int ignore)
 
 		if( (param = ay_strcasestr(in_tag.name, "src="))!=NULL ) {
 			
-			param+=strlen("src=");
+			param+=4 ; /*length of src=*/
 			_extract_parameter(param, img_loc, 1024);
 		
 			if(!strcmp(img_loc, "aol_icon.gif")) 
@@ -532,37 +532,37 @@ void unescape_html(GtkTextBuffer *buffer, GtkTextMark html_start)
 		if(!g_ascii_strncasecmp(code, "&gt;", 4)) {
 			gtk_text_buffer_delete(buffer, &start, &end);
 			gtk_text_buffer_get_iter_at_mark(buffer, &start, start_mark);
-			gtk_text_buffer_insert(buffer, &start, ">", strlen(">"));
+			gtk_text_buffer_insert(buffer, &start, ">", -1);
 			html_found = 1;
 		}
 		if(!g_ascii_strncasecmp(code, "&lt;", 4)) {
 			gtk_text_buffer_delete(buffer, &start, &end);
 			gtk_text_buffer_get_iter_at_mark(buffer, &start, start_mark);
-			gtk_text_buffer_insert(buffer, &start, "<", strlen("<"));
+			gtk_text_buffer_insert(buffer, &start, "<", -1);
 			html_found = 1;
 		}
 		if(!g_ascii_strncasecmp(code, "&amp;", 5)) {
 			gtk_text_buffer_delete(buffer, &start, &end);
 			gtk_text_buffer_get_iter_at_mark(buffer, &start, start_mark);
-			gtk_text_buffer_insert(buffer, &start, "&", strlen("&"));
+			gtk_text_buffer_insert(buffer, &start, "&", -1);
 			html_found = 1;
 		}
 		if(!g_ascii_strncasecmp(code, "&#8212;", 7)) {
 			gtk_text_buffer_delete(buffer, &start, &end);
 			gtk_text_buffer_get_iter_at_mark(buffer, &start, start_mark);
-			gtk_text_buffer_insert(buffer, &start, "--", strlen("--"));
+			gtk_text_buffer_insert(buffer, &start, "--", -1);
 			html_found = 1;
 		}
 		if(!g_ascii_strncasecmp(code, "&nbsp;", 6)) {
 			gtk_text_buffer_delete(buffer, &start, &end);
 			gtk_text_buffer_get_iter_at_mark(buffer, &start, start_mark);
-			gtk_text_buffer_insert(buffer, &start, " ", strlen(" "));
+			gtk_text_buffer_insert(buffer, &start, " ", -1);
 			html_found = 1;
 		}
 		if(!g_ascii_strncasecmp(code, "&quot;", 6)) {
 			gtk_text_buffer_delete(buffer, &start, &end);
 			gtk_text_buffer_get_iter_at_mark(buffer, &start, start_mark);
-			gtk_text_buffer_insert(buffer, &start, "\"", strlen("\""));
+			gtk_text_buffer_insert(buffer, &start, "\"", -1);
 			html_found = 1;
 		}
 
@@ -758,7 +758,7 @@ void html_text_buffer_append ( GtkTextView *text_view, char *txt, int ignore )
 
 	insert_mark = gtk_text_buffer_create_mark(buffer, NULL, &iter, TRUE);
 
-	gtk_text_buffer_insert(buffer, &iter, text, strlen(text));
+	gtk_text_buffer_insert(buffer, &iter, text, -1);
 	parse_html(text_view, *insert_mark, ignore);
 
 	if(iter_loc.y <= visible_rect.y+visible_rect.height) {

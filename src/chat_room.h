@@ -37,6 +37,11 @@ typedef struct _eb_chat_room_buddy
 	int color;
 } eb_chat_room_buddy;
 
+typedef enum {
+	CHAT_ROOM_LEAVE = -1,
+	CHAT_ROOM_JOIN  =  1
+} ChatRoomRefreshType ;
+
 struct _chat_window;
 typedef struct _chat_window eb_chat_room;
 
@@ -50,7 +55,7 @@ void eb_chat_room_show_message( eb_chat_room * chat_room, const char * user, con
 eb_chat_room* eb_start_chat_room( eb_local_account *ela, char * name , int is_public);
 void eb_chat_room_buddy_arrive( eb_chat_room * room, const char * alias, const char * handle );
 void eb_chat_room_buddy_leave( eb_chat_room * room, const char * handle );
-void eb_chat_room_refresh_list(eb_chat_room * room );
+void eb_chat_room_refresh_list(eb_chat_room * room, const char *handle, ChatRoomRefreshType refresh );
 int eb_chat_room_buddy_connected( eb_chat_room * room, char * user );
 void open_join_chat_window();
 char* next_chatroom_name();

@@ -1229,7 +1229,7 @@ gboolean chat_key_press( GtkWidget *widget, GdkEventKey *event, gpointer data )
 			complete_mode=FALSE;
 			return TRUE;
 		}
-		else if (event->keyval == GDK_Right || event->keyval == GDK_Left) {
+		else if ( (event->keyval == GDK_Right || event->keyval == GDK_Left) && !modifiers ) {
 			GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry));
 			GtkTextIter start, end;
 
@@ -2256,7 +2256,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 					tab_cw->entry->allocation.width, 
 					tab_cw->entry->allocation.height);
 	else
-		gtk_widget_set_size_request(cw->entry, 400, 50);
+		gtk_widget_set_size_request(cw->entry, -1, 50);
 
 	gtk_text_view_set_left_margin(GTK_TEXT_VIEW(cw->entry), 2);
 	gtk_text_view_set_right_margin(GTK_TEXT_VIEW(cw->entry), 5);
@@ -2275,7 +2275,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 	g_signal_connect(cw->entry, "key-press-event",
 			G_CALLBACK(chat_key_press), cw);
 
-	gtk_paned_pack2(GTK_PANED(resize_bar), scrollwindow, TRUE, TRUE);
+	gtk_paned_pack2(GTK_PANED(resize_bar), scrollwindow, FALSE, FALSE);
 
 	gtk_widget_show(scrollwindow);
 	gtk_box_pack_start(GTK_BOX(vbox),resize_bar, TRUE, TRUE, 5);

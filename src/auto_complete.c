@@ -49,10 +49,7 @@ char * complete_word( LList * l, const char *begin, int *choice)
 	int list_length = 0;
 	*choice = TRUE;
 	
-	if (begin == NULL)
-		return NULL;
-	
-	if (strlen(begin) == 0)
+	if (begin == NULL || *begin == '\0' )
 		return NULL;
 	
 	for (cur = l; cur && cur->data; cur = cur->next) {
@@ -160,7 +157,7 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 		nick = complete_word(words, comp_word, &choice);
 
 		if (nick != NULL) {
-			int b = strlen(word) - strlen(last_word);
+			int b = g_utf8_strlen(word, -1) - g_utf8_strlen(last_word, -1);
 			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
 
 			/*int inserted=b;*/
@@ -174,13 +171,13 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
 
 			eb_debug(DBG_CORE, "insert %s at %d\n",nick, b);
-			gtk_text_buffer_insert(buffer, &b_iter, nick, strlen(nick));
-			b+=strlen(nick);
+			gtk_text_buffer_insert(buffer, &b_iter, nick, -1);
+			b+=g_utf8_strlen(nick, -1);
 			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
 			gtk_text_buffer_get_iter_at_offset(buffer, &insert_iter, x);
 			
 			if (!choice) {
-				gtk_text_buffer_insert(buffer, &b_iter, " ", strlen(" "));
+				gtk_text_buffer_insert(buffer, &b_iter, " ", -1);
 				b++;
 				gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
 			}
@@ -232,9 +229,11 @@ void chat_auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 		int found=0;
 		LList *l = auto_complete_session_words ;
 
+		int last_char = strlen(word) - 1 ;
+
 		/* trim last space */
-		while (strlen (word) && (word[strlen(word)-1] == ' ' || ispunct(word[strlen(word)-1]))) {
-			word[strlen(word)-1]='\0';
+		while ( *word && (word[last_char] == ' ' || ispunct(word[last_char]) ) ) {
+			word[last_char--]='\0';
 		}
 
 		last_word = strrchr(word, ' ');

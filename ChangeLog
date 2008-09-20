@@ -1,3 +1,16 @@
+Sat Sep 20 2008 14:25 UTC [siddheshp]   0.5.0-79
+- ChangeLog, configure.ac,  modules/irc/irc.c, src/auto_complete.c, 
+src/chat_room.c, src/chat_room.h, src/chat_window.c, 
+src/gtk/html_text_buffer.c:
+* Sort Chat room buddy list alphabetically
+* Replaced strlen() with g_utf8_strlen() in autocomplete to cater for UTF-8
+characters. We might need to look at this in other modules as well.
+* Removed calls to strlen("literal") with the just actual length of the
+literal
+* Put autocomplete changes in chat_window.c in chat_room.c as well
+* Linkify 3rd person messages as well
+* Made chat window entry to be the same as chat room entry
+
 Wed Sep 17 2008 19:38 UTC [siddheshp]   0.5.0-78
 - ChangeLog, configure.ac, src/status.c:
 Sort contacts and groups alphabetically
