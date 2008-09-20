@@ -1,3 +1,9 @@
+Sat Sep 20 2008 19:00 UTC [siddheshp]   0.5.0-80
+- ChangeLog, configure.ac, src/chat_room.c:
+* Previous commit b0rked autocomplete for buddy nicknames
+* Trying to delete from list even when a valid entry was not found in the chat
+room
+
 Sat Sep 20 2008 14:25 UTC [siddheshp]   0.5.0-79
 - ChangeLog, configure.ac,  modules/irc/irc.c, src/auto_complete.c, 
 src/chat_room.c, src/chat_room.h, src/chat_window.c, 

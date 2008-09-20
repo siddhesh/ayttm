@@ -336,7 +336,8 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		{
 			eb_debug(DBG_CORE, "AUTO COMPLETE\n");
 			complete_mode=TRUE;
-			return chat_auto_complete(cr->entry, auto_complete_session_words, event);
+			return ( chat_auto_complete(cr->entry, auto_complete_session_words, event)
+					&& chat_auto_complete(cr->entry, cr->fellows, event) ) ;
 		} 
 	}
 
@@ -1166,7 +1167,7 @@ void eb_chat_room_refresh_list(eb_chat_room * room, const char *buddy, ChatRoomR
 {
 	GtkTreeIter insert;
 
-	eb_debug(DBG_CORE, "refresh list\n");
+	eb_debug(DBG_CORE, "refresh list (%d)%s\n", refresh, buddy);
 
 	if ( refresh == CHAT_ROOM_JOIN ) {
 		gtk_list_store_append(room->fellows_model, &insert);
@@ -1177,8 +1178,10 @@ void eb_chat_room_refresh_list(eb_chat_room * room, const char *buddy, ChatRoomR
 	else {
 		GtkTreeIter del_iter ;
 
-		if ( !gtk_tree_model_get_iter_first(GTK_TREE_MODEL(room->fellows_model), &del_iter) )
+		if ( !gtk_tree_model_get_iter_first(GTK_TREE_MODEL(room->fellows_model), &del_iter) ) {
+			eb_debug(DBG_CORE, "Nothing in the list yet??: %s\n", buddy);
 			return;
+		}
 
 		do {
 			char *name = NULL ;
@@ -1187,14 +1190,12 @@ void eb_chat_room_refresh_list(eb_chat_room * room, const char *buddy, ChatRoomR
 					0, &name,
 					-1);
 	
-			if (name && !strcmp(name, buddy)) {
+			if (buddy && name && !strcmp(name, buddy)) {
 				gtk_list_store_remove(room->fellows_model, &del_iter);
-				break;
+				return;
 			}
 		}
 		while( gtk_tree_model_iter_next(GTK_TREE_MODEL(room->fellows_model), &del_iter) ) ;
-
-		gtk_list_store_remove(room->fellows_model, &del_iter);
 	}
 }
 
