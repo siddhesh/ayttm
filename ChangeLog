@@ -1,3 +1,8 @@
+Sat Sep 20 2008 19:55 UTC [siddheshp]   0.5.0-81
+- ChangeLog, configure.ac, src/chat_room.c:
+Need to be more careful with my commits -- autocomplete for nicknames is
+finally fixed.
+
 Sat Sep 20 2008 19:00 UTC [siddheshp]   0.5.0-80
 - ChangeLog, configure.ac, src/chat_room.c:
 * Previous commit b0rked autocomplete for buddy nicknames

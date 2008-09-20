@@ -336,8 +336,11 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		{
 			eb_debug(DBG_CORE, "AUTO COMPLETE\n");
 			complete_mode=TRUE;
-			return ( chat_auto_complete(cr->entry, auto_complete_session_words, event)
-					&& chat_auto_complete(cr->entry, cr->fellows, event) ) ;
+
+			if ( !chat_auto_complete(cr->entry, auto_complete_session_words, event) )
+				return ( chat_auto_complete(cr->entry, cr->fellows, event) ) ;
+
+			return TRUE;
 		} 
 	}
 
