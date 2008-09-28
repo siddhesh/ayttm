@@ -16,7 +16,9 @@ char ** msn_read_line(msnconn *conn, int * numargs);
 
 void msn_clean_up(msnconn * conn);
 
-void msn_add_callback(msnconn * conn, void (*func)(msnconn * conn, int trid, char ** args, int numargs, callback_data * data), int trid, callback_data * data);
+void msn_add_callback(msnconn * conn, void (*func)(msnconn * conn, 
+			int trid, char ** args, int numargs, callback_data * data), 
+			int trid, callback_data * data);
 
 void msn_del_callback(msnconn * conn, int trid);
 
