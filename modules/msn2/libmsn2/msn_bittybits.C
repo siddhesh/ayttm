@@ -56,13 +56,30 @@ char ** msn_read_line(msnconn *conn, int * numargs)
 					*numargs=-1;
 					return NULL;      
 				} else if(conn->type==CONN_FTP) {
-					conn->numspaces++; conn->readbuf[conn->pos]='\0'; finished=1; break;
+					conn->numspaces++; 
+					conn->readbuf[conn->pos]='\0'; 
+					finished=1; 
+					break;
 				}
 			}
-			if(conn->pos == 1249) {conn->readbuf[conn->pos]='\0'; goto continued; }
-			if(c=='\r' || conn->pos > 1249) { goto continued; }
-			if(c=='\n') { conn->numspaces++; conn->readbuf[conn->pos]='\0'; finished=1; break; }
-			if(c==' ') { conn->numspaces++; }
+			if(conn->pos == 1249) {
+				conn->readbuf[conn->pos]='\0'; 
+				goto continued; 
+			}
+
+			if(c=='\r' || conn->pos > 1249)
+				goto continued;
+
+			if(c=='\n') { 
+				conn->numspaces++; 
+				conn->readbuf[conn->pos]='\0'; 
+				finished=1; 
+				break; 
+			}
+
+			if(c==' ') 
+				conn->numspaces++;
+
 			conn->readbuf[conn->pos]=c;
 			conn->pos++;
 		} else {
@@ -180,11 +197,7 @@ void msn_del_callback(msnconn * conn, int trid)
 
 	list=conn->callbacks;
 
-	if(list==NULL)
-		return;
-
-	do
-	{
+	while(list!=NULL) {
 		call=(callback *)list->data;
 
 		if(call->trid==trid) {
@@ -204,7 +217,7 @@ void msn_del_callback(msnconn * conn, int trid)
 		}
 
 		list=list->next;
-	} while(list!=NULL);
+	}
 }
 
 void msn_add_to_llist(llist *& listp, llist_data * data)
