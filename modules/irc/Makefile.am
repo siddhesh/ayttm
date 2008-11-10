@@ -4,6 +4,8 @@ pkglib_LTLIBRARIES = irc.la
 
 AM_CFLAGS = $(GTK_CFLAGS) -I$(top_srcdir)/src -Ilibirc
 
+noinst_HEADERS = irc.h
+
 if MINGW32
 WIN32_LDFLAGS = -no-undefined
 WIN32_LIBADD = -L../../src -layttm -lintl -lglib-2.0 -lws2_32 -lgtk

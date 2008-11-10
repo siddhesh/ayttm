@@ -9,6 +9,6 @@ LIBS = @LIBS@ $(GLIB_LIBS)
 libyahoo2_la_SOURCES = libyahoo2.c crypt.c md5.c sha1.c \
 	yahoo_httplib.c yahoo_util.c yahoo_list.c yahoo_fn.c
 
-pkginclude_HEADERS = yahoo2.h yahoo2_callbacks.h yahoo2_types.h \
+EXTRA_DIST = yahoo2.h yahoo2_callbacks.h yahoo2_types.h \
 	yahoo_httplib.h yahoo_list.h yahoo_fn.h
 

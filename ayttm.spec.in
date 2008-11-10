@@ -33,9 +33,9 @@ messages through AOL, ICQ, Yahoo, MSN, IRC and Jabber.
 
 %build
 %if "%{nodebug}" == "0"
-%configure --enable-smtp --enable-jasper-filter
+%configure --enable-smtp --enable-jasper-filter --sysconfdir=/etc
 %else
-%configure --disable-crash-dialog --enable-smtp --enable-jasper-filter
+%configure --disable-crash-dialog --enable-smtp --enable-jasper-filter --sysconfdir=/etc
 %endif
 make
 
@@ -53,7 +53,7 @@ rm -rf $RPM_BUILD_ROOT
 # Install man page.
 %{_mandir}/man*/*
 # Icons and sounds
-%{_datadir}/pixmaps/ayttm.png
+%{_datadir}/pixmaps/*.png
 %{_datadir}/@PACKAGE@/sounds/*
 %{_datadir}/@PACKAGE@/smileys/*
 # Red Hat menu (doesn't do any damage on other distros)
@@ -69,6 +69,8 @@ rm -rf $RPM_BUILD_ROOT
 # Lastly, the binary itself
 %{_bindir}/ayttm_streamer_wrapper.sh
 %{_bindir}/@PACKAGE@
+%exclude %{_libdir}/@PACKAGE@/*.a
+
 
 %changelog
 @CHANGELOG@

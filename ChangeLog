@@ -1,69 +1,77 @@
-Sun Sep 28 2008 15:40 UTC [siddheshp]   0.5.0-81
-ChangeLog, modules/msn2/libmsn2/msn_bittybits.C,
+* Mon Nov 10 2008 19:00 UTC [siddheshp]   0.5.0-82
+- ChangeLog, ayttm.spec.in, modules/irc/Makefile.am,
+modules/irc/libirc/Makefile.am, modules/yahoo2/libyahoo2/Makefile.am,
+pixmaps/Makefile.am, configure.ac, ChangeLog-0.5.0-45:
+ * Header files and images went missing from the built tarballs
+ * Fixed rpm build errors
+ * Moved old entries to ChangeLog-0.5.0-45
+
+* Sun Sep 28 2008 15:40 UTC [siddheshp]   0.5.0-81
+- ChangeLog, modules/msn2/libmsn2/msn_bittybits.C,
 modules/msn2/libmsn2/msn_bittybits.h:
-Code formatting. No functional changes.
+ Code formatting. No functional changes.
 
-Sat Sep 20 2008 19:55 UTC [siddheshp]   0.5.0-81
+* Sat Sep 20 2008 19:55 UTC [siddheshp]   0.5.0-81
 - ChangeLog, configure.ac, src/chat_room.c:
-Need to be more careful with my commits -- autocomplete for nicknames is
-finally fixed.
+ Need to be more careful with my commits -- autocomplete for nicknames is
+ finally fixed.
 
-Sat Sep 20 2008 19:00 UTC [siddheshp]   0.5.0-80
+* Sat Sep 20 2008 19:00 UTC [siddheshp]   0.5.0-80
 - ChangeLog, configure.ac, src/chat_room.c:
-* Previous commit b0rked autocomplete for buddy nicknames
-* Trying to delete from list even when a valid entry was not found in the chat
-room
+ * Previous commit b0rked autocomplete for buddy nicknames
+ * Trying to delete from list even when a valid entry was not found in the chat
+ room
 
-Sat Sep 20 2008 14:25 UTC [siddheshp]   0.5.0-79
+* Sat Sep 20 2008 14:25 UTC [siddheshp]   0.5.0-79
 - ChangeLog, configure.ac,  modules/irc/irc.c, src/auto_complete.c, 
 src/chat_room.c, src/chat_room.h, src/chat_window.c, 
 src/gtk/html_text_buffer.c:
-* Sort Chat room buddy list alphabetically
-* Replaced strlen() with g_utf8_strlen() in autocomplete to cater for UTF-8
-characters. We might need to look at this in other modules as well.
-* Removed calls to strlen("literal") with the just actual length of the
-literal
-* Put autocomplete changes in chat_window.c in chat_room.c as well
-* Linkify 3rd person messages as well
-* Made chat window entry to be the same as chat room entry
+ * Sort Chat room buddy list alphabetically
+ * Replaced strlen() with g_utf8_strlen() in autocomplete to cater for UTF-8
+ characters. We might need to look at this in other modules as well.
+ * Removed calls to strlen("literal") with the just actual length of the
+ literal
+ * Put autocomplete changes in chat_window.c in chat_room.c as well
+ * Linkify 3rd person messages as well
+ * Made chat window entry to be the same as chat room entry
 
-Wed Sep 17 2008 19:38 UTC [siddheshp]   0.5.0-78
+* Wed Sep 17 2008 19:38 UTC [siddheshp]   0.5.0-78
 - ChangeLog, configure.ac, src/status.c:
-Sort contacts and groups alphabetically
+ Sort contacts and groups alphabetically
 
-Sun Aug 31 2008 08:20 UTC [siddheshp]   0.5.0-77
+* Sun Aug 31 2008 08:20 UTC [siddheshp]   0.5.0-77
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
-No need to convert to/from UTF8; GTK2 does UTF8 by default.
+ No need to convert to/from UTF8; GTK2 does UTF8 by default.
 
-Sun Aug 31 2008 07:40 UTC [siddheshp]   0.5.0-76
+* Sun Aug 31 2008 07:40 UTC [siddheshp]   0.5.0-76
 - modules/yahoo2/yahoo.c, modules/yahoo2/libyahoo2/libyahoo2.c,
 modules/yahoo2/libyahoo2/yahoo2_callbacks.h,
 modules/yahoo2/libyahoo2/yahoo2_types.h, src/file_select.c: ChangeLog,
 configure.ac:
-* Merged changes made by Gennady Feldman in libyahoo2 upstream -- mostly 
-fixes and code cleanup
-* We don't really need to bump protocol version to 0xe; 0xc is quite alright
-* Set the full filename correctly for incoming files during file transfer
+ * Merged changes made by Gennady Feldman in libyahoo2 upstream -- mostly 
+ fixes and code cleanup
+ * We don't really need to bump protocol version to 0xe; 0xc is quite alright
+ * Set the full filename correctly for incoming files during file transfer
 
-Sun Aug 24 2008 18:55 UTC [siddheshp]   0.5.0-75
+* Sun Aug 24 2008 18:55 UTC [siddheshp]   0.5.0-75
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
 modules/yahoo2/libyahoo2/libyahoo2.c,
 modules/yahoo2/libyahoo2/yahoo_httplib.c, src/chat_room.c, src/chat_window.c,
 src/plugin_api.h:
-* Fixed Yahoo file transfer.
-* Put a slight padding in text entry and chat box so that words don't stick to
-the borders.
+ * Fixed Yahoo file transfer.
+ * Put a slight padding in text entry and chat box so that words don't stick to
+ the borders.
 
-Tue Aug 19 2008 14:35 UTC [siddheshp]   0.5.0-74
+* Tue Aug 19 2008 14:35 UTC [siddheshp]   0.5.0-74
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c:
-Attached to default smileys callback in aim-oscar.
+ Attached to default smileys callback in aim-oscar.
 
-Tue Aug 19 2008 08:05 UTC [siddheshp]   0.5.0-73
+* Tue Aug 19 2008 08:05 UTC [siddheshp]   0.5.0-73
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c,
 src/gtk/html_text_buffer.c:
-Fixed wrap behaviour for long words in the entry box and chat window.
+ Fixed wrap behaviour for long words in the entry box and chat window.
 
-Mon Aug 11 2008 04:45 UTC [siddheshp]   0.5.0-72
+* Mon Aug 11 2008 04:45 UTC [siddheshp]   0.5.0-72
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c,
 modules/aim-oscar/libfaim/src/admin.c, modules/aim-oscar/libfaim/src/auth.c,
 modules/aim-oscar/libfaim/src/bart.c, modules/aim-oscar/libfaim/src/bos.c,
@@ -106,162 +114,162 @@ pixmaps/msn/thumbdown.xpm, pixmaps/msn/thumbup.xpm, po/de.po, po/en_GB.po,
 po/es.po, po/fr.po, po/hi.po, po/nl.po, po/pt_BR.po, po/sv.po,
 src/chat_room.c, src/nomodule.c, src/plugin.c, src/smileys.c, src/smileys.h,
 src/gtk/html_text_buffer.c:
-Cleaned up some warnings... shouldn't break anything...
+ Cleaned up some warnings... shouldn't break anything...
 
-Sun Aug 10 2008 20:20 UTC [siddheshp]   0.5.0-71
+* Sun Aug 10 2008 20:20 UTC [siddheshp]   0.5.0-71
 - ChangeLog, modules/irc/irc.c, modules/irc/libirc/libirc.h,
 src/auto_complete.c, src/chat_room.c, src/chat_room.h, src/chat_window.c,
 configure.ac:
-* Fix Invite goof-up in IRC -- channel name and invitee got interchanged
-* Defer focus on notebook tab to chat room message entry box.
+ * Fix Invite goof-up in IRC -- channel name and invitee got interchanged
+ * Defer focus on notebook tab to chat room message entry box.
 
-Sun Aug 10 2008 15:10 UTC [siddheshp]   0.5.0-70
+* Sun Aug 10 2008 15:10 UTC [siddheshp]   0.5.0-70
 - ChangeLog, src/auto_complete.c, src/auto_complete.h:
-Forgot to add the auto_complete sources..
+ Forgot to add the auto_complete sources..
 
-Sun Aug 10 2008 15:05 UTC [siddheshp]   0.5.0-70
+* Sun Aug 10 2008 15:05 UTC [siddheshp]   0.5.0-70
 - src/Makefile.am, src/chat_room.c, src/chat_window.c, src/prefs.c,
 src/prefs.h, src/util.c, src/gtk/prefs_window.C, ChangeLog, configure.ac:
-* Added option to disable smileys in Preferences
-* Separated auto complete into a separate source file
-* Don't send the auto-completed version of a word on enter.
+ * Added option to disable smileys in Preferences
+ * Separated auto complete into a separate source file
+ * Don't send the auto-completed version of a word on enter.
 
-Sun Aug 10 2008 09:00 UTC [siddheshp]   0.5.0-69
+* Sun Aug 10 2008 09:00 UTC [siddheshp]   0.5.0-69
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c:
-* Set focus on message entry widget when chaging tabs with mouseclick.
-* Removed frames from chat windows. Now scroll windows have the ability to
-draw pretty borders
+ * Set focus on message entry widget when chaging tabs with mouseclick.
+ * Removed frames from chat windows. Now scroll windows have the ability to
+ draw pretty borders
 
-Wed Aug 06 2008 03:46 UTC [siddheshp]   0.5.0-68
+* Wed Aug 06 2008 03:46 UTC [siddheshp]   0.5.0-68
 - ChangeLog, configure.ac, src/browser.c, modules/Makefile.am:
-* Removed workwizu from SUBDIRS
-* Fixed double free() when using an alternate browser. George is on a roll :)
+ * Removed workwizu from SUBDIRS
+ * Fixed double free() when using an alternate browser. George is on a roll :)
 
-Sun Aug 03 2008 20:25 UTC [siddheshp]   0.5.0-67
+* Sun Aug 03 2008 20:25 UTC [siddheshp]   0.5.0-67
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c:
-Changed the Service Name from AIM/ICQ to AIM-ICQ. The / seems to confuse the
-parser.
+ Changed the Service Name from AIM/ICQ to AIM-ICQ. The / seems to confuse the
+ parser.
 
-Sun Aug 03 2008 16:00 UTC [siddheshp]   0.5.0-66
+* Sun Aug 03 2008 16:00 UTC [siddheshp]   0.5.0-66
 - ChangeLog, configure.ac, pixmaps/smileys.png, pixmaps/smileys.xcf,
 src/ayttm_tray.c, modules/aim-oscar/aim-oscar.c:
-* Disabled aim-toc and icq-toc modules by default and enabled aim-oscar.
-* Made smiley's eyes a little bigger 8)
-* Updated protocol display name in aim-oscar to AIM/ICQ instead of AIM-oscar.
+ * Disabled aim-toc and icq-toc modules by default and enabled aim-oscar.
+ * Made smiley's eyes a little bigger 8)
+ * Updated protocol display name in aim-oscar to AIM/ICQ instead of AIM-oscar.
 
-Sat Aug 02 2008 21:00 UTC [siddheshp]   0.5.0-65
+* Sat Aug 02 2008 21:00 UTC [siddheshp]   0.5.0-65
 - ChangeLog, configure.ac, src/main.c, src/icons.c, src/icons.h,
 src/Makefile.am, pixmaps/Makefile.am, pixmaps/buddy.png, pixmaps/buddy.xcf,
 pixmaps/away.png, pixmaps/away.xcf, pixmaps/group.png, pixmaps/group.xcf,
 pixmaps/group-chat.png, pixmaps/group-chat.xcf, pixmaps/smileys.png,
 pixmaps/smileys.xcf, src/status.c:
-Little icons for our menus. Also added a GtkIconFactory for ayttm so that we can
-put even more pwetty icons...
+ Little icons for our menus. Also added a GtkIconFactory for ayttm so that we can
+ put even more pwetty icons...
 
-Fri Aug 01 2008 22:05 UTC [siddheshp]   0.5.0-64
+* Fri Aug 01 2008 22:05 UTC [siddheshp]   0.5.0-64
 - ChangeLog, configure.ac, modules/irc/irc.c:
-* A buddy leaving a chatroom doesn't mean that he has logged off.
-* Store server-truncated nickname only for exchanges with the server, not for
-our records
+ * A buddy leaving a chatroom doesn't mean that he has logged off.
+ * Store server-truncated nickname only for exchanges with the server, not for
+ our records
 
-Thu Jul 31 2008 20:17 UTC [siddheshp]   0.5.0-63
+* Thu Jul 31 2008 20:17 UTC [siddheshp]   0.5.0-63
 - ChangeLog, configure.ac, src/edit_local_accounts.c:
-NULL check on service type to prevent crash on account creation. NOW #2021862
-is closed.
+ NULL check on service type to prevent crash on account creation. NOW #2021862
+ is closed.
 
-Sun Jul 27 2008 16:10 UTC [siddheshp]   0.5.0-62
+* Sun Jul 27 2008 16:10 UTC [siddheshp]   0.5.0-62
 - ChangeLog, src/gtk/html_text_buffer.c, configure.ac:
-Fixed scrolling behaviour when long text is received.
+ Fixed scrolling behaviour when long text is received.
 
-Sat Jul 26 2008 08:40 UTC [siddheshp]   0.5.0-61
+* Sat Jul 26 2008 08:40 UTC [siddheshp]   0.5.0-61
 - ChangeLog, configure.ac, src/gtk/html_text_buffer.c:
-Finally, the chat window won't scroll back on new messages if you've scrolled
-up to see the previous messages.
+ Finally, the chat window won't scroll back on new messages if you've scrolled
+ up to see the previous messages.
 
-Sat Jul 26 2008 06:25 UTC [siddheshp]   0.5.0-60
+* Sat Jul 26 2008 06:25 UTC [siddheshp]   0.5.0-60
 - ChangeLog, configure.ac,  modules/irc/irc.c,  modules/irc/libirc/libirc.h:
-* Recognize nickname that the server recognizes you as -- servers may truncate
-your nickname to a maxlen. Freenode limits nickname length to 16 characters
-* */me hits /me on the head* My nickname can be lower case as well as uppercase.
-* Comparing nickname to a blank string in PART. Should be assigned to the
-notices window.
+ * Recognize nickname that the server recognizes you as -- servers may truncate
+ your nickname to a maxlen. Freenode limits nickname length to 16 characters
+ * */me hits /me on the head* My nickname can be lower case as well as uppercase.
+ * Comparing nickname to a blank string in PART. Should be assigned to the
+ notices window.
 
-Sun Jul 20 2008 18:55 UTC [siddheshp]   0.5.0-59
+* Sun Jul 20 2008 18:55 UTC [siddheshp]   0.5.0-59
 - ChangeLog, configure.ac, modules/irc/irc.c, /src/prefs.c:
-* Buddy Management changes: Set buddy status if he/she appears in any chatroom
-or even messages us.
-* Allow offline personal messaging so that we may 'discover' if our buddy is
-online by simply messaging him/her.
-* Fixed crash when a user adds an invalid account when the protocol module is
-unloaded and then tries to load the protocol module and subsequently tries to
-connect... Phew! In short, it closes #2021862 on SF.Net.
+ * Buddy Management changes: Set buddy status if he/she appears in any chatroom
+ or even messages us.
+ * Allow offline personal messaging so that we may 'discover' if our buddy is
+ online by simply messaging him/her.
+ * Fixed crash when a user adds an invalid account when the protocol module is
+ unloaded and then tries to load the protocol module and subsequently tries to
+ connect... Phew! In short, it closes #2021862 on SF.Net.
 
-Mon Jul 14 2008 20:35 UTC [siddheshp]   0.5.0-58
+* Mon Jul 14 2008 20:35 UTC [siddheshp]   0.5.0-58
 - ChangeLog, configure.ac, modules/irc/irc.c,
 modules/irc/libirc/irc_message.c:
-* Allow /j command as a shortcut to /join
-* Fixed behaviour after nickname change. Change own nickname in our local
-account so that we can receive messages sent to our new nickname. Thanks
-to 'loot' of puppy linux for reporting this.
+ * Allow /j command as a shortcut to /join
+ * Fixed behaviour after nickname change. Change own nickname in our local
+ account so that we can receive messages sent to our new nickname. Thanks
+ to 'loot' of puppy linux for reporting this.
 
-Sat Jul 12 2008 18:55 UTC [siddheshp]   0.5.0-57
+* Sat Jul 12 2008 18:55 UTC [siddheshp]   0.5.0-57
 - ChangeLog, configure.ac, src/util.c, src/gtk/html_text_buffer.c:
-* Allow mixed case URLs. This is important for URLs that contain
-case-sensitive GET data.
-* Replaced the standard strcmp with glib string compare functions.
+ * Allow mixed case URLs. This is important for URLs that contain
+ case-sensitive GET data.
+ * Replaced the standard strcmp with glib string compare functions.
 
-Sat Jul 12 2008 05:55 UTC [siddheshp]   0.5.0-56
+* Sat Jul 12 2008 05:55 UTC [siddheshp]   0.5.0-56
 - ChangeLog, configure.ac, modules/msn2/libmsn2/msn_core:
-Fixed crash when user cancels msn connect request just as the server
-certificate is being authenticated.
+ Fixed crash when user cancels msn connect request just as the server
+ certificate is being authenticated.
 
-Tue Jul 08 2008 19:00 UTC [siddheshp]   0.5.0-55
+* Tue Jul 08 2008 19:00 UTC [siddheshp]   0.5.0-55
 - ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/irc.h:
-* Show the MOTD that comes on login in the notices window
-* Somebody better change the topic on #ayttm because ayttm now recognizes
-topics :)
+ * Show the MOTD that comes on login in the notices window
+ * Somebody better change the topic on #ayttm because ayttm now recognizes
+ topics :)
 
-Sun Jul 06 2008 19:09 UTC [siddheshp]   0.5.0-54
+* Sun Jul 06 2008 19:09 UTC [siddheshp]   0.5.0-54
 - ChangeLog, configure.ac, modules/irc/irc.c, src/info_window.c:
-* Info window crash fix. A bug left behind in the gtk2 port where we missed
-porting a GtkEditable reference to GtkTextView/Buffer.
-* UTF-8 validation in the info_window. TDOD, we need to add this before all
-text appends.
+ * Info window crash fix. A bug left behind in the gtk2 port where we missed
+ porting a GtkEditable reference to GtkTextView/Buffer.
+ * UTF-8 validation in the info_window. TDOD, we need to add this before all
+ text appends.
 
-Sun Jul 06 2008 13:25 UTC [siddheshp]   0.5.0-53
+* Sun Jul 06 2008 13:25 UTC [siddheshp]   0.5.0-53
 - ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/Attic/irc.h,
 modules/irc/libirc/Attic/irc_message.c, modules/irc/libirc/Attic/libirc.h:
-* Fixed buddy management for IRC
-* PRIVMSGs with individual members with /msg command
-* Fixed /whois crash
-* Added handlers for some errors
+ * Fixed buddy management for IRC
+ * PRIVMSGs with individual members with /msg command
+ * Fixed /whois crash
+ * Added handlers for some errors
 
-Thu Jun 19 2008 02:15 UTC [siddheshp]   0.5.0-52
+* Thu Jun 19 2008 02:15 UTC [siddheshp]   0.5.0-52
 - ChangeLog, configure.ac, src/offline_queue_mgmt.c:
-Trying to fclose a potentially NULL file pointer.
+ Trying to fclose a potentially NULL file pointer.
 
-Wed Jun 18 2008 20:10 UTC [siddheshp]   0.5.0-51
+* Wed Jun 18 2008 20:10 UTC [siddheshp]   0.5.0-51
 - ChangeLog, configure.ac, src/offline_queue_mgmt.c:
-We don't need to return from contact_mgmt_flush if contact_actions_queue
-does not exist. We can proceed with creating a blank contact_actions_queue and
-also auto-starting chatrooms.
+ We don't need to return from contact_mgmt_flush if contact_actions_queue
+ does not exist. We can proceed with creating a blank contact_actions_queue and
+ also auto-starting chatrooms.
 
-Tue Jun 17 2008 19:45 UTC [siddheshp]   0.5.0-50
+* Tue Jun 17 2008 19:45 UTC [siddheshp]   0.5.0-50
 - ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/irc.h,
 modules/irc/libirc/irc_message.c, modules/irc/libirc/libirc.h,
 src/chat_room.c, src/service.h:
-* Changed the public chatroom list download interface in service.h
-* Implemented channel list download.
-* irc_warning to show error messages and not log off. irc_error causes a
-logoff
-* Reject malformed messages sent by server. 
-* ChangeLog seemed to think it was Sunday for the past three days ;)
+ * Changed the public chatroom list download interface in service.h
+ * Implemented channel list download.
+ * irc_warning to show error messages and not log off. irc_error causes a
+ logoff
+ * Reject malformed messages sent by server. 
+ * ChangeLog seemed to think it was Sunday for the past three days ;)
 
-Mon Jun 16 2008 15:20 UTC [siddheshp]   0.5.0-49
+* Mon Jun 16 2008 15:20 UTC [siddheshp]   0.5.0-49
 - ChangeLog, configure.ac, modules/irc/irc.c:
-Ensure that ay_irc_make_chatroom_window returns a chatroom window.
+ Ensure that ay_irc_make_chatroom_window returns a chatroom window.
 
-Sat Jun 14 2008 10:55 UTC [siddheshp]   0.5.0-48
+* Sat Jun 14 2008 10:55 UTC [siddheshp]   0.5.0-48
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c,
 modules/aim-toc/aim-toc.c, modules/icq/icq.c, modules/icq-toc/icq-toc.c,
 modules/irc/irc.c, modules/irc/irc.h, modules/irc/libirc/irc_message.c,
@@ -269,1040 +277,32 @@ modules/irc/libirc/libirc.c, modules/irc/libirc/Attic/libirc.h,
 modules/jabber/jabber.c, modules/msn2/msn.C, modules/workwizu/workwizu.c,
 modules/yahoo2/yahoo.c, po/de.po, po/en_GB.po, po/es.po, po/fr.po, po/hi.po,
 po/nl.po, po/pt_BR.po, po/sv.po, src/chat_room.c, src/chat_room.h:
-* buffer overrun protection - replace strcat, strcpy, etc with strncat,
-strncpy, etc respectively
-* Allow creation of a chatroom window without joining a room
-* Allow /commands like /me, /join, /part, /leave, /quit, /nick
+ * buffer overrun protection - replace strcat, strcpy, etc with strncat,
+ strncpy, etc respectively
+ * Allow creation of a chatroom window without joining a room
+ * Allow /commands like /me, /join, /part, /leave, /quit, /nick
 
-Sat Jun 14 2008 05:24 UTC [siddheshp]   0.5.0-47
+* Sat Jun 14 2008 05:24 UTC [siddheshp]   0.5.0-47
 - ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/libirc/libirc.c,
 src/status.c:
-* Die if libltdl is not found during ./configure
-* Don't supply blank passwords during login
-* Reduce contact_mgmt_flush timeout by 4 seconds. 5 seconds seems too long at
-times
-* Chat room autoconnect is working now. We were not setting the
-ela->connecting and ela->connected flags during our login sequence. 
+ * Die if libltdl is not found during ./configure
+ * Don't supply blank passwords during login
+ * Reduce contact_mgmt_flush timeout by 4 seconds. 5 seconds seems too long at
+ times
+ * Chat room autoconnect is working now. We were not setting the
+ ela->connecting and ela->connected flags during our login sequence. 
 
-Sun Jun 08 2008 21:30 UTC [siddheshp]   0.5.0-46
+* Sun Jun 08 2008 21:30 UTC [siddheshp]   0.5.0-46
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
 modules/irc/libirc/libirc.h, modules/irc/libirc/libirc.c,
 modules/irc/libirc/irc_replies.h, modules/irc/libirc/irc_message.c,
 modules/irc/libirc/ctcp.h, modules/irc/libirc/ctcp.c, modules/irc/irc.c:
-* Fixed memory leak in CTCP decode.
-* Yahoo stubs for yahoologout and yahooerror from HEAD
-* Added server-to-server ERROR message into IRC command list. Freenode was
-sending me that on some connect timeouts -- it's not supposed to, but doesn't
-hurt to handle it.
-* Freeing some more memory (param list, CTCP extended data list)
-* Added some error reply handlers
-* Replaced NOTICE popups with a chat room window.
-
-Mon Jun 04 2008 17:51 UTC [siddheshp]	0.5.0-45
-- ChangeLog:
-Tagged Release v0.5.0-45
-
-Mon Jun 04 2008 04:35 UTC [siddheshp]	0.5.0-45
-- ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
-Added stubs for ext_yahoo_chat_yahoologout and ext_yahoo_chat_yahooerror
-
-Mon Jun 02 2008 20:00 UTC [siddheshp]	0.5.0-44
-- ChangeLog, configure.ac, src/messages.c:
-bluesmoon - refactored ay_do_* code
-
-Mon Jun 02 2008 19:35 UTC [siddheshp]	0.5.0-43
-- ChangeLog, configure.ac:
-DOH! did it again. libirc doesn't belong here yet... strange how I can do
-these things without even being drunk...
-
-Mon Jun 02 2008 19:10 UTC [siddheshp]	0.5.0-42
-- ChangeLog, configure.ac, modules/yahoo2/yahoo.c, modules/irc/Makefile.am, 
-modules/irc/irc.c, modules/jabber/jabber.c, modules/msn2/libmsn2/msn_core.C,
-modules/irc/irc.h, modules/irc/libirc/Makefile.am, modules/irc/libirc/ctcp.c,
-modules/irc/libirc/ctcp.h, modules/irc/libirc/irc_message.c,
-modules/irc/libirc/irc_replies.h, modules/irc/libirc/libirc.c,
-modules/irc/libirc/libirc.h:
-* bluesmoon - ignore error code 208 in msn
-* bluesmoon - jabber error does not lead to disconnection, so we're better    
-off showing it as a warning than as an error
-* Whole new IRC Library - WARNING! this one loves to crash, so be careful...
-
-Mon Jun 02 2008 18:00 UTC [siddheshp]	0.5.0-41
-- ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
-Change in plugin_api input handler broke yahoo login. Fixed. Thanks philip.
-
-Mon Jun 02 2008 17:40 UTC [siddheshp]	0.5.0-40
-- ChangeLog, configure.ac:
-Removed libirc from configure.ac. It's not in yet (read as oops ;) ).
-
-sun Jun 01 2008 21:50 UTC [siddheshp]	0.5.0-39
-- ChangeLog, configure.ac, src/chat_room.c:
-Fixed buddy pane resize issue with chat rooms.
-
-Mon Apr 14 2008 17:30 UTC [siddheshp]	0.5.0-38
-- ChangeLog, configure.ac, src/plugin_api.c, src/plugin_api.h
-modules/jabber/libEBjabber.c:
-* Re-implemented eb_input_add and eb_input_remove to replace deprecated
-gdk_input_add and gdk_input_remove
-* Fixed crash in jabber when chatting with multiple accounts.
-
-Tue Apr 08 2008 03:53 UTC [siddheshp]	0.5.0-37
-- ChangeLog, configure.ac, modules/yahoo2/libyahoo2/libyahoo2.c:
-Updated version number for yahoo plugin. Yahoo is now working again.
-
-Sun Mar 30 2008 13:24 UTC [siddheshp]	0.5.0-36
-- ChangeLog, configure.ac, modules/irc/irc.c, src/status.c:
-* RPL_LISTEND was being captured as 322. Corrected to 323
-* Prolonged Connecting progress bar for IRC logins till we finish receiving
-the channel list
-* Avoid adding dummy accounts to the status window. They don't belong to our
-contacts.
-* Write signoff messages to message log window when we do a 'Sign off All'
-
-Sat Mar 22 2008 08:35 UTC [siddheshp]	0.5.0-35
-- ChangeLog, configure.ac, modules/irc/irc.c:
-* Corrected command (/me, /quit, etc.) behaviour
-* More g_strsplit corrections
-
-Sat Mar 22 2008 06:31 UTC [siddheshp]	0.5.0-34
-- ChangeLog, configure.ac, modules/irc/irc.c, pixmaps/irc_away.xpm,
-pixmaps/irc_online.xpm, src/chat_room.c:
-* Incoming messages were being eaten up since we split incoming strings
-into 2 parts and were looking for the third part to display as message, which,
-as it turns out, is blank.
-* Cleaned up a couple of warnings as well.
-
-Fri Mar 21 2008 16:55 UTC [siddheshp]	0.5.0-33
-- ChangeLog, configure.ac, modules/irc/irc.c, src/status.c:
-
-* Ensure that a contact to be added exists in a group at all.
-IRC ChanServ contact gets added without a group, hence causing a crash.
-* Fixed splitting of ping packet in IRC.
-
-Fri Dec 14 2007 18:15 UTC [siddheshp]	0.5.0-32
-- autotrans.c, middle.c
-* Fixed conflict with aycryption. Closes #874568 on sourceforge
-
-Fri Dec 07 2007 04:31 UTC [bluesmoon]	0.5.0-31
-- chat_window.c
-* Fix bug introduced by last commit.  Moving the smilify function meant that
-message was an unallocated pointer when the filters were running through it.
-
-
-Thu Dec 06 2007 11:51 UTC [bluesmoon]	0.5.0-30
-- chat_window.c, main.c
-* Add a marker to outgoing_message_filters so that all filters before
-the marker are applied to the local as well as remote message, while
-all filters after the marker are only applied to the remote message.
-To add a pre-render out filter, use l_list_prepend and to add a post-render
-out filter, use l_list_append on outgoing_message_filters.  The default
-behaviour is a post-render filter for backwards compatibility.
-* move smilify to after filter run so that filters can insert smileys
-
-* These last two updates come from the Hack Centre at FOSS.IN/2007
-
-Thu Dec 06 2007 11:48 UTC [bluesmoon]	0.5.0-29
-- autotrans.c
-* Dropped translate_in from autotrans.c because it was the same as
-translate_out
-
-Sat Nov 29 2007 19:55 UTC [siddheshp]   0.5.0-28
-- ChangeLog, configure.ac, src/activity_bar.C, src/status.c:
-* Resize the 'Connecting' dialog when a progress bar closes. This
-closes #1838371 in Sourceforge
-* Reduced delay for updating status icons from 10 seconds to 5 seconds.
-Why do we need to wait so long?
-
-Sat Nov 12 2007 20:25 UTC [siddheshp]   0.5.0-27
-- ChangeLog, configure.ac, modules/utility/autotrans.c,
-modules/yahoo2/libyahoo2/yahoo_util.c, src/tcp_util.c:
-* Fixed crash when a blank message is sent in yahoo.
-* Babelfish has removed an extra space from their markup, which broke 
-our autotranslate ;-)
-
-Sat Nov 03 2007 20:30 UTC [siddheshp]   0.5.0-26
-- ChangeLog, configure.ac, src/chat_window.c, src/chat_window.h:
-Reworked logic to close chat windows and tabs. We were unnecessarily
-trying to destroy stuff multiple times. Closes #1077171 on sourceforge.
-
-Sat Oct 30 2007 18:50 UTC [siddheshp]   0.5.0-25
-- ChangeLog, configure.ac, src/chat_window.c:
-* Update window title upon closure of a tab
-* Reset the tab label alert status once it has been clicked upon
-Both close #912345 on sourceforge
-
-Sat Oct 27 2007 20:10 UTC [siddheshp]   0.5.0-24
-- ChangeLog, configure.ac, modules/jabber/libEBjabber.c:
-* Default to the "Default Server" setting if no "Connect Server"
-is mentioned. Closes #885083 on sourceforge.
-* Deleting the first element in the Connections JABBER_Conn list would 
-result in a dangling pointer
-
-Sun Oct 21 2007 20:25 UTC [siddheshp]   0.5.0-23
-- Changelog, configure.ac, modules/msn2/msn.C:
-Fixed method signature mismatch with msn_interfaces.h
-
-Sun Oct 21 2007 05:35 UTC [siddheshp]   0.5.0-22
-- ChangeLog, configure.ac, src/message_parse.c, src/nomodule.c,
-src/gtk/gtk_tree_view_tooltip.c, src/gtk/html_text_buffer.c:
-* Fixed a crash; null pointer in nomodule.c
-* Closed #879962 in the sourceforge bug tracker
-
-Fri Oct 19 2007 20:15 UTC [siddheshp]   0.5.0-21
-- ChangeLog, configure.ac, modules/msn2/msn.C:
-Fixed signature mismatch for ext_show_error with msn_interface.h
-
-Wed Oct 17 2007 19:40 UTC [siddheshp]   0.5.0-20
-- ChangeLog, configure.ac, src/ayttm_tray.c, src/status.c, src/status.h:
-* More window size and position related fixes.
-* Message window will now have a new message only on status change. Recent
-updates had broken this.
-
-Wed Oct 17 2007 19:05 UTC [siddheshp]   0.5.0-19
-- ChangeLog, configure.ac, src/ayttm_tray.c, src/status.c, src/status.h:
-Status window should restore to previous size and screen position when
-opened by clicking on the tray icon
-
-Tue Oct 16 2007 22:27 UTC [siddheshp]   0.5.0-18
-- pixmaps/yahoo_online.xpm, pixmaps/yahoo_sms.xpm, pixmaps/yahoo_away.xpm:
-Fixed some warnings
-
-Tue Oct 16 2007 22:25 UTC [siddheshp]   0.5.0-17
-- ChangeLog, configure.ac, modules/yahoo2/yahoo.c:
-Put in stubs for buddyicon related callbacks to prevent crashes
-
-Sat Oct 13 2007 19:40 UTC [siddheshp]   0.5.0-16
-- ChangeLog, configure.ac, src/status.c, src/gtk/gtk_tree_view_tooltip.c:
-Tooltip beautification; wrap long status messages
-
-Sat Oct 13 2007 17:45 UTC [siddheshp]   0.5.0-15
-- ChangeLog, configure.ac, src/chat_window.c, src/gtk/log_window.C:
-Changed linkification behaviour. Now we don't force html links on others.
-Closes Debian bug #198979
-
-Thu Oct 11 2007 20:38 UTC [siddheshp]   0.5.0-14
-- ChangeLog configure.ac modules/msn2/msn.C,
-- modules/msn2/libmsn2/msn_core.C,
-- modules/msn2/libmsn2/msn_core.h,
-- modules/msn2/libmsn2/msn_interface.C,
-- modules/msn2/libmsn2/msn_interface.h, pixmaps/action.xpm,
-- pixmaps/ayttm.xpm, pixmaps/cancel.xpm, pixmaps/error.xpm,
-- pixmaps/invite_btn.xpm, pixmaps/msn_away.xpm,
-- pixmaps/msn_online.xpm, pixmaps/ok.xpm, pixmaps/tb_edit.xpm
-- pixmaps/tb_no.xpm, pixmaps/tb_preferences.xpm,
-- pixmaps/tb_yes.xpm, src/Makefile.am, src/debug.h,
-- src/gtk_globals.h, src/main.c, src/plugin_api.c, src/plugin_api.h,
-- src/service.h, src/status.c, src/status.h, src/gtk/gtkutils.c,
-- src/gtk/gtkutils.h, src/gtk/html_text_buffer.c,
-- src/gtk/log_window.C, src/gtk/prefs_window.C, src/ayttm_tray.c,
-- src/ayttm_tray.h:
-* Fixed some warnings
-* We have a Tray Icon now :D
-
-Sun Sep 9 2007 17:17 UTC [siddheshp]   0.5.0-13
-- ChangeLog, configure.ac, src/gtk/prefs_window.C:
-Replaced deprecated function. Patch by Scott Kitterman 
-on Debian bug report.
-
-Sun Sep 2 2007 19:06 UTC [siddheshp]   0.5.0-12
-
-- ChangeLog, ayttm.spec.in, src/edit_local_accounts.c,
-- src/messages.c, configure.ac:
-Removed .a from install list, Used Pango Markup for the
-Help message in Add Accounts window.
-
-Wed Aug 29 2007 20:53 UTC [siddheshp]   0.5.0-11
-
-- ChangeLog,configure.ac:
-Updated to latest libyahoo2. Includes some patches
-that need to go upstream into libyahoo2 after more
-extensive testing.
-
-Wed Aug 22 2007 19:32 UTC [siddheshp]   0.5.0-10
-
-- ChangeLog,configure.ac:
-Updated version number. Updated X11 dependency
-
-Tue Aug 21 2007 20:20 UTC [siddheshp]   0.5.0-9
-
-- ChangeLog
-Updated ChangeLog
-
-Tue Aug 21 2007 19:45 UTC [siddheshp]   0.5.0-8
-
-- modules/aim-oscar/libfaim/src/Makefile.am:
-Removed CVS from list of sources to be built
-
-Tue Aug 21 2007 18:53 UTC [siddheshp]   0.5.0-7
-
-- Makefile.am, doc/ayttm.1:
-Manpage and ayttm.desktop file updates by Kartik Mistry
-
-Sun Aug 19 2007 06:40 UTC [siddheshp]	0.5.0-6
-
-- ChangeLog configure.ac:
-Updated release number
-
-Sun Aug 19 2007 06:29 UTC [siddheshp]	0.5.0-5
-
-- configure.ac:
-Added Strict checks for flex, bison and g++
-
-Sun Aug 12 2007 20:02 UTC [siddheshp]	0.5.0-4
-
-- modules/jabber/libEBjabber.c:
-"Agent List" seems to be deprecated
-(http://mailman.linuxpl.org/cicq/2006-March/004571.html) and
-hence gives a 501 error with gtalk.
-
-Sun Aug 12 2007 19:51 UTC [siddheshp]	0.5.0-3
-
-- src/status.c:
-Fixed crash when trying to drag nothing in status window
-
-Fri Aug 10 2007 20:10 UTC [siddheshp]	0.5.0-2
-
-- modules/smileys/: console_smileys/Makefile.am,
-- giles_smiles/Makefile.am:
-Fixed output directory names for smileys. I thought I had fixed
-this...
-
-Sun Aug 05 2007 11:38 UTC [siddheshp]	0.5.0-1
-
-- po/es.po:
-Updated Spanish Translation by Ricardo Mones
-
-Fri Aug 03 2007 20:38 UTC [siddheshp]	0.5.0-0
-
-- ChangeLog, ChangeLog-0.4.6-35, ChangeLog.cvs2cl, Makefile.am,
-- README, README.LINUX, configure.ac, gen, doc/Makefile.am,
-- doc/gtk2-porting.txt, libproxy/Makefile.am, libproxy/proxy.c,
-- m4/Makefile.am, mingw32/Makefile.am, modules/Makefile.am,
-- modules/aim-oscar/Makefile.am, modules/aim-oscar/aim-oscar.c,
-- modules/aim-oscar/libfaim/Makefile.am,
-- modules/aim-oscar/libfaim/include/Makefile.am,
-- modules/aim-oscar/libfaim/src/Makefile.am,
-- modules/aim-oscar/libfaim/src/rxhandlers.c,
-- modules/aim-toc/Makefile.am, modules/aim-toc/aim-toc.c,
-- modules/aim-toc/libtoc/Makefile.am,
-- modules/aim-toc/libtoc/libtoc.c, modules/aim-toc/libtoc/libtoc.h,
-- modules/aycryption/Makefile.am, modules/aycryption/aycryption.c,
-- modules/aycryption/select-keys.c,
-- modules/aycryption/select-keys.h, modules/icq/Makefile.am,
-- modules/icq/libicq/Makefile.am, modules/icq-toc/Makefile.am,
-- modules/icq-toc/icq-toc.c, modules/icq-toc/libtoc/Makefile.am,
-- modules/icq-toc/libtoc/libtoc.c, modules/icq-toc/libtoc/libtoc.h,
-- modules/image_filter/Makefile.am, modules/image_filter/img2jpc.c,
-- modules/importers/Makefile.am,
-- modules/importers/import_everybuddy.c,
-- modules/importers/importicq.c, modules/irc/Makefile.am,
-- modules/irc/irc.c, modules/jabber/Makefile.am,
-- modules/jabber/jabber.c, modules/jabber/libjabber/Makefile.am,
-- modules/jabber/libjabber/jid.c,
-- modules/jabber/libjabber/include/Makefile.am,
-- modules/jabber/libjabber/include/jabber/Makefile.am,
-- modules/jabber/libxode/Makefile.am,
-- modules/jabber/libxode/include/Makefile.am,
-- modules/livejournal/Makefile.am, modules/msn2/Makefile.am,
-- modules/msn2/msn.C, modules/msn2/libmsn2/Makefile.am,
-- modules/msn2/libmsn2/msn_bittybits.C,
-- modules/msn2/libmsn2/msn_core.h, modules/smileys/Makefile.am,
-- modules/smileys/smiley-themer.c,
-- modules/smileys/console_smileys/Makefile.am,
-- modules/smileys/giles_smiles/Makefile.am,
-- modules/smtp/Makefile.am, modules/smtp/smtp.c,
-- modules/utility/Makefile.am, modules/workwizu/Makefile.am,
-- modules/yahoo2/Makefile.am, modules/yahoo2/yahoo.c,
-- modules/yahoo2/libyahoo2/Makefile.am,
-- modules/yahoo2/libyahoo2/libyahoo2.c, pixmaps/Makefile.am,
-- po/LINGUAS, po/Makefile.in.in, po/de.po, po/en_GB.po, po/es.po,
-- po/fr.po, po/hi.po, po/nl.po, po/pt_BR.po, po/sv.po,
-- sounds/BuddyArrive.au, sounds/BuddyLeave.au, sounds/Makefile.am,
-- sounds/Receive.au, sounds/Send.au, src/Makefile.am, src/about.c,
-- src/account.h, src/account_parser.y, src/activity_bar.C,
-- src/add_contact_window.c, src/away_window.c, src/browser.c,
-- src/charconv.c, src/charconv.h, src/chat_room.c,
-- src/chat_window.c, src/chat_window.h, src/console_session.c,
-- src/contact.h, src/contact_actions.c, src/contact_parser.y,
-- src/crash.c, src/dialog.c, src/edit_account_window.c,
-- src/edit_contact_window.c, src/edit_group_window.c,
-- src/edit_list_window.c, src/edit_local_accounts.c,
-- src/file_select.c, src/file_select.h, src/image_window.c,
-- src/info_window.c, src/main.c, src/messages.c, src/nomodule.c,
-- src/plugin.c, src/plugin_api.c, src/service.c, src/service.h,
-- src/smileys.c, src/sound.c, src/status.c, src/status.h,
-- src/tcp_util.c, src/trigger.c, src/usercount.c, src/util.c,
-- src/util.h, src/gtk/Makefile.am, src/gtk/about_window.c,
-- src/gtk/extgtktext.c, src/gtk/extgtktext.h,
-- src/gtk/file_selection_dlg.C, src/gtk/gtk_eb_html.c,
-- src/gtk/gtk_eb_html.h, src/gtk/gtk_tree_view_tooltip.c,
-- src/gtk/gtk_tree_view_tooltip.h, src/gtk/gtkspell.c,
-- src/gtk/gtkspell.h, src/gtk/gtkutils.c, src/gtk/gtkutils.h,
-- src/gtk/html_text_buffer.c, src/gtk/html_text_buffer.h,
-- src/gtk/log_window.C, src/gtk/message_windows.c,
-- src/gtk/prefs_window.C:
-Merged gtk2-port into HEAD
-
-* Fri Aug 03 2007 16:47 UTC [siddheshp]
-
-- ChangeLog.cvs2cl:
-Sample Changelog using cvs2cl. Command `cvs2cl -b --gmt -f
-ChangeLog.cvs2cl`
-
-
-* Wed Jul 25 2007 19:24 UTC [siddheshp]  0.5.0-0
-
-- configure.ac, gen, modules/aim-oscar/aim-oscar.c,
-- modules/msn2/libmsn2/msn_core.h:
-Cleaned up some warnings
-
-* Sun Jul 22 2007 17:01 UTC [siddheshp]
-
-- sounds/: BuddyArrive.au, BuddyLeave.au, Receive.au, Send.au:
-Converted audio files to Sun/NEXT format. The old ones were wma
-audio files renamed to .au
-
-* Tue Jul 17 2007 18:25 UTC [siddheshp]
-
-- configure.ac, gen, po/LINGUAS, po/hi.po,
-- src/gtk/html_text_buffer.c:
-Multiple changes and fixes:  
-* Hindi translation by Ashish Jain
-* Configure checks and warnings for Pspell, libxpm-dev, libssl, libtool and more
-* Fixes in HTML parsing. Added html, title, pre and p tags to the parser.
-Also fixed case when upper case </A> tag is ignored
-
-* Mon Jul 09 2007 16:10 UTC [siddheshp]
-
-- src/gtk/html_text_buffer.c:
-Moved variable to start of block
-
-* Sun Jul 08 2007 18:51 UTC [siddheshp]
-
-- src/chat_window.c:
-Chat Autocompletion updates: 
-* Fixed broken tab completion 
-* Use Right and left arrows to stop the autocompletion without changing
-cursor position
-
-* Thu Jul 05 2007 18:17 UTC [siddheshp]
-
-- src/gtk/html_text_buffer.c:
-Fixes for multiple bugs in the html parser:  
-* Strip only known tags; simply write the others out as plain text
-* Apply unclosed tags in the end  
-* A stray < or > should not break the rest of the html following it
-
-* Mon Jun 25 2007 18:52 UTC [siddheshp]
-
-- configure.ac, src/browser.c:
-Look for installed browsers on ./configure instead of blindly
-defaulting to mozilla.
-
-* Sun Jun 17 2007 19:18 UTC [siddheshp]
-
-- modules/: aim-toc/aim-toc.c, aim-toc/libtoc/libtoc.c,
-- aycryption/aycryption.c, icq-toc/icq-toc.c,
-- icq-toc/libtoc/libtoc.c, image_filter/img2jpc.c,
-- importers/importicq.c, irc/irc.c, jabber/libjabber/jid.c,
-- yahoo2/libyahoo2/libyahoo2.c:
-Got rid of some build warnings
-
-* Sun Jun 17 2007 19:10 UTC [siddheshp]
-
-- modules/yahoo2/yahoo.c:
-Logging out immediately after login would cause ayttm to lock up
-with infinite "Account exists" messages.
-
-* Fri Jun 1 2007 12:28  kartik_m
-
-- debian/: README.Debian, changelog, compat, control, copyright,
-- dirs, docs, menu, postinst, rules:
-Removing dead debian/ directory
-
-* Fri Jun 1 2007 12:13  kartik_m
-
-- mkinstalldirs:
-Added missing mkinstalldirs needed to build po/
-
-* Sun Apr 29 2007 18:27 UTC [siddheshp]
-
-- modules/aycryption/aycryption.c, src/contact.h (gtk2-port):
-Removed dependency of core on gpgme.
-
-* Sat Apr 28 2007 20:54 UTC [siddheshp]
-
-- src/gtk/html_text_buffer.c:
-Fixed bug where anything between a & and ; gets deleted in chat
-text
-
-* Sat Apr 28 2007 20:19 UTC [siddheshp]
-
-- modules/aycryption/Makefile.am, modules/aycryption/aycryption.c,
-- modules/aycryption/select-keys.c,
-- modules/aycryption/select-keys.h, src/contact.h, configure.ac:
-GPGME port from 0.x to 1.x
-
-* Wed Apr 25 2007 17:50 UTC [siddheshp]
-
-- src/charconv.c:
-Moved variable declarations to start of block
-
-* Tue Apr 24 2007 22:08 UTC [siddheshp]
-
-- configure.ac, src/Makefile.am:
-Removed check for GDK_PIXBUF since its part of gtk now.
-
-* Tue Apr 24 2007 21:57 UTC [siddheshp]
-
-- src/: Makefile.am, account_parser.y, charconv.c, charconv.h,
-- contact_parser.y:
-Convert non-utf8 buddy name strings to utf8. This will also
-automatically import the old contact and account files if they're
-in some other non-utf8 charset.
-
-* Tue Apr 24 2007 21:50 UTC [siddheshp]
-
-- modules/msn2/msn.C:
-We don't need UTF-8 to native charset conversion -- gtk2 does
-UTF-8
-
-* Thu Apr 19 2007 18:45 UTC [siddheshp]
-
-- src/status.c:
-Sort contact list alphabetically -- patch by Philip Tellis
-
-* Sun Apr 15 2007 21:42 UTC [siddheshp]
-
-- modules/msn2/libmsn2/msn_bittybits.C:
-Allow special characters in msn friendly names
-
-* Sat Apr 14 2007 21:05 UTC [siddheshp]
-
-- src/gtk/prefs_window.C:
-The X should destroy the window; Joe user expects that.
-
-* Sat Apr 14 2007 20:27 UTC [siddheshp]
-
-- src/: chat_window.c, status.c:
-Fixed keyboard shortcuts for the chat window and the main window
-menu.
-
-* Thu Apr 12 2007 18:05 UTC [siddheshp]
-
-- modules/smtp/smtp.c, src/about.c:
-Corrected my email address
-
-* Thu Apr 12 2007 12:12  bluesmoon
-
-- src/about.c: 
-added siddhesh's name to developers list
-
-* Thu Apr 05 2007 12:55 UTC [siddheshp]
-
-- src/: add_contact_window.c, away_window.c, chat_room.c,
-- chat_window.c, dialog.c, edit_account_window.c,
-- edit_contact_window.c, edit_list_window.c, edit_local_accounts.c,
-- status.c, gtk/gtk_tree_view_tooltip.c, gtk/gtkspell.c,
-- gtk/html_text_buffer.c:
-Moved variable declarations to start of code blocks
-
-* Tue Apr 03 2007 21:37 UTC [siddheshp]
-
-- modules/importers/importicq.c:
-Fixed icqimport crash
-
-* Tue Apr 03 2007 20:57 UTC [siddheshp]
-
-- modules/: aim-oscar/libfaim/src/rxhandlers.c,
-- importers/import_everybuddy.c, importers/importicq.c:
-More issues caught by -Wall and also by --enable-smtp
-
-* Mon Apr 02 2004 20:41 UTC [siddheshp]
-
-- libproxy/proxy.c, modules/aycryption/select-keys.c,
-- modules/yahoo2/yahoo.c, src/add_contact_window.c,
-- src/chat_room.c, src/chat_window.c, src/console_session.c,
-- src/dialog.c, src/edit_contact_window.c, src/edit_list_window.c,
-- src/edit_local_accounts.c, src/info_window.c, src/plugin.c,
-- src/plugin_api.c, src/service.c, src/smileys.c, src/sound.c,
-- src/status.c, src/status.h, src/tcp_util.c, src/trigger.c,
-- src/usercount.c, src/gtk/about_window.c,
-- src/gtk/gtk_tree_view_tooltip.c, src/gtk/gtkspell.c,
-- src/gtk/gtkutils.c, src/gtk/html_text_buffer.c,
-- src/gtk/log_window.C, src/gtk/prefs_window.C:
-Mother of all Oops'es -- I was not building with -Wall. NOW most
-of the port is done... I hope :)
-
-* Mon Mar 26 2007 20:27 UTC [siddheshp]
-
-- ChangeLog, ChangeLog-0.4.6-35, README, README.LINUX, configure.ac:
-Updated ChangeLog and corrected some references to gtk1.2
-
-* Sat Mar 24 2007 17:28 GMT [siddhesh]
-
-- src/status.c:
-Fixed the 'Check latest version' check.
-
-* Fri Mar 23 2007 20:30 GMT [siddhesh]
-
-- configure.ac:
-Thou shall now be called version 0.5.0 :)
-
-* Wed Mar 21 2007 19:10 GMT [siddhesh]
-
-- modules/yahoo2/yahoo.c:
-Allow @ in yahoo usernames as well. See Feature Request #959812.
-
-* Tue Mar 20 2007 20:33 GMT [siddhesh]
-
-- src/gtk/html_text_buffer.c:
-Parses &quot; as ". Closes feature request #997779
-
-* Tue Mar 20 2007 20:31 GMT [siddhesh]
-
-- modules/yahoo2/libyahoo2/libyahoo2.c:
-Changed printf to DEBUG_MSG
-
-* Sun Mar 18 2007 20:24 GMT [siddhesh]
-
-- modules/yahoo2/libyahoo2/libyahoo2.c:
-Fixed status update for yahoo. Yahoo 6 introduces a new service
-number 0xc6 for status updates instead of 3 and 4. Now sending
-0xc6 results in reception of 3 or 4 depending on whether the user
-is going "Away" or coming "(I'm) Back"
-
-* Sun Mar 18 2007 20:21 GMT [siddhesh]
-
-- modules/yahoo2/yahoo.c:
-Applied patch #974493. Fixes incorrect comparison of EB_STATUSes
-with YAHOO_STATUSes
-
-* Sat Mar 17 2007 18:11 GMT [siddhesh]
-
-- configure.ac, src/chat_window.c, src/crash.c, src/smileys.c,
-- src/status.c, src/trigger.c, src/gtk/file_selection_dlg.C,
-- src/gtk/gtkutils.c, src/gtk/html_text_buffer.c,
-- src/gtk/prefs_window.C:
-* Removed XFT dependency 
-* Cleaned up obsolete code
-
-* Thu Mar 15 2007 19:34 GMT [siddhesh]
-
-- src/: account.h, status.c, gtk/Makefile.am, gtk/prefs_window.C:
-Tooltips implemented in the status window
-
-* Thu Mar 15 2007 19:29 GMT [siddhesh]
-
-- src/gtk/: gtk_tree_view_tooltip.c, gtk_tree_view_tooltip.h:
-Custom tooltip widget
-
-* Thu Mar 08 2007 19:11 GMT [siddhesh]
-
-- src/gtk/prefs_window.C:
-The "Edit Accounts" menu now works
-
-* Thu Mar 08 2007 18:55 GMT [siddhesh]
-
-- configure.ac, doc/gtk2-porting.txt,
-- modules/aycryption/select-keys.c, src/activity_bar.C,
-- src/away_window.c, src/dialog.c, src/edit_list_window.c,
-- src/status.c, src/gtk/Makefile.am, src/gtk/about_window.c,
-- src/gtk/gtkutils.c, src/gtk/log_window.C, src/gtk/prefs_window.C:
-Code now builds successfully with -DGTK_DISABLE_DEPRECATED
-
-* Sat Mar 03 2007 20:18 GMT [siddhesh]
-
-- po/LINGUAS:
-po/LINGUAS now contains the full set of translations. ALL_LINGUAS
-can force only a subset of those to be built for distribution
-
-* Sat Mar 03 2007 20:14 GMT [siddhesh]
-
-- modules/importers/importicq.c, src/file_select.c:
-Replaced GtkFileSelection with GtkFileChooser
-
-* Thu Mar 01 2007 21:36 GMT [siddhesh]
-
-- modules/msn2/msn.C, modules/yahoo2/yahoo.c,
-- src/contact_actions.c, src/file_select.c, src/file_select.h,
-- src/gtk/Makefile.am, src/gtk/file_selection_dlg.C:
-Replaced file_selection with file_chooser
-
-* Thu Mar 01 2007 19:45 GMT [siddhesh]
-
-- src/: edit_account_window.c, edit_contact_window.c,
-- gtk/prefs_window.C:
-Replaced deprecated GtkOptionMenu and GtkCombo
-
-* Thu Mar 01 2007 19:43 GMT [siddhesh]
-
-- src/: status.c, util.c:
-Added functions to refresh group and contact lines after editing
-them
-
-* Wed Feb 28 2007 02:43 GMT [siddhesh]
-
-- src/add_contact_window.c:
-Fixed crash when trying to add accounts with no services defined.
-
-* Wed Feb 28 2007 02:33 GMT [siddhesh]
-
-- src/add_contact_window.c:
-Replaced deprecated GtkCombo with GtkComboBoxEntry
-
-* Sat Feb 24 2007 11:57 GMT [siddhesh]
-
-- src/: chat_room.c, chat_window.h, edit_list_window.c, trigger.c:
-Ported deprecated GtkCombo to GtkComboBox and GtkCList to
-GtkTreeView
-
-* Fri Feb 23 2007 22:25 GMT [siddhesh]
-
-- src/: image_window.c, info_window.c, smileys.c:
-Replace deprecated GtkPixmap with GtkImage
-
-* Fri Feb 23 2007 21:51 GMT [siddhesh]
-
-- src/: add_contact_window.c, edit_contact_window.c:
-Ported deprecated GtkOptionMenu to GtkComboBox
-
-* Fri Feb 23 2007 21:35 GMT [siddhesh]
-
-- src/edit_local_accounts.c:
-Ported deprecated GtkOptionMenu to GtkComboBox and GtkCList to
-GtkTreeView
-
-* Thu Feb 22 2007 19:37 GMT [siddhesh]
-
-- src/gtk/prefs_window.C:
-Corrected selection mode from Single to Browse to force atleast
-one selection to persist.
-
-* Thu Feb 22 2007 19:35 GMT [siddhesh]
-
-- src/messages.c:
-Replaced custom dialog boxes with GtkMessageDialog
-
-* Thu Feb 22 2007 19:34 GMT [siddhesh]
-
-- src/: chat_room.c, chat_window.c, dialog.c, trigger.c,
-- gtk/about_window.c, gtk/html_text_buffer.c:
-Replaced deprecated GtkPixmap with GtkImage
-
-* Wed Feb 21 2007 20:16 GMT [siddhesh]
-
-- src/gtk/: gtk_eb_html.c, gtk_eb_html.h:
-Old html parser -- not needed anymore
-
-* Wed Feb 21 2007 20:00 GMT [siddhesh]
-
-- modules/aycryption/select-keys.c, src/chat_room.c,
-- src/chat_window.c, src/edit_list_window.c,
-- src/edit_local_accounts.c, src/status.c, src/gtk/prefs_window.C:
-Replaced deprecated functions for toolbars and signals
-
-* Tue Feb 20 2007 20:40 GMT [siddhesh]
-
-- src/: add_contact_window.c, away_window.c, chat_room.c,
-- chat_window.c, dialog.c, edit_account_window.c,
-- edit_contact_window.c, edit_group_window.c, edit_list_window.c,
-- edit_local_accounts.c, info_window.c, main.c, status.c,
-- trigger.c, gtk/about_window.c, gtk/gtkutils.c, gtk/gtkutils.h,
-- gtk/prefs_window.C:
-Multiple fixes: default window icon, replaced some deprecated
-functions.
-
-* Sun Feb 18 2007 19:47 GMT [siddhesh]
-
-- configure.ac, doc/gtk2-porting.txt, src/chat_window.c,
-- src/edit_list_window.c, src/status.c, src/gtk/html_text_buffer.c,
-- src/gtk/prefs_window.C:
-* Build without GTK_ENABLE_BROKEN 
-* Auto-scroll during drag in status window 
-* Fixed resize of preferences window
-
-* Sun Feb 18 2007 12:12 GMT [siddhesh]
-
-- src/dialog.c:
-Yet another gtktext becomes gtktextview
-
-* Sun Feb 18 2007 09:50 GMT [siddhesh]
-
-- src/smileys.c:
-Fixed smiley selection. Yahoo showed MSN smileys when using the
-Default Protocol Smileys
-
-* Sat Feb 17 2007 07:35 GMT [siddhesh]
-
-- src/: away_window.c, edit_list_window.c:
-Widget port: gtktext to gtktextview
-
-* Sat Feb 17 2007 06:21 GMT [siddhesh]
-
-- src/status.c:
-Fixed the autoresize bug in status window
-
-* Sat Feb 17 2007 06:20 GMT [siddhesh]
-
-- src/gtk/gtkspell.c:
-Menu popup now comes up with the menu key (or Shift+F10) as well
-
-* Sat Feb 17 2007 03:03 GMT [siddhesh]
-
-- configure.ac:
-We need GTK 2.6 or later for now.
-
-* Fri Feb 16 2007 18:35 GMT [siddhesh]
-
-- src/gtk/Makefile.am:
-We don't need gtk_eb_html.[c|h] anymore
-
-* Fri Feb 16 2007 18:34 GMT [siddhesh]
-
-- src/gtk/: gtkspell.c, gtkspell.h:
-Spell check is working now
-
-* Fri Feb 16 2007 09:58 GMT [siddhesh]
-
-- src/gtk/html_text_buffer.c:
-don't delete text marks after they're done as bad html needs it
-- :)
-
-* Fri Feb 16 2007 08:55 GMT [siddhesh]
-
-- src/gtk/html_text_buffer.c:
-Links now open on double click instead of single click
-
-* Wed Feb 14 2007 19:15 GMT [philip]
-
-- src/Makefile.am:
-comment at start of rule is unportable
-
-* Sat Feb 10 2007 18:32 GMT [siddhesh]
-
-- doc/gtk2-porting.txt, modules/aycryption/aycryption.c,
-- modules/aycryption/select-keys.c, src/add_contact_window.c,
-- src/away_window.c, src/edit_account_window.c,
-- src/edit_contact_window.c, src/edit_list_window.c,
-- src/edit_local_accounts.c, src/image_window.c, src/info_window.c,
-- src/smileys.c, src/trigger.c, src/usercount.c,
-- src/gtk/message_windows.c:
-replaced deprecated set_usize with set_size_request
-
-* Sat Feb 10 2007 18:30 GMT [siddhesh]
-
-- src/gtk/html_text_buffer.c:
-Finally got a non-deprecated function to show pixmaps
-
-* Sat Feb 10 2007 18:29 GMT [siddhesh]
-
-- src/: status.c, gtk/gtkutils.c:
-Ported menu and contact tree view in status window
-
-* Sat Feb 03 2007 21:50 GMT [siddhesh]
-
-- modules/aycryption/aycryption.c,
-- modules/aycryption/select-keys.c,
-- modules/importers/import_everybuddy.c,
-- modules/importers/importicq.c, src/add_contact_window.c,
-- src/away_window.c, src/chat_room.c, src/crash.c, src/dialog.c,
-- src/edit_account_window.c, src/edit_contact_window.c,
-- src/edit_group_window.c, src/edit_list_window.c,
-- src/edit_local_accounts.c, src/image_window.c, src/info_window.c,
-- src/smileys.c, src/status.c, src/trigger.c, src/usercount.c,
-- src/gtk/about_window.c, src/gtk/gtkspell.c, src/gtk/gtkutils.c,
-- src/gtk/message_windows.c:
-Ported signal functions to their gtk2 equivalents
-
-* Sat Feb 03 2007 20:32 GMT [siddhesh]
-
-- src/: edit_account_window.c, edit_contact_window.c:
-Fixed edit acount/contact windows. GtkDialog cannot have multiple
-widgets
-
-* Sat Feb 03 2007 19:45 GMT [siddhesh]
-
-- src/: chat_room.c, chat_window.c:
-Fixed autocomplete, ported chat window and room toolbars to gtk2
-
-* Fri Feb 02 2007 19:54 GMT [siddhesh]
-
-- src/smileys.c:
-Fixed smiley window which was broken due to the text entry port
-
-* Fri Jan 31 2007 18:06 GMT [siddhesh]
-
-- src/: chat_room.c, chat_window.c:
-Ported message entry widgets to gtktextview.
-multi-line/single-line works now
-
-* Wed Jan 31 2007 23:05 GMT [siddhesh]
-
-- src/: chat_window.c, gtk/html_text_buffer.c:
-ported chat window entry (gtk_text) to to gtk_text_view
-
-* Wed Jan 31 2007 23:03 GMT [siddhesh]
-
-- src/crash.c:
-ported gtk_text to gtk_text_view
-
-* Tue Jan 30 2007 19:25 GMT [siddhesh]
-
-- doc/gtk2-porting.txt, src/gtk/html_text_buffer.c:
-Fixed transparency issue with smileys and icons
-
-* Tue Jan 30 2007 17:11 GMT [siddhesh]
-
-- doc/gtk2-porting.txt, modules/aim-oscar/aim-oscar.c,
-- modules/aycryption/aycryption.c, modules/irc/irc.c,
-- src/chat_room.c, src/chat_window.c, src/info_window.c,
-- src/status.c:
-Fixed broken html in chat adn log windows.
-
-* Tue Jan 30 2007 17:09 GMT [siddhesh]
-
-- src/gtk/: Makefile.am, gtk_eb_html.c, html_text_buffer.c,
-- html_text_buffer.h, log_window.C:
-Fixed broken html in chat and log windows
-
-* Fri Jan 12 2007 18:16 GMT [siddhesh]
-
-- src/chat_window.c:
-Reversed smiley window fix. Needs more testing.
-
-* Thu Jan 11 2007 21:29 GMT [siddhesh]
-
-- doc/gtk2-porting.txt, src/gtk/prefs_window.C:
-Porting widgets to gtk2 - Tree to TreeView
-
-* Sun Jan 07 2007 19:21 GMT [siddhesh]
-
-- src/chat_window.c:
-Smiley popup now shows up on first click as well
-
-* Sun Jan 07 2007 19:18 GMT [siddhesh]
-
-- src/smileys.c:
-Fixed smiley popup
-
-* Sat Jan 06 2007 16:34 GMT [siddhesh]
-
-- Makefile.am, doc/Makefile.am, doc/gtk2-porting.txt,
-- libproxy/Makefile.am, m4/Makefile.am, mingw32/Makefile.am,
-- modules/Makefile.am, modules/aim-oscar/Makefile.am,
-- modules/aim-oscar/libfaim/Makefile.am,
-- modules/aim-oscar/libfaim/include/Makefile.am,
-- modules/aim-oscar/libfaim/src/Makefile.am,
-- modules/aim-toc/Makefile.am, modules/aim-toc/aim-toc.c,
-- modules/aim-toc/libtoc/Makefile.am,
-- modules/aim-toc/libtoc/libtoc.h, modules/aycryption/Makefile.am,
-- modules/aycryption/select-keys.c, modules/icq/Makefile.am,
-- modules/icq/libicq/Makefile.am, modules/icq-toc/Makefile.am,
-- modules/icq-toc/icq-toc.c, modules/icq-toc/libtoc/Makefile.am,
-- modules/icq-toc/libtoc/libtoc.h,
-- modules/image_filter/Makefile.am, modules/image_filter/img2jpc.c,
-- modules/importers/Makefile.am, modules/importers/importicq.c,
-- modules/irc/Makefile.am, modules/jabber/Makefile.am,
-- modules/jabber/libjabber/Makefile.am,
-- modules/jabber/libjabber/include/Makefile.am,
-- modules/jabber/libjabber/include/jabber/Makefile.am,
-- modules/jabber/libxode/Makefile.am,
-- modules/jabber/libxode/include/Makefile.am,
-- modules/livejournal/Makefile.am, modules/msn2/Makefile.am,
-- modules/msn2/libmsn2/Makefile.am, modules/smileys/Makefile.am,
-- modules/smileys/console_smileys/Makefile.am,
-- modules/smileys/giles_smiles/Makefile.am,
-- modules/smtp/Makefile.am, modules/utility/Makefile.am,
-- modules/workwizu/Makefile.am, modules/yahoo2/Makefile.am,
-- modules/yahoo2/libyahoo2/Makefile.am, pixmaps/Makefile.am,
-- po/Makefile.in.in, po/de.po, po/en_GB.po, po/es.po, po/fr.po,
-- po/nl.po, po/pt_BR.po, po/sv.po, sounds/Makefile.am,
-- src/Makefile.am, src/gtk/Makefile.am:
-fixed build and configure warnings
-
-* Sat Jan 05 2007 16:28 GMT [siddhesh]
-
-- src/: chat_room.c, status.c:
-Fixed toolbars
-
-* Fri Jan 05 2007 21:00 GMT [siddhesh]
-
-- src/: main.c, status.c:
-Fixed error messages on program close
-
-* Fri Jan 05 2007 20:58 GMT [siddhesh]
-
-- src/: chat_room.c, chat_window.c:
-UI fixes to chat window, many yet to come.
-
-* Fri Jan 05 2007 19:15 GMT [siddhesh]
-
-- modules/irc/irc.c:
-Fixed compile time warnings
-
-* Fri Jan 05 2007 19:09 GMT [siddhesh]
-
-- src/: add_contact_window.c, edit_account_window.c, util.c,
-- util.h:
-Cleaned up compiler warnings
-
-* Mon Jan 01 2007 11:23 GMT [philip]
-
-- doc/gtk2-porting.txt:
-updated status
-
-* Mon Jan 01 2007 11:19 GMT [philip]
-
-- src/: add_contact_window.c, edit_group_window.c,
-- edit_local_accounts.c, status.c:
-UI fixes for gtk2 - patch by Siddhesh Poyarekar
-
-* Mon Jan 01 2007 11:17 GMT [philip]
-
-- modules/smileys/: console_smileys/Makefile.am,
-- giles_smiles/Makefile.am:
-makefile fixes for space in directory
-name - patch by Siddhesh Poyarekar
-
-* Mon Jan 01 2007 10:59 GMT [philip]
-
-- modules/aycryption/: aycryption.c, select-keys.c:
-make aycryption work with gtk2 also - patch by Siddhesh Poyarekar
-
-* Mon Jan 01 2007 10:38 GMT [philip]
-
-- src/activity_bar.C:
-gtk2 progress bar is easier to work with :)
-
-* Mon Jan 01 2007 10:36 GMT [philip]
-
-- libproxy/proxy.c:
-don't throw an error on connect failure - let
-the calling lib fallback if possible and throw the error if
-necessary.  also fix indentation
-
-* Sun Dec 31 2006 08:12 GMT [philip]
-
-- doc/gtk2-porting.txt:
-document to decribe porting to gtk2
-
-* Sun Dec 31 2006 07:44 GMT [philip]
-
-- configure.ac, modules/importers/import_everybuddy.c,
-- modules/irc/irc.c, modules/jabber/jabber.c, modules/msn2/msn.C,
-- modules/smileys/smiley-themer.c,
-- modules/smileys/console_smileys/Makefile.am,
-- modules/smileys/giles_smiles/Makefile.am, modules/yahoo2/yahoo.c,
-- src/activity_bar.C, src/add_contact_window.c, src/chat_room.c,
-- src/chat_window.c, src/chat_window.h, src/dialog.c,
-- src/edit_account_window.c, src/edit_contact_window.c,
-- src/edit_group_window.c, src/edit_list_window.c,
-- src/edit_local_accounts.c, src/image_window.c, src/info_window.c,
-- src/nomodule.c, src/plugin_api.c, src/service.c, src/service.h,
-- src/smileys.c, src/status.c, src/trigger.c, src/gtk/Makefile.am,
-- src/gtk/extgtktext.c, src/gtk/extgtktext.h,
-- src/gtk/gtk_eb_html.c, src/gtk/gtk_eb_html.h, src/gtk/gtkutils.c,
-- src/gtk/log_window.C, src/gtk/prefs_window.C: 
-initial gtk2 port (note binary compatibility breakage)
+ * Fixed memory leak in CTCP decode.
+ * Yahoo stubs for yahoologout and yahooerror from HEAD
+ * Added server-to-server ERROR message into IRC command list. Freenode was
+ sending me that on some connect timeouts -- it's not supposed to, but doesn't
+ hurt to handle it.
+ * Freeing some more memory (param list, CTCP extended data list)
+ * Added some error reply handlers
+ * Replaced NOTICE popups with a chat room window.
 
