@@ -110,119 +110,115 @@ static struct sockaddr *get_server( int fd )
 
 static int connect_address( unsigned int addy, unsigned short port )
 {
-    int fd;
-    struct sockaddr_in sin;
+	int fd;
+	struct sockaddr_in sin;
 
-    sin.sin_addr.s_addr = addy;
-    sin.sin_family = AF_INET;
-    sin.sin_port = htons(port);
+	sin.sin_addr.s_addr = addy;
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(port);
 
-    fd = socket(AF_INET, SOCK_STREAM, 0);
+	fd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (fd > -1)
-    {
-        if (connect(fd, (struct sockaddr *)&sin, sizeof(sin)) > -1)
-        {
-		sleep(2);
-        	return fd;
-        }
-		else
-		{
-			perror("connect:" );
+	if (fd > -1) {
+		if (connect(fd, (struct sockaddr *)&sin, sizeof(sin)) > -1) {
+			sleep(2);
+			return fd;
 		}
+		else
+			perror("connect:" );
 
-    }
-	else
-	{
-		printf("unable to create socket\n");
 	}
-    return -1;
+	else
+		printf("unable to create socket\n");
+
+	return -1;
 }
 
 /* Call this function if you want to free memory when leaving */
 static void proxy_freemem( void )
 {
-    /* dummy function to avoid possibly memory leak */
-    if (proxy_host != NULL)
-        free(proxy_host);
-    if (proxy_realhost != NULL)
-        free(proxy_realhost);
+	/* dummy function to avoid possibly memory leak */
+	if (proxy_host != NULL)
+		free(proxy_host);
+	if (proxy_realhost != NULL)
+		free(proxy_realhost);
 	if ( proxy_auth != NULL )
 		free( proxy_auth );
 
-    return;
+	return;
 }
 
 /* this function is useless if you do use an external method to set 
-   the proxy setting, but it does yet allow to test the code without 
-   having to code the interface */
+	the proxy setting, but it does yet allow to test the code without 
+	having to code the interface */
 static void proxy_autoinit( void )
 {
-    if (getenv("HTTPPROXY") != NULL) {
-        proxy_host=(char *)strdup(getenv("HTTPPROXY"));
-        if (proxy_host != NULL) {
-            proxy_port=atoi(getenv("HTTPPROXYPORT"));
-	    proxy_type=PROXY_HTTP;
-            if (!proxy_port)
-                proxy_port=3128;
+	if (getenv("HTTPPROXY") != NULL) {
+		proxy_host=(char *)strdup(getenv("HTTPPROXY"));
+		if (proxy_host != NULL) {
+			proxy_port=atoi(getenv("HTTPPROXYPORT"));
+			proxy_type=PROXY_HTTP;
 
-	    if ( getenv( "HTTPPROXYUSER" ) ) {
-		char *proxy_user;
-		char *proxy_password;
+			if (!proxy_port)
+				proxy_port=3128;
 
-		proxy_user = getenv( "HTTPPROXYUSER" );
-		proxy_password = getenv( "HTTPPROXYPASSWORD" );
+			if ( getenv( "HTTPPROXYUSER" ) ) {
+				char *proxy_user;
+				char *proxy_password;
 
-		proxy_auth = encode_proxy_auth_str(proxy_user, proxy_password);
-	    }
+				proxy_user = getenv( "HTTPPROXYUSER" );
+				proxy_password = getenv( "HTTPPROXYPASSWORD" );
+
+				proxy_auth = encode_proxy_auth_str(proxy_user, proxy_password);
+			}
 #ifdef HAVE_ATEXIT
-	    /* if you do not have atexit, it means that if you don't call
-	       proxy_freemem when leaving, you'll have mem leaks */
-            atexit(proxy_freemem);
+			/* if you do not have atexit, it means that if you don't call
+				proxy_freemem when leaving, you'll have mem leaks */
+			atexit(proxy_freemem);
 #endif
-        }
-    }
+		}
+	}
 	else
 	{
 		proxy_type=PROXY_NONE;
 	}
-    proxy_inited=1;
+	proxy_inited=1;
 #ifdef __MINGW32__
-    {
-        WSADATA wsaData;
-        WSAStartup(MAKEWORD(2,0),&wsaData);
-    }
+	{
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2,0),&wsaData);
+	}
 #endif
-    return;
+	return;
 }
 
 /* external function to use to set the proxy settings */
 int proxy_set_proxy( int type, const char *host, int port )
 {
-    proxy_type=type;
-    if (type != PROXY_NONE) {
-    proxy_port=0;
-    
-    if (host != NULL)  {
-	proxy_host=(char *)strdup(host);
-	proxy_port=port;
-    }
-    if (proxy_port == 0)
-	proxy_port=3128;
+	proxy_type=type;
+	if (type != PROXY_NONE) {
+		proxy_port=0;
+	
+		if (host != NULL)  {
+			proxy_host=(char *)strdup(host);
+			proxy_port=port;
+		}
+		if (proxy_port == 0)
+			proxy_port=3128;
 #ifdef HAVE_ATEXIT
-    /* if you do not have atexit, it means that if you don't call
-       proxy_freemem when leaving, you'll have mem leaks */
-    atexit(proxy_freemem);
+		/* if you do not have atexit, it means that if you don't call
+		   proxy_freemem when leaving, you'll have mem leaks */
+		atexit(proxy_freemem);
 #endif
-    }
-    proxy_inited=1;
+	}
+	proxy_inited=1;
 #ifdef __MINGW32__
-    {
-        WSADATA wsaData;
-        WSAStartup(MAKEWORD(2,0),&wsaData);
-    }
+	{
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2,0),&wsaData);
+	}
 #endif
-    return(0);
+	return(0);
 }
 
 /* external function to set the proxy user and proxy pasword */
@@ -258,50 +254,51 @@ const char *proxy_get_auth( void )
 /* this code is borrowed from cvs 1.10 */
 static int	proxy_recv_line( int sock, char **resultp )
 {
-    int c;
-    char *result;
-    size_t input_index = 0;
-    size_t result_size = 80;
+	int c;
+	char *result;
+	size_t input_index = 0;
+	size_t result_size = 80;
 
-    result = (char *) malloc (result_size);
+	result = (char *) malloc (result_size);
 
-    while (1)
-    {
-	char ch;
-	if (recv (sock, &ch, 1, 0) < 0) {
-	    fprintf (stderr, "recv() error from  proxy server\n");
-	    return -1;
-        }
-	c = ch;
-
-	if (c == EOF)
+	while (1)
 	{
-	    free (result);
+		char ch;
+		if (recv (sock, &ch, 1, 0) < 0) {
+			fprintf (stderr, "recv() error from  proxy server\n");
+			return -1;
+		}
+		c = ch;
 
-	    /* It's end of file.  */
-	    fprintf(stderr, "end of file from  server\n");
+		if (c == EOF)
+		{
+			free (result);
+        
+			/* It's end of file.  */
+			fprintf(stderr, "end of file from  server\n");
+		}
+        
+		if (c == '\012')
+			break;
+        
+		result[input_index++] = c;
+		while (input_index + 1 >= result_size)
+		{
+			result_size *= 2;
+			result = (char *) realloc (result, result_size);
+		}
 	}
 
-	if (c == '\012')
-	    break;
+	if (resultp)
+		*resultp = result;
 
-	result[input_index++] = c;
-	while (input_index + 1 >= result_size)
-	{
-	    result_size *= 2;
-	    result = (char *) realloc (result, result_size);
-	}
-    }
+	/* Terminate it just for kicks, but we *can* deal with embedded NULs.  */
+	result[input_index] = '\0';
 
-    if (resultp)
-	*resultp = result;
+	if (resultp == NULL)
+		free (result);
 
-    /* Terminate it just for kicks, but we *can* deal with embedded NULs.  */
-    result[input_index] = '\0';
-
-    if (resultp == NULL)
-	free (result);
-    return input_index;
+	return input_index;
 }
 
 int proxy_recv( int s, void * buff, int len, unsigned int flags )
@@ -324,7 +321,7 @@ int proxy_recv( int s, void * buff, int len, unsigned int flags )
 	{
 		const int	buff_len = len + 10;
 		char		*tmpbuff = calloc( buff_len, sizeof( char ) );
-		int			mylen = recv( s, tmpbuff, buff_len, flags );
+		int		mylen = recv( s, tmpbuff, buff_len, flags );
 		
 		memcpy( buff, tmpbuff+10, len);
 		free( tmpbuff );
@@ -388,7 +385,7 @@ struct hostent *proxy_gethostbyname( const char *host )
 {
 	if ( !proxy_inited )
 		proxy_autoinit();
-    
+	
 	if ( proxy_type == PROXY_NONE || proxy_type == PROXY_SOCKS5 )
 		return( gethostbyname( host ) );
 
@@ -397,7 +394,7 @@ struct hostent *proxy_gethostbyname( const char *host )
 
 	/* we keep the real host name for the Connect command */
 	proxy_realhost = strdup( host );
-        
+		
 	return( gethostbyname( proxy_host ) );
 }
 
@@ -421,306 +418,308 @@ struct hostent *proxy_gethostbyname2( const char *host, int type )
 /* http://archive.socks.permeo.com/protocol/socks4.protocol */
 static int socks4_connect( int sock, struct sockaddr *serv_addr, int addrlen )
 {
-   struct sockaddr_in sa;
-   int i, packetlen;
-   struct hostent * hp;
+	struct sockaddr_in sa;
+	int i, packetlen;
+	struct hostent * hp;
 
-   if (!(hp = gethostbyname(proxy_host)))
-      return -1;
-   
-   if(proxy_auth && strlen(proxy_auth)) {
-	   packetlen = 9 + strlen(proxy_auth);
-   } else {
-	   packetlen = 9;
-   }
-   /* Clear the structure and setup for SOCKS4 open */  
-   bzero(&sa, sizeof(sa));
-   sa.sin_family = AF_INET;
-   sa.sin_port = htons (proxy_port);
-   bcopy(hp->h_addr, (char *) &sa.sin_addr, hp->h_length);
-   
-   /* Connect to the SOCKS4 port and send a connect packet */
-   if (connect(sock, (struct sockaddr *) &sa, sizeof (sa))!=-1)
-   {
-      unsigned short realport;
-      unsigned char packet[packetlen];
-      if (!(hp = gethostbyname(proxy_realhost)))
-      {
-         return -1;
-      }
-      realport = ntohs(((struct sockaddr_in *)serv_addr)->sin_port);
-      packet[0] = 4;                                        /* Version */
-      packet[1] = 1;                                       /* CONNECT  */
-      packet[2] = (((unsigned short) realport) >> 8);      /* DESTPORT */
-      packet[3] = (((unsigned short) realport) & 0xff);    /* DESTPORT */
-      packet[4] = (unsigned char) (hp->h_addr_list[0])[0]; /* DESTIP   */
-      packet[5] = (unsigned char) (hp->h_addr_list[0])[1]; /* DESTIP   */
-      packet[6] = (unsigned char) (hp->h_addr_list[0])[2]; /* DESTIP   */
-      packet[7] = (unsigned char) (hp->h_addr_list[0])[3]; /* DESTIP   */
-      if(proxy_auth && strlen(proxy_auth)) {
-	      for (i=0; i < strlen(proxy_user); i++) {
-		      packet[i+8] = 
-			    (unsigned char)proxy_user[i];  /* AUTH     */
-	      }
-      }
-      packet[packetlen-1] = 0;                              /* END      */
-      printf("Sending \"%s\"\n", packet);
-      if (write(sock, packet, packetlen) == packetlen)
-      {
-         bzero(packet, sizeof(packet));
-         /* Check response - return as SOCKS4 if its valid */
-         if (read(sock, packet, 9)>=4)
-         {
-	    if (packet[1] == 90)		 
-	            return 0;
-	    else if(packet[1] == 91)
-		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request for an unknown reason.") );
-	    else if(packet[1] == 92)
-		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request because it could not connect to our identd.") );
-	    else if(packet[1] == 93)
-		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request because identd returned a different userid.") );
-	    else {
-		    ay_do_error( _("Proxy Error"), _("Socks 4 proxy rejected request with an RFC-uncompliant error cod.") );   
-		    printf("=>>%d\n",packet[1]);
-	    }		    
-         } else {
-		printf("short read %s\n",packet);
-	 }	
-      }
-      close(sock);
-   }
-   
-   return -1;
+	if (!(hp = gethostbyname(proxy_host)))
+		return -1;
+	
+	if(proxy_auth && strlen(proxy_auth)) {
+		packetlen = 9 + strlen(proxy_auth);
+	} else {
+		packetlen = 9;
+	}
+	/* Clear the structure and setup for SOCKS4 open */  
+	bzero(&sa, sizeof(sa));
+	sa.sin_family = AF_INET;
+	sa.sin_port = htons (proxy_port);
+	bcopy(hp->h_addr, (char *) &sa.sin_addr, hp->h_length);
+	
+	/* Connect to the SOCKS4 port and send a connect packet */
+	if (connect(sock, (struct sockaddr *) &sa, sizeof (sa))!=-1)
+	{
+		unsigned short realport;
+		unsigned char packet[packetlen];
+		if (!(hp = gethostbyname(proxy_realhost)))
+		{
+		       return -1;
+		}
+		realport = ntohs(((struct sockaddr_in *)serv_addr)->sin_port);
+		packet[0] = 4;										/* Version */
+		packet[1] = 1;										/* CONNECT  */
+		packet[2] = (((unsigned short) realport) >> 8);	  /* DESTPORT */
+		packet[3] = (((unsigned short) realport) & 0xff);	/* DESTPORT */
+		packet[4] = (unsigned char) (hp->h_addr_list[0])[0]; /* DESTIP	*/
+		packet[5] = (unsigned char) (hp->h_addr_list[0])[1]; /* DESTIP	*/
+		packet[6] = (unsigned char) (hp->h_addr_list[0])[2]; /* DESTIP	*/
+		packet[7] = (unsigned char) (hp->h_addr_list[0])[3]; /* DESTIP	*/
+		if(proxy_auth && strlen(proxy_auth)) {
+		        for (i=0; i < strlen(proxy_user); i++) {
+		      	  packet[i+8] = 
+		      		(unsigned char)proxy_user[i];  /* AUTH	 */
+		        }
+		}
+		packet[packetlen-1] = 0;							  /* END	  */
+		printf("Sending \"%s\"\n", packet);
+		if (write(sock, packet, packetlen) == packetlen)
+		{
+			 bzero(packet, sizeof(packet));
+			 /* Check response - return as SOCKS4 if its valid */
+			if (read(sock, packet, 9)>=4)
+			{
+				if (packet[1] == 90)		 
+					return 0;
+				else if(packet[1] == 91)
+					ay_do_error( _("Proxy Error"), 
+							_("Socks 4 proxy rejected request for an unknown reason.") );
+				else if(packet[1] == 92)
+					ay_do_error( _("Proxy Error"), 
+							_("Socks 4 proxy rejected request because it could not connect to our identd.") );
+				else if(packet[1] == 93)
+					ay_do_error( _("Proxy Error"), 
+							_("Socks 4 proxy rejected request because identd returned a different userid.") );
+				else {
+					ay_do_error( _("Proxy Error"), 
+							_("Socks 4 proxy rejected request with an RFC-uncompliant error cod.") );	
+					printf("=>>%d\n",packet[1]);
+				}			
+			} else {
+				printf("short read %s\n",packet);
+			}	
+		}
+		close(sock);
+	}
+	
+	return -1;
 }
 
 /* http://archive.socks.permeo.com/rfc/rfc1928.txt */
 /* http://archive.socks.permeo.com/rfc/rfc1929.txt */
 static int socks5_connect( int sockfd, struct sockaddr *serv_addr, int addrlen )
 {
-   int i;
-   int s =0;
+	int i;
+	int s =0;
 #ifdef __MINGW32__
-   char type;
+	char type;
 #else
-   int type;
+	int type;
 #endif
-   unsigned int size = sizeof(int);
-   int tcplink = 0;
-   struct sockaddr_in bind_addr;
-   struct sockaddr_in sin;
-   struct hostent * hostinfo;
-   char buff[530];
-   int need_auth = 0;
-   int j;   
-   getsockopt( sockfd, SOL_SOCKET, SO_TYPE, &type, &size );
-   printf(" %d %d %d \n", SOCK_STREAM, SOCK_DGRAM, type );
+	unsigned int size = sizeof(int);
+	int tcplink = 0;
+	struct sockaddr_in bind_addr;
+	struct sockaddr_in sin;
+	struct hostent * hostinfo;
+	char buff[530];
+	int need_auth = 0;
+	int j;	
+	getsockopt( sockfd, SOL_SOCKET, SO_TYPE, &type, &size );
+	printf(" %d %d %d \n", SOCK_STREAM, SOCK_DGRAM, type );
 
-   bind_addr.sin_addr.s_addr = INADDR_ANY;
-   bind_addr.sin_family = PF_INET;
-   bind_addr.sin_port = 0;
+	bind_addr.sin_addr.s_addr = INADDR_ANY;
+	bind_addr.sin_family = PF_INET;
+	bind_addr.sin_port = 0;
 
-   if( type == SOCK_DGRAM )
-   {
-	   size = sizeof(bind_addr);
-	   if(bind(sockfd, (struct sockaddr*)&bind_addr, sizeof(bind_addr)) < 0 )
-	   {
-		   perror("bind");
-	   }
-	   getsockname( sockfd, (struct sockaddr*)&bind_addr, &size );
-   }
-   hostinfo = gethostbyname (proxy_host);
-   if (hostinfo == NULL) 
-   {
-	   fprintf (stderr, "Unknown host %s.\n", proxy_host);
-	   return (-1);
-   }
-
-   /* connect to the proxy server */
-   bcopy(hostinfo->h_addr, (char *)&sin.sin_addr, hostinfo->h_length);
-   sin.sin_family = AF_INET;
-   sin.sin_port = htons(proxy_port);
-
-   if( type != SOCK_DGRAM )
-   {
-      s = connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)); 
-	   if( s < 0 )
-		   return s;
-   }
-   else
-   {
-#ifdef __MINGW32__
-	   printf("Connecting to %lx on %u\n", inet_addr(proxy_host), proxy_port );
-#else
-	   printf("Connecting to %x on %u\n", inet_addr(proxy_host), proxy_port );
-#endif
-	   tcplink = connect_address( inet_addr(proxy_host), proxy_port );
-	   printf("We got socket %d\n", tcplink);
-   }
-
-   buff[0] = 0x05;  //use socks v5
-   if(proxy_user && strlen(proxy_user)) {
-	   buff[1] = 0x02;  //we support (no authentication & username/pass)
-	   buff[2] = 0x00;  //we support the method type "no authentication"
-	   buff[3] = 0x02;  //we support the method type "username/passw"
-	   need_auth=1;
-   } else {
-	   buff[1] = 0x01;  //we support (no authentication)
-	   buff[2] = 0x00;  //we support the method type "no authentication"
-   }	 
-
-
-   if( type != SOCK_DGRAM )
-   {
-	   int l = 0;
-	   write( sockfd, buff, 3+need_auth );
-	   
-	   l = read( sockfd, buff, 2 );
-	   printf("read %d\n",l);
-   }
-   else
-   {
-	   write( tcplink, buff, 3+need_auth );
-	   read( tcplink, buff, 2 );
-	   fprintf(stderr, "We got a response back from the SOCKS server\n");
-   }
-
-   printf("buff[] %d %d proxy_user %s\n",buff[0],buff[1], proxy_user);
-   if( buff[1] == 0x00 )
-	   need_auth = 0;
-   else if (buff[1] == 0x02 && proxy_user && strlen(proxy_user))
-	   need_auth = 1;
-   else {
-	   fprintf(stderr, "No Acceptable Methods");
-	   return -1;
-   }
-   printf("need_auth=%d\n",need_auth);
-   if (need_auth) {
-	/* subneg start */
-	buff[0] = 0x01; 		/* subneg version  */
-	printf("[%d]",buff[0]);
-	buff[1] = strlen(proxy_user);   /* username length */
-	printf("[%d]",buff[1]);
-	for (i=0; i < strlen(proxy_user) && i<255; i++) {
-		      buff[i+2] = 
-			    proxy_user[i];  /* AUTH     */
-		      printf("%c",buff[i+2]);
+	if( type == SOCK_DGRAM )
+	{
+		size = sizeof(bind_addr);
+		if(bind(sockfd, (struct sockaddr*)&bind_addr, sizeof(bind_addr)) < 0 )
+		{
+			perror("bind");
+		}
+		getsockname( sockfd, (struct sockaddr*)&bind_addr, &size );
 	}
-	i+=2;
-	buff[i] = strlen(proxy_password);
-	printf("[%d]",buff[i]);
-	i++;
-	for (j=0; j < strlen(proxy_password) && j<255; j++) {
-		      buff[i+j] = 
-			    proxy_password[j];  /* AUTH     */
-			printf("%c",buff[i+j]);
+	hostinfo = gethostbyname (proxy_host);
+	if (hostinfo == NULL) 
+	{
+		fprintf (stderr, "Unknown host %s.\n", proxy_host);
+		return (-1);
 	}
-	i+=(j);
-	buff[i]=0;
+
+	/* connect to the proxy server */
+	bcopy(hostinfo->h_addr, (char *)&sin.sin_addr, hostinfo->h_length);
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(proxy_port);
+
 	if( type != SOCK_DGRAM )
 	{
-		write( sockfd, buff, i );
-		read( sockfd, buff, 2 );
+		s = connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)); 
+		if( s < 0 )
+			return s;
 	}
 	else
 	{
-		write( tcplink, buff, i );
+#ifdef __MINGW32__
+		printf("Connecting to %lx on %u\n", inet_addr(proxy_host), proxy_port );
+#else
+		printf("Connecting to %x on %u\n", inet_addr(proxy_host), proxy_port );
+#endif
+		tcplink = connect_address( inet_addr(proxy_host), proxy_port );
+		printf("We got socket %d\n", tcplink);
+	}
+
+	buff[0] = 0x05;  //use socks v5
+	if(proxy_user && strlen(proxy_user)) {
+		buff[1] = 0x02;  //we support (no authentication & username/pass)
+		buff[2] = 0x00;  //we support the method type "no authentication"
+		buff[3] = 0x02;  //we support the method type "username/passw"
+		need_auth=1;
+	} else {
+		buff[1] = 0x01;  //we support (no authentication)
+		buff[2] = 0x00;  //we support the method type "no authentication"
+	}	 
+
+
+	if( type != SOCK_DGRAM )
+	{
+		int l = 0;
+		write( sockfd, buff, 3+need_auth );
+		
+		l = read( sockfd, buff, 2 );
+		printf("read %d\n",l);
+	}
+	else
+	{
+		write( tcplink, buff, 3+need_auth );
 		read( tcplink, buff, 2 );
 		fprintf(stderr, "We got a response back from the SOCKS server\n");
 	}
-	if (buff[1] != 0) {
-		ay_do_error( _("Proxy Error"), _("Socks5 proxy refused our authentication.") );
+
+	printf("buff[] %d %d proxy_user %s\n",buff[0],buff[1], proxy_user);
+	if( buff[1] == 0x00 )
+		need_auth = 0;
+	else if (buff[1] == 0x02 && proxy_user && strlen(proxy_user))
+		need_auth = 1;
+	else {
+		fprintf(stderr, "No Acceptable Methods");
 		return -1;
 	}
-   }
-   
-   buff[0] = 0x05; //use socks5
-   buff[1] = ((type == SOCK_STREAM) ? 0x01 : 0x03); //connect
-   buff[2] = 0x00; //reserved
-   buff[3] = 0x01; //ipv4 address
-   if( type != SOCK_DGRAM )
-   {
-	   memcpy(buff+4, &(((struct sockaddr_in *)serv_addr)->sin_addr),4 );
-	   memcpy((buff+8), &(((struct sockaddr_in *)serv_addr)->sin_port), 2);
-   }
-   else
-   {
-	   buff[4] = 0x00;
-	   buff[5] = 0x00;
-	   buff[6] = 0x00;
-	   buff[7] = 0x00;
-	   memcpy((buff+8), &(((struct sockaddr_in *)&bind_addr)->sin_port), 2);
-	   printf("UDP port %s %d\n", inet_ntoa(((struct sockaddr_in *)serv_addr)->sin_addr), 
-			   ntohs(((struct sockaddr_in *)serv_addr)->sin_port));
-	   for( i = 0; i < 8; i++ )
-	   {
-		   printf("%03d ", buff[i] );
-	   }
-	   printf("%d", ntohs(*(unsigned short *)&buff[8]));
-	   printf("\n");
-   }
+	printf("need_auth=%d\n",need_auth);
+	if (need_auth) {
+		/* subneg start */
+		buff[0] = 0x01; 		/* subneg version  */
+		printf("[%d]",buff[0]);
+		buff[1] = strlen(proxy_user);	/* username length */
+		printf("[%d]",buff[1]);
+		for (i=0; i < strlen(proxy_user) && i<255; i++) {
+			buff[i+2] = proxy_user[i];  /* AUTH	 */
+			printf("%c",buff[i+2]);
+		}
+		i+=2;
+		buff[i] = strlen(proxy_password);
+		printf("[%d]",buff[i]);
+		i++;
+		for (j=0; j < strlen(proxy_password) && j<255; j++) {
+			buff[i+j] = proxy_password[j];  /* AUTH	 */
+			printf("%c",buff[i+j]);
+		}
+		i+=(j);
+		buff[i]=0;
+		if( type != SOCK_DGRAM )
+		{
+			write( sockfd, buff, i );
+			read( sockfd, buff, 2 );
+		}
+		else
+		{
+			write( tcplink, buff, i );
+			read( tcplink, buff, 2 );
+			fprintf(stderr, "We got a response back from the SOCKS server\n");
+		}
+		if (buff[1] != 0) {
+			ay_do_error( _("Proxy Error"), _("Socks5 proxy refused our authentication.") );
+			return -1;
+		}
+	}
+	
+	buff[0] = 0x05; //use socks5
+	buff[1] = ((type == SOCK_STREAM) ? 0x01 : 0x03); //connect
+	buff[2] = 0x00; //reserved
+	buff[3] = 0x01; //ipv4 address
+	if( type != SOCK_DGRAM )
+	{
+		memcpy(buff+4, &(((struct sockaddr_in *)serv_addr)->sin_addr),4 );
+		memcpy((buff+8), &(((struct sockaddr_in *)serv_addr)->sin_port), 2);
+	}
+	else
+	{
+		buff[4] = 0x00;
+		buff[5] = 0x00;
+		buff[6] = 0x00;
+		buff[7] = 0x00;
+		memcpy((buff+8), &(((struct sockaddr_in *)&bind_addr)->sin_port), 2);
+		printf("UDP port %s %d\n", inet_ntoa(((struct sockaddr_in *)serv_addr)->sin_addr), 
+				ntohs(((struct sockaddr_in *)serv_addr)->sin_port));
+		for( i = 0; i < 8; i++ )
+		{
+			printf("%03d ", buff[i] );
+		}
+		printf("%d", ntohs(*(unsigned short *)&buff[8]));
+		printf("\n");
+	}
 
-   if( type != SOCK_DGRAM )
-   {
-	   write( sockfd, buff, 10 );
-	   read(sockfd, buff, 10);
-   }
-   else
-   {
-	   write( tcplink, buff, 10 );
-	   read( tcplink, buff, 10);
-	   fprintf(stderr, "We got another response from the server!\n");
-   }
+	if( type != SOCK_DGRAM )
+	{
+		write( sockfd, buff, 10 );
+		read(sockfd, buff, 10);
+	}
+	else
+	{
+		write( tcplink, buff, 10 );
+		read( tcplink, buff, 10);
+		fprintf(stderr, "We got another response from the server!\n");
+	}
 
-   //	buff[1] = 0;
+	//	buff[1] = 0;
 
 
-   if( buff[1] == 0x00 )
-   {
-	   for( i = 0; i < 8; i++ )
-	   {
-		   printf("%03d ", buff[i] );
-	   }
-	   printf("%d", ntohs(*(unsigned short *)&buff[8]));
-	   printf("\n");
-	   if( type == SOCK_DGRAM )
-	   {
-		   udp_connection	*conn = calloc( 1, sizeof(udp_connection) );
-		   struct sockaddr	*host = calloc( 1, sizeof(struct sockaddr) );
-		   
-		   memcpy(host, serv_addr, sizeof(struct sockaddr_in));
-		   conn->next = server_list;
-		   conn->fd = sockfd;
-		   conn->host = host;
-		   server_list = conn;
-		   printf("adding UDP connection %s %d on fd %d\n", 
-			   inet_ntoa((((struct sockaddr_in *)serv_addr)->sin_addr)),
-			   ntohs(((struct sockaddr_in *)serv_addr)->sin_port),
-			   sockfd );
+	if( buff[1] == 0x00 )
+	{
+		for( i = 0; i < 8; i++ )
+		{
+			printf("%03d ", buff[i] );
+		}
+		printf("%d", ntohs(*(unsigned short *)&buff[8]));
+		printf("\n");
+		if( type == SOCK_DGRAM )
+		{
+			udp_connection	*conn = calloc( 1, sizeof(udp_connection) );
+			struct sockaddr	*host = calloc( 1, sizeof(struct sockaddr) );
+			
+			memcpy(host, serv_addr, sizeof(struct sockaddr_in));
+			conn->next = server_list;
+			conn->fd = sockfd;
+			conn->host = host;
+			server_list = conn;
+			printf("adding UDP connection %s %d on fd %d\n", 
+				inet_ntoa((((struct sockaddr_in *)serv_addr)->sin_addr)),
+				ntohs(((struct sockaddr_in *)serv_addr)->sin_port),
+				sockfd );
 
-		   memcpy( &sin.sin_addr, buff+4, 4);
-		   memcpy( &sin.sin_port, buff+8, 2);
+			memcpy( &sin.sin_addr, buff+4, 4);
+			memcpy( &sin.sin_port, buff+8, 2);
 
-    	   sin.sin_family = AF_INET;
-		   printf( "trying to connect to %s on port %d \n", 
-				   inet_ntoa(sin.sin_addr), ntohs(sin.sin_port) );
-           s = connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)); 
-	   }
+			sin.sin_family = AF_INET;
+			printf( "trying to connect to %s on port %d \n", 
+					inet_ntoa(sin.sin_addr), ntohs(sin.sin_port) );
+			s = connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)); 
+		}
 
-	   printf("libproxy; SOCKS5 connection on %d (%d)\n", sockfd,s  );
-	   return  s;
-   }
-   else
-   {
-	   for( i = 0; i < 8; i++ )
-	   {
-		   printf("%03d ", buff[i] );
-	   }
-	   printf("%d", ntohs(*(unsigned short *)&buff[8]));
-	   printf("\n");
-	   fprintf(stderr, "SOCKS error number %d\n", buff[1] );
-	   close(sockfd);
-	   return -1;
-   }
+		printf("libproxy; SOCKS5 connection on %d (%d)\n", sockfd,s  );
+		return  s;
+	}
+	else
+	{
+		for( i = 0; i < 8; i++ )
+		{
+			printf("%03d ", buff[i] );
+		}
+		printf("%d", ntohs(*(unsigned short *)&buff[8]));
+		printf("\n");
+		fprintf(stderr, "SOCKS error number %d\n", buff[1] );
+		close(sockfd);
+		return -1;
+	}
 }
 
 static int http_tunnel_init( int sockfd, struct sockaddr *serv_addr, int addrlen )
@@ -729,12 +728,12 @@ static int http_tunnel_init( int sockfd, struct sockaddr *serv_addr, int addrlen
 	char cmd[200];
 	char *inputline = NULL;
 	unsigned short realport=ntohs(((struct sockaddr_in *)serv_addr)->sin_port);
-   
+	
 	sprintf(cmd,"CONNECT %s:%d HTTP/1.1\r\n",proxy_realhost,realport);
 	if ( proxy_auth != NULL ) {
-	    strcat( cmd, "Proxy-Authorization: Basic " );
-	    strcat( cmd, proxy_auth );
-	    strcat( cmd, "\r\n" );
+		strcat( cmd, "Proxy-Authorization: Basic " );
+		strcat( cmd, proxy_auth );
+		strcat( cmd, "\r\n" );
 	}
 	strcat( cmd, "\r\n" );
 #ifndef DEBUG
@@ -750,29 +749,29 @@ static int http_tunnel_init( int sockfd, struct sockaddr *serv_addr, int addrlen
 	debug_print(debug_buff);
 #endif
 	if (!strstr(inputline, "200")) {
-		    /* Check if proxy authorization needed */
-		   if ( strstr( inputline, "407" ) ) {
-		       while(proxy_recv_line(sockfd,&inputline) > 0) {
-			       free(inputline);
-		       }
-				ay_do_error( _("Proxy Error"), _("HTTP proxy error: Authentication required.") );
-		       return( -2 );
-		   }
-		   if ( strstr( inputline, "403" ) ) {
-		       while(proxy_recv_line(sockfd,&inputline) > 0) {
-			       free(inputline);
-		       }
-				ay_do_error( _("Proxy Error"), _("HTTP proxy error: permission denied.") );
-		       return( -2 );
-		   }
-		   free(inputline);
-		   return(-1);
+		/* Check if proxy authorization needed */
+		if ( strstr( inputline, "407" ) ) {
+			while(proxy_recv_line(sockfd,&inputline) > 0) {
+				free(inputline);
+			}
+			ay_do_error( _("Proxy Error"), _("HTTP proxy error: Authentication required.") );
+			return( -2 );
 		}
+		if ( strstr( inputline, "403" ) ) {
+			while(proxy_recv_line(sockfd,&inputline) > 0) {
+				free(inputline);
+			}
+			ay_do_error( _("Proxy Error"), _("HTTP proxy error: permission denied.") );
+			return( -2 );
+		}
+		free(inputline);
+		return(-1);
+	}
 
 	while (strlen(inputline)>1) {
 		free(inputline);
 		if (proxy_recv_line(sockfd,&inputline) < 0) {
-		   return(-1);
+			return(-1);
 		}
 #ifndef DEBUG
 		sprintf(debug_buff,"<%s>\n",inputline);
@@ -780,7 +779,7 @@ static int http_tunnel_init( int sockfd, struct sockaddr *serv_addr, int addrlen
 #endif
 	}
 	free(inputline);
-	        
+			
 	return 0;
 }
 
@@ -788,8 +787,8 @@ static int http_connect( int sockfd, struct sockaddr *serv_addr, int addrlen )
 {
 	/* do the  tunneling */
 	/* step one : connect to  proxy */
-   struct sockaddr_in name;
-   int ret;
+	struct sockaddr_in name;
+	int ret;
 	struct hostent *hostinfo;
 	unsigned short shortport = proxy_port;
 
@@ -807,9 +806,9 @@ static int http_connect( int sockfd, struct sockaddr *serv_addr, int addrlen )
 	debug_print(debug_buff);
 #endif
 	if ((ret = connect(sockfd,(struct sockaddr *)&name,sizeof(name)))<0)
-	   return(ret);
+		return(ret);
 
-   return (http_tunnel_init(sockfd, serv_addr, addrlen));       
+	return (http_tunnel_init(sockfd, serv_addr, addrlen));		
 }
 
 int proxy_connect_host( const char *host, int port, void *cb, void *data, void *scb )
@@ -858,24 +857,24 @@ int proxy_get_proxy( ) {
 
 int proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen, void *cb, void *data, void *scb )
 {
-   int tmp;
-   ay_socket_callback callback = (ay_socket_callback)cb;
-   
-   if (!proxy_inited)
-	   proxy_autoinit();
+	int tmp;
+	ay_socket_callback callback = (ay_socket_callback)cb;
+	
+	if (!proxy_inited)
+		proxy_autoinit();
 
-   if (sockfd == -1 && (proxy_type != PROXY_NONE || !callback))
-	   sockfd = socket(AF_INET, SOCK_STREAM, 0);
-   
-   switch (proxy_type) {
-      case PROXY_NONE:    /* No proxy */
-		{
+	if (sockfd == -1 && (proxy_type != PROXY_NONE || !callback))
+		sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	
+	switch (proxy_type) {
+	case PROXY_NONE:	/* No proxy */
+	{
 		struct sockaddr_in *sin = (struct sockaddr_in *)serv_addr;
 		if (callback)
 			return ay_socket_new_async(
-			      inet_ntoa(sin->sin_addr), 
-			      ntohs(sin->sin_port), 
-			      callback, data, scb);
+				  inet_ntoa(sin->sin_addr), 
+				  ntohs(sin->sin_port), 
+				  callback, data, scb);
 		else {
 			if (connect(sockfd, serv_addr, addrlen) == 0) {
 				return sockfd;
@@ -884,33 +883,33 @@ int proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen, void *cb
 			}
 		}
 		break;
-		}
-      case PROXY_HTTP:    /* Http proxy */
+	}
+	case PROXY_HTTP:	/* Http proxy */
 		if ( (tmp=http_connect(sockfd, serv_addr, addrlen)) >= 0 ) {
 			return conn_ok(sockfd, callback, data);
 		} else {
 			return conn_nok(sockfd, callback, data);
 		}
 		break;
-      case PROXY_SOCKS4:  /* SOCKS4 proxy */
+	case PROXY_SOCKS4:  /* SOCKS4 proxy */
 		if ( (tmp=socks4_connect(sockfd, serv_addr, addrlen)) >= 0 ) {
 			return conn_ok(sockfd, callback, data);
 		} else {
 			return conn_nok(sockfd, callback, data);
 		}
 		break;
-      case PROXY_SOCKS5:  /* SOCKS5 proxy */
+	case PROXY_SOCKS5:  /* SOCKS5 proxy */
 		if ( (tmp=socks5_connect(sockfd, serv_addr, addrlen)) >= 0 ) {
 			return conn_ok(sockfd, callback, data);
 		} else {
 			return conn_nok(sockfd, callback, data);
 		}
 		break;
-      default:
-	      fprintf(stderr,"Unknown proxy type : %d.\n",proxy_type);
-	      break;
-   }
-   return(-1);
+	default:
+		fprintf(stderr,"Unknown proxy type : %d.\n",proxy_type);
+		break;
+	}
+	return(-1);
 }
 
 static char *encode_proxy_auth_str( const char *user, const char *passwd )
@@ -999,41 +998,41 @@ static char *encode_proxy_auth_str( const char *user, const char *passwd )
 static const unsigned char pr2six[256] =
 {
 #ifndef CHARSET_EBCDIC
-    /* ASCII table */
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 64, 64, 63,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64,
-    64,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 64,
-    64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
+	/* ASCII table */
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 64, 64, 63,
+	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64,
+	64,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 64,
+	64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+	41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
 #else /*CHARSET_EBCDIC*/
-    /* EBCDIC table */
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 63, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 64, 64, 64, 64, 64, 64,
-    64, 35, 36, 37, 38, 39, 40, 41, 42, 43, 64, 64, 64, 64, 64, 64,
-    64, 64, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64,  0,  1,  2,  3,  4,  5,  6,  7,  8, 64, 64, 64, 64, 64, 64,
-    64,  9, 10, 11, 12, 13, 14, 15, 16, 17, 64, 64, 64, 64, 64, 64,
-    64, 64, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 64, 64,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64
+	/* EBCDIC table */
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 63, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 64, 64, 64, 64, 64, 64,
+	64, 35, 36, 37, 38, 39, 40, 41, 42, 43, 64, 64, 64, 64, 64, 64,
+	64, 64, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64, 64,
+	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+	64,  0,  1,  2,  3,  4,  5,  6,  7,  8, 64, 64, 64, 64, 64, 64,
+	64,  9, 10, 11, 12, 13, 14, 15, 16, 17, 64, 64, 64, 64, 64, 64,
+	64, 64, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 64, 64,
+	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64
 #endif /*CHARSET_EBCDIC*/
 };
 
@@ -1043,92 +1042,92 @@ static int ap_base64decode_binary(unsigned char *bufplain, const char *bufcoded)
 
 static int ap_base64decode_len(const char *bufcoded)
 {
-    int nbytesdecoded;
-    register const unsigned char *bufin;
-    register int nprbytes;
+	int nbytesdecoded;
+	register const unsigned char *bufin;
+	register int nprbytes;
 
-    bufin = (const unsigned char *) bufcoded;
-    while (pr2six[*(bufin++)] <= 63);
+	bufin = (const unsigned char *) bufcoded;
+	while (pr2six[*(bufin++)] <= 63);
 
-    nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
-    nbytesdecoded = ((nprbytes + 3) / 4) * 3;
+	nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
+	nbytesdecoded = ((nprbytes + 3) / 4) * 3;
 
-    return nbytesdecoded + 1;
+	return nbytesdecoded + 1;
 }
 
 static int ap_base64decode(char *bufplain, const char *bufcoded)
 {
 #ifdef CHARSET_EBCDIC
-    int i;
+	int i;
 #endif				/* CHARSET_EBCDIC */
-    int len;
-    
-    len = ap_base64decode_binary((unsigned char *) bufplain, bufcoded);
+	int len;
+	
+	len = ap_base64decode_binary((unsigned char *) bufplain, bufcoded);
 #ifdef CHARSET_EBCDIC
-    for (i = 0; i < len; i++)
+	for (i = 0; i < len; i++)
 	bufplain[i] = os_toebcdic[bufplain[i]];
 #endif				/* CHARSET_EBCDIC */
-    bufplain[len] = '\0';
-    return len;
+	bufplain[len] = '\0';
+	return len;
 }
 
 /* This is the same as ap_base64udecode() except on EBCDIC machines, where
  * the conversion of the output to ebcdic is left out.
  */
 static int ap_base64decode_binary(unsigned char *bufplain,
-				   const char *bufcoded)
+					const char *bufcoded)
 {
-    int nbytesdecoded;
-    register const unsigned char *bufin;
-    register unsigned char *bufout;
-    register int nprbytes;
+	int nbytesdecoded;
+	register const unsigned char *bufin;
+	register unsigned char *bufout;
+	register int nprbytes;
 
-    bufin = (const unsigned char *) bufcoded;
-    while (pr2six[*(bufin++)] <= 63);
-    nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
-    nbytesdecoded = ((nprbytes + 3) / 4) * 3;
+	bufin = (const unsigned char *) bufcoded;
+	while (pr2six[*(bufin++)] <= 63);
+	nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
+	nbytesdecoded = ((nprbytes + 3) / 4) * 3;
 
-    bufout = (unsigned char *) bufplain;
-    bufin = (const unsigned char *) bufcoded;
+	bufout = (unsigned char *) bufplain;
+	bufin = (const unsigned char *) bufcoded;
 
-    while (nprbytes > 4) {
+	while (nprbytes > 4) {
 	*(bufout++) =
-	    (unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
+		(unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
 	*(bufout++) =
-	    (unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
+		(unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
 	*(bufout++) =
-	    (unsigned char) (pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
+		(unsigned char) (pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
 	bufin += 4;
 	nprbytes -= 4;
-    }
+	}
 
-    /* Note: (nprbytes == 1) would be an error, so just ingore that case */
-    if (nprbytes > 1) {
+	/* Note: (nprbytes == 1) would be an error, so just ingore that case */
+	if (nprbytes > 1) {
 	*(bufout++) =
-	    (unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
-    }
-    if (nprbytes > 2) {
+		(unsigned char) (pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4);
+	}
+	if (nprbytes > 2) {
 	*(bufout++) =
-	    (unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
-    }
-    if (nprbytes > 3) {
+		(unsigned char) (pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2);
+	}
+	if (nprbytes > 3) {
 	*(bufout++) =
-	    (unsigned char) (pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
-    }
+		(unsigned char) (pr2six[bufin[2]] << 6 | pr2six[bufin[3]]);
+	}
 
-    nbytesdecoded -= (4 - nprbytes) & 3;
-    return nbytesdecoded;
+	nbytesdecoded -= (4 - nprbytes) & 3;
+	return nbytesdecoded;
 }
 #endif
 
 static const char basis_64[] =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* Ayttm - We don't use these but they are left in in case we want them later */
 #if 0
 static int ap_base64encode_len(int len)
 {
-    return ((len + 2) / 3 * 4) + 1;
+	return ((len + 2) / 3 * 4) + 1;
 }
 #endif
 
@@ -1136,71 +1135,71 @@ static int ap_base64encode_len(int len)
  * the conversion of the input to ascii is left out.
  */
 static int ap_base64encode_binary(char *encoded,
-                                       const unsigned char *string, int len)
+		const unsigned char *string, int len)
 {
-    int i;
-    char *p;
+	int i;
+	char *p;
 
-    p = encoded;
-    for (i = 0; i < len - 2; i += 3) {
-	*p++ = basis_64[(string[i] >> 2) & 0x3F];
-	*p++ = basis_64[((string[i] & 0x3) << 4) |
-	                ((int) (string[i + 1] & 0xF0) >> 4)];
-	*p++ = basis_64[((string[i + 1] & 0xF) << 2) |
-	                ((int) (string[i + 2] & 0xC0) >> 6)];
-	*p++ = basis_64[string[i + 2] & 0x3F];
-    }
-    if (i < len) {
-	*p++ = basis_64[(string[i] >> 2) & 0x3F];
-	if (i == (len - 1)) {
-	    *p++ = basis_64[((string[i] & 0x3) << 4)];
-	    *p++ = '=';
+	p = encoded;
+	for (i = 0; i < len - 2; i += 3) {
+		*p++ = basis_64[(string[i] >> 2) & 0x3F];
+		*p++ = basis_64[((string[i] & 0x3) << 4) |
+						((int) (string[i + 1] & 0xF0) >> 4)];
+		*p++ = basis_64[((string[i + 1] & 0xF) << 2) |
+						((int) (string[i + 2] & 0xC0) >> 6)];
+		*p++ = basis_64[string[i + 2] & 0x3F];
 	}
-	else {
-	    *p++ = basis_64[((string[i] & 0x3) << 4) |
-	                    ((int) (string[i + 1] & 0xF0) >> 4)];
-	    *p++ = basis_64[((string[i + 1] & 0xF) << 2)];
+	if (i < len) {
+		*p++ = basis_64[(string[i] >> 2) & 0x3F];
+		if (i == (len - 1)) {
+			*p++ = basis_64[((string[i] & 0x3) << 4)];
+			*p++ = '=';
+		}
+		else {
+			*p++ = basis_64[((string[i] & 0x3) << 4) |
+							((int) (string[i + 1] & 0xF0) >> 4)];
+			*p++ = basis_64[((string[i + 1] & 0xF) << 2)];
+		}
+		*p++ = '=';
 	}
-	*p++ = '=';
-    }
 
-    *p++ = '\0';
-    return p - encoded;
+	*p++ = '\0';
+	return p - encoded;
 }
 
 static int ap_base64encode(char *encoded, const char *string, int len)
 {
 #ifndef CHARSET_EBCDIC
-    return ap_base64encode_binary(encoded, (const unsigned char *) string, len);
+	return ap_base64encode_binary(encoded, (const unsigned char *) string, len);
 #else				/* CHARSET_EBCDIC */
-    int i;
-    char *p;
+	int i;
+	char *p;
 
-    p = encoded;
-    for (i = 0; i < len - 2; i += 3) {
-	*p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
-	*p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
-	                ((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
-	*p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2) |
-	                ((int) (os_toascii[string[i + 2]] & 0xC0) >> 6)];
-	*p++ = basis_64[os_toascii[string[i + 2]] & 0x3F];
-    }
-    if (i < len) {
-	*p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
-	if (i == (len - 1)) {
-	    *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4)];
-	    *p++ = '=';
+	p = encoded;
+	for (i = 0; i < len - 2; i += 3) {
+		*p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
+		*p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
+						((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
+		*p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2) |
+						((int) (os_toascii[string[i + 2]] & 0xC0) >> 6)];
+		*p++ = basis_64[os_toascii[string[i + 2]] & 0x3F];
 	}
-	else {
-	    *p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
-	                    ((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
-	    *p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2)];
+	if (i < len) {
+		*p++ = basis_64[(os_toascii[string[i]] >> 2) & 0x3F];
+		if (i == (len - 1)) {
+			*p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4)];
+			*p++ = '=';
+		}
+		else {
+			*p++ = basis_64[((os_toascii[string[i]] & 0x3) << 4) |
+							((int) (os_toascii[string[i + 1]] & 0xF0) >> 4)];
+			*p++ = basis_64[((os_toascii[string[i + 1]] & 0xF) << 2)];
+		}
+		*p++ = '=';
 	}
-	*p++ = '=';
-    }
 
-    *p++ = '\0';
-    return p - encoded;
+	*p++ = '\0';
+	return p - encoded;
 #endif				/* CHARSET_EBCDIC */
 }
 
