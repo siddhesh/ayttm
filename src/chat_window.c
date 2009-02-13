@@ -2310,7 +2310,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 #define TOOLBAR_APPEND(tool_btn,txt,icn,cbk,cwx) {\
 	tool_btn = GTK_WIDGET(gtk_tool_button_new(icn,txt));\
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(tool_btn),-1);\
-	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(tool_btn),gtk_tooltips_new(),txt,txt);\
+	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(tool_btn),txt);\
 	g_signal_connect(tool_btn,"clicked",G_CALLBACK(cbk),cwx); \
 	gtk_widget_show(tool_btn); }
 #define ICON_CREATE(icon,iconwid,xpm) {\
@@ -2346,8 +2346,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(cw->offline_button),-1);
 		
-		gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(cw->offline_button),
-				gtk_tooltips_new(),_("Allow"),
+		gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(cw->offline_button),
 				_("Allow Offline Messaging Ctrl+O"));
 
 		g_signal_connect(cw->offline_button,"clicked",
@@ -2389,8 +2388,7 @@ chat_window * eb_chat_window_new(eb_local_account * local, struct contact * remo
 
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(cw->sound_button),-1);
 	
-	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(cw->sound_button),
-			gtk_tooltips_new(),_("Sound"),
+	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(cw->sound_button),
 			_("Enable Sounds Ctrl+S"));
 
 	g_signal_connect(cw->sound_button,"clicked",

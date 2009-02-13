@@ -1705,19 +1705,19 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator), TRUE);\
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(separator) , -1);\
 	gtk_widget_show(separator); }
-#define TOOLBAR_APPEND_TOGGLE_BUTTON(tool_btn,txt,tip,pvt_tip,icn,cbk,cwx) {\
+#define TOOLBAR_APPEND_TOGGLE_BUTTON(tool_btn,txt,tip,icn,cbk,cwx) {\
 	tool_btn = GTK_WIDGET( gtk_toggle_tool_button_new() );\
 	gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(tool_btn), icn);\
 	gtk_tool_button_set_label(GTK_TOOL_BUTTON(tool_btn),txt);\
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(tool_btn),-1);\
-	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(tool_btn),gtk_tooltips_new(),tip,pvt_tip);\
+	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(tool_btn),tip);\
 	g_signal_connect(tool_btn,"clicked",G_CALLBACK(cbk),cwx);\
         gtk_widget_show(tool_btn); }
 	
 #define TOOLBAR_APPEND(tool_btn,txt,icn,cbk,cwx) {\
 	tool_btn = GTK_WIDGET(gtk_tool_button_new(icn,txt));\
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(tool_btn),-1);\
-	gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(tool_btn),gtk_tooltips_new(),txt,txt);\
+	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(tool_btn),txt);\
 	g_signal_connect(tool_btn,"clicked",G_CALLBACK(cbk),cwx); \
 	gtk_widget_show(tool_btn); }
 #define ICON_CREATE(icon,iconwid,xpm) {\
@@ -1743,7 +1743,6 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	TOOLBAR_APPEND_TOGGLE_BUTTON(chat_room->reconnect_button,
 			_("Reconnect at login"),
 			_("Reconnect at login"),
-			_("Reconnect at login"),
 			iconwid,
 			set_reconnect_on_toggle,
 			chat_room
@@ -1756,7 +1755,6 @@ void eb_join_chat_room( eb_chat_room * chat_room, int send_join )
 	TOOLBAR_APPEND_TOGGLE_BUTTON(chat_room->sound_button,
 			_("Sound"),
 			_("Enable Sounds"),
-			_("Sound"),
 			iconwid,
 			set_sound_on_toggle,
 			chat_room

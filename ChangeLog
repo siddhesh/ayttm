@@ -1,3 +1,10 @@
+* Fri Feb 13 2009 14:30 UTC [siddheshp]   0.5.0-83
+- ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c,
+src/edit_local_accounts.c:
+ * Replaced deprecated gtk_tool_item_set_tooltip with
+ gtk_tool_item_set_tooltip_text.
+ * Bumped GTK required version to 2.12.0 since the above function needs it
+
 * Wed Nov 19 2008 18:35 UTC [siddheshp]   0.5.0-82
 - ChangeLog, libproxy/proxy.c:
  * Code formatting only.

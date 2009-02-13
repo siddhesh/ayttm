@@ -749,12 +749,12 @@ void	ay_edit_local_accounts( void )
 
 	/*Add Button */
 
-#define TOOLBAR_APPEND(titem,in_xpm,label,tip,p_tip,callback,cb_data) { \
+#define TOOLBAR_APPEND(titem,in_xpm,label,tip,callback,cb_data) { \
 	icon = gdk_pixbuf_new_from_xpm_data((const char **) in_xpm); \
 	iconwid = gtk_image_new_from_pixbuf(icon); \
 	gtk_widget_show(iconwid); \
 	titem = gtk_tool_button_new(iconwid, label); \
-	gtk_tool_item_set_tooltip(titem, gtk_tooltips_new(), tip, p_tip); \
+	gtk_tool_item_set_tooltip_text(titem, tip); \
 	g_signal_connect(titem, "clicked", G_CALLBACK(callback), cb_data); \
 	gtk_widget_show(GTK_WIDGET(titem)); \
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), titem, -1); \
@@ -768,24 +768,24 @@ void	ay_edit_local_accounts( void )
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_sep, -1); \
 }
 
-	TOOLBAR_APPEND(toolitem, help_xpm, _("Help"), _("Help"), _("Help"), help_callback, NULL);
+	TOOLBAR_APPEND(toolitem, help_xpm, _("Help"), _("Help"), help_callback, NULL);
 
 	TOOLBAR_APPEND_SEPARATOR(TRUE);
 
-	TOOLBAR_APPEND(toolitem, tb_preferences_xpm, _("Add"), _("Add Account"), _("Add"), add_callback, NULL);
+	TOOLBAR_APPEND(toolitem, tb_preferences_xpm, _("Add"), _("Add Account"), add_callback, NULL);
 
 	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/*Delete Button */
 
-	TOOLBAR_APPEND(del_button, tb_trash_xpm, _("Delete"), _("Delete Account"), _("Delete"), remove_callback, NULL);
+	TOOLBAR_APPEND(del_button, tb_trash_xpm, _("Delete"), _("Delete Account"), remove_callback, NULL);
 	
 	gtk_widget_set_sensitive(GTK_WIDGET(del_button), FALSE);
 	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/* Modify Button */
 
-	TOOLBAR_APPEND(mod_button, tb_edit_xpm, _("Modify"), _("Modify Account"), _("Modify"), modify_callback, NULL);
+	TOOLBAR_APPEND(mod_button, tb_edit_xpm, _("Modify"), _("Modify Account"), modify_callback, NULL);
 	
 	gtk_widget_set_sensitive(GTK_WIDGET(mod_button), FALSE);
 
@@ -793,13 +793,13 @@ void	ay_edit_local_accounts( void )
 
 	/*Okay Button */
 
-	TOOLBAR_APPEND(toolitem, ok_xpm, _("Ok"), _("Ok"), _("Ok"), ok_callback, NULL);
+	TOOLBAR_APPEND(toolitem, ok_xpm, _("Ok"), _("Ok"), ok_callback, NULL);
 	
 	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/*Cancel Button */
 
-	TOOLBAR_APPEND(toolitem, cancel_xpm, _("Cancel"), _("Cancel"), _("Cancel"), cancel_callback, NULL);
+	TOOLBAR_APPEND(toolitem, cancel_xpm, _("Cancel"), _("Cancel"), cancel_callback, NULL);
 
 #undef TOOLBAR_APPEND_SEPARATOR
 #undef TOOLBAR_APPEND

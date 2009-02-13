@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=82
+RELEASE=83
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -213,8 +213,8 @@ fi
 
 AM_PATH_GLIB_2_0( , [AC_DEFINE(HAVE_GLIB, 1, [Define if you have glib])],
 	AC_MSG_ERROR([Unable to find glib-devel version 2.0.0 or higher]))
-AM_PATH_GTK_2_0( 2.6.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
-	AC_MSG_ERROR([Unable to find gtk-devel version 2.6.0 or higher]))
+AM_PATH_GTK_2_0( 2.12.0, [AC_DEFINE(HAVE_GTK, 1, [Define if you have gtk])],
+	AC_MSG_ERROR([Unable to find gtk-devel version 2.12.0 or higher]))
 
 AC_ARG_ENABLE(webcam, AC_HELP_STRING([--disable-webcam],
 		[Do not build webcam support]))
