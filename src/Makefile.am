@@ -3,12 +3,9 @@ SUBDIRS = gtk
 bin_PROGRAMS = ayttm
 
 if MINGW32
-localedir = locale
 WIN32_SRC = ayttm.rc exchndl2.cxx
 WIN32_LD = -mwindows -Wl,--export-all-symbols -Wl,--out-implib,libayttm.a
 WIN32_LIBS = -lws2_32 -lwinmm
-else
-localedir = $(datadir)/locale
 endif
 # for building on windows
 EXTRA_DIST = ayttm.rc exchndl2.cxx

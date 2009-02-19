@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm 0.4.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-11 02:16+0530\n"
+"POT-Creation-Date: 2009-02-19 22:04+0530\n"
 "PO-Revision-Date: 2004-09-24 10:27+0100\n"
 "Last-Translator: Patrik Hermansson <patrik@paheco.nu>\n"
 "Language-Team: SV <pather@comhem.se>\n"
@@ -16,17 +16,17 @@ msgstr ""
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libproxy/proxy.c:477 libproxy/proxy.c:479 libproxy/proxy.c:481
-#: libproxy/proxy.c:483 libproxy/proxy.c:631 libproxy/proxy.c:758
-#: libproxy/proxy.c:765
+#: libproxy/proxy.c:474 libproxy/proxy.c:477 libproxy/proxy.c:480
+#: libproxy/proxy.c:483 libproxy/proxy.c:630 libproxy/proxy.c:757
+#: libproxy/proxy.c:764
 msgid "Proxy Error"
 msgstr "Proxyfel"
 
-#: libproxy/proxy.c:477
+#: libproxy/proxy.c:475
 msgid "Socks 4 proxy rejected request for an unknown reason."
 msgstr "Socks 4 proxyn avvisade förfrågan av okänd anledning."
 
-#: libproxy/proxy.c:479
+#: libproxy/proxy.c:478
 msgid ""
 "Socks 4 proxy rejected request because it could not connect to our identd."
 msgstr "Socks 4 proxyn avvisade förfrågan, kunde ej kontakta vår identd."
@@ -37,19 +37,19 @@ msgid ""
 msgstr ""
 "Socks 4 proxyn avvisade förfrågan, identd returnerade ett annat userid."
 
-#: libproxy/proxy.c:483
+#: libproxy/proxy.c:484
 msgid "Socks 4 proxy rejected request with an RFC-uncompliant error cod."
 msgstr "Socks 4 proxyn avvisade förfrågan med en RFC-inkompatibel felkod."
 
-#: libproxy/proxy.c:631
+#: libproxy/proxy.c:630
 msgid "Socks5 proxy refused our authentication."
 msgstr "Socks5 proxyn avvisade vår autenciering"
 
-#: libproxy/proxy.c:758
+#: libproxy/proxy.c:757
 msgid "HTTP proxy error: Authentication required."
 msgstr "HTTP proxy fel: Autenciering krävs."
 
-#: libproxy/proxy.c:765
+#: libproxy/proxy.c:764
 msgid "HTTP proxy error: permission denied."
 msgstr "HTTP proxy fel: Åtkomst nekad"
 
@@ -118,20 +118,20 @@ msgstr ""
 
 #: modules/aim-toc/aim-toc.c:1049 modules/icq-toc/icq-toc.c:981
 #: modules/irc/irc.c:511 modules/jabber/jabber.c:466 modules/msn2/msn.C:485
-#: modules/smtp/smtp.c:188 modules/yahoo2/yahoo.c:2512
+#: modules/smtp/smtp.c:188 modules/yahoo2/yahoo.c:2507
 #: src/edit_local_accounts.c:677
 msgid "_Password:"
 msgstr "_Lösenord:"
 
 #: modules/aim-toc/aim-toc.c:1056 modules/icq-toc/icq-toc.c:988
 #: modules/jabber/jabber.c:480 modules/msn2/msn.C:492
-#: modules/yahoo2/yahoo.c:2519
+#: modules/yahoo2/yahoo.c:2514
 msgid "_Ask for password at Login time"
 msgstr "_Fråga efter lösenord vid inloggning"
 
 #: modules/aim-toc/aim-toc.c:1063 modules/icq-toc/icq-toc.c:995
 #: modules/irc/irc.c:518 modules/jabber/jabber.c:487 modules/msn2/msn.C:499
-#: modules/yahoo2/yahoo.c:2526 src/edit_local_accounts.c:714
+#: modules/yahoo2/yahoo.c:2521 src/edit_local_accounts.c:714
 msgid "_Connect at startup"
 msgstr "_Anslut vid uppstart"
 
@@ -145,7 +145,7 @@ msgstr "Användaren är tillfälligt ute"
 
 #: modules/aim-toc/aim-toc.c:1348 src/chat_window.c:884 src/chat_window.c:1412
 #: src/chat_window.c:1416 src/chat_window.c:1418 src/chat_window.c:2195
-#: src/chat_window.c:2324 src/contact_util.C:417 src/crash.c:468
+#: src/chat_window.c:2331 src/contact_util.C:417 src/crash.c:468
 #: src/crash.c:487 src/edit_account_window.c:330 src/edit_account_window.c:361
 #: src/status.c:1308 src/status.c:1753 src/status.c:1799 src/util.c:1067
 #: src/util.c:1095 src/util.c:1204
@@ -283,7 +283,7 @@ msgstr "Välj"
 
 #: modules/aycryption/select-keys.c:451 modules/aycryption/select-keys.c:709
 #: modules/importers/import_everybuddy.c:258 src/activity_bar.C:136
-#: src/add_contact_window.c:476 src/chat_room.c:626 src/chat_room.c:1012
+#: src/add_contact_window.c:476 src/chat_room.c:656 src/chat_room.c:1042
 #: src/dialog.c:431 src/edit_account_window.c:295
 #: src/edit_contact_window.c:221 src/edit_group_window.c:131
 #: src/edit_list_window.c:654 src/edit_local_accounts.c:802
@@ -636,51 +636,51 @@ msgstr "<b>Server:</b> %s<br>"
 msgid "<i><b>Server Info: </b></i> %s<br>"
 msgstr "<b>Server:</b> %s<br>"
 
-#: modules/irc/irc.c:1774
+#: modules/irc/irc.c:1775
 #, c-format
 msgid "<font color=\"#00BBBB\">%s is running %s"
 msgstr ""
 
-#: modules/irc/irc.c:1783
+#: modules/irc/irc.c:1784
 #, fuzzy
 msgid " on "
 msgstr "Typsnitt: "
 
-#: modules/irc/irc.c:1809
+#: modules/irc/irc.c:1810
 #, c-format
 msgid "<font color=\"#AABB44\">%s has sent Time as <B>%s</B></font>"
 msgstr ""
 
-#: modules/irc/irc.c:1836
+#: modules/irc/irc.c:1837
 #, c-format
 msgid "<I><B><font color=\"#AA0000\">%s:</font></B> %s</I>"
 msgstr ""
 
-#: modules/irc/irc.c:1936
+#: modules/irc/irc.c:1937
 #, c-format
 msgid ">>> Inviting %s [%s] <<<"
 msgstr ">>> Bjuder in %s [%s] <<<"
 
-#: modules/irc/irc.c:1938
+#: modules/irc/irc.c:1939
 #, c-format
 msgid ">>> Inviting %s <<<"
 msgstr ">>> Bjuder in %s <<<"
 
-#: modules/irc/irc.c:2114 modules/irc/irc.c:2162
+#: modules/irc/irc.c:2115 modules/irc/irc.c:2163
 #, fuzzy
 msgid "Nickname in Use"
 msgstr "Smeknamn: %s<br>"
 
-#: modules/irc/irc.c:2127
+#: modules/irc/irc.c:2128
 #, fuzzy
 msgid "No such Server"
 msgstr "Förvald server:"
 
-#: modules/irc/irc.c:2140
+#: modules/irc/irc.c:2141
 msgid "No such Channel"
 msgstr ""
 
-#: modules/irc/irc.c:2153
+#: modules/irc/irc.c:2154
 msgid "No such Nickname"
 msgstr ""
 
@@ -720,8 +720,8 @@ msgid "SSL Po_rt:"
 msgstr "SSL Po_rt:"
 
 #: modules/jabber/jabber.c:1258 modules/msn2/msn.C:2467
-#: modules/workwizu/workwizu.c:326 modules/yahoo2/yahoo.c:2160
-#: src/chat_room.c:1875 src/chat_room.c:1893
+#: modules/workwizu/workwizu.c:326 modules/yahoo2/yahoo.c:2155
+#: src/chat_room.c:1934 src/chat_room.c:1952
 msgid "typing..."
 msgstr "skriver..."
 
@@ -840,7 +840,7 @@ msgstr "MSN lösenord för: %s"
 msgid "MSN logins must have @domain.tld part."
 msgstr "MSN-logins måste ha en @domain.tld del"
 
-#: modules/msn2/msn.C:1124 modules/yahoo2/yahoo.c:1072
+#: modules/msn2/msn.C:1124 modules/yahoo2/yahoo.c:1065
 msgid "Save file as"
 msgstr "Spara fil som"
 
@@ -849,8 +849,8 @@ msgstr "Spara fil som"
 msgid "The file %s has been successfully transfered."
 msgstr "Filen %s har överförts"
 
-#: modules/msn2/msn.C:1262 modules/msn2/msn.C:2005 modules/yahoo2/yahoo.c:2806
-#: modules/yahoo2/yahoo.c:2849 src/chat_window.c:692 src/chat_window.c:1419
+#: modules/msn2/msn.C:1262 modules/msn2/msn.C:2005 modules/yahoo2/yahoo.c:2801
+#: modules/yahoo2/yahoo.c:2844 src/chat_window.c:692 src/chat_window.c:1419
 #: src/contact_util.C:600 src/contact_util.C:604 src/offline_queue_mgmt.c:161
 #: src/offline_queue_mgmt.c:163 src/status.c:1309 src/status.c:1665
 #: src/status.c:1702 src/util.c:1102 src/util.c:1234 src/util.c:1238
@@ -1165,27 +1165,27 @@ msgstr "Fråga efter överfört filnamn"
 msgid "Show how long contact has been away"
 msgstr "Visa hur lång tid kontakten varit frånvarande"
 
-#: modules/yahoo2/yahoo.c:929
+#: modules/yahoo2/yahoo.c:925
 #, c-format
 msgid "<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"
 msgstr "<FONT COLOR=\"#0000FF\">[Offlinemeddelande vid %s]</FONT><BR>%s"
 
-#: modules/yahoo2/yahoo.c:1096
+#: modules/yahoo2/yahoo.c:1089
 #, c-format
 msgid ""
 "%s, the yahoo user %s has sent you a file%s%s, Do you want to accept it?"
 msgstr ""
 "%s, yahooanvändaren %s har skickat dig en fil%s%s. Vill du acceptera den?"
 
-#: modules/yahoo2/yahoo.c:1098
+#: modules/yahoo2/yahoo.c:1091
 msgid " with the message "
 msgstr "med meddelandet"
 
-#: modules/yahoo2/yahoo.c:1108
+#: modules/yahoo2/yahoo.c:1101
 msgid "Yahoo File Transfer"
 msgstr "Yahoo filöverföring"
 
-#: modules/yahoo2/yahoo.c:1283
+#: modules/yahoo2/yahoo.c:1280
 #, c-format
 msgid ""
 "The yahoo user %s declined your invitation to join conference %s, with the "
@@ -1194,18 +1194,18 @@ msgstr ""
 "Yahooanvändaren %s avvisade din inbjudan till konferensen %s, med "
 "meddelandet: %s"
 
-#: modules/yahoo2/yahoo.c:1286 modules/yahoo2/yahoo.c:1744
-#: modules/yahoo2/yahoo.c:2031 modules/yahoo2/yahoo.c:2074
-#: modules/yahoo2/yahoo.c:2222 modules/yahoo2/yahoo.c:2389
-#: modules/yahoo2/yahoo.c:3253
+#: modules/yahoo2/yahoo.c:1283 modules/yahoo2/yahoo.c:1739
+#: modules/yahoo2/yahoo.c:2026 modules/yahoo2/yahoo.c:2069
+#: modules/yahoo2/yahoo.c:2220 modules/yahoo2/yahoo.c:2387
+#: modules/yahoo2/yahoo.c:3248
 msgid "Yahoo Error"
 msgstr "Yahoo fel"
 
-#: modules/yahoo2/yahoo.c:1315 modules/yahoo2/yahoo.c:1392
+#: modules/yahoo2/yahoo.c:1312 modules/yahoo2/yahoo.c:1389
 msgid "Thanks, but no thanks"
 msgstr "Tack, men nej tack"
 
-#: modules/yahoo2/yahoo.c:1329
+#: modules/yahoo2/yahoo.c:1326
 #, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to a conference - %s, the topic is %"
@@ -1214,30 +1214,30 @@ msgstr ""
 "%s, yahooanvändaren %s har inbjudit dig till en konferens - %s. Ämnena är %"
 "s.\n"
 
-#: modules/yahoo2/yahoo.c:1330
+#: modules/yahoo2/yahoo.c:1327
 #, c-format
 msgid "Do you want to join?"
 msgstr "Vill du vara med?"
 
-#: modules/yahoo2/yahoo.c:1336
+#: modules/yahoo2/yahoo.c:1333
 msgid "Yahoo Join Conference"
 msgstr "Yahoo anslut till konferens"
 
-#: modules/yahoo2/yahoo.c:1535
+#: modules/yahoo2/yahoo.c:1530
 msgid "Join my conference"
 msgstr "Delta i min konferens"
 
-#: modules/yahoo2/yahoo.c:1669
+#: modules/yahoo2/yahoo.c:1664
 #, c-format
 msgid "%s's webcam"
 msgstr "%s's webbkamera"
 
-#: modules/yahoo2/yahoo.c:1744 modules/yahoo2/yahoo.c:2031
+#: modules/yahoo2/yahoo.c:1739 modules/yahoo2/yahoo.c:2026
 msgid "Cannot find a valid local account to view user's webcam."
 msgstr ""
 "Kan inte hitta ett riktigt lokalt konto för att se användarens webbkamera"
 
-#: modules/yahoo2/yahoo.c:1759
+#: modules/yahoo2/yahoo.c:1754
 #, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to view their webcam.Do you want to "
@@ -1246,36 +1246,36 @@ msgstr ""
 "%s, yahooanvändaren %s har bjudit in till för att titta på deras webbkamera. "
 "Vill du acceptera detta?"
 
-#: modules/yahoo2/yahoo.c:1764
+#: modules/yahoo2/yahoo.c:1759
 msgid "Yahoo Webcam Invitation"
 msgstr "Yahoo Webcam Inbjudan"
 
-#: modules/yahoo2/yahoo.c:1792
+#: modules/yahoo2/yahoo.c:1787
 #, c-format
 msgid "%s, webcam connection closed. %s "
 msgstr "%s, webbkameraanslutningen stängd. %s"
 
-#: modules/yahoo2/yahoo.c:1794
+#: modules/yahoo2/yahoo.c:1789
 msgid "stopped broadcasting."
 msgstr "avslutade sändning."
 
-#: modules/yahoo2/yahoo.c:1796
+#: modules/yahoo2/yahoo.c:1791
 msgid "cancelled viewing permission."
 msgstr "avbrutit tillåtelse att titta."
 
-#: modules/yahoo2/yahoo.c:1798
+#: modules/yahoo2/yahoo.c:1793
 msgid "declined you permission."
 msgstr "nekade dig tillåtelse."
 
-#: modules/yahoo2/yahoo.c:1800
+#: modules/yahoo2/yahoo.c:1795
 msgid "does not have their webcam online."
 msgstr "har inte sin Webcam online."
 
-#: modules/yahoo2/yahoo.c:1802
+#: modules/yahoo2/yahoo.c:1797
 msgid "did something we don't know about."
 msgstr "gjorde någonting vi inte vet."
 
-#: modules/yahoo2/yahoo.c:1808
+#: modules/yahoo2/yahoo.c:1803
 msgid ""
 "\n"
 "Close image window?"
@@ -1283,26 +1283,26 @@ msgstr ""
 "\n"
 "Stänga bildfönster?"
 
-#: modules/yahoo2/yahoo.c:1809 modules/yahoo2/yahoo.c:1811
+#: modules/yahoo2/yahoo.c:1804 modules/yahoo2/yahoo.c:1806
 msgid "Webcam connection closed"
 msgstr "Webkamera-anslutning stängd"
 
-#: modules/yahoo2/yahoo.c:1859 modules/yahoo2/yahoo.c:1928
+#: modules/yahoo2/yahoo.c:1854 modules/yahoo2/yahoo.c:1923
 #, c-format
 msgid "My webcam (%d viewer%s)"
 msgstr ""
 
-#: modules/yahoo2/yahoo.c:1904
+#: modules/yahoo2/yahoo.c:1899
 #, c-format
 msgid "%s, the yahoo user %s has stopped viewing your webcam."
 msgstr "%s, yahooanvändaren %s har slutat titta på din webbkamera."
 
-#: modules/yahoo2/yahoo.c:1909
+#: modules/yahoo2/yahoo.c:1904
 #, c-format
 msgid "%s, the yahoo user %s is viewing your webcam."
 msgstr "%s, yahooanvändaren %s tittar på din webbkamera."
 
-#: modules/yahoo2/yahoo.c:1914
+#: modules/yahoo2/yahoo.c:1909
 #, c-format
 msgid ""
 "%s, the yahoo user %s wants to view your webcam.\n"
@@ -1311,7 +1311,7 @@ msgstr ""
 "%s, yahooanvändaren %s vill titta på din webbkamera.\n"
 "Tillåter du detta?"
 
-#: modules/yahoo2/yahoo.c:1918
+#: modules/yahoo2/yahoo.c:1913
 #, c-format
 msgid ""
 "%s, the yahoo user %s wants to %d your webcam.  Tell the ayttm devels about "
@@ -1320,93 +1320,94 @@ msgstr ""
 "%s, yahooanvändaren %s vill %d din webbkamera. Berätta detta för "
 "Ayttmutvecklarna."
 
-#: modules/yahoo2/yahoo.c:1926 modules/yahoo2/yahoo.c:1952
+#: modules/yahoo2/yahoo.c:1921 modules/yahoo2/yahoo.c:1947
 msgid "Yahoo Webcam"
 msgstr "Yahoo webbkamera"
 
-#: modules/yahoo2/yahoo.c:1936
+#: modules/yahoo2/yahoo.c:1931
 msgid "Yahoo Webcam Request"
 msgstr "Yahoo webbkameraförfrågan"
 
-#: modules/yahoo2/yahoo.c:1952
+#: modules/yahoo2/yahoo.c:1947
 msgid "Could not read images from your webcam, could not find a video grabber."
 msgstr ""
 "Kunde inte läsa bilder från din webbkamera, kunde inte hitta någon "
 "videofångare (videograbber). "
 
-#: modules/yahoo2/yahoo.c:2007
+#: modules/yahoo2/yahoo.c:2002
 #, c-format
 msgid "%s, the yahoo user %s has declined your invitation to view your webcam."
 msgstr ""
 "%s, yahooanvändaren %s har avböjt din inbjudan till att se din webbkamera."
 
-#: modules/yahoo2/yahoo.c:2008
+#: modules/yahoo2/yahoo.c:2003
 msgid "Webcam invite declined"
 msgstr "Webbkamerainbjudan avvisad"
 
-#: modules/yahoo2/yahoo.c:2072
+#: modules/yahoo2/yahoo.c:2067
 #, c-format
 msgid "%s has rejected your request to be added as a buddy%s%s"
 msgstr "%s har avvisat din förfrågan att bli tillagd som kompis%s%s"
 
-#: modules/yahoo2/yahoo.c:2073
+#: modules/yahoo2/yahoo.c:2068
 msgid " with the message:\n"
 msgstr "med meddelandet:\n"
 
-#: modules/yahoo2/yahoo.c:2084
+#: modules/yahoo2/yahoo.c:2079
 #, c-format
 msgid "%s, the yahoo user %s has added you to their contact list"
 msgstr "%s, Yahooanvändaren %s har lagt till dig i sin kontaktlista."
 
-#: modules/yahoo2/yahoo.c:2086
+#: modules/yahoo2/yahoo.c:2081
 msgid " with the following message:\n"
 msgstr "med följande meddelande:\n"
 
-#: modules/yahoo2/yahoo.c:2092
+#: modules/yahoo2/yahoo.c:2087
 msgid "Do you want to allow this?"
 msgstr "Vill du tillåta detta?"
 
-#: modules/yahoo2/yahoo.c:2096
+#: modules/yahoo2/yahoo.c:2091
 msgid "Yahoo New Contact"
 msgstr "Yahoo ny kontakt"
 
-#: modules/yahoo2/yahoo.c:2191
+#: modules/yahoo2/yahoo.c:2186
 #, c-format
 msgid "You have new mail from %s about %s\n"
 msgstr "Du har ny epost från %s om %s\n"
 
-#: modules/yahoo2/yahoo.c:2197
+#: modules/yahoo2/yahoo.c:2192
 #, c-format
 msgid "You have %d message%s\n"
 msgstr "Du har %d meddelande%s\n"
 
-#: modules/yahoo2/yahoo.c:2198
+#: modules/yahoo2/yahoo.c:2193
 msgid "s"
 msgstr "s"
 
-#: modules/yahoo2/yahoo.c:2203
+#: modules/yahoo2/yahoo.c:2198
 msgid "Yahoo Mail"
 msgstr "Yahoo e-post"
 
-#: modules/yahoo2/yahoo.c:2214
-msgid "Yahoo System Message"
+#: modules/yahoo2/yahoo.c:2210
+#, fuzzy, c-format
+msgid "%s: Yahoo System Message"
 msgstr "Yahoo systemmeddelande"
 
-#: modules/yahoo2/yahoo.c:2303
+#: modules/yahoo2/yahoo.c:2301
 #, c-format
 msgid "Logging in to Yahoo account: %s"
 msgstr "Loggar in till Yahookontot: %s"
 
-#: modules/yahoo2/yahoo.c:2332
+#: modules/yahoo2/yahoo.c:2330
 #, c-format
 msgid "Yahoo! password for: %s"
 msgstr "Yahoo!-lösenord för: %s"
 
-#: modules/yahoo2/yahoo.c:2355
+#: modules/yahoo2/yahoo.c:2353
 msgid "Fetching buddies..."
 msgstr "Hämtar kompisar..."
 
-#: modules/yahoo2/yahoo.c:2368
+#: modules/yahoo2/yahoo.c:2366
 #, c-format
 msgid ""
 "Could not log into Yahoo service - username not recognised.  Please verify "
@@ -1415,7 +1416,7 @@ msgstr ""
 "Kunde inte logga in till Yahootjänsten - användernamnet kändes inte igen. "
 "Var god kontrollera att du skrivit ditt användarnamn rätt."
 
-#: modules/yahoo2/yahoo.c:2371
+#: modules/yahoo2/yahoo.c:2369
 #, c-format
 msgid ""
 "Could not log into Yahoo service - incorrect password.  Please verify that "
@@ -1424,7 +1425,7 @@ msgstr ""
 "Kunde inte logga in på Yahootjänsten - felaktigt lösenord. Var god "
 "kontrollera att du skrivit korrekt lösenord."
 
-#: modules/yahoo2/yahoo.c:2375
+#: modules/yahoo2/yahoo.c:2373
 #, c-format
 msgid ""
 "Could not log into Yahoo service.  Your account has been locked.\n"
@@ -1433,7 +1434,7 @@ msgstr ""
 "Kunde inte logga in till Yahootjänsten. Ditt konto har blivit låst.\n"
 "Besök %s för att återaktivera det."
 
-#: modules/yahoo2/yahoo.c:2378
+#: modules/yahoo2/yahoo.c:2376
 #, c-format
 msgid ""
 "You have been logged out of the yahoo service, possibly due to a duplicate "
@@ -1442,7 +1443,7 @@ msgstr ""
 "Du har blivit utloggad från Yahootjänsten, antagligen på grund av dubbla "
 "inloggningar."
 
-#: modules/yahoo2/yahoo.c:2380
+#: modules/yahoo2/yahoo.c:2378
 #, c-format
 msgid ""
 "Could not connect to Yahoo server.  Please verify that you are connected to "
@@ -1451,58 +1452,58 @@ msgstr ""
 "Kunde inte ansluta till Yahooservern. Var god kontrollera att du är ansluten "
 "till nätet och att pagern's värdnamn och port är korrekt angivna."
 
-#: modules/yahoo2/yahoo.c:2382
+#: modules/yahoo2/yahoo.c:2380
 #, c-format
 msgid "Could not log into Yahoo service due to unknown state: %d\n"
 msgstr "Kunde inte logga in på Yahootjänsten på grund av okänd status: %d\n"
 
-#: modules/yahoo2/yahoo.c:2505
+#: modules/yahoo2/yahoo.c:2500
 msgid "_Yahoo Id:"
 msgstr "_Yahoo Id:"
 
-#: modules/yahoo2/yahoo.c:2533
+#: modules/yahoo2/yahoo.c:2528
 msgid "Yahoo _Mail Notification"
 msgstr "Yahoo _Mail-anmälan"
 
-#: modules/yahoo2/yahoo.c:2540
+#: modules/yahoo2/yahoo.c:2535
 msgid "Login _invisible"
 msgstr "Login _osynlig"
 
-#: modules/yahoo2/yahoo.c:2547
+#: modules/yahoo2/yahoo.c:2542
 msgid "Ignore _System Messages"
 msgstr "Ignorera _Systemmeddelanden"
 
-#: modules/yahoo2/yahoo.c:3005
+#: modules/yahoo2/yahoo.c:3000
 #, c-format
 msgid "%s for %d:%02d:%02d"
 msgstr "%s för %d:%02d:%02d"
 
-#: modules/yahoo2/yahoo.c:3227
+#: modules/yahoo2/yahoo.c:3222
 #, c-format
 msgid "Yahoo read error (%d): %s"
 msgstr "Yahoo läsfel (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3231
+#: modules/yahoo2/yahoo.c:3226
 #, c-format
 msgid "Yahoo read error: Server closed socket"
 msgstr "Yahoo läsfel: Servern stängde sockeln"
 
-#: modules/yahoo2/yahoo.c:3240
+#: modules/yahoo2/yahoo.c:3235
 #, c-format
 msgid "Yahoo write error (%d): %s"
 msgstr "Yahoo skrivfel (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3244
+#: modules/yahoo2/yahoo.c:3239
 #, c-format
 msgid "Yahoo write error: Server closed socket"
 msgstr "Yahoo skrivfel: Servern stängde sockeln"
 
-#: modules/yahoo2/yahoo.c:3659 modules/yahoo2/yahoo.c:3664
+#: modules/yahoo2/yahoo.c:3654 modules/yahoo2/yahoo.c:3659
 #, fuzzy
 msgid "Invite to view Webcam"
 msgstr "Bjud in "
 
-#: modules/yahoo2/yahoo.c:3673 modules/yahoo2/yahoo.c:3678
+#: modules/yahoo2/yahoo.c:3668 modules/yahoo2/yahoo.c:3673
 msgid "View Webcam"
 msgstr "Visa Webkamera"
 
@@ -1574,7 +1575,7 @@ msgstr "Kontofel"
 msgid "No Account Name specified."
 msgstr "Inget lokalt konto angivet."
 
-#: src/add_contact_window.c:229 src/chat_room.c:760
+#: src/add_contact_window.c:229 src/chat_room.c:790
 msgid "No local account specified."
 msgstr "Inget lokalt konto angivet."
 
@@ -1639,7 +1640,7 @@ msgstr "_Kontakt:"
 msgid "_Group: "
 msgstr "_Grupp:"
 
-#: src/add_contact_window.c:451 src/chat_window.c:886 src/chat_window.c:2327
+#: src/add_contact_window.c:451 src/chat_window.c:886 src/chat_window.c:2334
 msgid "Add Contact"
 msgstr "Lägg till kontakt"
 
@@ -1684,95 +1685,94 @@ msgstr "Jag är tillbaka"
 msgid "Away"
 msgstr "Iväg"
 
-#: src/chat_room.c:563
+#: src/chat_room.c:593
 msgid "Chatroom error"
 msgstr "Chattrumsfel"
 
-#: src/chat_room.c:563
+#: src/chat_room.c:593
 msgid "Cannot invite a third party until a protocol has been chosen."
 msgstr "Kan inte bjuda in en tredje part förrän ett protokoll har valts."
 
-#: src/chat_room.c:571 src/chat_room.c:611
+#: src/chat_room.c:601 src/chat_room.c:641
 msgid "Invite a contact"
 msgstr "Bjud in en kontakt"
 
-#: src/chat_room.c:584
+#: src/chat_room.c:614
 msgid "Handle: "
 msgstr ""
 
-#: src/chat_room.c:598
+#: src/chat_room.c:628
 msgid "Message: "
 msgstr "Meddelande:"
 
-#: src/chat_room.c:621 src/chat_window.c:948
+#: src/chat_room.c:651 src/chat_window.c:948
 msgid "Invite"
 msgstr "Bjud in"
 
-#: src/chat_room.c:662
+#: src/chat_room.c:692
 #, c-format
 msgid "Chatroom %d"
 msgstr "Chattrum %d"
 
-#: src/chat_room.c:760 src/chat_room.c:777
+#: src/chat_room.c:790 src/chat_room.c:807
 msgid "Cannot join"
 msgstr "Kan inte delta"
 
-#: src/chat_room.c:777 src/chat_room.c:872 src/edit_account_window.c:77
+#: src/chat_room.c:807 src/chat_room.c:902 src/edit_account_window.c:77
 #: src/edit_account_window.c:88
 msgid "The local account doesn't exist."
 msgstr "Det lokala kontot existerar inte."
 
-#: src/chat_room.c:835 src/chat_room.c:872
+#: src/chat_room.c:865 src/chat_room.c:902
 msgid "Cannot list chatrooms"
 msgstr "Kan inte lista chattrum"
 
-#: src/chat_room.c:835
+#: src/chat_room.c:865
 msgid "No list available."
 msgstr "Ingen lista tillgänglig"
 
-#: src/chat_room.c:839
+#: src/chat_room.c:869
 msgid "Select a chatroom."
 msgstr "Välj ett chattrum."
 
-#: src/chat_room.c:839
+#: src/chat_room.c:869
 msgid "Public chatrooms list"
 msgstr "Lista över publika chattrum"
 
-#: src/chat_room.c:841 src/chat_room.c:951
+#: src/chat_room.c:871 src/chat_room.c:981
 msgid "List public chatrooms..."
 msgstr "Lista publika chattrum..."
 
-#: src/chat_room.c:876
+#: src/chat_room.c:906
 msgid "Loading List. This may take a while..."
 msgstr ""
 
-#: src/chat_room.c:921
+#: src/chat_room.c:951
 msgid "Chat Room Name: "
 msgstr "Chattrummets namn:"
 
-#: src/chat_room.c:932 src/edit_account_window.c:237
+#: src/chat_room.c:962 src/edit_account_window.c:237
 msgid "Local account: "
 msgstr "Lokalt konto:"
 
-#: src/chat_room.c:942 src/chat_room.c:1683 src/chat_room.c:1684
-#: src/chat_room.c:1685
+#: src/chat_room.c:972 src/chat_room.c:1744 src/chat_room.c:1745
 msgid "Reconnect at login"
 msgstr "Återanslut vid login"
 
-#: src/chat_room.c:946
+#: src/chat_room.c:976
 msgid "Chatroom is public"
 msgstr "Chattrummet är publikt"
 
-#: src/chat_room.c:959
+#: src/chat_room.c:989
 msgid "Join a Chat Room"
 msgstr "Anslut till ett chattrum"
 
-#: src/chat_room.c:997
+#: src/chat_room.c:1027
 #, fuzzy
 msgid "Join"
 msgstr "Delta"
 
-#: src/chat_room.c:1217
+#: src/chat_room.c:1265
 #, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) has joined the chat.</b></body>"
@@ -1780,48 +1780,47 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) har anslutit till chatten.</b></"
 "body>"
 
-#: src/chat_room.c:1236
+#: src/chat_room.c:1284
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat.</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) har lämnat chatten.</b></body>"
 
-#: src/chat_room.c:1239
+#: src/chat_room.c:1287
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s has left the chat.</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s har lämnat chatten.</b></body>"
 
-#: src/chat_room.c:1527 src/status.c:2572
+#: src/chat_room.c:1581 src/status.c:2575
 msgid "Online"
 msgstr "Online"
 
-#: src/chat_room.c:1590
+#: src/chat_room.c:1652
 msgid "Invite User"
 msgstr "Bjud in användare"
 
-#: src/chat_room.c:1672 src/chat_window.c:2367
+#: src/chat_room.c:1733 src/chat_window.c:2373
 msgid "Insert Smiley"
 msgstr "Infoga Smiley"
 
-#: src/chat_room.c:1696 src/chat_room.c:1698 src/chat_window.c:2381
-#: src/chat_window.c:2386 src/gtk/prefs_window.C:498
+#: src/chat_room.c:1756 src/chat_window.c:2387 src/gtk/prefs_window.C:498
 msgid "Sound"
 msgstr "Ljud"
 
-#: src/chat_room.c:1697 src/chat_window.c:913
+#: src/chat_room.c:1757 src/chat_window.c:913
 msgid "Enable Sounds"
 msgstr "Aktivera ljud"
 
-#: src/chat_room.c:1727 src/chat_window.c:929 src/chat_window.c:2417
+#: src/chat_room.c:1786 src/chat_window.c:929 src/chat_window.c:2422
 #: src/gtk/log_window.C:264
 msgid "Actions..."
 msgstr "Handlingar..."
 
-#: src/chat_room.c:1730 src/chat_window.c:964
+#: src/chat_room.c:1789 src/chat_window.c:964
 msgid "Send Message"
 msgstr "Skicka meddelande"
 
-#: src/chat_room.c:1734 src/chat_window.c:984 src/crash.c:268
+#: src/chat_room.c:1793 src/chat_window.c:984 src/crash.c:268
 #: src/gtk/about_window.c:193 src/image_window.c:149 src/info_window.c:120
 msgid "Close"
 msgstr "Stäng"
@@ -1967,41 +1966,41 @@ msgstr "Konversationen avslutad"
 msgid "<body bgcolor=#F9E589 width=*>%sConversation ended%s</body>\n"
 msgstr "<body bgcolor=#F9E589 width=*>%sKonversation avslutad%s</body>\n"
 
-#: src/chat_window.c:2338 src/chat_window.c:2343
+#: src/chat_window.c:2345
 msgid "Allow"
 msgstr "Tillåt"
 
-#: src/chat_window.c:2344
+#: src/chat_window.c:2350
 #, fuzzy
 msgid "Allow Offline Messaging Ctrl+O"
 msgstr "Tillåt offlinemeddelanden CTRL+O"
 
-#: src/chat_window.c:2387
+#: src/chat_window.c:2392
 #, fuzzy
 msgid "Enable Sounds Ctrl+S"
 msgstr "Aktivera ljud CTRL+S"
 
-#: src/chat_window.c:2408
+#: src/chat_window.c:2413
 msgid "View Log CTRL+L"
 msgstr "Visa logg CTRL+L"
 
-#: src/chat_window.c:2428
+#: src/chat_window.c:2433
 msgid "Send File CTRL+T"
 msgstr "Skicka fil CTRL+T"
 
-#: src/chat_window.c:2438
+#: src/chat_window.c:2443
 msgid "Invite CTRL+I"
 msgstr "Inbjud CTRL+I"
 
-#: src/chat_window.c:2448
+#: src/chat_window.c:2453
 msgid "Ignore CTRL+G"
 msgstr "Ignorera CTRL+G"
 
-#: src/chat_window.c:2458
+#: src/chat_window.c:2463
 msgid "Send Message CTRL+R"
 msgstr "Skicka meddelande CTRL+R"
 
-#: src/chat_window.c:2468 src/chat_window.c:2470
+#: src/chat_window.c:2473 src/chat_window.c:2475
 msgid "Close CTRL+Q"
 msgstr "Stäng CTRL+Q"
 
@@ -2397,7 +2396,7 @@ msgstr "Avancerat:Kodning"
 msgid "Advanced:Proxy"
 msgstr "Avancerat:Proxy"
 
-#: src/gtk/prefs_window.C:506 src/gtk/prefs_window.C:1080 src/status.c:2588
+#: src/gtk/prefs_window.C:506 src/gtk/prefs_window.C:1080 src/status.c:2591
 msgid "Accounts"
 msgstr "Konton"
 
@@ -3076,7 +3075,7 @@ msgid ""
 "<span size='small'>Since %s</span>"
 msgstr ""
 
-#: src/status.c:1633 src/status.c:2636
+#: src/status.c:1633 src/status.c:2639
 msgid "-"
 msgstr "-"
 
@@ -3090,149 +3089,149 @@ msgstr "%s är nu Online"
 msgid "%s is now Offline"
 msgstr "%s är nu Offline"
 
-#: src/status.c:2122
+#: src/status.c:2125
 #, c-format
 msgid "eb_smiley_function: calling callback\n"
 msgstr "eb_smiley_function: calling callback\n"
 
-#: src/status.c:2130
+#: src/status.c:2133
 #, c-format
 msgid "eb_import_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2140
+#: src/status.c:2143
 #, c-format
 msgid "eb_profile_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2291
+#: src/status.c:2294
 #, fuzzy
 msgid "Sign o_n all"
 msgstr "/Chatt/Logga på alla"
 
-#: src/status.c:2291
+#: src/status.c:2294
 #, fuzzy
 msgid "Sign onto all accounts"
 msgstr "Importera lokala konton"
 
-#: src/status.c:2293
+#: src/status.c:2296
 #, fuzzy
 msgid "Sign o_ff all"
 msgstr "/Chatt/Logga av alla"
 
-#: src/status.c:2293
+#: src/status.c:2296
 #, fuzzy
 msgid "Sign off all accounts"
 msgstr "Importera lokala konton"
 
-#: src/status.c:2295
+#: src/status.c:2298
 #, fuzzy
 msgid "New group chat"
 msgstr "/Chatt/Ny gruppchatt"
 
-#: src/status.c:2295
+#: src/status.c:2298
 msgid "Start a chat room for a group chat"
 msgstr ""
 
-#: src/status.c:2297
+#: src/status.c:2300
 #, fuzzy
 msgid "Set as _away"
 msgstr "Ange 'iväg'"
 
-#: src/status.c:2297
+#: src/status.c:2300
 msgid "Set a Custom \"Away\" status"
 msgstr ""
 
-#: src/status.c:2299
+#: src/status.c:2302
 #, fuzzy
 msgid "_Quit"
 msgstr "/ChattAvsluta"
 
-#: src/status.c:2299
+#: src/status.c:2302
 #, fuzzy
 msgid "Close Ayttm"
 msgstr "Hej Ayttm"
 
-#: src/status.c:2301
+#: src/status.c:2304
 #, fuzzy
 msgid "_Preferences"
 msgstr "Ayttm Inställningar"
 
-#: src/status.c:2301
+#: src/status.c:2304
 #, fuzzy
 msgid "Customize your Ayttm"
 msgstr "Hej Ayttm"
 
-#: src/status.c:2303
+#: src/status.c:2306
 #, fuzzy
 msgid "Add or _delete accounts"
 msgstr "/Redigera/Lägg till eller ta bort konto..."
 
-#: src/status.c:2304
+#: src/status.c:2307
 #, fuzzy
 msgid "Add or Delete chat accounts"
 msgstr "/Redigera/Lägg till eller ta bort konto..."
 
-#: src/status.c:2306
+#: src/status.c:2309
 #, fuzzy
 msgid "Edit _accounts"
 msgstr "Redigera konto"
 
-#: src/status.c:2306
+#: src/status.c:2309
 #, fuzzy
 msgid "Edit your account details"
 msgstr "Fel: Kontot existerar"
 
-#: src/status.c:2308
+#: src/status.c:2311
 #, fuzzy
 msgid "Add a _contact account"
 msgstr "/Redigera/Lägg till ett konto..."
 
-#: src/status.c:2309
+#: src/status.c:2312
 #, fuzzy
 msgid "Add an account for a contact"
 msgstr "Lägg till konto till kontakt..."
 
-#: src/status.c:2311
+#: src/status.c:2314
 #, fuzzy
 msgid "Add a _group"
 msgstr "Lägg till grupp"
 
-#: src/status.c:2311
+#: src/status.c:2314
 #, fuzzy
 msgid "Add a contact group"
 msgstr "Lägg till kontakt till grupp..."
 
-#: src/status.c:2314
+#: src/status.c:2317
 #, fuzzy
 msgid "_Web site"
 msgstr "/Hjälp/_Hemsida..."
 
-#: src/status.c:2316
+#: src/status.c:2319
 #, fuzzy
 msgid "_Manual"
 msgstr "/Hjälp/_Manual..."
 
-#: src/status.c:2319
+#: src/status.c:2322
 #, fuzzy
 msgid "_About Ayttm"
 msgstr "Om Ayttm"
 
-#: src/status.c:2321
+#: src/status.c:2324
 #, fuzzy
 msgid "Check for new _release"
 msgstr "/Hjälp/Sök efter ny _version"
 
-#: src/status.c:2325
+#: src/status.c:2328
 #, fuzzy
 msgid "Dump structures"
 msgstr "/Hjälp/Dumpa strukturer"
 
-#: src/status.c:2580
+#: src/status.c:2583
 msgid "Contacts"
 msgstr "Kontakter"
 
-#: src/status.c:2615
+#: src/status.c:2618
 #, fuzzy
 msgid "Welcome To Ayttm"
 msgstr "Hej Ayttm"

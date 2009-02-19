@@ -1,3 +1,8 @@
+* Thu Feb 19 2009 16:45 UTC [siddheshp]   0.5.0-83
+- ChangeLog, po/*.po, src/Makefile.am:
+ * Updated po files due to string changes
+ * Removed ./gen warning. Looks like AC_INIT defines a localedir as well.
+
 * Fri Feb 13 2009 14:30 UTC [siddheshp]   0.5.0-83
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c,
 src/edit_local_accounts.c:
