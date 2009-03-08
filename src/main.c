@@ -224,6 +224,8 @@ int main(int argc, char *argv[])
 	g_snprintf(config_dir, 1024, "%s/.ayttm/",getenv("HOME"));
 #endif
 
+	g_thread_init(NULL);
+
 #if defined ( HAVE_GETOPT ) || defined ( HAVE_GETOPT_LONG )
 	while (1) {
 #ifdef HAVE_GETOPT_LONG

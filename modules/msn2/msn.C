@@ -170,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.84 $",
-	"$Date: 2008/08/02 06:13:11 $",
+	"$Revision: 1.85 $",
+	"$Date: 2009/03/08 18:42:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2561,7 +2561,7 @@ int ext_async_socket(char *host, int port, void *cb, void *data)
 {
   msnconn *conn = (msnconn *)data;
   
-  int tag = proxy_connect_host(host, port, cb, data, (void *)ay_msn_connect_status);
+  int tag = ay_connect_host(host, port, cb, data, (void *)ay_msn_connect_status);
   
   if (conn->type == CONN_NS) {
 	  char *handle = ((authdata_NS *)conn->auth)->username;

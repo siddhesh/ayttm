@@ -140,7 +140,7 @@ int jab_start(jconn j, int port, int use_ssl)
     if (!j->serv || !strlen(j->serv))
       j->serv = j->user->server;
 
-    if ((tag = proxy_connect_host(j->serv, port,
+    if ((tag = ay_connect_host(j->serv, port,
 		    	    (ay_socket_callback)jab_continue, j, NULL)) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
 	    return 0;

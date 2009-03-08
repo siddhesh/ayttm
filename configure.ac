@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=84
+RELEASE=85
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -429,7 +429,7 @@ fi
 
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src"
 CXXFLAGS="$CXXFLAGS"
-EB_LDFLAGS="$EB_LDFLAGS $LDFLAGS"
+EB_LDFLAGS="$EB_LDFLAGS $LDFLAGS  `pkg-config --libs gthread-2.0`"
 
 AC_SUBST_FILE(CHANGELOG)
 CHANGELOG="ChangeLog"

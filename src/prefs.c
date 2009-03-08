@@ -900,12 +900,18 @@ void ayttm_prefs_read_file(char *file)
 	
 	fclose( fp );
 
-	proxy_set_proxy( iGetLocalPref("proxy_type"), cGetLocalPref("proxy_host"), iGetLocalPref("proxy_port") );
-	
-	if ( iGetLocalPref("proxy_type") != 0 )
-	{
-		proxy_set_auth( iGetLocalPref("do_proxy_auth"), cGetLocalPref("proxy_user"), cGetLocalPref("proxy_password") );
-	}
+	if ( iGetLocalPref("do_proxy_auth") != 0 )
+		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+					cGetLocalPref("proxy_host"), 
+					iGetLocalPref("proxy_port"),
+					cGetLocalPref("proxy_user"),
+					cGetLocalPref("proxy_password") );
+	else
+		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+					cGetLocalPref("proxy_host"), 
+					iGetLocalPref("proxy_port"),
+					NULL,
+					NULL );
 }
 
 void	ayttm_prefs_read( void )
@@ -1273,12 +1279,19 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	
 	write_account_list();
 	
-	proxy_set_proxy( iGetLocalPref("proxy_type"), cGetLocalPref("proxy_host"), iGetLocalPref("proxy_port") );
 	
-	if ( inPrefs->advanced.proxy_type != 0 )
-	{
-		proxy_set_auth( iGetLocalPref("do_proxy_auth"), cGetLocalPref("proxy_user"), cGetLocalPref("proxy_password") );
-	}
+	if ( inPrefs->advanced.do_proxy_auth != 0 )
+		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+					cGetLocalPref("proxy_host"), 
+					iGetLocalPref("proxy_port"),
+					cGetLocalPref("proxy_user"),
+					cGetLocalPref("proxy_password") );
+	else
+		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+					cGetLocalPref("proxy_host"), 
+					iGetLocalPref("proxy_port"),
+					NULL,
+					NULL );
 	
 	s_free_pref_struct( inPrefs );
 }

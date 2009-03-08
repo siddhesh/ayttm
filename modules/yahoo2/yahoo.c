@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.103 $",
-	"$Date: 2008/08/31 08:26:36 $",
+	"$Revision: 1.104 $",
+	"$Date: 2009/03/08 18:42:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -3181,7 +3181,7 @@ static int ext_yahoo_connect_async(int id, const char *host, int port,
 
 	ylad = ccd->ela->protocol_local_account_data;
 	ccd->tag = ylad->connect_tag = 
-		proxy_connect_host(host, port, _yahoo_connected, ccd, ay_yahoo_connect_status);
+		ay_connect_host(host, port, _yahoo_connected, ccd, ay_yahoo_connect_status);
 
 	conn = l_list_prepend(conn, ccd);
 

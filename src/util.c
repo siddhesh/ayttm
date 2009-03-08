@@ -1944,7 +1944,7 @@ char * ay_http_get(const char *uri) {
 	*(url-sizeof(char)) = '\0';
 	
 	eb_debug(DBG_CORE,"Getting %s from %s\n", url, server);
-	sock = proxy_connect_host(server, 80, NULL, NULL, NULL);
+	sock = ay_connect_host(server, 80, NULL, NULL, NULL);
 	/* FIXME: won't work with proxy */
 	if (sock <= 0) {
 		ay_do_error(_("Can't connect"), _("Connection to the server failed."));

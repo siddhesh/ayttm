@@ -92,8 +92,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.27 $",
-	"$Date: 2008/08/19 14:38:17 $",
+	"$Revision: 1.28 $",
+	"$Date: 2009/03/08 18:42:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1186,7 +1186,7 @@ faim_cb_handle_redirect (aim_session_t *sess, aim_frame_t *fr, ...)
 
 		tstconn->status |= AIM_CONN_STATUS_INPROGRESS;
 
-		if (proxy_connect_host (host, port,
+		if (ay_connect_host (host, port,
 					oscar_chatnav_connect, ela,
 					oscar_chatnav_connect_status) < 0) {
 			aim_conn_kill (sess, &tstconn);
@@ -1231,7 +1231,7 @@ faim_cb_handle_redirect (aim_session_t *sess, aim_frame_t *fr, ...)
 
 		ocr->conn->status |= AIM_CONN_STATUS_INPROGRESS;
 
-		if (proxy_connect_host (host, port,
+		if (ay_connect_host (host, port,
 					oscar_chat_connect, ecr,
 					oscar_chatnav_connect_status) < 0) {
 			aim_conn_kill (&(alad->aimsess), &tstconn);
@@ -1703,7 +1703,7 @@ ay_oscar_finish_login (const char *password, void *data)
 
 	alad->conn->status |= AIM_CONN_STATUS_INPROGRESS;
 
-	if (proxy_connect_host (FAIM_LOGIN_SERVER, FAIM_LOGIN_PORT,
+	if (ay_connect_host (FAIM_LOGIN_SERVER, FAIM_LOGIN_PORT,
 				oscar_login_connect, account,
 				oscar_login_connect_status) < 0) {
 		connect_error (alad, "Could not connect to host");

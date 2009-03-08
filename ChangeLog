@@ -1,3 +1,16 @@
+* Sun Mar 08 2009 18:40 UTC [siddheshp]   0.5.0-85
+- ChangeLog, configure.ac, libproxy/libproxy.h, libproxy/proxy.c,
+modules/aim-oscar/aim-oscar.c, modules/irc/irc.c,
+modules/jabber/libjabber/jconn.c, modules/msn2/msn.C, /modules/yahoo2/yahoo.c,
+src/main.c, src/prefs.c, src/util.c:
+ * Re-wrote network connectivity code.
+ * Replaced deprecated gethostbyname with getaddrinfo
+ * Multi-threading to avoid hang-ups during proxy connections or hostname
+ look-ups
+ * Removed datagram connection support from SOCKS5 since it was not used and
+ was only getting in the way
+ * Removed unused code
+
 * Thu Feb 23 2009 08:35 UTC [siddheshp]   0.5.0-84
 - ChangeLog, configure.ac, libproxy/proxy.c:
  * Removed ap_base64encode() in favour of g_base64_encode()

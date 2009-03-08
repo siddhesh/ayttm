@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.48 $",
-	"$Date: 2008/09/20 14:29:40 $",
+	"$Revision: 1.49 $",
+	"$Date: 2009/03/08 18:42:31 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -279,7 +279,7 @@ static void ay_irc_login( eb_local_account * account)
 	if (ila->ia->port[0] == '\0' )
 		strcpy(ila->ia->port, "6667") ;
 
-	if ((tag = proxy_connect_host(ila->ia->connect_address, atoi(ila->ia->port), irc_connect_cb, 
+	if ((tag = ay_connect_host(ila->ia->connect_address, atoi(ila->ia->port), irc_connect_cb, 
 					account, (void *)ay_irc_connect_status)) < 0)
 	{
 		char buff[1024]; 

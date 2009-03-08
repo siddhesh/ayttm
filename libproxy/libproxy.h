@@ -1,7 +1,7 @@
 /*
  * Ayttm
  *
- * Copyright (C) 2003, the Ayttm team
+ * Copyright (C) 2003,2009 the Ayttm team
  * 
  * Ayttm is derivative of Everybuddy
  * Copyright (C) 1998-1999, Torrey Searle
@@ -27,21 +27,80 @@
 #ifndef __LIBPROXY_H__
 #define __LIBPROXY_H__
 
+#include <glib.h>
 
-enum eProxyType
+#define AY_DEFAULT_PROXY_PORT 3128
+
+/* Proxy Types */
+typedef enum
 {
-	PROXY_NONE = 0,
-	PROXY_HTTP,
-	PROXY_SOCKS4,
-	PROXY_SOCKS5,
+	PROXY_NONE = 0,	/* No Proxy */
+	PROXY_HTTP,	/* HTTP */
+	PROXY_SOCKS4,	/* Socks 4 */
+	PROXY_SOCKS5,	/* Socks 5 */
 	
-	PROXY_MAX
-};
+	PROXY_MAX	/* Number of proxies supported */
+} eProxyType ;
 
+/* 
+ * Various status codes returned by the connection routines to
+ * indicate the reason for failure. AY_NONE is success.
+ */
+typedef enum
+{
+	AY_NONE = 0,
+	AY_CONNECTION_REFUSED = -1,
+	AY_HOSTNAME_LOOKUP_FAIL = -2,
+	AY_PROXY_PERMISSION_DENIED = -3,
+	AY_PROXY_AUTH_REQUIRED = -4,
+	AY_SOCKS4_UNKNOWN = -5,
+	AY_SOCKS4_IDENTD_FAIL = -6,
+	AY_SOCKS4_IDENT_USER_DIFF = -7,
+	AY_SOCKS4_INCOMPATIBLE_ERROR = -8,
+	AY_SOCKS5_CONNECT_FAIL = -9,
+	AY_INVALID_CONNECT_DATA = -10,
+	AY_CANCEL_CONNECT = -11
+} eConnectionStatus;
 
-/* forward declaraions */
-struct hostent;		/* #include <netdb.h> */
-struct sockaddr;	/* #include <sys/socket.h> */
+/* Proxy Structure */
+typedef struct
+{
+	char *host;		/* Proxy Host */
+	int port;		/* Port */
+	eProxyType type;	/* Proxy Type, see eProxyType for types supported */
+	char *username;		/* Proxy username. NULL if the proxy requires no authentication */
+	char *password;		/* Proxy Password */
+} ay_proxy_data ;
+
+/* Update connection status in requestor */
+typedef void ( *ay_status_callback )(const char *msg, void *callback_data);
+
+/* Callback function to be called once connection completes */
+typedef void ( *ay_connect_callback )(int fd, int error, void *callback_data);
+
+/* The connection function for any proxy */
+typedef int  ( *ay_connect_handler )(int sockfd, gpointer con );
+
+/* This is what we throw all around the place within this 
+ * module to get the connection done.
+ */
+typedef struct
+{
+	char			*host;			/* Hostname */
+	int			 port;			/* Port */
+	int			 sockfd;		/* The resultant socket file descriptor */
+	ay_proxy_data		*proxy;			/* Proxy. NULL if the connection is direct */
+
+	ay_connect_handler	 connect;		/* Points to the appropriate connection function in case of proxy */
+
+	ay_connect_callback	 callback;		/* What we should call when connection is completed */
+	ay_status_callback	 status_callback;	/* Update status in the requestor */
+	void			*cb_data;		/* What the requestor wants us to give back once we're done */
+
+	GAsyncQueue		*leash;			/* What the main thread uses to keep track of its thread */
+	guint			 source;		/* Tag for the polling idle function -- useful as a unique ID */
+	eConnectionStatus	 status;		/* Status of connection. See the eConnectionStatus enum */
+} ay_connection ;
 
 
 #ifdef __cplusplus
@@ -52,27 +111,11 @@ extern "C" {
 #define extern __declspec(dllimport)
 #endif
 
-/* gethostbyname functions */
-extern struct hostent	*proxy_gethostbyname( const char *host ) ;
-extern struct hostent	*proxy_gethostbyname2( const char *host, int type ) ;
-
-/* send/receive */
-int	proxy_send( int s, const void *msg, int len, unsigned int flags );
-int	proxy_recv( int s, void * buff, int len, unsigned int flags );
-
-extern int proxy_get_proxy(void);
-
-/* connect functions */
-extern int	proxy_connect( int sockfd, struct sockaddr *serv_addr, int addrlen,
-				void *cb, void *data, void *scb );
-extern int	proxy_connect_host( const char *host, int port, void *cb, void *data, void *scb ) ;
+/* connect function */
+int ay_connect_host( const char *host, int port, void *cb, void *data, void *scb ) ;
 
 /* proxy setting */
-extern int	proxy_set_proxy( int proxy_type, const char *proxy_host, int proxy_port );
-
-/* proxy authorization */
-extern int			proxy_set_auth( const int required, const char *user, const char *passwd );
-extern const char	*proxy_get_auth( void );
+int ay_set_default_proxy( int proxy_type, const char *proxy_host, int proxy_port, char *username, char *password );
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 #define extern extern
