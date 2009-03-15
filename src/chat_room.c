@@ -543,7 +543,7 @@ static void invite_callback( GtkWidget * widget, gpointer data )
 	eb_chat_room * ecr = data;
 	char *acc = NULL;
 	char * invited = gtk_combo_box_get_active_text(GTK_COMBO_BOX(ecr->invite_buddy));
-	if (!strstr(invited, "(") || !strstr(invited, ")"))
+	if (!invited || !strstr(invited, "(") || !strstr(invited, ")"))
 		return;
 	if (ecr->preferred) {
 		/* this is a chat window */
