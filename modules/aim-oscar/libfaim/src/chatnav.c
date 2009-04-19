@@ -379,7 +379,7 @@ static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, ai
 	}
 
 	if (snac2->family != 0x000d) {
-		faimdprintf(sess, 0, "faim: chatnav_parse_info: recieved response that maps to corrupt request! (fam=%04x)\n", snac2->family);
+		faimdprintf(sess, 0, "faim: chatnav_parse_info: received response that maps to corrupt request! (fam=%04x)\n", snac2->family);
 		return 0;
 	}
 

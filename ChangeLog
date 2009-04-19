@@ -1,3 +1,8 @@
+* Sun Apr 19 2009 02:30 UTC [siddheshp]   0.5.0-87
+- modules/aim-oscar/libfaim/CHANGES, modules/aim-oscar/libfaim/src/chatnav.c,
+modules/aim-oscar/libfaim/src/im.c, ChangeLog, configure.ac:
+ * Fixed spelling errors reported by Kartik Mistry.
+
 * Sun Mar 15 2009 09:05 UTC [siddheshp]   0.5.0-86
 - ChangeLog, configure.ac, src/chat_room.c, modules/irc/libirc/.cvsignore:
  * Pressing the invite button in chat room without selecting an account causes

@@ -140,7 +140,7 @@ No release numbers
 
  - Wed Aug 29 16:59:24 PDT 2001
   - Pass up entire icon triplet (checksum/length/timestamp) in all cases
-     that it is recieved.
+     that it is received.
   - Eric was paying more attention than I am.
 
  - Sat Aug 25 19:46:38 PDT 2001
