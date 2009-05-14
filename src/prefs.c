@@ -518,7 +518,7 @@ static void	s_write_module_prefs( void *inListItem, void *inData )
 static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 {
 	t_module_pref	*the_prefs = inListItem;
-	int		apply = (int)inData;
+	int		apply = GPOINTER_TO_INT(inData);
 	eb_PLUGIN_INFO	*plugin_info = NULL;
 		
 	if ( !apply )
@@ -588,7 +588,7 @@ static void	s_apply_or_cancel_module_prefs( void *inListItem, void *inData )
 static void	s_apply_or_cancel_account_prefs( void *inListItem, void *inData )
 {
 	t_account_pref	*the_prefs = inListItem;
-	int		apply = (int)inData;
+	int		apply = GPOINTER_TO_INT(inData);
 	eb_local_account	*ela = NULL;
 		
 	if ( !apply )
@@ -1270,12 +1270,12 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	cSetLocalPref( "remote_encoding", inPrefs->advanced.remote_encoding );
 
 	/* modules */
-	l_list_foreach( inPrefs->module.module_info, s_apply_or_cancel_module_prefs, (void *)1 );
+	l_list_foreach( inPrefs->module.module_info, s_apply_or_cancel_module_prefs, GINT_TO_POINTER(1) );
 	
 	ayttm_prefs_write();
 
 	/* accounts */
-	l_list_foreach( inPrefs->account.account_info, s_apply_or_cancel_account_prefs, (void *)1 );
+	l_list_foreach( inPrefs->account.account_info, s_apply_or_cancel_account_prefs, GINT_TO_POINTER(1) );
 	
 	write_account_list();
 	
@@ -1300,8 +1300,8 @@ void	ayttm_prefs_cancel( struct prefs *inPrefs )
 {
 	assert( inPrefs != NULL );
 	
-	l_list_foreach( inPrefs->module.module_info, s_apply_or_cancel_module_prefs, (void *)0 );
-	l_list_foreach( inPrefs->account.account_info, s_apply_or_cancel_account_prefs, (void *)0 );
+	l_list_foreach( inPrefs->module.module_info, s_apply_or_cancel_module_prefs, GINT_TO_POINTER(0) );
+	l_list_foreach( inPrefs->account.account_info, s_apply_or_cancel_account_prefs, GINT_TO_POINTER(0) );
 	
 	s_free_pref_struct( inPrefs );
 }

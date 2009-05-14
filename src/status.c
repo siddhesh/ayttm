@@ -505,7 +505,7 @@ static gboolean expand_callback ( GtkTreeView * tree_view, GtkTreeIter *iter,
 
 static void status_show_callback(GtkWidget *w, gpointer data)
 {
-	status_show = (int)data;
+	status_show = GPOINTER_TO_INT(data);
 	update_contact_list(); 
 	eb_save_size(contact_window, NULL);
 }
@@ -1899,7 +1899,7 @@ void drag_motion_callback
 
 	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(widget), &rectangle);
 
-	gtk_tree_view_widget_to_tree_coords(GTK_TREE_VIEW(widget), x, y, &wx, &wy);
+	gtk_tree_view_convert_widget_to_bin_window_coords (GTK_TREE_VIEW(widget), x, y, &wx, &wy);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 	valid = gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,

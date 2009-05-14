@@ -188,7 +188,7 @@ static void eb_gtk_dialog_callback(GtkWidget *widget, gpointer data)
 	callback_data *cd = (callback_data *)data;
 	int result=0;
 
-	result=(int)g_object_get_data(G_OBJECT(widget), "userdata");
+	result=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "userdata"));
 	cd->action(cd->data, result);
 	free(cd);
 }
@@ -231,7 +231,7 @@ static void do_dialog( const char *message, const char *title, void (*action)(Gt
 	g_signal_connect(button, "clicked", G_CALLBACK(action), data );
 	g_signal_connect_swapped(button, "clicked",
 			G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
-	g_object_set_data(G_OBJECT(button), "userdata", (gpointer)0);
+	g_object_set_data(G_OBJECT(button), "userdata", GINT_TO_POINTER(0));
 	gtk_widget_show(button);
 	
 	buttons->no = button;
@@ -244,7 +244,7 @@ static void do_dialog( const char *message, const char *title, void (*action)(Gt
 	g_signal_connect(button, "clicked", G_CALLBACK(action), data );
 	g_signal_connect_swapped(button, "clicked",
 			G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
-	g_object_set_data(G_OBJECT(button), "userdata", (gpointer)1);
+	g_object_set_data(G_OBJECT(button), "userdata", GINT_TO_POINTER(1));
 	gtk_widget_show(button);
 
 	buttons->yes = button;

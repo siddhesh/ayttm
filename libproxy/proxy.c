@@ -640,7 +640,7 @@ static gpointer _do_connect( gpointer data )
 	int retval=0;
 	ay_connection *con = (ay_connection *)data;
 	char message[255];
-	GAsyncQueue *leash;
+	GAsyncQueue *leash = NULL;
 
 	/* Tell the main thread that I have begun */
 	if(con->callback) {
