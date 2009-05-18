@@ -1,3 +1,9 @@
+* Mon May 18 2009 14:45 UTC [siddheshp]   0.5.0-89
+ * Added Categories into the .desktop. Closes #522497 in bugs.debian.org.
+Thanks Andrei Popescu
+ * Disabled -DGTK_DISABLE_DEPRECATED. We needed it only for the gtk2 port and
+ now it is only getting in the way, caused #527696 in bugs.debian.org. Fixed.
+
 * Thu May 14 2009 15:40 UTC [siddheshp]   0.5.0-88
  * Fixed some warnings
 

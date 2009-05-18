@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=88
+RELEASE=89
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -279,7 +279,7 @@ fi
 LIBS=$ac_check_lib_save_LIBS 
 CFLAGS=$ac_check_lib_save_CFLAGS
 
-GTK_CFLAGS="$GTK_CFLAGS -DGTK_DISABLE_DEPRECATED"
+GTK_CFLAGS="$GTK_CFLAGS" # -DGTK_DISABLE_DEPRECATED"
 EB_CFLAGS="$EB_CFLAGS $GLIB_CFLAGS $GTK_CFLAGS"
 EB_LIBS="$EB_LIBS $GLIB_LIBS $GTK_LIBS"
 
