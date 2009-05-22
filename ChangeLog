@@ -1,3 +1,8 @@
+* Fri May 22 2009 05:45 UTC [siddheshp]   0.5.0-90
+- configure.ac, Makefile.am, ChangeLog:
+ * Should have added Categories into Makefile.am, not the .desktop, which is
+ automatically generated. Stupid mistakes.
+
 * Wed May 20 2009 08:50 UTC [siddheshp]   0.5.0-89
 - configure.ac, Makefile.am, ChangeLog:
  * Removed mingw32

@@ -25,6 +25,7 @@ CLEANFILES = $(Utilities_DATA) $(gnome_DATA) $(sysconf_DATA)
 	@echo Comment=\"The GTK Unified Messaging Client\">>@PACKAGE@.desktop;
 	@echo Terminal=0 >> @PACKAGE@.desktop;
 	@echo Type=Application >> @PACKAGE@.desktop;
+	@echo "Categories=Network;InstantMessaging" >> @PACKAGE@.desktop;
 
 @PACKAGE@rc: Makefile
 	@rm -f @PACKAGE@rc >/dev/null 2>&1;
