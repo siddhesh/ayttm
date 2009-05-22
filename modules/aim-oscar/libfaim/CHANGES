@@ -93,7 +93,7 @@ No release numbers
 
  - Fri Sep  7 21:18:51 PDT 2001
   - Make icon field names uniform
-  - Add AIM_IMFLAGS_CUSTOMFEATURES.  This allows the client to send/recieve
+  - Add AIM_IMFLAGS_CUSTOMFEATURES.  This allows the client to send/receive
      the field in IMs that show client information.
     - This can be used to identify other open source OSCAR clients, if any
         one is interested.
@@ -679,7 +679,7 @@ No release numbers
       directim is working.  And its got bugs.  But he's not online
       right now, so I can't bitch.  I'd love to bitch here, but I'm 
       tired. 
-     - Can definitly accept directim connections and send/recieve.
+     - Can definitly accept directim connections and send/receive.
      - See faimtest for the new callbacks.  (Urg.)
      - Here weeee gooooo.  (Not sure if this will break everyone or not.)
 

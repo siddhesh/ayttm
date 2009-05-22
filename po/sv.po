@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm 0.4.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-19 22:04+0530\n"
+"POT-Creation-Date: 2009-05-22 11:09+0530\n"
 "PO-Revision-Date: 2004-09-24 10:27+0100\n"
 "Last-Translator: Patrik Hermansson <patrik@paheco.nu>\n"
 "Language-Team: SV <pather@comhem.se>\n"
@@ -16,42 +16,20 @@ msgstr ""
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libproxy/proxy.c:474 libproxy/proxy.c:477 libproxy/proxy.c:480
-#: libproxy/proxy.c:483 libproxy/proxy.c:630 libproxy/proxy.c:757
-#: libproxy/proxy.c:764
-msgid "Proxy Error"
-msgstr "Proxyfel"
+#: libproxy/proxy.c:554
+#, fuzzy, c-format
+msgid "Cancelling connection"
+msgstr "Kan inte ansluta"
 
-#: libproxy/proxy.c:475
-msgid "Socks 4 proxy rejected request for an unknown reason."
-msgstr "Socks 4 proxyn avvisade förfrågan av okänd anledning."
+#: libproxy/proxy.c:656 libproxy/proxy.c:687
+#, fuzzy, c-format
+msgid "Connecting to %s"
+msgstr "Ansluter till %s:%d..."
 
-#: libproxy/proxy.c:478
-msgid ""
-"Socks 4 proxy rejected request because it could not connect to our identd."
-msgstr "Socks 4 proxyn avvisade förfrågan, kunde ej kontakta vår identd."
-
-#: libproxy/proxy.c:481
-msgid ""
-"Socks 4 proxy rejected request because identd returned a different userid."
-msgstr ""
-"Socks 4 proxyn avvisade förfrågan, identd returnerade ett annat userid."
-
-#: libproxy/proxy.c:484
-msgid "Socks 4 proxy rejected request with an RFC-uncompliant error cod."
-msgstr "Socks 4 proxyn avvisade förfrågan med en RFC-inkompatibel felkod."
-
-#: libproxy/proxy.c:630
-msgid "Socks5 proxy refused our authentication."
-msgstr "Socks5 proxyn avvisade vår autenciering"
-
-#: libproxy/proxy.c:757
-msgid "HTTP proxy error: Authentication required."
-msgstr "HTTP proxy fel: Autenciering krävs."
-
-#: libproxy/proxy.c:764
-msgid "HTTP proxy error: permission denied."
-msgstr "HTTP proxy fel: Åtkomst nekad"
+#: libproxy/proxy.c:673
+#, fuzzy, c-format
+msgid "Connecting to proxy %s"
+msgstr "Ansluter till %s:%d..."
 
 #: modules/aim-toc/aim-toc.c:120 modules/icq/icq.c:120
 #: modules/icq-toc/icq-toc.c:120 modules/msn2/msn.C:196
@@ -2800,7 +2778,7 @@ msgstr "%sKonversationen började %s %s\n"
 msgid "%sConversation ended on %s %s\n"
 msgstr "%sKonversationen slutade %s %s\n"
 
-#: src/main.c:418
+#: src/main.c:420
 #, c-format
 msgid ""
 "Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot "
@@ -2809,7 +2787,7 @@ msgstr ""
 "Ayttm körs redan (pid=%d), och UNIX-sockeln för fjärrkontrol kan inte "
 "anslutas."
 
-#: src/main.c:420
+#: src/main.c:422
 msgid "Already Logged On"
 msgstr "Redan inloggad"
 
@@ -3392,6 +3370,33 @@ msgstr "Kan inte ansluta"
 #: src/util.c:1950
 msgid "Connection to the server failed."
 msgstr "Anslutning till servern misslyckades."
+
+#~ msgid "Proxy Error"
+#~ msgstr "Proxyfel"
+
+#~ msgid "Socks 4 proxy rejected request for an unknown reason."
+#~ msgstr "Socks 4 proxyn avvisade förfrågan av okänd anledning."
+
+#~ msgid ""
+#~ "Socks 4 proxy rejected request because it could not connect to our identd."
+#~ msgstr "Socks 4 proxyn avvisade förfrågan, kunde ej kontakta vår identd."
+
+#~ msgid ""
+#~ "Socks 4 proxy rejected request because identd returned a different userid."
+#~ msgstr ""
+#~ "Socks 4 proxyn avvisade förfrågan, identd returnerade ett annat userid."
+
+#~ msgid "Socks 4 proxy rejected request with an RFC-uncompliant error cod."
+#~ msgstr "Socks 4 proxyn avvisade förfrågan med en RFC-inkompatibel felkod."
+
+#~ msgid "Socks5 proxy refused our authentication."
+#~ msgstr "Socks5 proxyn avvisade vår autenciering"
+
+#~ msgid "HTTP proxy error: Authentication required."
+#~ msgstr "HTTP proxy fel: Autenciering krävs."
+
+#~ msgid "HTTP proxy error: permission denied."
+#~ msgstr "HTTP proxy fel: Åtkomst nekad"
 
 #~ msgid "Connection closed by %s."
 #~ msgstr "Anslutningen stängd av %s."

@@ -833,9 +833,9 @@ faim_export int aim_srv_setavailmsg(aim_session_t *sess, char *msg)
  * on Win32.  So far, AOL has only been requesting bytes in static regions
  * of memory.  (I won't put it past them to start requesting data in
  * less static regions -- regions that are initialized at run time, but still
- * before the client recieves this request.)
+ * before the client receives this request.)
  *
- * When the client recieves the request, it adds it to the current ds
+ * When the client receives the request, it adds it to the current ds
  * (0x00400000) and dereferences it, copying the data into a buffer which
  * it then runs directly through the MD5 hasher.  The 16 byte output of
  * the hash is then sent back to the server.

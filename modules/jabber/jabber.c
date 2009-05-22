@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.49 $",
-	"$Date: 2008/08/11 04:50:45 $",
+	"$Revision: 1.50 $",
+	"$Date: 2009/05/22 06:02:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -788,13 +788,13 @@ static void eb_jabber_send_invite( eb_local_account * account, eb_chat_room * ro
 	eb_debug(DBG_JBR, "Empty function\n");
 }
 
-static void eb_jabber_get_info( eb_local_account * reciever, eb_account * sender)
+static void eb_jabber_get_info( eb_local_account * receiver, eb_account * sender)
 {
 	char buff[1024];
 
 	eb_debug(DBG_JBR, "Not implemented yet\n");
 	if(sender->infowindow == NULL){
-	 sender->infowindow = eb_info_window_new(reciever, sender);
+	 sender->infowindow = eb_info_window_new(receiver, sender);
 	}
 
 	if(sender->infowindow->info_type == -1 || sender->infowindow->info_data == NULL){

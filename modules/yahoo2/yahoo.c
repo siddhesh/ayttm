@@ -136,8 +136,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.104 $",
-	"$Date: 2009/03/08 18:42:31 $",
+	"$Revision: 1.105 $",
+	"$Date: 2009/05/22 06:02:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -3093,7 +3093,7 @@ static void eb_yahoo_set_away(eb_local_account * ela, char * message, int away)
 	}
 }
 
-static void eb_yahoo_get_info(eb_local_account * reciever, eb_account * sender)
+static void eb_yahoo_get_info(eb_local_account * receiver, eb_account * sender)
 {
 	char buff[1024];
 

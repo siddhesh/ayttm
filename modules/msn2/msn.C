@@ -170,8 +170,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.85 $",
-	"$Date: 2009/03/08 18:42:31 $",
+	"$Revision: 1.86 $",
+	"$Date: 2009/05/22 06:02:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1480,7 +1480,7 @@ static void eb_msn_send_invite( eb_local_account * account, eb_chat_room * room,
         msn_invite_user( ((msnconn *)room->protocol_local_chat_room_data), user );
 }
 
-static void eb_msn_get_info( eb_local_account * reciever, eb_account * sender)
+static void eb_msn_get_info( eb_local_account * receiver, eb_account * sender)
 {
     gchar buff[1024];
     g_snprintf(buff, 1024, "http://members.msn.com/%s", sender->handle);

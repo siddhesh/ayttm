@@ -561,7 +561,7 @@ static void icqtoc_get_file_data( gpointer data, int source, eb_input_condition 
 		close(conn->fd);
 endtransfer:
 		eb_input_remove(conn->handle);
-		icqtoc_complete_file_recieve(conn->progress);
+		icqtoc_complete_file_receive(conn->progress);
 		g_free(conn);
 	}
 }
@@ -671,7 +671,7 @@ if(DEBUG) {
 		conn->amount = 0;
 		conn->file = file;
 
-		conn->progress = icqtoc_begin_file_recieve( filename,  ntohl(*((long*)(buff+22))) );
+		conn->progress = icqtoc_begin_file_receive( filename,  ntohl(*((long*)(buff+22))) );
 
 		conn->handle = eb_input_add(fd, EB_INPUT_READ, icqtoc_get_file_data, conn);
 

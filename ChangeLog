@@ -1,3 +1,15 @@
+* Fri May 22 2009 05:45 UTC [siddheshp]   0.5.0-91
+* ChangeLog, modules/aim-oscar/libfaim/CHANGES,
+modules/aim-oscar/libfaim/src/rxqueue.c,
+modules/aim-oscar/libfaim/src/service.c, modules/aim-toc/aim, toc.c,
+modules/aim-toc/libtoc/libtoc.c, modules/aim-toc/libtoc/libtoc.h,
+modules/icq/icq.c, modules/icq-toc/icq-toc.c, modules/icq-toc/libtoc/libtoc.c,
+modules/icq-toc/libtoc/libtoc.h, modules/jabber/jabber.c, modules/msn2/msn.C,
+modules/yahoo2/yahoo.c, po/de.po, po/en_GB.po, po/es.po, po/fr.po, po/hi.po,
+po/nl.po, po/pt_BR.po, po/sv.po:
+ * Replaced all recieve with receive. Hopefully Debians Lintian will be happy
+ now.
+
 * Fri May 22 2009 05:45 UTC [siddheshp]   0.5.0-90
 - configure.ac, Makefile.am, ChangeLog:
  * Should have added Categories into Makefile.am, not the .desktop, which is

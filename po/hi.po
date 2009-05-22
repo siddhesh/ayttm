@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-19 22:04+0530\n"
+"POT-Creation-Date: 2009-05-22 11:09+0530\n"
 "PO-Revision-Date: 2007-02-24 09:42+0530\n"
 "Last-Translator: Ashish Jain <ashish_jain_mca@yahoo.co.nz>\n"
 "Language-Team: आशीष जैन ( ASHISH JAIN ) <tensai_ashish@yahoo.com>\n"
@@ -19,42 +19,20 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "Plural-Forms: nplurals=2; plural=n != 1\n"
 
-#: libproxy/proxy.c:474 libproxy/proxy.c:477 libproxy/proxy.c:480
-#: libproxy/proxy.c:483 libproxy/proxy.c:630 libproxy/proxy.c:757
-#: libproxy/proxy.c:764
-msgid "Proxy Error"
-msgstr "प्रोक्सी दोष"
+#: libproxy/proxy.c:554
+#, fuzzy, c-format
+msgid "Cancelling connection"
+msgstr " %s से सम्पर्क नही ।"
 
-#: libproxy/proxy.c:475
-msgid "Socks 4 proxy rejected request for an unknown reason."
-msgstr "Socks 4 प्रोक्सी ने अज्ञात कारण हेतु प्रार्थना अस्व‍ीकार की "
+#: libproxy/proxy.c:656 libproxy/proxy.c:687
+#, fuzzy, c-format
+msgid "Connecting to %s"
+msgstr " %s  से सम्पर्क ख़त्म ।"
 
-#: libproxy/proxy.c:478
-msgid ""
-"Socks 4 proxy rejected request because it could not connect to our identd."
-msgstr "हमारे identd. से ना जुडने के कारण Socks 4 प्रोक्सी ने प्रार्थना अस्व‍ीकार की "
-
-#: libproxy/proxy.c:481
-msgid ""
-"Socks 4 proxy rejected request because identd returned a different userid."
-msgstr ""
-"हमारे identd. से भिन्न userid. लौटने के कारण Socks 4 प्रोक्सी ने प्रार्थना अस्व‍ीकार की "
-
-#: libproxy/proxy.c:484
-msgid "Socks 4 proxy rejected request with an RFC-uncompliant error cod."
-msgstr "Socks 4 प्रोक्सी ने प्रार्थना RFC-uncompliant दोष के साथ अस्व‍ीकार की "
-
-#: libproxy/proxy.c:630
-msgid "Socks5 proxy refused our authentication."
-msgstr "हमारी प्रमाणितता Socks5 ने अस्व‍ीकार की"
-
-#: libproxy/proxy.c:757
-msgid "HTTP proxy error: Authentication required."
-msgstr "HTTP प्रोक्सी दोष : प्रमाणितता चाहिए ।"
-
-#: libproxy/proxy.c:764
-msgid "HTTP proxy error: permission denied."
-msgstr "HTTP प्रोक्सी दोष : अनुमति खण्डित ।"
+#: libproxy/proxy.c:673
+#, fuzzy, c-format
+msgid "Connecting to proxy %s"
+msgstr " %s के द्वारा सम्पर्क बन्द ।"
 
 #: modules/aim-toc/aim-toc.c:120 modules/icq/icq.c:120
 #: modules/icq-toc/icq-toc.c:120 modules/msn2/msn.C:196
@@ -2749,14 +2727,14 @@ msgstr ""
 msgid "%sConversation ended on %s %s\n"
 msgstr ""
 
-#: src/main.c:418
+#: src/main.c:420
 #, c-format
 msgid ""
 "Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot "
 "be connected."
 msgstr ""
 
-#: src/main.c:420
+#: src/main.c:422
 msgid "Already Logged On"
 msgstr ""
 
@@ -3303,6 +3281,34 @@ msgstr ""
 msgid "Connection to the server failed."
 msgstr ""
 
+#~ msgid "Proxy Error"
+#~ msgstr "प्रोक्सी दोष"
+
+#~ msgid "Socks 4 proxy rejected request for an unknown reason."
+#~ msgstr "Socks 4 प्रोक्सी ने अज्ञात कारण हेतु प्रार्थना अस्व‍ीकार की "
+
+#~ msgid ""
+#~ "Socks 4 proxy rejected request because it could not connect to our identd."
+#~ msgstr "हमारे identd. से ना जुडने के कारण Socks 4 प्रोक्सी ने प्रार्थना अस्व‍ीकार की "
+
+#~ msgid ""
+#~ "Socks 4 proxy rejected request because identd returned a different userid."
+#~ msgstr ""
+#~ "हमारे identd. से भिन्न userid. लौटने के कारण Socks 4 प्रोक्सी ने प्रार्थना अस्व‍ीकार "
+#~ "की "
+
+#~ msgid "Socks 4 proxy rejected request with an RFC-uncompliant error cod."
+#~ msgstr "Socks 4 प्रोक्सी ने प्रार्थना RFC-uncompliant दोष के साथ अस्व‍ीकार की "
+
+#~ msgid "Socks5 proxy refused our authentication."
+#~ msgstr "हमारी प्रमाणितता Socks5 ने अस्व‍ीकार की"
+
+#~ msgid "HTTP proxy error: Authentication required."
+#~ msgstr "HTTP प्रोक्सी दोष : प्रमाणितता चाहिए ।"
+
+#~ msgid "HTTP proxy error: permission denied."
+#~ msgstr "HTTP प्रोक्सी दोष : अनुमति खण्डित ।"
+
 #~ msgid ""
 #~ "NOTICE %s :CLIENTINFO ACTION CLIENTINFO PING VERSION :Use CLIENTINFO "
 #~ "<COMMAND> to get more specific information\n"
@@ -3332,9 +3338,6 @@ msgstr ""
 #~ msgstr ""
 #~ "ध्यान दें %s :CLIENTINFO :VERSION  दर्शाता है client type, version और "
 #~ "environment\n"
-
-#~ msgid "Connection closed by %s."
-#~ msgstr " %s के द्वारा सम्पर्क बन्द ।"
 
 #~ msgid "Could not resolve host."
 #~ msgstr " host विश्लेषण में असमर्थ ।"

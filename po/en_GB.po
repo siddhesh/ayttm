@@ -7,48 +7,27 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-19 22:04+0530\n"
-"PO-Revision-Date: $Date: 2009/02/19 16:44:37 $\n"
+"POT-Creation-Date: 2009-05-22 11:09+0530\n"
+"PO-Revision-Date: $Date: 2009/05/22 06:02:23 $\n"
 "Last-Translator: Philip S Tellis <philip.tellis@gmx.net>\n"
 "Language-Team: Philip S Tellis <philip.tellis@gmx.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libproxy/proxy.c:474 libproxy/proxy.c:477 libproxy/proxy.c:480
-#: libproxy/proxy.c:483 libproxy/proxy.c:630 libproxy/proxy.c:757
-#: libproxy/proxy.c:764
-msgid "Proxy Error"
+#: libproxy/proxy.c:554
+#, c-format
+msgid "Cancelling connection"
 msgstr ""
 
-#: libproxy/proxy.c:475
-msgid "Socks 4 proxy rejected request for an unknown reason."
+#: libproxy/proxy.c:656 libproxy/proxy.c:687
+#, c-format
+msgid "Connecting to %s"
 msgstr ""
 
-#: libproxy/proxy.c:478
-msgid ""
-"Socks 4 proxy rejected request because it could not connect to our identd."
-msgstr ""
-
-#: libproxy/proxy.c:481
-msgid ""
-"Socks 4 proxy rejected request because identd returned a different userid."
-msgstr ""
-
-#: libproxy/proxy.c:484
-msgid "Socks 4 proxy rejected request with an RFC-uncompliant error cod."
-msgstr ""
-
-#: libproxy/proxy.c:630
-msgid "Socks5 proxy refused our authentication."
-msgstr ""
-
-#: libproxy/proxy.c:757
-msgid "HTTP proxy error: Authentication required."
-msgstr ""
-
-#: libproxy/proxy.c:764
-msgid "HTTP proxy error: permission denied."
+#: libproxy/proxy.c:673
+#, c-format
+msgid "Connecting to proxy %s"
 msgstr ""
 
 #: modules/aim-toc/aim-toc.c:120 modules/icq/icq.c:120
@@ -2643,14 +2622,14 @@ msgstr ""
 msgid "%sConversation ended on %s %s\n"
 msgstr ""
 
-#: src/main.c:418
+#: src/main.c:420
 #, c-format
 msgid ""
 "Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot "
 "be connected."
 msgstr ""
 
-#: src/main.c:420
+#: src/main.c:422
 msgid "Already Logged On"
 msgstr ""
 

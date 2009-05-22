@@ -49,9 +49,9 @@ typedef struct _toc_file_conn
 
 void (*toc_new_user)(toc_conn *conn, char * group, char * handle);
 void (*toc_new_group)(char * group);
-int  (*toc_begin_file_recieve)( const char * filename, unsigned long size );
+int  (*toc_begin_file_receive)( const char * filename, unsigned long size );
 void (*toc_update_file_status)( int tag, unsigned long progress );
-void (*toc_complete_file_recieve)( int tag );
+void (*toc_complete_file_receive)( int tag );
 void (*toc_im_in)(toc_conn  * conn, char * user, char * message );
 void (*toc_chat_im_in)(toc_conn  * conn, char * id, char * user, char * message );
 void (*update_user_status)(toc_conn *conn, char * user, int online, time_t idle, int evil, int unavailable );

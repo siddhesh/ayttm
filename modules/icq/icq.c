@@ -98,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ", 
 	"Provides support for the ICQ protocol", 
-	"$Revision: 1.10 $",
-	"$Date: 2008/08/02 06:13:09 $",
+	"$Revision: 1.11 $",
+	"$Date: 2009/05/22 06:02:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -302,7 +302,7 @@ static char * icq_to_html( char  * r, char * g, char * b, char * style, char * i
 
 
 /*
- *  this is to help deypher the statuses that you send and recieve
+ *  this is to help deypher the statuses that you send and receive
  */
 enum
 {

@@ -557,7 +557,7 @@ static void toc_get_file_data( gpointer data, int source, eb_input_condition con
 		close(conn->fd);
 endtransfer:
 		eb_input_remove(conn->handle);
-		toc_complete_file_recieve(conn->progress);
+		toc_complete_file_receive(conn->progress);
 		g_free(conn);
 	}
 }
@@ -667,7 +667,7 @@ if(DEBUG) {
 		conn->amount = 0;
 		conn->file = file;
 
-		conn->progress = toc_begin_file_recieve( filename,  ntohl(*((long*)(buff+22))) );
+		conn->progress = toc_begin_file_receive( filename,  ntohl(*((long*)(buff+22))) );
 
 		conn->handle = eb_input_add(fd, EB_INPUT_READ, toc_get_file_data, conn);
 

@@ -96,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.49 $",
-	"$Date: 2008/08/02 06:13:09 $",
+	"$Revision: 1.50 $",
+	"$Date: 2009/05/22 06:02:23 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -494,7 +494,7 @@ static void eb_icq_user_info(toc_conn * conn, char * user, char * message )
 {
 	eb_local_account * ela =  icq_find_local_account_by_conn(conn);
 	eb_account * sender = NULL;
-	eb_local_account * reciever = NULL;
+	eb_local_account * receiver = NULL;
 
 
 	sender = find_account_with_ela(user, ela);
@@ -511,11 +511,11 @@ static void eb_icq_user_info(toc_conn * conn, char * user, char * message )
 		sender = ea;
 
 	}
-	reciever = find_suitable_local_account( ela, ela->service_id );
+	receiver = find_suitable_local_account( ela, ela->service_id );
 
 	if(sender->infowindow == NULL )
 	{
-		sender->infowindow = eb_info_window_new(reciever, sender);
+		sender->infowindow = eb_info_window_new(receiver, sender);
 	}
 
 	sender->infowindow->info_data = strdup(message);
@@ -600,7 +600,7 @@ static void eb_icq_parse_incoming_im(toc_conn * conn, char * user, char * messag
 		struct eb_icq_local_account_data * alad = ela->protocol_local_account_data;
 		
 		eb_account * sender = NULL;
-		eb_local_account * reciever = NULL;
+		eb_local_account * receiver = NULL;
 
 		eb_debug(DBG_TOC, "eb_icq_parse_incomming_im %d %d, %d %d\n", conn->fd, conn->seq_num, alad->conn->fd, alad->conn->seq_num );
 
@@ -626,11 +626,11 @@ static void eb_icq_parse_incoming_im(toc_conn * conn, char * user, char * messag
 					sender->account_contact->group->name);
 		}
 		
-		reciever = find_suitable_local_account( ela, ela->service_id);
+		receiver = find_suitable_local_account( ela, ela->service_id);
 		//strip_html(msg);
 
-		eb_parse_incoming_message(reciever, sender, message);
-		if(reciever == NULL)
+		eb_parse_incoming_message(receiver, sender, message);
+		if(receiver == NULL)
 		{
 			g_warning("Reciever == NULL");
 		}
@@ -1337,9 +1337,9 @@ struct service_callbacks * query_callbacks()
 	icqtoc_join_ack = eb_icq_join_ack;
 	icqtoc_join_error = eb_icq_join_error;
 	icqtoc_chat_update_buddy = eb_icq_chat_update_buddy;
-	icqtoc_begin_file_recieve = eb_icq_progress_window_new;
+	icqtoc_begin_file_receive = eb_icq_progress_window_new;
 	icqtoc_update_file_status = eb_icq_update_progress;
-	icqtoc_complete_file_recieve = eb_icq_progress_window_close;
+	icqtoc_complete_file_receive = eb_icq_progress_window_close;
 	icqtoc_file_offer = eb_icq_file_offer;
 	icqtoc_user_info = eb_icq_user_info;
 	icqtoc_new_user = eb_icq_new_user;
