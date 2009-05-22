@@ -7,7 +7,20 @@ License: 	GPL
 URL: 		http://ayttm.sourceforge.net
 Source: 	%{name}-%{version}.tar.bz2
 Buildroot: 	%{_tmppath}/%{name}-%{version}-%{release}-root
-Requires:	@REQUIRES@
+
+Requires: gtk2 >= 2.12.0
+Requires: glib2 >= 2.0.0
+@REQUIRES@
+
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: flex
+BuildRequires: bison
+BuildRequires: libtool-ltdl
+BuildRequires: libtool-ltdl-devel
+BuildRequires: gtk2-devel >= 2.12.0
+BuildRequires: glib2-devel >= 2.0.0
+
 
 # If you want stripped RPM with no crash dialog use
 # --define "nodebug 1" in rpmbuild commandline
@@ -22,8 +35,13 @@ consistant user interface. Currently, Ayttm supports sending and receiving
 messages through AOL, ICQ, Yahoo, MSN, IRC and Jabber.
 
 %if "%{nodebug}" == "0"
+
 %define optflags -g
-%define __spec_install_post %{_libdir}/rpm/brp-compress 
+
+%ifnarch x86_64 # x86_64 does not have brp-compress
+%define __spec_install_post %{_libdir}/rpm/brp-compress
+%endif
+
 %endif
 
 %define debug_package %{nil}

@@ -1,5 +1,9 @@
+* Fri May 22 2009 09:40 UTC [siddheshp]   0.5.0-92
+* ChangeLog, configure.ac, ayttm.spec.in:
+ * Added Requires and BuildRequires in rpm spec file
+
 * Fri May 22 2009 05:45 UTC [siddheshp]   0.5.0-91
-* ChangeLog, modules/aim-oscar/libfaim/CHANGES,
+- ChangeLog, modules/aim-oscar/libfaim/CHANGES,
 modules/aim-oscar/libfaim/src/rxqueue.c,
 modules/aim-oscar/libfaim/src/service.c, modules/aim-toc/aim, toc.c,
 modules/aim-toc/libtoc/libtoc.c, modules/aim-toc/libtoc/libtoc.h,
@@ -20,6 +24,7 @@ po/nl.po, po/pt_BR.po, po/sv.po:
  * Removed mingw32
 
 * Mon May 18 2009 14:45 UTC [siddheshp]   0.5.0-89
+- ayttm.desktop, configure.ac, ChangeLog:
  * Added Categories into the .desktop. Closes #522497 in bugs.debian.org.
 Thanks Andrei Popescu
  * Disabled -DGTK_DISABLE_DEPRECATED. We needed it only for the gtk2 port and

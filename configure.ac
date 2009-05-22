@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=91
+RELEASE=92
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -14,6 +14,9 @@ CORE_VERSION=21
 AM_CONFIG_HEADER(config.h)
 
 AM_MAINTAINER_MODE
+
+AC_SUBST(REQUIRES)
+REQUIRES=
 
 # Checks for programs.
 AC_PROG_CC
@@ -160,8 +163,6 @@ AC_SEARCH_LIBS(libiconv_open, iconv)
 ###############################################################################
 
 if test "$use_mingw" = no ; then
-  AC_SUBST(REQUIRES)
-  REQUIRES=
   AC_ARG_ENABLE(crash-dialog, AC_HELP_STRING([--disable-crash-dialog],
   		[Disable crash dialog]),
   	[enable_crash_dialog=$enableval], [enable_crash_dialog=yes])
@@ -171,7 +172,7 @@ if test "$use_mingw" = no ; then
   	AC_MSG_CHECKING([whether to use crash dialog])
   	if test "$enable_crash_dialog" != "no"; then
   		AC_DEFINE(CRASH_DIALOG, 1, Pop up crash dialog)
-  		REQUIRES="gdb"
+  		REQUIRES="Requires: gdb"
   	fi
   	AC_MSG_RESULT($enable_crash_dialog)
   fi
