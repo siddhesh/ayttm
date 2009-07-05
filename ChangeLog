@@ -1,3 +1,8 @@
+* sun Jul 05 2009 15:30 UTC [siddheshp]   0.5.0-93
+- Changelog, configure.ac, /modules/irc/libirc/libirc.c,
+/modules/irc/irc.c:
+ * PONG for the IRC PING. Thanks Piotr Stefaniak <2134918 at gmail dawt com>
+
 * Fri May 22 2009 09:40 UTC [siddheshp]   0.5.0-92
 * ChangeLog, configure.ac, ayttm.spec.in:
  * Added Requires and BuildRequires in rpm spec file

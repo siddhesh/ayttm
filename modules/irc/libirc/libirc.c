@@ -253,12 +253,12 @@ void irc_request_list ( const char *channel, const char *target, irc_account *ia
 
 
 /* Send a PONG message response. Called by the PING handler */
-void irc_send_pong(const char *servername, irc_account *ia)
+void irc_send_pong(const char *message, irc_account *ia)
 {
 	char buff[BUF_LEN];
 	memset(buff, 0, BUF_LEN);
 
-	sprintf(buff, "PONG %s %s\n", ia->nick, servername);
+	sprintf(buff, "PONG %s\n", message);
 	irc_send_data(buff, strlen(buff), ia);
 }
 

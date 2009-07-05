@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.49 $",
-	"$Date: 2009/03/08 18:42:31 $",
+	"$Revision: 1.50 $",
+	"$Date: 2009/07/05 15:36:27 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -355,6 +355,12 @@ static void ay_irc_got_welcome ( const char *nick, const char *message,
 		free(ia->nick);
 
 	ia->nick = strdup(nick);
+}
+
+
+static void ay_irc_got_ping ( const char *message, irc_account *ia)
+{
+	irc_send_pong(message, ia);
 }
 
 
@@ -2221,6 +2227,7 @@ static irc_callbacks *ay_irc_map_callbacks( void )
 
 	/* Only these are implemented so far. More to come... */
 	cb->got_welcome      		= ay_irc_got_welcome ;
+	cb->got_ping         		= ay_irc_got_ping ;
 	cb->incoming_notice		= ay_irc_got_notice ;
 	cb->buddy_quit			= ay_buddy_quit ;
 	cb->buddy_join			= ay_buddy_join ;
