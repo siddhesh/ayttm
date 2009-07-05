@@ -505,9 +505,13 @@ static gboolean expand_callback ( GtkTreeView * tree_view, GtkTreeIter *iter,
 
 static void status_show_callback(GtkWidget *w, gpointer data)
 {
-	status_show = GPOINTER_TO_INT(data);
-	update_contact_list(); 
-	eb_save_size(contact_window, NULL);
+	int newdata = GPOINTER_TO_INT(data);
+
+	if (newdata == status_show)
+		return;
+
+	status_show = newdata;
+	update_contact_list();
 }
 
 static GtkWidget *make_info_menu(struct contact *c, int *nb)
@@ -1163,30 +1167,27 @@ void update_group_line(grouplist * eg)
 
 static void set_status_label(eb_account *ea, int update_contact)
 {
-	char * c = NULL, *tmp = NULL;
+	char *c = NULL, *tmp = NULL, *t = NULL;
 	int need_tooltip_update = 0;
 	
 	c = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 40);
 
-	while (strchr(c,'\n') != NULL) {
-		char *t = strchr(c,'\n');
+	/* Replace every newline with space. */
+	while (t = strchr(c,'\n')) {
 		*t = ' ';
 	}
 
-	if(strlen(c) == 40) {
+	if (strlen(c) == 40)
 		c[39] = c[38] = c[37] = '.';
-	}
-
-	tmp = g_strdup_printf("%s%s%s",
-			strlen(c)?"(":"",
-			c,
-			strlen(c)?")":"");
+	
+	if (strlen(c))
+		tmp = g_strdup_printf("(%s)", c);
+	else
+		tmp = g_strdup("");
 
 	if (ea->status) {
-		char *current = NULL;
-		current = g_strdup(ea->status);
-		eb_debug(DBG_CORE,"current %s c %s\n",current,tmp);
-		if (current && strcmp(current, tmp)) {
+		eb_debug(DBG_CORE, "%s [%s|%s]\n", ea->account_contact->nick, ea->status, tmp);
+		if (strcmp(ea->status, tmp)) {
 			char buff[1024];
 			g_snprintf(buff, 1024, _("%s is now %s"), 
 					ea->account_contact->nick,
@@ -1195,8 +1196,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 		}
 	}
 	
-	ea->status = strdup(tmp);
-	ea->tiptext = ea->status;
+	ea->tiptext = ea->status = strdup(tmp);
 	
 	if (update_contact) {
 		struct tm *mytime;
@@ -1717,23 +1717,6 @@ static void contact_logoff(struct contact * ec)
 			-1);
 }
 
-/* timeout called every 30 seconds for each online account to update
-   its status */
-static gint refresh_buddy_status(eb_account * ea)
-{
-	/* remove the timeout if the account is no longer displayed */
-	if (!ea->list_item || ea->status_handler == -1) {
-		ea->status_handler = -1;
-		return FALSE;
-	}
-	
-	/* don't refresh if a "door" icon is being displayed */
-	if (ea->icon_handler != -1)
-		return TRUE;
-		
-	buddy_update_status(ea);
-	return TRUE;
-}
 
 /* called to signify that a buddy has logged in, and updates the GUI
    accordingly */
@@ -1775,10 +1758,6 @@ void buddy_login(eb_account * ea)
 			MAIN_VIEW_ICON, ea->pix,
 			MAIN_VIEW_STATUS, ea->status,
 			-1);
-	
-	/* make sure the status gets updated often */
-	ea->status_handler = eb_timeout_add(30000,
-		(GtkFunction)refresh_buddy_status, (gpointer) ea);
 }
 
 /* called to signify that a buddy has logged off, and updates the GUI
@@ -2660,7 +2639,7 @@ void eb_status_window()
 			   GINT_TO_POINTER(1));
 	g_signal_connect(radioaccount, "clicked", G_CALLBACK(status_show_callback),
 			   GINT_TO_POINTER(0));
-	g_signal_connect(statuswindow, "size-allocate", G_CALLBACK(eb_save_size),
+	g_signal_connect(statuswindow, "configure-event", G_CALLBACK(eb_save_size),
 			   NULL);
 	
 	set_menu_sensitivity();
