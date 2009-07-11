@@ -45,7 +45,6 @@ typedef struct JABBERCONN {
     char   jid[LINE_LENGTH+1];	/* The jabber id, of the form user@host/resource */
     int	   listenerID;
     jconn  conn;		/* The actualy jabber connection struct */
-    int    id;			/* FIXME: User better. A key to connect sent requests and returned packets */
     int    reg_flag;		/* Indicates whether we have registered successfully with the jabber server */
     struct JABBERCONN *next;
 } JABBER_Conn;

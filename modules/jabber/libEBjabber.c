@@ -732,34 +732,32 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 	char *show, *type, *body, *subj, *ask, *code;
 	char *room, *user, *agent_type;
 	char buff[8192+1];	/* FIXME: Find right size */
-	int iid, status;
-	jid  jabber_id=NULL;
-	JABBER_Conn *JConn=NULL;
+	int status;
+	jid jabber_id = NULL;
+	JABBER_Conn *JConn = NULL;
 	JABBER_InstantMessage JIM;
 	JABBER_Dialog *JD;
 	struct jabber_buddy JB;
 
 	/* This should not return NULL, but might */
-	eb_debug(DBG_JBR, ">\n");
-	JConn=JCfindConn(conn);
-	if(!JConn) {
+	eb_debug(DBG_JBR, ">Packet to: %s\n", conn->user->user);
+	JConn = JCfindConn(conn);
+	if (!JConn) {
 		sprintf(buff, "%s@%s/%s - connection error, can't find connection, packets are being dropped!",
 			conn->user->user, conn->user->server, conn->user->resource);
-		ay_do_error( _("Jabber Error"), buff );
+		ay_do_error( _("Jabber Error"), buff);
 		eb_debug(DBG_JBR, "<Returning error - can't find connection\n");
 		return;
 	}
 	jpacket_reset(packet);
-	eb_debug(DBG_JBR,  "Packet: %s\n", packet->x->name);
-	switch(packet->type) {
+	eb_debug(DBG_JBR, "Packet: %s\n", packet->x->name);
+	switch (packet->type) {
 	case JPACKET_MESSAGE:
-		eb_debug(DBG_JBR,  "MESSAGE received\n");
-		from = xmlnode_get_attrib (packet->x, "from");
-		type = xmlnode_get_attrib (packet->x, "type");
-		/* type can be empty, chat, groupchat, or error */
-		eb_debug(DBG_JBR, "Message type: %s\n", type);
-		x = xmlnode_get_tag (packet->x, "body");
-		body = xmlnode_get_data (x);
+		from = xmlnode_get_attrib(packet->x, "from");
+		type = xmlnode_get_attrib(packet->x, "type");
+		eb_debug(DBG_JBR, "MESSAGE received: %s\n", type);
+		x = xmlnode_get_tag(packet->x, "body");
+		body = xmlnode_get_data(x);
 		x = xmlnode_get_tag(packet->x, "x");
 		if (x) {
 			type = xmlnode_get_attrib(x, "xmlns");
@@ -767,238 +765,159 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			if (!strcmp(type, "jabber:x:event")) {
 				xmlnode comp = xmlnode_get_tag(x, "composing");
 				char *tfrom = strdup(from);
-				if (comp) {
-					JABBERBuddy_typing(JConn, tfrom,1);
-				} else {
-					JABBERBuddy_typing(JConn, tfrom,0);
-				}
+				JABBERBuddy_typing(JConn, tfrom, comp ? 1 : 0);
 				free(tfrom);
 			}
 		}
-		x = xmlnode_get_tag (packet->x, "subject");
+		x = xmlnode_get_tag(packet->x, "subject");
 		if (x) {
-			subj = xmlnode_get_data (x);
+			subj = xmlnode_get_data(x);
 			snprintf(buff, 8192, "%s: %s", subj, body);
 		}
 		else {
 			subj = NULL;
-			if(body)
+			if (body)
 				strncpy(buff, body, 8192);
 			else
 				buff[0]='\0';
 		}
-		eb_debug (DBG_JBR, "from %s, type %s, body: %s, subj %s\n", from, type, body, subj);
-		if(type && !strcmp(type, "groupchat"))
-		{
-			user=strchr(from, '/');
-			//room=strtok(from, "@");
-			room=from;
-			if(!user) {
-				user=room;
-				//user+=strlen(room)+1;
-			}
+		eb_debug(DBG_JBR, "from %s, type %s, body: %s, subj %s\n", from, type, body, subj);
+		if (type && !strcmp(type, "groupchat"))	{
+			user = strchr(from, '/');
+			room = from;
+			if (!user)
+				user = room;
 			else {
 				*user = 0;
 				user++;
 			}
-			eb_debug(DBG_JBR,"chatroom: %s %s %s\n",room,user,buff);
+			eb_debug(DBG_JBR, "chatroom: %s %s %s\n", room, user, buff);
 			JABBERChatRoomMessage(room, user, buff);
 		}
-		else
-		{
+		else {
 			/* For now, ayttm does not understand resources */
-			JIM.msg=buff;
+			JIM.msg = buff;
 			JIM.JConn = JConn;
-			eb_debug(DBG_JBR,  "JIM.msg: %s\n", JIM.msg);
-			eb_debug(DBG_JBR,  "Rendering message\n");
-			JIM.sender=strtok(from, "/");
-			if(!JIM.sender)
-				JIM.sender=from;
-			eb_debug(DBG_JBR,  "JIM.sender: %s\n", JIM.sender);
+			eb_debug(DBG_JBR, "JIM.msg: %s\n", JIM.msg);
+			eb_debug(DBG_JBR, "Rendering message\n");
+			JIM.sender = strtok(from, "/");
+			if (!JIM.sender)
+				JIM.sender = from;
+			eb_debug(DBG_JBR, "JIM.sender: %s\n", JIM.sender);
 			JABBERInstantMessage(&JIM);
 		}
 		break;
 	case JPACKET_IQ:
-		eb_debug(DBG_JBR,  "IQ packet received\n");
-		type = xmlnode_get_attrib(packet->x, "type");
-		from = xmlnode_get_attrib(packet->x, "from");
-		if(!type) {
-			eb_debug(DBG_JBR,  "<JPACKET_IQ: NULL type\n");
+		if (!(type = xmlnode_get_attrib(packet->x, "type"))) {
+			eb_debug(DBG_JBR, "<JPACKET_IQ: NULL type\n");
 			return;
 		}
-		eb_debug(DBG_JBR,  "IQ received: %s\n", type);
-		if(!strcmp(type, "result")) {
-			id = xmlnode_get_attrib (packet->x, "id");
-			if (id) {
-				iid = atoi (id);
-				eb_debug(DBG_JBR,  "iid: %i\n", iid);
-				if (iid == JConn->id) {
-					if (!JConn->reg_flag) {
-						eb_debug (DBG_JBR, "requesting roster\n");
-						x = jutil_iqnew (JPACKET__GET, NS_ROSTER);
-						xmlnode_put_attrib(x, "id", "Roster");
-						jab_send (conn, x);
-						xmlnode_free(x);
+		if (!(id = xmlnode_get_attrib(packet->x, "id"))) {
+			eb_debug(DBG_JBR, "<JPACKET_IQ: NULL id\n");
+			return;
+		}
+		from = xmlnode_get_attrib(packet->x, "from");
+		eb_debug(DBG_JBR, "IQ received: %s\n", type);
+		if (!strcmp(type, "result")) {
+			if (!(x = xmlnode_get_tag(packet->x, "query"))) {
+				/* If there is no <query/>, <id> is the only way to recognize IQ */
+				if (!strcmp(id, "id_auth")) {
+					eb_debug(DBG_JBR, "Authorization successful, announcing presence\n");
+					jab_send_raw(conn, "<presence/>");
 
-						// Looks like this is deprecated
-//						eb_debug (DBG_JBR, "requesting agent list\n");
-//						x = jutil_iqnew (JPACKET__GET, NS_AGENTS);
-//						xmlnode_put_attrib(x, "id", "Agent List");
-//						jab_send (conn, x);
-//						xmlnode_free(x);
+					x = jutil_iqnew(JPACKET__GET, NS_ROSTER);
+					xmlnode_put_attrib(x, "id", "Roster");
+					eb_debug(DBG_JBR, "Requesting roster\n");
+					jab_send(conn, x);
+					xmlnode_free(x);
 
-						eb_debug(DBG_JBR,  "<Requested roster and agent list\n");
-						return;
-					}
-					else {
-						JConn->reg_flag = 0;
-						JConn->id = atoi (jab_auth (conn));
-						eb_debug (DBG_JBR, "<Performing auth\n");
-						return;
-					}
+					x = jutil_iqnew(JPACKET__GET, NS_DISCOINFO);
+					xmlnode_put_attrib(x, "to", conn->user->server);
+					xmlnode_put_attrib(x, "id", "disco");
+					eb_debug(DBG_JBR, "<Sending discovery request to %s\n", conn->user->server);
+					jab_send(conn, x);
+					xmlnode_free(x);
+					return;
 				}
-			}
-			else {
-				eb_debug(DBG_JBR,  "No ID!\n");
-			}
-			x = xmlnode_get_tag (packet->x, "query");
-			if (!x) {
-//				eb_debug(DBG_JBR,  "No Query tag in packet, don't care.\n");
+				else if (!strcmp(id, "id_reg")) {
+					JConn->reg_flag = 0;
+					eb_debug(DBG_JBR, "<Performing authorization\n");
+					jab_auth(conn);
+					return;
+				}
 				break;
 			}
-			ns = xmlnode_get_attrib (x, "xmlns");
-			eb_debug(DBG_JBR,  "ns: %s\n", ns);
-			if (strcmp (ns, NS_ROSTER) == 0) {
-				y = xmlnode_get_tag (x, "item");
-				for (;;) {
-					alias = xmlnode_get_attrib (y, "jid");
-					sub = xmlnode_get_attrib (y, "subscription");
-					name = xmlnode_get_attrib (y, "name");
-					group = xmlnode_get_attrib (y, "group");
-					eb_debug(DBG_JBR,  "Buddy: %s(%s) %s %s\n", alias, group, sub, name);
-					if(alias && sub && name) {
-						JB.jid=strtok(alias, "/");
-						if(!JB.jid) {
-							JB.jid=strdup(alias);
-						}
-						else {
-							JB.jid=strdup(JB.jid);
-						}
-						JB.name=strdup(name);
-						JB.sub=strdup(sub);
+			ns = xmlnode_get_attrib(x, "xmlns");
+			eb_debug(DBG_JBR, "ns: %s\n", ns);
+			if (!strcmp(ns, NS_ROSTER)) {
+				for (y = xmlnode_get_tag(x, "item"); y; y = xmlnode_get_nextsibling(y)) {
+					alias = xmlnode_get_attrib(y, "jid");
+					sub = xmlnode_get_attrib(y, "subscription");
+					name = xmlnode_get_attrib(y, "name");
+					group = xmlnode_get_attrib(y, "group");
+					eb_debug(DBG_JBR, "Buddy: %s(%s) %s %s\n", alias, group, sub, name);
+					if (alias && sub && name) {
+						JB.jid = strtok(alias, "/");
+						JB.jid = strdup(JB.jid ? JB.jid : alias);
+						JB.name = strdup(name);
+						JB.sub = strdup(sub);
 						/* State does not matter */
-						JB.status=JABBER_OFFLINE;
-						JB.JConn=JConn;
+						JB.status = JABBER_OFFLINE;
+						JB.JConn = JConn;
 						JABBERAddBuddy(&JB);
 						free(JB.name);
 						free(JB.sub);
 						free(JB.jid);
 					}
-					y = xmlnode_get_nextsibling (y);
-					if (!y) break;
 				}
 			}
-			else if(strcmp (ns, NS_AGENTS)==0) {
-				y = xmlnode_get_tag (x, "agent");
-				iid=1001;
-				for (;;) {
-					alias = xmlnode_get_attrib (y, "jid");
-					if(alias) {
-						name = xmlnode_get_tag_data (y, "name");
-						desc = xmlnode_get_tag_data (y, "description");
-						service = xmlnode_get_tag_data (y, "service");
-						agent_type=NULL;
-						if(xmlnode_get_tag(y, "groupchat"))
-							agent_type="groupchat";
-						else if(xmlnode_get_tag(y, "transport"))
-							agent_type="transport";
-						else if (xmlnode_get_tag(y, "search"))
-							agent_type="search";
-						eb_debug(DBG_JBR, "Agent type: %s found from: %s\n", agent_type, from);
-						j_add_agent(name, alias, desc, service, from, agent_type);
-/*						z = jutil_iqnew (JPACKET__GET, NS_AGENT);
-						xmlnode_put_attrib(z, "to", alias);
-						xmlnode_put_attrib(z, "id", name);
-
-//						xmlnode_put_attrib(z, "id", "1");
-						to=xmlnode_get_attrib(z, "to");
-						eb_debug(DBG_JBR, "to: %s - %s - %s\n", to,
-							xmlnode_get_attrib(z, "type"),
-							xmlnode_get_attrib(z, "id"));
-*/
-						/* Don't send the request until we can support the results */
-						//jab_send (conn, z);
-						//xmlnode_free(z);
-					}
-					y = xmlnode_get_nextsibling (y);
-					if (!y) break;
+			else if (!strcmp(ns, NS_DISCOINFO)) {
+				for (y = xmlnode_get_tag(x, "feature"); y; y = xmlnode_get_nextsibling(y)) {
+					name = xmlnode_get_attrib(y, "var");
+					eb_debug(DBG_JBR, "Feature: %s\n", name);
 				}
 			}
-			else if(strcmp (ns, NS_AGENT)==0) {
-				name=xmlnode_get_tag_data(x, "name");
-				url =xmlnode_get_tag_data(x, "url");
-				eb_debug(DBG_JBR, "agent: %s - %s\n", name, url);
-			}
-			jab_send_raw (conn, "<presence/>");
-			eb_debug(DBG_JBR, "<Announcing presence\n");
+			eb_debug(DBG_JBR, "<\n");
 			return;
-			
 		}
 		else
-		if(!strcmp(type, "set")) {
-			x = xmlnode_get_tag (packet->x, "query");
-			ns = xmlnode_get_attrib (x, "xmlns");
-			if (strcmp (ns, NS_ROSTER) == 0) {
-				y = xmlnode_get_tag (x, "item");
-				alias = xmlnode_get_attrib (y, "jid");
-				sub = xmlnode_get_attrib (y, "subscription");
-				name = xmlnode_get_attrib (y, "name");
-				ask = xmlnode_get_attrib (y, "ask");
-				eb_debug(DBG_JBR,  "Need to find a buddy: %s %s %s %s\n", alias, sub, name, ask);
-/*				bud = buddy_find (alias);
-*/
-				if (sub) {
-					if (strcmp (sub, "remove") == 0) {
-						eb_debug(DBG_JBR,  "Need to remove a buddy: %s\n", alias);
-					}
-				}
-/*
-				if (!bud) {
-					buddy_add_to_clist (buddy_add (alias, sub, name));
-					if (!name && !ask) roster_new ("Edit User", alias, NULL);
-				}
-				else if (name) {
-					free (bud->name);
-					bud->name = strdup (name);
-					set_name (bud);
-				}
-*/
+		if (!strcmp(type, "set")) {
+			x = xmlnode_get_tag(packet->x, "query");
+			ns = xmlnode_get_attrib(x, "xmlns");
+			if (!strcmp(ns, NS_ROSTER)) {
+				y = xmlnode_get_tag(x, "item");
+				alias = xmlnode_get_attrib(y, "jid");
+				sub = xmlnode_get_attrib(y, "subscription");
+				name = xmlnode_get_attrib(y, "name");
+				ask = xmlnode_get_attrib(y, "ask");
+				eb_debug(DBG_JBR, "Need to find a buddy: %s %s %s %s\n", alias, sub, name, ask);
+				if (sub && !strcmp(sub, "remove")) 
+					eb_debug(DBG_JBR, "Need to remove a buddy: %s\n", alias);
 			}
-
 		}
 		else
-		if(!strcmp(type, "error")) {
-			x = xmlnode_get_tag (packet->x, "error");
-			from = xmlnode_get_attrib (packet->x, "from");
+		if (!strcmp(type, "error")) {
+			x = xmlnode_get_tag(packet->x, "error");
+			from = xmlnode_get_attrib(packet->x, "from");
 			to=xmlnode_get_attrib(packet->x, "to");
-			code = xmlnode_get_attrib (x, "code");
-			name = xmlnode_get_attrib (x, "id");
+			code = xmlnode_get_attrib(x, "code");
+			name = xmlnode_get_attrib(x, "id");
 			desc = xmlnode_get_tag_data(packet->x, "error");
 			eb_debug(DBG_JBR, "Received error: [%i]%s from %s[%s], sent to %s\n", atoi(code), desc, from, name, to);
-			switch(atoi(code)) {
+			switch (atoi(code)) {
 			case 401: /* Unauthorized */
 				if (JConn->reg_flag)
 					break;
 				//FIXME: We need to change our status to offline first
-				JD=calloc(sizeof(JABBER_Dialog), 1);
+				JD = calloc(sizeof(JABBER_Dialog), 1);
 				name = xmlnode_get_tag_data(packet->iq, "username");
 				jabber_id = jab_getjid(conn);
-				JD->heading=_("Register? You're not authorized");
+				JD->heading = _("Register? You're not authorized");
 				sprintf(buff, _("Do you want to try to create the account \"%s\" on the jabber server %s?"), 
 						jabber_id->user, jabber_id->server );
-				JD->message=strdup(buff);
-				JD->callback=j_on_create_account;
-				JD->JConn=JConn;
+				JD->message = strdup(buff);
+				JD->callback = j_on_create_account;
+				JD->JConn = JConn;
 				JABBERDialog(JD);
 				break;
 			case 302: /* Redirect */
@@ -1017,48 +936,43 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			case 503: /* Service Unavailable */
 			case 504: /* Remote Server Timeout */
 			default:
-				sprintf(buff, "%s@%s/%s - %s (%s)", conn->user->user, conn->user->server, conn->user->resource, desc, code);
+				sprintf(buff, "%s@%s/%s - %s (%s)", conn->user->user, conn->user->server,
+													conn->user->resource, desc, code);
 				ay_do_error( _("Jabber Error"), buff );
 				fprintf(stderr, "Error: %s\n", code);
 			}
 		}
 		break;
 	case JPACKET_PRESENCE:
-		eb_debug(DBG_JBR,  "Presence packet received\n");
+		eb_debug(DBG_JBR, "Presence packet received\n");
 		status = JABBER_ONLINE;
-		type = xmlnode_get_attrib (packet->x, "type");
-		from = xmlnode_get_attrib (packet->x, "from");
+		type = xmlnode_get_attrib(packet->x, "type");
+		from = xmlnode_get_attrib(packet->x, "from");
 		/* For now, ayttm does not understand resources */
-		eb_debug(DBG_JBR,  "PRESENCE received type: %s from: %s\n", type, from);
-		x = xmlnode_get_tag (packet->x, "show");
-		if (x) {
-			show = xmlnode_get_data (x);
-			if(show) {
-				if (strcmp (show, "away") == 0) status = JABBER_AWAY;
-				else if (strcmp (show, "dnd") == 0) status = JABBER_DND;
-				else if (strcmp (show, "xa") == 0) status = JABBER_XA;
-				else if (strcmp (show, "chat") == 0) status = JABBER_CHAT;
+		eb_debug(DBG_JBR, "PRESENCE received type: %s from: %s\n", type, from);
+		if (x = xmlnode_get_tag(packet->x, "show")) {
+			show = xmlnode_get_data(x);
+			if (show) {
+				if (!strcmp(show, "away")) status = JABBER_AWAY;
+				else if (!strcmp(show, "dnd")) status = JABBER_DND;
+				else if (!strcmp(show, "xa")) status = JABBER_XA;
+				else if (!strcmp(show, "chat")) status = JABBER_CHAT;
 			}
-			else
-			{
+			else {
 				eb_debug(DBG_JBR, "Presence packet received from %s w/o a status string, is this a conference room?\n",
 					 from);
 				break;
 			}
 		}
-		if (type) {
-			if (strcmp (type, "unavailable") == 0) status = JABBER_OFFLINE;
-		}
-		if(strncmp(packet->from->server,
-                           "conference.",strlen("conference.")) == 0)
-		{
+		if (type && !strcmp(type, "unavailable"))
+			status = JABBER_OFFLINE;
+		if (!strncmp(packet->from->server, "conference.", strlen("conference."))) {
 			eb_debug(DBG_JBR, "Presence received from a conference room\n");
-			user=strchr(from, '/');
-			//room=strtok(from, "@");
+			user = strchr(from, '/');
 			room=from;
-			if(!user) {
-				user=room;
-				user+=strlen(room)+1;
+			if (!user) {
+				user = room;
+				user += strlen(room)+1;
 			}
 			else {
 				*user = 0;
@@ -1066,51 +980,48 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			}
 			JABBERChatRoomBuddyStatus(room, user, status);
 		}
-		else
-		{
-			JB.jid=strtok(from, "/");
+		else {
+			JB.jid = strtok(from, "/");
 			if(!JB.jid)
-				JB.jid=from;
-			JB.status=status;
-			JB.JConn=JConn;
+				JB.jid = from;
+			JB.status = status;
+			JB.JConn = JConn;
 			JABBERStatusChange(&JB);
 		}
 		break;
 	case JPACKET_S10N:
-		eb_debug(DBG_JBR,  "S10N packet received\n");
-		from = xmlnode_get_attrib (packet->x, "from");
-		type = xmlnode_get_attrib (packet->x, "type");
+		eb_debug(DBG_JBR, "S10N packet received\n");
+		from = xmlnode_get_attrib(packet->x, "from");
+		type = xmlnode_get_attrib(packet->x, "type");
 		if (type) {
-			JD=calloc(sizeof(JABBER_Dialog), 1);
-			if (strcmp (type, "subscribe") == 0) {
+			JD = calloc(1, sizeof(JABBER_Dialog));
+			if (!strcmp(type, "subscribe")) {
 				sprintf(buff, _("%s wants to add you to his friends' list.\n\nDo you want to accept?"), 
 						from);
-				JD->message=strdup(buff);
-				JD->heading="Subscribe Request";
-				JD->callback=j_allow_subscribe;
-				JD->requestor=strdup(from);
-				JD->JConn=JConn;
+				JD->message = strdup(buff);
+				JD->heading = "Subscribe Request";
+				JD->callback = j_allow_subscribe;
+				JD->requestor = strdup(from);
+				JD->JConn = JConn;
 				JABBERDialog(JD);
-				eb_debug (DBG_JBR, "<Initiated dialog to allow or deny subscribe request\n");
+				eb_debug(DBG_JBR, "<Initiated dialog to allow or deny subscribe request\n");
 				return;
 			}
 			else
-			if (strcmp (type, "unsubscribe") == 0) {
+			if (!strcmp (type, "unsubscribe"))
 				return;
-			}
 		}
 		break;
 	case JPACKET_UNKNOWN:
 	default:
-		from = xmlnode_get_attrib (packet->x, "from");
-		if(from) {
-			fprintf(stderr, "unrecognized packet: %i received from %s\n", packet->type, from);
-		}
+		from = xmlnode_get_attrib(packet->x, "from");
+		if (from)
+			eb_debug(DBG_JBR, "unrecognized packet: %i received from %s\n", packet->type, from)
 		else
-			fprintf(stderr, "unrecognized packet: %i received\n", packet->type);
+			eb_debug(DBG_JBR, "unrecognized packet: %i received\n", packet->type);
 		break;
 	}
-	eb_debug (DBG_JBR, "<\n");
+	eb_debug(DBG_JBR, "<\n");
 }
 
 void j_on_state_handler(jconn conn, int state) {
@@ -1150,7 +1061,7 @@ void j_on_state_handler(jconn conn, int state) {
 	case JCONN_STATE_ON:
 		eb_debug(DBG_JBR,  "JCONN_STATE_ON\n");
 		if (previous_state == JCONN_STATE_CONNECTED) {
-			JConn->id = atoi (jab_auth(JConn->conn));
+			jab_auth(JConn->conn);
 			JConn->listenerID = eb_input_add(JConn->conn->fd, EB_INPUT_READ,
 	                        	jabber_callback_handler, JConn);
 			eb_debug(DBG_JBR,  "*** ListenerID: %i FD: %i\n", JConn->listenerID, JConn->conn->fd);
@@ -1168,11 +1079,11 @@ void j_on_state_handler(jconn conn, int state) {
 void j_on_create_account(void *data) {
 	JABBER_Dialog_PTR jd;
 
-	eb_debug(DBG_JBR,  "Entering, but doing little\n");
-	jd=(JABBER_Dialog_PTR)data;
+	eb_debug(DBG_JBR, "Entering, but doing little\n");
+	jd = (JABBER_Dialog_PTR)data;
 	jd->JConn->reg_flag = 1;
-	jd->JConn->id = atoi (jab_reg (jd->JConn->conn));
-	eb_debug(DBG_JBR,  "Leaving\n");
+	jab_reg(jd->JConn->conn);
+	eb_debug(DBG_JBR, "Leaving\n");
 	jd->JConn->conn->sid = NULL;
 }
 

@@ -63,7 +63,6 @@ jconn jab_new(char *user, char *pass, char *serv)
     j->serv = pstrdup(p, serv);
     
     j->state = JCONN_STATE_OFF;
-    j->id = 1;
     j->fd = -1;
 
     return j;
@@ -256,18 +255,6 @@ char *jab_getsid(jconn j)
 }
 
 /*
- *  jab_getid -- get a unique id
- *
- *  parameters
- *      j -- connection
- */
-char *jab_getid(jconn j)
-{
-    snprintf(j->idbuf, 8, "%d", j->id++);
-    return &j->idbuf[0];
-}
-
-/*
  *  jab_send -- send xml data
  *
  *  parameters
@@ -287,7 +274,7 @@ void jab_send(jconn j, xmlnode x)
 #endif	
 	     write(j->fd, buf, strlen(buf));
 #ifdef JDEBUG
-	    fprintf(stderr, "jab< %s\n", buf);
+	    fprintf(stderr, "jab<%s %s\n", j->user->user, buf);
 #endif
     }
 }
@@ -310,7 +297,7 @@ void jab_send_raw(jconn j, const char *str)
 		write(j->fd, str, strlen(str));
     }
 #ifdef JDEBUG
-    fprintf(stderr, "rjab< %s\n", str);
+    fprintf(stderr, "rjab<%s %s\n", j->user->user, str);
 #endif
 }
 
@@ -338,7 +325,7 @@ void jab_recv(jconn j)
     {
         buf[len] = '\0';
 #ifdef JDEBUG
-        fprintf(stderr, "jab> %s\n", buf);
+        fprintf(stderr, "jab>%s %s\n", j->user->user, buf);
 #endif
         XML_Parse(j->parser, buf, len, 0);
     }
@@ -386,26 +373,22 @@ void jab_poll(jconn j, int timeout)
  *
  *  parameters
  *      j -- connection
- *
- *  returns
- *      id of the iq packet
  */
-char *jab_auth(jconn j)
+void jab_auth(jconn j)
 {
     xmlnode x,y,z;
-    char *hash, *user, *id;
+    char *hash, *user;
 
-    if(!j) return(NULL);
+    if (!j)
+		return(NULL);
 
     x = jutil_iqnew(JPACKET__SET, NS_AUTH);
-    id = jab_getid(j);
-    xmlnode_put_attrib(x, "id", id);
+    xmlnode_put_attrib(x, "id", "id_auth");
     y = xmlnode_get_tag(x,"query");
 
     user = j->user->user;
 
-    if (user)
-    {
+    if (user) {
         z = xmlnode_insert_tag(y, "username");
         xmlnode_insert_cdata(z, user, -1);
     }
@@ -413,8 +396,7 @@ char *jab_auth(jconn j)
     z = xmlnode_insert_tag(y, "resource");
     xmlnode_insert_cdata(z, j->user->resource, -1);
 
-    if (j->sid)
-    {
+    if (j->sid) {
         z = xmlnode_insert_tag(y, "digest");
         hash = pmalloc(x->p, strlen(j->sid)+strlen(j->pass)+1);
         strcpy(hash, j->sid);
@@ -422,15 +404,13 @@ char *jab_auth(jconn j)
         hash = shahash(hash);
         xmlnode_insert_cdata(z, hash, 40);
     }
-    else
-    {
-	z = xmlnode_insert_tag(y, "password");
-	xmlnode_insert_cdata(z, j->pass, -1);
+    else {
+		z = xmlnode_insert_tag(y, "password");
+		xmlnode_insert_cdata(z, j->pass, -1);
     }
 
     jab_send(j, x);
     xmlnode_free(x);
-    return id;
 }
 
 /*
@@ -438,27 +418,22 @@ char *jab_auth(jconn j)
  *
  *  parameters
  *      j -- connection
- *
- *  returns
- *      id of the iq packet
  */
-char *jab_reg(jconn j)
+void jab_reg(jconn j)
 {
     xmlnode x,y,z;
-    char *user, *id;
-    /* UNUSED char *hash; */
+    char *user;
 
-    if (!j) return(NULL);
+    if (!j)
+		return(NULL);
 
     x = jutil_iqnew(JPACKET__SET, NS_REGISTER);
-    id = jab_getid(j);
-    xmlnode_put_attrib(x, "id", id);
-    y = xmlnode_get_tag(x,"query");
+    xmlnode_put_attrib(x, "id", "id_reg");
+    y = xmlnode_get_tag(x, "query");
 
     user = j->user->user;
 
-    if (user)
-    {
+    if (user){
         z = xmlnode_insert_tag(y, "username");
         xmlnode_insert_cdata(z, user, -1);
     }
@@ -466,17 +441,16 @@ char *jab_reg(jconn j)
     z = xmlnode_insert_tag(y, "resource");
     xmlnode_insert_cdata(z, j->user->resource, -1);
 
-    if (j->pass)
-    {
-	z = xmlnode_insert_tag(y, "password");
-	xmlnode_insert_cdata(z, j->pass, -1);
+    if (j->pass){
+		z = xmlnode_insert_tag(y, "password");
+		xmlnode_insert_cdata(z, j->pass, -1);
     }
 
     jab_send(j, x);
     xmlnode_free(x);
     j->state = JCONN_STATE_ON;
     STATE_EVT(JCONN_STATE_ON)
-    return id;
+    return;
 }
 
 

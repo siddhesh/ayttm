@@ -251,6 +251,8 @@ typedef struct terror_struct
 #define NS_XDBGINSERT "jabber:xdb:ginsert"
 #define NS_XDBNSLIST  "jabber:xdb:nslist"
 
+#define NS_DISCOINFO  "http://jabber.org/protocol/disco#info"
+
 
 
 /* --------------------------------------------------------- */
@@ -305,8 +307,6 @@ typedef struct jconn_struct
     char        *serv;     /* Server to connect to (overrides one in JID) */
 
     /* Stream stuff */
-    int         id;        /* id counter for jab_getid() function */
-    char        idbuf[9];  /* temporary storage for jab_getid() */
     char        *sid;      /* stream id from server, for digest auth */
     XML_Parser  parser;    /* Parser instance */
     xmlnode     current;   /* Current node in parsing instance.. */
@@ -335,15 +335,14 @@ void jab_stop(jconn j);
 int jab_getfd(jconn j);
 jid jab_getjid(jconn j);
 char *jab_getsid(jconn j);
-char *jab_getid(jconn j);
 
 void jab_send(jconn j, xmlnode x);
 void jab_send_raw(jconn j, const char *str);
 void jab_recv(jconn j);
 void jab_poll(jconn j, int timeout);
 
-char *jab_auth(jconn j);
-char *jab_reg(jconn j);
+void jab_auth(jconn j);
+void jab_reg(jconn j);
 
 
 
