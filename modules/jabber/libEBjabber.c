@@ -763,7 +763,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		x = xmlnode_get_tag(packet->x, "x");
 		if (x) {
 			type = xmlnode_get_attrib(x, "xmlns");
-			printf("type: %s\n", type);
+			eb_debug(DBG_JBR, "type: %s\n", type);
 			if (!strcmp(type, "jabber:x:event")) {
 				xmlnode comp = xmlnode_get_tag(x, "composing");
 				char *tfrom = strdup(from);
@@ -914,7 +914,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 							agent_type="transport";
 						else if (xmlnode_get_tag(y, "search"))
 							agent_type="search";
-						eb_debug(DBG_JBR, "Agent type: %s found from: %s!\n", agent_type, from);
+						eb_debug(DBG_JBR, "Agent type: %s found from: %s\n", agent_type, from);
 						j_add_agent(name, alias, desc, service, from, agent_type);
 /*						z = jutil_iqnew (JPACKET__GET, NS_AGENT);
 						xmlnode_put_attrib(z, "to", alias);
@@ -940,7 +940,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				eb_debug(DBG_JBR, "agent: %s - %s\n", name, url);
 			}
 			jab_send_raw (conn, "<presence/>");
-			eb_debug (DBG_JBR, "<Announcing presenceh\n");
+			eb_debug(DBG_JBR, "<Announcing presence\n");
 			return;
 			
 		}

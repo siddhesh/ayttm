@@ -82,8 +82,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.50 $",
-	"$Date: 2009/05/22 06:02:23 $",
+	"$Revision: 1.51 $",
+	"$Date: 2009/07/11 04:34:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -204,7 +204,7 @@ static eb_local_account *find_local_account_by_conn(JABBER_Conn *JConn)
 		if ( ((eb_local_account *)(acc->data))->service_id == SERVICE_INFO.protocol_id) {
 			eb_jabber_local_account_data *jlad = ((eb_local_account *)(acc->data))->protocol_local_account_data;
 			if (jlad->JConn && jlad->JConn == JConn) {
-				eb_debug(DBG_JBR, "found (%s) !\n", ((eb_local_account *)(acc->data))->handle);
+				eb_debug(DBG_JBR, "found (%s)\n", ((eb_local_account *)(acc->data))->handle);
 				return (eb_local_account *)(acc->data);
 			} else 
 				eb_debug(DBG_JBR, "JConns: %p %p didn't match\n",
@@ -220,7 +220,7 @@ static eb_local_account *find_local_account_by_conn(JABBER_Conn *JConn)
 				*strstr(user, "/") = 0;
 			
 			if (!jlad->JConn && !strcmp(ela->handle, user)) {
-				eb_debug(DBG_JBR, "found (%s) via handle!\n", ((eb_local_account *)(acc->data))->handle);
+				eb_debug(DBG_JBR, "found (%s) via handle\n", ((eb_local_account *)(acc->data))->handle);
 				free(user);
 				return (eb_local_account *)(acc->data);
 			} else 
@@ -291,14 +291,12 @@ static void ay_jabber_cancel_connect (void *data)
 	eb_jabber_logout(ela);
 }
 
-static void eb_jabber_finish_login( const char *password, void *data)
+static void eb_jabber_finish_login(const char *password, void *data)
 {
 	eb_local_account *account = data;
 	eb_jabber_local_account_data * jlad;
 	char buff[1024];
 	int port = 5222;
-	
-	eb_debug(DBG_JBR, ">\n");
 
 	jlad = (eb_jabber_local_account_data *)account->protocol_local_account_data;
 	
@@ -312,15 +310,15 @@ static void eb_jabber_finish_login( const char *password, void *data)
 #endif
 	strcpy(jlad->server_port,"5222");
 	}
-	
+
 #ifdef HAVE_OPENSSL
 	if (jlad->use_ssl)
 		port = atoi(jlad->ssl_server_port);
 	else
 #endif
 		port = atoi(jlad->server_port);
-	
-	jlad->connect_tag = JABBER_Login(account->handle, (char *)password, 
+
+	jlad->connect_tag = JABBER_Login(account->handle, (char *)password,
 			jabber_server, jlad->connect_server, jlad->use_ssl, port);
 }
 
@@ -1243,21 +1241,20 @@ void	JABBERError( char *message, char *title )
 void JABBERBuddy_typing(JABBER_Conn *JConn, char *from, int typing) {
 	eb_local_account *ela = NULL;
 	eb_account *ea = NULL;
+	char *dbgstr = NULL;
 	
-	ela = find_local_account_by_conn(JConn);
-	printf("JABBERBuddy_Typing %s\n", from);
-	if (!ela)
-		return;
-	printf("ela %s\n",ela->handle);
-	ea = find_account_with_ela(from, ela);
+	if (ela = find_local_account_by_conn(JConn))
+		ea = find_account_with_ela(from, ela);
 
-	if (!ea) 
-		return;
-	printf("ea %s\n",ea->handle);
-	if (iGetLocalPref("do_typing_notify"))
+	if (ea && iGetLocalPref("do_typing_notify"))
 		eb_update_status(ea, typing?_("typing..."):"");
-	
-	
+
+	dbgstr = g_strdup_printf("from: %s. ela: %s. ea: %s\n",
+			from,
+			ela?ela->handle:"NULL", 
+			ea?ea->handle:"NULL");
+	eb_debug(DBG_JBR, "%s", dbgstr);
+	g_free(dbgstr);
 }
 
 typedef struct {

@@ -239,6 +239,8 @@ int EB_DEBUG(const char *func, char *file, int line, const char *fmt, va_alist)
 {
 	va_list ap;
 	static int indent=0;
+	time_t t;
+	struct tm *cur_time;
 
 #ifdef __STDC__
 	va_start(ap, fmt);
@@ -248,7 +250,13 @@ int EB_DEBUG(const char *func, char *file, int line, const char *fmt, va_alist)
 	if(fmt && fmt[0]=='>')
 		indent++;
 
-	fprintf(stderr, "%*.*s%s[%i]:%s - ", indent, indent, " ", file, line, func);
+	time(&t);
+	cur_time = localtime(&t);
+
+	fprintf(stderr, "%d:%.2d:%.2d %*.*s%s[%i]:%s - ",
+		cur_time->tm_hour, cur_time->tm_min, cur_time->tm_sec,
+		indent, indent, " ", file, line, func);
+
 	vfprintf(stderr, fmt, ap);
 	fflush(stderr);
 	va_end(ap);

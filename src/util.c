@@ -602,7 +602,7 @@ eb_chat_room * find_chat_room_by_id( const char * id )
 	LList * node = chat_rooms;
 	for( node= chat_rooms; node; node=node->next) {
 		eb_chat_room * ecr = node->data;
-		eb_debug(DBG_CORE, "Comparing %s to %s\n", id, ecr->id );
+		/* eb_debug(DBG_CORE, "Comparing %s to %s\n", id, ecr->id ); */
 		if(!strcmp(id, ecr->id))
 			return ecr;
 	}

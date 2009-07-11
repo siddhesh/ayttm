@@ -1,3 +1,11 @@
+* Sat Jul 11 2009 04:30 UTC [siddheshp]   0.5.0-96
+- ChangeLog, configure.ac, modules/irc/libirc/libirc.c,
+modules/jabber/jabber.c, modules/jabber/libEBjabber.c,
+modules/jabber/libjabber/jconn.c, src/plugin_api.c, src/util.c:
+ * Piotr Stefaniak <2134918 at gmail dawt com> - Debug message changes.
+ -DIRCDEBUG to get them for libirc and -DJDEBUG for libjabber. A bit of
+ cleanup as well.
+
 * Sat Jul 11 2009 04:20 UTC [siddheshp]   0.5.0-95
 - ChangeLog, configure.ac, modules/jabber/libEBjabber.c:
  * Piotr Stefaniak <2134918 at gmail dawt com> - Commented out jabber send

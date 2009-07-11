@@ -287,7 +287,7 @@ void jab_send(jconn j, xmlnode x)
 #endif	
 	     write(j->fd, buf, strlen(buf));
 #ifdef JDEBUG
-	    printf ("out: %s\n", buf);
+	    fprintf(stderr, "jab< %s\n", buf);
 #endif
     }
 }
@@ -310,7 +310,7 @@ void jab_send_raw(jconn j, const char *str)
 		write(j->fd, str, strlen(str));
     }
 #ifdef JDEBUG
-    printf ("rout: %s\n", str);
+    fprintf(stderr, "rjab< %s\n", str);
 #endif
 }
 
@@ -338,7 +338,7 @@ void jab_recv(jconn j)
     {
         buf[len] = '\0';
 #ifdef JDEBUG
-        printf (" in: %s\n", buf);
+        fprintf(stderr, "jab> %s\n", buf);
 #endif
         XML_Parse(j->parser, buf, len, 0);
     }

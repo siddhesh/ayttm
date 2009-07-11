@@ -432,6 +432,10 @@ void irc_send_data(void *buf, int len, irc_account *ia)
 		bytesleft -= n;
 	}
 
+#ifdef IRCDEBUG
+	fprintf(stderr, "irc< %s", buf);
+#endif
+
 	if(n==-1) {
 		char buff[1024]; 
 		snprintf(buff, sizeof(buff), _("Error occurred while sending data to %s: %s"), 
@@ -474,7 +478,9 @@ void irc_recv (irc_account *ia, int source, int condition)
 
 		if(buf[i-1] == '\n') {
 			buf[i-2]='\0';
-
+#ifdef IRCDEBUG
+			fprintf(stderr, "irc> %s\n", buf);
+#endif
 			irc_message_parse(buf, ia);
 
 			memset(buf, 0, BUF_LEN);
