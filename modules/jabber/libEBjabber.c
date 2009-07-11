@@ -542,14 +542,18 @@ int JABBER_LeaveChatRoom(JABBER_Conn *JConn, char *room_name, char *nick)
 	return(0);
 }
 
-void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, int typing)
+void JABBER_Send_typing(JABBER_Conn *JConn, const char *from, const char *to, int typing)
 {
+	/*
+	 * Obsolete, has to be rewritten to conform to XEP-0085
+	 * http://xmpp.org/extensions/xep-0085.html
+
 	char buffer[4096];
-	if (!JConn || !JConn->conn) 
+	if (!JConn || !JConn->conn)
 		return;
-	
+
 	if (typing) {
-		snprintf(buffer, 4095, 
+		snprintf(buffer, 4095,
 			"<message "
     				"from='%s' "
 				"to='%s'>"
@@ -559,7 +563,7 @@ void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, i
   				"</x>"
 			"</message>",
 			from, to, from);
-  	
+
 	} else {
 		snprintf(buffer, 4095,
 			"<message "
@@ -570,9 +574,9 @@ void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, i
 				"</x>"
 			"</message>",
 			from,to,from);
-	}	
-	printf("sending %s\n",buffer);
-	jab_send_raw(JConn->conn, buffer);
+	}
+	eb_debug(DBG_JBR, "sending %s\n", buffer);
+	jab_send_raw(JConn->conn, buffer); */
 }
 
 int JABBER_IsChatRoom(char *from)
