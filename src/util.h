@@ -142,6 +142,8 @@ char *ay_get_last_version(void);
 void ay_dump_cts(void);
 void ay_dump_elas(void);
 
+gchar *convert_to_utf8(const char *message);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

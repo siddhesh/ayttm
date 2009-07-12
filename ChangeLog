@@ -1,3 +1,11 @@
+* Sun Jul 12 2009 10:10 UTC [siddheshp]   0.5.0-99
+- ChangeLog, configure.ac, src/gtk/html_text_buffer.c, src/util.h, src/util.c,
+src/message_parse.c, src/chat_room.c:
+ * Last update was a disaster. Another try at utf8 validation and correction
+ * moved convert_to_utf8() to utils to make it accessible to everyone
+ * Added conversion into html_text_buffer so that it will apply all across
+ * Reverted goof-ups in the last commit
+
 * Sun Jul 12 2009 09:00 UTC [siddheshp]   0.5.0-98
 - ChangeLog, configure.ac, src/prefs.c, src/message_parse.c:
  * Added utf8 validation and correction

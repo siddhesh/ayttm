@@ -1386,8 +1386,7 @@ void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, gchar * message)
 	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), "\n", HTML_IGNORE_NONE );
 	ay_log_file_message( chat_room->logfile, "", link_message );
 
-	if (link_message)
-		g_free(link_message);
+	g_free(link_message);
 }
 
 void eb_chat_room_show_message( eb_chat_room * chat_room,

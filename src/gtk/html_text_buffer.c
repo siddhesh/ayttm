@@ -721,7 +721,7 @@ void parse_html( GtkTextView *text_view, GtkTextMark html_start, int ignore )
  */
 void html_text_buffer_append ( GtkTextView *text_view, char *txt, int ignore )
 {
-	char *text = strdup(txt);
+	gchar *text = convert_to_utf8(txt);
 	GtkTextIter iter;
 	GtkTextMark *insert_mark;
 	GtkTextIter end;
@@ -767,6 +767,8 @@ void html_text_buffer_append ( GtkTextView *text_view, char *txt, int ignore )
 		gtk_text_view_scroll_mark_onscreen( text_view, 
 				gtk_text_buffer_create_mark(buffer, NULL, &end, TRUE) );
 	}
+
+	g_free(text);
 }
 
 

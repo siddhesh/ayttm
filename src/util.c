@@ -2056,3 +2056,63 @@ char *ay_get_last_version(void)
 	free(rss);
 	return version;
 }
+
+
+/*
+ * Tries to convert incoming string into utf-8
+ */
+gchar *convert_to_utf8(const char *message)
+{
+	const gchar *error_loc = NULL;
+	gchar *output = NULL;
+	gchar *correct = NULL;
+	gchar *converted = NULL;
+	const gchar *home_encoding = NULL;
+	int i=0;
+
+	char **encodings = g_strsplit_set(cGetLocalPref("encodings"), " \t", 0);
+
+	/* We need not do anything for a valid UTF-8 string */
+	if(g_utf8_validate(message, -1, &error_loc))
+		return g_strdup(message);
+	
+	/* The string is not utf-8. Save the valid result and 
+	 * try converting from the error position onwards */
+	error_loc++;
+	correct = g_strndup(message, error_loc-message);
+
+	/* Try converting from the encoding options configured */
+
+	while(encodings[i] && encodings[i][0]) {
+		converted = g_convert(error_loc, -1, "UTF-8", encodings[i], NULL, NULL, NULL);
+
+		if(converted) {
+			output = g_strjoin("", correct, converted, NULL);
+
+			g_free(converted);
+			g_free(correct);
+
+			return output;
+		}
+		i++;
+	}
+
+	/* Nothing worked. Just convert from your locale to utf-8 with fallbacks.
+	 * Unless of course, the locale is also UTF-8, hence making this a moot point */
+	if(!g_get_charset(&home_encoding))
+		converted = g_convert_with_fallback(error_loc, -1, "UTF-8", home_encoding, NULL, NULL, NULL, NULL);
+
+	if (converted)
+		output = g_strjoin("", correct, converted, NULL);
+	else
+		output = g_strjoin("", correct, 
+				_("<font color=\"#f00\">(truncated message since it was in an unknown encoding)</font>"),
+				NULL);
+
+	g_free(converted);
+	g_free(correct);
+
+	return output;
+}
+
+
