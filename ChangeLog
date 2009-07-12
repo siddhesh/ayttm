@@ -1,3 +1,10 @@
+* Sun Jul 12 2009 09:00 UTC [siddheshp]   0.5.0-98
+- ChangeLog, configure.ac, src/prefs.c, src/message_parse.c:
+ * Added utf8 validation and correction
+ * Added a 'encodings' preference to specify the list of encodings to use for
+ charset conversion. Users may specify encodings as a list separated by spaces
+ * Added ISO-8859-15 and CP1252 as default values for encodings
+
 * Sat Jul 11 2009 07:15 UTC [siddheshp]   0.5.0-97
 - ChangeLog, configure.ac, modules/jabber/libEBjabber.c,
 modules/jabber/libEBjabber.h,

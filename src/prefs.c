@@ -687,6 +687,7 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_spell_checking", 0 );
 	cSetLocalPref( "spell_dictionary", "" );
 	cSetLocalPref( "FontFace", "helvetica" );
+	cSetLocalPref( "encodings", "ISO-8859-15 CP1252" );
 
 	/* logging */
 	iSetLocalPref( "do_logging", 1 );
@@ -958,6 +959,7 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_auto_complete=%d\n", iGetLocalPref("do_auto_complete") );
 	fprintf( fp, "do_smiley=%d\n", iGetLocalPref("do_smiley" ) );
 	fprintf( fp, "FontFace=%s\n", cGetLocalPref("FontFace") );
+	fprintf( fp, "encodings=%s\n", cGetLocalPref("encodings") );
 #ifdef HAVE_LIBPSPELL
     fprintf( fp, "do_spell_checking=%d\n", iGetLocalPref("do_spell_checking") );
 	fprintf( fp, "spell_dictionary=%s\n", cGetLocalPref("spell_dictionary") );

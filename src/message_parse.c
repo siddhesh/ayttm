@@ -93,6 +93,64 @@ typedef struct {
 } progress_callback_data;
 
 
+/*
+ * Tries to convert incoming string into utf-8
+ */
+static gchar *convert_to_utf8(const char *message)
+{
+	const gchar *error_loc = NULL;
+	gchar *output = NULL;
+	gchar *correct = NULL;
+	gchar *converted = NULL;
+	const gchar *home_encoding = NULL;
+	int i=0;
+
+	char **encodings = g_strsplit_set(cGetLocalPref("encodings"), " \t", 0);
+
+	/* We need not do anything for a valid UTF-8 string */
+	if(g_utf8_validate(message, -1, &error_loc))
+		return g_strdup(message);
+	
+	/* The string is not utf-8. Save the valid result and 
+	 * try converting from the error position onwards */
+	error_loc++;
+	correct = g_strndup(message, error_loc-message);
+
+	/* Try converting from the encoding options configured */
+
+	while(encodings[i] && encodings[i][0]) {
+		converted = g_convert(error_loc, -1, "UTF-8", encodings[i], NULL, NULL, NULL);
+
+		if(converted) {
+			output = g_strjoin("", correct, converted, NULL);
+
+			g_free(converted);
+			g_free(correct);
+
+			return output;
+		}
+		i++;
+	}
+
+	/* Nothing worked. Just convert from your locale to utf-8 with fallbacks.
+	 * Unless of course, the locale is also UTF-8, hence making this a moot point */
+	if(!g_get_charset(&home_encoding))
+		converted = g_convert_with_fallback(error_loc, -1, "UTF-8", home_encoding, NULL, NULL, NULL, NULL);
+
+	if (converted)
+		output = g_strjoin("", correct, converted, NULL);
+	else
+		output = g_strjoin("", correct, 
+				_("<font color=\"#f00\">(truncated message since it was in an unknown encoding)</font>"),
+				NULL);
+
+	g_free(converted);
+	g_free(correct);
+
+	return output;
+}
+
+
 static void send_file2(void * ptr )
 {
 #ifdef HAVE_PTHREAD
@@ -401,12 +459,12 @@ void eb_parse_incoming_message( eb_local_account * account,
 				 eb_account * remote,
 				 char * message )
 {
-	char * buff;
 	char * ptr;
-	buff = strdup(message);
+	char *buff = convert_to_utf8(message);
 
 	ptr = strtok(buff," ");
 
+	/* Do we want to keep this? */
 	if(ptr && !strcmp(ptr, "EB_COMMAND") && !xfer_in_progress)
 	{
 		eb_debug(DBG_CORE, "EB_COMMAND received\n");
@@ -469,14 +527,20 @@ void eb_parse_incoming_message( eb_local_account * account,
 		}
 	}
 	else
-		eb_chat_window_display_remote_message( account, remote, message );
+		eb_chat_window_display_remote_message( account, remote, buff );
 	
-	free(buff);
+	g_free(buff);
 }
 
 void eb_update_status( eb_account * remote,
                        char * message )
 {
-        eb_chat_window_display_status( remote, message );
-	eb_chat_room_display_status(remote, message);
+	char *buff = convert_to_utf8(message);
+
+        eb_chat_window_display_status( remote, buff );
+	eb_chat_room_display_status(remote, buff);
+
+	g_free(buff);
 }
+
+
