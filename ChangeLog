@@ -1,3 +1,7 @@
+* Tue Jul 12 2009 10:00 UTC [siddheshp]   0.5.0-100
+- ChangeLog, configure.ac, src/chat_room.c:
+ * Piotr Stefaniak <2134918 at gmail dawt com>: Code cleanup
+
 * Sun Jul 12 2009 10:10 UTC [siddheshp]   0.5.0-99
 - ChangeLog, configure.ac, src/gtk/html_text_buffer.c, src/util.h, src/util.c,
 src/message_parse.c, src/chat_room.c:
