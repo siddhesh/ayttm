@@ -1188,6 +1188,44 @@ void eb_chat_room_buddy_arrive(eb_chat_room *room, const gchar *alias, const gch
 	eb_chat_room_refresh_list(room, handle, CHAT_ROOM_JOIN);
 }
 
+void eb_chat_room_buddy_chnick(eb_chat_room *room, const gchar *buddy, const gchar *newnick)
+{
+	GtkTreeIter iter;
+	gchar *buf;
+	LList *node;
+	eb_chat_room_buddy *ecrb;
+
+	if (!buddy || !(node = find_chat_room_buddy(room, buddy)))
+		return;
+
+	if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(room->fellows_model), &iter)) {
+		eb_debug(DBG_CORE, "Nothing in the list?: %s\n", buddy);
+		return;
+	}
+
+	ecrb = node->data;
+
+	strncpy(ecrb->alias, newnick, sizeof(ecrb->alias));
+	strncpy(ecrb->handle, newnick, sizeof(ecrb->handle));
+
+	buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s is now known as %s</b></body>"), buddy, newnick);
+	eb_chat_room_show_3rdperson(room, buf);
+	g_free(buf);
+
+	eb_chat_room_private_log_reference(room, newnick, newnick);
+
+	do {
+		char *name = NULL;
+		gtk_tree_model_get(GTK_TREE_MODEL(room->fellows_model), &iter, 0, &name, -1);
+
+		if (name && !strcmp(name, buddy)) {
+			gtk_list_store_set(room->fellows_model, &iter, 0, newnick, -1);
+			return;
+		}
+	}
+	while (gtk_tree_model_iter_next(GTK_TREE_MODEL(room->fellows_model), &iter));
+}
+
 void eb_chat_room_buddy_leave(eb_chat_room *room, const gchar *handle)
 {
 	LList *node = find_chat_room_buddy(room, handle);

@@ -54,6 +54,7 @@ void eb_chat_room_show_3rdperson( eb_chat_room * chat_room, char * message);
 void eb_chat_room_show_message( eb_chat_room * chat_room, const char * user, const char * message );
 eb_chat_room* eb_start_chat_room( eb_local_account *ela, char * name , int is_public);
 void eb_chat_room_buddy_arrive( eb_chat_room * room, const char * alias, const char * handle );
+void eb_chat_room_buddy_chnick(eb_chat_room *room, const char *buddy, const char *newnick);
 void eb_chat_room_buddy_leave( eb_chat_room * room, const char * handle );
 void eb_chat_room_refresh_list(eb_chat_room * room, const char *handle, ChatRoomRefreshType refresh );
 int eb_chat_room_buddy_connected( eb_chat_room * room, char * user );

@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.50 $",
-	"$Date: 2009/07/05 15:36:27 $",
+	"$Revision: 1.51 $",
+	"$Date: 2009/07/14 11:07:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1450,14 +1450,9 @@ static void ay_buddy_nick_change (const char *newnick, irc_message_prefix *prefi
 
 			// If it's me I've got to change my name too eh...
 			if(!strcmp(ia->nick, prefix->nick)) {
-				char colorized_msg[BUF_LEN];
-
-				snprintf(colorized_msg,BUF_LEN, 
-						"<font color=#008888><b>Your nickname is now %s</b></font>",
-						newnick);
-
-				eb_chat_room_show_3rdperson(ecr, colorized_msg);
 				strcpy(ia->nick, newnick);
+				strncpy(ecr->local_user->handle, newnick, sizeof(ecr->local_user->handle));
+				strncpy(ecr->local_user->alias, newnick, sizeof(ecr->local_user->alias));
 
 				// Rename my notices channel
 				if(!strcmp(ecr->id, room_name)) {
@@ -1472,15 +1467,12 @@ static void ay_buddy_nick_change (const char *newnick, irc_message_prefix *prefi
 						*tmp='\0';
 
 					strncpy(ecr->room_name, room_name, sizeof(ecr->room_name));
+					gtk_window_set_title(GTK_WINDOW(ecr->window), room_name);
 				}
 			}
-
 			if (!strcmp(buff3[1], ia->connect_address) 
 					&& eb_chat_room_buddy_connected(ecr, prefix->nick))
-			{
-				eb_chat_room_buddy_leave(ecr, prefix->nick);
-				eb_chat_room_buddy_arrive(ecr, newnick, newnick);
-			}
+				eb_chat_room_buddy_chnick(ecr, prefix->nick, newnick);
 
 			if(buff3) {
 				g_strfreev(buff3);
@@ -1976,7 +1968,6 @@ static eb_chat_room *ay_irc_make_chat_room_window(char *name, eb_local_account *
 		strncat(channelname, ila->ia->connect_address, name_len-strlen(channelname));
 	}
 
-	g_strdown(channelname);
 	ecr = find_chat_room_by_id(channelname);
 
 	if( ecr )
