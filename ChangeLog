@@ -1,10 +1,15 @@
-* Tue Jul 12 2009 11:05 UTC [siddheshp]   0.5.0-101
+* Tue Jul 14 2009 11:10 UTC [siddheshp]   0.5.0-102
+- ChangeLog, configure.ac, src/chat_window.c:
+ * Piotr Stefaniak <2134918 at gmail dawt com>: Code cleanup
+ * /me: Fixed ChangeLog
+
+* Tue Jul 14 2009 11:05 UTC [siddheshp]   0.5.0-101
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_room.h, modules/irc/irc.c:
  * Changes by Piotr Stefaniak <2134918 at gmail dawt com>:
  * 	Better nickname change messages in IRC
  * 	Keep your own nickname blue even after a nick change
 
-* Tue Jul 12 2009 10:00 UTC [siddheshp]   0.5.0-100
+* Tue Jul 14 2009 10:00 UTC [siddheshp]   0.5.0-100
 - ChangeLog, configure.ac, src/chat_room.c:
  * Piotr Stefaniak <2134918 at gmail dawt com>: Code cleanup
 
