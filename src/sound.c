@@ -96,7 +96,6 @@ static int play_audio(gchar *soundfile)
 	read(fd,buf,24);
 	read(fd,buf,info.st_size-24);
 	close(fd);
-	eb_debug(DBG_CORE, "File is %ld bytes\n", info.st_size);
 
 	audio_device = getenv("AUDIODEV");
 	if (audio_device == NULL) {
@@ -104,7 +103,7 @@ static int play_audio(gchar *soundfile)
 		audio_device = "/dev/audio";
 	}
 
-	eb_debug(DBG_CORE, "sending to %s\n", audio_device);
+	eb_debug(DBG_CORE, "File is %ld bytes. Sending to %s\n", info.st_size, audio_device);
 
 	fd = open(audio_device, O_WRONLY | O_EXCL);
 	if (fd < 0)
