@@ -78,6 +78,8 @@ typedef struct _chat_window
 
 	GtkWidget* notebook; /* when using tabbed chat, this is the same for all chat_window structs. */
 	GtkWidget* notebook_child; /* this part is different for each person we're talking to */
+	int notebook_page;
+	int is_child_red;
 
 	/* CHATROOM STUFF */
 	
@@ -129,7 +131,7 @@ void send_message(GtkWidget *widget, gpointer d);
 void layout_chatwindow (chat_window *cw, GtkWidget *vbox, char *name);
 chat_window *find_tabbed_chat_window_index (int current_page);
 void set_tab_red(chat_window *cw);
-void set_tab_normal(chat_window *cw);
+void reassign_tab_pages();
 void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, const char *msg);
 gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *inCW, GdkModifierType inModifiers, const GdkEventKey *inEvent );
 void cw_remove_tab(struct contact *ct);

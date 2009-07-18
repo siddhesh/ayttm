@@ -228,14 +228,20 @@ static void send_typing_status(eb_chat_room *cr)
 int eb_chat_room_notebook_switch(void *notebook, int page_num)
 {
 	LList *w = NULL;
+	GtkWidget *label = NULL;
+
 	for (w = chat_rooms; w; w = w->next) {
 		eb_chat_room *cr = (eb_chat_room *)w->data;
-		if (gtk_notebook_page_num(GTK_NOTEBOOK(notebook), cr->notebook_child) == page_num) {
-			eb_debug(DBG_CORE, "crnotebook %p child %p\n", cr->notebook, cr->notebook_child);
-			set_tab_normal(cr);
-			eb_chat_room_update_window_title(cr, FALSE);
+		if (cr->notebook_page == page_num) {
+			if (cr->is_child_red) {
+				eb_debug(DBG_CORE, "Setting tab to normal\n");
+				label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(cr->notebook), cr->notebook_child);
+				gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, NULL);
+				cr->is_child_red = FALSE;
+			}
 
 			ENTRY_FOCUS(cr);
+			eb_chat_room_update_window_title(cr, FALSE);
 
 			return FALSE;
 		}
@@ -254,9 +260,6 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	GdkModifierType modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
 	static gboolean complete_mode = FALSE;
-
-	eb_chat_room_update_window_title(cr, FALSE);
-	set_tab_normal(cr);
 
 	if (!iGetLocalPref("do_multi_line"))
 		return FALSE;
@@ -1007,14 +1010,17 @@ void destroy_chat_room (GtkWidget *widget, gpointer data)
 	if (iGetLocalPref("do_tabbed_chat")) {
 		GtkWidget *window = room->window;
 		GtkWidget *notebook = room->notebook;
-		int tab_number;
 
-		tab_number = gtk_notebook_page_num (GTK_NOTEBOOK(notebook), room->notebook_child);
-		gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), tab_number);
+		gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), room->notebook_page);
 
-		if (gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0) == NULL)
+		if (!gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0)) {
+			eb_debug(DBG_CORE, "destroying the whole window\n");
 			gtk_widget_destroy(window);
-	} else
+			return;
+		}
+		reassign_tab_pages();
+	}
+	else
 		gtk_widget_destroy(room->window);
 }
 
@@ -1066,6 +1072,8 @@ eb_chat_room *find_tabbed_chat_room(void)
 			return cr;
 		w = w->next;
 	}
+
+	eb_debug(DBG_CORE, "no window found\n");
 	return NULL;
 }
 
@@ -1084,8 +1092,7 @@ eb_chat_room *find_tabbed_chat_room_index(int current_page)
 
 	for (l1 = chat_rooms; l1; l1 = l1->next) {
 		eb_chat_room *cr = (eb_chat_room *)l1->data;
-		if (gtk_notebook_page_num(GTK_NOTEBOOK (notebook_window->notebook),
-					cr->notebook_child) == current_page)
+		if (notebook_window->notebook_page == current_page)
 			return cr;
 	}
 	return NULL;
@@ -1255,13 +1262,12 @@ void eb_chat_room_buddy_leave(eb_chat_room *room, const gchar *handle)
 static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event, gpointer userdata)
 {
 	eb_chat_room *cr = (eb_chat_room *)userdata;
-	if (iGetLocalPref("do_tabbed_chat")) {
-		int tab_number = gtk_notebook_page_num(GTK_NOTEBOOK(cr->notebook), cr->notebook_child);
-		if (tab_number != gtk_notebook_get_current_page(GTK_NOTEBOOK(cr->notebook)))
-			return FALSE;
-	}
+
+	if (iGetLocalPref("do_tabbed_chat")
+	&&  cr->notebook_page != gtk_notebook_get_current_page(GTK_NOTEBOOK(cr->notebook)))
+		return FALSE;
+
 	eb_chat_room_update_window_title(cr, FALSE);
-	set_tab_normal(cr);
 	if (cr->entry)
 		ENTRY_FOCUS(cr);
 	return FALSE;
@@ -1316,7 +1322,6 @@ eb_chat_room *eb_start_chat_room(eb_local_account *ela, gchar *name, int is_publ
 			chat_rooms = l_list_append(chat_rooms, ecb);
 
 		eb_chat_room_update_window_title(ecb, FALSE);
-		set_tab_normal(ecb);
 	}
 
 	eb_debug(DBG_CORE, "Started chatroom %s\n", name);
@@ -1402,14 +1407,13 @@ void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user, const
 			chat_room->typing_fellows = l_list_remove(chat_room->typing_fellows, acc);
 			eb_chat_room_display_status(acc, NULL);
 		}
-		eb_chat_room_update_window_title(chat_room, TRUE);
+		if (!gtk_window_is_active(GTK_WINDOW(chat_room->window)))
+			eb_chat_room_update_window_title(chat_room, TRUE);
 		if (iGetLocalPref("do_raise_window"))
 			gdk_window_raise(chat_room->window->window);
 		if (chat_room->notebook) {
-			int remote_num = gtk_notebook_page_num(GTK_NOTEBOOK(chat_room->notebook),
-					      chat_room->notebook_child);
 			int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(chat_room->notebook));
-			if (remote_num != current_num)
+			if (chat_room->notebook_page != current_num)
 				set_tab_red(chat_room);
 		}
 
@@ -1756,12 +1760,8 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 
 	gtk_widget_grab_focus(chat_room->entry);
 
-	if (iGetLocalPref("do_tabbed_chat")) {
-		int page_num = gtk_notebook_page_num (GTK_NOTEBOOK
-				     (chat_room->notebook),
-				     chat_room->notebook_child);
-		gtk_notebook_set_current_page (GTK_NOTEBOOK(chat_room->notebook), page_num);
-	}
+	if (iGetLocalPref("do_tabbed_chat"))
+		gtk_notebook_set_current_page(GTK_NOTEBOOK(chat_room->notebook), chat_room->notebook_page);
 }
 
 static void init_chat_room_log_file(eb_chat_room *chat_room)

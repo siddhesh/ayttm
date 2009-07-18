@@ -94,24 +94,30 @@
 	} \
 }
 
+#define ENTRY_FOCUS(x) { chat_window *x2 = x; \
+	GET_CHAT_WINDOW(x2); \
+	gtk_widget_grab_focus(x2->entry); \
+}
+
+#define EB_UPDATE_WINDOW_TITLE_TO_TAB(cwnd, newmsg) \
+	eb_update_window_title_func(cwnd, newmsg, TRUE);
+
+#define EB_UPDATE_WINDOW_TITLE(cwnd, newmsg) \
+	eb_update_window_title_func(cwnd, newmsg, FALSE);
+
 /* flash_window_title.c */
 void flash_title(GdkWindow *window);
 
 
 /* forward declaration */
-static void eb_update_window_title(chat_window *cw, gboolean new_message);
-static void eb_update_window_title_to_tab(int tab, gboolean new_message);
+static void eb_update_window_title_func(chat_window *cw, gboolean new_message, gboolean from_callback);
 static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event, gpointer userdata);
 static gboolean chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
+static chat_window *find_tabbed_current_chat_window();
 LList *outgoing_message_filters = NULL;
 LList *incoming_message_filters = NULL;
 
 static LList *chat_window_list = NULL;
-
-#define ENTRY_FOCUS(x) { chat_window *x2 = x; \
-			 GET_CHAT_WINDOW(x2); \
-			 gtk_widget_grab_focus(x2->entry); \
-}
 
 #ifdef HAVE_ICONV_H
 
@@ -220,10 +226,11 @@ void set_tab_red(chat_window *cw)
 	GdkColor color;
 	GtkWidget *notebook = NULL, *child = NULL, *label = NULL;
 
-	eb_debug(DBG_CORE, "Setting tab to red\n");
-
 	if (!cw)
 		return;
+	
+	eb_debug(DBG_CORE, "Setting tab to red\n");
+
 	notebook = cw->notebook;
 	child = cw->notebook_child;
 
@@ -234,25 +241,33 @@ void set_tab_red(chat_window *cw)
 
 	gdk_color_parse("red", &color);
 	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, &color);
+	cw->is_child_red = TRUE;
 }
 
-void set_tab_normal(chat_window *cw)
+void reassign_tab_pages()
 {
-	GtkWidget *notebook = NULL, *child = NULL, *label = NULL;
+	LList *l1;
+	chat_window *cw;
 
-	eb_debug(DBG_CORE, "Setting tab to normal\n");
+	l1 = chat_window_list;
+	while (l1 && l1->data) {
+		cw = (chat_window *)l1->data;
+		if (cw->notebook && cw->notebook_child)
+			cw->notebook_page = gtk_notebook_page_num(GTK_NOTEBOOK(cw->notebook), cw->notebook_child);
+		else
+			eb_debug(DBG_CORE, "bug: chat_window found but (!notebook || !notebook_child)\n");
+		l1 = l1->next;
+	}
 
-	if (!cw)
-		return;
-	notebook = cw->notebook;
-	child = cw->notebook_child;
-
-	if (!notebook || !child)
-		return;
-
-	label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(notebook), child);
-
-	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, NULL);
+	l1 = chat_rooms;
+	while (l1 && l1->data) {
+		cw = (chat_window *)l1->data;
+		if (cw->notebook && cw->notebook_child)
+			cw->notebook_page = gtk_notebook_page_num(GTK_NOTEBOOK(cw->notebook), cw->notebook_child);
+		else
+			eb_debug(DBG_CORE, "bug: chat_room found but (!notebook || !notebook_child)\n");
+		l1 = l1->next;
+	}
 }
 
 
@@ -342,6 +357,8 @@ static void destroy_event(GtkWidget *widget, gpointer userdata)
 	/* gotta clean up all of the people we're talking with */
 	g_signal_handlers_disconnect_by_func(cw->window, G_CALLBACK(handle_focus), cw);
 	remove_smiley_window(cw);
+	
+	eb_debug(DBG_CORE, "calling remove_from_chat_window_list %p\n", cw);
 	remove_from_chat_window_list(cw);
 
 	end_conversation(cw);
@@ -352,28 +369,31 @@ void cw_remove_tab(struct contact *ct)
 	chat_window *cw = ct->chatwindow;
 	GtkWidget *window = ct->chatwindow->window;
 	GtkWidget *notebook = ct->chatwindow->notebook;
-	int tab_number, pagenum;
+	int tab_number = ct->chatwindow->notebook_page;
 
-	eb_debug(DBG_CORE, "getting tab_number for %p\n", notebook);
-	tab_number = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), ct->chatwindow->notebook_child);
-	eb_debug(DBG_CORE, "tab_number = %d(%p)\n", tab_number, notebook);
+	eb_debug(DBG_CORE, "tab_number %d notebook %p\n", tab_number, notebook);
+
 	g_signal_handlers_block_by_func(notebook, G_CALLBACK(chat_notebook_switch_callback), NULL);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), tab_number);
-
-	if ((pagenum = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook))) != -1)
-		eb_update_window_title_to_tab(pagenum, FALSE);
-
-	g_signal_handlers_unblock_by_func(notebook, G_CALLBACK(chat_notebook_switch_callback), NULL);
 	eb_debug(DBG_CORE, "removed page\n");
-	if (!gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0))
-		gtk_widget_destroy(window);
+	g_signal_handlers_unblock_by_func(notebook, G_CALLBACK(chat_notebook_switch_callback), NULL);
 
-	remove_from_chat_window_list(cw);
+	if (!gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0)) {
+		eb_debug(DBG_CORE, "destroying the whole window\n");
+		gtk_widget_destroy(window);
+		return;
+	}
+
+	reassign_tab_pages();
+
+	EB_UPDATE_WINDOW_TITLE(cw, FALSE);
 }
 
 static void close_tab_callback(GtkWidget *button, gpointer userdata)
 {
 	chat_window *cw =(chat_window*)userdata;
+
+	eb_debug(DBG_CORE, "cw->contact %p\n", cw->contact);
 
 	/* Why bother if there's none... */
 	if (cw->contact)
@@ -448,6 +468,7 @@ static void cw_put_message(chat_window *cw, char *text, int fore, int back, int 
 void send_message(GtkWidget *widget, gpointer d)
 {
 	chat_window *data =(chat_window*)d;
+	eb_local_account *temp_ela = data->local_user;
 	gchar buff[BUF_SIZE];
 	gchar buff2[BUF_SIZE];
 	gchar *text, *o_text = NULL;
@@ -498,7 +519,8 @@ void send_message(GtkWidget *widget, gpointer d)
 		return;
 	}
 
-	eb_update_window_title(data, FALSE);
+	if (temp_ela != data->local_user)
+		EB_UPDATE_WINDOW_TITLE(data, FALSE);
 
 	text = cw_get_message(data);
 
@@ -519,8 +541,6 @@ void send_message(GtkWidget *widget, gpointer d)
 	}
 
 	message = strdup(text);
-
-	eb_update_window_title(data, FALSE);
 
 	eb_debug(DBG_CORE, "Starting to run outgoing filters\n");
 
@@ -650,7 +670,6 @@ void send_message(GtkWidget *widget, gpointer d)
 		gtk_widget_hide(data->talk_pixmap);
 		printf("chat icon is off... \n");
 */
-		set_tab_normal(data->contact->chatwindow);
 	}
 }
 
@@ -844,10 +863,8 @@ static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event,
 			 gpointer userdata)
 {
 	chat_window *cw = (chat_window *)userdata;
-	eb_update_window_title(cw, FALSE);
 
-	if (cw->entry)
-		ENTRY_FOCUS(cw);
+	EB_UPDATE_WINDOW_TITLE(cw, FALSE);
 
 	return FALSE;
 }
@@ -1129,8 +1146,6 @@ gboolean chat_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 	const GdkModifierType modifiers = event->state & 
 		(GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
 
-	eb_update_window_title(cw, FALSE);
-
 	if (event->keyval == GDK_Return) {
 		/* Just print a newline on Shift-Return */
 		/* But only if we are told to do multiline... */
@@ -1192,13 +1207,10 @@ gboolean chat_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 		} 
 	}
 
-	if (cw->notebook) {
-		// check tab changes if this is a tabbed chat window
-		if (check_tab_accelerators(widget, cw, modifiers, event))
-			return(TRUE);
-	} 
+	if (modifiers && cw->notebook && check_tab_accelerators(widget, cw, modifiers, event))
+		return(TRUE);
 
-	if ((cw->preferred) && (!modifiers))
+	if (cw->preferred && cw->local_user && !modifiers)
 		send_typing_status(cw);
 
 	return FALSE;
@@ -1210,14 +1222,20 @@ static gboolean chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebook
 {
 	/* find the contact for the page we just switched to and turn off their talking penguin icon */
 	LList *l1 = chat_window_list;
+	GtkWidget *label = NULL;
 
 	while (l1 && l1->data) {
-		chat_window *cw =(chat_window *)l1->data;
-		if (gtk_notebook_page_num(notebook, cw->notebook_child) == page_num) {
-			eb_debug(DBG_CORE, "notebook %p child %p \n", cw->notebook, cw->notebook_child);
-			set_tab_normal(cw);
+		chat_window *cw = (chat_window *)l1->data;
+		if (cw->notebook_page == page_num) {
+			if (cw->is_child_red) {
+				eb_debug(DBG_CORE, "Setting tab to normal\n");
+				label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(cw->notebook), cw->notebook_child);
+				gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, NULL);
+				cw->is_child_red = FALSE;
+			}
+
 			ENTRY_FOCUS(cw);
-			eb_update_window_title_to_tab(page_num, FALSE);
+			EB_UPDATE_WINDOW_TITLE_TO_TAB(cw, FALSE);
 			return FALSE;
 		}
 		l1 = l1->next;
@@ -1226,28 +1244,14 @@ static gboolean chat_notebook_switch_callback(GtkNotebook *notebook, GtkNotebook
 	return eb_chat_room_notebook_switch(notebook, page_num);
 }
 
-
-static void chat_notebook_tab_focus_callback(GtkNotebook *notebook, gpointer user_data)
-{
-	gint page_num = gtk_notebook_get_current_page(notebook);
-
-	chat_notebook_switch_callback(notebook, NULL, page_num, user_data);
-}
-
-
 static chat_window *find_tabbed_chat_window()
 {
 	LList *l1 = chat_window_list;
 
 	while (l1 && l1->data) {
 		chat_window *cw = (chat_window *)l1->data;
-		if (cw && cw->window) {
-			eb_debug(DBG_CORE, "testing %s\n", cw->contact->nick);
-			if (cw->notebook) {
-				eb_debug(DBG_CORE, "found %s\n", cw->contact->nick);
-				return cw;
-			}
-		}
+		if (cw->window && cw->notebook)
+			return cw;
 		l1 = l1->next;
 	}
 
@@ -1267,7 +1271,7 @@ chat_window *find_tabbed_chat_window_index(int current_page)
 
 	while (l1 && l1->data) {
 		chat_window *cw = (chat_window *)l1->data;
-		if (cw->notebook && gtk_notebook_page_num(GTK_NOTEBOOK(cw->notebook), cw->notebook_child) == current_page)
+		if (cw->notebook && cw->notebook_page == current_page)
 			return cw;
 		l1 = l1->next;
 	}
@@ -1411,24 +1415,32 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 
 	/* for now we will assume the identity that the person in question talked
 	to us last as */
-	remote_contact->chatwindow->local_user = account;
+	if (remote_contact->chatwindow->local_user != account) {
+		eb_debug(DBG_CORE, "local_user %p = account %p\n", remote_contact->chatwindow->local_user, account);
+		remote_contact->chatwindow->local_user = account;
+		EB_UPDATE_WINDOW_TITLE(remote_contact->chatwindow, FALSE);
+	}
 
 	/* also specify that if possible, try to use the same account they used
 	to last talk to us with */
 	remote_contact->chatwindow->preferred = remote;
 
 	if (remote_contact->chatwindow->notebook) {
-		int remote_num = gtk_notebook_page_num(GTK_NOTEBOOK(remote_contact->chatwindow->notebook),
-				      remote_contact->chatwindow->notebook_child);
-		int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(remote_contact->chatwindow->notebook));
-		if (remote_num != current_num)
+		int remote_num = remote_contact->chatwindow->notebook_page;
+		if (remote_num != remote_contact->chatwindow->notebook_page && !remote_contact->chatwindow->is_child_red)
 			set_tab_red(remote_contact->chatwindow);
-
 	}
 	else if (iGetLocalPref("do_raise_window"))
 			gdk_window_show(remote_contact->chatwindow->window->window);	  
 
-	eb_update_window_title(remote_contact->chatwindow, TRUE);
+	if (!gtk_window_is_active(GTK_WINDOW(remote_contact->chatwindow->window)))
+		EB_UPDATE_WINDOW_TITLE(remote_contact->chatwindow, TRUE);
+
+	if (remote_contact->chatwindow->notebook) {
+		int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(remote_contact->chatwindow->notebook));
+		if (remote_contact->chatwindow->notebook_page != current_num)
+			set_tab_red(remote_contact->chatwindow);
+	}
 
 	if (remote_contact->chatwindow->sound_enabled) {
 		if (firstmsg) {
@@ -1564,42 +1576,18 @@ void eb_chat_window_display_contact(struct contact *remote_contact)
 	}
 
 	if (remote_contact->chatwindow->notebook) {
-		int page_num = gtk_notebook_page_num(GTK_NOTEBOOK
-				    (remote_contact->chatwindow->notebook),
-				     remote_contact->chatwindow->notebook_child);
-		chat_window *current = NULL;
-		set_tab_normal(remote_contact->chatwindow);
+		int page_num = remote_contact->chatwindow->notebook_page;
 
-		current = find_tabbed_chat_window();
-		if (current)
-			GET_CHAT_WINDOW(current);
-
-		eb_debug(DBG_CORE, "blocking or %p\n", remote_contact->chatwindow->notebook);
 		g_signal_handlers_block_by_func(remote_contact->chatwindow->notebook,
 				G_CALLBACK(chat_notebook_switch_callback), NULL);
-		if (current && current != remote_contact->chatwindow) {
-			/* Why don't we simply do a cw_get_message() ? */
-			GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(current->entry));
-			GtkTextIter start, end;
-			char *text;
-
-			gtk_text_buffer_get_bounds(buffer, &start, &end);
-			text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-
-			if (!strlen(text)) {
-				gtk_notebook_set_current_page(GTK_NOTEBOOK
-					  (remote_contact->chatwindow->notebook), page_num);
-				ENTRY_FOCUS(remote_contact->chatwindow);
-			}
-			g_free(text);
-		} else {
-			gtk_notebook_set_current_page(GTK_NOTEBOOK
-				  (remote_contact->chatwindow->notebook), page_num);
-			ENTRY_FOCUS(remote_contact->chatwindow);
-		}
+		gtk_notebook_set_current_page(GTK_NOTEBOOK
+				(remote_contact->chatwindow->notebook), page_num);
 		g_signal_handlers_unblock_by_func(remote_contact->chatwindow->notebook,
                                          G_CALLBACK(chat_notebook_switch_callback), NULL);
+
+		ENTRY_FOCUS(remote_contact->chatwindow);
 	}
+	EB_UPDATE_WINDOW_TITLE(remote_contact->chatwindow, FALSE);
 }
 
 void eb_chat_window_display_account(eb_account *remote_account)
@@ -1610,12 +1598,10 @@ void eb_chat_window_display_account(eb_account *remote_account)
 	if (!remote_account)
 		return;
 
-	remote_contact = remote_account->account_contact;
+	if (!(remote_contact = remote_account->account_contact))
+		return;
 
 	account = find_suitable_local_account_for_remote(remote_account, NULL);
-
-	if (!remote_contact)
-		return;
 
 	if (!remote_contact->chatwindow || !remote_contact->chatwindow->window) {
 		if (remote_contact->chatwindow)
@@ -1640,40 +1626,19 @@ void eb_chat_window_display_account(eb_account *remote_account)
 	else if (remote_contact->chatwindow && remote_contact->chatwindow->window) {
 		gdk_window_raise(remote_contact->chatwindow->window->window);
 		/* ENTRY_FOCUS(remote_contact->chatwindow);*/
-	}       
-    
-	eb_update_window_title(remote_contact->chatwindow, FALSE);
+	} 
+
+	EB_UPDATE_WINDOW_TITLE(remote_contact->chatwindow, FALSE);
 
 	if (remote_contact->chatwindow->notebook) {
-		int page_num = gtk_notebook_page_num(GTK_NOTEBOOK(remote_contact->chatwindow->notebook),
-			                		 remote_contact->chatwindow->notebook_child);
-
-		chat_window *current = NULL;
-		set_tab_normal(remote_contact->chatwindow);
-
-		current = find_tabbed_chat_window();
-		GET_CHAT_WINDOW(current);
+		int page_num = remote_contact->chatwindow->notebook_page;
 		g_signal_handlers_block_by_func(remote_contact->chatwindow->notebook,
 				G_CALLBACK(chat_notebook_switch_callback), NULL);
-		if (current && current != remote_contact->chatwindow) {
-			GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(current->entry));
-			GtkTextIter start, end;
-			char *text;
 
-			gtk_text_buffer_get_bounds(buffer, &start, &end);
-			text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+		gtk_notebook_set_current_page(GTK_NOTEBOOK
+				(remote_contact->chatwindow->notebook), page_num);
+		ENTRY_FOCUS(remote_contact->chatwindow);
 
-			if (!strlen(text)) {
-				gtk_notebook_set_current_page(GTK_NOTEBOOK
-					  (remote_contact->chatwindow->notebook), page_num);
-				ENTRY_FOCUS(remote_contact->chatwindow);
-			}
-			g_free(text);
-		} else {
-			gtk_notebook_set_current_page(GTK_NOTEBOOK
-				  (remote_contact->chatwindow->notebook), page_num);
-			ENTRY_FOCUS(remote_contact->chatwindow);
-		}
 		g_signal_handlers_unblock_by_func(remote_contact->chatwindow->notebook,
                                          G_CALLBACK(chat_notebook_switch_callback), NULL);
 	}
@@ -1910,57 +1875,35 @@ void eb_chat_window_display_status(eb_account *remote, gchar *message)
 	g_free(tmp);
 }
 
-static void eb_update_window_title_to_tab(int tab, gboolean new_message)
-{
-	char buff[BUF_SIZE];
-	chat_window *cw = NULL;
 
-	cw = find_tabbed_chat_window_index(tab);
-	if (cw && cw->notebook
-	&&  cw->contact
-	&&  cw->local_user
-	&&  cw->preferred
-	&&  GET_SERVICE(cw->local_user).name) {
-		g_snprintf(buff, BUF_SIZE, "%s%s(%s <=> %s via %s)",
-			new_message ? "*" : "",
-			cw->contact->nick, cw->local_user->alias,
-			cw->preferred->handle,
-			GET_SERVICE(cw->local_user).name);
-		if (cw->contact->chatwindow && cw->contact->chatwindow->window)
-			gtk_window_set_title(GTK_WINDOW(cw->contact->chatwindow->window), buff);
-	}
-	else if (cw && cw->contact && cw->contact->chatwindow && cw->contact->chatwindow->window)
-		gtk_window_set_title(GTK_WINDOW(cw->contact->chatwindow->window), cw->contact->nick);
-}
-
-static void eb_update_window_title(chat_window *cw, gboolean new_message)
+static void eb_update_window_title_func(chat_window *cw, gboolean new_message, gboolean from_callback)
 {
 	char buff[BUF_SIZE];
 	const int tabbedChat = iGetLocalPref("do_tabbed_chat");
+	int choose_buff = 0;
 
-	if (!tabbedChat && cw && cw->contact && cw->preferred
-	&&  cw->local_user && GET_SERVICE(cw->local_user).name) {
-		g_snprintf(buff, BUF_SIZE, "%s%s(%s <=> %s via %s)",
-			new_message ? "*" : "",
-			cw->contact->nick, cw->local_user->alias,
-			cw->preferred->handle, GET_SERVICE(cw->local_user).name);
+	if (tabbedChat && !new_message && !from_callback)
+		cw = find_tabbed_current_chat_window();
 
-		gtk_window_set_title(GTK_WINDOW(cw->contact->chatwindow->window), buff);
+	if (!cw
+	||  !cw->contact
+	||  !cw->contact->chatwindow
+	||  !cw->contact->chatwindow->window
+	||  (tabbedChat && !cw->notebook))
+		return;
+
+	if (cw->local_user && cw->preferred && GET_SERVICE(cw->local_user).name) {
+		g_snprintf(buff, BUF_SIZE, "%s%s (%s <%s> %s)",
+			new_message ? "* " : "",
+			cw->contact->nick,
+			cw->preferred->handle,
+			GET_SERVICE(cw->local_user).name,
+			cw->local_user->handle);
+		choose_buff = 1;
 	}
-	else if (tabbedChat) {
-		if (!new_message) 	  
-			cw = find_tabbed_current_chat_window();
-		if (cw && cw->notebook && cw->contact  && cw->local_user 
-		&& cw->preferred && GET_SERVICE(cw->local_user).name) {
-			g_snprintf(buff, BUF_SIZE, "%s%s(%s <=> %s via %s)",
-				new_message ? "*" : "",
-				cw->contact->nick, cw->local_user->alias,
-				cw->preferred->handle,
-				GET_SERVICE(cw->local_user).name);
+	gtk_window_set_title(GTK_WINDOW(cw->contact->chatwindow->window),
+		choose_buff ? buff : cw->contact->nick);
 
-			gtk_window_set_title(GTK_WINDOW(cw->contact->chatwindow->window), buff);
-		}
-	}
 	if (new_message)
 		flash_title(cw->contact->chatwindow->window->window);
 }
@@ -2018,9 +1961,6 @@ void layout_chatwindow(chat_window *cw, GtkWidget *vbox, char *name)
 			g_signal_connect(cw->notebook, "switch-page",
 				       G_CALLBACK(chat_notebook_switch_callback), NULL);
 
-			g_signal_connect(cw->notebook, "focus-in-event",
-				       G_CALLBACK(chat_notebook_tab_focus_callback), NULL);
-
 			gtk_widget_show(cw->notebook);
 		}
 		else {
@@ -2046,6 +1986,7 @@ void layout_chatwindow(chat_window *cw, GtkWidget *vbox, char *name)
 		gtk_notebook_append_page(GTK_NOTEBOOK(cw->notebook), vbox, contact_label);
 
 		cw->notebook_child = vbox;
+		cw->notebook_page = gtk_notebook_page_num(GTK_NOTEBOOK(cw->notebook), vbox);
 		gtk_widget_show(vbox);
 	} else {
 		/* setup like normal */
