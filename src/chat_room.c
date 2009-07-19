@@ -1413,7 +1413,7 @@ void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user, const
 			gdk_window_raise(chat_room->window->window);
 		if (chat_room->notebook) {
 			int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(chat_room->notebook));
-			if (chat_room->notebook_page != current_num)
+			if (chat_room->notebook_page != current_num && !chat_room->is_child_red)
 				set_tab_red(chat_room);
 		}
 

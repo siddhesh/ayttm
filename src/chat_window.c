@@ -1426,8 +1426,10 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 	remote_contact->chatwindow->preferred = remote;
 
 	if (remote_contact->chatwindow->notebook) {
-		int remote_num = remote_contact->chatwindow->notebook_page;
-		if (remote_num != remote_contact->chatwindow->notebook_page && !remote_contact->chatwindow->is_child_red)
+		int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(remote_contact->chatwindow->notebook));
+		if (remote_contact->chatwindow->notebook_page != current_num
+		&&  !remote_contact->chatwindow->is_child_red)
+
 			set_tab_red(remote_contact->chatwindow);
 	}
 	else if (iGetLocalPref("do_raise_window"))
@@ -1435,12 +1437,6 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 
 	if (!gtk_window_is_active(GTK_WINDOW(remote_contact->chatwindow->window)))
 		EB_UPDATE_WINDOW_TITLE(remote_contact->chatwindow, TRUE);
-
-	if (remote_contact->chatwindow->notebook) {
-		int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(remote_contact->chatwindow->notebook));
-		if (remote_contact->chatwindow->notebook_page != current_num)
-			set_tab_red(remote_contact->chatwindow);
-	}
 
 	if (remote_contact->chatwindow->sound_enabled) {
 		if (firstmsg) {
