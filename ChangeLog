@@ -1,3 +1,13 @@
+* Sat Jul 18 2009 19:29 UTC [pstef]   0.5.0-103
+- ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c,
+src/chat_window.h:
+ * New message asterisk (*) and setting tab to red have not always worked
+ properly. Fixed.
+ * Set window title and set tab color only when needed. This means less debug
+ messages and less window flickering.
+ * New element notebook_page in chat_window structure. It takes place of
+ gtk_notebook_page_num() calls.
+
 * Tue Jul 14 2009 11:10 UTC [siddheshp]   0.5.0-102
 - ChangeLog, configure.ac, src/chat_window.c:
  * Piotr Stefaniak <2134918 at gmail dawt com>: Code cleanup
