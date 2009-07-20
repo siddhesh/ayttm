@@ -74,8 +74,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Notes", 
 	"Store notes about your contacts and buddies", 
-	"$Revision: 1.12 $",
-	"$Date: 2005/02/13 13:36:55 $",
+	"$Revision: 1.13 $",
+	"$Date: 2009/07/20 16:37:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -95,7 +95,7 @@ static void rename_notes(char *onick, char *nnick)
 	char cmd2[1024];
 	if (strcmp(onick,nnick) == 0)
 		return;
-	eb_debug(DBG_MOD, "> Rename %s to %s",onick,nnick);
+	eb_debug(DBG_MOD, "> Rename %s to %s\n", onick, nnick);
 	snprintf(cmd1, 1024, "%s/%s", notes_dir, onick);
 	snprintf(cmd2, 1024, "%s/%s", notes_dir, nnick);
 	rename(cmd1, cmd2);
