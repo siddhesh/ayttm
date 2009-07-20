@@ -687,7 +687,7 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_spell_checking", 0 );
 	cSetLocalPref( "spell_dictionary", "" );
 	cSetLocalPref( "FontFace", "helvetica" );
-	cSetLocalPref( "encodings", "ISO-8859-15 CP1252" );
+	cSetLocalPref( "encodings", "CP1252 ISO-8859-15 ISO-8859-2" );
 
 	/* logging */
 	iSetLocalPref( "do_logging", 1 );

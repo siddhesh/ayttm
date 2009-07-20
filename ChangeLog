@@ -1,3 +1,10 @@
+* Mon Jul 20 2009 14:55 UTC [siddheshp]   0.5.0-105
+- ChangeLog, configure.ac, src/util.c, src/prefs.c:
+ * Actually get the charset conversion to work
+ * Try CP1252 first for the benefit of some IRC servers who love to convert
+ messages to the 'compatible' encoding. This should not affect other
+ protocols.
+
 * Mon Jul 20 2009 06:55 UTC [pstef]   0.5.0-104
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c:
  * Fixed problem with handling window titles after changing option "Use tabs in

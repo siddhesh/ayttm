@@ -2070,7 +2070,7 @@ gchar *convert_to_utf8(const char *message)
 	const gchar *home_encoding = NULL;
 	int i=0;
 
-	char **encodings = g_strsplit_set(cGetLocalPref("encodings"), " \t", 0);
+	char **enclist = g_strsplit_set(cGetLocalPref("encodings"), " \t", -1);
 
 	/* We need not do anything for a valid UTF-8 string */
 	if(g_utf8_validate(message, -1, &error_loc))
@@ -2078,13 +2078,12 @@ gchar *convert_to_utf8(const char *message)
 	
 	/* The string is not utf-8. Save the valid result and 
 	 * try converting from the error position onwards */
-	error_loc++;
 	correct = g_strndup(message, error_loc-message);
 
 	/* Try converting from the encoding options configured */
 
-	while(encodings[i] && encodings[i][0]) {
-		converted = g_convert(error_loc, -1, "UTF-8", encodings[i], NULL, NULL, NULL);
+	while(enclist[i] && enclist[i][0]) {
+		converted = g_convert(error_loc, -1, "UTF-8", enclist[i], NULL, NULL, NULL);
 
 		if(converted) {
 			output = g_strjoin("", correct, converted, NULL);
