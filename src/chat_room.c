@@ -1007,7 +1007,7 @@ void destroy_chat_room (GtkWidget *widget, gpointer data)
 {
 	eb_chat_room *room = (eb_chat_room *)data;
 
-	if (iGetLocalPref("do_tabbed_chat")) {
+	if (room->notebook) {
 		GtkWidget *window = room->window;
 		GtkWidget *notebook = room->notebook;
 
@@ -1263,13 +1263,12 @@ static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event, gpointer u
 {
 	eb_chat_room *cr = (eb_chat_room *)userdata;
 
-	if (iGetLocalPref("do_tabbed_chat")
+	if (cr->notebook
 	&&  cr->notebook_page != gtk_notebook_get_current_page(GTK_NOTEBOOK(cr->notebook)))
 		return FALSE;
 
 	eb_chat_room_update_window_title(cr, FALSE);
-	if (cr->entry)
-		ENTRY_FOCUS(cr);
+
 	return FALSE;
 
 }
@@ -1760,7 +1759,7 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 
 	gtk_widget_grab_focus(chat_room->entry);
 
-	if (iGetLocalPref("do_tabbed_chat"))
+	if (chat_room->notebook)
 		gtk_notebook_set_current_page(GTK_NOTEBOOK(chat_room->notebook), chat_room->notebook_page);
 }
 

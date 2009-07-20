@@ -255,7 +255,7 @@ void reassign_tab_pages()
 		if (cw->notebook && cw->notebook_child)
 			cw->notebook_page = gtk_notebook_page_num(GTK_NOTEBOOK(cw->notebook), cw->notebook_child);
 		else
-			eb_debug(DBG_CORE, "bug: chat_window found but (!notebook || !notebook_child)\n");
+			cw->notebook_page = -2;
 		l1 = l1->next;
 	}
 
@@ -265,7 +265,7 @@ void reassign_tab_pages()
 		if (cw->notebook && cw->notebook_child)
 			cw->notebook_page = gtk_notebook_page_num(GTK_NOTEBOOK(cw->notebook), cw->notebook_child);
 		else
-			eb_debug(DBG_CORE, "bug: chat_room found but (!notebook || !notebook_child)\n");
+			cw->notebook_page = -2;
 		l1 = l1->next;
 	}
 }
@@ -386,7 +386,8 @@ void cw_remove_tab(struct contact *ct)
 
 	reassign_tab_pages();
 
-	EB_UPDATE_WINDOW_TITLE(cw, FALSE);
+	if (cw = find_tabbed_current_chat_window())
+		EB_UPDATE_WINDOW_TITLE(cw, FALSE);
 }
 
 static void close_tab_callback(GtkWidget *button, gpointer userdata)
@@ -863,6 +864,10 @@ static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event,
 			 gpointer userdata)
 {
 	chat_window *cw = (chat_window *)userdata;
+
+	if (cw->notebook
+	&&  cw->notebook_page != gtk_notebook_get_current_page(GTK_NOTEBOOK(cw->notebook)))
+		return FALSE;
 
 	EB_UPDATE_WINDOW_TITLE(cw, FALSE);
 
@@ -1875,17 +1880,16 @@ void eb_chat_window_display_status(eb_account *remote, gchar *message)
 static void eb_update_window_title_func(chat_window *cw, gboolean new_message, gboolean from_callback)
 {
 	char buff[BUF_SIZE];
-	const int tabbedChat = iGetLocalPref("do_tabbed_chat");
 	int choose_buff = 0;
 
-	if (tabbedChat && !new_message && !from_callback)
+	/* Tabbed window activated not from tab callback */
+	if (cw->notebook && !new_message && !from_callback)
 		cw = find_tabbed_current_chat_window();
 
 	if (!cw
 	||  !cw->contact
 	||  !cw->contact->chatwindow
-	||  !cw->contact->chatwindow->window
-	||  (tabbedChat && !cw->notebook))
+	||  !cw->contact->chatwindow->window)
 		return;
 
 	if (cw->local_user && cw->preferred && GET_SERVICE(cw->local_user).name) {
@@ -1994,6 +1998,7 @@ void layout_chatwindow(chat_window *cw, GtkWidget *vbox, char *name)
 
 		cw->notebook = NULL;
 		cw->notebook_child = NULL;
+		cw->notebook_page = -2;
 		gtk_container_add(GTK_CONTAINER(cw->window), vbox);
 		gtk_widget_show(vbox);
 	}

@@ -1,3 +1,8 @@
+* Mon Jul 20 2009 06:55 UTC [pstef]   0.5.0-104
+- ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c:
+ * Fixed problem with handling window titles after changing option "Use tabs in
+ chat windows" while having at least one chat window open. 
+
 * Sat Jul 18 2009 19:29 UTC [pstef]   0.5.0-103
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c,
 src/chat_window.h:
