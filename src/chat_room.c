@@ -341,11 +341,16 @@ static void set_sound_on_toggle(GtkWidget *sound_button, gpointer userdata)
 {
 	eb_chat_room *cr = (eb_chat_room *)userdata;
 
-	/* Set the sound_enable variable depending on the toggle button */
-	if (gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON (sound_button)))
-		cr->sound_enabled = TRUE;
-	else
+	/* Toggle the setting */
+	if (cr->sound_enabled)
 		cr->sound_enabled = FALSE;
+	else
+		cr->sound_enabled = TRUE;
+
+	g_signal_handlers_block_by_func(cr->sound_button, set_sound_on_toggle, userdata);
+	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(cr->sound_button), cr->sound_enabled);
+	g_signal_handlers_unblock_by_func(cr->sound_button, set_sound_on_toggle, userdata);
+
 }
 
 void start_auto_chatrooms(eb_local_account *ela)
@@ -1330,12 +1335,17 @@ eb_chat_room *eb_start_chat_room(eb_local_account *ela, gchar *name, int is_publ
 void eb_chat_room_show_3rdperson(eb_chat_room *chat_room, gchar *message)
 {
 	char *link_message = NULL ;
+	char *encoded = NULL;
 
 	link_message = linkify(message);
 
-	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), link_message, HTML_IGNORE_NONE);
+	encoded = ay_chat_convert_message((chat_window *)chat_room, link_message);
+
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), encoded, HTML_IGNORE_NONE);
 	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), "\n", HTML_IGNORE_NONE);
 	ay_log_file_message(chat_room->logfile, "", link_message);
+
+	g_free(encoded);
 
 	g_free(link_message);
 }
@@ -1344,6 +1354,7 @@ void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user, const
 {
 	gchar buff[2048];
 	gchar *temp_message, *link_message;
+	char *encoded = NULL;
 #ifdef __MINGW32__
 	char *recoded;
 #endif
@@ -1433,15 +1444,18 @@ void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user, const
 	link_message = recoded;
 #endif
 
+	encoded = ay_chat_convert_message((chat_window *)chat_room, link_message);
+
 	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), buff, HTML_IGNORE_NONE);
-	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), link_message,
+	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), encoded,
 		(iGetLocalPref("do_ignore_back") ? HTML_IGNORE_BACKGROUND : HTML_IGNORE_NONE) |
 		(iGetLocalPref("do_ignore_fore") ? HTML_IGNORE_FOREGROUND : HTML_IGNORE_NONE) |
 		(iGetLocalPref("do_ignore_font") ? HTML_IGNORE_FONT : HTML_IGNORE_NONE));
 	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), "\n", HTML_IGNORE_NONE);
 
-	ay_log_file_message(chat_room->logfile, buff, link_message);
+	ay_log_file_message(chat_room->logfile, buff, encoded);
 
+	g_free(encoded);
 	g_free(link_message);
 
 	if (chat_room->sound_enabled && strcmp(chat_room->local_user->handle, user))
@@ -1478,6 +1492,70 @@ static void _show_smileys_cb(GtkWidget *widget, smiley_callback_data *data)
 {
 	show_smileys_cb(data);
 }
+
+
+
+/* This handles the right mouse button clicks*/
+
+static gboolean cr_handle_click(GtkWidget *widget, GdkEventButton *event, 
+			 gpointer userdata)
+{
+	eb_chat_room *cr = (eb_chat_room *)userdata;
+
+	if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
+		GtkWidget *menu, *button;
+		char encoding_label[1024];
+
+		g_signal_stop_emission_by_name(GTK_OBJECT(widget), "button-press-event");
+		menu = gtk_menu_new();
+
+		/* Sound Selection*/
+		button = gtk_menu_item_new_with_label(_(cr->sound_enabled ? "Disable Sounds" : "Enable Sounds"));
+
+		g_signal_connect(button, "activate", G_CALLBACK(set_sound_on_toggle), cr);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
+		gtk_widget_show(button);
+
+		/* Character Encoding for the chat room */
+		if(cr->encoding)
+			snprintf(encoding_label, sizeof(encoding_label), _("Set Character Encoding (%s)"), cr->encoding);
+		else
+			snprintf(encoding_label, sizeof(encoding_label), _("Set Character Encoding"));
+
+		button = gtk_menu_item_new_with_label(_(encoding_label));
+
+		g_signal_connect(button, "activate", G_CALLBACK(ay_set_chat_encoding), cr);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
+		gtk_widget_show(button);
+
+		/* Invite Selection*/
+		button = gtk_menu_item_new_with_label(_("Invite"));
+		g_signal_connect(button, "activate", G_CALLBACK(do_invite_window), cr);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
+		gtk_widget_show(button);
+
+		/* Send message Section*/
+		button = gtk_menu_item_new_with_label(_("Send Message"));
+		g_signal_connect(button, "activate", G_CALLBACK(send_cr_message), cr);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
+		gtk_widget_show(button);
+
+		/* Close Selection*/
+		button = gtk_menu_item_new_with_label(_("Close"));
+
+		g_signal_connect(button, "activate", G_CALLBACK(destroy_chat_room), cr);
+
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
+		gtk_widget_show(button);
+
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
+			event->button, event->time);
+	}
+
+	return FALSE;
+}
+
+
 
 void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 {
@@ -1527,6 +1605,8 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 	gtk_container_add(GTK_CONTAINER(scrollwindow), chat_room->chat);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwindow),
 					   GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+
+	g_signal_connect(chat_room->chat, "button-press-event", G_CALLBACK(cr_handle_click), chat_room);
 
 	g_signal_connect(chat_room->fellows_widget, "row-activated",
 					G_CALLBACK(fellows_activated), chat_room);

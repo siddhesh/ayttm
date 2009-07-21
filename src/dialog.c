@@ -340,7 +340,7 @@ void do_text_input_window(const char *title, const char *value,
 		void (*action)(const char *text, void *data), 
 		void *data )
 {
-	do_text_input_window_multiline(title, value, 1, 0, action, data);
+	do_text_input_window_multiline(title, value, 0, 0, action, data);
 }
 
 void do_password_input_window(const char *title, const char *value, 

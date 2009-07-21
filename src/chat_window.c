@@ -317,6 +317,7 @@ static void end_conversation(chat_window *cw)
 	 * tabbed chat window
 	 */
 
+	g_free(cw->encoding);
 	memset(cw, 0, sizeof(chat_window));
 	g_free(cw);
 }
@@ -386,7 +387,7 @@ void cw_remove_tab(struct contact *ct)
 
 	reassign_tab_pages();
 
-	if (cw = find_tabbed_current_chat_window())
+	if ((cw = find_tabbed_current_chat_window()))
 		EB_UPDATE_WINDOW_TITLE(cw, FALSE);
 }
 
@@ -461,8 +462,10 @@ static void cw_reset_message(chat_window *cw)
 static void cw_put_message(chat_window *cw, char *text, int fore, int back, int font)
 {
 	char *msg = linkify(text);
+	char *encoded = ay_chat_convert_message(cw, msg);
 	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), msg, fore | back | font);
 
+	g_free(encoded);
 	g_free(msg);
 }
 
@@ -730,7 +733,7 @@ static void send_file(GtkWidget *sendf_button, gpointer userdata)
 		return;
 	}
 
-	if (ea = find_suitable_remote_account(data->preferred, data->contact))
+	if ((ea = find_suitable_remote_account(data->preferred, data->contact)))
 		eb_do_send_file(ea);
 }
 
@@ -884,6 +887,7 @@ static gboolean handle_click(GtkWidget *widget, GdkEventButton *event,
 	if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
 		GtkWidget *menu, *button;
 		menu_data *md = NULL;
+		char encoding_label[1024];
 
 		g_signal_stop_emission_by_name(GTK_OBJECT(widget), "button-press-event");
 		menu = gtk_menu_new();
@@ -907,13 +911,25 @@ static gboolean handle_click(GtkWidget *widget, GdkEventButton *event,
 		}
 
 		/* Allow account selection when there are multiple accounts for the same protocl */
-		if (button = get_local_accounts(cw))
+		if ((button = get_local_accounts(cw)))
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 
 		/* Sound Selection*/
 		button = gtk_menu_item_new_with_label(_(cw->sound_enabled ? "Disable Sounds" : "Enable Sounds"));
 
 		g_signal_connect(button, "activate", G_CALLBACK(set_sound_callback), cw);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
+		gtk_widget_show(button);
+
+		/* Character Encoding for the chat room */
+		if(cw->encoding)
+			snprintf(encoding_label, sizeof(encoding_label), _("Set Character Encoding (%s)"), cw->encoding);
+		else
+			snprintf(encoding_label, sizeof(encoding_label), _("Set Character Encoding"));
+
+		button = gtk_menu_item_new_with_label(_(encoding_label));
+
+		g_signal_connect(button, "activate", G_CALLBACK(ay_set_chat_encoding), cw);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
 
@@ -957,7 +973,7 @@ static gboolean handle_click(GtkWidget *widget, GdkEventButton *event,
 		gtk_widget_show(button);
 
 		/* Add Plugin Menus*/
-		if (md = GetPref(EB_CHAT_WINDOW_MENU)) {
+		if ((md = GetPref(EB_CHAT_WINDOW_MENU))) {
 			int should_sep = 0;
 			gtkut_create_menu_button(GTK_MENU(menu), NULL, NULL, NULL);
 			should_sep = (add_menu_items(menu, -1, should_sep, NULL,
@@ -1335,7 +1351,7 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 	struct tm *cur_time;
 	time_t t;
 	LList *filter_walk;
-	gchar *message, *temp_message, *link_message;
+	gchar *message, *temp_message, *link_message, *encoded;
 
 	/* init to false so only play if first msg is one received rather than sent */
 	gboolean firstmsg = FALSE;
@@ -1488,8 +1504,10 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 
 	g_snprintf(buff, BUF_SIZE, "<B>%s </B>", buff2);
 
+	encoded = ay_chat_convert_message(remote_contact->chatwindow, link_message);
+
 	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), buff, HTML_IGNORE_NONE);
-	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), link_message,
+	html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->chatwindow->chat), encoded,
 		(iGetLocalPref("do_ignore_back")?HTML_IGNORE_BACKGROUND:HTML_IGNORE_NONE) |
 		(iGetLocalPref("do_ignore_fore")?HTML_IGNORE_FOREGROUND:HTML_IGNORE_NONE) |
 		(iGetLocalPref("do_ignore_font")?HTML_IGNORE_FONT:HTML_IGNORE_NONE));
@@ -1540,6 +1558,7 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 #endif
 	g_free(message);
 	g_free(link_message);
+	g_free(encoded);
 }
 
 void eb_chat_window_display_contact(struct contact *remote_contact)
@@ -2363,3 +2382,51 @@ void chat_window_to_chat_room(chat_window *cw, eb_account *third_party, const ch
 	crw->msg = strdup(msg);
 	eb_timeout_add(1000, (GtkFunction)wait_chatroom_connected, (gpointer)crw);
 }
+
+
+gchar *ay_chat_convert_message(chat_window *cw, char *msg)
+{
+	gchar *encoded;
+	GError *error = NULL;
+
+	if(!cw->encoding) {
+		return g_strdup(msg);
+	}
+
+	/* Blindly convert from user specified locale to UTF-8 */
+	encoded = g_convert_with_fallback (msg, -1, "UTF-8", cw->encoding, NULL, NULL, NULL, NULL);
+
+	if(!encoded) {
+		encoded = g_strdup_printf("Message Conversion Error Code %d: %s\n", error->code, error->message);
+	}
+	
+	return encoded;
+}
+
+
+static void ay_set_chat_encoding_cb(const char *value, void *data)
+{
+	chat_window *cw = (chat_window *)data;
+
+	if(cw->encoding) {
+		g_free(cw->encoding);
+		cw->encoding = NULL;
+	}
+	
+	if(value && value[0]) {
+		cw->encoding = g_strdup(value);
+	}
+}
+
+
+void ay_set_chat_encoding(GtkWidget *widget, void *data)
+{
+	char title[255];
+	chat_window *cw = (chat_window *)data;
+
+	snprintf(title, sizeof(title), _("Character Encoding for %s"), cw->room_name);
+
+	do_text_input_window(title, cw->encoding?cw->encoding:"", ay_set_chat_encoding_cb, cw);
+}
+
+

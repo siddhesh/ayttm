@@ -106,6 +106,7 @@ typedef struct _chat_window
 	GtkWidget * invite_window;
 	GtkWidget * invite_buddy;
 	GtkWidget * invite_message;
+	char *encoding;		/* Character Encoding to use for this window */
 } chat_window;
 
 /* Struct to hold info used by get_local_accounts to hold callback info */
@@ -137,5 +138,10 @@ gboolean check_tab_accelerators( const GtkWidget *inWidget, const chat_window *i
 void cw_remove_tab(struct contact *ct);
 gboolean cw_close_win (GtkWidget * close_button, gpointer userdata);
 void chat_auto_complete_validate (GtkWidget *entry);
+
+gchar *ay_chat_convert_message(chat_window *cw, char *msg);
+
+void ay_set_chat_encoding(GtkWidget *widget, void *data);
+
 
 #endif

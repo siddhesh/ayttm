@@ -32,6 +32,7 @@
 #include <string.h>
 #include "smileys.h"
 #include "browser.h"
+#include "util.h"
 
 #include "pixmaps/no_such_smiley.xpm"
 #include "pixmaps/aol_icon.xpm"
