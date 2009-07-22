@@ -1,3 +1,8 @@
+* Wed Jul 22 2009 09:35 UTC [siddheshp]   0.5.0-107
+- ChangeLog, configure.ac, modules/irc/libirc/libirc.c:
+modules/irc/libirc/libirc.h:
+ * Handle messages coming in multiple packets in IRC
+
 * Tue Jul 21 2009 10:40 UTC [siddheshp]   0.5.0-106
 - ChangeLog, configure.ac, src/chat_room.c, src/chat_window.c,
 src/chat_window.h, src/dialog.c, src/gtk/html_text_buffer.c:

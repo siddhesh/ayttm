@@ -135,6 +135,10 @@ typedef struct {
 
 	struct _irc_callbacks *callbacks;
 
+	/* Store partial messages in this */
+	char buf[BUF_LEN];
+	int len;
+
 	void *data ;
 } irc_account ;
 

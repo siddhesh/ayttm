@@ -448,23 +448,17 @@ void irc_send_data(void *buf, int len, irc_account *ia)
 
 void irc_recv (irc_account *ia, int source, int condition)
 {
-	char buf[BUF_LEN];
 	int n = 0;
-	int errors = 0;
-	int i=0;
-
-	memset(buf, 0, BUF_LEN);
 
 	if (source != ia->fd)
 		return ;
 
 	do {
-		n = recv(source, &buf[i++], 1, 0);
+		n = recv(source, &ia->buf[ia->len], 1, 0);
 
-		if(n==-1) {
-			if (errno == EAGAIN && errors < 10) {
-				errors++;
-				continue;
+		if(n<=0) {
+			if (n == -1 && (errno == EAGAIN || errno == EINTR) ) {
+				return;	/* Try again later */
 			}
 
 			/* Connection closed by other side - log off */
@@ -476,16 +470,23 @@ void irc_recv (irc_account *ia, int source, int condition)
 			return;
 		}
 
-		if(buf[i-1] == '\n') {
-			buf[i-2]='\0';
-#ifdef IRCDEBUG
-			fprintf(stderr, "irc> %s\n", buf);
-#endif
-			irc_message_parse(buf, ia);
+		if(ia->buf[ia->len] == '\n') {
+			if(ia->buf[ia->len - 1]!='\r')
+				continue;
 
-			memset(buf, 0, BUF_LEN);
-			i=0;
+			ia->buf[ia->len-1]='\0';
+#define IRCDEBUG
+#ifdef IRCDEBUG
+			fprintf(stderr, "irc> %s\n", ia->buf);
+#endif
+			irc_message_parse(ia->buf, ia);
+
+			memset(ia->buf, 0, BUF_LEN);
+			ia->len = 0;
+
+			continue;
 		}
+		ia->len++;
 	} while(n>0);
 }
 
