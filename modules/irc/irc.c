@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.53 $",
-	"$Date: 2009/07/24 13:09:41 $",
+	"$Revision: 1.54 $",
+	"$Date: 2009/07/24 14:28:19 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1347,7 +1347,7 @@ static void ay_buddy_quit(const char *message, irc_message_prefix *prefix, irc_a
 				}
 				if (message && *message) {
 					char *buf;
-					buf = g_strdup_printf(_(". %s"), message);
+					buf = g_strdup_printf(_(". Quit reason: %s"), message);
 					eb_chat_room_buddy_leave_ex(ecr, prefix->nick, buf);
 					g_free(buf);
 				}
@@ -1374,7 +1374,7 @@ static void ay_buddy_part(const char *channel, const char *message,
 	if (ecr = find_chat_room_by_id(room_name)) {
 		if (message && *message) {
 			char *buf;
-			buf = g_strdup_printf(_(". Reason: %s"), message);
+			buf = g_strdup_printf(_(". Part reason: %s"), message);
 			eb_chat_room_buddy_leave_ex(ecr, prefix->nick, buf);
 			g_free(buf);
 		}
