@@ -91,6 +91,7 @@ typedef struct _chat_window
 	LList * fellows;   /* who is in the chat room */
 	GtkWidget *fellows_widget;  /* GtkTreeView of online folks */
 	GtkListStore *fellows_model;  /* Model for fellows_widget */
+	GtkTreeViewColumn *column;
 	LList * typing_fellows;
 	int total_arrivals;
 	int is_public;

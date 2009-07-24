@@ -56,6 +56,7 @@ eb_chat_room* eb_start_chat_room( eb_local_account *ela, char * name , int is_pu
 void eb_chat_room_buddy_arrive( eb_chat_room * room, const char * alias, const char * handle );
 void eb_chat_room_buddy_chnick(eb_chat_room *room, const char *buddy, const char *newnick);
 void eb_chat_room_buddy_leave( eb_chat_room * room, const char * handle );
+void eb_chat_room_buddy_leave_ex(eb_chat_room *room, const char *handle, const char *ex);
 void eb_chat_room_refresh_list(eb_chat_room * room, const char *handle, ChatRoomRefreshType refresh );
 int eb_chat_room_buddy_connected( eb_chat_room * room, char * user );
 void open_join_chat_window();

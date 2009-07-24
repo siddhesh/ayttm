@@ -38,42 +38,22 @@
 
 int get_command_num(char *command)
 {
-	int command_num = 0;
+	if (command && *command) {
+		     if (!strncmp(command, "NOTICE",  6)) return IRC_CMD_NOTICE;
+		else if (!strncmp(command, "QUIT",    4)) return IRC_CMD_QUIT;
+		else if (!strncmp(command, "JOIN",    4)) return IRC_CMD_JOIN;
+		else if (!strncmp(command, "PART",    4)) return IRC_CMD_PART;
+		else if (!strncmp(command, "MODE",    4)) return IRC_CMD_MODE;
+		else if (!strncmp(command, "INVITE",  6)) return IRC_CMD_INVITE;
+		else if (!strncmp(command, "KICK",    4)) return IRC_CMD_KICK;
+		else if (!strncmp(command, "NICK",    4)) return IRC_CMD_NICK;
+		else if (!strncmp(command, "PRIVMSG", 7)) return IRC_CMD_PRIVMSG;
+		else if (!strncmp(command, "KILL",    4)) return IRC_CMD_KILL;
+		else if (!strncmp(command, "PING",    4)) return IRC_CMD_PING;
+		else if (!strncmp(command, "ERROR",   5)) return IRC_CMD_ERROR;
+ 	}
 
-	if(command)
-	{
-		if((command_num=atoi(command)))
-			return command_num;
-
-		if(!strncmp(command,"NOTICE", 6))
-			command_num = 	IRC_CMD_NOTICE;
-		else if(!strncmp(command,"QUIT", 4))
-			command_num = 	IRC_CMD_QUIT;
-		else if(!strncmp(command,"JOIN", 4))
-			command_num = 	IRC_CMD_JOIN;
-		else if(!strncmp(command,"PART", 4))
-			command_num = 	IRC_CMD_PART;
-		else if(!strncmp(command,"MODE", 4))
-			command_num = 	IRC_CMD_MODE;
-		else if(!strncmp(command,"INVITE", 6))
-			command_num = 	IRC_CMD_INVITE;
-		else if(!strncmp(command,"KICK", 4))
-			command_num = 	IRC_CMD_KICK;
-		else if(!strncmp(command,"NICK", 4))
-			command_num = 	IRC_CMD_NICK;
-		else if(!strncmp(command,"PRIVMSG", 7))
-			command_num = 	IRC_CMD_PRIVMSG;
-		else if(!strncmp(command,"KILL", 4))
-			command_num = 	IRC_CMD_KILL;
-		else if(!strncmp(command,"PING", 4))
-			command_num = 	IRC_CMD_PING;
-		else if(!strncmp(command,"ERROR", 5))
-			command_num = 	IRC_CMD_ERROR;
-		else
-			command_num = 0 ;
-	}
-
-	return command_num;
+	return 0;
 }
 
 /* 
@@ -90,13 +70,12 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 	char *nick_offset 	=	NULL;
 	char *host_offset 	=	NULL;
 	char *servername_offset	=	NULL;
-	char *command		=	NULL;
 	char *command_offset	=	NULL;
 	char *message_offset	=	NULL;
 	char *params_offset	=	NULL;
 	char *next_param_offset	=	NULL;
 
-	int command_num = 0 ;
+	int command_num = 0;
 
 	irc_param_list *params = NULL;
 	irc_message_prefix *prefix = (irc_message_prefix *)calloc(1, sizeof(irc_message_prefix));
@@ -139,9 +118,8 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 		
 			host_offset = strchr(user_offset, '@');
 		}
-		else {
+		else
 			host_offset = strchr(prefix_offset, '@');
-		}
 
 		if(host_offset) {
 			*host_offset = '\0';
@@ -152,9 +130,8 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 		 * If there's no user and nick, we assume it is a nickname 
 		 * unless the name contains a dot 
 		 */
-		if(!user_offset && !host_offset && strchr(prefix_offset, '.')) {
+		if(!user_offset && !host_offset && strchr(prefix_offset, '.'))
 			servername_offset = prefix_offset;
-		}
 		else
 			nick_offset = prefix_offset;
 
@@ -169,16 +146,13 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 			prefix->nick = strdup(nick_offset);
 	}
 	else
-		command_offset = incoming ;
+		command_offset = incoming;
 
 	params_offset = strchr(command_offset, ' ');
 	if(params_offset) {
 		*params_offset = '\0';
 		params_offset++;
 	}
-
-	/* Command Done */
-	command = strdup(command_offset);
 
 	while( params_offset && (next_param_offset = strchr(params_offset, ' ')) ) {
 		*next_param_offset = '\0';
@@ -193,8 +167,13 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 	if(message_offset)
 		params = irc_param_list_add(params, message_offset);
 
-	/* Done, now lets execute the command */
-	command_num = get_command_num(command);
+	/* 
+	 * Done, now lets execute the command.
+	 * If prefix offset is present, use atoi() to get command number.
+	 * Use get_command_num() if atoi() fails or if there is no prefix_offset.
+	 */
+	if (!prefix_offset || !(command_num = atoi(command_offset)))
+		command_num = get_command_num(command_offset);
 
 	switch(command_num)
 	{
@@ -223,6 +202,7 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 		break ;
 	case IRC_CMD_PART	:
 		CB_EXEC(ia->callbacks, buddy_part)(irc_param_list_get_at(params, 0), 
+						   irc_param_list_get_at(params, 1), 
 						   prefix,
 						   ia);
 		break ;
@@ -384,6 +364,13 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 	case RPL_TOPIC		:
 		CB_EXEC(ia->callbacks, got_topic)(irc_param_list_get_at(params, 1),
 						  irc_param_list_get_at(params, 2),
+						  prefix,
+						  ia);
+		break ;
+	case RPL_TOPICSETBY :
+		CB_EXEC(ia->callbacks, got_topicsetby)(irc_param_list_get_at(params, 1),
+						  irc_param_list_get_at(params, 2),
+						  irc_param_list_get_at(params, 3),
 						  prefix,
 						  ia);
 		break ;

@@ -877,7 +877,7 @@ static void join_chat_destroy(GtkWidget *widget, gpointer data)
 }
 
 /*
- *  Let's build ourselfs a nice little dialog window to
+ *  Let's build ourselves a nice little dialog window to
  *  ask us what chat window we want to join :)
  */
 void open_join_chat_window()
@@ -1106,10 +1106,15 @@ eb_chat_room *find_tabbed_chat_room_index(int current_page)
 void eb_chat_room_refresh_list(eb_chat_room *room, const char *buddy, ChatRoomRefreshType refresh)
 {
 	GtkTreeIter insert;
+	gchar *buf;
 
 	eb_debug(DBG_CORE, "refresh list (%d)%s\n", refresh, buddy);
 
 	if (refresh == CHAT_ROOM_JOIN) {
+		room->total_arrivals++;
+		buf = g_strdup_printf(_("Online: %i"), room->total_arrivals);
+		gtk_tree_view_column_set_title(room->column, buf);
+		g_free(buf);
 		gtk_list_store_append(room->fellows_model, &insert);
 		gtk_list_store_set(room->fellows_model, &insert, 0, buddy, -1);
 	}
@@ -1127,6 +1132,10 @@ void eb_chat_room_refresh_list(eb_chat_room *room, const char *buddy, ChatRoomRe
 			gtk_tree_model_get(GTK_TREE_MODEL(room->fellows_model), &del_iter, 0, &name, -1);
 
 			if (buddy && name && !strcmp(name, buddy)) {
+				room->total_arrivals--;
+				buf = g_strdup_printf(_("Online: %i"), room->total_arrivals);
+				gtk_tree_view_column_set_title(room->column, buf);
+				g_free(buf);
 				gtk_list_store_remove(room->fellows_model, &del_iter);
 				return;
 			}
@@ -1178,26 +1187,29 @@ void eb_chat_room_buddy_arrive(eb_chat_room *room, const gchar *alias, const gch
 	eb_chat_room_buddy *ecrb = NULL;
 	gchar *buf;
 	LList *t;
+
 	ecrb = g_new0(eb_chat_room_buddy, 1);
 	strncpy(ecrb->alias, alias, sizeof(ecrb->alias));
 	strncpy(ecrb->handle, handle, sizeof(ecrb->handle));
-	room->total_arrivals++;
-	ecrb->color = room->total_arrivals % nb_cr_colors;
 
 	for (t = room->fellows; t && t->data; t = t->next)
 		if (!strcasecmp(handle, ((eb_chat_room_buddy *)t->data)->handle))
 			return;
 
-	buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s (%s) has joined the chat.</b></body>"), alias, handle);
+	if (!strcmp(alias, handle))
+		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> "
+			"%s has joined the chat.</b></body>"), handle);
+	else
+		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> "
+			"%s (%s) has joined the chat.</b></body>"), handle, alias);
 	eb_chat_room_show_3rdperson(room, buf);
-
 	eb_chat_room_private_log_reference(room, alias, handle);
-
 	g_free(buf);
 
 	room->fellows = l_list_append(room->fellows, ecrb);
 
 	eb_chat_room_refresh_list(room, handle, CHAT_ROOM_JOIN);
+	ecrb->color = room->total_arrivals % nb_cr_colors;
 }
 
 void eb_chat_room_buddy_chnick(eb_chat_room *room, const gchar *buddy, const gchar *newnick)
@@ -1238,32 +1250,6 @@ void eb_chat_room_buddy_chnick(eb_chat_room *room, const gchar *buddy, const gch
 	while (gtk_tree_model_iter_next(GTK_TREE_MODEL(room->fellows_model), &iter));
 }
 
-void eb_chat_room_buddy_leave(eb_chat_room *room, const gchar *handle)
-{
-	LList *node = find_chat_room_buddy(room, handle);
-	gchar *buf;
-
-	if (node) {
-		eb_chat_room_buddy *ecrb = node->data;
-	        buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat.</b></body>"),
-				ecrb->alias, handle);
-	} else
-		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s has left the chat.</b></body>"),
-				handle);
-        eb_chat_room_show_3rdperson(room, buf);
-	g_free(buf);
-
-	if (node && room->fellows) {
-		eb_chat_room_buddy *ecrb = node->data;
-		eb_account *ea = find_account_by_handle(ecrb->handle, room->local_user->service_id);
-		if (ea)
-			eb_chat_room_display_status (ea, NULL);
-		room->fellows = l_list_remove(room->fellows, ecrb);
-		g_free(ecrb);
-	}
-	eb_chat_room_refresh_list(room, handle, CHAT_ROOM_LEAVE);
-}
-
 static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event, gpointer userdata)
 {
 	eb_chat_room *cr = (eb_chat_room *)userdata;
@@ -1276,6 +1262,41 @@ static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event, gpointer u
 
 	return FALSE;
 
+}
+
+void eb_chat_room_buddy_leave(eb_chat_room *room, const gchar *handle)
+{
+	eb_chat_room_buddy_leave_ex(room, handle, ".");
+}
+
+void eb_chat_room_buddy_leave_ex(eb_chat_room *room, const gchar *handle, const gchar *ex)
+{
+	LList *node = find_chat_room_buddy(room, handle);
+	gchar *buf;
+
+	if (node) {
+		eb_chat_room_buddy *ecrb = node->data;
+			if (!strcmp(handle, ecrb->alias))
+	        	buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> "
+					"%s has left the chat%s</b></body>"), handle, ex);
+			else
+				buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> "
+					"%s (%s) has left the chat%s</b></body>"), handle, ecrb->alias, ex);
+	} else
+		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> %s has left the chat%s</b></body>"),
+				handle, ex);
+	eb_chat_room_show_3rdperson(room, buf);
+	g_free(buf);
+
+	if (node && room->fellows) {
+		eb_chat_room_buddy *ecrb = node->data;
+		eb_account *ea = find_account_by_handle(ecrb->handle, room->local_user->service_id);
+		if (ea)
+			eb_chat_room_display_status (ea, NULL);
+		room->fellows = l_list_remove(room->fellows, ecrb);
+		g_free(ecrb);
+	}
+	eb_chat_room_refresh_list(room, handle, CHAT_ROOM_LEAVE);
 }
 
 static void eb_chat_room_update_window_title(eb_chat_room *ecb, gboolean new_message)
@@ -1564,7 +1585,6 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 	GtkWidget *scrollwindow = gtk_scrolled_window_new(NULL, NULL);
 	gboolean enableSoundButton = FALSE;
 	GtkCellRenderer *renderer;
-	GtkTreeViewColumn *column;
 	char *room_title = NULL;
 	GtkWidget *scrollwindow2;
 
@@ -1585,8 +1605,8 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 	chat_room->fellows_widget = gtk_tree_view_new_with_model(GTK_TREE_MODEL(chat_room->fellows_model));
 
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes(_("Online"), renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(chat_room->fellows_widget), column);
+	chat_room->column = gtk_tree_view_column_new_with_attributes(_("Online"), renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(chat_room->fellows_widget), chat_room->column);
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(chat_room->fellows_model),
 			0, GTK_SORT_ASCENDING);

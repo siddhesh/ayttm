@@ -258,7 +258,7 @@ void irc_send_pong(const char *message, irc_account *ia)
 	char buff[BUF_LEN];
 	memset(buff, 0, BUF_LEN);
 
-	sprintf(buff, "PONG %s\n", message);
+	sprintf(buff, "PONG :%s\n", message);
 	irc_send_data(buff, strlen(buff), ia);
 }
 
@@ -475,7 +475,6 @@ void irc_recv (irc_account *ia, int source, int condition)
 				continue;
 
 			ia->buf[ia->len-1]='\0';
-#define IRCDEBUG
 #ifdef IRCDEBUG
 			fprintf(stderr, "irc> %s\n", ia->buf);
 #endif

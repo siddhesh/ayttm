@@ -166,6 +166,7 @@ typedef struct _irc_callbacks {
 					irc_account *ia);
 	                        	
 	void (*buddy_part)		(const char *channel, 
+					const char *message, 
 					irc_message_prefix *prefix, 
 					irc_account *ia);
 	                        	
@@ -288,7 +289,13 @@ typedef struct _irc_callbacks {
 					const char *topic,
 					irc_message_prefix *prefix,
 					irc_account *ia);
-                                	
+
+	void (*got_topicsetby)		(const char *channel,
+					const char *nickname,
+					const char *time,
+					irc_message_prefix *prefix,
+					irc_account *ia);
+
 	void (*inviting)		(const char *channel,
 					const char *nick,
 					irc_message_prefix *prefix,
