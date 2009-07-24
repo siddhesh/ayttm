@@ -1,3 +1,17 @@
+* Fri Jul 24 2009 13:09 UTC [pstef]   0.5.0-108
+- ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/libirc/irc_message.c,
+modules/irc/libirc/irc_replies.h, modules/irc/libirc/libirc.c,
+modules/irc/libirc/libirc.h, src/chat_room.c, src/chat_room.h,
+src/chat_window.h:
+ * Create notices window on IRC Welcome (fixes no window when there is no MOTD)
+ * Don't ask for /NAMES after joining a channel, we get names list as we join it
+ * Improved messages on people join/part channel
+ * Fixed notices tab/window title(s) changing on nickname change
+ * Show channel topic author
+ * Improved IRC commands conversion and got rid of memory leak by the way
+ * PONG can handle two-parameter message
+ * Show number of people online in a channel
+
 * Wed Jul 22 2009 09:35 UTC [siddheshp]   0.5.0-107
 - ChangeLog, configure.ac, modules/irc/libirc/libirc.c:
 modules/irc/libirc/libirc.h:
