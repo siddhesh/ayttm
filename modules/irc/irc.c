@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.54 $",
-	"$Date: 2009/07/24 14:28:19 $",
+	"$Revision: 1.55 $",
+	"$Date: 2009/07/25 08:20:42 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -1430,8 +1430,12 @@ static void ay_buddy_nick_change(const char *newnick, irc_message_prefix *prefix
 								GTK_NOTEBOOK(ecr->notebook), ecr->notebook_child, room_name);
 
 					if (!ecr->notebook
-					||  ecr->notebook_page == gtk_notebook_get_current_page(GTK_NOTEBOOK(ecr->notebook)))
-						eb_chat_room_update_window_title(ecr, FALSE);
+					||  ecr->notebook_page == gtk_notebook_get_current_page(GTK_NOTEBOOK(ecr->notebook))) {
+						char *room_title;
+						room_title = g_strdup_printf("%s [IRC]", ecr->room_name);
+						gtk_window_set_title(GTK_WINDOW(ecr->window), room_title);
+						g_free(room_title);
+					}
 				}
 			}
 			if (!strcmp(buff3[1], ia->connect_address)
