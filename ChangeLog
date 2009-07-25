@@ -1,3 +1,7 @@
+* Sat Jul 25 2009 08:20 UTC [pstef]   0.5.0-109
+- ChangeLog, configure.ac, modules/irc/irc.c:
+ * Fixed crash on changing window title (when user changes his nickname)
+
 * Fri Jul 24 2009 13:09 UTC [pstef]   0.5.0-108
 - ChangeLog, configure.ac, modules/irc/irc.c, modules/irc/libirc/irc_message.c,
 modules/irc/libirc/irc_replies.h, modules/irc/libirc/libirc.c,
