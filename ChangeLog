@@ -1,3 +1,8 @@
+* Sun Jul 26 2009 10:10 UTC [pstef]   0.5.0-110
+- ChangeLog, configure.ac, modules/irc/irc.c, src/chat_room.c:
+ * Fixed possible crash in color stripping function (IRC)
+ * Refresh window title after removing tab with chat room
+
 * Sat Jul 25 2009 08:20 UTC [pstef]   0.5.0-109
 - ChangeLog, configure.ac, modules/irc/irc.c:
  * Fixed crash on changing window title (when user changes his nickname)
