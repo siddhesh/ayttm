@@ -93,8 +93,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.55 $",
-	"$Date: 2009/07/25 08:20:42 $",
+	"$Revision: 1.56 $",
+	"$Date: 2009/07/26 10:10:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -155,7 +155,7 @@ static unsigned char *strip_color (unsigned char *text)
 	unsigned char *new_str;
 
 	if (!text)
-		text[0] = '\0';
+		return calloc(1, sizeof(char));
 
 	len = strlen ((char *)text);
 	new_str = calloc (len + 2, sizeof(char));
