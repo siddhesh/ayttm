@@ -1008,7 +1008,7 @@ void open_join_chat_window()
 	g_signal_connect(join_chat_window, "destroy", G_CALLBACK(join_chat_destroy), NULL);
 }
 
-void destroy_chat_room (GtkWidget *widget, gpointer data)
+void destroy_chat_room(GtkWidget *widget, gpointer data)
 {
 	eb_chat_room *room = (eb_chat_room *)data;
 
@@ -1027,6 +1027,9 @@ void destroy_chat_room (GtkWidget *widget, gpointer data)
 	}
 	else
 		gtk_widget_destroy(room->window);
+
+	if ((room = find_tabbed_chat_window_index(-1)))
+		eb_chat_room_update_window_title(room, FALSE);
 }
 
 void eb_destroy_all_chat_rooms(void)
