@@ -41,10 +41,12 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info custmsg_LTX_plugin_info
-#define plugin_init custmsg_LTX_plugin_init
-#define plugin_finish custmsg_LTX_plugin_finish
-#define module_version custmsg_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info custmsg_LTX_plugin_info
+	#define plugin_init custmsg_LTX_plugin_init
+	#define plugin_finish custmsg_LTX_plugin_finish
+	#define module_version custmsg_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -60,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Custom Message", 
 	"Pick a custom away message from a file", 
-	"$Revision: 1.2 $",
-	"$Date: 2008/08/11 04:50:46 $",
+	"$Revision: 1.3 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

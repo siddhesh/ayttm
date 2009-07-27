@@ -34,8 +34,10 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info video_capture_LTX_plugin_info
-#define module_version video_capture_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info video_capture_LTX_plugin_info
+	#define module_version video_capture_LTX_module_version
+#endif
 
 
 static int plugin_init();
@@ -48,8 +50,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Video Capture",
 	"Capture video images from some source",
-	"$Revision: 1.3 $",
-	"$Date: 2004/12/29 21:13:46 $",
+	"$Revision: 1.4 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	0,
 	plugin_init,
 	plugin_finish,

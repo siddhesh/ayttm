@@ -28,6 +28,7 @@
 #include "input_list.h"
 #include "account.h"
 #include <glib.h>
+#include <config.h>
 
 #ifdef __cplusplus
 extern "C" {

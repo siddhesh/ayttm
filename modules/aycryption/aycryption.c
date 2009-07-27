@@ -47,8 +47,10 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info aycryption_LTX_plugin_info
-#define module_version aycryption_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info aycryption_LTX_plugin_info
+	#define module_version aycryption_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -95,8 +97,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.23 $",
-	"$Date: 2008/08/11 04:50:44 $",
+	"$Revision: 1.24 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,

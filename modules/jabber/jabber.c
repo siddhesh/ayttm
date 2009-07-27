@@ -62,11 +62,13 @@ typedef unsigned long ulong;
  *                             Begin Module Code
  ************************************************************************************/
 /*  Module defines */
-#define plugin_info jabber_LTX_plugin_info
-#define SERVICE_INFO jabber_LTX_SERVICE_INFO
-#define plugin_init jabber_LTX_plugin_init
-#define plugin_finish jabber_LTX_plugin_finish
-#define module_version jabber_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info jabber_LTX_plugin_info
+	#define SERVICE_INFO jabber_LTX_SERVICE_INFO
+	#define plugin_init jabber_LTX_plugin_init
+	#define plugin_finish jabber_LTX_plugin_finish
+	#define module_version jabber_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -82,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.51 $",
-	"$Date: 2009/07/11 04:34:30 $",
+	"$Revision: 1.52 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

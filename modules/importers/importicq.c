@@ -40,8 +40,10 @@
  ******************************************************************************/
 
 /*  Module defines */
-#define plugin_info importicq_LTX_plugin_info
-#define module_version importicq_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info importicq_LTX_plugin_info
+	#define module_version importicq_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -56,8 +58,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"ICQ99 Contact List", 
 	"Imports your ICQ99 contact list into Ayttm", 
-	"$Revision: 1.8 $",
-	"$Date: 2007/08/03 20:38:38 $",
+	"$Revision: 1.9 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

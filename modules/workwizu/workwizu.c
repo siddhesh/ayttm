@@ -78,11 +78,13 @@ typedef unsigned long ulong;
  *                             Begin Module Code
  ************************************************************************************/
 
-#define plugin_info workwizu_LTX_plugin_info
-#define SERVICE_INFO workwizu_LTX_SERVICE_INFO
-#define plugin_init workwizu_LTX_plugin_init
-#define plugin_finish workwizu_LTX_plugin_finish
-#define module_version workwizu_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info workwizu_LTX_plugin_info
+	#define SERVICE_INFO workwizu_LTX_SERVICE_INFO
+	#define plugin_init workwizu_LTX_plugin_init
+	#define plugin_finish workwizu_LTX_plugin_finish
+	#define module_version workwizu_LTX_module_version
+#endif
 
 unsigned int module_version() {return CORE_VERSION;}
 
@@ -113,8 +115,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"Workwizu",
 	"Provides Workwizu Chat support",
-	"$Revision: 1.16 $",
-	"$Date: 2008/08/02 06:13:12 $",
+	"$Revision: 1.17 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -52,8 +52,10 @@ void do_list_dialog(char * message, char * title, char **list,
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info autotrans_LTX_plugin_info
-#define module_version autotrans_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info autotrans_LTX_plugin_info
+	#define module_version autotrans_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -79,8 +81,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.14 $",
-	"$Date: 2007/12/14 18:16:51 $",
+	"$Revision: 1.15 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	trans_init,
 	trans_finish,

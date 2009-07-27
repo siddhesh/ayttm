@@ -251,7 +251,7 @@ static int socks4_connect( int sock, struct sockaddr *serv_addr, int addrlen, ay
 	else
 		packetlen = 9;
 
-	result = lookup_address(con->host, con->port, AF_INET);
+	result = lookup_address(con->host, con->port, AF_UNSPEC);
 
 	if(!result)
 	       return AY_HOSTNAME_LOOKUP_FAIL;

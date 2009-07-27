@@ -47,9 +47,11 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info smtp_LTX_plugin_info
-#define SERVICE_INFO smtp_LTX_SERVICE_INFO
-#define module_version smtp_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info smtp_LTX_plugin_info
+	#define SERVICE_INFO smtp_LTX_SERVICE_INFO
+	#define module_version smtp_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -70,8 +72,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP",
 	"Provides Simple Mail Transfer Protocol (SMTP) support",
-	"$Revision: 1.22 $",
-	"$Date: 2007/08/03 20:38:39 $",
+	"$Revision: 1.23 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

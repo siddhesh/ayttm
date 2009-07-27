@@ -73,11 +73,13 @@ int do_icq_debug = 0;
  *                             Begin Module Code
  ************************************************************************************/
 /*  Module defines */
-#define plugin_info icq_toc_LTX_plugin_info
-#define SERVICE_INFO icq_toc_LTX_SERVICE_INFO
-#define plugin_init icq_toc_LTX_plugin_init
-#define plugin_finish icq_toc_LTX_plugin_finish
-#define module_version icq_toc_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info icq_toc_LTX_plugin_info
+	#define SERVICE_INFO icq_toc_LTX_SERVICE_INFO
+	#define plugin_init icq_toc_LTX_plugin_init
+	#define plugin_finish icq_toc_LTX_plugin_finish
+	#define module_version icq_toc_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -96,8 +98,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"ICQ TOC",
 	"Provides ICQ support via the TOC protocol",
-	"$Revision: 1.50 $",
-	"$Date: 2009/05/22 06:02:23 $",
+	"$Revision: 1.51 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

@@ -78,11 +78,13 @@
  *                             Begin Module Code
  ************************************************************************************/
 /*  Module defines */
-#define plugin_info msn2_LTX_plugin_info
-#define SERVICE_INFO msn2_LTX_SERVICE_INFO
-#define plugin_init msn2_LTX_plugin_init
-#define plugin_finish msn2_LTX_plugin_finish
-#define module_version msn2_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info msn2_LTX_plugin_info
+	#define SERVICE_INFO msn2_LTX_SERVICE_INFO
+	#define plugin_init msn2_LTX_plugin_init
+	#define plugin_finish msn2_LTX_plugin_finish
+	#define module_version msn2_LTX_module_version
+#endif
 
 
 class eb_msn_chatroom : public llist_data
@@ -170,8 +172,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.86 $",
-	"$Date: 2009/05/22 06:02:23 $",
+	"$Revision: 1.87 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

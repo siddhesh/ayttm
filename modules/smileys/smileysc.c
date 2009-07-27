@@ -33,8 +33,10 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info smileysc_LTX_plugin_info
-#define module_version smileysc_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info smileysc_LTX_plugin_info
+	#define module_version smileysc_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -52,8 +54,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Console Smilies",
 	"Provides the console smiley theme",
-	"$Revision: 1.1 $",
-	"$Date: 2003/05/09 06:01:14 $",
+	"$Revision: 1.2 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

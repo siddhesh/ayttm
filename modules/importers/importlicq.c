@@ -44,8 +44,10 @@
  ******************************************************************************/
 
 /*  Module defines */
-#define plugin_info importlicq_LTX_plugin_info
-#define module_version importlicq_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info importlicq_LTX_plugin_info
+	#define module_version importlicq_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -62,8 +64,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"Licq Contact List", 
 	"Imports your Licq contact list into Ayttm", 
-	"$Revision: 1.7 $",
-	"$Date: 2003/05/06 17:04:48 $",
+	"$Revision: 1.8 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

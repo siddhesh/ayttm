@@ -46,8 +46,10 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info smiley_themer_LTX_plugin_info
-#define module_version smiley_themer_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info smiley_themer_LTX_plugin_info
+	#define module_version smiley_themer_LTX_module_version
+#endif
 
 
 static int plugin_init();
@@ -72,8 +74,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SMILEY,
 	"Smiley Themes",
 	"Loads smiley themes from disk at run time",
-	"$Revision: 1.16 $",
-	"$Date: 2008/08/11 04:50:46 $",
+	"$Revision: 1.17 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

@@ -93,9 +93,11 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info yahoo2_LTX_plugin_info
-#define SERVICE_INFO yahoo2_LTX_SERVICE_INFO
-#define module_version yahoo2_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info yahoo2_LTX_plugin_info
+	#define SERVICE_INFO yahoo2_LTX_SERVICE_INFO
+	#define module_version yahoo2_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -136,8 +138,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.105 $",
-	"$Date: 2009/05/22 06:02:23 $",
+	"$Revision: 1.106 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

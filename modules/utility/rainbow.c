@@ -41,10 +41,12 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info rainbow_LTX_plugin_info
-#define plugin_init rainbow_LTX_plugin_init
-#define plugin_finish rainbow_LTX_plugin_finish
-#define module_version rainbow_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info rainbow_LTX_plugin_info
+	#define plugin_init rainbow_LTX_plugin_init
+	#define plugin_finish rainbow_LTX_plugin_finish
+	#define module_version rainbow_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -77,8 +79,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Rainbow",
 	"Turns all outgoing messages into rainbow colours using HTML",
-	"$Revision: 1.8 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.9 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,

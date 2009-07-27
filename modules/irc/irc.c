@@ -74,11 +74,13 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info irc_LTX_plugin_info
-#define SERVICE_INFO irc_LTX_SERVICE_INFO
-#define plugin_init irc_LTX_plugin_init
-#define plugin_finish irc_LTX_plugin_finish
-#define module_version irc_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info irc_LTX_plugin_info
+	#define SERVICE_INFO irc_LTX_SERVICE_INFO
+	#define plugin_init irc_LTX_plugin_init
+	#define plugin_finish irc_LTX_plugin_finish
+	#define module_version irc_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -93,8 +95,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.56 $",
-	"$Date: 2009/07/26 10:10:40 $",
+	"$Revision: 1.57 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

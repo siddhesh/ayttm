@@ -55,10 +55,12 @@ static char notes_editor[MAX_PREF_LEN]="xedit";
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info notes_LTX_plugin_info
-#define plugin_init notes_LTX_plugin_init
-#define plugin_finish notes_LTX_plugin_finish
-#define module_version notes_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info notes_LTX_plugin_info
+	#define plugin_init notes_LTX_plugin_init
+	#define plugin_finish notes_LTX_plugin_finish
+	#define module_version notes_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -74,8 +76,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY, 
 	"Notes", 
 	"Store notes about your contacts and buddies", 
-	"$Revision: 1.13 $",
-	"$Date: 2009/07/20 16:37:40 $",
+	"$Revision: 1.14 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

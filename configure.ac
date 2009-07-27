@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=110
+RELEASE=111
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -48,6 +48,21 @@ AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+
+# Dynamic Library Loading
+# - To choose if we use POSIX dlopen or cross-platform libtool
+
+AC_ARG_ENABLE(posix-dlopen, AC_HELP_STRING([--enable-posix-dlopen],
+		[Use POSIX dlopen to open shared libraries instead of libtool. Note that we still need libtool to build the application]), 
+		[use_posix_dlopen=yes], [use_posix_dlopen=no])
+
+if test "$use_posix_dlopen" = "no"; then
+	echo "Using Libtool for dynamic library loading"
+else
+	echo "Using POSIX dlopen for dynamic library loading"
+	AC_DEFINE([USE_POSIX_DLOPEN], [1], [Define if we use POSIX dlopen])
+fi
+
 AC_CHECK_TOOL(RC, windres, no)
 
 # add some platform-specific flags

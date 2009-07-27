@@ -10,6 +10,8 @@ gnome_DATA = @PACKAGE@.desktop
 
 sysconf_DATA = @PACKAGE@rc
 
+noinst_HEADERS = config.h
+
 # distdir = $(PACKAGE)-$(VERSION)-$(RELEASE)
 
 # most of these are for building on windows

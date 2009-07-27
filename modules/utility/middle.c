@@ -41,10 +41,12 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info middle_LTX_plugin_info
-#define plugin_init middle_LTX_plugin_init
-#define plugin_finish middle_LTX_plugin_finish
-#define module_version middle_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info middle_LTX_plugin_info
+	#define plugin_init middle_LTX_plugin_init
+	#define plugin_finish middle_LTX_plugin_finish
+	#define module_version middle_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -64,8 +66,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_FILTER,
 	"L33t-o-matic",
 	"Turns all incoming and outgoing messages into l33t-speak",
-	"$Revision: 1.10 $",
-	"$Date: 2007/12/14 18:16:51 $",
+	"$Revision: 1.11 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&s_ref_count,
 	middle_init,
 	middle_finish,

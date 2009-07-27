@@ -71,11 +71,13 @@ typedef unsigned long ulong;
  *                             Begin Module Code
  ************************************************************************************/
 /*  Module defines */
-#define plugin_info aim_oscar_LTX_plugin_info
-#define SERVICE_INFO aim_oscar_LTX_SERVICE_INFO
-#define plugin_init aim_oscar_LTX_plugin_init
-#define plugin_finish aim_oscar_LTX_plugin_finish
-#define module_version aim_oscar_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info aim_oscar_LTX_plugin_info
+	#define SERVICE_INFO aim_oscar_LTX_SERVICE_INFO
+	#define plugin_init aim_oscar_LTX_plugin_init
+	#define plugin_finish aim_oscar_LTX_plugin_finish
+	#define module_version aim_oscar_LTX_module_version
+#endif
 
 unsigned int module_version () {return CORE_VERSION;}
 
@@ -92,8 +94,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.28 $",
-	"$Date: 2009/03/08 18:42:31 $",
+	"$Revision: 1.29 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

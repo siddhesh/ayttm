@@ -76,11 +76,13 @@ unsigned int module_version() {return CORE_VERSION;}
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info icq_LTX_plugin_info
-#define SERVICE_INFO icq_LTX_SERVICE_INFO
-#define plugin_init icq_LTX_plugin_init
-#define plugin_finish icq_LTX_plugin_finish
-#define module_version icq_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info icq_LTX_plugin_info
+	#define SERVICE_INFO icq_LTX_SERVICE_INFO
+	#define plugin_init icq_LTX_plugin_init
+	#define plugin_finish icq_LTX_plugin_finish
+	#define module_version icq_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -98,8 +100,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"ICQ", 
 	"Provides support for the ICQ protocol", 
-	"$Revision: 1.11 $",
-	"$Date: 2009/05/22 06:02:23 $",
+	"$Revision: 1.12 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

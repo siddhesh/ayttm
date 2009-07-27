@@ -43,10 +43,12 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info import_gnomeicu_LTX_plugin_info
-#define plugin_init import_gnomeicu_LTX_plugin_init
-#define plugin_finish import_gnomeicu_LTX_plugin_finish
-#define module_version import_gnomeicu_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info import_gnomeicu_LTX_plugin_info
+	#define plugin_init import_gnomeicu_LTX_plugin_init
+	#define plugin_finish import_gnomeicu_LTX_plugin_finish
+	#define module_version import_gnomeicu_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -61,8 +63,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"GnomeICU Contact List", 
 	"Imports your GnomeICU contact list into Ayttm", 
-	"$Revision: 1.8 $",
-	"$Date: 2003/05/06 17:04:48 $",
+	"$Revision: 1.9 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish

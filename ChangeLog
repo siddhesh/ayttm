@@ -1,3 +1,21 @@
+* Mon Jul 27 2009 16:33 UTC [pstef]   0.5.0-111
+- Makefile.am, configure.ac, libproxy/proxy.c, modules/aim-oscar/aim-oscar.c,
+modules/aycryption/aycryption.c, modules/icq/icq.c, modules/icq-toc/icq-toc.c,
+modules/image_filter/img2jpc.c, modules/image_filter/video_capture.c,
+modules/importers/import_everybuddy.c, modules/importers/import_gaim.c,
+modules/importers/import_gnomeicu.c, modules/importers/importicq.c,
+modules/importers/importlicq.c, modules/irc/irc.c, modules/jabber/jabber.c,
+modules/livejournal/lj.c, modules/msn2/msn.C, modules/smileys/giles_smiles.c,
+modules/smileys/smiley-themer.c, modules/smileys/smileysc.c,
+modules/smtp/smtp.c, modules/utility/autotrans.c,
+modules/utility/custom_message.c, modules/utility/middle.c,
+modules/utility/notes.c, modules/utility/rainbow.c,
+modules/workwizu/workwizu.c, modules/yahoo2/yahoo.c, src/plugin.c,
+src/plugin_api.h:
+ * Added option --enable-posix-dlopen to use POSIX style dlopen() instead of
+ libtool. This has to be explicitly enabled during ./configure since the
+ default behaviour is to use libtool for this
+
 * Sun Jul 26 2009 10:10 UTC [pstef]   0.5.0-110
 - ChangeLog, configure.ac, modules/irc/irc.c, src/chat_room.c:
  * Fixed possible crash in color stripping function (IRC)

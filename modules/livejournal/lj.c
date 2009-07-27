@@ -49,9 +49,11 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info lj_LTX_plugin_info
-#define SERVICE_INFO lj_LTX_SERVICE_INFO
-#define module_version lj_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info lj_LTX_plugin_info
+	#define SERVICE_INFO lj_LTX_SERVICE_INFO
+	#define module_version lj_LTX_module_version
+#endif
 
 
 /* Function Prototypes */
@@ -75,8 +77,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"LiveJournal",
 	"Ayttm client for LiveJournal (http://www.livejournal.com/)",
-	"$Revision: 1.3 $",
-	"$Date: 2003/12/10 10:28:54 $",
+	"$Revision: 1.4 $",
+	"$Date: 2009/07/27 16:42:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

@@ -18,8 +18,10 @@
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
-#define plugin_info img2jpc_LTX_plugin_info
-#define module_version img2jpc_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info img2jpc_LTX_plugin_info
+	#define module_version img2jpc_LTX_module_version
+#endif
 
 
 static int plugin_init();
@@ -31,8 +33,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Img2JPC",
 	"Codec for JPG2000 images",
-	"$Revision: 1.8 $",
-	"$Date: 2007/08/03 20:38:38 $",
+	"$Revision: 1.9 $",
+	"$Date: 2009/07/27 16:42:03 $",
 	NULL,
 	plugin_init,
 	plugin_finish,
