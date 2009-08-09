@@ -721,9 +721,8 @@ static void account_menu(GdkEventButton *event, gpointer d)
 			/* sep */
 
 	if ((md = GetPref(EB_CONTACT_MENU))) {
-		int should_sep = 0;
+		int should_sep = (add_menu_items(menu, -1, 0, NULL, acc, NULL) > 0);
 
-		should_sep = (add_menu_items(menu,-1, should_sep, NULL, acc, NULL) > 0);
 		add_menu_items(menu, acc->service_id, should_sep, NULL, acc, NULL);
 	}
 
@@ -1154,14 +1153,15 @@ void update_group_line(grouplist * eg)
 
 static void set_status_label(eb_account *ea, int update_contact)
 {
-	char *c = NULL, *tmp = NULL, *t = NULL;
+	char *c = NULL, *tmp = NULL;
 	int need_tooltip_update = 0;
 
 	c = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 40);
 
 	/* Replace every newline with space. */
-	while ((t = strchr(c,'\n')))
-		*t = ' ';
+	for (tmp = c; *tmp; tmp++)
+		if (*tmp == '\n')
+			*tmp = ' ';
 
 	if (strlen(c) == 40)
 		c[39] = c[38] = c[37] = '.';
@@ -2068,8 +2068,8 @@ static GtkWidget *MakeStatusMenu(eb_local_account *ela)
 	GTK_CHECK_MENU_ITEM(l_list_nth(widgets, 0)->data)->active = 0;
 
 	/* Now, activate the desired status radio item */
-	GTK_CHECK_MENU_ITEM(
-		l_list_nth(widgets, eb_services[ela->service_id].sc->get_current_state(ela))->data)->active = 1;
+	temp_list = l_list_nth(widgets, eb_services[ela->service_id].sc->get_current_state(ela));
+	GTK_CHECK_MENU_ITEM(temp_list->data)->active = 1;
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(ela->status_button), status_menu);
 	l_list_free(status_label);
@@ -2378,9 +2378,7 @@ void set_menu_sensitivity(void)
 
 static gchar *menu_translate(const gchar *path, gpointer data)
 {
-	gchar *retval;
-	retval = (gchar *) gettext(path);
-	return retval;
+	return (gchar *) gettext(path);
 }
 
 static void menu_add_widget(GtkUIManager *ui, GtkWidget *widget, GtkContainer *container)
