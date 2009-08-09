@@ -1,4 +1,11 @@
-* Mon Jul 27 2009 16:33 UTC [pstef]   0.5.0-111
+* Sun Aug 9 2009 09:02 UTC [pstef]   0.5.0-112
+- ChangeLog, configure.ac, src/status.c:
+ * Reformatted file src/status.c
+ * Some code improvements in src/status.c
+ * Corrected last ChangeLog entry; it was Siddhesh who added option
+ --enable-posix-dlopen, not me
+
+* Mon Jul 27 2009 16:33 UTC [siddheshp]   0.5.0-111
 - Makefile.am, configure.ac, libproxy/proxy.c, modules/aim-oscar/aim-oscar.c,
 modules/aycryption/aycryption.c, modules/icq/icq.c, modules/icq-toc/icq-toc.c,
 modules/image_filter/img2jpc.c, modules/image_filter/video_capture.c,
