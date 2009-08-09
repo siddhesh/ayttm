@@ -103,7 +103,7 @@ enum {
 };
 
 enum {
-	TARGET_TYPE_ACCOUNT=1,
+	TARGET_TYPE_ACCOUNT = 1,
 	TARGET_TYPE_CONTACT,
 	TARGET_TYPE_GROUP
 };
@@ -158,13 +158,15 @@ void set_tooltips_active(int active)
 		tooltip = gtk_tree_view_tooltip_new_for_treeview(GTK_TREE_VIEW(contact_list));
 
 	if (active)
-		gtk_tree_view_tooltip_set_tip_columns(tooltip,
+		gtk_tree_view_tooltip_set_tip_columns(
+				tooltip,
 				MAIN_VIEW_HAS_TIP,
 				MAIN_VIEW_ICON,
 				MAIN_VIEW_LABEL,
 				MAIN_VIEW_STATUS_TIP);
 	else
-		gtk_tree_view_tooltip_set_tip_columns(tooltip,
+		gtk_tree_view_tooltip_set_tip_columns(
+				tooltip,
 				-1,
 				-1,
 				-1,
@@ -221,7 +223,8 @@ static void edit_group_callback(GtkWidget *w, grouplist *g)
 
 static void sort_group_callback(GtkWidget *w, grouplist *g)
 {
-	LList *l = g->members, *sorted = NULL;
+	LList *l = g->members;
+	LList *sorted = NULL;
 
 	while (l) {
 		sorted = l_list_insert_sorted(sorted, l->data, (LListCompFunc)contact_cmp);
@@ -269,7 +272,7 @@ static void offer_remove_group_callback(GtkWidget *w, gpointer d)
 {
 	if (d) {
 		grouplist *g = (grouplist *)d;
-		char buff [1024];
+		char buff[1024];
 
 		snprintf(buff, sizeof(buff), _("Do you really want to delete group \"%s\"?"), g->name);
 		eb_do_dialog(buff, _("Delete Group"), remove_group_callback, d);
@@ -293,7 +296,7 @@ static void offer_remove_contact_callback(GtkWidget *w, gpointer d)
 {
 	if (d) {
 		struct contact *c = (struct contact *)d;
-		char buff [1024];
+		char buff[1024];
 
 		snprintf(buff, sizeof(buff), _("Do you really want to delete contact \"%s\"?"), c->nick);
 		eb_do_dialog(buff, _("Delete Contact"), remove_contact_callback, d);
@@ -404,7 +407,7 @@ static void update_status_message(gchar *message)
 		create_log_window();
 
 	if (status_bar) {
-		int i = 0;
+		int i;
 		char *tstamp_mess = NULL;
 		time_t t;
 		struct tm *cur_time;
@@ -485,7 +488,8 @@ static gboolean expand_callback(
 
 	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
 
-	gtk_tree_model_get(model, iter,
+	gtk_tree_model_get(
+			model, iter,
 			MAIN_VIEW_ROW_DATA, &d,
 			MAIN_VIEW_ROW_TYPE, &type, -1);
 
@@ -513,10 +517,10 @@ static GtkWidget *make_info_menu(struct contact *c, int *nb)
 	LList *iterator;
 	GtkWidget *InfoMenu = gtk_menu_new();
 	GtkWidget *button;
-	char *buff = NULL;
+	char *buff;
 
-	for (iterator=c->accounts; iterator; iterator=iterator->next) {
-		eb_account *account = (eb_account*)iterator->data;
+	for (iterator=c->accounts; iterator; iterator = iterator->next) {
+		eb_account *account = (eb_account *)iterator->data;
 
 		if (account->online && RUN_SERVICE(account)->get_info) {
 			buff = g_strdup_printf(
@@ -636,9 +640,9 @@ int add_menu_items(void *vmenu, int cur_service, int should_sep,
 static void contact_menu(GdkEventButton *event, gpointer d)
 {
 	struct contact *conn = d;
-	GtkWidget *menu = NULL;
-	GtkWidget *submenu = NULL;
-	menu_data *md = NULL;
+	GtkWidget *menu;
+	GtkWidget *submenu;
+	menu_data *md;
 
 	int nbitems = 0;
 	int cur_service = -1;
@@ -696,9 +700,9 @@ static void contact_menu(GdkEventButton *event, gpointer d)
 
 static void account_menu(GdkEventButton *event, gpointer d)
 {
-	GtkWidget *menu = NULL;
+	GtkWidget *menu;
 	eb_account *acc = (eb_account *)d;
-	menu_data *md = NULL;
+	menu_data *md;
 
 	menu = gtk_menu_new();
 
@@ -750,9 +754,8 @@ static gboolean right_click(GtkWidget *widget, GdkEventButton *event, gpointer d
 
 		GtkTreePath *path;
 
-		if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
-					event->x, event->y, &path,
-					NULL, NULL, NULL)) {
+		if (gtk_tree_view_get_path_at_pos(
+					GTK_TREE_VIEW(widget), event->x, event->y, &path, NULL, NULL, NULL)) {
 
 			gtk_tree_selection_select_path(selection, path);
 			gtk_tree_model_get_iter(model, &sel_iter, path);
@@ -761,7 +764,8 @@ static gboolean right_click(GtkWidget *widget, GdkEventButton *event, gpointer d
 		else
 			return FALSE;
 
-		gtk_tree_model_get(model, &sel_iter,
+		gtk_tree_model_get(
+				model, &sel_iter,
 				MAIN_VIEW_ROW_DATA, &data,
 				MAIN_VIEW_ROW_TYPE, &target_type,
 				-1);
@@ -778,8 +782,8 @@ static gboolean right_click(GtkWidget *widget, GdkEventButton *event, gpointer d
 }
 
 
-static void double_click(GtkTreeView *tree_view, GtkTreePath *path,
-		GtkTreeViewColumn *col, gpointer data)
+static void double_click(
+		GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *col, gpointer data)
 {
 	int target_type;
 	gpointer d;
@@ -789,7 +793,8 @@ static void double_click(GtkTreeView *tree_view, GtkTreePath *path,
 
 	gtk_tree_model_get_iter(model, &pos, path);
 
-	gtk_tree_model_get(model, &pos,
+	gtk_tree_model_get(
+			model, &pos,
 			MAIN_VIEW_ROW_DATA, &d,
 			MAIN_VIEW_ROW_TYPE, &target_type,
 			-1);
@@ -797,7 +802,7 @@ static void double_click(GtkTreeView *tree_view, GtkTreePath *path,
 	if (target_type == TARGET_TYPE_ACCOUNT)
 		eb_chat_window_display_account((eb_account *)d);
 	else if (target_type == TARGET_TYPE_CONTACT)
-			eb_chat_window_display_contact((struct contact *)d);
+		eb_chat_window_display_contact((struct contact *)d);
 
 }
 
@@ -907,6 +912,7 @@ static void eb_status(GtkCheckMenuItem *widget, gpointer stats)
 		char *sname = NULL;
 		LList *l = eb_services[s->ela->service_id].sc->get_states();
 		int i;
+
 		for (i = 0; i <= s->status; i++) {
 			sname = (char *)l->data;
 			l = l->next;
@@ -925,14 +931,15 @@ static void eb_status(GtkCheckMenuItem *widget, gpointer stats)
 			eb_set_active_menu_status(s->ela->status_menu, new_state);
 	}
 	eb_debug(DBG_CORE, "%s set to state %d.\n", eb_services[s->ela->service_id].name, s->status);
+
 	/* in about 10 seconds try to flush contact mgmt queue */
 	if (s->ela->mgmt_flush_tag == 0
-	&&(s->ela->connecting || s->ela->connected)) {
+	&& (s->ela->connecting || s->ela->connected)) {
 
-		s->ela->mgmt_flush_tag =
-			eb_timeout_add(
+		s->ela->mgmt_flush_tag = eb_timeout_add(
 					1000 + (1000 * s->ela->service_id),
-					(GtkFunction)contact_mgmt_flush, (gpointer)s->ela);
+					(GtkFunction)contact_mgmt_flush,
+					(gpointer)s->ela);
 	}
 
 	if (s->ela->mgmt_flush_tag
@@ -948,8 +955,8 @@ static void eb_sign_on_predef(int all)
 {
 	LList *node = accounts;
 	while (node) {
-		eb_local_account *ac = (eb_local_account*)(node->data);
-		if (!ac->connected &&(all || ac->connect_at_startup)) {
+		eb_local_account *ac = (eb_local_account *)(node->data);
+		if (!ac->connected && (all || ac->connect_at_startup)) {
 			char buff[1024];
 
 			RUN_SERVICE(ac)->login(ac);
@@ -967,9 +974,8 @@ static void eb_sign_on_predef(int all)
 void eb_sign_on_all()
 {
 	eb_sign_on_predef(1);
-	if (iGetLocalPref("do_version_check")) {
+	if (iGetLocalPref("do_version_check"))
 		ay_check_release(NULL, GINT_TO_POINTER(1));
-	}
 }
 
 void eb_sign_on_startup()
@@ -981,7 +987,7 @@ void eb_sign_off_all()
 {
 	LList *node = accounts;
 	while (node) {
-		eb_local_account *ac = (eb_local_account*)(node->data);
+		eb_local_account *ac = (eb_local_account *)(node->data);
 		if (ac && ac->connected) {
 			char buff[1024];
 
@@ -1004,7 +1010,7 @@ void eb_sign_off_all()
 
 void reset_list(void)
 {
-	LList *grps = groups;
+	LList *grps;
 	for (grps = groups; grps; grps = grps->next)
 		remove_group_line(grps->data);
 }
@@ -1237,7 +1243,8 @@ void add_account_line(eb_account *ea)
 	gtk_tree_store_append(
 			contact_list_store, &iter, (GtkTreeIter *)(ea->account_contact->list_item));
 
-	gtk_tree_store_set(contact_list_store, &iter,
+	gtk_tree_store_set(
+			contact_list_store, &iter,
 			MAIN_VIEW_ICON, ea->pix,
 			MAIN_VIEW_LABEL, label,
 			MAIN_VIEW_STATUS, ea->status,
@@ -1445,7 +1452,8 @@ void contact_update_status(struct contact *ec)
 	   the contact line (preferably the default protocol account, but
 	   if that one is not logged on, use another) */
 	for (l = ec->accounts; l; l = l->next) {
-		eb_account * account = l->data;
+		eb_account *account = l->data;
+
 		if (account->online) {
 			if (account->service_id == ec->default_chatb) {
 				ea = account;
@@ -1454,10 +1462,8 @@ void contact_update_status(struct contact *ec)
 			else if (!ea || !ea->online)
 				ea = account;
 		}
-		else if (!ea) {
-			if (account->service_id == ec->default_chatb)
-				ea = account;
-		}
+		else if (!ea && account->service_id == ec->default_chatb)
+			ea = account;
 	}
 
 	if (!ea)
@@ -1529,10 +1535,11 @@ void buddy_update_status(eb_account *ea)
 		return;
 
 	tmp = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 20);
-	c = g_strdup_printf("%s%s%s",
-			strlen(tmp)?"(":"",
-			tmp,
-			strlen(tmp)?")":"");
+
+	if (strlen(tmp))
+		c = g_strdup_printf("(%s)", tmp);
+	else
+		c = g_strdup("");
 
 	set_status_label(ea, FALSE);
 	eb_update_status(ea, c);
@@ -1545,7 +1552,7 @@ void buddy_update_status(eb_account *ea)
 		tmpbuf = GDK_PIXBUF(ea->pix);
 		if (RUN_SERVICE(ea) && RUN_SERVICE(ea)->get_status_pixmap && ea->pix) {
 			gtkut_set_pixbuf(
-					ea->ela, (const char **) RUN_SERVICE(ea)->get_status_pixmap(ea), &tmpbuf);
+					ea->ela, (const char **)RUN_SERVICE(ea)->get_status_pixmap(ea), &tmpbuf);
 
 			ea->pix = tmpbuf;
 
@@ -1598,6 +1605,7 @@ static gint set_account_icon(eb_account *ea)
 static gint update_window_title(struct contact *ec)
 {
 	gchar *title;
+
 	if (window_title_handler != -1)
 		eb_timeout_remove(window_title_handler);
 
@@ -1622,6 +1630,7 @@ static gint update_window_title(struct contact *ec)
 static void contact_login(struct contact *ec)
 {
 	char buff[1024];
+
 	ec->group->contacts_online++;
 
 	/* display the "open door" icon */
@@ -1661,6 +1670,7 @@ static void contact_login(struct contact *ec)
 static void contact_logoff(struct contact *ec)
 {
 	char buff[1024];
+
 	/* display the "closed door" icon */
 	ec->pix = iconlogoff_pb;
 	ec->group->contacts_online--;
@@ -1701,7 +1711,6 @@ static void contact_logoff(struct contact *ec)
    accordingly */
 void buddy_login(eb_account *ea)
 {
-
 	/* don't do anything if this has already been done */
 	if (ea->online)
 		return;
@@ -1723,8 +1732,8 @@ void buddy_login(eb_account *ea)
 	/* set the timeout to remove the "open door" icon */
 	if (ea->icon_handler != -1)
 		eb_timeout_remove(ea->icon_handler);
-	ea->icon_handler = eb_timeout_add(5000, (GtkFunction)set_account_icon,
-		(gpointer) ea);
+
+	ea->icon_handler = eb_timeout_add(5000, (GtkFunction)set_account_icon, (gpointer) ea);
 
 	/* if there is only one account(this one) logged in under the
 	   parent contact, we must login the contact also */
@@ -1763,9 +1772,12 @@ void buddy_logoff(eb_account *ea)
 	/* removes any previously set timeouts for the account */
 	if (ea->icon_handler != -1)
 		eb_timeout_remove(ea->icon_handler);
+
 	ea->icon_handler = -1;
+
 	if (ea->status_handler != -1)
 		eb_timeout_remove(ea->status_handler);
+
 	ea->status_handler = -1;
 
 	/* if this is the last account of the parent contact to log off,
@@ -1858,8 +1870,7 @@ void drag_motion_callback(
 	gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(widget), x, y, &wx, &wy);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-	valid = gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
-			&path, NULL, NULL, NULL);
+	valid = gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y, &path, NULL, NULL, NULL);
 
 	/*
 	 * This is probably a bit crude. Any better approach to this?
@@ -2159,6 +2170,7 @@ void eb_smiley_window(void *v_smiley_submenuitem)
 			GtkWidget *label;
 		} *items = malloc(sizeof(struct _menu_items) *l_list_length(md->menu_items));
 		int i;
+
 		for (i = 0,list = md->menu_items; list; i++, list = list->next) {
 			items[i].mid = (menu_item_data *)list->data;
 			eb_debug(DBG_CORE, "adding smiley item: %s\n", items[i].mid->label);
@@ -2215,7 +2227,7 @@ void eb_set_status_window(void *v_set_status_submenuitem)
 	GtkWidget *set_status_submenuitem = v_set_status_submenuitem;
 	GtkWidget *label;
 	GtkWidget *account_menu = gtk_menu_new();
-	LList *list = NULL;
+	LList *list;
 
 	label = gtk_tearoff_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(account_menu), label);
@@ -2376,7 +2388,7 @@ void set_menu_sensitivity(void)
 
 static gchar *menu_translate(const gchar *path, gpointer data)
 {
-	return (gchar *) gettext(path);
+	return (gchar *)gettext(path);
 }
 
 static void menu_add_widget(GtkUIManager *ui, GtkWidget *widget, GtkContainer *container)
@@ -2586,11 +2598,10 @@ void eb_status_window()
 	gtk_widget_show(label);
 	radioonline = label;
 
-	label = gtk_radio_button_new_with_label_from_widget
-		(GTK_RADIO_BUTTON(label), _("Contacts"));
+	label = gtk_radio_button_new_with_label_from_widget(
+			GTK_RADIO_BUTTON(label), _("Contacts"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 1);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(label),
-			status_show==1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(label), status_show == 1);
 	gtk_widget_show(label);
 	radiocontact = label;
 
