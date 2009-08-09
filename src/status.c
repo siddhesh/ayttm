@@ -1154,7 +1154,6 @@ void update_group_line(grouplist * eg)
 static void set_status_label(eb_account *ea, int update_contact)
 {
 	char *c = NULL, *tmp = NULL;
-	int need_tooltip_update = 0;
 
 	c = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 40);
 
@@ -1188,28 +1187,27 @@ static void set_status_label(eb_account *ea, int update_contact)
 		struct tm *mytime;
 		char buff[128];
 		char *status;
+		struct contact *ac = ea->account_contact;
 
-		if (ea->account_contact->status)
-			g_free(ea->account_contact->status);
-		ea->account_contact->status = strdup(tmp);
-
-		need_tooltip_update = (ea->account_contact->last_status && strcmp(c, ea->account_contact->last_status));
+		if (ac->status)
+			g_free(ac->status);
+		ac->status = strdup(tmp);
 
 		status = RUN_SERVICE(ea)->get_status_string(ea);
 
-		if (need_tooltip_update) {
-			time(&ea->account_contact->last_status_change);
-			if (ea->account_contact->last_status)
-				free(ea->account_contact->last_status);
-			ea->account_contact->last_status = strdup(tmp);
+		if (ac->last_status && strcmp(c, ac->last_status)) {
+			time(&ac->last_status_change);
+			if (ac->last_status)
+				free(ac->last_status);
+			ac->last_status = strdup(tmp);
 		}
 
-		if (ea->account_contact->last_status_change) {
-			mytime = localtime(&ea->account_contact->last_status_change);
+		if (ac->last_status_change) {
+			mytime = localtime(&ac->last_status_change);
 			strftime(buff, 128, "%H:%M(%b %d)", mytime);
 			ea->tiptext = g_strdup_printf(
 					_("%s\n<span size=\'small\'>Since %s</span>"),
-					strlen(status)?status:"Online", buff);
+					strlen(status) ? status : "Online", buff);
 		}
 	}
 	g_free(c);
