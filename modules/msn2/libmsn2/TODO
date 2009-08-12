@@ -1,18 +1,14 @@
-Key:
+Here's a list fo things that are pending and will be implemented sooner 
+or later. This is in no particular order. Also, the hints in brackets are 
+only indicative:
 
-TODO:		*
-Untested:	+
-Done:		-
-
-Post-2.0:
-*	Buddy groups
-*	Persistent lists
-*	Voice/video chat
-
-2.0:
-
--	File transfer (both ways!)
--	Connection-based errors
--	MSNP7
--	Mail notification
+* MSG and Typing notifications. Includes Switchboard stuff (CAL, RNG, ANS,
+  MSG, BYE, etc.)
+* Group chat
+* Chat invitations	(SND)
+* Ping	(PNG, QNG)
+* Add/Remove/Modify buddies	(SOAP with ADL, RML)
+* File transfer (MSNC?)
+* Group modifications
+* Membership changes (SOAP)
 
