@@ -62,7 +62,7 @@ typedef unsigned long ulong;
 #include "config.h"
 #include "dialog.h"
 
-#include "libproxy/libproxy.h"
+#include "libproxy/networking.h"
 
 #include "pixmaps/aim_online.xpm"
 #include "pixmaps/aim_away.xpm"
@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.29 $",
-	"$Date: 2009/07/27 16:42:03 $",
+	"$Revision: 1.30 $",
+	"$Date: 2009/08/13 20:20:37 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -206,6 +206,8 @@ struct eb_aim_local_account_data
 	int input_chatnav;
 	int login_activity_bar;
 
+	int connect_tag;
+
 	int prompt_password;
 };
 
@@ -255,6 +257,8 @@ static char *msgerrreason[] = {
 	"Not while on AOL"
 };
 static int msgerrreasonlen = 25;
+
+static int is_setting_state = 0;
 
 /* misc */
 static const char *aim_normalize (const char *s);
@@ -309,11 +313,11 @@ static int faim_cb_chat_info_update     (aim_session_t *sess, aim_frame_t *fr, .
 static int faim_cb_chat_incoming_msg    (aim_session_t *sess, aim_frame_t *fr, ...);
 
 /* Connection callbacks */
-static void oscar_login_connect (int fd, int error, void *data);
+static void oscar_login_connect (AyConnection *fd, int error, void *data);
 static void oscar_login_connect_status (const char *msg, void *data);
-static void oscar_chatnav_connect (int fd, int error, void *data);
+static void oscar_chatnav_connect (AyConnection *fd, int error, void *data);
 static void oscar_chatnav_connect_status (const char *msg, void *data);
-static void oscar_chat_connect (int fd, int error, void *data);
+static void oscar_chat_connect (AyConnection *fd, int error, void *data);
 
 /* Debug functions taken from yahoo module */
 
@@ -577,9 +581,12 @@ faim_cb_connerr (aim_session_t *sess, aim_frame_t *fr, ...)
 		} else {
 			connect_error (alad, "You have been signed off for an unknown reason.");
 		}
+
+		is_setting_state = 1;
 		if (ela->status_menu) {
 			eb_set_active_menu_status (ela->status_menu, AIM_OFFLINE);
 		}
+		is_setting_state = 0;
 		// ay_aim_logout (ela);
 	}
 
@@ -890,16 +897,18 @@ faim_cb_icbmparaminfo (aim_session_t *sess, aim_frame_t *fr, ...)
 	
 	LOG (("You are now officially online.\n"))
 	
+	is_setting_state = 1;
 	if(ela->status_menu) {
-		/* Make sure set_current_state doesn't call us back */
-		ela->connected = -1;
 		eb_set_active_menu_status(ela->status_menu, AIM_ONLINE);
 	}
+	is_setting_state = 0;
+
 	ela->connected = 1;
 	ela->connecting = 0;
 	
-	ay_activity_bar_remove (alad->login_activity_bar);
-	alad->login_activity_bar = -1;
+	if(alad->login_activity_bar)
+		ay_activity_bar_remove (alad->login_activity_bar);
+	alad->login_activity_bar = 0;
 
 	return 1;
 }
@@ -1147,6 +1156,8 @@ faim_cb_handle_redirect (aim_session_t *sess, aim_frame_t *fr, ...)
 	char *host;
 	int port, i;
 
+	AyConnection *con;
+
 	LOG (("faim_cb_handle_redirect ()"))
 	
 	va_start (ap, fr);
@@ -1188,9 +1199,12 @@ faim_cb_handle_redirect (aim_session_t *sess, aim_frame_t *fr, ...)
 
 		tstconn->status |= AIM_CONN_STATUS_INPROGRESS;
 
-		if (ay_connect_host (host, port,
-					oscar_chatnav_connect, ela,
-					oscar_chatnav_connect_status) < 0) {
+		con = ay_connection_new(host, port, AY_CONNECTION_TYPE_PLAIN);
+        
+		if (ay_connection_connect (con,
+					oscar_chatnav_connect,
+					oscar_chatnav_connect_status,
+					NULL, ela) < 0) {
 			aim_conn_kill (sess, &tstconn);
 			alad->conn_chatnav = NULL;
 			WARNING (("unable to create socket to chatnav server\n"))
@@ -1233,9 +1247,12 @@ faim_cb_handle_redirect (aim_session_t *sess, aim_frame_t *fr, ...)
 
 		ocr->conn->status |= AIM_CONN_STATUS_INPROGRESS;
 
-		if (ay_connect_host (host, port,
-					oscar_chat_connect, ecr,
-					oscar_chatnav_connect_status) < 0) {
+		con = ay_connection_new(host, port, AY_CONNECTION_TYPE_PLAIN);
+        
+		if (ay_connection_connect (con,
+					oscar_chat_connect,
+					oscar_chatnav_connect_status,
+					NULL, ecr) < 0) {
 			aim_conn_kill (&(alad->aimsess), &tstconn);
 			WARNING (("unable to create socket to chat server\n"))
 			g_free (host);
@@ -1551,21 +1568,38 @@ int eb_aim_msg_error(struct aim_session_t * sess,struct command_rx_struct *comma
 /************************/
 
 static void
-oscar_login_connect (int fd, int error, void *data)
+oscar_login_connect (AyConnection *fd, int error, void *data)
 {
 	eb_local_account *account = (eb_local_account *)data;
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
-	LOG (("oscar_login_connect(): fd=%d, error=%d", fd, error))
+	if(error == AY_CANCEL_CONNECT) {
+		if (alad->login_activity_bar)
+			ay_activity_bar_remove (alad->login_activity_bar);	
+        
+		alad->login_activity_bar = 0;
+        
+		ay_aim_logout(account);
 
-	alad->conn->fd = fd;
+		is_setting_state = 1;
+		if(account->status_menu) {
+			eb_set_active_menu_status(account->status_menu, AIM_OFFLINE);
+		}
+		is_setting_state = 0;
 
-	if (fd < 0) {
+		return;
+	}
+
+	if (!fd) {
 		connect_error (alad, "Could not connect to host");
 		ref_count--;
 		return;
 	}
+
+	alad->conn->fd = ay_connection_get_fd(fd);
+
+	LOG (("oscar_login_connect(): fd=%d, error=%d", alad->conn->fd, error))
 
 	aim_conn_completeconnect (&(alad->aimsess), alad->conn);
 
@@ -1581,20 +1615,22 @@ oscar_login_connect_status (const char *msg, void *data)
 }			    
 
 static void
-oscar_chatnav_connect (int fd, int error, void *data)
+oscar_chatnav_connect (AyConnection *fd, int error, void *data)
 {
 	eb_local_account *account = (eb_local_account *)data;
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
-	LOG (("oscar_chatnav_connect(): fd=%d, error=%d", fd, error))
-
-	alad->conn_chatnav->fd = fd;
-
-	if (fd < 0) {
+	if (!fd) {
 		WARNING (("unable to create socket to chatnav server\n"))
 		return;
 	}
+
+	alad->conn_chatnav->fd = ay_connection_get_fd(fd);
+
+	LOG (("oscar_chatnav_connect(): fd=%d, error=%d", alad->conn_chatnav->fd, error))
+
+	ay_connection_free_no_close(fd);
 
 	aim_conn_completeconnect (&(alad->aimsess), alad->conn_chatnav);
 
@@ -1609,7 +1645,7 @@ oscar_chatnav_connect_status (const char *msg, void *data)
 }			    
 
 static void
-oscar_chat_connect (int fd, int error, void *data)
+oscar_chat_connect (AyConnection *fd, int error, void *data)
 {
 	eb_chat_room *ecr = (eb_chat_room *)data;
 	struct oscar_chat_room *ocr = (struct oscar_chat_room *)ecr->protocol_local_chat_room_data;
@@ -1617,9 +1653,7 @@ oscar_chat_connect (int fd, int error, void *data)
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
-	LOG (("oscar_chat_connect(): fd=%d, error=%d", fd, error))
-
-	if (fd < 0) {
+	if (!fd) {
 		aim_conn_kill (&(alad->aimsess), &(ocr->conn));
 		g_free (ocr->name);
 		g_free (ocr->show);
@@ -1628,7 +1662,12 @@ oscar_chat_connect (int fd, int error, void *data)
 		return;
 	}
 
-	ocr->conn->fd = fd;
+	ocr->conn->fd = ay_connection_get_fd(fd);
+
+	LOG (("oscar_chat_connect(): fd=%d, error=%d", ocr->conn->fd, error))
+
+	ay_connection_free_no_close(fd);
+
 	aim_conn_completeconnect (&(alad->aimsess), ocr->conn);
 	ocr->input = eb_input_add (ocr->conn->fd, EB_INPUT_READ|EB_INPUT_EXCEPTION ,
 				   ay_aim_callback, account);
@@ -1650,7 +1689,9 @@ static void
 ay_aim_cancel_connect (void *data)
 {
 	eb_local_account *ela = (eb_local_account *)data;
-	ay_aim_logout (ela);
+	struct eb_aim_local_account_data *alad = (struct eb_aim_local_account_data *)ela->protocol_local_account_data;
+
+	ay_connection_cancel_connect(alad->connect_tag);
 }
 
 /* Helper function */
@@ -1660,12 +1701,15 @@ connect_error (struct eb_aim_local_account_data *alad, char *msg)
 	if (alad->login_activity_bar)
 		ay_activity_bar_remove (alad->login_activity_bar);	
 	
+	alad->login_activity_bar = 0;
+	
 	ay_do_error ("AIM Error", msg);
 }
 
 static void
 ay_oscar_finish_login (const char *password, void *data)
 {
+	AyConnection *con;
 	eb_local_account *account = (eb_local_account *)data;
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)account->protocol_local_account_data;
@@ -1705,9 +1749,12 @@ ay_oscar_finish_login (const char *password, void *data)
 
 	alad->conn->status |= AIM_CONN_STATUS_INPROGRESS;
 
-	if (ay_connect_host (FAIM_LOGIN_SERVER, FAIM_LOGIN_PORT,
-				oscar_login_connect, account,
-				oscar_login_connect_status) < 0) {
+	con = ay_connection_new(FAIM_LOGIN_SERVER, FAIM_LOGIN_PORT, AY_CONNECTION_TYPE_PLAIN);
+
+	if ( (alad->connect_tag = ay_connection_connect (con,
+				oscar_login_connect, 
+				oscar_login_connect_status, 
+				NULL, account)) < 0) {
 		connect_error (alad, "Could not connect to host");
 		ref_count--;
 		return;
@@ -1769,7 +1816,10 @@ ay_aim_logout (eb_local_account *account)
 	struct eb_aim_local_account_data * alad;
 
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
-	eb_input_remove(alad->input);
+
+	if(alad->input)
+		eb_input_remove(alad->input);
+
 	aim_conn_kill(&(alad->aimsess), &(alad->conn));
 	alad->status=AIM_OFFLINE;
 	ref_count--;
@@ -1780,6 +1830,7 @@ ay_aim_logout (eb_local_account *account)
 	
 	account->connected = 0;
 	account->connecting = 0;
+	alad->connect_tag = 0;
 }
 
 static LList *
@@ -1939,6 +1990,7 @@ ay_oscar_set_away (eb_local_account * account, gchar * message, int away)
 	struct eb_aim_local_account_data * alad;
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
+	is_setting_state = 1;
 	if (message) {
 		if (account->status_menu) {
 			eb_set_active_menu_status (account->status_menu, AIM_AWAY);
@@ -1948,6 +2000,7 @@ ay_oscar_set_away (eb_local_account * account, gchar * message, int away)
 			eb_set_active_menu_status (account->status_menu, AIM_ONLINE);
 		}
 	}
+	is_setting_state = 0;
 }
 
 static void
@@ -2005,6 +2058,9 @@ ay_aim_set_current_state (eb_local_account * account, gint state)
 	alad = (struct eb_aim_local_account_data *)account->protocol_local_account_data;
 
 	LOG (("ay_aim_set_current_state = %d", state))
+
+	if(is_setting_state)
+		return;
 
 	switch (state) {
 	case AIM_ONLINE:

@@ -31,6 +31,7 @@
 #include "plugin_api.h"
 #include "libEBjabber.h"
 #include "messages.h"
+#include "dialog.h"
 
 
 #ifdef __MINGW32__
@@ -78,6 +79,7 @@ JABBER_Conn *JCnewConn(void)
 	jnew->next=Connections;
 	eb_debug(DBG_JBR, "JCnewConn: %p\n", jnew);
 	Connections=jnew;
+	jnew->state = JCONN_STATE_OFF;
 	return(Connections);
 }
 
@@ -193,25 +195,71 @@ void JCfreeServerList(char **list)
  * End jabber multiple connection routines
  ****************************************/
 
-void jabber_callback_handler(void *data, int source, eb_input_condition cond)
+void jabber_callback_handler(AyConnection *con, eb_input_condition cond, void *data)
 {
     JABBER_Conn *JConn=data;
     /* Let libjabber do the work, it calls what we setup in jab_packet_handler */
-    jab_poll(JConn->conn, 0);
+    jab_poll(JConn->conn);
     /* Is this connection still good? */
     if(!JConn->conn) {
 	eb_debug(DBG_JBR, "Logging out because JConn->conn is NULL\n");
         JABBERLogout(JConn);
-        eb_input_remove(JConn->listenerID);
+        ay_connection_input_remove(JConn->listenerID);
     }
-    else if(JConn->conn->state==JCONN_STATE_OFF || JConn->conn->fd==-1) {
+    else if(JConn->conn->state==JCONN_STATE_OFF) {
         /* No, clean up */
         JABBERLogout(JConn);
-        eb_input_remove(JConn->listenerID);
+        ay_connection_input_remove(JConn->listenerID);
         jab_delete(JConn->conn);
         JConn->conn=NULL;
     }
 }
+
+
+int ext_jabber_connect(jconn j, AyConnectCallback callback)
+{
+	JABBER_Conn *conn = JCfindConn(j);
+
+	conn->connection = ay_connection_new(j->serv, j->user->port, j->usessl?AY_CONNECTION_TYPE_SSL:AY_CONNECTION_TYPE_PLAIN);
+
+	if(!j->usessl)
+		return ay_connection_connect(conn->connection, callback, NULL, NULL, j);
+	else
+		return ay_connection_connect(conn->connection, callback, NULL, eb_do_confirm_dialog, j);
+}
+
+void ext_jabber_disconnect(jconn j)
+{
+	JABBER_Conn *conn = JCfindConn(j);
+
+	if(!conn) {
+		printf("WHAT THE HELL ARE WE TRYING TO FREE(%p)?!?!?!\n", j);
+		abort();
+		return;
+	}
+
+	printf("Freeing %p\n", conn->connection);
+
+	ay_connection_free(conn->connection);
+	conn->connection = NULL;
+}
+
+
+int ext_jabber_read(jconn j, char *buf, int len)
+{
+	JABBER_Conn *conn = JCfindConn(j);
+
+	return ay_connection_read(conn->connection, buf, len);
+}
+
+
+int ext_jabber_write(jconn j, const char *buf, int len)
+{
+	JABBER_Conn *conn = JCfindConn(j);
+
+	return ay_connection_write(conn->connection, buf, len);
+}
+
 
 /* Functions called from the ayttm jabber.c file */
 
@@ -279,7 +327,11 @@ int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, i
 	
 	jab_packet_handler(JConn->conn, j_on_packet_handler);
 	jab_state_handler(JConn->conn, j_on_state_handler);
-	tag = jab_start(JConn->conn, port, use_ssl);
+
+	JConn->conn->user->port = port;
+	JConn->conn->usessl = use_ssl;
+
+	tag = jab_start(JConn->conn);
 
 	return tag;
 }
@@ -437,7 +489,7 @@ int JABBER_Logout(JABBER_Conn *JConn) {
 		if(JConn->conn) {
 			eb_debug(DBG_JBR,  "JConn->conn exists, closing everything up\n");
 			j_remove_agents_from_host(JCgetServerName(JConn));
-			eb_input_remove(JConn->listenerID);
+			ay_connection_input_remove(JConn->listenerID);
 			jab_stop(JConn->conn);
 			jab_delete(JConn->conn);
 		}
@@ -728,9 +780,9 @@ void j_add_agent(char *name, char *alias, char *desc, char *service, char *host,
 void j_on_packet_handler(jconn conn, jpacket packet) {
 	xmlnode x, y;
 	char *id, *ns, *alias, *sub, *name, *from, *group;
-	char *desc, *service, *to, *url;
+	char *desc, *to;
 	char *show, *type, *body, *subj, *ask, *code;
-	char *room, *user, *agent_type;
+	char *room, *user;
 	char buff[8192+1];	/* FIXME: Find right size */
 	int status;
 	jid jabber_id = NULL;
@@ -950,7 +1002,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		from = xmlnode_get_attrib(packet->x, "from");
 		/* For now, ayttm does not understand resources */
 		eb_debug(DBG_JBR, "PRESENCE received type: %s from: %s\n", type, from);
-		if (x = xmlnode_get_tag(packet->x, "show")) {
+		if ((x = xmlnode_get_tag(packet->x, "show"))) {
 			show = xmlnode_get_data(x);
 			if (show) {
 				if (!strcmp(show, "away")) status = JABBER_AWAY;
@@ -1024,13 +1076,33 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 	eb_debug(DBG_JBR, "<\n");
 }
 
+
+void ext_jabber_connect_error(void *data, int error, jconn j)
+{
+	JABBER_Conn *JConn = JCfindConn(j);
+
+	if(error == AY_CANCEL_CONNECT) {
+		ay_connection_input_remove(JConn->listenerID);
+		JABBERLogout(JConn);
+		j_remove_agents_from_host(JCgetServerName(JConn));
+		JConn->conn=NULL;
+	}
+	else {
+		j_on_state_handler(j, JCONN_STATE_OFF);
+	}
+}
+
+
 void j_on_state_handler(jconn conn, int state) {
-	static int previous_state=JCONN_STATE_OFF;
+	int previous_state;
 	JABBER_Conn *JConn=NULL;
 	char buff[4096];
 
-	eb_debug(DBG_JBR, "Entering: new state: %i previous_state: %i\n", state, previous_state);
 	JConn=JCfindConn(conn);
+	previous_state = JConn->state;
+
+	eb_debug(DBG_JBR, "Entering: new state: %i previous_state: %i\n", state, previous_state);
+
 	switch(state) {
 	case JCONN_STATE_OFF:
 		if(previous_state!=JCONN_STATE_OFF) {
@@ -1038,10 +1110,10 @@ void j_on_state_handler(jconn conn, int state) {
 			snprintf(buff, 4096, _("The Jabber server %s has disconnected you."),
 				JCgetServerName(JConn));
 			JABBERError(buff, _("Disconnect"));
-			eb_input_remove(JConn->listenerID);
+			JABBERLogout(JConn);
+			ay_connection_input_remove(JConn->listenerID);
 			/* FIXME: Do we need to free anything? */
 			j_remove_agents_from_host(JCgetServerName(JConn));
-			JABBERLogout(JConn);
 			JConn->conn=NULL;
 		}
 		else if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
@@ -1062,9 +1134,9 @@ void j_on_state_handler(jconn conn, int state) {
 		eb_debug(DBG_JBR,  "JCONN_STATE_ON\n");
 		if (previous_state == JCONN_STATE_CONNECTED) {
 			jab_auth(JConn->conn);
-			JConn->listenerID = eb_input_add(JConn->conn->fd, EB_INPUT_READ,
+			JConn->listenerID = ay_connection_input_add(JConn->connection, EB_INPUT_READ,
 	                        	jabber_callback_handler, JConn);
-			eb_debug(DBG_JBR,  "*** ListenerID: %i FD: %i\n", JConn->listenerID, JConn->conn->fd);
+			eb_debug(DBG_JBR,  "*** ListenerID: %i\n", JConn->listenerID);
 			JABBERConnected(JConn);
 		}
 		break;
@@ -1072,7 +1144,7 @@ void j_on_state_handler(jconn conn, int state) {
 		eb_debug(DBG_JBR,  "UNKNOWN state: %i\n", state);
 		break;
 	}
-	previous_state=state;
+	JConn->state=state;
 	eb_debug(DBG_JBR, "Leaving\n");
 }
 

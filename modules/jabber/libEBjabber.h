@@ -3,6 +3,7 @@
 
 #include <jabber/jabber.h>
 #include <glib.h>
+#include "libproxy/networking.h"
 
 #define DEFAULT_HOST "jabber.com"
 #define DEFAULT_PORT 5222
@@ -47,6 +48,8 @@ typedef struct JABBERCONN {
     jconn  conn;		/* The actualy jabber connection struct */
     int    reg_flag;		/* Indicates whether we have registered successfully with the jabber server */
     struct JABBERCONN *next;
+    AyConnection *connection;
+    int state;
 } JABBER_Conn;
 
 typedef struct INSTANT_MESSAGE {

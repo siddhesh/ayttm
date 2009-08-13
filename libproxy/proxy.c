@@ -32,9 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 #ifdef __MINGW32__
 #include <winsock2.h>
@@ -45,10 +43,12 @@
 #include <arpa/inet.h>
 #endif
 
-#include "libproxy.h"
-#include "tcp_util.h"
-#include "messages.h"
+#include "proxy.h"
+#include "proxy_private.h"
+#include "common.h"
+#include "net_constants.h"
 
+#include <glib.h>
 
 #ifdef __MINGW32__
 #define sleep(a)		Sleep(1000*a)
@@ -59,88 +59,20 @@
 #define ECONNREFUSED	WSAECONNREFUSED	 
 #endif
 
-static ay_proxy_data *default_proxy = NULL;
-static GSList *ay_active_connections = NULL;
-
 /* Prototypes */
-static char *encode_proxy_auth_str( ay_proxy_data *proxy );
-static gpointer _do_connect( gpointer data );
+static char *encode_proxy_auth_str( AyProxyData *proxy );
 
 
 #define debug_print printf
 
 
-static struct addrinfo *lookup_address(const char *host, int port_num, int family)
-{
-	struct addrinfo hints;
-	struct addrinfo *result=NULL;
-	char port[10];
-
-	memset(&hints, 0, sizeof(struct addrinfo));
-
-	hints.ai_family = family;
-	hints.ai_socktype = SOCK_STREAM;
-
-	snprintf(port, sizeof(port), "%d", port_num);
-
-	if ( getaddrinfo(host, port, &hints, &result) < 0 ) {
-		debug_print("unable to create socket\n");
-	}
-	else {
-		return result;
-	}
-
-	return NULL;
-}
-
-
-static int connect_address( const char *host, int port_num )
-{
-	int fd;
-	struct addrinfo hints;
-	struct addrinfo *result=NULL, *rp=NULL;
-	char port[10];
-
-	memset(&hints, 0, sizeof(struct addrinfo));
-
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-
-	snprintf(port, sizeof(port), "%d", port_num);
-
-	if ( getaddrinfo(host, port, &hints, &result) < 0 ) {
-		debug_print("unable to create socket\n");
-	}
-	else {
-		for( rp = result; rp; rp = rp->ai_next ) {
-			fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-
-			if (fd == -1)
-				continue;
-
-			if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1) {
-				sleep(2);  /* Anyone know why we sleep here? */
-				
-				freeaddrinfo(result);
-				return fd;
-			}
-			else
-				perror("connect:" );
-		}
-	}
-
-	if(result)
-		freeaddrinfo(result);
-
-	return -1;
-}
-
-
-/* external function to use to set the proxy settings */
-int ay_set_default_proxy( int type, const char *host, int port, char *username, char *password)
+/* 
+ * External function to use to set the proxy settings
+ */
+int ay_proxy_set_default ( AyProxyType type, const char *host, int port, char *username, char *password)
 {
 	if (!default_proxy)
-		default_proxy = g_new0(ay_proxy_data, 1);
+		default_proxy = g_new0(AyProxyData, 1);
 
 	default_proxy->type=type;
 
@@ -184,59 +116,8 @@ int ay_set_default_proxy( int type, const char *host, int port, char *username, 
 }
 
 
-/* this code is borrowed from cvs 1.10 */
-static int	proxy_recv_line( int sock, char **resultp )
-{
-	int c;
-	char *result;
-	size_t input_index = 0;
-	size_t result_size = 80;
-
-	result = (char *) malloc (result_size);
-
-	while (1)
-	{
-		char ch;
-		if (recv (sock, &ch, 1, 0) < 0) {
-			fprintf (stderr, "recv() error from  proxy server\n");
-			return -1;
-		}
-		c = ch;
-
-		if (c == EOF)
-		{
-			free (result);
-        
-			/* It's end of file.  */
-			fprintf(stderr, "end of file from  server\n");
-		}
-        
-		if (c == '\012')
-			break;
-        
-		result[input_index++] = c;
-		while (input_index + 1 >= result_size)
-		{
-			result_size *= 2;
-			result = (char *) realloc (result, result_size);
-		}
-	}
-
-	if (resultp)
-		*resultp = result;
-
-	/* Terminate it just for kicks, but we *can* deal with embedded NULs.  */
-	result[input_index] = '\0';
-
-	if (resultp == NULL)
-		free (result);
-
-	return input_index;
-}
-
-
 /* http://archive.socks.permeo.com/protocol/socks4.protocol */
-static int socks4_connect( int sock, struct sockaddr *serv_addr, int addrlen, ay_connection *con )
+int socks4_connect( int sock, const char *host, int port, AyProxyData *proxy )
 {
 	int i, packetlen;
 
@@ -246,12 +127,12 @@ static int socks4_connect( int sock, struct sockaddr *serv_addr, int addrlen, ay
 	int retval = 0;
 
 
-	if(con->proxy->username && con->proxy->username[0])
-		packetlen = 9 + strlen(con->proxy->username);
+	if(proxy->username && proxy->username[0])
+		packetlen = 9 + strlen(proxy->username);
 	else
 		packetlen = 9;
 
-	result = lookup_address(con->host, con->port, AF_UNSPEC);
+	result = lookup_address(host, port, AF_INET);
 
 	if(!result)
 	       return AY_HOSTNAME_LOOKUP_FAIL;
@@ -260,17 +141,17 @@ static int socks4_connect( int sock, struct sockaddr *serv_addr, int addrlen, ay
 
 	packet[0] = 4;						/* Version */
 	packet[1] = 1;						/* CONNECT  */
-	packet[2] = (((unsigned short) con->port) >> 8);	/* DESTPORT */
-	packet[3] = (((unsigned short) con->port) & 0xff);	/* DESTPORT */
+	packet[2] = (((unsigned short) port) >> 8);	/* DESTPORT */
+	packet[3] = (((unsigned short) port) & 0xff);	/* DESTPORT */
 
 	/* DESTIP */
 	bcopy(packet+4, &(((struct sockaddr_in *)result->ai_addr)->sin_addr), 4 );
 
 	freeaddrinfo(result);
 
-	if(con->proxy->username && con->proxy->username[0]) {
-	        for (i=0; con->proxy->username[i]; i++) {
-	      	  packet[i+8] = (unsigned char)con->proxy->username[i];  /* AUTH	 */
+	if(proxy->username && proxy->username[0]) {
+	        for (i=0; proxy->username[i]; i++) {
+	      	  packet[i+8] = (unsigned char)proxy->username[i];  /* AUTH	 */
 	        }
 	}
 	packet[packetlen-1] = 0;							  /* END	  */
@@ -324,7 +205,7 @@ static int socks4_connect( int sock, struct sockaddr *serv_addr, int addrlen, ay
  * I'll add it back if/when it is needed or if I feel like being very correct 
  * some time later...
  */
-static int socks5_connect( int sockfd, ay_connection *con )
+int socks5_connect( int sockfd, const char *host, int port, AyProxyData *proxy )
 {
 	int i;
 	char buff[530];
@@ -334,7 +215,7 @@ static int socks5_connect( int sockfd, ay_connection *con )
 
 
 	buff[0] = 0x05;  //use socks v5
-	if(con->proxy->username && con->proxy->username[0]) {
+	if(proxy->username && proxy->username[0]) {
 		buff[1] = 0x02;  //we support (no authentication & username/pass)
 		buff[2] = 0x00;  //we support the method type "no authentication"
 		buff[3] = 0x02;  //we support the method type "username/passw"
@@ -345,39 +226,39 @@ static int socks5_connect( int sockfd, ay_connection *con )
 	}	 
 
 
-	write( sockfd, buff, 3+((con->proxy->username && con->proxy->username[0])?1:0) );
+	write( sockfd, buff, 3+((proxy->username && proxy->username[0])?1:0) );
 	
 	if ( read( sockfd, buff, 2 ) < 0 ) {
 		close(sockfd);
 		return AY_SOCKS5_CONNECT_FAIL;
 	}
 
-//	printf("buff[] %d %d proxy_user %s\n",buff[0],buff[1], con->proxy->username);
+//	printf("buff[] %d %d proxy_user %s\n",buff[0],buff[1], proxy->username);
 	if( buff[1] == 0x00 )
 		need_auth = 0;
-	else if (buff[1] == 0x02 && con->proxy->username && con->proxy->username[0])
+	else if (buff[1] == 0x02 && proxy->username && proxy->username[0])
 		need_auth = 1;
 	else {
 		fprintf(stderr, "No Acceptable Methods");
 		return AY_SOCKS5_CONNECT_FAIL;
 	}
-//	printf("need_auth=%d\n",((con->proxy->username && con->proxy->username[0])?1:0));
-	if (((con->proxy->username && con->proxy->username[0])?1:0)) {
+//	printf("need_auth=%d\n",((proxy->username && proxy->username[0])?1:0));
+	if (((proxy->username && proxy->username[0])?1:0)) {
 		/* subneg start */
 		buff[0] = 0x01; 		/* subneg version  */
 		printf("[%d]",buff[0]);
-		buff[1] = strlen(con->proxy->username);	/* username length */
+		buff[1] = strlen(proxy->username);	/* username length */
 		printf("[%d]",buff[1]);
-		for (i=0; con->proxy->username[i] && i<255; i++) {
-			buff[i+2] = con->proxy->username[i];  /* AUTH	 */
+		for (i=0; proxy->username[i] && i<255; i++) {
+			buff[i+2] = proxy->username[i];  /* AUTH	 */
 			printf("%c",buff[i+2]);
 		}
 		i+=2;
-		buff[i] = strlen(con->proxy->password);
+		buff[i] = strlen(proxy->password);
 		printf("[%d]",buff[i]);
 		i++;
-		for (j=0; j < con->proxy->password[j] && j<255; j++) {
-			buff[i+j] = con->proxy->password[j];  /* AUTH	 */
+		for (j=0; j < proxy->password[j] && j<255; j++) {
+			buff[i+j] = proxy->password[j];  /* AUTH	 */
 			printf("%c",buff[i+j]);
 		}
 		i+=(j);
@@ -401,7 +282,7 @@ static int socks5_connect( int sockfd, ay_connection *con )
 	buff[2] = 0x00; //reserved
 	buff[3] = 0x01; //ipv4 address
 
-	if ( ( result = lookup_address(con->host, con->port, AF_UNSPEC) ) == NULL )
+	if ( ( result = lookup_address(host, port, AF_UNSPEC) ) == NULL )
 		return AY_HOSTNAME_LOOKUP_FAIL;
 
 	memcpy(buff+4, &(((struct sockaddr_in *)result->ai_addr)->sin_addr),4 );
@@ -431,7 +312,8 @@ static int socks5_connect( int sockfd, ay_connection *con )
 	return AY_NONE;
 }
 
-static int http_connect( int sockfd, ay_connection *con )
+
+int http_connect( int sockfd, const char *host, int port, AyProxyData *proxy )
 {
 	/* step two : do  proxy tunneling init */
 	char cmd[200];
@@ -439,9 +321,9 @@ static int http_connect( int sockfd, ay_connection *con )
 	char *proxy_auth = NULL;
 	char debug_buff[255];
 	
-	sprintf(cmd,"CONNECT %s:%d HTTP/1.1\r\n",con->host,con->port);
-	if ( con->proxy->username && con->proxy->username[0] ) {
-		proxy_auth = encode_proxy_auth_str(con->proxy);
+	sprintf(cmd,"CONNECT %s:%d HTTP/1.1\r\n",host, port);
+	if ( proxy->username && proxy->username[0] ) {
+		proxy_auth = encode_proxy_auth_str(proxy);
 
 		strcat( cmd, "Proxy-Authorization: Basic " );
 		strcat( cmd, proxy_auth );
@@ -454,7 +336,7 @@ static int http_connect( int sockfd, ay_connection *con )
 #endif
 	if (send(sockfd,cmd,strlen(cmd),0)<0)
 		return AY_CONNECTION_REFUSED;
-	if (proxy_recv_line(sockfd,&inputline) < 0)
+	if (ay_recv_line(sockfd,&inputline) < 0)
 		return AY_CONNECTION_REFUSED;
 #ifndef DEBUG
 	sprintf(debug_buff,"<%s>\n",inputline);
@@ -463,14 +345,14 @@ static int http_connect( int sockfd, ay_connection *con )
 	if (!strstr(inputline, "200")) {
 		/* Check if proxy authorization needed */
 		if ( strstr( inputline, "407" ) ) {
-			while(proxy_recv_line(sockfd,&inputline) > 0) {
+			while(ay_recv_line(sockfd,&inputline) > 0) {
 				free(inputline);
 			}
 //			ay_do_error( _("Proxy Error"), _("HTTP proxy error: Authentication required.") );
 			return AY_PROXY_AUTH_REQUIRED;
 		}
 		if ( strstr( inputline, "403" ) ) {
-			while(proxy_recv_line(sockfd,&inputline) > 0) {
+			while(ay_recv_line(sockfd,&inputline) > 0) {
 				free(inputline);
 			}
 //			ay_do_error( _("Proxy Error"), _("HTTP proxy error: permission denied.") );
@@ -482,7 +364,7 @@ static int http_connect( int sockfd, ay_connection *con )
 
 	while (strlen(inputline)>1) {
 		free(inputline);
-		if (proxy_recv_line(sockfd,&inputline) < 0) {
+		if (ay_recv_line(sockfd,&inputline) < 0) {
 			return AY_CONNECTION_REFUSED;
 		}
 #ifndef DEBUG
@@ -498,225 +380,7 @@ static int http_connect( int sockfd, ay_connection *con )
 }
 
 
-static gboolean check_connect_complete(gpointer data)
-{
-	ay_connection *con = data;
-
-	if( g_async_queue_try_pop(con->leash) ) {
-		/* Execute callback only if the connection was not cancelled */
-		if (con->status != AY_CANCEL_CONNECT) {
-			if (con->status != AY_NONE)
-				con->sockfd = -1;
-
-			con->callback(con->sockfd, con->status, con->cb_data);
-		}
-		else if ( con->status == AY_CANCEL_CONNECT && con->sockfd >= 0 )
-			close(con->sockfd);
-
-		ay_active_connections = g_slist_remove(ay_active_connections, con);
-
-		g_async_queue_unref(con->leash);
-		free(con->host);
-
-		g_free(con);
-
-		return FALSE;
-	}
-	
-	return TRUE;
-}
-
-
-static int ay_compare_connections(ay_connection *con1, ay_connection *con2)
-{
-	if( con1->source == con2->source )
-		return 0;
-
-	return 1;
-}
-
-
-/* Cancel a connection. Lets the thread know that we're no longer interested in its connection */
-void ay_cancel_connect(guint source)
-{
-	GSList *element = NULL;
-	ay_connection con;
-	char message [255];
-
-	con.source = source;
-
-	element = g_slist_find_custom(ay_active_connections, &con, (GCompareFunc)ay_compare_connections);
-
-	if(element !=NULL) {
-		((ay_connection *)element->data)->status = AY_CANCEL_CONNECT;
-
-		if( ((ay_connection *)element->data)->status_callback != NULL ) {
-			snprintf(message, sizeof(message), _("Cancelling connection"));
-			((ay_connection *)element->data)->status_callback(message, ((ay_connection *)element->data)->cb_data);
-		}
-	}
-}
-
-
-int ay_connect_host( const char *host, int port, void *cb, void *data, void *scb )
-{
-	ay_connection *con = g_new0(ay_connection, 1);
-
-	if (cb)
-		ay_active_connections = g_slist_append(ay_active_connections, con);
-
-	con->host = strdup(host);
-	con->port = port;
-	con->callback = cb;
-	con->cb_data = data;
-	con->status_callback = scb;
-
-	/* This could be extended later to have separate proxies for different connections */
-	con->proxy = default_proxy;
-
-	if(!default_proxy || default_proxy->type == PROXY_NONE)
-		con->connect = NULL ;
-	else if (default_proxy->type == PROXY_HTTP)
-		con->connect = (ay_connect_handler)http_connect ;
-	else if (default_proxy->type == PROXY_SOCKS4)
-		con->connect = (ay_connect_handler)socks4_connect ;
-	else if (default_proxy->type == PROXY_SOCKS5)
-		con->connect = (ay_connect_handler)socks5_connect ;
-	else {
-		debug_print("Invalid proxy\n");
-		return AY_INVALID_CONNECT_DATA;
-	}
-
-	if(cb) {
-		con->leash  = g_async_queue_new ();
-
-		g_thread_create(_do_connect, con, FALSE, NULL);
-
-		/* Wait till the connector thread starts */
-		g_async_queue_pop(con->leash);
-
-		con->source = g_idle_add(check_connect_complete, con);
-
-		return con->source;
-	}
-	else {
-		int sockfd;
-
-		con = _do_connect(con);
-
-		sockfd = con->sockfd;
-
-		ay_active_connections = g_slist_remove(ay_active_connections, con);
-		free(con->host);
-		g_free(con);
-
-		return sockfd;
-	}
-}
-
-
-static gboolean ay_check_continue_connecting(ay_connection *con, GAsyncQueue *leash)
-{
-	if(con->status == AY_CANCEL_CONNECT) {
-		if(con->sockfd)
-			close(con->sockfd);
-
-		con->sockfd = -1;
-
-		if(con->callback) {
-			g_async_queue_push(leash, con);
-			g_async_queue_unref(leash);
-		}
-
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-
-static gpointer _do_connect( gpointer data )
-{
-	int retval=0;
-	ay_connection *con = (ay_connection *)data;
-	char message[255];
-	GAsyncQueue *leash = NULL;
-
-	/* Tell the main thread that I have begun */
-	if(con->callback) {
-		g_async_queue_ref(con->leash);
-		leash = con->leash;
-		g_async_queue_push(con->leash, con);
-	}
-
-	if( !ay_check_continue_connecting(con, leash) )
-		return con;
-
-	if(con->status_callback != NULL) {
-		snprintf(message, sizeof(message), _("Connecting to %s"), con->host);
-		con->status_callback(message, con->cb_data);
-	}
-
-	if (!con->connect) {
-		con->sockfd = connect_address(con->host, con->port);
-
-		if( !ay_check_continue_connecting(con, leash) )
-			return con;
-
-		if(con->sockfd<0)
-			con->status = errno;
-	}
-	else {
-		int proxyfd = 0;
-
-		if(con->status_callback != NULL) {
-			snprintf(message, sizeof(message), _("Connecting to proxy %s"), con->proxy->host);
-			con->status_callback(message, con->cb_data);
-		}
-
-		/* First get a connection to the proxy */
-		proxyfd = connect_address(con->proxy->host, con->proxy->port);
-
-		if(proxyfd>=0) {
-			if( !ay_check_continue_connecting(con, leash) ) {
-				close(proxyfd);
-				return con;
-			}
-        
-			if(con->status_callback != NULL) {
-				snprintf(message, sizeof(message), _("Connecting to %s"), con->proxy->host);
-				con->status_callback(message, con->cb_data);
-			}
-
-			retval = con->connect(proxyfd, con);
-
-			if( !ay_check_continue_connecting(con, leash) ) {
-				close(proxyfd);
-				return con;
-			}
-        
-			if(retval<0)
-				con->status = retval;
-			else
-				con->sockfd = proxyfd;
-		}
-		else {
-			con->status = errno;
-		}
-	}
-
-	if(con->callback) {
-		fcntl(con->sockfd, F_SETFL, O_NONBLOCK);
-
-		g_async_queue_push(leash, con);
-		g_async_queue_unref(leash);
-	}
-
-	return con;
-}
-
-
-static char *encode_proxy_auth_str( ay_proxy_data *proxy )
+static char *encode_proxy_auth_str( AyProxyData *proxy )
 {
 	char buff[200];
 

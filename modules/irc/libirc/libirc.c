@@ -33,15 +33,15 @@ void irc_login( const char *password, int mode, irc_account *ia )
 
 	if(password && password [0]) {
 		sprintf(buff, "PASS %s\n", password);
-		irc_send_data(buff, strlen(buff), ia);
+		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 	}
 	if(ia->nick) {
 		sprintf(buff, "NICK %s\n", ia->nick);
-		irc_send_data(buff, strlen(buff), ia);
+		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 	}
 	if(ia->user) {
 		sprintf(buff, "USER %s %d * :Ayttm user %s\n", ia->user, mode, ia->user);
-		irc_send_data(buff, strlen(buff), ia);
+		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 	}
 }
 
@@ -53,7 +53,7 @@ void irc_logout( irc_account *ia )
 	memset(buff,0,BUF_LEN);
 
 	sprintf(buff, "QUIT :Ayttm logging off\n");
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -101,7 +101,7 @@ void irc_send_privmsg( const char *recipient, char *message, irc_account *ia)
 	}
 
 	if(*buff)
-		irc_send_data(buff, strlen(buff), ia);
+		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 
 }
 
@@ -116,7 +116,7 @@ void irc_send_notice( const char *recipient, char *message, irc_account *ia)
 	out_msg = ctcp_encode (message, strlen(message) ) ;
 
 	sprintf(buff, "NOTICE %s :%s\n", recipient, out_msg);
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -134,7 +134,7 @@ void irc_send_whois( const char *target, const char *mask, irc_account *ia )
 	strcat(buff, mask);
 	strcat(buff, "\n");
 
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -147,12 +147,12 @@ void irc_set_away( char * message, irc_account *ia )
 	if (message) {
 		/* Actually set away */
 		sprintf(buff, "AWAY :%s\n", message);
-		irc_send_data(buff, strlen(buff), ia);
+		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 
 	} else {
 		/* Unset away */
 		sprintf(buff, "AWAY\n");
-		irc_send_data(buff, strlen(buff), ia);
+		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 	}
 }
 
@@ -164,7 +164,7 @@ void irc_set_mode(int irc_mode, irc_account *ia)
 	memset(buff, 0, BUF_LEN);
 
 	sprintf(buff, "MODE %s +%c\n", ia->nick, irc_modes[irc_mode]);
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -175,7 +175,7 @@ void irc_unset_mode(int irc_mode, irc_account *ia)
 	memset(buff, 0, BUF_LEN);
 
 	sprintf(buff, "MODE %s -%c\n", ia->nick, irc_modes[irc_mode]);
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -187,7 +187,7 @@ void irc_join (const char *room, irc_account *ia)
 
 	sprintf(buff, "JOIN :%s\n", room);
 			
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 /* Leave a Channel */
@@ -198,7 +198,7 @@ void irc_leave_chat_room(const char *room, irc_account *ia)
 
 	sprintf(buff, "PART :%s\n", room);
 			
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -212,11 +212,11 @@ void irc_send_invite( const char *user, const char *room,
 	if (*message) {
 		sprintf(buff, "PRIVMSG %s :%s\n", user, message);
 			
-		irc_send_data(buff, strlen(buff), ia);
+		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 	}
 
 	sprintf(buff, "INVITE %s %s\n", user, room);
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -226,7 +226,7 @@ void irc_get_names_list( const char *channel, irc_account *ia )
 	memset(buff, 0, BUF_LEN);
 
 	sprintf(buff, "NAMES %s\n", channel);
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -248,7 +248,7 @@ void irc_request_list ( const char *channel, const char *target, irc_account *ia
 
 	strcat(buff, "\n");
 
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -259,7 +259,7 @@ void irc_send_pong(const char *message, irc_account *ia)
 	memset(buff, 0, BUF_LEN);
 
 	sprintf(buff, "PONG :%s\n", message);
-	irc_send_data(buff, strlen(buff), ia);
+	ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 }
 
 
@@ -397,96 +397,22 @@ char *irc_param_list_get_at(irc_param_list * list, int position)
 
 
 
-/* Send data to the IRC server */
-void irc_send_data(void *buf, int len, irc_account *ia)
+int irc_recv (irc_account *ia, char *buf, int len)
 {
-	int total = 0;	  // how many bytes we've sent
-	int bytesleft = len; // how many we have left to send
-	int n = 0;
-	int errors = 0;
-	int fd = ia->fd;
+	if(buf[len] == '\n') {
+		if(buf[len-1] !='\r')
+			return 0;
 
-	if (!fd) {
-		char buff[1024]; 
-		snprintf(buff, sizeof(buff), _("Not connected to %s."), ia->connect_address);
+		buf[len-1]='\0';
+//#ifdef IRCDEBUG
+		fprintf(stderr, "irc> %s\n", buf);
+//#endif
+		irc_message_parse(buf, ia);
 
-		ia->callbacks->irc_error(buff, ia->data) ;
-
-		return ;
+		return 1;
 	}
 
-	while(total < len) {
-		n = send(fd, buf+total, bytesleft, 0);
-		if (n == -1) {
-			errors++;
-		
-			/* sleep a little bit and try again, up to 10 times */
-			if ((errno == EAGAIN) && (errors < 10)) {
-				n = 0;
-				usleep(1); 
-			}
-			else
-				break;
-		}
-		total += n;
-		bytesleft -= n;
-	}
-
-#ifdef IRCDEBUG
-	fprintf(stderr, "irc< %s", buf);
-#endif
-
-	if(n==-1) {
-		char buff[1024]; 
-		snprintf(buff, sizeof(buff), _("Error occurred while sending data to %s: %s"), 
-				ia->connect_address, strerror(errno));
-
-		ia->callbacks->irc_error(buff, ia->data);
-	}
-}
-
-
-void irc_recv (irc_account *ia, int source, int condition)
-{
-	int n = 0;
-
-	if (source != ia->fd)
-		return ;
-
-	do {
-		n = recv(source, &ia->buf[ia->len], 1, 0);
-
-		if(n<=0) {
-			if (n == -1 && (errno == EAGAIN || errno == EINTR) ) {
-				return;	/* Try again later */
-			}
-
-			/* Connection closed by other side - log off */
-			char buff[1024]; 
-			snprintf(buff, sizeof(buff), _("Connection closed by %s."), ia->connect_address);
-
-			ia->callbacks->irc_error(buff, ia->data) ;
-
-			return;
-		}
-
-		if(ia->buf[ia->len] == '\n') {
-			if(ia->buf[ia->len - 1]!='\r')
-				continue;
-
-			ia->buf[ia->len-1]='\0';
-#ifdef IRCDEBUG
-			fprintf(stderr, "irc> %s\n", ia->buf);
-#endif
-			irc_message_parse(ia->buf, ia);
-
-			memset(ia->buf, 0, BUF_LEN);
-			ia->len = 0;
-
-			continue;
-		}
-		ia->len++;
-	} while(n>0);
+	return 0;
 }
 
 

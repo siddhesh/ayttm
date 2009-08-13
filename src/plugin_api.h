@@ -106,9 +106,9 @@ typedef void (*eb_menu_callback) (ebmCallbackData *data);
 
 /* File */
 typedef enum {
-	EB_INPUT_READ = G_IO_IN | G_IO_HUP | G_IO_ERR | G_IO_NVAL,
+	EB_INPUT_READ = G_IO_IN | G_IO_HUP | G_IO_PRI | G_IO_ERR | G_IO_NVAL,
 	EB_INPUT_WRITE =  G_IO_OUT | G_IO_ERR | G_IO_NVAL,
-	EB_INPUT_EXCEPTION = G_IO_PRI | G_IO_NVAL
+	EB_INPUT_EXCEPTION = G_IO_ERR | G_IO_NVAL
 } eb_input_condition;
 
 

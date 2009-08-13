@@ -2,7 +2,7 @@ SUBDIRS = libjabber libxode
 
 EXTRA_DIST = libEBjabber.h
 
-AM_CFLAGS = $(GTK_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/src -Ilibjabber/include -Ilibxode/include $(EB_CFLAGS)
+AM_CFLAGS = -DJDEBUG $(GTK_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/src -Ilibjabber/include -Ilibxode/include $(EB_CFLAGS)
 
 if MINGW32
 WIN32_LDFLAGS = -no-undefined

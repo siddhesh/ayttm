@@ -18,20 +18,23 @@
  */
 
 #include "jabber/jabber.h"
-#include "tcp_util.h"
-#include "libproxy/libproxy.h"
+#include "libproxy/networking.h"
 #include <config.h>
-#ifdef HAVE_OPENSSL
-#include "ssl.h"
-#endif
+
 /* local macros for launching event handlers */
 #define STATE_EVT(arg) if(j->on_state) { (j->on_state)(j, (arg) ); }
+
+extern int ext_jabber_connect(jconn j, void *callback);
+extern void ext_jabber_connect_error(void *data, int error, jconn j);
+extern void ext_jabber_disconnect(jconn j);
+int ext_jabber_read(jconn j, char *buf, int len);
+int ext_jabber_write(jconn j, const char *buf, int len);
 
 /* prototypes of the local functions */
 static void startElement(void *userdata, const char *name, const char **attribs);
 static void endElement(void *userdata, const char *name);
 static void charData(void *userdata, const char *s, int slen);
-void jab_continue (int fd, int error, void *data);
+void jab_continue (void *data, int error, jconn j);
 
 /*
  *  jab_new -- initialize a new jabber connection
@@ -63,7 +66,6 @@ jconn jab_new(char *user, char *pass, char *serv)
     j->serv = pstrdup(p, serv);
     
     j->state = JCONN_STATE_OFF;
-    j->fd = -1;
 
     return j;
 }
@@ -119,7 +121,7 @@ void jab_packet_handler(jconn j, jconn_packet_h h)
  *      j -- connection
  *
  */
-int jab_start(jconn j, int port, int use_ssl)
+int jab_start(jconn j)
 {
     int tag = 0;
     if(!j || j->state != JCONN_STATE_OFF) return 0;
@@ -128,52 +130,31 @@ int jab_start(jconn j, int port, int use_ssl)
     XML_SetUserData(j->parser, (void *)j);
     XML_SetElementHandler(j->parser, startElement, endElement);
     XML_SetCharacterDataHandler(j->parser, charData);
-#ifdef HAVE_OPENSSL
-    j->usessl = use_ssl;
-#else
-    j->usessl = 0;
-#endif    
-    
-    j->user->port = port;
 
     if (!j->serv || !strlen(j->serv))
       j->serv = j->user->server;
 
-    if ((tag = ay_connect_host(j->serv, port,
-		    	    (ay_socket_callback)jab_continue, j, NULL)) < 0) {
+    if ((tag = ext_jabber_connect(j, jab_continue)) < 0) {
 	    STATE_EVT(JCONN_STATE_OFF);
 	    return 0;
-    }	 
+    }
     return tag; 
-    
 }
-void jab_continue (int fd, int error, void *data)
-{	
-    jconn j = (jconn)data;	
+
+
+void jab_continue (void *data, int error, jconn j)
+{
     xmlnode x;
     char *t,*t2;
 
-    j->fd = fd;
 
-    if(j->fd < 0 || error) {
-        STATE_EVT(JCONN_STATE_OFF)
+    if(error) {
+    	ext_jabber_connect_error(data, error, j);
         return;
     }
+
     j->state = JCONN_STATE_CONNECTED;
     STATE_EVT(JCONN_STATE_CONNECTED)
-
-#ifdef HAVE_OPENSSL
-    if (j->usessl) {
-            j->ssl_sock = (SockInfo*)malloc(sizeof(SockInfo));
-	    ssl_init();
-	    j->ssl_sock->sock = fd;
-	    if (!ssl_init_socket(j->ssl_sock, j->user->server, j->user->port)) {
-		  printf("ssl error !\n");  
-		  STATE_EVT(JCONN_STATE_OFF)
-		  return;
-	    }
-    }  
-#endif
 
     /* start stream */
     x = jutil_header(NS_CLIENT, j->user->server);
@@ -189,7 +170,6 @@ void jab_continue (int fd, int error, void *data)
 
     j->state = JCONN_STATE_ON;
     STATE_EVT(JCONN_STATE_ON)
-
 }
 
 /*
@@ -203,12 +183,12 @@ void jab_stop(jconn j)
     if(!j || j->state == JCONN_STATE_OFF) return;
 
     j->state = JCONN_STATE_OFF;
-    close(j->fd);
-    j->fd = -1;
+    ext_jabber_disconnect(j);
+
     XML_ParserFree(j->parser);
 }
 
-/*
+/* UNUSED
  *  jab_getfd -- get file descriptor of connection socket
  *
  *  parameters
@@ -217,13 +197,13 @@ void jab_stop(jconn j)
  *  returns
  *      fd of the socket or -1 if socket was not connected
  */
-int jab_getfd(jconn j)
+/* int jab_getfd(jconn j)
 {
     if(j)
         return j->fd;
     else
         return -1;
-}
+}*/
 
 /*
  *  jab_getjid -- get jid structure of user
@@ -267,12 +247,9 @@ void jab_send(jconn j, xmlnode x)
     if (j && j->state != JCONN_STATE_OFF)
     {
 	    char *buf = xmlnode2str(x);
-#ifdef HAVE_OPENSSL
-	if(j->usessl && buf)
-		ssl_write(j->ssl_sock->ssl, buf, strlen(buf));
-	else if (buf)
-#endif	
-	     write(j->fd, buf, strlen(buf));
+
+	    ext_jabber_write(j, buf, strlen(buf));
+
 #ifdef JDEBUG
 	    fprintf(stderr, "jab<%s %s\n", j->user->user, buf);
 #endif
@@ -289,12 +266,7 @@ void jab_send(jconn j, xmlnode x)
 void jab_send_raw(jconn j, const char *str)
 {
     if (j && j->state != JCONN_STATE_OFF) {
-#ifdef HAVE_OPENSSL
-	if(j->usessl)
-		ssl_write(j->ssl_sock->ssl, str, strlen(str));
-	else
-#endif	
-		write(j->fd, str, strlen(str));
+	    ext_jabber_write(j, str, strlen(str));
     }
 #ifdef JDEBUG
     fprintf(stderr, "rjab<%s %s\n", j->user->user, str);
@@ -307,20 +279,21 @@ void jab_send_raw(jconn j, const char *str)
  *  parameters
  *      j -- connection
  */
-void jab_recv(jconn j)
+int jab_recv(jconn j)
 {
     static char buf[4096];
-    int len;
+    int len = 0;
 
     if(!j || j->state == JCONN_STATE_OFF)
-        return;
+        return -1;
 
-#ifdef HAVE_OPENSSL
-    if (j->usessl) 
-	    len = ssl_read(j->ssl_sock->ssl, buf, sizeof(buf)-1);
-    else
-#endif
-            len = read(j->fd, buf, sizeof(buf)-1);
+/*    do {
+    	ret = ext_jabber_read(j, buf, sizeof(buf)-1);
+    } while( ret > 0 && (len+=ret) );
+*/
+
+    len = ext_jabber_read(j, buf, sizeof(buf) - 1 );
+
     if(len>0)
     {
         buf[len] = '\0';
@@ -329,13 +302,15 @@ void jab_recv(jconn j)
 #endif
         XML_Parse(j->parser, buf, len, 0);
     }
-    else if(len<0)
+    else if( len<0 && errno != EAGAIN )
     {
         STATE_EVT(JCONN_STATE_OFF);
         jab_stop(j);
     }
+
+    return len;
 }
-#undef JDEBUG
+//#undef JDEBUG
 /*
  *  jab_poll -- check socket for incoming data
  *
@@ -343,29 +318,9 @@ void jab_recv(jconn j)
  *      j -- connection
  *      timeout -- poll timeout
  */
-void jab_poll(jconn j, int timeout)
+void jab_poll(jconn j)
 {
-    fd_set fds;
-    struct timeval tv;
-
-    if (!j || j->state == JCONN_STATE_OFF)
-        return;
-
-    FD_ZERO(&fds);
-    FD_SET(j->fd, &fds);
-
-    if (timeout < 0)
-    {
-        if (select(j->fd + 1, &fds, NULL, NULL, NULL) > 0)
-            jab_recv(j);
-    }
-    else
-    {
-	    tv.tv_sec  = 0;
-	    tv.tv_usec = timeout;
-	    if (select(j->fd + 1, &fds, NULL, NULL, &tv) > 0)
-	        jab_recv(j);
-    }
+    jab_recv(j);
 }
 
 /*

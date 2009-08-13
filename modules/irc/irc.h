@@ -24,6 +24,7 @@
  * irc.h
  */
 
+#include "libproxy/networking.h"
 
 /* RFC1459 and RFC2812 defines max message size
    including \n == 512 bytes, but being tolerant of
@@ -53,6 +54,7 @@ typedef struct irc_local_account_type
 	irc_account *ia;
 	void (*got_public_chatrooms) (LList *list, void *data);
 	void *public_chatroom_callback_data;
+	AyConnection *	connection;
 } irc_local_account;
 
 typedef struct irc_account_type
@@ -130,7 +132,7 @@ static void ay_irc_accept_invite( eb_local_account * account, void * invitation 
 static void ay_irc_decline_invite( eb_local_account * account, void * invitation );
 static void eb_irc_read_prefs_config(LList * values);
 static LList * eb_irc_write_prefs_config();
-static void irc_connect_cb(int fd, int error, void *data);
+static void irc_connect_cb(AyConnection *con, AyConnectionStatus error, void *data);
 
 void irc_finish_login(eb_local_account *ela);
 static irc_callbacks *ay_irc_map_callbacks( void ) ;

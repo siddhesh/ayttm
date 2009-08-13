@@ -144,6 +144,9 @@ void ay_dump_elas(void);
 
 gchar *convert_to_utf8(const char *message);
 
+char *ay_base64_encode(const unsigned char *in, int len);
+unsigned char *ay_base64_decode(const char *in, int *len);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

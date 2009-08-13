@@ -52,8 +52,6 @@ char *strchr (), *strrchr ();
 #include "yahoo_debug.h"
 #ifdef __MINGW32__
 # include <winsock2.h>
-# define write(a,b,c) send(a,b,c,0)
-# define read(a,b,c)  recv(a,b,c,0)
 # define snprintf _snprintf
 #endif
 
@@ -66,7 +64,7 @@ extern struct yahoo_callbacks *yc;
 
 extern enum yahoo_log_level log_level;
 
-int yahoo_tcp_readline(char *ptr, int maxlen, int fd)
+int yahoo_tcp_readline(char *ptr, int maxlen, void *fd)
 {
 	int n, rc;
 	char c;
@@ -74,7 +72,7 @@ int yahoo_tcp_readline(char *ptr, int maxlen, int fd)
 	for (n = 1; n < maxlen; n++) {
 
 		do {
-			rc = read(fd, &c, 1);
+			rc = YAHOO_CALLBACK(ext_yahoo_read)(fd, &c, 1);
 		} while(rc == -1 && (errno == EINTR || errno == EAGAIN)); /* this is bad - it should be done asynchronously */
 
 		if (rc == 1) {
@@ -99,7 +97,7 @@ int yahoo_tcp_readline(char *ptr, int maxlen, int fd)
 }
 
 static int url_to_host_port_path(const char *url,
-		char *host, int *port, char *path)
+		char *host, int *port, char *path, int *ssl)
 {
 	char *urlcopy=NULL;
 	char *slash=NULL;
@@ -114,10 +112,14 @@ static int url_to_host_port_path(const char *url,
 	 * http://hostname:port/
 	 * http://hostname:port/path
 	 * http://hostname:port/path:foo
+	 * and https:// variants of the above
 	 */
 
 	if(strstr(url, "http://") == url) {
 		urlcopy = strdup(url+7);
+	} else if(strstr(url, "https://") == url) {
+		urlcopy = strdup(url+8);
+		*ssl=1;
 	} else {
 		WARNING(("Weird url - unknown protocol: %s", url));
 		return 0;
@@ -127,7 +129,10 @@ static int url_to_host_port_path(const char *url,
 	colon = strchr(urlcopy, ':');
 
 	if(!colon || (slash && slash < colon)) {
-		*port = 80;
+		if (*ssl)
+			*port = 443;
+		else
+			*port = 80;
 	} else {
 		*colon = 0;
 		*port = atoi(colon+1);
@@ -277,7 +282,7 @@ char *yahoo_xmldecode(const char *instr)
 	return (str);
 }
 
-typedef void (*http_connected)(int id, int fd, int error);
+typedef void (*http_connected)(int id, void *fd, int error);
 
 struct callback_data {
 	int id;
@@ -286,26 +291,26 @@ struct callback_data {
 	void *user_data;
 };
 
-static void connect_complete(int fd, int error, void *data)
+static void connect_complete(void *fd, int error, void *data)
 {
 	struct callback_data *ccd = data;
-	if(error == 0 && fd > 0)
-		write(fd, ccd->request, strlen(ccd->request));
+	if(error == 0)
+		YAHOO_CALLBACK(ext_yahoo_write)(fd, ccd->request, strlen(ccd->request));
 	FREE(ccd->request);
 	ccd->callback(ccd->id, fd, error, ccd->user_data);
 	FREE(ccd);
 }
 
 static void yahoo_send_http_request(int id, char *host, int port, char *request, 
-		yahoo_get_fd_callback callback, void *data)
+		yahoo_get_fd_callback callback, void *data, int use_ssl)
 {
 	struct callback_data *ccd=y_new0(struct callback_data, 1);
 	ccd->callback = callback;
 	ccd->id = id;
 	ccd->request = strdup(request);
 	ccd->user_data = data;
-	
-	YAHOO_CALLBACK(ext_yahoo_connect_async)(id, host, port, connect_complete, ccd);
+
+	YAHOO_CALLBACK(ext_yahoo_connect_async)(id, host, port, connect_complete, ccd, use_ssl);
 }
 
 void yahoo_http_post(int id, const char *url, const char *cookies, long content_length,
@@ -315,8 +320,9 @@ void yahoo_http_post(int id, const char *url, const char *cookies, long content_
 	int port = 80;
 	char path[255];
 	char buff[1024];
+	int ssl = 0;
 	
-	if(!url_to_host_port_path(url, host, &port, path))
+	if(!url_to_host_port_path(url, host, &port, path, &ssl))
 		return;
 
 	/* thanks to kopete dumpcap */
@@ -332,7 +338,7 @@ void yahoo_http_post(int id, const char *url, const char *cookies, long content_
 			host, port,
 			content_length);
 
-	yahoo_send_http_request(id, host, port, buff, callback, data);
+	yahoo_send_http_request(id, host, port, buff, callback, data, ssl);
 }
 
 void yahoo_http_get(int id, const char *url, const char *cookies,
@@ -341,20 +347,28 @@ void yahoo_http_get(int id, const char *url, const char *cookies,
 	char host[255];
 	int port = 80;
 	char path[255];
-	char buff[1024];
+	char buff[2048];
+	char cookiebuff[1024];
+	int ssl = 0;
 	
-	if(!url_to_host_port_path(url, host, &port, path))
+	if(!url_to_host_port_path(url, host, &port, path, &ssl))
 		return;
+
+	/* Allow cases when we don't need to send a cookie */
+	if(cookies)
+		snprintf(cookiebuff, sizeof(cookiebuff), "Cookie: %s\r\n", cookies);
+	else
+		cookiebuff[0]='\0';
 
 	snprintf(buff, sizeof(buff), 
 			"GET %s HTTP/1.0\r\n"
 			"Host: %s:%d\r\n"
 			"User-Agent: Mozilla/4.5 [en] (" PACKAGE "/" VERSION ")\r\n"
-			"Cookie: %s\r\n"
+			"%s"
 			"\r\n",
-			path, host, port, cookies);
+			path, host, port, cookiebuff);
 
-	yahoo_send_http_request(id, host, port, buff, callback, data);
+	yahoo_send_http_request(id, host, port, buff, callback, data, ssl);
 }
 
 struct url_data {
@@ -362,7 +376,7 @@ struct url_data {
 	void *user_data;
 };
 
-static void yahoo_got_url_fd(int id, int fd, int error, void *data)
+static void yahoo_got_url_fd(int id, void *fd, int error, void *data)
 {
 	char *tmp=NULL;
 	char buff[1024];
@@ -372,7 +386,7 @@ static void yahoo_got_url_fd(int id, int fd, int error, void *data)
 
 	struct url_data *ud = data;
 
-	if(error || fd < 0) {
+	if(error || fd == NULL) {
 		ud->callback(id, fd, error, filename, filesize, ud->user_data);
 		FREE(ud);
 		return;

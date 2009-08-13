@@ -179,8 +179,15 @@ static gboolean ay_io_invoke(GIOChannel *source, GIOCondition condition, gpointe
 {
 	AyIOClosure *closure = data;
 
-	if(closure->condition & condition)
+	if(closure->condition & condition) {
+		if(!closure->function) {
+			g_warning("NULL Function called for data %p, fd %d\n", closure->data,  g_io_channel_unix_get_fd(source));
+
+			return TRUE;
+		}
+
 		closure->function(closure->data, g_io_channel_unix_get_fd(source), condition);
+	}
 
 	return TRUE;
 }
@@ -201,6 +208,8 @@ int eb_input_add(int fd, eb_input_condition condition, eb_input_function functio
 	closure->function = function;
 	closure->condition = condition;
 	closure->data = callback_data;
+
+	eb_debug(DBG_CORE, "Adding input %d with function %p for data %p", fd, function, callback_data);
 
 	channel = g_io_channel_unix_new(fd);
 	result = g_io_add_watch_full(channel, G_PRIORITY_DEFAULT, condition, 

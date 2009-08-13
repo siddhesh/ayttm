@@ -28,8 +28,8 @@ extern "C" {
 
 #include "yahoo2_types.h"
 
-/* returns the socket descriptor for a given pager connection. shouldn't be needed */
-int  yahoo_get_fd(int id);
+/* returns the socket descriptor object for a given pager connection. shouldn't be needed */
+void *yahoo_get_fd(int id);
 
 /* says how much logging to do */
 /* see yahoo2_types.h for the different values */
@@ -176,8 +176,8 @@ void yahoo_get_url_handle(int id, const char *url,
 /* these should be called when input is available on a fd */
 /* registered by ext_yahoo_add_handler */
 /* if these return negative values, errno may be set */
-int  yahoo_read_ready(int id, int fd, void *data);
-int  yahoo_write_ready(int id, int fd, void *data);
+int  yahoo_read_ready(int id, void *fd, void *data);
+int  yahoo_write_ready(int id, void *fd, void *data);
 
 /* utility functions. these do not hit the server */
 enum yahoo_status yahoo_current_status(int id);

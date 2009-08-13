@@ -8,7 +8,7 @@ modules/importers/import_everybuddy.c
 modules/irc/irc.c
 modules/jabber/jabber.c
 modules/jabber/libEBjabber.c
-modules/msn2/msn.C
+modules/msn2/msn.c
 modules/smtp/smtp.c
 modules/utility/autotrans.c
 modules/utility/middle.c

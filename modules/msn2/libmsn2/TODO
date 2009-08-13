@@ -2,13 +2,12 @@ Here's a list fo things that are pending and will be implemented sooner
 or later. This is in no particular order. Also, the hints in brackets are 
 only indicative:
 
-* MSG and Typing notifications. Includes Switchboard stuff (CAL, RNG, ANS,
-  MSG, BYE, etc.)
-* Group chat
+* Group chat	(Done, but not tested yet)
 * Chat invitations	(SND)
 * Ping	(PNG, QNG)
 * Add/Remove/Modify buddies	(SOAP with ADL, RML)
 * File transfer (MSNC?)
 * Group modifications
 * Membership changes (SOAP)
+* Error Handling
 

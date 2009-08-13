@@ -51,7 +51,6 @@ typedef unsigned long ulong;
 #include "smileys.h"
 #include "gtk_globals.h"
 #include "activity_bar.h"
-#include "tcp_util.h"
 #include "messages.h"
 #include "dialog.h"
 
@@ -84,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.52 $",
-	"$Date: 2009/07/27 16:42:04 $",
+	"$Revision: 1.53 $",
+	"$Date: 2009/08/13 20:20:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -287,10 +286,7 @@ static void ay_jabber_cancel_connect (void *data)
 	eb_jabber_local_account_data * jlad;
 	jlad = (eb_jabber_local_account_data *)ela->protocol_local_account_data;
 	
-	ay_socket_cancel_async(jlad->connect_tag);
-	jlad->activity_tag=0;
-	jlad->connect_tag = 0;
-	eb_jabber_logout(ela);
+	ay_connection_cancel_connect(jlad->connect_tag);
 }
 
 static void eb_jabber_finish_login(const char *password, void *data)
@@ -535,6 +531,8 @@ static eb_local_account * eb_jabber_read_local_account_config( LList * values )
 		*tmp='\0';
 	strcpy(ela->alias, buff );
 	ela->service_id = SERVICE_INFO.protocol_id;
+
+	eb_debug(DBG_JBR, "Created local account (ela=%p, jlad=%p)\n", ela, jlad);
 
 	return ela;
 }

@@ -36,7 +36,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <assert.h>
-#include <libproxy.h>
+#include <networking.h>
 
 #ifdef __MINGW32__
 #include <winsock2.h>
@@ -1924,6 +1924,7 @@ char * ay_http_get(const char *uri) {
 	char *url = NULL;
 	int sock = 0;
 	char buf[4096];
+	AyConnection *con = NULL;
 	
 	server = strdup(uri);
 	
@@ -1944,10 +1945,15 @@ char * ay_http_get(const char *uri) {
 	*(url-sizeof(char)) = '\0';
 	
 	eb_debug(DBG_CORE,"Getting %s from %s\n", url, server);
-	sock = ay_connect_host(server, 80, NULL, NULL, NULL);
-	/* FIXME: won't work with proxy */
+
+	con = ay_connection_new(server, 80, AY_CONNECTION_TYPE_PLAIN);
+
+	sock = ay_connection_connect(con, NULL, NULL, NULL, NULL);
+
 	if (sock <= 0) {
 		ay_do_error(_("Can't connect"), _("Connection to the server failed."));
+
+		ay_connection_free(con);
 		return NULL;
 	}
 
@@ -1959,7 +1965,7 @@ char * ay_http_get(const char *uri) {
 	
 	eb_debug(DBG_CORE, "<%s", buf);
 	
-	if (write (sock, buf, strlen(buf)) < strlen(buf)) {
+	if (ay_connection_write (con, buf, strlen(buf)) < strlen(buf)) {
 		eb_debug(DBG_CORE, "Couldn't write to sock !\n");
 		return NULL;
 	}
@@ -1973,6 +1979,7 @@ char * ay_http_get(const char *uri) {
 		/* getting headers */
 		if (ay_http_readline(buf, sizeof(buf), sock) < 0) {
 			eb_debug(DBG_CORE, "readline error\n");
+			ay_connection_free(con);
 			return NULL;
 		}
 	}
@@ -1990,7 +1997,7 @@ char * ay_http_get(const char *uri) {
 		
 	}
 	
-	close(sock);
+	ay_connection_free(con);
 	return result;
 }
 
@@ -2070,6 +2077,9 @@ gchar *convert_to_utf8(const char *message)
 	const gchar *home_encoding = NULL;
 	int i=0;
 
+	if(!message)
+		return NULL;
+
 	char **enclist = g_strsplit_set(cGetLocalPref("encodings"), " \t", -1);
 
 	/* We need not do anything for a valid UTF-8 string */
@@ -2112,6 +2122,91 @@ gchar *convert_to_utf8(const char *message)
 	g_free(correct);
 
 	return output;
+}
+
+
+static const char base64_alpha[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+/* Encode binary data into base64 */
+char *ay_base64_encode(const unsigned char *in, int len)
+{
+	int i=0, j=0;
+
+	unsigned char *out = (char *)calloc((len + len % 3) * 4 / 3 + 1, sizeof(char));
+
+	for(i = 0, j = 0; i < len; i += 3, j+= 4) {
+
+		out[j] = base64_alpha[in[i] >> 2];
+
+		if(i+1<len)
+			out[j + 1] = base64_alpha[((in[i] & 0x03) << 4 ) | (in[i+1] >>4)];
+		else {
+			out[j + 1] = base64_alpha[((in[i] & 0x03) << 4 )];
+			out[j + 2] = '=';
+			out[j + 3] = '=';
+		}
+
+		if(i+2<len){
+			out[j + 2] = base64_alpha[((in[i+1] & 0x0f) << 2 ) | (in[i+2] >>6)];
+			out[j + 3] = base64_alpha[((in[i+2] & 0x3f))];
+		}
+		else if (i+2==len) {
+			out[j + 2] = base64_alpha[((in[i+1] & 0x0f) << 2 )];
+			out[j + 3] = '=';
+		}
+	}
+
+	return out;
+}
+
+
+/* Decode base64 into (possibly) binary data */
+unsigned char *ay_base64_decode(const char *in, int *len)
+{
+	int i=0, j=0;
+	int inlen = strlen(in);
+	int less = 0;
+
+	if(in[inlen-2] == '=')
+		less = 2;
+	else if (in[inlen-1] == '=')
+		less = 1;
+
+	*len = (inlen * 3 / 4) - less;
+
+	/* Leave space for null termination in case this is just a string */
+	char *out = (char *)calloc(*len + 1, sizeof(char));
+
+	for(i = 0, j = 0; i < inlen; i += 4, j+= 3) {
+		char tmpin[4]={0,0,0,0};
+		int k=0;
+
+		for(k=0; k<65; k++) {
+			if(in[i] == base64_alpha[k])
+				tmpin[0] = k;
+
+			if(in[i+1] == base64_alpha[k])
+				tmpin[1] = k;
+
+			if(in[i+2] == base64_alpha[k])
+				tmpin[2] = k;
+
+			if(in[i+3] == base64_alpha[k])
+				tmpin[3] = k;
+		}
+
+		out[j] = (tmpin[0] << 2) | (( tmpin[1] & 0x30 ) >> 4);
+
+
+		if(tmpin[2] < 64) {
+			out[j + 1] = ((tmpin[1] & 0x0f) << 4) | ((tmpin[2] & 0x3c) >> 2);
+		}
+		if(tmpin[3] < 64) {
+			out[j + 2] = ((tmpin[2] & 0x03) << 6) | tmpin[3] ;
+		}
+	}
+
+	return out;
 }
 
 

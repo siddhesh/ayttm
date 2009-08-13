@@ -1,3 +1,61 @@
+* Thu Aug 13 2009 20:20 UTC [siddheshp]   0.5.0-113
+- ChangeLog, libproxy/Makefile.am, libproxy/proxy.c,
+modules/aim-oscar/aim-oscar.c, modules/irc/irc.c, modules/irc/irc.h,
+modules/irc/libirc/libirc.c, modules/irc/libirc/libirc.h,
+modules/jabber/Makefile.am, modules/jabber/jabber.c,
+modules/jabber/libEBjabber.c, modules/jabber/libEBjabber.h,
+modules/jabber/libjabber/jconn.c,
+modules/jabber/libjabber/include/jabber/jabber.h,
+modules/msn2/libmsn2/Makefile.am, modules/msn2/libmsn2/TODO,
+modules/yahoo2/yahoo.c, modules/yahoo2/libyahoo2/libyahoo2.c,
+modules/yahoo2/libyahoo2/yahoo2.h,
+modules/yahoo2/libyahoo2/yahoo2_callbacks.h,
+modules/yahoo2/libyahoo2/yahoo2_types.h,
+modules/yahoo2/libyahoo2/yahoo_httplib.c,
+modules/yahoo2/libyahoo2/yahoo_httplib.h, po/POTFILES.in, po/de.po,
+po/en_GB.po, po/es.po, po/fr.po, po/hi.po, po/nl.po, po/pt_BR.po, po/sv.po,
+src/Makefile.am, src/dialog.c, src/dialog.h, src/plugin_api.c,
+src/plugin_api.h, src/prefs.c, src/util.c, src/util.h, src/gtk/prefs_window.C: 
+ * Merged netv2 branch into HEAD
+
+* Thu Aug 13 2009 13:10 UTC [siddheshp]   0.5.0-98-netv2
+- ChangeLog, configure.ac, modules/msn2/msn.c,
+modules/msn2/libmsn2/Makefile.am, modules/msn2/libmsn2/TODO,
+modules/msn2/libmsn2/msn-account.h, modules/msn2/libmsn2/msn-commands.c,
+modules/msn2/libmsn2/msn-connection.c, modules/msn2/libmsn2/msn-connection.h,
+modules/msn2/libmsn2/msn-errors.h, modules/msn2/libmsn2/msn-ext.h,
+modules/msn2/libmsn2/msn-login.c, modules/msn2/libmsn2/msn-message.c,
+modules/msn2/libmsn2/msn-message.h, modules/msn2/libmsn2/msn.h, msn-sb.c,
+msn-sb.h:
+ * MSN: Fixed crash on connection cancel
+ * MSN: Messaging and switchboard stuff. It's ugly, but it's done!
+ * MSN: Fixed a couple of double free cases in msn-connection
+ * MSN: Forgot to add msn-util.c in p[revious update
+ * MSN: Fixed msn_urldecode()
+
+* Wed Aug 12 2009 14:20 UTC [siddheshp]   0.5.0-97-netv2
+- ChangeLog, configure.ac, modules/msn2/msn.c,
+modules/msn2/libmsn2/Makefile.am, modules/msn2/libmsn2/msn-account.h,
+modules/msn2/libmsn2/msn-commands.c, modules/msn2/libmsn2/msn-contacts.c,
+modules/msn2/libmsn2/msn-ext.h, modules/msn2/libmsn2/msn-util.h,
+modules/msn2/libmsn2/msn-util.c, modules/msn2/libmsn2/msn.c,
+modules/msn2/libmsn2/msn.h:
+ * MSN: Presence information from and to users
+ * MSN: Notification of changes in own status and buddy status
+
+* Tue Aug 11 2009 22:20 UTC [siddheshp]   0.5.0-96-netv2
+- ChangeLog, configure.ac, modules/msn2/libmsn2/msn.c,
+modules/msn2/libmsn2/msn-login.h:
+ * MSN: Response for CHL (challenge message) from server
+
+* Tue Aug 11 2009 19:55 UTC [siddheshp]   0.5.0-95-netv2
+- ChangeLog, modules/msn2/msn.c, modules/msn2/libmsn2/*, libproxy/common.c,
+libproxy/net_constants.h, src/util.h, src/util.c:
+ * NET: Flag connection failures
+ * MSN: Complete rewrite. MSNP15 authentication, contact download and initial
+ presence. Everything else is still TBD
+ * CORE: Added base64_encode and decode utility functions.
+
 * Sun Aug 9 2009 09:02 UTC [pstef]   0.5.0-112
 - ChangeLog, configure.ac, src/status.c:
  * Reformatted file src/status.c
@@ -45,6 +103,13 @@ src/chat_window.h:
  * Improved IRC commands conversion and got rid of memory leak by the way
  * PONG can handle two-parameter message
  * Show number of people online in a channel
+
+* Wed Jul 22 2009 15:25 UTC [siddheshp]   0.5.0-94-netv2
+- ChangeLog, configure.ac, libproxy/networking.c, libproxy/networking.h,
+modules/aim-oscar/aim-oscar.c, modules/irc/irc.c, modules/jabber/jabber.c,
+modules/jabber/libEBjabber.c, modules/jabber/libEBjabber.h,
+modules/jabber/libjabber/jconn.c, modules/yahoo2/yahoo.c, src/plugin_api.h:
+ * NET, AIM, YMSG, JAB: Fixed connection cancellation code
 
 * Wed Jul 22 2009 09:35 UTC [siddheshp]   0.5.0-107
 - ChangeLog, configure.ac, modules/irc/libirc/libirc.c:
@@ -111,6 +176,25 @@ src/message_parse.c, src/chat_room.c:
  charset conversion. Users may specify encodings as a list separated by spaces
  * Added ISO-8859-15 and CP1252 as default values for encodings
 
+* Sat Jul 11 2009 11:45 UTC [siddheshp]   0.5.0-93-netv2
+- ChangeLog, modules/yahoo2/libyahoo2/libyahoo2.c:
+ * YMSG: Previous commit also added support to directly log in with a
+ particular status (BRB for example)
+
+* Sat Jul 11 2009 11:45 UTC [siddheshp]   0.5.0-93-netv2
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
+modules/yahoo2/libyahoo2/libyahoo2.c, modules/yahoo2/libyahoo2/yahoo2_types.h,
+modules/yahoo2/libyahoo2/yahoo_httplib.c, libproxy/ssl_certificate.h,
+libproxy/networking.h, libproxy/networking.c, libproxy/Attic/common.c:
+ * NET: Hostname resolution failure should be made known with reason
+ * NET: Initialize server socket to -1
+ * NET: More utility functions
+ * YMSG: Get address book from address.yahoo.com
+ * YMSG: Cookies are bigger. Increase cookie buffer size
+ * YMSG: Bump yahoo messenger version and build number to match pidgin
+ * YMSG: Add the mystery B cookie. Doesn't seem to do much but I found the
+ official yahoo client sending it
+
 * Sat Jul 11 2009 07:15 UTC [siddheshp]   0.5.0-97
 - ChangeLog, configure.ac, modules/jabber/libEBjabber.c,
 modules/jabber/libEBjabber.h,
@@ -136,6 +220,30 @@ modules/jabber/libjabber/jconn.c, src/plugin_api.c, src/util.c:
  * Piotr Stefaniak <2134918 at gmail dawt com> - Commented out jabber send
  typing notification since it is obsolete and causes errors on gtalk
 
+* Tue Jul 07 2009 09:45 UTC [siddheshp]   0.5.0-92-netv2
+- ChangeLog, modules/yahoo2/libyahoo2/libyahoo2.c, configure.ac:
+ * Removed obsolete old authentication protocol support
+ * Added a few FIXMEs and TODOs to remind me of what else is to be done
+
+* Mon Jul 06 2009 18:25 UTC [siddheshp]   0.5.0-91-netv2
+- ChangeLog, configure.ac, libproxy/networking.c, libproxy/networking.h,
+modules/aim-oscar/aim-oscar.c:
+ * A couple of hacks in AyConnection to allow for quick porting of aim-oscar
+ code to the new connection stuff. I'm just too lazy to do this now and it's
+ not as if AIM is changing it's chat protocol soon
+ * Utilized those hacks in AIM. I think AIM is working now. Somebody please
+ test. I got an invalid password error on an account I don't remember the
+ password of.
+
+* Mon Jul 06 2009 15:35 UTC [siddheshp]   0.5.0-90-netv2
+- ChangeLog, configure.ac, modules/yahoo2/libyahoo2/yahoo2_types.h,
+/modules/yahoo2/libyahoo2/libyahoo2.c, /modules/yahoo2/yahoo.c,
+/libproxy/common.c:
+ * Reshuffled authentication sequence a bit. Pager server does not like to
+ wait till our HTTPS authentication sequence is done, so delaying pager
+ connection to after the https authentication is done.
+ * Added login failure messages
+
 * Sun Jul 05 2009 15:55 UTC [siddheshp]   0.5.0-94
 - ChangeLog, configure.ac, src/status.c:
  * Save size only when necessary -- i.e. when it changes
@@ -148,6 +256,25 @@ modules/jabber/libjabber/jconn.c, src/plugin_api.c, src/util.c:
 - Changelog, configure.ac, /modules/irc/libirc/libirc.c,
 /modules/irc/irc.c:
  * PONG for the IRC PING. Thanks Piotr Stefaniak <2134918 at gmail dawt com>
+
+* Fri Jul 03 2009 12:27 UTC [siddheshp]   0.5.0-89-netv2
+- libproxy/networking.c, modules/yahoo2/yahoo.c,
+modules/yahoo2/libyahoo2/libyahoo2.c,
+modules/yahoo2/libyahoo2/yahoo_httplib.c,
+modules/yahoo2/libyahoo2/yahoo2_types.h:
+ * YMSG16 is in!
+
+* Sat Jun 27 2009 20:45 UTC [siddheshp]   0.5.0-88-netv2
+- libproxy/net_constants.h, libproxy/networking.c, libproxy/networking.h,
+modules/yahoo2/yahoo.c, modules/yahoo2/libyahoo2/libyahoo2.c,
+modules/yahoo2/libyahoo2/yahoo2.h,
+modules/yahoo2/libyahoo2/yahoo2_callbacks.h,
+modules/yahoo2/libyahoo2/yahoo2_types.h,
+modules/yahoo2/libyahoo2/yahoo_httplib.c,
+modules/yahoo2/libyahoo2/yahoo_httplib.h, ChangeLog, configure.ac:
+ * Added Server connection to accept connections
+ * Fixed synchronous connection code
+ * Moved yahoo to netv2
 
 * Fri May 22 2009 09:40 UTC [siddheshp]   0.5.0-92
 * ChangeLog, configure.ac, ayttm.spec.in:
@@ -188,6 +315,27 @@ Thanks Andrei Popescu
 - modules/aim-oscar/libfaim/CHANGES, modules/aim-oscar/libfaim/src/chatnav.c,
 modules/aim-oscar/libfaim/src/im.c, ChangeLog, configure.ac:
  * Fixed spelling errors reported by Kartik Mistry.
+
+* Fri Apr 17 2009 11:25 UTC [siddheshp]   0.5.0-87-netv2
+- ChangeLog, Makefile.am, configure.ac, libproxy/Makefile.am,
+libproxy/proxy.c, modules/aim-oscar/aim-oscar.c,
+modules/irc/irc.c, modules/irc/irc.h,
+modules/irc/libirc/libirc.c, modules/irc/libirc/libirc.h,
+modules/jabber/Makefile.am, modules/jabber/jabber.c,
+modules/jabber/libEBjabber.c, modules/jabber/libEBjabber.h,
+modules/jabber/libjabber/jconn.c,
+modules/jabber/libjabber/include/jabber/jabber.h,
+modules/msn2/msn.C, modules/yahoo2/yahoo.c,
+modules/yahoo2/libyahoo2/libyahoo2.c, po/de.po, po/en_GB.po,
+po/es.po, po/fr.po, po/hi.po, po/nl.po, po/pt_BR.po, po/sv.po,
+src/Makefile.am, src/dialog.c, src/dialog.h, src/plugin_api.c,
+src/prefs.c, src/util.c, src/gtk/prefs_window.C,
+libproxy/common.c, libproxy/common.h, libproxy/net_constants.h,
+libproxy/networking.c, libproxy/networking.h, libproxy/proxy.h,
+libproxy/proxy_private.h, libproxy/ssl.c, libproxy/ssl.h,
+libproxy/ssl_certificate.c, libproxy/ssl_certificate.h:
+ * Check in revamped net code. This breaks a lot of things
+ * Currently working protocols are IRC, Jabber.
 
 * Sun Mar 15 2009 09:05 UTC [siddheshp]   0.5.0-86
 - ChangeLog, configure.ac, src/chat_room.c, modules/irc/libirc/.cvsignore:

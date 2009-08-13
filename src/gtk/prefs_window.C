@@ -34,7 +34,7 @@
 
 #include "service.h"
 #include "util.h"
-#include "libproxy/libproxy.h"
+#include "libproxy/networking.h"
 #include "sound.h"
 #include "value_pair.h"
 #include "gtk_globals.h"
@@ -372,7 +372,7 @@ class ay_proxy_panel : public ay_prefs_window_panel
 			
 			union
 			{
-				eProxyType		m_proxy_type;
+				AyProxyType		m_proxy_type;
 				int				*m_toggle_data;
 			};
 		} t_cb_data;
@@ -386,7 +386,7 @@ class ay_proxy_panel : public ay_prefs_window_panel
 		
 		struct prefs::advanced &m_prefs;
 
-		eProxyType	m_last_proxy_type;
+		AyProxyType	m_last_proxy_type;
 		
 		GtkWidget	*m_proxy_checkbox;
 		
@@ -2143,7 +2143,7 @@ ay_proxy_panel::ay_proxy_panel( const char *inTopFrameText, struct prefs::advanc
 // Build
 void	ay_proxy_panel::Build( GtkWidget *inParent )
 {
-	m_last_proxy_type = static_cast<eProxyType>(m_prefs.proxy_type);
+	m_last_proxy_type = static_cast<AyProxyType>(m_prefs.proxy_type);
 	
 	// set last type to HTTP if we are currently set to NONE
 	//	because NONE is not one of the radio buttons
@@ -2174,7 +2174,7 @@ void	ay_proxy_panel::Build( GtkWidget *inParent )
 	/* Because it seems that the 'clicked' function is called when we create the radio buttons [!],
 		we must save our current value and restore it after the creation of the radio buttons
 	*/
-	const eProxyType	old_value = m_last_proxy_type;
+	const AyProxyType	old_value = m_last_proxy_type;
 	
 	GSList	*radio_group = NULL;
 	
@@ -2363,7 +2363,7 @@ void	ay_proxy_panel::s_set_proxy_type( GtkWidget *w, void *data )
 	assert( cb_data != NULL );
 
 	ay_proxy_panel	*the_panel = cb_data->m_panel;
-	eProxyType		the_type = cb_data->m_proxy_type;
+	AyProxyType		the_type = cb_data->m_proxy_type;
     
 	the_panel->m_last_proxy_type = the_type;
 

@@ -50,9 +50,6 @@
 #endif
 
 #include "config.h"
-#ifdef HAVE_OPENSSL
-#include "ssl.h"
-#endif
 
 #include "libxode.h"
 
@@ -301,7 +298,6 @@ typedef struct jconn_struct
     /* Core structure */
     pool        p;	       /* Memory allocation pool */
     int         state;	   /* Connection state flag */
-    int         fd;	       /* Connection file descriptor */
     jid         user;      /* User info */
     char        *pass;     /* User passwd */
     char        *serv;     /* Server to connect to (overrides one in JID) */
@@ -315,9 +311,6 @@ typedef struct jconn_struct
     void (*on_state)(struct jconn_struct *j, int state);
     void (*on_packet)(struct jconn_struct *j, jpacket p);
 
-#ifdef HAVE_OPENSSL
-    SockInfo *ssl_sock;
-#endif
     int usessl;
 } *jconn, jconn_struct;
 
@@ -329,17 +322,17 @@ jconn jab_new(char *user, char *pass, char *serv);
 void jab_delete(jconn j);
 void jab_state_handler(jconn j, jconn_state_h h);
 void jab_packet_handler(jconn j, jconn_packet_h h);
-int jab_start(jconn j, int port, int use_ssl);
+int jab_start(jconn j);
 void jab_stop(jconn j);
 
-int jab_getfd(jconn j);
+//int jab_getfd(jconn j);
 jid jab_getjid(jconn j);
 char *jab_getsid(jconn j);
 
 void jab_send(jconn j, xmlnode x);
 void jab_send_raw(jconn j, const char *str);
-void jab_recv(jconn j);
-void jab_poll(jconn j, int timeout);
+int jab_recv(jconn j);
+void jab_poll(jconn j);
 
 void jab_auth(jconn j);
 void jab_reg(jconn j);

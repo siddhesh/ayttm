@@ -283,6 +283,45 @@ static void self_update_value(void *data, int ans)
 	
 }
 
+
+int eb_do_confirm_dialog(const char *message, const char *title)
+{
+	GtkWidget *dialog, *content_area, *label;
+	int ret=0;
+
+	dialog = gtk_dialog_new_with_buttons(title, NULL, 0, 
+						GTK_STOCK_YES, GTK_RESPONSE_ACCEPT, 
+						GTK_STOCK_NO, GTK_RESPONSE_REJECT, NULL);
+
+	content_area = gtk_hbox_new(FALSE, 5);
+
+	gtk_container_add ( gtk_dialog_get_content_area(GTK_DIALOG(dialog)), content_area );
+
+	label = gtk_label_new("");
+
+	gtk_label_set_markup(GTK_LABEL(label), message);
+
+	gtk_box_pack_start(GTK_BOX(content_area), 
+			gtk_image_new_from_stock(GTK_STOCK_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG), 
+			FALSE, FALSE, 5);
+
+	gtk_box_pack_start(GTK_BOX(content_area), label, TRUE, TRUE, 5);
+
+	gtk_widget_show_all(dialog);
+
+	ret = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	if (ret == GTK_RESPONSE_ACCEPT)
+		ret = 1;
+	else
+		ret = 0;
+
+	gtk_widget_destroy(dialog);
+
+	return ret;
+}
+
+
 void eb_do_no_callback_dialog( const char *message, const char *title, int *value)
 {
 	*value = -1;

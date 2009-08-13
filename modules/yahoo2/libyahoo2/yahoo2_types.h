@@ -112,6 +112,7 @@ enum yahoo_service { /* these are easier to see in hex */
 	YAHOO_SERVICE_Y7_FILETRANSFERACCEPT,    /* YMSG13 */
 	YAHOO_SERVICE_Y7_MINGLE = 0xe1, /* YMSG13 */
 	YAHOO_SERVICE_Y7_CHANGE_GROUP = 0xe7, /* YMSG13 */
+	YAHOO_SERVICE_MYSTERY = 0xef,		/* Don't know what this is for */
 	YAHOO_SERVICE_Y8_STATUS = 0xf0,                 /* YMSG15 */
 	YAHOO_SERVICE_Y8_LIST = 0Xf1,                   /* YMSG15 */
 	YAHOO_SERVICE_WEBLOGIN = 0x0226,
@@ -157,7 +158,8 @@ enum yahoo_login_status {
 	YAHOO_LOGIN_PASSWD = 13,
 	YAHOO_LOGIN_LOCK = 14,
 	YAHOO_LOGIN_DUPL = 99,
-	YAHOO_LOGIN_SOCK = -1
+	YAHOO_LOGIN_SOCK = -1,
+	YAHOO_LOGIN_UNKNOWN = 999
 };
 
 enum yahoo_error {
@@ -185,7 +187,7 @@ enum yahoo_log_level {
 	YAHOO_LOG_DEBUG
 };
 
-#define YAHOO_PROTO_VER 0x000c
+#define YAHOO_PROTO_VER 0x0010
 
 /* Yahoo style/color directives */
 #define YAHOO_COLOR_BLACK "\033[30m"
@@ -215,7 +217,8 @@ enum yahoo_connection_type {
 	YAHOO_CONNECTION_WEBCAM_MASTER,
 	YAHOO_CONNECTION_WEBCAM,
 	YAHOO_CONNECTION_CHATCAT,
-	YAHOO_CONNECTION_SEARCH
+	YAHOO_CONNECTION_SEARCH,
+	YAHOO_CONNECTION_AUTH
 };
 
 enum yahoo_webcam_direction_type {
@@ -264,7 +267,9 @@ struct yahoo_data {
 	char  *cookie_y;
 	char  *cookie_t;
 	char  *cookie_c;
+	char  *cookie_b;
 	char  *login_cookie;
+	char  *crumb;
 
 	YList *buddies;
 	YList *ignore;
@@ -331,12 +336,12 @@ struct yahoo_found_contact {
 /*
  * Function pointer to be passed to http get/post and send file
  */
-typedef void (*yahoo_get_fd_callback)(int id, int fd, int error, void *data);
+typedef void (*yahoo_get_fd_callback)(int id, void *fd, int error, void *data);
 
 /*
  * Function pointer to be passed to yahoo_get_url_handle
  */
-typedef void (*yahoo_get_url_handle_callback)(int id, int fd, int error,
+typedef void (*yahoo_get_url_handle_callback)(int id, void *fd, int error,
 		const char *filename, unsigned long size, void *data);
 
 

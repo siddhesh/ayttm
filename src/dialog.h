@@ -59,6 +59,8 @@ void do_text_input_window_multiline( const char *title, const char *value,
 		void (*action)(const char *text, void *data), 
 		void *data );
 
+int eb_do_confirm_dialog(const char *message, const char *title);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

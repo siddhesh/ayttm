@@ -68,7 +68,6 @@
 #include "smileys.h"
 #include "add_contact_window.h"
 #include "image_window.h"
-#include "tcp_util.h"
 #include "messages.h"
 #include "dialog.h"
 #include "mem_util.h"
@@ -79,7 +78,7 @@
 #include "yahoo_util.h"
 #include "globals.h"
 
-#include "libproxy/libproxy.h"
+#include "libproxy/networking.h"
 
 #include "pixmaps/yahoo_online.xpm"
 #include "pixmaps/yahoo_away.xpm"
@@ -118,7 +117,7 @@ static int do_prompt_save_file = 1;
 static int do_guess_away = 0;
 static int do_show_away_time = 0;
 
-static char pager_host[MAX_PREF_LEN]="scs.msg.yahoo.com";
+static char pager_host[MAX_PREF_LEN]="cs101.msg.sp1.yahoo.com";
 static char pager_port[MAX_PREF_LEN]="5050";
 static char filetransfer_host[MAX_PREF_LEN]="filetransfer.msg.yahoo.com";
 static char filetransfer_port[MAX_PREF_LEN]="80";
@@ -138,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.106 $",
-	"$Date: 2009/07/27 16:42:04 $",
+	"$Revision: 1.107 $",
+	"$Date: 2009/08/13 20:20:38 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -309,7 +308,6 @@ typedef struct {
 	int login_invisible;
 	int initial_state;
 	int ignore_system;
-	int fd;
 	int id;
 
 	int input;
@@ -892,10 +890,13 @@ static void ext_yahoo_got_ignore(int id, YList * ign)
 	}
 }
 
+
+/* Don't need to do anything */
 static void ext_yahoo_got_cookies(int id)
 {
-	yahoo_get_yab(id);
+
 }
+
 
 static void ext_yahoo_got_im(int id, const char *me, const char *who, const char *msg, long tm, int stat, int utf8)
 {
@@ -950,19 +951,19 @@ static void ext_yahoo_got_ping ( int id, const char *errormsg )
 /*************************************
  * File transfer code starts here
  */
-static void eb_yahoo_save_file_callback(gpointer data, int fd, eb_input_condition cond)
+static void eb_yahoo_save_file_callback(AyConnection *fd, eb_input_condition cond, gpointer data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	int file = yftd->file;
 	unsigned long count, c;
 	char buffer[1024];
 
-	count = read(fd, buffer, sizeof(buffer));
+	count = ay_connection_read(fd, buffer, sizeof(buffer));
 
 	if(count == 0) {
 		eb_input_remove(yftd->input);
 		close(file);
-		close(fd);
+		ay_connection_free(fd);
 
 		ay_activity_bar_remove(yftd->progress);
 
@@ -977,17 +978,19 @@ static void eb_yahoo_save_file_callback(gpointer data, int fd, eb_input_conditio
 	yftd->transferred += count;
 	LOG(("total size: %ld, transferred: %ld\n", yftd->fsize, yftd->transferred));
 	ay_progress_bar_update_progress(yftd->progress, yftd->transferred);
+
+	// do ay_connection_write instead
 	while(count > 0 && (c=write(file, buffer, count)) < count) 
 		count -= c;
 }
 
-static void eb_yahoo_got_url_handle(int id, int fd, int error, 
+static void eb_yahoo_got_url_handle(int id, void *fd, int error, 
 		const char *filename, unsigned long size, void *data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	char label[1024]="     ";	/* 5 spaces so that label[5]==NULL */
 
-	if(error || fd<=0) {
+	if(error || fd == NULL) {
 		WARNING(("yahoo_get_url_handle returned (%d) %s", error, strerror(error)));
 		FREE(yftd->from);
 		FREE(yftd->url);
@@ -1008,7 +1011,7 @@ static void eb_yahoo_got_url_handle(int id, int fd, int error,
 
 	if(yftd->file <= 0) {
 		WARNING(("Could not create file: %s, %s", filename, strerror(errno)));
-		close(fd);
+		ay_connection_free(AY_CONNECTION(fd));
 		FREE(yftd->from);
 		FREE(yftd->url);
 		FREE(yftd->fname);
@@ -1018,7 +1021,7 @@ static void eb_yahoo_got_url_handle(int id, int fd, int error,
 
 	snprintf(label,1024,"Receiving %s...", filename);
 	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);
-	yftd->input = eb_input_add(fd, EB_INPUT_READ, eb_yahoo_save_file_callback, yftd);
+	yftd->input = ay_connection_input_add(AY_CONNECTION(fd), EB_INPUT_READ, eb_yahoo_save_file_callback, yftd);
 }
 
 static void eb_yahoo_save_file(const char *filename, gpointer data)
@@ -1103,15 +1106,14 @@ static void ext_yahoo_got_file(int id, const char *me, const char *from,
 	eb_do_dialog(buff, _("Yahoo File Transfer"), eb_yahoo_accept_file, yftd);
 }
 
-static void eb_yahoo_send_file_callback(gpointer data, int fd, 
-		eb_input_condition cond)
+static void eb_yahoo_send_file_callback(AyConnection *fd, eb_input_condition cond, gpointer data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	int file = yftd->file;
 	unsigned long count, c;
 	char buffer[1024];
 
-	LOG(("eb_yahoo_send_file_callback: %d", fd));
+	LOG(("eb_yahoo_send_file_callback: %p", fd));
 	count = read(file, buffer, sizeof(buffer));
 
 	if(count == 0) {
@@ -1121,7 +1123,7 @@ static void eb_yahoo_send_file_callback(gpointer data, int fd,
 
 	yftd->transferred += count;
 	ay_progress_bar_update_progress(yftd->progress, yftd->transferred);
-	while(count > 0 && (c=write(fd, buffer, count)) < count) 
+	while(count > 0 && (c=ay_connection_write(fd, buffer, count)) < count) 
 		count -= c;
 
 	if(yftd->transferred >= yftd->fsize) {
@@ -1129,7 +1131,7 @@ static void eb_yahoo_send_file_callback(gpointer data, int fd,
 done_sending:
 		eb_input_remove(yftd->input);
 		close(file);
-		close(fd);
+		ay_connection_free(fd);
 
 		ay_activity_bar_remove(yftd->progress);
 
@@ -1140,7 +1142,7 @@ done_sending:
 	}
 }
 
-static void eb_yahoo_got_fd(int id, int fd, int error, void *data)
+static void eb_yahoo_got_fd(int id, void *fd, int error, void *data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
 	char label[1024];
@@ -1155,7 +1157,7 @@ static void eb_yahoo_got_fd(int id, int fd, int error, void *data)
 	snprintf(label,1024,"Sending %s...", yftd->fname);
 	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);	
 
-	yftd->input = eb_input_add(fd, EB_INPUT_WRITE, eb_yahoo_send_file_callback, yftd);
+	yftd->input = ay_connection_input_add(AY_CONNECTION(fd), EB_INPUT_WRITE, eb_yahoo_send_file_callback, yftd);
 }
 
 static void eb_yahoo_send_file(eb_local_account *from, eb_account *to, char *file)
@@ -1589,7 +1591,7 @@ static void ext_yahoo_chat_cat_xml(int id, const char *xml)
 }
 
 static void ext_yahoo_chat_join(int id, const char *me, const char *room, 
-				const char * topic, YList *members, int fd)
+				const char * topic, YList *members, void *fd)
 {
 }
 
@@ -2242,37 +2244,16 @@ struct connect_callback_data {
 	void *data;
 	int tag;
 };
-static LList *conn = NULL;
 
 static void ay_yahoo_cancel_connect(void *data)
 {
 	eb_local_account *ela = data;
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	if(ylad->connect_tag) {
-		LList *l;
-		ay_socket_cancel_async(ylad->connect_tag);
+		ay_connection_cancel_connect(ylad->connect_tag);
 		if(ela->connecting) {
-			for(l=conn; l; l=l_list_next(l)) {
-				struct connect_callback_data *ccd = l->data;
-				if(ccd->tag == ylad->connect_tag) {
-					conn = l_list_remove_link(conn, l);
-					ccd->callback(-1, 0, ccd->data);
-					FREE(ccd);
-					break;
-				}
-			}
-			yahoo_close(ylad->id);
-			ref_count--;
-			ela->connecting = 0;
-			ylad->connect_tag = 0;
-			ylad->connect_progress_tag = 0;
 		}
 	}
-	is_setting_state = 1;
-	if (ela->status_menu) {
-		eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_OFFLINE);
-	}
-	is_setting_state = 0;
 }
 
 static void eb_yahoo_finish_login(const char *password, void *data)
@@ -3139,17 +3120,33 @@ static int eb_yahoo_is_suitable(eb_local_account *ela, eb_account *ea)
 	*/
 }
 
-static void _yahoo_connected(int fd, int error, void * data)
+static void _yahoo_connected(AyConnection *fd, int error, void * data)
 {
 	struct connect_callback_data *ccd = data;
 	eb_local_account * ela = ccd->ela;
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 
-	conn = l_list_remove(conn, ccd);
+	if(error == AY_CANCEL_CONNECT) {
+		yahoo_close(ylad->id);
+		ref_count--;
+		ela->connecting = 0;
+		ylad->connect_tag = 0;
+		ylad->connect_progress_tag = 0;
 
-	ccd->callback(fd, error, ccd->data);
-	FREE(ccd);
-	ylad->connect_tag = 0;
+		ccd->callback(NULL, 0, ccd->data);
+		FREE(ccd);
+
+		is_setting_state = 1;
+		if (ela->status_menu) {
+			eb_set_active_menu_status(ela->status_menu, EB_DISPLAY_YAHOO_OFFLINE);
+		}
+		is_setting_state = 0;
+	}
+	else {
+		ccd->callback(fd, error, ccd->data);
+		FREE(ccd);
+		ylad->connect_tag = 0;
+	}
 }
 
 static void ay_yahoo_connect_status(const char *msg, void *data)
@@ -3160,11 +3157,31 @@ static void ay_yahoo_connect_status(const char *msg, void *data)
 	ay_activity_bar_update_label(ylad->connect_progress_tag, msg);
 }
 
-static int ext_yahoo_connect_async(int id, const char *host, int port, 
-				   yahoo_connect_callback callback, void *data)
+
+static int ext_yahoo_write(void *fd, char *buf, int len)
 {
+	return ay_connection_write(AY_CONNECTION(fd), buf, len);
+}
+
+static int ext_yahoo_read(void *fd, char *buf, int len)
+{
+	return ay_connection_read(AY_CONNECTION(fd), buf, len);
+}
+
+static void ext_yahoo_close(void *fd)
+{
+	ay_connection_free(AY_CONNECTION(fd));
+}
+
+
+static int ext_yahoo_connect_async(int id, const char *host, int port, 
+				   yahoo_connect_callback callback, void *data, int use_ssl)
+{
+	AyConnection *fd = ay_connection_new(host,port, use_ssl?AY_CONNECTION_TYPE_SSL:AY_CONNECTION_TYPE_PLAIN);
+
 #ifdef __MINGW32__
-	int fd = ay_socket_new(host,port);
+	ay_connection_connect(fd, NULL, NULL, eb_do_confirm_dialog, NULL);
+
 	if(fd == -1)
 		callback(fd, WSAGetLastError(), data);
 	else
@@ -3182,13 +3199,16 @@ static int ext_yahoo_connect_async(int id, const char *host, int port,
 	ccd->data = data;
 
 	ylad = ccd->ela->protocol_local_account_data;
-	ccd->tag = ylad->connect_tag = 
-		ay_connect_host(host, port, _yahoo_connected, ccd, ay_yahoo_connect_status);
 
-	conn = l_list_prepend(conn, ccd);
+	if(use_ssl)
+		ccd->tag = ylad->connect_tag = 
+			ay_connection_connect(fd, _yahoo_connected, ay_yahoo_connect_status, eb_do_confirm_dialog, ccd);
+	else
+		ccd->tag = ylad->connect_tag = 
+			ay_connection_connect(fd, _yahoo_connected, ay_yahoo_connect_status, NULL, ccd);
 
 	if(ylad->connect_tag < 0)
-		_yahoo_connected(-1, errno, ccd);
+		_yahoo_connected(NULL, errno, ccd);
 
 	return ylad->connect_tag;
 #endif
@@ -3196,7 +3216,10 @@ static int ext_yahoo_connect_async(int id, const char *host, int port,
 
 static int ext_yahoo_connect(const char *host, int port)
 {
-	return ay_socket_new(host, port);
+	/* We will not use any sync stuff. hangs up our UI */
+	LOG(("Why are we doing a synchronous connect?!"));
+
+	return -1;
 }
 
 /*************************************
@@ -3204,20 +3227,21 @@ static int ext_yahoo_connect(const char *host, int port)
  */
 typedef struct {
 	int id;
-	int fd;
+	AyConnection *fd;
 	gpointer data;
 	int tag;
 } eb_yahoo_callback_data;
 
-static void eb_yahoo_callback(void * data, int source, eb_input_condition condition)
+static void eb_yahoo_callback(AyConnection *fd, eb_input_condition condition, void * data)
 {
 	eb_yahoo_callback_data *d = data;
 	int ret=1;
 	char buff[1024]={0};
 
 	if(condition & EB_INPUT_READ) {
-		LOG(("Read: %d", source));
-		ret = yahoo_read_ready(d->id, source, d->data);
+		LOG(("Read: %p", fd));
+		// Do the read with ay_connection_read and call yahoo_got_data with the data
+		ret = yahoo_read_ready(d->id, fd, d->data);
 
 		if(ret == -1)
 			snprintf(buff, sizeof(buff), 
@@ -3229,8 +3253,10 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 	}
 
 	if(ret > 0 && condition & EB_INPUT_WRITE) {
-		LOG(("Write: %d", source));
-		ret = yahoo_write_ready(d->id, source, d->data);
+		LOG(("Write: %p", fd));
+
+		// Do write with ay_connection_write and then call yahoo_sent_data
+		ret = yahoo_write_ready(d->id, fd, d->data);
 
 		if(ret == -1)
 			snprintf(buff, sizeof(buff), 
@@ -3242,7 +3268,7 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 	}
 
 	if(condition & EB_INPUT_EXCEPTION)
-		LOG(("Exception: %d", source));
+		LOG(("Exception: %p", fd));
 	if(!(condition & (EB_INPUT_READ | EB_INPUT_WRITE | EB_INPUT_EXCEPTION)))
 		LOG(("Unknown: %d", condition));
 
@@ -3252,7 +3278,7 @@ static void eb_yahoo_callback(void * data, int source, eb_input_condition condit
 
 static YList * handlers = NULL;
 
-static int ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond, void *data)
+static int ext_yahoo_add_handler(int id, void *fd, yahoo_input_condition cond, void *data)
 {
 	eb_input_condition eb_cond = 0;
 
@@ -3273,8 +3299,8 @@ static int ext_yahoo_add_handler(int id, int fd, yahoo_input_condition cond, voi
 			break;
 	}
 
-	d->tag = eb_input_add(fd, eb_cond, eb_yahoo_callback, d);
-	LOG(("client:%d added fd:%d for cond:%d; tag:%d", id, fd, cond, d->tag));
+	d->tag = ay_connection_input_add(AY_CONNECTION(fd), eb_cond, eb_yahoo_callback, d);
+	LOG(("client:%d added fd:%p for cond:%d; tag:%d", id, fd, cond, d->tag));
 
 	handlers = y_list_append(handlers, d);
 	return d->tag;
@@ -3287,8 +3313,8 @@ static void ext_yahoo_remove_handler(int id, int tag)
 	{
 		eb_yahoo_callback_data *d = l->data;
 		if(d->tag == tag) {
-			LOG(("client:%d removed fd:%d with tag:%d", d->id, d->fd, d->tag));
-			eb_input_remove(d->tag);
+			LOG(("client:%d removed fd:%p with tag:%d", d->id, d->fd, d->tag));
+			ay_connection_input_remove(d->tag);
 			handlers = y_list_remove_link(handlers, l);
 			FREE(d);
 			y_list_free_1(l);
@@ -3728,6 +3754,9 @@ static void register_callbacks()
 	yc.ext_yahoo_remove_handler = ext_yahoo_remove_handler;
 	yc.ext_yahoo_connect_async = ext_yahoo_connect_async;
 	yc.ext_yahoo_connect = ext_yahoo_connect;
+	yc.ext_yahoo_read = ext_yahoo_read;
+	yc.ext_yahoo_write = ext_yahoo_write;
+	yc.ext_yahoo_close = ext_yahoo_close;
 
 	yc.ext_yahoo_chat_cat_xml = ext_yahoo_chat_cat_xml;
 	yc.ext_yahoo_chat_join = ext_yahoo_chat_join;

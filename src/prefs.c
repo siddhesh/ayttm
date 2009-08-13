@@ -39,7 +39,7 @@
 #include "value_pair.h"
 #include "globals.h"
 #include "defaults.h"
-#include "libproxy/libproxy.h"
+#include "libproxy/networking.h"
 #include "plugin.h"
 #include "prefs.h"
 #include "messages.h"
@@ -902,13 +902,13 @@ void ayttm_prefs_read_file(char *file)
 	fclose( fp );
 
 	if ( iGetLocalPref("do_proxy_auth") != 0 )
-		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+		ay_proxy_set_default( iGetLocalPref("proxy_type"), 
 					cGetLocalPref("proxy_host"), 
 					iGetLocalPref("proxy_port"),
 					cGetLocalPref("proxy_user"),
 					cGetLocalPref("proxy_password") );
 	else
-		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+		ay_proxy_set_default( iGetLocalPref("proxy_type"), 
 					cGetLocalPref("proxy_host"), 
 					iGetLocalPref("proxy_port"),
 					NULL,
@@ -1283,13 +1283,13 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	
 	
 	if ( inPrefs->advanced.do_proxy_auth != 0 )
-		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+		ay_proxy_set_default( iGetLocalPref("proxy_type"), 
 					cGetLocalPref("proxy_host"), 
 					iGetLocalPref("proxy_port"),
 					cGetLocalPref("proxy_user"),
 					cGetLocalPref("proxy_password") );
 	else
-		ay_set_default_proxy( iGetLocalPref("proxy_type"), 
+		ay_proxy_set_default( iGetLocalPref("proxy_type"), 
 					cGetLocalPref("proxy_host"), 
 					iGetLocalPref("proxy_port"),
 					NULL,

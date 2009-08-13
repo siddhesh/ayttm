@@ -357,6 +357,10 @@ typedef struct _irc_callbacks {
 					irc_message_prefix *prefix,
 					irc_account *ia);
                                 	
+	void (*irc_send_data)		(void *buf,
+					int len,
+				        irc_account *ia);
+                                	
 	void (*irc_error)		(const char *message,
 				        void *data);
                                 	
@@ -611,9 +615,9 @@ void irc_param_list_free(irc_param_list *param_list ) ;
 
 irc_name_list *irc_gen_name_list(char *message);
 
-void irc_recv (irc_account *ia, int source, int condition) ;
+int irc_recv (irc_account *ia, char *buf, int len) ;
 
-void irc_send_data(void *buf, int len, irc_account *ia) ;
+//void irc_send_data(void *buf, int len, irc_account *ia) ;
 
 void irc_get_command_string(char *out, const char *recipient, char *command, char *params, irc_account *ia);
 
