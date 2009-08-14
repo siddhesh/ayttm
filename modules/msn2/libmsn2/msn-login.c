@@ -194,7 +194,7 @@ static void msn_mashup_tokens_and_login(MsnAccount *ma)
 /* 5) SSO */
 
 /* 5.2) Process Response */
-static void msn_sso_response(MsnAccount *ma, char *data, int len)
+static void msn_sso_response(MsnAccount *ma, char *data, int len, void *cbdata)
 {
 	/*
 	 * TODO: Check for redirects?
@@ -313,7 +313,7 @@ static void msn_sso_start (MsnAccount *ma)
 		url = strdup("https://login.live.com/RST.srf");
 	}
 
-	msn_http_request(ma, MSN_HTTP_POST, NULL, url, sso_request, msn_sso_response, params);
+	msn_http_request(ma, MSN_HTTP_POST, NULL, url, sso_request, msn_sso_response, params, NULL);
 
 	free(sso_request);
 	free(url);

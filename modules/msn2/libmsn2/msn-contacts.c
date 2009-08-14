@@ -246,7 +246,7 @@ static void _send_adl(MsnAccount *ma)
 }
 
 
-static void msn_ab_response(MsnAccount *ma, char *data, int len)
+static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 {
 	char *offset = data;
 
@@ -325,7 +325,6 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len)
 
 				if(!strcmp(b->passport, in_chunk)) {
 					cur_buddy = b;
-					b->type = MSN_BUDDY_EMAIL;
 					break;
 				}
 
@@ -362,7 +361,6 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len)
 
 				if(!strcmp(b->passport, in_chunk)) {
 					cur_buddy = b;
-					b->type = MSN_BUDDY_PASSPORT;
 					break;
 				}
 
@@ -403,14 +401,14 @@ void msn_download_address_book(MsnAccount *ma)
 
 	char *ab_request = msn_soap_build_request(MSN_CONTACT_LIST_REQUEST, ma->contact_ticket);	
 
-	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_ab_response, NULL);
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_ab_response, NULL, NULL);
 
 	free(url);
 	free(ab_request);
 }
 
 
-static void msn_membership_response(MsnAccount *ma, char *data, int len)
+static void msn_membership_response(MsnAccount *ma, char *data, int len, void *cbdata)
 {
 	char *offset = data;
 	MsnBuddyType cur_type = -1;
@@ -442,6 +440,7 @@ static void msn_membership_response(MsnAccount *ma, char *data, int len)
 			break;
 
 		while(chunk) {
+			int type = 0;
 			char *in_offset = chunk;
 			const char *nick_tag = NULL;
 			MsnBuddy *bud = NULL;
@@ -451,10 +450,14 @@ static void msn_membership_response(MsnAccount *ma, char *data, int len)
 			if(!chunk)
 				break;
 
-			if( !strcmp(chunk, "Passport") )
+			if( !strcmp(chunk, "Passport") ) {
 				nick_tag = "PassportName";
-			else if( !strcmp(chunk, "Email") )
+				type = MSN_BUDDY_PASSPORT;
+			}
+			else if( !strcmp(chunk, "Email") ) {
 				nick_tag = "Email";
+				type = MSN_BUDDY_EMAIL;
+			}
 
 			_get_next_tag_chunk(&chunk, &in_offset, nick_tag);
 			if(!chunk)
@@ -478,6 +481,7 @@ static void msn_membership_response(MsnAccount *ma, char *data, int len)
 				bud->status = MSN_STATE_OFFLINE;
 				bud->passport = strdup(chunk);
 				bud->list = cur_type;
+				bud->type = type;
 				ma->buddies = l_list_append(ma->buddies, bud);
 			}
 
@@ -508,7 +512,147 @@ void msn_sync_contacts(MsnAccount *ma)
 
 	char *ab_request = msn_soap_build_request(MSN_MEMBERSHIP_LIST_REQUEST, ma->contact_ticket);	
 
-	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_membership_response, NULL);
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_membership_response, NULL, NULL);
+
+	free(url);
+	free(ab_request);
+}
+
+
+/* Reject a Pending member */
+static void msn_remove_pending_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	MsnBuddy *bud = cbdata;
+
+	if(!strstr(data, "<DeleteMemberResponse")) {
+		fprintf(stderr, "Removal failed\n");
+		return;
+	}
+
+	ma->buddies = l_list_remove(ma->buddies, bud);
+	free(bud);
+}
+
+
+static const char *PASSPORT_MEMBER_INFO =
+	"<Member xsi:type=\"PassportMember\" "
+			"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+		"<Type>Passport</Type>"
+		"<State>Accepted</State>"
+		"<PassportName>%s</PassportName>"
+	"</Member>";
+
+static const char *EMAIL_MEMBER_INFO =
+	"<Member xsi:type=\"EmailMember\">"
+		"<Type>Email</Type>"
+		"<State>Accepted</State>"
+		"<Email>%s</Email>"
+	"</Member>";
+
+
+void msn_buddy_remove_pending(MsnAccount *ma, MsnBuddy *bud)
+{
+	char *url = strdup("https://contacts.msn.com/abservice/SharingService.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/DeleteMember";
+
+	char passport_tag[512];
+
+	if(bud->type == MSN_BUDDY_PASSPORT)
+		snprintf(passport_tag, sizeof(passport_tag), PASSPORT_MEMBER_INFO, bud->passport);
+	else
+		snprintf(passport_tag, sizeof(passport_tag), EMAIL_MEMBER_INFO, bud->passport);
+
+	char *ab_request = msn_soap_build_request(MSN_MEMBERSHIP_LIST_MODIFY,
+						"ContactMsgrAPI",
+						ma->contact_ticket,
+						"DeleteMember",
+						"Pending",
+						passport_tag,
+						"DeleteMember"
+						);
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_remove_pending_response, 
+			"Connection: Keep-Alive\r\n"
+			"Cache-Control: no-cache\r\n", bud);
+
+	free(url);
+	free(ab_request);
+}
+
+
+/* Add a contact */
+void msn_buddy_allow_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	char *start = NULL, *offset = NULL;
+	MsnBuddy *bud = cbdata;
+
+	if((start = strstr(data, "<guid>"))) {
+		start += 6;
+		offset = strstr(start, "</guid>");
+		if(offset) {
+			LList *groups = ma->groups;
+			*offset = '\0';
+			while(groups) {
+				MsnGroup *group = groups->data;
+
+				if(!strcmp(group->guid, start)) {
+					bud->group = group;
+					break;
+				}
+				groups = l_list_next(groups);
+			}
+		}
+	}
+
+	if(offset) {
+		bud->list &= ~MSN_BUDDY_PENDING;
+		bud->list |= MSN_BUDDY_ALLOW;
+		ext_buddy_added(ma, bud);
+	}
+}
+
+
+static const char *PASSPORT_CONTACT_INFO =
+	"<contactType>LivePending</contactType>"
+	"<passportName>%s</passportName>"
+	"<isMessengerUser>true</isMessengerUser>"
+	"<MessengerMemberInfo>"
+	        "<DisplayName>%s</DisplayName>"
+	"</MessengerMemberInfo>";
+
+static const char *EMAIL_CONTACT_INFO =
+	"<emails>"
+		"<ContactEmail>"
+			"<contactEmailType>Messenger2</contactEmailType>"
+			"<email>%s</email>"
+			"<isMessengerEnabled>true</isMessengerEnabled>"
+			"<Capability>0</Capability>"
+			"<MessengerEnabledExternally>false</MessengerEnabledExternally>"
+			"<propertiesChanged/>"
+		"</ContactEmail>"
+	"</emails>";
+
+
+void msn_buddy_allow(MsnAccount *ma, MsnBuddy *bud)
+{
+	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABContactAdd";
+
+	char passport_tag[512];
+
+	if(bud->type == MSN_BUDDY_PASSPORT)
+		snprintf(passport_tag, sizeof(passport_tag), PASSPORT_CONTACT_INFO, bud->passport, bud->friendlyname);
+	else
+		snprintf(passport_tag, sizeof(passport_tag), EMAIL_CONTACT_INFO, bud->passport);
+
+	char *ab_request = msn_soap_build_request(MSN_CONTACT_ADD_REQUEST, 
+						"ContactSave", 
+						ma->contact_ticket,
+						passport_tag,
+						bud->friendlyname
+						);
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_buddy_allow_response, NULL, bud);
 
 	free(url);
 	free(ab_request);

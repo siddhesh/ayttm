@@ -145,8 +145,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.2 $",
-	"$Date: 2009/08/13 20:20:38 $",
+	"$Revision: 1.3 $",
+	"$Date: 2009/08/14 10:35:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -166,6 +166,7 @@ struct service SERVICE_INFO = {
 
 static void ay_msn_connect_status(const char *msg, void *data);
 static void ay_msn_logout( eb_local_account * account );
+static int ay_msn_authorize_user( eb_local_account *ela, MsnBuddy *bud );
 
 static void *mi1 = NULL;
 static void *mi2 = NULL;
@@ -745,14 +746,62 @@ void ext_msn_connect(MsnConnection *mc, MsnConnectionCallback callback)
 }
 
 
+static gboolean ay_msn_add_buddy(eb_local_account *ela, MsnBuddy *bud)
+{
+	char *contact_name;
+	struct contact *con;
+	grouplist *g;
+
+	gboolean ret = FALSE;
+
+	eb_account *ea = find_account_with_ela(bud->passport, ela);
+
+	if(!bud->friendlyname)
+		bud->friendlyname = strdup(bud->passport);
+
+	contact_name = bud->friendlyname;
+
+	if(ea) {
+		if(strcmp(ea->account_contact->nick, contact_name)
+			&& !strcmp(ea->account_contact->nick, ea->handle))
+		{
+			rename_contact(ea->account_contact, contact_name);
+			ret = TRUE;
+		}
+
+		bud->ext_data = ea;
+		ea->protocol_account_data = bud;
+
+		return ret;
+	}
+
+	g = find_grouplist_by_name(bud->group?bud->group->name:_("Unknown"));
+
+	con = find_contact_in_group_by_nick(contact_name, g);
+	if(!con)
+		con = find_contact_in_group_by_nick(bud->passport, g);
+	if(!con)
+		con = find_contact_by_nick(contact_name);
+	if(!con)
+		con = find_contact_by_nick(bud->passport);
+
+	if(!con) {
+		ret = TRUE;
+		con=add_new_contact(bud->group?bud->group->name:_("Unknown"), contact_name, SERVICE_INFO.protocol_id);
+	}
+	ea = ay_msn_new_account_for_buddy(ela, bud);
+	add_account(con->nick, ea);
+
+	return ret;
+}
+
+
 /* Done. Set our presence now */
 void ext_msn_contacts_synced(MsnAccount *ma)
 {
-	int changed = 0;
+	gboolean update = FALSE;
 	eb_local_account *ela = (eb_local_account *)ma->ext_data;
 	ay_msn_local_account *mlad = (ay_msn_local_account *)ela->protocol_local_account_data;
-
-	eb_account *ea = NULL;
 
 	LList *buds = ma->buddies;
 
@@ -769,10 +818,25 @@ void ext_msn_contacts_synced(MsnAccount *ma)
 
 	for(;buds; buds = l_list_next(buds)) {
 		MsnBuddy *bud = buds->data;
-		char *contact_name;
-		struct contact *con;
-		grouplist *g;
+		int changed = FALSE;
 
+		if (bud->list & MSN_BUDDY_BLOCK) {
+			eb_debug(DBG_MSN, "%s blocked. Skipping...\n", bud->passport);
+			continue;
+		}
+
+		if (bud->list & MSN_BUDDY_PENDING) {
+			changed = ay_msn_authorize_user(ela, bud);
+			if(!changed)
+				continue;
+		}
+
+		changed = ay_msn_add_buddy(ela, bud);
+
+		if(changed)
+			update = TRUE;
+
+/*
 		ea = find_account_with_ela(bud->passport, ela);
 
 		if(!bud->friendlyname)
@@ -809,9 +873,10 @@ void ext_msn_contacts_synced(MsnAccount *ma)
 		}
 		ea = ay_msn_new_account_for_buddy(ela, bud);
 		add_account(con->nick, ea);
+*/
 	}
 
-	if(changed) {
+	if(update) {
 		update_contact_list();
 		write_contact_list();
 	}
@@ -1248,9 +1313,32 @@ static void ay_msn_leave_chat_room( eb_chat_room * room )
 }
 
 
-static int ay_msn_authorize_user( eb_local_account *ela, char * username, char * friendlyname )
+void ext_buddy_added(MsnAccount *ma, MsnBuddy *bud)
 {
+	ay_msn_add_buddy(ma->ext_data, bud);
+}
 
+
+static int ay_msn_authorize_user( eb_local_account *ela, MsnBuddy *bud )
+{
+	char buff[1024];
+
+	ay_msn_local_account *mlad = ela->protocol_local_account_data;
+
+	snprintf(buff, sizeof(buff), 
+			_("The MSN user:\n\n <b>%s(%s)</b>\n\nhas added you to their contact list.\nDo you want to allow this?"), 
+			bud->friendlyname?bud->friendlyname:bud->passport, bud->passport);
+
+	int result = eb_do_confirm_dialog(buff, _("MSN New Contact"));
+
+	if(result) {
+		msn_buddy_allow(mlad->ma, bud);
+	}
+	else {
+		msn_buddy_remove_pending(mlad->ma, bud);
+	}
+
+	return result;
 }
 
 
@@ -1454,17 +1542,6 @@ void ext_update_friendlyname(MsnConnection *mc)
 	strncpy(mlad->friendlyname, mc->account->friendlyname, MAX_PREF_LEN);
 
 	eb_debug(DBG_MSN, "Your friendlyname is now: %s\n", mlad->friendlyname);
-}
-
-
-int ext_confirm_add_buddy(MsnConnection *mc, char * username, char * friendlyname)
-{
-	eb_local_account *ela = (eb_local_account *)mc->account->ext_data;
-
-	eb_debug(DBG_MSN, "%s (%s) has added you to their contact list.\nYou might want to add them to your Allow or Block list\n", 
-		username, friendlyname);
-
-	return ay_msn_authorize_user(ela, username, friendlyname);
 }
 
 
@@ -1717,7 +1794,6 @@ void *ext_socket_accept(void *fd)
 
 void ext_msn_free(MsnConnection *mc)
 {
-	printf("Freeing %p\n", mc);
 	ext_unregister_read(mc);
 	ext_unregister_write(mc);
 	ay_connection_free(AY_CONNECTION(mc->ext_data));

@@ -18,6 +18,7 @@ typedef struct {
 	char *request;
 	char *soap_action;
 	int cleaned;
+	void *cb_data;
 } HttpData;
 
 static LList *http_connection_list = NULL;
@@ -50,8 +51,6 @@ int msn_http_got_response(MsnConnection *mc, int len)
 
 		mc->current_message->size = atoi(offset);
 		*end = '\r';
-
-		printf("Got content length: %d bytes\n", mc->current_message->size);
 	}
 
 	/* The data has started, so adjust the current capacity and message content accordingly */
@@ -63,20 +62,15 @@ int msn_http_got_response(MsnConnection *mc, int len)
 		mc->current_message->payload = temp;
 
 		data->cleaned = 1;
-
-		printf("Got rid of headers\n");
 	}
 
 	/* We're not done yet */
 	if(len >0 && (!data->cleaned || mc->current_message->size > strlen(mc->current_message->payload))) {
-		printf("Not done yet :: %d < %d\n", mc->current_message->size, strlen(mc->current_message->payload));
 		return 0;
 	}
 
-	printf("Completed :: %d >= %d\n", mc->current_message->size, strlen(mc->current_message->payload));
-
 	data->callback(mc->account, mc->current_message->payload, 
-			mc->current_message->size?mc->current_message->size:strlen(mc->current_message->payload));
+			mc->current_message->size?mc->current_message->size:strlen(mc->current_message->payload), data->cb_data);
 
 	mc->account->connections = l_list_remove(mc->account->connections, mc);
 
@@ -188,7 +182,7 @@ static void http_connect(MsnAccount *ma, char *host, int port, int use_ssl, Http
 
 
 void msn_http_request(MsnAccount *ma, MsnRequestType type, char *soap_action, char *url, 
-			char *request, MsnHttpCallback callback, char *params)
+			char *request, MsnHttpCallback callback, char *params, void *cb_data)
 {
 	char *host, *path;
 	int port;
@@ -236,6 +230,7 @@ void msn_http_request(MsnAccount *ma, MsnRequestType type, char *soap_action, ch
 	data->path = path;
 	data->params = (params?strdup(params):strdup(""));
 	data->soap_action = (soap_action?strdup(soap_action):NULL);
+	data->cb_data = cb_data;
 
 	if(type == MSN_HTTP_GET) {
 		data->connect_callback = http_get_connected;

@@ -90,6 +90,8 @@ struct _MsnAccount {
 	LList *buddies;			/* List of buddies */
 	LList *groups;			/* List of groups */
 
+	char *cache_key;
+
 	int blp;
 	int status;			/* Messenger Status */
 } ;

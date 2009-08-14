@@ -590,7 +590,7 @@ static void msn_command_got_QRY (MsnConnection *mc)
 
 static void msn_command_got_SBS (MsnConnection *mc)
 {
-	fprintf(stderr, "Got SBS. Don't know what it is but it means we're logged in\n");
+	/* Got SBS. Don't know what it is but it means we're logged in */
 }
 
 
@@ -700,7 +700,7 @@ static void msn_command_got_RNG (MsnConnection *mc)
 	while(buds) {
 		bud = buds->data;
 
-		if(!strcmp(bud->passport, nick))
+		if(!strcmp(bud->passport, nick) && (bud->type & ~MSN_BUDDY_BLOCK))
 			break;
 
 		buds = l_list_next(buds);
