@@ -1,3 +1,14 @@
+* Fri Aug 14 2009 08:25 UTC [pstef]   0.5.0-115
+- ChangeLog, configure.ac, src/account.h, src/ayttm_tray.c, src/status.c:
+ * File formatting
+ * Added new_state and new_status elements to eb_account structure, although
+ they are not used yet
+ * Write preferences on quit
+ * Ayttm - history window won't reject messages that include at least one digit
+ anymore
+ * Brought back missing space in messages like "Setting %s(on %s) to %s"
+ * Some other code improvements
+
 * Fri Aug 14 2009 02:50 UTC [siddheshp]   0.5.0-114
 - ChangeLog, configure.ac, src/dialog.c:
  * Modified GTK configure test. Bumped default check to 2.14 and use 2.12 as
