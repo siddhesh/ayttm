@@ -145,8 +145,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.4 $",
-	"$Date: 2009/08/14 12:55:30 $",
+	"$Revision: 1.5 $",
+	"$Date: 2009/08/14 14:07:43 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -171,24 +171,25 @@ static int ay_msn_authorize_user( eb_local_account *ela, MsnBuddy *bud );
 static void *mi1 = NULL;
 static void *mi2 = NULL;
 
+static char ay_msn_host[MAX_PREF_LEN] = MSN_DEFAULT_HOST;
+static char ay_msn_port[MAX_PREF_LEN] = MSN_DEFAULT_PORT;
+
 static int plugin_init()
 {
 	eb_debug(DBG_MSN, "MSN\n");
-
-	strncpy(msn_host, MSN_DEFAULT_HOST, sizeof(msn_host));
 
 	ref_count=0;
 	input_list * il = g_new0(input_list, 1);
 	plugin_info.prefs = il;
 
-	il->widget.entry.value = msn_host;
+	il->widget.entry.value = ay_msn_host;
 	il->name = "msn_server";
 	il->label = _("Server:");
 	il->type = EB_INPUT_ENTRY;
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
-	il->widget.entry.value = msn_port;
+	il->widget.entry.value = ay_msn_port;
 	il->name = "msn_port";
 	il->label = _("Port:");
 	il->type = EB_INPUT_ENTRY;
@@ -590,6 +591,9 @@ static void ay_msn_finish_login(const char *password, void *data)
 	mlad->activity_tag = ay_activity_bar_add(buff, ay_msn_cancel_connect, account);
 
 	mlad->ma->password = strdup(password);
+
+	strcpy(msn_host, ay_msn_host);
+	strcpy(msn_port, ay_msn_port);
 
 	if(!mlad->friendlyname[0])
 		mlad->ma->friendlyname = strdup(account->alias);

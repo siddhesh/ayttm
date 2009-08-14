@@ -1,3 +1,11 @@
+* Fri Aug 14 2009 14:05 UTC [siddheshp]   0.5.0-118
+- ChangeLog, configure.ac, libproxy/net_constants.h, libproxy/networking.c,
+modules/msn2/msn.c, modules/msn2/libmsn2/msn-login.c,
+modules/msn2/libmsn2/msn-login.h, modules/msn2/libmsn2/msn-message.c:
+ * Fixed a silly glitch in msn_is_error_message
+ * Fixed glitch in ay_connection_strerror
+ * MSN prefs glitch
+
 * Fri Aug 14 2009 12:55 UTC [siddheshp]   0.5.0-117
 - ChangeLog, configure.ac, libproxy/net_constants.h, libproxy/networking.c,
 libproxy/networking.h, modules/msn2/msn.c, modules/msn2/libmsn2/Makefile.am,

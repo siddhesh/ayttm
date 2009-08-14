@@ -662,7 +662,7 @@ static char *errors[] =
 		"Connection cancelled",
 		"Certificate Rejected",
 		"Interrupt. You should not be getting this request. File a bug report",
-		"Connection failed"
+		"Connection Refused"
 	};
 
 
@@ -671,7 +671,9 @@ const char *ay_connection_strerror(int error)
 	if(error <=0 && error > AY_NUM_ERRORS)
 		return errors[0-error];
 
-	return _("Unknown Error");
+	/* Assume this is an errno */
+	printf("no return code found for %d\n", error);
+	return strerror(error);
 }
 
 

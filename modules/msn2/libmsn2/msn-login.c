@@ -426,7 +426,7 @@ void msn_login(MsnAccount *ma)
 	if(msn_port[0])
 		mc->port = atoi(msn_port);
 	else
-		mc->port = MSN_DEFAULT_PORT;
+		mc->port = atoi(MSN_DEFAULT_PORT);
 
 	mc->type = MSN_CONNECTION_NS;
 	mc->account = ma;

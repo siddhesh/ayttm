@@ -13,7 +13,7 @@
 #define MSN_OFFICIAL_CLIENT	"BC01"
 
 #define MSN_DEFAULT_HOST	"messenger.hotmail.com"
-#define MSN_DEFAULT_PORT	1863
+#define MSN_DEFAULT_PORT	"1863"
 
 #define MSN_PROTO_CVR0		"CVR0"
 #define MSN_AUTH_SSO		"SSO"
