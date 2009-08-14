@@ -1,3 +1,10 @@
+* Fri Aug 14 2009 02:50 UTC [siddheshp]   0.5.0-114
+- ChangeLog, configure.ac, src/dialog.c:
+ * Modified GTK configure test. Bumped default check to 2.14 and use 2.12 as
+ fallback if it fails
+ * Conditionally use either dialog->vbox or gtk_dialog_get_content_area
+ depending on whether we detected gtk < 2.14 or not respectively
+
 * Thu Aug 13 2009 20:20 UTC [siddheshp]   0.5.0-113
 - ChangeLog, libproxy/Makefile.am, libproxy/proxy.c,
 modules/aim-oscar/aim-oscar.c, modules/irc/irc.c, modules/irc/irc.h,

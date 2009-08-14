@@ -295,7 +295,11 @@ int eb_do_confirm_dialog(const char *message, const char *title)
 
 	content_area = gtk_hbox_new(FALSE, 5);
 
+#ifdef HAVE_GTK_2_14
 	gtk_container_add ( gtk_dialog_get_content_area(GTK_DIALOG(dialog)), content_area );
+#else
+	gtk_container_add ( GTK_DIALOG(dialog)->vbox, content_area );
+#endif
 
 	label = gtk_label_new("");
 
