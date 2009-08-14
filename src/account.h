@@ -67,20 +67,22 @@ typedef struct local_account {
 } eb_local_account;
 
 typedef struct account {
-        int service_id;
-	eb_local_account * ela;
-        char handle[255];
-	struct contact * account_contact;
-        void * protocol_account_data;
-	void * list_item; /* GtkWidget */
-	void * status; /* GtkWidget */
-	char * tiptext;
-	void * pix; /* GtkWidget */
+	int service_id;
+	eb_local_account *ela;
+	char handle[255];
+	struct contact *account_contact;
+	void *protocol_account_data;
+	void *list_item; /* GtkWidget */
+	void *status; /* GtkWidget */
+	char *tiptext;
+	void *pix; /* GtkWidget */
 	int icon_handler;
 	int online;
 	int status_handler;
-	struct _info_window * infowindow;
-	int priority;
+	struct _info_window *infowindow;
+ 	int priority;
+	char *new_state;
+	char *new_status;
 } eb_account;
 
 const char *decode_password(const char *pass_in, int enc_type);

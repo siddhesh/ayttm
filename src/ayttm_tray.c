@@ -65,6 +65,8 @@ gboolean icon_activate(GtkStatusIcon * status_icon, gpointer data)
 /* End Ayttm */
 void ayttm_end_app(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
+	eb_debug(DBG_CORE, "Writing preferences\n");
+	ayttm_prefs_write();
 	eb_debug(DBG_CORE, "Signing out...\n");
 	eb_sign_off_all();	
 	eb_debug(DBG_CORE, "Signed out\n");

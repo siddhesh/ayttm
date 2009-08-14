@@ -184,13 +184,6 @@ gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 	return TRUE;
 }
 
-void ayttm_end_app_from_menu(GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-	delete_event(widget, event, data);
-
-	ayttm_end_app(widget, event, data);
-}
-
 static void send_file_callback(GtkWidget *w, eb_account *ea)
 {
 	eb_do_send_file(ea);
@@ -340,8 +333,6 @@ static void eb_save_size(GtkWidget *widget, gpointer data)
 	gtkut_widget_get_uposition(statuswindow, &x, &y);
 	iSetLocalPref("x_contact_window", x);
 	iSetLocalPref("y_contact_window", y);
-	iSetLocalPref("status_show_level", status_show);
-	eb_debug(DBG_CORE, "saving window size\n");
 
 	ayttm_prefs_write();
 }
@@ -407,23 +398,20 @@ static void update_status_message(gchar *message)
 		create_log_window();
 
 	if (status_bar) {
-		int i;
+		char *ch;
 		char *tstamp_mess = NULL;
 		time_t t;
 		struct tm *cur_time;
 
-		for (i = strlen(message) - 1; i >= 0 && isspace(message[i]); i--)
-			message[i] = ' ';
+		for (ch = message; *ch; ch++)
+			if (isspace(*ch))
+				*ch = ' ';
 
 		time(&t);
 		cur_time = localtime(&t);
-		tstamp_mess = g_strdup_printf("<font color=#888888><b>%d:%.2d:%.2d</b></font> %s<br>",
+		tstamp_mess = g_strdup_printf(
+				"<font color=#888888><b>%d:%.2d:%.2d</b></font> %s<br>",
 				cur_time->tm_hour, cur_time->tm_min, cur_time->tm_sec, message);
-
-		for (i = 0; i < strlen(message); i++) {
-				if (isdigit(message[i]))
-						return;
-		}
 
 		if (last_inserted) {
 			if (!strcmp(last_inserted, message))
@@ -509,6 +497,7 @@ static void status_show_callback(GtkWidget *w, gpointer data)
 		return;
 
 	status_show = newdata;
+	iSetLocalPref("status_show_level", status_show);
 	update_contact_list();
 }
 
@@ -921,7 +910,7 @@ static void eb_status(GtkCheckMenuItem *widget, gpointer stats)
 		eb_services[s->ela->service_id].sc->set_current_state(s->ela, s->status);
 		new_state = eb_services[s->ela->service_id].sc->get_current_state(s->ela);
 		snprintf(
-				buff, 1024, _("Setting %s(on %s) to %s"),
+				buff, 1024, _("Setting %s (on %s) to %s"),
 				s->ela->handle, get_service_name(s->ela->service_id), sname);
 
 		update_status_message(buff);
@@ -961,7 +950,7 @@ static void eb_sign_on_predef(int all)
 
 			RUN_SERVICE(ac)->login(ac);
 			snprintf(
-					buff, 1024, _("Setting %s(on %s) to Online"),
+					buff, 1024, _("Setting %s (on %s) to Online"),
 					ac->handle, get_service_name(ac->service_id));
 
 			update_status_message(buff);
@@ -993,7 +982,7 @@ void eb_sign_off_all()
 
 			RUN_SERVICE(ac)->logout(ac) ;
 			snprintf(
-					buff, 1024, _("Setting %s(on %s) to Offline"),
+					buff, 1024, _("Setting %s (on %s) to Offline"),
 					ac->handle, get_service_name(ac->service_id));
 
 			update_status_message(buff);
@@ -1041,7 +1030,7 @@ void update_contact_list()
 			/* Visibility of contact */
 
 			/* show_all_accounts presumes show_all_contacts */
-			if ((status_show == 1) ||(status_show == 0)) {
+			if (status_show == 1 || status_show == 0) {
 				/* MUST show the contact */
 				add_contact_line(con);
 				contact_update_status(con);
@@ -1218,8 +1207,6 @@ static void set_status_label(eb_account *ea, int update_contact)
 	}
 	g_free(c);
 	g_free(tmp);
-
-	set_tooltips_active(iGetLocalPref("do_show_tooltips"));
 }
 
 /* makes an account visible on the buddy list, making the contact visible
@@ -1721,7 +1708,8 @@ void buddy_login(eb_account *ea)
 	if (!ea->account_contact->last_status)
 		ea->account_contact->last_status = strdup("dummy");
 
-	if (iGetLocalPref("do_ignore_unknown") && !strcmp(_("Unknown"), ea->account_contact->group->name))
+	if (iGetLocalPref("do_ignore_unknown")
+	&&  !strcmp(_("Unknown"), ea->account_contact->group->name))
 		return;
 
 	add_account_line(ea);
@@ -1763,7 +1751,8 @@ void buddy_logoff(eb_account *ea)
 	if (!ea->account_contact->last_status)
 		ea->account_contact->last_status = strdup("dummy");
 
-	if (iGetLocalPref("do_ignore_unknown") && !strcmp(_("Unknown"), ea->account_contact->group->name))
+	if (iGetLocalPref("do_ignore_unknown")
+	&&  !strcmp(_("Unknown"), ea->account_contact->group->name))
 		return;
 
 	/* sets the "closed door" icon */
@@ -1773,12 +1762,10 @@ void buddy_logoff(eb_account *ea)
 	if (ea->icon_handler != -1)
 		eb_timeout_remove(ea->icon_handler);
 
-	ea->icon_handler = -1;
-
 	if (ea->status_handler != -1)
 		eb_timeout_remove(ea->status_handler);
 
-	ea->status_handler = -1;
+	ea->icon_handler = ea->status_handler = -1;
 
 	/* if this is the last account of the parent contact to log off,
 	   we must log off the contact also */
@@ -2290,7 +2277,7 @@ static GtkActionEntry action_items[] = {
 		N_("_Quit"),
 		"<control>Q",
 		N_("Close Ayttm"),
-		G_CALLBACK(ayttm_end_app_from_menu)},
+		G_CALLBACK(ayttm_end_app)},
 	{"Prefs",
 		GTK_STOCK_PREFERENCES,
 		N_("_Preferences"),
@@ -2499,7 +2486,8 @@ void ay_set_submenus(void)
 
 void hide_status_window()
 {
-	eb_save_size(statuswindow, NULL);
+	/* iSetLocalPref("show_contact_window", 0); */
+	/* There is no such preference, but should be */
 	gtk_widget_hide(statuswindow);
 }
 
@@ -2509,6 +2497,9 @@ void show_status_window()
 	int win_x, win_y;
 	unsigned int win_w, win_h;
 	int flags;
+
+	/* iSetLocalPref("show_contact_window", 1); */
+	/* There is no such preference, but should be */
 
 	/* handle geometry - ivey */
 #ifndef __MINGW32__
