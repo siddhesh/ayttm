@@ -1,21 +1,29 @@
 #ifndef _MSN_ERRORS_H_
 #define _MSN_ERRORS_H_
 
-#include <stdio.h>
-#include <string.h>
+
+#include "msn.h"
+
+struct _MsnError {
+	int error_num;
+	const char *message;
+	int fatal;
+	int nsfatal;
+};
+
 
 enum {
-	MSN_ERROR_NS_CONNECTION_RESET=0x01,
+	MSN_ERROR_CONNECTION_RESET=0x01,
 
-	MSN_LOGIN_OK=0x100,
+	MSN_LOGIN_OK=0x1000,
 	MSN_LOGIN_FAIL_PASSPORT,
 	MSN_LOGIN_FAIL_SSO,
 	MSN_LOGIN_FAIL_VER,
 	MSN_LOGIN_FAIL_OTHER,
-	MSN_MESSAGE_DELIVERY_FAILED=0x200
+	MSN_MESSAGE_DELIVERY_FAILED=0x2000
 };
 
-char *msn_strerror(int error);
+const MsnError *msn_strerror(int error);
 
 #endif
 

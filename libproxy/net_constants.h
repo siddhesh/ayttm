@@ -47,7 +47,8 @@ typedef enum
 	AY_CANCEL_CONNECT = -11,
 	AY_SSL_CERT_REJECT = -12,
 	AY_UI_REQUEST = -13,
-	AY_CONNECT_FAILED = -14
+	AY_CONNECT_FAILED = -14,
+	AY_NUM_ERRORS
 } AyConnectionStatus;
 
 

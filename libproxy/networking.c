@@ -646,3 +646,32 @@ AyConnectionType ay_connection_get_type(AyConnection *con)
 }
 
 
+static char *errors[] = 
+	{
+		"Success",
+		"Connection Refused",
+		"Hostname Lookup failed",
+		"Permission denied",
+		"Proxy requires Authentication",
+		"Socks4: Disconnected due to an unknown error",
+		"Socks4: Authentication failed",
+		"Socks4: Invalid username",
+		"Socks4: Incompatible",
+		"Socks5: Connection failed",
+		"Invalid Connection information",
+		"Connection cancelled",
+		"Certificate Rejected",
+		"Interrupt. You should not be getting this request. File a bug report",
+		"Connection failed"
+	};
+
+
+const char *ay_connection_strerror(int error)
+{
+	if(error <=0 && error > AY_NUM_ERRORS)
+		return errors[0-error];
+
+	return _("Unknown Error");
+}
+
+

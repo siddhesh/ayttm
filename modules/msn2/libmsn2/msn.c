@@ -44,16 +44,6 @@ void msn_account_free(MsnAccount *ma)
 }
 
 
-char *msn_strerror(int error)
-{
-	char buf[1024];
-
-	sprintf(buf, "Error code %p\n", error);
-
-	return strdup(buf);
-}
-
-
 void msn_account_cancel_connect(MsnAccount *ma)
 {
 	msn_connection_free(ma->ns_connection);

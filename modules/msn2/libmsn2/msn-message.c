@@ -329,3 +329,24 @@ void msn_send_IM(MsnAccount *ma, MsnBuddy *buddy)
 }
 
 
+int msn_message_is_error(MsnConnection *mc)
+{
+	MsnMessage *msg = mc->current_message;
+	int errno;
+
+	if((errno = atoi(msg->argv[0]))) {
+		const MsnError *error = msn_strerror(errno);
+		ext_msn_error(mc, errno);
+
+		/* The connection and hence the message will have been
+		 * freed if this is fatal */
+		if(!error->fatal && !error->nsfatal)
+			msn_connection_free_current_message(mc);
+
+		return 1;
+	}
+
+	return 0;
+}
+
+

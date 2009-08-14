@@ -96,7 +96,8 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 	}
 	else if (mc->type == MSN_CONNECTION_NS || mc->type == MSN_CONNECTION_SB) {
 		if(len == 0) {
-			ext_msn_error(mc, MSN_ERROR_NS_CONNECTION_RESET);
+			const MsnError *error = msn_strerror(MSN_ERROR_CONNECTION_RESET);
+			ext_msn_error(mc, error);
 			return 1;
 		}
 
@@ -111,21 +112,21 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 			if(mc->current_message->state)
 				return 0;
                 
-			/*
-			 * Check if:
-			 * TODO 1) It is an error message OR
-			 * 2) It is a response to a previous message
-			 *
-			 * Otherwise look for the default handler for the message
-			 */
-			if( msn_connection_pop_callback(mc) == 0 ) 
-				msn_message_handle_incoming(mc);
-
-			if( mc->account ) {
-				msn_connection_free_current_message(mc);
-			}
-			else {
-				msn_connection_free(mc);
+			/* Skip processing this message if it is an error */
+			if(!msn_message_is_error(mc)) {
+				/*
+				 * Check if this is a response to a previous message
+				 * Otherwise look for the default handler for the message
+				 */
+				if( !msn_message_is_error(mc) && msn_connection_pop_callback(mc) == 0 ) 
+					msn_message_handle_incoming(mc);
+                                
+				if( mc->account ) {
+					msn_connection_free_current_message(mc);
+				}
+				else {
+					msn_connection_free(mc);
+				}
 			}
 		} while(remaining > 0);
 	}
@@ -144,7 +145,7 @@ void msn_connection_free(MsnConnection *mc)
 	ext_msn_free(mc); 
 	msn_connection_free_current_message(mc); 
 	l_list_free(mc->callbacks); 
-	if(mc->host) free(mc->host); 
+	free(mc->host); 
 	free(mc); 
 }
 

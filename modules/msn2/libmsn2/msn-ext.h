@@ -6,7 +6,7 @@
 #include "msn.h"
 
 void ext_msn_free(MsnConnection *mc);
-void ext_msn_error(MsnConnection *mc, int code);
+void ext_msn_error(MsnConnection *mc, const MsnError *error);
 void ext_show_error(MsnConnection *mc, const char *msg);
 void ext_msn_send_data(MsnConnection *mc, char *buf, int len);
 void ext_msn_account_destroyed(MsnAccount *ma);

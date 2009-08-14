@@ -145,8 +145,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.3 $",
-	"$Date: 2009/08/14 10:35:28 $",
+	"$Revision: 1.4 $",
+	"$Date: 2009/08/14 12:55:30 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -682,8 +682,14 @@ void ay_msn_connected(AyConnection *fd, int error, void *data)
 			ay_msn_logout(ela);
 		}
 		else {
+			const MsnError *err = msn_strerror(error);
+			const char *msg = err->message;
+
+			if(err->error_num != error)
+				msg = ay_connection_strerror(error);
+
 			snprintf(errbuf, sizeof(errbuf), "Could not Connect to server %s:\n%s",
-					mc->host, msn_strerror(error)); /* replace with ay_connection* */
+					mc->host, msg); /* replace with ay_connection* */
 	
 			ay_do_error(_("MSN Error"), errbuf);
 
@@ -913,7 +919,9 @@ void ext_msn_login_response(MsnAccount *ma, int error)
 	else {
 		char buf[1024];
 
-		snprintf(buf, sizeof(buf), _("MSN Login Failed:\n\n%s"), msn_strerror(error));
+		const MsnError *err = msn_strerror(error);
+
+		snprintf(buf, sizeof(buf), _("MSN Login Failed:\n\n%s"), err->message);
 
 		ay_do_error(_("Login Failed"), buf);
 
@@ -1542,6 +1550,24 @@ void ext_update_friendlyname(MsnConnection *mc)
 	strncpy(mlad->friendlyname, mc->account->friendlyname, MAX_PREF_LEN);
 
 	eb_debug(DBG_MSN, "Your friendlyname is now: %s\n", mlad->friendlyname);
+}
+
+
+void ext_msn_error(MsnConnection *mc, const MsnError *error)
+{
+	if(error->nsfatal || error->fatal)
+		ay_do_error(_("MSN Error"), error->message);
+	else
+		ay_do_warning(_("MSN :: Operation failed"), error->message);
+
+	if(error->nsfatal)
+		ay_msn_logout(mc->account->ext_data);
+	else if(error->fatal) {
+		if(mc->type == MSN_CONNECTION_SB)
+			msn_sb_disconnect(mc);
+		else
+			ay_msn_logout(mc->account->ext_data);
+	}
 }
 
 

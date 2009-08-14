@@ -7,6 +7,7 @@ typedef struct _MsnConnection	MsnConnection;
 typedef struct _MsnIM		MsnIM;
 typedef struct _MsnBuddy	MsnBuddy;
 typedef struct _MsnGroup	MsnGroup;
+typedef struct _MsnError	MsnError;
 
 typedef struct _SBPayload	SBPayload;
 

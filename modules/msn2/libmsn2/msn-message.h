@@ -3,6 +3,7 @@
 #define _MSN_MESSAGE_H_
 
 #include "msn.h"
+#include "msn-errors.h"
 
 #define MSN_MSG_NO_ACK		"U"
 #define MSN_MSG_NACK_FAIL	"N"
@@ -108,6 +109,7 @@ void msn_send_IM_to_sb(MsnConnection *sb, MsnIM *im);
 
 void msn_send_IM(MsnAccount *ma, MsnBuddy *buddy);
 
+int msn_message_is_error(MsnConnection *mc);
 
 #endif
 

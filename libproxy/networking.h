@@ -107,6 +107,8 @@ int ay_connection_listen(AyConnection *con);
 
 AyConnectionType ay_connection_get_type(AyConnection *con);
 
+const char *ay_connection_strerror(int error_num);
+
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 #define extern extern
