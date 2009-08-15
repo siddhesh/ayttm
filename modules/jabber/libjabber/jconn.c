@@ -335,7 +335,7 @@ void jab_auth(jconn j)
     char *hash, *user;
 
     if (!j)
-		return(NULL);
+		return;
 
     x = jutil_iqnew(JPACKET__SET, NS_AUTH);
     xmlnode_put_attrib(x, "id", "id_auth");
@@ -380,7 +380,7 @@ void jab_reg(jconn j)
     char *user;
 
     if (!j)
-		return(NULL);
+		return;
 
     x = jutil_iqnew(JPACKET__SET, NS_REGISTER);
     xmlnode_put_attrib(x, "id", "id_reg");
@@ -405,7 +405,6 @@ void jab_reg(jconn j)
     xmlnode_free(x);
     j->state = JCONN_STATE_ON;
     STATE_EVT(JCONN_STATE_ON)
-    return;
 }
 
 

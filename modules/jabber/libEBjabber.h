@@ -69,7 +69,8 @@ struct jabber_buddy
 	char *name;				/* Users name */
 	char *jid;				/* the buddy's id */
 	char *sub;				/* Subscriptions state */
-	int  status;				/* Their current status */
+	int  status;			/* Their current state */
+	char *description;		/* Their current status */
 	JABBER_Conn *JConn;
 };
 

@@ -1,3 +1,12 @@
+* Sat Aug 15 2009  UTC [pstef]   0.5.0-119
+- ChangeLog, configure.ac, modules/jabber/jabber.c,
+modules/jabber/libEBjabber.c, modules/jabber/libEBjabber.h,
+modules/jabber/libjabber/jconn.c:
+ * Jabber module is now able to tell us buddy status (description)
+ * Got rid of some harmless compile warnings in Jabber module
+ * Less debug messages from Jabber
+ * Minor code improvements
+
 * Fri Aug 14 2009 14:05 UTC [siddheshp]   0.5.0-118
 - ChangeLog, configure.ac, libproxy/net_constants.h, libproxy/networking.c,
 modules/msn2/msn.c, modules/msn2/libmsn2/msn-login.c,

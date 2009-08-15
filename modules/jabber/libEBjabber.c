@@ -40,7 +40,7 @@
 #endif
 
 
-extern void JABBERStatusChange(void *data);
+extern void JABBERStatusChange(struct jabber_buddy *jb);
 extern void JABBERAddBuddy(void *data);
 extern void JABBERInstantMessage(void *data);
 extern void JABBERDialog(void *data);
@@ -378,8 +378,7 @@ int JABBER_SendMessage(JABBER_Conn *JConn, char *handle, char *message) {
 		eb_debug(DBG_JBR, "******Called with NULL JConn for user %s!!!\n", handle);
 		return(0);
 	}
-	eb_debug(DBG_JBR,  "handle: %s message: %s\n", handle, message);
-	eb_debug(DBG_JBR,  "********* %s -> %s\n", JConn->jid, handle);
+	eb_debug(DBG_JBR,  "%s -> %s:\nOUT.msg: %s\n", JConn->jid, handle, message);
 	/* We always want to chat.  :) */
 	x = jutil_msgnew(TMSG_CHAT, handle, NULL, message);
 	jab_send(JConn->conn, x);
@@ -802,12 +801,11 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		return;
 	}
 	jpacket_reset(packet);
-	eb_debug(DBG_JBR, "Packet: %s\n", packet->x->name);
+	type = xmlnode_get_attrib(packet->x, "type");
+	from = xmlnode_get_attrib(packet->x, "from");
+	eb_debug(DBG_JBR, "Packet: %s. Type: %s. From: %s\n", packet->x->name, type, from);
 	switch (packet->type) {
 	case JPACKET_MESSAGE:
-		from = xmlnode_get_attrib(packet->x, "from");
-		type = xmlnode_get_attrib(packet->x, "type");
-		eb_debug(DBG_JBR, "MESSAGE received: %s\n", type);
 		x = xmlnode_get_tag(packet->x, "body");
 		body = xmlnode_get_data(x);
 		x = xmlnode_get_tag(packet->x, "x");
@@ -833,7 +831,6 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			else
 				buff[0]='\0';
 		}
-		eb_debug(DBG_JBR, "from %s, type %s, body: %s, subj %s\n", from, type, body, subj);
 		if (type && !strcmp(type, "groupchat"))	{
 			user = strchr(from, '/');
 			room = from;
@@ -850,17 +847,15 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			/* For now, ayttm does not understand resources */
 			JIM.msg = buff;
 			JIM.JConn = JConn;
-			eb_debug(DBG_JBR, "JIM.msg: %s\n", JIM.msg);
-			eb_debug(DBG_JBR, "Rendering message\n");
 			JIM.sender = strtok(from, "/");
 			if (!JIM.sender)
 				JIM.sender = from;
-			eb_debug(DBG_JBR, "JIM.sender: %s\n", JIM.sender);
+			eb_debug(DBG_JBR, "JIM.sender: %s\nJIM.msg: %s\n", JIM.sender, JIM.msg);
 			JABBERInstantMessage(&JIM);
 		}
 		break;
 	case JPACKET_IQ:
-		if (!(type = xmlnode_get_attrib(packet->x, "type"))) {
+		if (!type) {
 			eb_debug(DBG_JBR, "<JPACKET_IQ: NULL type\n");
 			return;
 		}
@@ -868,8 +863,6 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			eb_debug(DBG_JBR, "<JPACKET_IQ: NULL id\n");
 			return;
 		}
-		from = xmlnode_get_attrib(packet->x, "from");
-		eb_debug(DBG_JBR, "IQ received: %s\n", type);
 		if (!strcmp(type, "result")) {
 			if (!(x = xmlnode_get_tag(packet->x, "query"))) {
 				/* If there is no <query/>, <id> is the only way to recognize IQ */
@@ -996,12 +989,10 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		}
 		break;
 	case JPACKET_PRESENCE:
-		eb_debug(DBG_JBR, "Presence packet received\n");
 		status = JABBER_ONLINE;
-		type = xmlnode_get_attrib(packet->x, "type");
-		from = xmlnode_get_attrib(packet->x, "from");
 		/* For now, ayttm does not understand resources */
-		eb_debug(DBG_JBR, "PRESENCE received type: %s from: %s\n", type, from);
+		if (type && !strcmp(type, "error"))
+			break;
 		if ((x = xmlnode_get_tag(packet->x, "show"))) {
 			show = xmlnode_get_data(x);
 			if (show) {
@@ -1018,7 +1009,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		}
 		if (type && !strcmp(type, "unavailable"))
 			status = JABBER_OFFLINE;
-		if (!strncmp(packet->from->server, "conference.", strlen("conference."))) {
+		if (!strncmp(packet->from->server, "conference.", 11)) {
 			eb_debug(DBG_JBR, "Presence received from a conference room\n");
 			user = strchr(from, '/');
 			room=from;
@@ -1033,8 +1024,11 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			JABBERChatRoomBuddyStatus(room, user, status);
 		}
 		else {
-			JB.jid = strtok(from, "/");
-			if(!JB.jid)
+			if ((x = xmlnode_get_tag(packet->x, "status")))
+				JB.description = xmlnode_get_data(x);
+			else
+				JB.description = NULL;
+			if (!(JB.jid = strtok(from, "/")))
 				JB.jid = from;
 			JB.status = status;
 			JB.JConn = JConn;
@@ -1042,9 +1036,6 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		}
 		break;
 	case JPACKET_S10N:
-		eb_debug(DBG_JBR, "S10N packet received\n");
-		from = xmlnode_get_attrib(packet->x, "from");
-		type = xmlnode_get_attrib(packet->x, "type");
 		if (type) {
 			JD = calloc(1, sizeof(JABBER_Dialog));
 			if (!strcmp(type, "subscribe")) {
@@ -1066,12 +1057,7 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 		break;
 	case JPACKET_UNKNOWN:
 	default:
-		from = xmlnode_get_attrib(packet->x, "from");
-		if (from)
-			eb_debug(DBG_JBR, "unrecognized packet: %i received from %s\n", packet->type, from)
-		else
-			eb_debug(DBG_JBR, "unrecognized packet: %i received\n", packet->type);
-		break;
+		eb_debug(DBG_JBR, "unrecognized packet: %i received from %s\n", packet->type, from)
 	}
 	eb_debug(DBG_JBR, "<\n");
 }

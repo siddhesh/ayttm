@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.53 $",
-	"$Date: 2009/08/13 20:20:38 $",
+	"$Revision: 1.54 $",
+	"$Date: 2009/08/15 19:57:27 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -134,7 +134,7 @@ static int plugin_finish()
  *                             End Module Code
  ************************************************************************************/
 
-static char * jabber_status_strings[] =
+static char *jabber_state_strings[] =
 { "", "Away", "Do Not Disturb", "Extended Away", "Chat", "Offline"};
 
 
@@ -149,6 +149,7 @@ static input_list * jabber_prefs = NULL;
 typedef struct _eb_jabber_account_data
 {
 	int status;		//the status of the user
+	char *description;
 	JABBER_Conn *JConn;	//The connection we know about them from
 } eb_jabber_account_data;
 
@@ -192,7 +193,7 @@ static int is_setting_state = 0;
 static void jabber_dialog_callback( gpointer data, int result );
 static void jabber_list_dialog_callback( const char * text, gpointer data );
 void JABBERInstantMessage(void *data);
-void JABBERStatusChange(void *data);
+void JABBERStatusChange(struct jabber_buddy *jb);
 void JABBERDialog(void *data);
 void JABBERListDialog(const char **list, void *data);
 void JABBERLogout(void *data);
@@ -682,10 +683,10 @@ static const char ** eb_jabber_get_status_pixmap( eb_account * account)
 		return jabber_away_xpm;
 }
 
-static char * eb_jabber_get_status_string( eb_account * account )
+static char *eb_jabber_get_status_string(eb_account *account)
 {
-	eb_jabber_account_data * jad = account->protocol_account_data;
-	return jabber_status_strings[jad->status];
+	eb_jabber_account_data *jad = account->protocol_account_data;
+	return jad->description ? jad->description : "";
 }
 
 static void eb_jabber_set_idle( eb_local_account * account, int idle )
@@ -1118,44 +1119,59 @@ void JABBERInstantMessage(void *data)
 ** Output:  none
 */
 
-void JABBERStatusChange(void *data)
+void JABBERStatusChange(struct jabber_buddy *jb)
 {
-	struct jabber_buddy *jb;
 	eb_account *ea;
 	eb_jabber_account_data *jad;
-	eb_local_account *ela = NULL;
+	eb_local_account *ela;
+	int status;
+	char *old_desc;
 	
-	if(!data)
+	if (!jb)
 		return;
-	eb_debug(DBG_JBR, ">\n");
-	jb = (struct jabber_buddy *)data;
 
-	ela = find_local_account_by_conn(jb->JConn);
-	if (!ela) {
+	eb_debug(DBG_JBR, ">\n");
+	if (!(ela = find_local_account_by_conn(jb->JConn))) {
 		eb_debug(DBG_JBR, "no ela!\n");
 		return;
 	}
-	ea = find_account_with_ela(jb->jid, ela);
-	if (!ea) {	/* Add an unknown account */
-	ea = eb_jabber_new_account(ela, jb->jid);
-		if ( !find_grouplist_by_name("Unknown" )) {
-				add_group("Unknown");
-		}
+
+	if (!(ea = find_account_with_ela(jb->jid, ela))) {
+		/* Add an unknown account */
+		ea = eb_jabber_new_account(ela, jb->jid);
+		if (!find_grouplist_by_name("Unknown"))
+			add_group("Unknown");
 		add_unknown(ea);
 	}
 	jad = ea->protocol_account_data;
 
-	eb_debug(DBG_JBR,  "New status for %s is %i\n", jb->jid, jb->status);
-	if (jb->status != JABBER_OFFLINE && jad->status==JABBER_OFFLINE) {
-		jad->status = jb->status;
-		buddy_login(ea);
-	} else if (jb->status == JABBER_OFFLINE && jad->status!=JABBER_OFFLINE) {
-		jad->status = jb->status;
-		buddy_logoff(ea);
-	}
+	status = jad->status;
 	jad->status = jb->status;
-	jad->JConn=jb->JConn;
-	buddy_update_status(ea); 
+
+	old_desc = jad->description;
+	jad->description = g_strdup(jb->description);
+
+	jad->JConn = jb->JConn;
+
+	if (jb->status != status)
+		ea->new_state = jabber_state_strings[jb->status];
+
+	if ((!old_desc && jb->description && jb->description[0])
+	||  (old_desc && !jb->description && old_desc[0])
+	||  (old_desc && jb->description && strcmp(old_desc, jb->description))) {
+
+		eb_debug(DBG_JBR, "[%s|%s]\n", old_desc, jb->description);
+		ea->new_status = jad->description;
+	}
+
+	if (jb->status != JABBER_OFFLINE && status == JABBER_OFFLINE)
+		buddy_login(ea);
+	else if (jb->status == JABBER_OFFLINE && status != JABBER_OFFLINE)
+		buddy_logoff(ea);	
+	else if (ea->new_state || ea->new_status)
+		buddy_update_status_and_log(ea);
+
+	g_free(old_desc);
 	eb_debug(DBG_JBR, "<\n");
 }
 
@@ -1243,7 +1259,7 @@ void JABBERBuddy_typing(JABBER_Conn *JConn, char *from, int typing) {
 	eb_account *ea = NULL;
 	char *dbgstr = NULL;
 	
-	if (ela = find_local_account_by_conn(JConn))
+	if ((ela = find_local_account_by_conn(JConn)))
 		ea = find_account_with_ela(from, ela);
 
 	if (ea && iGetLocalPref("do_typing_notify"))
