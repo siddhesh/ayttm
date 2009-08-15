@@ -1160,7 +1160,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 	if (strlen(c) == 40)
 		c[39] = c[38] = c[37] = '.';
 
-	if (strlen(c))
+	if (c && c[0])
 		tmp = g_strdup_printf("(%s)", c);
 	else
 		tmp = g_strdup("");
@@ -1174,6 +1174,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 					ea->account_contact->nick, strlen(c) ? c : "Online");
 			update_status_message(buff);
 		}
+		g_free(ea->status);
 	}
 
 	ea->tiptext = ea->status = strdup(tmp);
@@ -1199,10 +1200,12 @@ static void set_status_label(eb_account *ea, int update_contact)
 
 		if (ac->last_status_change) {
 			mytime = localtime(&ac->last_status_change);
-			strftime(buff, 128, "%H:%M(%b %d)", mytime);
+			strftime(buff, 128, "%H:%M (%b %d)", mytime);
+			g_free(c);
+			c = g_markup_escape_text(status, -1);
 			ea->tiptext = g_strdup_printf(
 					_("%s\n<span size=\'small\'>Since %s</span>"),
-					strlen(status) ? status : "Online", buff);
+					(c && c[0]) ? c : "Online", buff);
 		}
 	}
 	g_free(c);
