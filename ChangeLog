@@ -1,3 +1,15 @@
+* Sun Aug 16 2009 21:08 UTC [pstef]   0.5.0-121
+- ChangeLog, configure.ac, src/auto_complete.c, src/chat_room.c,
+src/chat_window.c:
+ * Less debug messages about autocompletion
+ * Improved functions that handle input from keyboard in chat windows
+ * Don't send typing notify if the user is using keyboard but not typing text
+ * Up and down keys will now navigate through the text instead of bringing up
+ previously sent messages. To navigate through messages history, use Ctrl + up
+ and Ctrl + down.
+ * Fixed debug message "history Wrapped!"
+ * Less debug messages about incoming and outgoing message filtering
+
 * Sat Aug 15 2009 21:59 UTC [pstef]   0.5.0-120
 - ChangeLog, configure.ac, src/status.c:
  * Fixed memory leak

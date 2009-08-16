@@ -258,44 +258,47 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 {
 	eb_chat_room *cr = (eb_chat_room *)data;
 	GdkModifierType modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
-
+	gboolean do_complete = iGetLocalPref("do_auto_complete");
+	gboolean do_multi = iGetLocalPref("do_multi_line");
 	static gboolean complete_mode = FALSE;
 
-	if (!iGetLocalPref("do_multi_line"))
-		return FALSE;
-
 	if (event->keyval == GDK_Return) {
+		if (do_complete)
+			chat_auto_complete_insert(cr->entry, event);
 		/* Just print a newline on Shift-Return */
-		if (event->state & GDK_SHIFT_MASK)
+		/* But only if we are told to do multiline... */
+		if (event->state & GDK_SHIFT_MASK && do_multi)
 			event->state = 0;
-		else if (iGetLocalPref("do_enter_send")) {
+		/* ... otherwise simply print out the grub */
+		else if (!do_multi || iGetLocalPref("do_enter_send")) {
 			gtk_text_buffer_delete_selection(
 					gtk_text_view_get_buffer(GTK_TEXT_VIEW(cr->entry)), FALSE, TRUE);
 
-			chat_auto_complete_insert(cr->entry, event);
-
-			/*Prevents a newline from being printed*/
+			/* Prevents a newline from being printed */
 			g_signal_stop_emission_by_name(G_OBJECT(widget), "key-press-event");
 
 			send_cr_message(NULL, cr);
 			return TRUE;
 		}
 	}
-	else if (event->keyval == GDK_Up && (!modifiers))
+	else if (event->keyval == GDK_Up && event->state & GDK_CONTROL_MASK)
 		chat_history_up(cr);
-	else if (event->keyval == GDK_Down && (!modifiers))
+	else if (event->keyval == GDK_Down && event->state & GDK_CONTROL_MASK)
 		chat_history_down(cr);
 	else if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down)
 		chat_scroll(cr, event);
+	else if (modifiers && check_tab_accelerators(widget, cr, modifiers, event))
+		/* check tab changes if this is a tabbed chat window */
+		return TRUE;
+	else if (!modifiers)
+		send_typing_status(cr);
 
-	else if (iGetLocalPref("do_auto_complete")) {
+	if (do_complete) {
 		if (event->keyval == GDK_space || ispunct(event->keyval)) {
-			eb_debug(DBG_CORE, "AUTO COMPLETE INSERT\n");
 			chat_auto_complete_insert(cr->entry, event);
 			complete_mode = FALSE;
 		}
 		else if (event->keyval == GDK_Tab) {
-			eb_debug(DBG_CORE, "AUTO COMPLETE VALIDATE\n");
 			chat_auto_complete_validate(cr->entry);
 			complete_mode = FALSE;
 			return TRUE;
@@ -315,24 +318,15 @@ static gboolean cr_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 			}
 		}
 		else if	((event->keyval >= GDK_a && event->keyval <= GDK_z)
-			  || (event->keyval >= GDK_A && event->keyval <= GDK_Z))
-		{
-			eb_debug(DBG_CORE, "AUTO COMPLETE\n");
-			complete_mode = TRUE;
+			 ||  (event->keyval >= GDK_A && event->keyval <= GDK_Z)) {
 
+			complete_mode = TRUE;
 			if (!chat_auto_complete(cr->entry, auto_complete_session_words, event))
 				return chat_auto_complete(cr->entry, cr->fellows, event);
 
 			return TRUE;
 		}
 	}
-
-	/* check tab changes if this is a tabbed chat window */
-	if (cr->notebook && check_tab_accelerators(widget, cr, modifiers, event))
-		return TRUE;
-
-	if (!modifiers)
-		send_typing_status(cr);
 
 	return FALSE;
 }

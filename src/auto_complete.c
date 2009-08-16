@@ -153,7 +153,7 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 
 		comp_word = malloc(strlen(last_word)+2);
 		sprintf(comp_word, "%s%c",last_word,event->keyval);
-		eb_debug(DBG_CORE, "word caught: %s\n",comp_word);
+		/* eb_debug(DBG_CORE, "word caught: %s\n",comp_word); */
 		nick = complete_word(words, comp_word, &choice);
 
 		if (nick != NULL) {
@@ -170,7 +170,7 @@ int chat_auto_complete (GtkWidget *entry, LList *words, GdkEventKey *event)
 			gtk_text_buffer_delete(buffer, &b_iter, &insert_iter);
 			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
 
-			eb_debug(DBG_CORE, "insert %s at %d\n",nick, b);
+			/* eb_debug(DBG_CORE, "insert %s at %d\n",nick, b); */
 			gtk_text_buffer_insert(buffer, &b_iter, nick, -1);
 			b+=g_utf8_strlen(nick, -1);
 			gtk_text_buffer_get_iter_at_offset(buffer, &b_iter, b);
@@ -260,7 +260,7 @@ void chat_auto_complete_insert(GtkWidget *entry, GdkEventKey *event)
 			l = l->next;
 		}
 		if (!found) {
-			eb_debug(DBG_CORE, "word inserted: %s\n",last_word);
+			/* eb_debug(DBG_CORE, "word inserted: %s\n",last_word); */
 			auto_complete_session_words = l_list_prepend(auto_complete_session_words, last_word);
 		}
 	}

@@ -484,6 +484,7 @@ void send_message(GtkWidget *widget, gpointer d)
 	char *recoded;
 #endif
 	int pre_filter = 1;
+	int i = 0;
 
 	GET_CHAT_WINDOW(data);
 
@@ -546,12 +547,10 @@ void send_message(GtkWidget *widget, gpointer d)
 
 	message = strdup(text);
 
-	eb_debug(DBG_CORE, "Starting to run outgoing filters\n");
-
 	for (filter_walk = outgoing_message_filters; filter_walk; filter_walk = filter_walk->next) {
 		char *(*ifilter)(const eb_local_account *, const eb_account *, const struct contact *, const char *);
 
-		eb_debug(DBG_CORE, "Running an outgoing filter:\n");
+		i++;
 
 		ifilter = filter_walk->data;
 
@@ -580,7 +579,7 @@ void send_message(GtkWidget *widget, gpointer d)
 			return;
 	}
 
-	eb_debug(DBG_CORE, "Finished outgoing filters\n");
+	eb_debug(DBG_CORE, "Finished %i outgoing filters\n", i);
 
 	/* end outbound filters */
 
@@ -1033,20 +1032,31 @@ gboolean check_tab_accelerators(const GtkWidget *inWidget, const chat_window *in
 	if (inCW->notebook) { /* only change tabs if this window is tabbed */
 		GdkDeviceKey accel_prev_tab, accel_next_tab;
 
-		gtk_accelerator_parse(cGetLocalPref("accel_next_tab"), &(accel_next_tab.keyval), &(accel_next_tab.modifiers));
-		gtk_accelerator_parse(cGetLocalPref("accel_prev_tab"), &(accel_prev_tab.keyval), &(accel_prev_tab.modifiers));
+		gtk_accelerator_parse(
+				cGetLocalPref("accel_next_tab"),
+				&(accel_next_tab.keyval),
+				&(accel_next_tab.modifiers));
+
+		gtk_accelerator_parse(
+				cGetLocalPref("accel_prev_tab"),
+				&(accel_prev_tab.keyval),
+				&(accel_prev_tab.modifiers));
 
 		/* 
 		 * this does not allow for using the same keyval for both prev and next
 		 * when next contains every modifier that previous has (with some more)
 		 * but i really don't think that will be a huge problem =)
 		 */
-		if ((inModifiers == accel_prev_tab.modifiers) &&(inEvent->keyval == accel_prev_tab.keyval)) {
+		if (inModifiers == accel_prev_tab.modifiers
+		&&  inEvent->keyval == accel_prev_tab.keyval) {
+
 			g_signal_stop_emission_by_name(G_OBJECT(inWidget), "key-press-event");
 			gtk_notebook_prev_page(GTK_NOTEBOOK(inCW->notebook));
 			return TRUE;
 		}
-		else if ((inModifiers == accel_next_tab.modifiers) &&(inEvent->keyval == accel_next_tab.keyval)) {
+		else if (inModifiers == accel_next_tab.modifiers
+			 &&  inEvent->keyval == accel_next_tab.keyval) {
+
 			g_signal_stop_emission_by_name(G_OBJECT(inWidget), "key-press-event");
 			gtk_notebook_next_page(GTK_NOTEBOOK(inCW->notebook));
 			return TRUE;
@@ -1099,17 +1109,8 @@ void chat_history_up(chat_window *cw)
 			cw->this_msg_in_history = 1;
 		}
 	}
-	else {
-		cw->hist_pos=cw->hist_pos->prev;
-
-		if (!cw->hist_pos) {
-			LList *node = NULL;
-
-			eb_debug(DBG_CORE, "history Wrapped!\n");
-			for (node = cw->history; node; node = node->next)
-				cw->hist_pos = node;
-		}
-	}
+	else if (cw->hist_pos->prev)
+		cw->hist_pos = cw->hist_pos->prev;
 
 	gtk_text_buffer_delete(buffer, &start, &end);
 	p = cw_set_message(cw, cw->hist_pos->data);
@@ -1166,42 +1167,47 @@ gboolean chat_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 	chat_window	*cw =(chat_window *)data;
 	const GdkModifierType modifiers = event->state & 
 		(GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_MOD4_MASK);
+	gboolean do_complete = iGetLocalPref("do_auto_complete");
+	gboolean do_multi = iGetLocalPref("do_multi_line");
 
 	if (event->keyval == GDK_Return) {
+		if (do_complete)
+			chat_auto_complete_insert(cw->entry, event);
 		/* Just print a newline on Shift-Return */
 		/* But only if we are told to do multiline... */
-		if (event->state & GDK_SHIFT_MASK && iGetLocalPref("do_multi_line"))
+		if (event->state & GDK_SHIFT_MASK && do_multi)
 			event->state = 0;
 		/* ... otherwise simply print out the grub */
-		else if (!iGetLocalPref("do_multi_line") || iGetLocalPref("do_enter_send")) {
+		else if (!do_multi || iGetLocalPref("do_enter_send")) {
 			gtk_text_buffer_delete_selection(
 					gtk_text_view_get_buffer(GTK_TEXT_VIEW(cw->entry)), FALSE, TRUE);
-
-			chat_auto_complete_insert(cw->entry, event);
 
 			/* Prevents a newline from being printed */
 			g_signal_stop_emission_by_name(GTK_OBJECT(widget), "key-press-event");
 
 			chat_warn_if_away(cw);
 			send_message(NULL, cw);
-
 			return TRUE;
 		}
 	}
-	else if ((event->keyval == GDK_Up) && (!modifiers))
+	else if (event->keyval == GDK_Up && event->state & GDK_CONTROL_MASK)
 		chat_history_up(cw);
-	else if ((event->keyval == GDK_Down) && (!modifiers))
+	else if (event->keyval == GDK_Down && event->state & GDK_CONTROL_MASK)
 		chat_history_down(cw);
 	else if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down)
 		chat_scroll(cw, event);
-	else if (iGetLocalPref("do_auto_complete")) {
+	else if (modifiers && check_tab_accelerators(widget, cw, modifiers, event))
+		/* check tab changes if this is a tabbed chat window */
+		return TRUE;
+	else if (!modifiers && cw->preferred && cw->local_user)
+		send_typing_status(cw);
+
+	if (do_complete) {
 		if (event->keyval == GDK_space || ispunct(event->keyval)) {
-			eb_debug(DBG_CORE, "AUTO COMPLETE INSERT\n");
 			chat_auto_complete_insert(cw->entry, event);
 			complete_mode = FALSE;
-		} 
+		}
 		else if (event->keyval == GDK_Tab) {
-			eb_debug(DBG_CORE, "AUTO COMPLETE VALIDATE\n");
 			chat_auto_complete_validate(cw->entry);
 			complete_mode = FALSE;
 			return TRUE;
@@ -1221,19 +1227,12 @@ gboolean chat_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 			}
 		}
 		else if	((event->keyval >= GDK_a && event->keyval <= GDK_z)
-			  ||(event->keyval >= GDK_A && event->keyval <= GDK_Z)) {
-			eb_debug(DBG_CORE, "AUTO COMPLETE\n");
+			 ||  (event->keyval >= GDK_A && event->keyval <= GDK_Z)) {
+
 			complete_mode = TRUE;
 			return chat_auto_complete(cw->entry, auto_complete_session_words, event);
 		} 
 	}
-
-	if (modifiers && cw->notebook && check_tab_accelerators(widget, cw, modifiers, event))
-		return(TRUE);
-
-	if (cw->preferred && cw->local_user && !modifiers)
-		send_typing_status(cw);
-
 	return FALSE;
 }
 
@@ -1352,6 +1351,7 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 	time_t t;
 	LList *filter_walk;
 	gchar *message, *temp_message, *link_message, *encoded;
+	int i = 0;
 
 	/* init to false so only play if first msg is one received rather than sent */
 	gboolean firstmsg = FALSE;
@@ -1380,15 +1380,13 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 		return;
 
 	/* Inbound filters here - Meredydd */
-	eb_debug(DBG_CORE, "Starting to run incoming filters\n");
-
 	message = strdup(o_message);
 
 	for (filter_walk=incoming_message_filters; filter_walk; filter_walk = filter_walk->next) {
 		char *(*ofilter)(const eb_local_account *, const eb_account *, const struct contact *, const char *);
 		char *otext = NULL;
 
-		eb_debug(DBG_CORE, "Running an incoming filter:\n");
+		i++;
 		ofilter = filter_walk->data;
 
 		otext = ofilter(account, remote, remote_contact, message);
@@ -1398,7 +1396,7 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 			return;
 	}
 
-	eb_debug(DBG_CORE, "Finished incoming filters\n");
+	eb_debug(DBG_CORE, "Finished %i incoming filters\n", i);
 
 	/* end inbound filters */
 
