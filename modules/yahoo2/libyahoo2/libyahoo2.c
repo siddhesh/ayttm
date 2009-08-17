@@ -1797,6 +1797,39 @@ static void yahoo_process_mail(struct yahoo_input_data *yid, struct yahoo_packet
 		YAHOO_CALLBACK(ext_yahoo_mail_notify)(yd->client_id, NULL, NULL, count);
 }
 
+static void yahoo_process_new_contact(struct yahoo_input_data *yid, struct yahoo_packet *pkt)
+{
+	struct yahoo_data *yd = yid->yd;
+	char *me = NULL;
+	char *who = NULL;
+	char *msg = NULL;
+	int online = -1;
+	int away = 0;
+	int idle = 0;
+	int mobile = 0;
+
+	YList *l;
+
+	for (l = pkt->hash; l; l = l->next) {
+		struct yahoo_pair *pair = l->data;
+		if (pair->key == 4)
+			who = pair->value;
+		else if (pair->key == 5)
+			me = pair->value;
+		else if (pair->key == 14)
+			msg = pair->value;
+		else if (pair->key == 13)
+			online = strtol(pair->value, NULL, 10);
+	}
+
+	if (who && online < 0)
+		YAHOO_CALLBACK(ext_yahoo_contact_added)(yd->client_id, me, who, msg);
+	else if (online)
+		YAHOO_CALLBACK(ext_yahoo_status_changed)(yd->client_id, who, online, msg, away, idle, mobile);
+	else if(pkt->status == 0x07)
+		YAHOO_CALLBACK(ext_yahoo_rejected)(yd->client_id, who, msg);
+}
+
 static void yahoo_process_contact(struct yahoo_input_data *yid, struct yahoo_packet *pkt)
 {
 	struct yahoo_data *yd = yid->yd;
@@ -2020,6 +2053,31 @@ static void yahoo_process_ping(struct yahoo_input_data *yid, struct yahoo_packet
 	YAHOO_CALLBACK(ext_yahoo_got_ping)(yid->yd->client_id, errormsg);
 }
 
+
+static void yahoo_process_buddy_change_group(struct yahoo_input_data *yid, struct yahoo_packet *pkt)
+{
+	YList *l;
+	char *me = NULL;
+	char *who = NULL;
+	char *old_group = NULL;
+	char *new_group = NULL;
+
+	for (l = pkt->hash; l; l = l->next) {
+		struct yahoo_pair *pair = l->data;
+		if (pair->key == 1)
+			me = pair->value;
+		if (pair->key == 7)
+			who = pair->value;
+		if (pair->key == 224)
+			old_group=pair->value;
+		if (pair->key == 264) 
+			new_group=pair->value;
+	}
+
+	YAHOO_CALLBACK(ext_yahoo_got_buddy_change_group)(yid->yd->client_id, me, who, old_group, new_group);
+}
+
+
 static void _yahoo_webcam_get_server_connected(void *fd, int error, void *d)
 {
 	struct yahoo_input_data *yid = d;
@@ -2145,6 +2203,9 @@ static void yahoo_packet_process(struct yahoo_input_data *yid, struct yahoo_pack
 	case YAHOO_SERVICE_NEWMAIL:
 		yahoo_process_mail(yid, pkt);
 		break;
+	case YAHOO_SERVICE_Y7_AUTHORIZATION:
+		yahoo_process_new_contact(yid, pkt);
+		break;
 	case YAHOO_SERVICE_NEWCONTACT:
 		yahoo_process_contact(yid, pkt);
 		break;
@@ -2199,6 +2260,9 @@ static void yahoo_packet_process(struct yahoo_input_data *yid, struct yahoo_pack
 		break;
 	case YAHOO_SERVICE_PING:
 		yahoo_process_ping(yid, pkt);
+		break;
+	case YAHOO_SERVICE_Y7_CHANGE_GROUP:
+		yahoo_process_buddy_change_group(yid, pkt);
 		break;
 	case YAHOO_SERVICE_IDLE:
 	case YAHOO_SERVICE_MAILSTAT:
@@ -3609,15 +3673,42 @@ void yahoo_get_yab(int id)
 			_yahoo_http_connected, yid);
 }
 
+struct yahoo_post_data {
+	struct yahoo_input_data *yid;
+	char *data;
+};
+
+static void _yahoo_http_post_connected(int id, void *fd, int error, void *data)
+{
+	struct yahoo_post_data *yad = data;
+	struct yahoo_input_data *yid = yad->yid;
+	char *buff = yad->data;
+
+	if(fd <= 0) {
+		inputs = y_list_remove(inputs, yid);
+		FREE(yid);
+		return;
+	}
+
+	YAHOO_CALLBACK(ext_yahoo_write)(fd, buff, strlen(buff));
+
+	yid->fd = fd;
+	yid->read_tag=YAHOO_CALLBACK(ext_yahoo_add_handler)(yid->yd->client_id, fd, YAHOO_INPUT_READ, yid);
+
+	FREE(buff);
+	FREE(yad);
+}
+
 /* FIXME This is also likely affected */
 void yahoo_set_yab(int id, struct yab * yab)
 {
+	struct yahoo_post_data *yad = y_new0(struct yahoo_post_data, 1);
 	struct yahoo_data *yd = find_conn_by_id(id);
 	struct yahoo_input_data *yid;
 	char url[1024];
 	char buff[1024];
-	char *temp;
-	int size = sizeof(url)-1;
+	char post[1024];
+	int size = 0;
 
 	if(!yd)
 		return;
@@ -3626,71 +3717,29 @@ void yahoo_set_yab(int id, struct yab * yab)
 	yid->type = YAHOO_CONNECTION_YAB;
 	yid->yd = yd;
 
-	strncpy(url, "http://insider.msg.yahoo.com/ycontent/?addab2=0", size);
+	size = snprintf(post, sizeof(post), "<?xml version=\"1.0\" encoding=\"utf-8\">"
+						"<ab k=\"%s\" cc=\"%d\">\n"
+						"<ct e=\"1\" yi='%s' nn='%s' />\n"
+						"</ab>\r\n",
+						yd->user, 
+						9,	/* Don't know why */
+						yab->id,
+						yab->nname
+						);
 
-	if(yab->dbid) {
-		/* change existing yab */
-		char tmp[32];
-		strncat(url, "&ee=1&ow=1&id=", size - strlen(url));
-		snprintf(tmp, sizeof(tmp), "%d", yab->dbid);
-		strncat(url, tmp, size - strlen(url));
-	}
+	yad->yid = yid;
+	yad->data = strdup(post);
 
-	if(yab->fname) {
-		strncat(url, "&fn=", size - strlen(url));
-		temp = yahoo_urlencode(yab->fname);
-		strncat(url, temp, size - strlen(url));
-		free(temp);
-	}
-	if(yab->lname) {
-		strncat(url, "&ln=", size - strlen(url));
-		temp = yahoo_urlencode(yab->lname);
-		strncat(url, temp, size - strlen(url));
-		free(temp);
-	}
-	strncat(url, "&yid=", size - strlen(url));
-	temp = yahoo_urlencode(yab->id);
-	strncat(url, temp, size - strlen(url));
-	free(temp);
-	if(yab->nname) {
-		strncat(url, "&nn=", size - strlen(url));
-		temp = yahoo_urlencode(yab->nname);
-		strncat(url, temp, size - strlen(url));
-		free(temp);
-	}
-	if(yab->email) {
-		strncat(url, "&e=", size - strlen(url));
-		temp = yahoo_urlencode(yab->email);
-		strncat(url, temp, size - strlen(url));
-		free(temp);
-	}
-	if(yab->hphone) {
-		strncat(url, "&hp=", size - strlen(url));
-		temp = yahoo_urlencode(yab->hphone);
-		strncat(url, temp, size - strlen(url));
-		free(temp);
-	}
-	if(yab->wphone) {
-		strncat(url, "&wp=", size - strlen(url));
-		temp = yahoo_urlencode(yab->wphone);
-		strncat(url, temp, size - strlen(url));
-		free(temp);
-	}
-	if(yab->mphone) {
-		strncat(url, "&mp=", size - strlen(url));
-		temp = yahoo_urlencode(yab->mphone);
-		strncat(url, temp, size - strlen(url));
-		free(temp);
-	}
-	strncat(url, "&pp=0", size - strlen(url));
+	strcpy(url, "http://address.yahoo.com/yab/us?v=XM&prog=ymsgr&.intl=us"
+			"&sync=1&tags=short&noclear=1&useutf8=1&legenc=codepage-1252");
 
 	snprintf(buff, sizeof(buff), "Y=%s; T=%s",
 			yd->cookie_y, yd->cookie_t);
 
 	inputs = y_list_prepend(inputs, yid);
 
-	yahoo_http_get(yid->yd->client_id, url, buff, 
-			_yahoo_http_connected, yid);
+	yahoo_http_post(yid->yd->client_id, url, buff, size,
+			_yahoo_http_post_connected, yad);
 }
 
 void yahoo_set_identity_status(int id, const char * identity, int active)
@@ -3773,11 +3822,19 @@ void yahoo_add_buddy(int id, const char *who, const char *group, const char *msg
 		return;
 
 	pkt = yahoo_packet_new(YAHOO_SERVICE_ADDBUDDY, YPACKET_STATUS_DEFAULT, yd->session_id);
-	yahoo_packet_hash(pkt, 1, yd->user);
-	yahoo_packet_hash(pkt, 7, who);
-	yahoo_packet_hash(pkt, 65, group);
 	if (msg != NULL) /* add message/request "it's me add me" */
 		yahoo_packet_hash(pkt, 14, msg);
+	else
+		yahoo_packet_hash(pkt, 14, "");
+	yahoo_packet_hash(pkt, 65, group);
+	yahoo_packet_hash(pkt, 97, "1");
+	yahoo_packet_hash(pkt, 1, yd->user);
+	yahoo_packet_hash(pkt, 302, "319");
+	yahoo_packet_hash(pkt, 300, "319");
+	yahoo_packet_hash(pkt, 7, who);
+	yahoo_packet_hash(pkt, 334, "0");
+	yahoo_packet_hash(pkt, 301, "319");
+	yahoo_packet_hash(pkt, 303, "319");
 	yahoo_send_packet(yid, pkt, 0);
 	yahoo_packet_free(pkt);
 }
@@ -3797,6 +3854,29 @@ void yahoo_remove_buddy(int id, const char *who, const char *group)
 	yahoo_packet_hash(pkt, 1, yd->user);
 	yahoo_packet_hash(pkt, 7, who);
 	yahoo_packet_hash(pkt, 65, group);
+	yahoo_send_packet(yid, pkt, 0);
+	yahoo_packet_free(pkt);
+}
+
+void yahoo_confirm_buddy(int id, const char *who)
+{
+	struct yahoo_input_data *yid = find_input_by_id_and_type(id, YAHOO_CONNECTION_PAGER);
+	struct yahoo_data *yd;
+	struct yahoo_packet *pkt;
+
+	if(!yid)
+		return;
+	yd = yid->yd;
+
+	if (!yd->logged_in)
+		return;
+
+	pkt = yahoo_packet_new(YAHOO_SERVICE_Y7_AUTHORIZATION, YPACKET_STATUS_DEFAULT, yd->session_id);
+	yahoo_packet_hash(pkt, 1, yd->user);
+	yahoo_packet_hash(pkt, 5, who);
+	yahoo_packet_hash(pkt, 241, "0");
+	yahoo_packet_hash(pkt, 13, "1");
+	yahoo_packet_hash(pkt, 334, "0");
 	yahoo_send_packet(yid, pkt, 0);
 	yahoo_packet_free(pkt);
 }
@@ -3875,19 +3955,16 @@ void yahoo_change_buddy_group(int id, const char *who, const char *old_group, co
 		return;
 	yd = yid->yd;
 
-	pkt = yahoo_packet_new(YAHOO_SERVICE_ADDBUDDY, YPACKET_STATUS_DEFAULT, yd->session_id);
+	pkt = yahoo_packet_new(YAHOO_SERVICE_Y7_CHANGE_GROUP, YPACKET_STATUS_DEFAULT, yd->session_id);
 	yahoo_packet_hash(pkt, 1, yd->user);
+	yahoo_packet_hash(pkt, 302, "240");
+	yahoo_packet_hash(pkt, 300, "240");
 	yahoo_packet_hash(pkt, 7, who);
-	yahoo_packet_hash(pkt, 65, new_group);
-	yahoo_packet_hash(pkt, 14, " ");
+	yahoo_packet_hash(pkt, 224, old_group);
+	yahoo_packet_hash(pkt, 264, new_group);
+	yahoo_packet_hash(pkt, 301, "240");
+	yahoo_packet_hash(pkt, 303, "240");
 
-	yahoo_send_packet(yid, pkt, 0);
-	yahoo_packet_free(pkt);
-
-	pkt = yahoo_packet_new(YAHOO_SERVICE_REMBUDDY, YPACKET_STATUS_DEFAULT, yd->session_id);
-	yahoo_packet_hash(pkt, 1, yd->user);
-	yahoo_packet_hash(pkt, 7, who);
-	yahoo_packet_hash(pkt, 65, old_group);
 	yahoo_send_packet(yid, pkt, 0);
 	yahoo_packet_free(pkt);
 }

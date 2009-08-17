@@ -693,6 +693,21 @@ int YAHOO_CALLBACK_TYPE(ext_yahoo_read)(void *fd, char *buf, int len);
  */
 void YAHOO_CALLBACK_TYPE(ext_yahoo_close)(void *fd);
 
+/*
+ * Name: ext_yahoo_got_buddy_change_group
+ * 	Acknowledgement of buddy changing group
+ * Params:
+ * 	id: client id
+ * 	me: The user
+ * 	who: Buddy name
+ * 	old_group: Old group name
+ * 	new_group: New group name
+ * Returns:
+ * 	Nothing
+ */
+void YAHOO_CALLBACK_TYPE(ext_yahoo_got_buddy_change_group)(int id, const char *me, const char *who, 
+							const char *old_group, const char *new_group);
+
 #ifdef USE_STRUCT_CALLBACKS
 };
 

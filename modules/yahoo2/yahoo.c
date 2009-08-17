@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.107 $",
-	"$Date: 2009/08/13 20:20:38 $",
+	"$Revision: 1.108 $",
+	"$Date: 2009/08/17 13:55:14 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2056,7 +2056,10 @@ static void eb_yahoo_authorize_callback(gpointer data, int result)
 			ea = eb_yahoo_new_account(ela, ay->who);
 			ea->account_contact = c;
 			add_unknown_account_window_new(ea);
+
 		}
+
+		yahoo_confirm_buddy(ay->id, ay->who);
 	} else {
 		yahoo_reject_buddy(ay->id, ay->who, "Thanks, but no thanks.");
 	}
@@ -3358,6 +3361,12 @@ static void ext_yahoo_chat_yahoologout (int id, const char *me)
 }
 
 
+static void ext_yahoo_got_buddy_change_group (int id, const char *me, const char *who, const char *old_group, const char *new_group)
+{
+
+}
+
+
 /*
  * Callback handling code ends here
  ***********************************/
@@ -3781,6 +3790,7 @@ static void register_callbacks()
 
 	yc.ext_yahoo_chat_yahoologout = ext_yahoo_chat_yahoologout;
 	yc.ext_yahoo_chat_yahooerror  = ext_yahoo_chat_yahooerror ;
+	yc.ext_yahoo_got_buddy_change_group = ext_yahoo_got_buddy_change_group;
 
 	yahoo_register_callbacks(&yc);
 	

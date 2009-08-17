@@ -40,7 +40,7 @@ static tDeveloperInfo sAyttmDevTeam[AYTTM_TEAM_SIZE] =
 	{"Philip S. Tellis", 	"<philip.tellis@gmail.com>", 	"Yahoo!"},
 	{"Edward L. Haletky", 	"<elh@astroarch.com>",			"Windows Port"},
 	{"Tahir Hashmi", 		"<code_martial@softhome.net>",	"Documentation"},
-	{"Siddhesh Poyarekar", 		"<siddhesh.poyarekar@gmail.com>",	"Gtk2 Port, IRC, MSN"}
+	{"Siddhesh Poyarekar", 		"<siddhesh.poyarekar@gmail.com>",	"Gtk2 Port, IRC, MSN"},
 	{"Piotr Stefaniak", 		"<2134918@gmail.com>",	"UI, IRC and Jabber fixes"}
 };
 

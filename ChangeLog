@@ -1,3 +1,11 @@
+* Mon Aug 17 2009 13:55 UTC [siddheshp]   0.5.0-122
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
+modules/yahoo2/libyahoo2/libyahoo2.c, modules/yahoo2/libyahoo2/yahoo2.h,
+modules/yahoo2/libyahoo2/yahoo2_callbacks.h, src/about.c:
+ * CORE: Fixed typo in about.c when adding Piotr to About box.
+ * YMSG: Add buddy, remove buddy, Rename group, change groups for a buddy, edit buddy
+ nickname (not tested)
+
 * Sun Aug 16 2009 21:08 UTC [pstef]   0.5.0-121
 - ChangeLog, configure.ac, src/auto_complete.c, src/chat_room.c,
 src/chat_window.c:
