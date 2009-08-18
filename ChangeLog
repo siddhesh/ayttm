@@ -1,5 +1,6 @@
 * Tue Aug 18 2009 13:30 UTC [siddheshp]   0.5.0-125
-- ChangeLog, configure.ac, src/status.c:
+- ChangeLog, configure.ac, src/status.c, modules/msn2/libmsn2/msn-ext.h,
+modules/msn2/libmsn2/msn-message.c, modules/msn2/libmsn2/msn-sb.c:
  * CORE: Fixed g_source_remove_warning
  * MSN: Goofed. Forgot to add msn-errors.c
  * MSN: Fixed some warnings
