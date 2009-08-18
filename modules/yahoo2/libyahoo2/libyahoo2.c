@@ -1443,7 +1443,7 @@ static void yahoo_process_buddy_list(struct yahoo_input_data *yid, struct yahoo_
 	}
 
 	/* we could be getting multiple packets here */
-	if (!last_packet)
+	if (pkt->hash && !last_packet)
 		return;
 
 
