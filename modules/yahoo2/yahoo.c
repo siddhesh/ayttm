@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.108 $",
-	"$Date: 2009/08/17 13:55:14 $",
+	"$Revision: 1.109 $",
+	"$Date: 2009/08/18 12:25:29 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2059,15 +2059,17 @@ static void eb_yahoo_authorize_callback(gpointer data, int result)
 
 		}
 
-		yahoo_confirm_buddy(ay->id, ay->who);
+		yahoo_confirm_buddy(ay->id, ay->who, 0, NULL);
 	} else {
-		yahoo_reject_buddy(ay->id, ay->who, "Thanks, but no thanks.");
+		yahoo_confirm_buddy(ay->id, ay->who, 1, "Thanks, but no thanks.");
 	}
 
 	if (ay) 
 		FREE(ay->who);
 	FREE(ay);
 }
+
+
 static void ext_yahoo_rejected(int id, const char *who, const char *msg)
 {
 	char buff[1024];
@@ -2075,6 +2077,7 @@ static void ext_yahoo_rejected(int id, const char *who, const char *msg)
 			who, (msg?_(" with the message:\n"):"."), (msg?msg:""));
 	ay_do_warning( _("Yahoo Error"), buff );
 }
+
 
 static void ext_yahoo_contact_added(int id, const char *myid,
 				    const char *who, const char *msg)

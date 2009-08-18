@@ -1824,12 +1824,11 @@ static void yahoo_process_new_contact(struct yahoo_input_data *yid, struct yahoo
 
 	if (who && online < 0)
 		YAHOO_CALLBACK(ext_yahoo_contact_added)(yd->client_id, me, who, msg);
-	else if (online)
-		YAHOO_CALLBACK(ext_yahoo_status_changed)(yd->client_id, who, online, msg, away, idle, mobile);
-	else if(pkt->status == 0x07)
+	else if(online == 2)
 		YAHOO_CALLBACK(ext_yahoo_rejected)(yd->client_id, who, msg);
 }
 
+/* UNUSED? */
 static void yahoo_process_contact(struct yahoo_input_data *yid, struct yahoo_packet *pkt)
 {
 	struct yahoo_data *yd = yid->yd;
@@ -3858,7 +3857,7 @@ void yahoo_remove_buddy(int id, const char *who, const char *group)
 	yahoo_packet_free(pkt);
 }
 
-void yahoo_confirm_buddy(int id, const char *who)
+void yahoo_confirm_buddy(int id, const char *who, int reject, const char *msg)
 {
 	struct yahoo_input_data *yid = find_input_by_id_and_type(id, YAHOO_CONNECTION_PAGER);
 	struct yahoo_data *yd;
@@ -3874,30 +3873,17 @@ void yahoo_confirm_buddy(int id, const char *who)
 	pkt = yahoo_packet_new(YAHOO_SERVICE_Y7_AUTHORIZATION, YPACKET_STATUS_DEFAULT, yd->session_id);
 	yahoo_packet_hash(pkt, 1, yd->user);
 	yahoo_packet_hash(pkt, 5, who);
-	yahoo_packet_hash(pkt, 241, "0");
-	yahoo_packet_hash(pkt, 13, "1");
+	if(reject)
+		yahoo_packet_hash(pkt, 13, "2");
+	else
+		yahoo_packet_hash(pkt, 13, "1");
 	yahoo_packet_hash(pkt, 334, "0");
-	yahoo_send_packet(yid, pkt, 0);
-	yahoo_packet_free(pkt);
-}
-
-void yahoo_reject_buddy(int id, const char *who, const char *msg)
-{
-	struct yahoo_input_data *yid = find_input_by_id_and_type(id, YAHOO_CONNECTION_PAGER);
-	struct yahoo_data *yd;
-	struct yahoo_packet *pkt;
-
-	if(!yid)
-		return;
-	yd = yid->yd;
-
-	if (!yd->logged_in)
-		return;
-
-	pkt = yahoo_packet_new(YAHOO_SERVICE_REJECTCONTACT, YPACKET_STATUS_DEFAULT, yd->session_id);
-	yahoo_packet_hash(pkt, 1, yd->user);
-	yahoo_packet_hash(pkt, 7, who);
-	yahoo_packet_hash(pkt, 14, msg);
+	if(msg) {
+		yahoo_packet_hash(pkt, 14, msg);
+		yahoo_packet_hash(pkt, 97, "1");
+	}
+	else
+		yahoo_packet_hash(pkt, 241, "0");
 	yahoo_send_packet(yid, pkt, 0);
 	yahoo_packet_free(pkt);
 }
