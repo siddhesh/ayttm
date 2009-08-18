@@ -12,6 +12,7 @@
 #include "msn.h"
 #include "msn-util.h"
 #include "msn-ext.h"
+#include "msn-sb.h"
 
 
 enum {
@@ -249,7 +250,7 @@ void msn_message_free(MsnMessage *msg)
 void msn_message_check_ack(MsnConnection *mc)
 {
 	if(!strcmp(mc->current_message->argv[0], "NACK"))
-		ext_do_warning(mc->account, MSN_MESSAGE_DELIVERY_FAILED);
+		ext_show_warning(mc->account, MSN_MESSAGE_DELIVERY_FAILED);
 }
 
 

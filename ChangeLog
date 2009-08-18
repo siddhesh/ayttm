@@ -1,3 +1,9 @@
+* Tue Aug 18 2009 13:30 UTC [siddheshp]   0.5.0-125
+- ChangeLog, configure.ac, src/status.c:
+ * CORE: Fixed g_source_remove_warning
+ * MSN: Goofed. Forgot to add msn-errors.c
+ * MSN: Fixed some warnings
+
 * Tue Aug 18 2009 12:25 UTC [siddheshp]   0.5.0-124
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
 modules/yahoo2/libyahoo2/libyahoo2.c, modules/yahoo2/libyahoo2/yahoo2.h:

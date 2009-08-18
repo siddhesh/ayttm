@@ -4,6 +4,9 @@
 #include "llist.h"
 #include "msn-ext.h"
 
+#include <stdio.h>
+#include <string.h>
+
 #define MSN_SB "SB"
 
 void msn_sb_got_join(MsnConnection *mc)

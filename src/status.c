@@ -1762,10 +1762,10 @@ void buddy_logoff(eb_account *ea)
 	ea->pix = iconlogoff_pb;
 
 	/* removes any previously set timeouts for the account */
-	if (ea->icon_handler != -1)
+	if (ea->icon_handler > 0)
 		eb_timeout_remove(ea->icon_handler);
 
-	if (ea->status_handler != -1)
+	if (ea->status_handler > 0)
 		eb_timeout_remove(ea->status_handler);
 
 	ea->icon_handler = ea->status_handler = -1;

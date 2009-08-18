@@ -33,5 +33,7 @@ void ext_got_IM_sb(MsnConnection *mc, MsnBuddy *bud);
 void ext_got_IM(MsnConnection *mc, MsnIM *im, MsnBuddy *bud);
 void ext_got_typing(MsnConnection *mc, MsnBuddy *bud);
 
+void ext_got_ans(MsnConnection *mc);
+
 #endif
 
