@@ -46,6 +46,5 @@ src/offline_queue_mgmt.c
 src/plugin.c
 src/service.c
 src/status.c
-src/tcp_util.c
 src/trigger.c
 src/util.c
