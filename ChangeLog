@@ -1,3 +1,13 @@
+* Wed Aug 19 2009 04:05 UTC [siddheshp]   0.5.0-126
+- ChangeLog, configure.ac, modules/aycryption/aycryption.c,
+modules/aycryption/select-keys.c, modules/livejournal/lj.c,
+modules/livejournal/lj_httplib.c, modules/utility/autotrans.c,
+src/Makefile.am, src/dialog.c, src/dialog.h:
+ * Removed unused tcp_util.c, tcp_util.h from src
+ * Removed redundant ssl code from src
+ * Removed unnecessary references to tcp_util.h
+ * Reworked dialogs to use stock icons and buttons -- they're prettier
+
 * Tue Aug 18 2009 13:30 UTC [siddheshp]   0.5.0-125
 - ChangeLog, configure.ac, src/status.c, modules/msn2/libmsn2/msn-ext.h,
 modules/msn2/libmsn2/msn-message.c, modules/msn2/libmsn2/msn-sb.c:

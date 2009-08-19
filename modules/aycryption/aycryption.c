@@ -34,7 +34,6 @@
 #include "plugin_api.h"
 #include "prefs.h"
 #include "util.h"
-#include "tcp_util.h"
 #include "messages.h"
 #include "debug.h"
 #include "platform_defs.h"
@@ -97,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.24 $",
-	"$Date: 2009/07/27 16:42:03 $",
+	"$Revision: 1.25 $",
+	"$Date: 2009/08/19 04:07:04 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,

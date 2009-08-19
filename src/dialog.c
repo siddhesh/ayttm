@@ -31,57 +31,22 @@
 #include "dialog.h"
 #include "gtk_globals.h"
 
-#include "gtk/gtkutils.h"
 
-#include "pixmaps/tb_yes.xpm"
-#include "pixmaps/tb_no.xpm"
-#include "pixmaps/ok.xpm"
-#include "pixmaps/cancel.xpm"
-#include "pixmaps/question.xpm"
-
-
-typedef struct _list_dialog_data {
-	void (*callback)(const char *value, void *data);
-	void *data;
-} list_dialog_data;
-
-typedef struct {
-	void *data;
-	void (*action)(void *, int);
-} callback_data;
-
-typedef struct _text_input_window
-{
-	void (*callback)(const char *value, void *data);
-	void *data;
-	GtkWidget *window;
-	GtkWidget *text;
-} text_input_window;
-
-
-static void list_dialog_callback(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, void *data)
-{
-	gchar *text;
-	list_dialog_data *ldd = data;
-	GtkTreeIter iter;
-	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
-	gtk_tree_model_get_iter(model, &iter, path);
-
-	gtk_tree_model_get(model, &iter, 0, &text, -1);
-	ldd->callback(text, ldd->data);
-	free(ldd);
-}
-
-void do_list_dialog( const char *message, const char *title, const char **list, void (*action)(const char *text, void *data), void *data )
+/* List Dialogs */
+void do_list_dialog( const char *message, const char *title, const char **list, 
+			void (*action)(const char *text, void *data), void *data )
 {
 	const char **ptr=list;
 	LList *tmp = NULL;
+
 	while(*ptr) {
 		char *t=strdup(*ptr);
 		ptr++;
 		tmp = l_list_append(tmp, t);
 	}
+
 	do_llist_dialog(message, title, tmp, action, data);
+
 	while(tmp) {
 		LList *t=tmp;
 		free(tmp->data);
@@ -91,196 +56,110 @@ void do_list_dialog( const char *message, const char *title, const char **list, 
 }
 
 
-void do_llist_dialog( const char *message, const char *title, const LList *list, void (*action)(const char *text, void *data), void *data )
+void do_llist_dialog( const char *message, const char *title, const LList *list, 
+			void (*action)(const char *text, void *data), void *data )
 {
-	GtkWidget * dialog_window;
-	GtkWidget * label;
-	GtkWidget * clist;
-	GtkListStore *clist_store;
-	GtkWidget * scwin;
+	GtkWidget *dialog;
+	GtkWidget *label;
+	GtkWidget *list_view;
+	GtkListStore *list_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *selection;
+
+	GtkWidget *scwin;
+	GtkWidget *dialog_content_area;
 	
-	/*  UNUSED GtkWidget * button_box; */
-	char *Row[2]={NULL, NULL};
-	list_dialog_data *ldata;
 	const LList *t_list = list;
+
+	int result = 0;
 
 	eb_debug(DBG_CORE, ">Entering\n");
 	if(list==NULL) {
 		eb_debug(DBG_CORE, ">Leaving as list[0]==NULL\n");
 		return;
 	}
-	dialog_window = gtk_dialog_new();
 
-	gtk_widget_realize(dialog_window);
-	gtk_window_set_title(GTK_WINDOW(dialog_window), title );
+	dialog = gtk_dialog_new_with_buttons(
+						title,
+						NULL,
+						0,
+						GTK_STOCK_OK,
+						GTK_RESPONSE_ACCEPT,
+						GTK_STOCK_CANCEL,
+						GTK_RESPONSE_REJECT,
+						NULL
+					);
+
+#ifdef HAVE_GTK_2_14
+	dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+#else
+	dialog_content_area = GTK_DIALOG(dialog)->vbox;
+#endif
 
 	label = gtk_label_new(message);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->vbox),
-		label, FALSE, FALSE, 5);
 
-	clist_store = gtk_list_store_new(1, G_TYPE_STRING);
-	clist = gtk_tree_view_new_with_model(GTK_TREE_MODEL(clist_store));
-	g_object_set(clist, "headers-visible", FALSE, NULL);
+
+	list_store = gtk_list_store_new(1, G_TYPE_STRING);
+	list_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
+	g_object_set(list_view, "headers-visible", FALSE, NULL);
 
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes(NULL, renderer,
 			"text", 0,
 			NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(clist), column);
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(clist));
+
+	gtk_tree_view_append_column(GTK_TREE_VIEW(list_view), column);
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list_view));
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
+
+	g_signal_connect_swapped(list_view, "row-activated", G_CALLBACK(gtk_window_activate_default), dialog);
+
+	scwin = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add (GTK_CONTAINER(scwin),list_view);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_widget_set_size_request(scwin, -1, 350);
 
 	while(t_list) {
 		GtkTreeIter append;
-		Row[0]=strdup(t_list->data);
-		gtk_list_store_append(clist_store, &append);
-		gtk_list_store_set(clist_store, &append, 0, Row[0], -1);
-		free(Row[0]);
+
+		gtk_list_store_append(list_store, &append);
+		gtk_list_store_set(list_store, &append, 0, t_list->data, -1);
 		t_list = t_list->next;
 	}
 
-	ldata=calloc(1, sizeof(list_dialog_data));
-	ldata->callback=action;
-	ldata->data=data;
-	g_signal_connect(clist, "row-activated", G_CALLBACK(list_dialog_callback), ldata);
-	g_signal_connect_swapped(clist, "row-activated", G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
-	gtk_widget_show(clist);
-	/* End list construction */
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), label, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), scwin, TRUE, TRUE, 5 );
 
-	scwin = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add
-		(GTK_CONTAINER(scwin),clist);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),
-                GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_size_request(scwin, 250, 350);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->action_area), 
-						scwin, FALSE, FALSE, 5 );
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_widget_show_all(dialog_window);
-	eb_debug(DBG_CORE, ">Leaving, all done\n");
-}
+	gtk_widget_show_all(dialog);
 
-typedef struct _dialog_buttons {
-	GtkWidget *yes;
-	GtkWidget *no;
-} dialog_buttons;
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
 
-static void dialog_close(GtkWidget *widget, GdkEventAny *event, gpointer data)
-{
-	dialog_buttons *b = (dialog_buttons *)data;
-	if (event->type == GDK_KEY_PRESS) {
-		if (((GdkEventKey *)event)->keyval == GDK_Escape) {
-			g_signal_emit_by_name(b->no, "clicked", NULL);
-		} else if (((GdkEventKey *)event)->keyval == GDK_KP_Enter) {
-			g_signal_emit_by_name(b->yes, "clicked", NULL);
-		} else if (((GdkEventKey *)event)->keyval == GDK_Return) {
-			g_signal_emit_by_name(b->yes, "clicked", NULL);
-		}
+	if(result == GTK_RESPONSE_ACCEPT) {
+		char *chars;
+		GtkTreeIter iter;
+		GtkTreeModel *model = GTK_TREE_MODEL(list_store);
+
+		if(!gtk_tree_selection_get_selected(selection, &model, &iter))
+			return;
+        
+		gtk_tree_model_get(GTK_TREE_MODEL(list_store), &iter, 0, &chars, -1);
+		action(chars, data);
 	}
+
+	gtk_widget_destroy(dialog);
 }
 
-static void eb_gtk_dialog_callback(GtkWidget *widget, gpointer data)
-{
-	callback_data *cd = (callback_data *)data;
-	int result=0;
 
-	result=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "userdata"));
-	cd->action(cd->data, result);
-	free(cd);
-}
-
-static void do_dialog( const char *message, const char *title, void (*action)(GtkWidget *widget, gpointer data), gpointer data )
-{
-	GtkWidget *dialog_window;
-	GtkWidget *label;
-	GtkWidget *hbox2, *hbox_xpm;
-	GtkWidget *iconwid;
-	GdkPixbuf *icon;
-	GtkWidget *button;
-	dialog_buttons *buttons = g_new0(dialog_buttons, 1);
-	
-	dialog_window = gtk_dialog_new();
-	gtk_widget_realize(dialog_window);
-	
-	label = gtk_label_new(message);
-	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-	gtk_widget_show(label);
-	gtk_widget_set_size_request(label, 240, -1);
-
-	gtk_misc_set_alignment (GTK_MISC (label), 0.1, 0.5);
-
-	hbox_xpm = gtk_hbox_new(FALSE,5);
-	
-	icon = gdk_pixbuf_new_from_xpm_data( (const char **) question_xpm);
-	iconwid = gtk_image_new_from_pixbuf(icon);
-	
-	gtk_box_pack_start(GTK_BOX(hbox_xpm), iconwid, TRUE, TRUE, 20);
-	gtk_box_pack_start(GTK_BOX(hbox_xpm), label, TRUE, TRUE, 5);
-	gtk_widget_show(iconwid);
-	gtk_widget_show(label);
-
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->vbox), hbox_xpm, TRUE, TRUE, 5);
-	gtk_widget_show(hbox_xpm);
-		
-	button = gtkut_create_icon_button( _("No"), tb_no_xpm, dialog_window );
-	
-	g_signal_connect(button, "clicked", G_CALLBACK(action), data );
-	g_signal_connect_swapped(button, "clicked",
-			G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
-	g_object_set_data(G_OBJECT(button), "userdata", GINT_TO_POINTER(0));
-	gtk_widget_show(button);
-	
-	buttons->no = button;
-	
-	hbox2 = gtk_hbox_new(FALSE, 5);
-	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 5);
-
-	button = gtkut_create_icon_button( _("Yes"), tb_yes_xpm, dialog_window );
-	
-	g_signal_connect(button, "clicked", G_CALLBACK(action), data );
-	g_signal_connect_swapped(button, "clicked",
-			G_CALLBACK(gtk_widget_destroy), (gpointer)dialog_window);
-	g_object_set_data(G_OBJECT(button), "userdata", GINT_TO_POINTER(1));
-	gtk_widget_show(button);
-
-	buttons->yes = button;
-	
-	g_signal_connect(dialog_window, "key-press-event", G_CALLBACK(dialog_close), buttons);
-	
-	gtk_box_pack_end(GTK_BOX(hbox2), button, FALSE, FALSE, 5);
-
-	gtk_widget_show(hbox2);
-	
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog_window)->action_area), 
-						hbox2, TRUE, TRUE, 0);
-	
-	gtk_container_set_border_width(GTK_CONTAINER(dialog_window), 5);
-	gtk_widget_realize(dialog_window);
-	gtk_window_set_title(GTK_WINDOW(dialog_window), title );
-	gtk_window_set_position(GTK_WINDOW(dialog_window), GTK_WIN_POS_MOUSE);
-	gtk_widget_set_size_request(dialog_window, 350, 150);
-	gtk_widget_show(dialog_window);
-	if (dialog_window->requisition.height > 150)
-		gtk_widget_set_size_request(dialog_window, 350, -1);
-}
-
+/* Confirmation dialogs */
 void eb_do_dialog(const char *message, const char *title, void (*action)(void *, int), void *data)
 {
-	callback_data *cd=calloc(1, sizeof(callback_data));
-	cd->action=action;
-	cd->data=data;
-	do_dialog(message, title, eb_gtk_dialog_callback, cd);
-}
+	int result = eb_do_confirm_dialog(message, title);
 
-static void self_update_value(void *data, int ans)
-{
-	int *value = (int *)data;
-	*value = ans;
-	
+	action(data, result);
 }
 
 
@@ -289,17 +168,28 @@ int eb_do_confirm_dialog(const char *message, const char *title)
 	GtkWidget *dialog, *content_area, *label;
 	int ret=0;
 
-	dialog = gtk_dialog_new_with_buttons(title, NULL, 0, 
-						GTK_STOCK_YES, GTK_RESPONSE_ACCEPT, 
-						GTK_STOCK_NO, GTK_RESPONSE_REJECT, NULL);
+	GtkWidget *dialog_content_area = NULL;
+
+	dialog = gtk_dialog_new_with_buttons(
+						title,
+						NULL,
+						0,
+						GTK_STOCK_YES,
+						GTK_RESPONSE_ACCEPT,
+						GTK_STOCK_NO,
+						GTK_RESPONSE_REJECT,
+						NULL
+					);
 
 	content_area = gtk_hbox_new(FALSE, 5);
 
 #ifdef HAVE_GTK_2_14
-	gtk_container_add ( gtk_dialog_get_content_area(GTK_DIALOG(dialog)), content_area );
+	dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 #else
-	gtk_container_add ( GTK_DIALOG(dialog)->vbox, content_area );
+	dialog_content_area = GTK_DIALOG(dialog)->vbox;
 #endif
+
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), content_area, TRUE, TRUE, 2);
 
 	label = gtk_label_new("");
 
@@ -308,6 +198,8 @@ int eb_do_confirm_dialog(const char *message, const char *title)
 	gtk_box_pack_start(GTK_BOX(content_area), 
 			gtk_image_new_from_stock(GTK_STOCK_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG), 
 			FALSE, FALSE, 5);
+
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_REJECT);
 
 	gtk_box_pack_start(GTK_BOX(content_area), label, TRUE, TRUE, 5);
 
@@ -326,180 +218,141 @@ int eb_do_confirm_dialog(const char *message, const char *title)
 }
 
 
-void eb_do_no_callback_dialog( const char *message, const char *title, int *value)
+/* Input Windows */
+static void do_input_window_internal(const char *title, const char *value,
+				void (*action)(const char *text, void *data), int is_password,
+				void *data)
 {
-	*value = -1;
-	eb_do_dialog(message, title, self_update_value, value);
-	while (*value == -1) {
-		gtk_main_iteration();
-	}	
-}
+	GtkWidget *label, *text;
+	GtkWidget *dialog_content_area = NULL;
+	int dummy = 0, result = 0;
+	char *chars = NULL;
 
-/*
- * The following methods are for the text input window
- */
+	GtkWidget *dialog = gtk_dialog_new_with_buttons(
+							_("Ayttm"),
+							NULL,	/* TODO get parent */
+							0,
+							GTK_STOCK_OK,
+							GTK_RESPONSE_ACCEPT,
+							GTK_STOCK_CANCEL,
+							GTK_RESPONSE_REJECT,
+							NULL
+						);
 
-static void input_window_destroy(GtkWidget * widget, gpointer data)
-{
-	g_free(data);
-}
+#ifdef HAVE_GTK_2_14
+	dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+#else
+	dialog_content_area = GTK_DIALOG(dialog)->vbox;
+#endif
 
-static void input_window_cancel(GtkWidget * widget, gpointer data)
-{
-	text_input_window * window = (text_input_window*)data;
-	gtk_widget_destroy(window->window);
-}
+	label = gtk_label_new("");
+	text = gtk_entry_new();
 
-static void input_window_ok(GtkWidget * widget, gpointer data)
-{
-	char *text;
-	text_input_window * window = (text_input_window*)data;
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
 
-	if(GTK_IS_TEXT_VIEW(window->text)) {
-		GtkTextIter start, end;
-		GtkTextBuffer *buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(window->text));
-		gtk_text_buffer_get_bounds(buffer, &start, &end);
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_label_set_markup(GTK_LABEL(label), title);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
-		text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+	gtk_editable_insert_text (GTK_EDITABLE(text), value, strlen(value), &dummy);
+	gtk_editable_set_editable(GTK_EDITABLE(text), TRUE);
+	gtk_entry_set_activates_default(GTK_ENTRY(text), TRUE);
+
+	if(is_password)
+		gtk_entry_set_visibility(GTK_ENTRY(text), FALSE);
+
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), label, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), text, FALSE, TRUE, 5);
+
+	gtk_widget_show_all(dialog);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	if(result == GTK_RESPONSE_ACCEPT) {
+		chars = gtk_editable_get_chars(GTK_EDITABLE(text), 0, -1);
+		action(chars, data);
 	}
-	else {
-		text = gtk_editable_get_chars(GTK_EDITABLE(window->text), 0, -1);
-	}
-	window->callback(text, window->data);
-	g_free(text);
+
+	gtk_widget_destroy(dialog);
 }
 
-static gboolean	enter_pressed( GtkWidget *widget, GdkEventKey *event, gpointer data )
-{
-	if (event->keyval == GDK_Return) {
-		input_window_ok(NULL, data);
-		gtk_widget_destroy(((text_input_window*)data)->window);
-		return TRUE;
-	}
-	return FALSE;
-}
 
 void do_text_input_window(const char *title, const char *value, 
 		void (*action)(const char *text, void *data), 
 		void *data )
 {
-	do_text_input_window_multiline(title, value, 0, 0, action, data);
+	do_input_window_internal(title, value, action, 0, data);
 }
 
 void do_password_input_window(const char *title, const char *value, 
 		void (*action)(const char *text, void *data), 
 		void *data )
 {
-	do_text_input_window_multiline(title, value, 0, 1, action, data);
+	do_input_window_internal(title, value, action, 1, data);
 }
 
 void do_text_input_window_multiline(const char *title, const char *value, 
-		int ismulti, int ispassword, 
 		void (*action)(const char *text, void *data), 
 		void *data )
 {
-	GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
 	GtkWidget * label; 
-	GtkWidget * hbox;
-	GtkWidget * hbox2;
-	GtkWidget * separator;
-	GtkWidget * button;
-	int dummy;
-	char *window_title;
-	text_input_window * input_window = g_new0(text_input_window, 1);
+	GtkWidget *text;
+	GtkWidget * dialog_content_area;
+	int result = 0;
+
+	GtkTextBuffer *buffer = NULL;
 	
-	if (ispassword) ismulti=FALSE;
+	GtkWidget *dialog = gtk_dialog_new_with_buttons(
+							_("Ayttm"),
+							NULL,	/* TODO get parent */
+							0,
+							GTK_STOCK_OK,
+							GTK_RESPONSE_ACCEPT,
+							GTK_STOCK_CANCEL,
+							GTK_RESPONSE_REJECT,
+							NULL
+						);
+
+#ifdef HAVE_GTK_2_14
+	dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+#else
+	dialog_content_area = GTK_DIALOG(dialog)->vbox;
+#endif
+
+	label = gtk_label_new("");
+
+
+	text = gtk_text_view_new();
 	
-	input_window->callback = action;
-	input_window->data = data;
+	gtk_widget_set_size_request(text, 400, 200);
 
-	input_window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_position(GTK_WINDOW(input_window->window), GTK_WIN_POS_MOUSE);
-	gtk_widget_realize(input_window->window);
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_container_set_border_width(GTK_CONTAINER(input_window->window), 5);
-	label = gtk_label_new(title);
-
-	if (ismulti)
-		input_window->text = gtk_text_view_new();
-	else {
-		input_window->text = gtk_entry_new();
-		gtk_editable_set_editable(GTK_EDITABLE(input_window->text), TRUE);
-		g_signal_connect(input_window->text, "key-press-event",
-				G_CALLBACK(enter_pressed), input_window);
-	}
-	if (ispassword)
-		gtk_entry_set_visibility(GTK_ENTRY(input_window->text), FALSE);
-	
-	gtk_widget_set_size_request(input_window->text, 400, ismulti?200:-1);
-
-	if(!ismulti) {
-		gtk_editable_insert_text(GTK_EDITABLE(input_window->text),
-					 value, strlen(value), &dummy);
-		gtk_editable_set_editable(GTK_EDITABLE(input_window->text),
-				TRUE);
-	}
-	else {
-		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input_window->text));
-		gtk_text_buffer_insert_at_cursor(buffer, value, strlen(value));
-	}
-
-	gtk_widget_show(label);
-	gtk_widget_show(input_window->text);
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+	gtk_text_buffer_insert_at_cursor(buffer, value, strlen(value));
 
 	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_label_set_markup(GTK_LABEL(label), title);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-	gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox), input_window->text, TRUE, TRUE, 0);
 
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), label, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), text, FALSE, FALSE, 5);
 
-	separator = gtk_hseparator_new();
-	gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
-	gtk_widget_show(separator);
+	gtk_widget_show_all(dialog);
 
-	hbox2 = gtk_hbox_new(TRUE, 5);
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
 
-  	gtk_widget_set_size_request(hbox2, 200,25);
+	if(result == GTK_RESPONSE_ACCEPT) {
+		GtkTextIter start, end;
+		char *chars;
 
-	button = gtkut_create_icon_button( _("OK"), ok_xpm, input_window->window );
-		     
-	g_signal_connect(button, "clicked", G_CALLBACK(input_window_ok), input_window);
+		gtk_text_buffer_get_bounds(buffer, &start, &end);
 
-	g_signal_connect_swapped(button, "clicked",
-			G_CALLBACK(gtk_widget_destroy),input_window->window);
-	     
-	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-	gtk_widget_show(button);
+		chars = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+		action(chars, data);
+	}
 
-	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, input_window->window );
-	     
-	g_signal_connect(button, "clicked", G_CALLBACK(input_window_cancel), input_window);
-
-	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-	gtk_widget_show(button);
-
-	hbox = gtk_hbox_new(FALSE, 0);
-		
-	gtk_box_pack_end(GTK_BOX(hbox),hbox2, FALSE, FALSE, 0);
-	gtk_widget_show(hbox2);      
-      
-  	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
-
-	gtk_container_add(GTK_CONTAINER(input_window->window), vbox);
-	gtk_widget_show(vbox);
-
-	if (strstr(title,"\n")) 
-		window_title = g_strndup(title, (int)(strstr(title,"\n") - title));
-	else
-		window_title = g_strdup(title);
-    	gtk_window_set_title(GTK_WINDOW(input_window->window), window_title);
-	g_free(window_title);
-
-	g_signal_connect(input_window->window, "destroy",
-			G_CALLBACK(input_window_destroy), input_window);
-
-	gtk_widget_grab_focus(input_window->text);
-	gtk_widget_show(input_window->window);
+	gtk_widget_destroy(dialog);
 }
+
 

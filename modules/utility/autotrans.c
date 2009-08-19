@@ -37,7 +37,6 @@
 #include "plugin_api.h"
 #include "prefs.h"
 #include "util.h"
-#include "tcp_util.h"
 #include "messages.h"
 #include "llist.h"
 #include "platform_defs.h"
@@ -81,8 +80,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.15 $",
-	"$Date: 2009/07/27 16:42:04 $",
+	"$Revision: 1.16 $",
+	"$Date: 2009/08/19 04:07:04 $",
 	&ref_count,
 	trans_init,
 	trans_finish,

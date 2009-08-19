@@ -33,7 +33,6 @@
 #include <ctype.h>
 
 #include "plugin_api.h"
-#include "tcp_util.h"
 
 #include "value_pair.h"
 #include "lj_httplib.h"

@@ -36,8 +36,6 @@ void eb_do_dialog( const char *message, const char *title,
 		void (*action)(void *data, int result), 
 		void *data );
 
-void eb_do_no_callback_dialog( const char *message, const char *title, int *value);
-
 void do_list_dialog( const char *message, const char *title, const char **list, 
 		void (*action)(const char *text, void *data), 
 		void *data );
@@ -55,7 +53,6 @@ void do_password_input_window( const char *title, const char *value,
 		void *data );
 
 void do_text_input_window_multiline( const char *title, const char *value, 
-		int ismulti, int ispassword, 
 		void (*action)(const char *text, void *data), 
 		void *data );
 

@@ -31,7 +31,6 @@
 
 #include "service.h"
 #include "plugin_api.h"
-#include "tcp_util.h"
 #include "activity_bar.h"
 
 #include "status.h"
@@ -77,8 +76,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"LiveJournal",
 	"Ayttm client for LiveJournal (http://www.livejournal.com/)",
-	"$Revision: 1.4 $",
-	"$Date: 2009/07/27 16:42:04 $",
+	"$Revision: 1.5 $",
+	"$Date: 2009/08/19 04:07:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
