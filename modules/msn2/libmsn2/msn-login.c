@@ -21,6 +21,7 @@
 #include "msn-message.h"
 #include "msn-soap.h"
 #include "msn-http.h"
+#include "msn-ext.h"
 
 
 static void msn_login_connected(MsnConnection *mc);
@@ -450,6 +451,8 @@ void msn_logout(MsnAccount *ma)
 	ma->status = MSN_STATE_OFFLINE;
 
 	l_list_foreach(ma->connections, msn_connection_free, NULL);
+
+	l_list_foreach(ma->buddies, msn_buddy_reset, NULL);
 }
 
 

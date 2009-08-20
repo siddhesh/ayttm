@@ -1,3 +1,12 @@
+* Thu Aug 20 2009 12:05 UTC [siddheshp]   0.5.0-127
+- ChangeLog, configure.ac, modules/msn2/msn.c,
+modules/msn2/libmsn2/msn-account.h, modules/msn2/libmsn2/msn-commands.c,
+modules/msn2/libmsn2/msn-contacts.c, modules/msn2/libmsn2/msn-contacts.h,
+modules/msn2/libmsn2/msn-ext.h, modules/msn2/libmsn2/msn-login.c,
+modules/msn2/libmsn2/msn-message.h, modules/msn2/libmsn2/msn-soap.c,
+modules/msn2/libmsn2/msn-soap.h, modules/msn2/libmsn2/msn.c:
+ * MSN: Group management, Contact management, Moving contacts within groups
+
 * Wed Aug 19 2009 04:05 UTC [siddheshp]   0.5.0-126
 - ChangeLog, configure.ac, modules/aycryption/aycryption.c,
 modules/aycryption/select-keys.c, modules/livejournal/lj.c,

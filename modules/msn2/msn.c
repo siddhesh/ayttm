@@ -145,8 +145,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.5 $",
-	"$Date: 2009/08/14 14:07:43 $",
+	"$Revision: 1.6 $",
+	"$Date: 2009/08/20 12:07:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -830,60 +830,21 @@ void ext_msn_contacts_synced(MsnAccount *ma)
 		MsnBuddy *bud = buds->data;
 		int changed = FALSE;
 
-		if (bud->list & MSN_BUDDY_BLOCK) {
-			eb_debug(DBG_MSN, "%s blocked. Skipping...\n", bud->passport);
-			continue;
-		}
-
 		if (bud->list & MSN_BUDDY_PENDING) {
 			changed = ay_msn_authorize_user(ela, bud);
 			if(!changed)
 				continue;
 		}
 
+		if (!(bud->list & MSN_BUDDY_ALLOW)) {
+			eb_debug(DBG_MSN, "%s blocked or not in our list. Skipping...\n", bud->passport);
+			continue;
+		}
+
 		changed = ay_msn_add_buddy(ela, bud);
 
 		if(changed)
 			update = TRUE;
-
-/*
-		ea = find_account_with_ela(bud->passport, ela);
-
-		if(!bud->friendlyname)
-			bud->friendlyname = strdup(bud->passport);
-
-		contact_name = bud->friendlyname;
-
-		if(ea) {
-			if(strcmp(ea->account_contact->nick, contact_name)
-				&& !strcmp(ea->account_contact->nick, ea->handle))
-			{
-				rename_contact(ea->account_contact, contact_name);
-			}
-
-			bud->ext_data = ea;
-			ea->protocol_account_data = bud;
-
-			continue;
-		}
-
-		g = find_grouplist_by_name(bud->group?bud->group->name:_("Unknown"));
-
-		con = find_contact_in_group_by_nick(contact_name, g);
-		if(!con)
-			con = find_contact_in_group_by_nick(bud->passport, g);
-		if(!con)
-			con = find_contact_by_nick(contact_name);
-		if(!con)
-			con = find_contact_by_nick(bud->passport);
-
-		if(!con) {
-			changed = 1;
-			con=add_new_contact(bud->group?bud->group->name:_("Unknown"), contact_name, SERVICE_INFO.protocol_id);
-		}
-		ea = ay_msn_new_account_for_buddy(ela, bud);
-		add_account(con->nick, ea);
-*/
 	}
 
 	if(update) {
@@ -1054,12 +1015,13 @@ void ext_got_ans(MsnConnection *mc)
 }
 
 
-void ext_buddy_left(MsnConnection *mc, char *passport)
+void ext_buddy_left(MsnConnection *mc, const char *passport)
 {
 	SBPayload *payload = mc->sbpayload;
 	eb_chat_room *ecr = ay_msn_find_chat_room(payload->session_id);
 
-	eb_chat_room_buddy_leave(ecr, passport);
+	if(ecr)
+		eb_chat_room_buddy_leave(ecr, passport);
 }
 
 
@@ -1101,7 +1063,7 @@ static void ay_msn_add_user(eb_account * account )
 
 	while(buds) {
 		MsnBuddy *bud = buds->data;
-		if(!strcasecmp(bud->passport, account->handle)) {
+		if(!strcasecmp(bud->passport, account->handle) && bud->type & MSN_BUDDY_ALLOW ) {
 			eb_debug(DBG_MSN, "Buddy %s Already Exists", bud->passport);
 			return;
 		}
@@ -1109,7 +1071,7 @@ static void ay_msn_add_user(eb_account * account )
 		buds = l_list_next(buds);
 	}
 
-	msn_add_buddy(mlad->ma, account->handle, account->account_contact->group->name, account->account_contact->nick);
+	msn_buddy_add(mlad->ma, account->handle, account->account_contact->nick, account->account_contact->group->name);
 }
 
 
@@ -1225,9 +1187,19 @@ static void ay_msn_terminate_chat(eb_account * account )
 }
 
 
-static void ay_msn_del_user(eb_account * account )
+static void ay_msn_del_user(eb_account * ea)
 {
+	ay_msn_local_account *mlad = ea->ela->protocol_local_account_data;
+	MsnBuddy *bud = ea->protocol_account_data;
 
+	if(bud)
+		msn_buddy_remove(mlad->ma, bud);
+}
+
+
+void ext_buddy_removed(MsnAccount *ma, const char *bud)
+{
+	eb_debug(DBG_MSN, "Removed buddy %s\n", bud);
 }
 
 
@@ -1368,31 +1340,94 @@ static void ay_msn_send_invite( eb_local_account * account, eb_chat_room * room,
 
 static void ay_msn_get_info( eb_local_account * receiver, eb_account * sender)
 {
-
+	ay_do_info(_("MSN"), _("Not Implemented"));
 }
 
 
 static void ay_msn_change_group(eb_account * ea, const char *new_group)
 {
+	MsnGroup *grp;
+	MsnBuddy *bud = ea->protocol_account_data;
 
+	ay_msn_local_account *mlad = ea->ela->protocol_local_account_data;
+
+	LList *l = mlad->ma->groups;
+
+	if(!bud) {
+		eb_debug(DBG_MSN, "No buddy home!\n");
+		return;
+	}
+
+	while(l) {
+		grp = l->data;
+
+		if(!strcmp(new_group, grp->name))
+			break;
+
+		l = l_list_next(l);
+	}
+
+	if(l)
+		msn_change_buddy_group(mlad->ma, bud, grp);
 }
 
 
 static void ay_msn_del_group(eb_local_account *ela, const char *group) 
 {
+	ay_msn_local_account *mlad = ela->protocol_local_account_data;
 
+	MsnGroup *grp;
+	LList *l = mlad->ma->groups;
+
+	while(l) {
+		grp = l->data;
+
+		if(!strcmp(group, grp->name))
+			break;
+
+		l = l_list_next(l);
+	}
+
+	if(l)
+		msn_group_del(mlad->ma, grp);
+}
+
+
+void ext_group_add_failed(MsnAccount *ma, const char *group, const char *msg)
+{
+	char buf[1024];
+
+	snprintf(buf, sizeof(buf), _("Unable to add group <b>%s</b>. Server returned error:\n\n<i>%s</i>"),
+		group, msg?msg:_("Unknown error"));
 }
 
 
 static void ay_msn_add_group(eb_local_account *ela, const char *group) 
 {
+	ay_msn_local_account *mlad = ela->protocol_local_account_data;
 
+	msn_group_add(mlad->ma, group);
 }
 
 
 static void ay_msn_rename_group(eb_local_account *ela, const char *ogroup, const char *ngroup) 
 {
+	ay_msn_local_account *mlad = ela->protocol_local_account_data;
 
+	MsnGroup *grp;
+	LList *l = mlad->ma->groups;
+
+	while(l) {
+		grp = l->data;
+
+		if(!strcmp(ogroup, grp->name))
+			break;
+
+		l = l_list_next(l);
+	}
+
+	if(l)
+		msn_group_mod(mlad->ma, grp, ngroup);
 }
 
 

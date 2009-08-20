@@ -8,10 +8,10 @@
 #include <stdarg.h>
 
 #include "msn-message.h"
+#include "msn-sb.h"
 #include "msn-util.h"
 #include "msn-connection.h"
 #include "msn-ext.h"
-#include "msn-sb.h"
 
 /* You can fill this only if you think that 1664 bytes for payload ought 
  * not to be enough for anybody right...
@@ -265,49 +265,6 @@ int msn_command_set_payload_size(MsnMessage *msg)
 }
 
 
-MsnMessage *msn_command_build_message (const char *msg, ...)
-{
-/*
-	va_list ap;
-	int command_mode = 1;
-	int parm_count = 0;
-	int remaining = MAX_PAYLOAD_SIZE;
-
-	int parm = 0;
-
-	char *arg = NULL;
-
-	memset(msg->payload, 0, MAX_PAYLOAD_SIZE+1);
-
-
-	while ( parm < msg->payload_info->parm_count ) {
-		strncat(msg->payload, msg->payload_info->names[parm], remaining);
-		remaining -= strlen(msg->payload_info->names[parm]);
-
-		strncat(msg->payload, ": ", remaining);
-		remaining -=2;
-
-		strncat(msg->payload, msg->payload_info->values[parm], remaining);
-		remaining -= strlen(msg->payload_info->values[parm]);
-
-		strncat(msg->payload, "\r\n", remaining);
-		remaining -=2;
-
-		parm++;
-	}
-
-	if(parm_count) {
-		strncat(msg->payload, "\r\n", remaining);
-		remaining -=2 ;
-	}
-
-	if(msg->payload_info->body) {
-		strncat(msg->payload, msg->payload_info->body, remaining);
-	}
-*/
-}
-
-
 void msn_command_parse_payload (MsnMessage *msg)
 {
 	MsnCommandPayloadHandler parse_payload;
@@ -412,7 +369,6 @@ static void msn_command_got_MSG (MsnConnection *mc)
 	MsnBuddy *bud = NULL;
 
 	char *nick = mc->current_message->argv[1];
-	char *name = mc->current_message->argv[2];
 
 	for(i=0;i < payload_info->parm_count; i++) {
 		if(!strcmp(payload_info->names[i], "TypingUser")) {
@@ -436,7 +392,6 @@ static void msn_command_got_MSG (MsnConnection *mc)
 
 		if(!strcmp(payload_info->names[i], "X-MMS-IM-Format")) {
 			char *top, *start = NULL, *end = NULL;
-			int done = 0;
 			im = m_new0(MsnIM, 1);
 
 			top = payload_info->values[i];

@@ -22,11 +22,13 @@ void ext_register_write(MsnConnection *mc);
 void ext_unregister_read(MsnConnection *mc);
 void ext_unregister_write(MsnConnection *mc);
 
+void ext_msn_contacts_synced(MsnAccount *ma);
+void ext_buddy_added(MsnAccount *ma, MsnBuddy *bud);
 void ext_got_buddy_status(MsnConnection *mc, MsnBuddy *bud);
 void ext_buddy_joined_chat(MsnConnection *mc, char *passport, char *friendlyname);
+void ext_buddy_left(MsnConnection *mc, const char *passport);
 
 void ext_got_status_change(MsnAccount *ma);
-
 void ext_update_friendlyname(MsnConnection *mc);
 
 void ext_got_IM_sb(MsnConnection *mc, MsnBuddy *bud);

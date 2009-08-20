@@ -40,6 +40,7 @@ typedef enum {
 struct _MsnBuddy {
 	char *passport;
 	char *friendlyname;
+	char *contact_id;
 	int status;
 
 	MsnGroup *group;
@@ -98,8 +99,14 @@ struct _MsnAccount {
 
 #define msn_account_new() (m_new0(MsnAccount, 1))
 
+void msn_buddy_free(MsnBuddy *bud);
+void msn_buddy_reset(MsnBuddy *bud);
+void msn_account_free(MsnAccount *ma);
+
 void msn_account_cancel_connect(MsnAccount *ma);
-void msn_set_presence(MsnAccount *ma, int state);
+void msn_set_initial_presence(MsnAccount *ma, int state);
+
+void msn_set_state(MsnAccount *ma, int state);
 
 #endif
 

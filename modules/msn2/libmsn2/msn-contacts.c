@@ -2,12 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "msn-contacts.h"
+#include "msn-ext.h"
 #include "msn-soap.h"
 #include "msn-http.h"
-#include "msn-contacts.h"
 #include "msn-account.h"
 #include "msn-util.h"
-#include "msn-ext.h"
 
 #define MSN_PRIVACY_ALLOW "AL"
 #define MSN_PRIVACY_BLOCK "BL"
@@ -138,7 +138,6 @@ static void _send_adl(MsnAccount *ma)
 	int offset = 0;
 	char *cur_domain = NULL;
 	int cur_type = 0;
-	int calledback = 0;
 
 	/* Sort the list */
 	while(in) {
@@ -215,10 +214,10 @@ static void _send_adl(MsnAccount *ma)
 			cur_type = a->type;
 		}
 		else {
-			snprintf(buf, sizeof(buf), "</d><d n=\"%s\"><c n=\"%s\" l=\"%u\" t=\"1\"/>", a->domain, a->name, a->mask);
+			snprintf(buf+offset, sizeof(buf)-offset, "</d><d n=\"%s\"><c n=\"%s\" l=\"%u\" t=\"1\"/>", 
+					a->domain, a->name, a->mask);
 
 			cur_domain = a->domain;
-			cur_type = a->type;
 		}
 
 		offset += strlen(buf+offset);
@@ -238,11 +237,8 @@ static void _send_adl(MsnAccount *ma)
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
 	}
 
-	/* We want to know the response to the last ADL/FQY */
-	if(cur_type == MSN_BUDDY_PASSPORT)
-		msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response);
-	else
-		msn_connection_push_callback(ma->ns_connection, msn_got_initial_fqy_response);
+	msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response);
+
 }
 
 
@@ -304,6 +300,7 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 		MsnBuddy *cur_buddy = NULL;
 		MsnGroup *cur_group = NULL;
 		char *in_offset = chunk, *in_chunk = chunk;
+		char *contact_id = NULL;
 
 		_get_next_tag_chunk(&in_chunk, &in_offset, "Contact");
 		if(!in_chunk)
@@ -313,6 +310,12 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 		chunk = in_offset;
 
 		in_offset = in_chunk;
+
+		_get_next_tag_chunk(&in_chunk, &in_offset, "contactId");
+
+		if(in_chunk)
+			contact_id = in_chunk;
+
 		/* Check if this is an email messenger member */
 		_get_next_tag_chunk(&in_chunk, &in_offset, "contactEmailType");
 
@@ -371,6 +374,7 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 		/* Get display name only if the buddy exists in our membership list */
 
 		if(cur_buddy) {
+			cur_buddy->contact_id = strdup(contact_id);
 			cur_buddy->group = cur_group;
 
 			_get_next_tag_chunk(&in_chunk, &in_offset, "displayName");
@@ -381,8 +385,8 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 				cur_buddy->friendlyname = strdup(cur_buddy->passport);
 
 #if __DEBUG__
-			printf("Got info for %s (Name :: %s, Group :: %s)\n", cur_buddy->passport, 
-				cur_buddy->friendlyname, cur_buddy->group?cur_buddy->group->name:"(*None*)");
+			printf("Got info for %s (Name :: %s, Group :: %s, Contact ID :: %s)\n", cur_buddy->passport, 
+				cur_buddy->friendlyname, cur_buddy->group?cur_buddy->group->name:"(*None*)", cur_buddy->contact_id);
 #endif
 		}
 	}
@@ -494,7 +498,7 @@ static void msn_membership_response(MsnAccount *ma, char *data, int len, void *c
 		LList *l = ma->buddies;
 
 		while(l) {
-			printf("%s\t\t%d\n", ((MsnBuddy *)l->data)->passport, ((MsnBuddy *)l->data)->list);
+			printf("%s\t%d\t%d\n", ((MsnBuddy *)l->data)->passport, ((MsnBuddy *)l->data)->type, ((MsnBuddy *)l->data)->list);
 			l = l_list_next(l);
 		}
 	}
@@ -519,20 +523,27 @@ void msn_sync_contacts(MsnAccount *ma)
 }
 
 
-/* Reject a Pending member */
-static void msn_remove_pending_response(MsnAccount *ma, char *data, int len, void *cbdata)
+static int _is_passport_member(const char *email)
 {
-	MsnBuddy *bud = cbdata;
+	char *offset = strchr(email, '@');
 
-	if(!strstr(data, "<DeleteMemberResponse")) {
-		fprintf(stderr, "Removal failed\n");
-		return;
-	}
+	if(!offset)
+		return 0;
 
-	ma->buddies = l_list_remove(ma->buddies, bud);
-	free(bud);
+	offset++;
+
+	/* TODO Add all possible msn domains here */
+	if(   !strncmp(offset, "hotmail", 7)
+	   || !strncmp(offset, "msn", 3)
+	   || !strncmp(offset, "live", 4)
+	)
+		return 1;
+	else
+		return 0;
 }
 
+
+/* Membership List Management */
 
 static const char *PASSPORT_MEMBER_INFO =
 	"<Member xsi:type=\"PassportMember\" "
@@ -549,13 +560,47 @@ static const char *EMAIL_MEMBER_INFO =
 		"<Email>%s</Email>"
 	"</Member>";
 
+typedef void (*MsnMembershipCallback) (MsnAccount *ma, int error, void *data);
 
-void msn_buddy_remove_pending(MsnAccount *ma, MsnBuddy *bud)
+typedef struct {
+	int add;
+	const char *scenario;
+	const char *list;
+	void *data;
+	MsnMembershipCallback callback;
+} MsnMembershipData;
+
+
+static void msn_membership_update_response(MsnAccount *ma, char *data, int len, void *cbdata)
 {
-	char *url = strdup("https://contacts.msn.com/abservice/SharingService.asmx");
-	char *soap_action = "http://www.msn.com/webservices/AddressBook/DeleteMember";
+	MsnMembershipData *mmbr = cbdata;
+	char *offset = NULL;
 
+	if(mmbr->add)
+		offset=strstr(data, "<AddMemberResponse");
+	else
+		offset=strstr(data, "<DeleteMemberResponse");
+
+	if(mmbr->callback)
+		mmbr->callback(ma, offset?0:1, mmbr->data);
+	
+	free(mmbr);
+}
+
+
+static void msn_membership_list_update(MsnAccount *ma, MsnBuddy *bud, MsnMembershipData *data)
+{
+	const char *action;
+	char soap_action[512];
+	char *url = strdup("https://contacts.msn.com/abservice/SharingService.asmx");
 	char passport_tag[512];
+
+	if(data->add)
+		action = "AddMember";
+	else
+		action = "DeleteMember";
+
+	snprintf(soap_action, sizeof(soap_action), "http://www.msn.com/webservices/AddressBook/%s", action);
 
 	if(bud->type == MSN_BUDDY_PASSPORT)
 		snprintf(passport_tag, sizeof(passport_tag), PASSPORT_MEMBER_INFO, bud->passport);
@@ -563,55 +608,325 @@ void msn_buddy_remove_pending(MsnAccount *ma, MsnBuddy *bud)
 		snprintf(passport_tag, sizeof(passport_tag), EMAIL_MEMBER_INFO, bud->passport);
 
 	char *ab_request = msn_soap_build_request(MSN_MEMBERSHIP_LIST_MODIFY,
-						"ContactMsgrAPI",
+						data->scenario,
 						ma->contact_ticket,
-						"DeleteMember",
-						"Pending",
+						action,
+						data->list,
 						passport_tag,
-						"DeleteMember"
+						action
 						);
 
-	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_remove_pending_response, 
-			"Connection: Keep-Alive\r\n"
-			"Cache-Control: no-cache\r\n", bud);
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_membership_update_response, NULL, data);
 
 	free(url);
 	free(ab_request);
 }
 
 
-/* Add a contact */
-void msn_buddy_allow_response(MsnAccount *ma, char *data, int len, void *cbdata)
+/* Remove from Pending list */
+static void msn_remove_pending_response(MsnAccount *ma, int error, void *cbdata)
 {
-	char *start = NULL, *offset = NULL;
 	MsnBuddy *bud = cbdata;
 
-	if((start = strstr(data, "<guid>"))) {
-		start += 6;
-		offset = strstr(start, "</guid>");
-		if(offset) {
-			LList *groups = ma->groups;
-			*offset = '\0';
-			while(groups) {
-				MsnGroup *group = groups->data;
-
-				if(!strcmp(group->guid, start)) {
-					bud->group = group;
-					break;
-				}
-				groups = l_list_next(groups);
-			}
-		}
+	if(error) {
+		fprintf(stderr, "Removal failed\n");
+		return;
 	}
 
-	if(offset) {
-		bud->list &= ~MSN_BUDDY_PENDING;
-		bud->list |= MSN_BUDDY_ALLOW;
-		ext_buddy_added(ma, bud);
-	}
+	ma->buddies = l_list_remove(ma->buddies, bud);
+	free(bud);
 }
 
 
+void msn_buddy_remove_pending(MsnAccount *ma, MsnBuddy *bud)
+{
+	MsnMembershipData *mmbr = m_new0(MsnMembershipData, 1);
+
+	mmbr->add = 0;
+	mmbr->scenario = "ContactMsgrAPI";
+	mmbr->list = "Pending";
+	mmbr->callback = msn_remove_pending_response;
+	mmbr->data = bud;
+
+	msn_membership_list_update(ma, bud, mmbr);
+}
+
+
+/* Unblock a Buddy */
+static void msn_unblock_response(MsnAccount *ma, int error, void *cbdata)
+{
+	MsnBuddy *bud = cbdata;
+
+	ext_msn_buddy_unblock_response(ma, error, bud);
+	bud->list = MSN_BUDDY_ALLOW;
+}
+
+
+void msn_buddy_unblock(MsnAccount *ma, MsnBuddy *bud)
+{
+	MsnMembershipData *mmbr = m_new0(MsnMembershipData, 1);
+
+	mmbr->add = 1;
+	mmbr->scenario = "BlockUnblock";
+	mmbr->list = "Allow";
+	mmbr->callback = msn_unblock_response;
+	mmbr->data = bud;
+
+	msn_membership_list_update(ma, bud, mmbr);
+}
+
+
+/* Block a buddy */
+static void msn_block_response(MsnAccount *ma, int error, void *cbdata)
+{
+	MsnBuddy *bud = cbdata;
+
+	ext_msn_buddy_unblock_response(ma, error, bud);
+	bud->list = MSN_BUDDY_BLOCK;
+}
+
+
+void msn_buddy_block(MsnAccount *ma, MsnBuddy *bud)
+{
+	MsnMembershipData *mmbr = m_new0(MsnMembershipData, 1);
+
+	mmbr->add = 1;
+	mmbr->scenario = "BlockUnblock";
+	mmbr->list = "Block";
+	mmbr->callback = msn_block_response;
+	mmbr->data = bud;
+
+	msn_membership_list_update(ma, bud, mmbr);
+}
+
+
+/* Group Management */
+typedef void (*GroupCallback) (MsnAccount *ma, MsnGroup *group, void *data);
+
+typedef struct {
+	char *name;
+	GroupCallback callback;
+	void *data;
+} GroupCallbackData;
+
+
+/* Add group */
+static void msn_group_add_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	char *offset;
+	char *end;
+	GroupCallbackData *d = cbdata;
+	MsnGroup *group = NULL;
+
+	if((offset = strstr(data, "<guid>"))) {
+		group = m_new0(MsnGroup, 1);
+
+		offset += 6;
+
+		end = strstr(offset, "</guid>");
+		*end = '\0';
+
+		group->name = d->name;
+		group->guid = strdup(offset);
+
+		ma->groups = l_list_append(ma->groups, group);
+
+	}
+	else {
+		offset = strstr(data, "<faultstring>");
+
+		if(offset) {
+			offset += 13;
+
+			end = strstr(data, "</faultstring>");
+			*end = '\0';
+
+		}
+
+		ext_group_add_failed(ma, d->name, offset);
+
+		free(d->name);
+	}
+
+	if(d->callback)
+		d->callback(ma, group, d->data);
+
+	free(d);
+}
+
+
+static void msn_group_add_with_cb(MsnAccount *ma, const char *groupname, GroupCallback callback, void *data)
+{
+	GroupCallbackData *d = m_new0(GroupCallbackData, 1);
+
+	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABGroupAdd";
+
+	d->callback = callback;
+	d->data = data;
+	d->name = strdup(groupname);
+
+	char *grp_request = msn_soap_build_request(MSN_GROUP_ADD_REQUEST, 
+						ma->contact_ticket,
+						groupname
+						);
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, grp_request, msn_group_add_response, NULL, d);
+
+	free(url);
+	free(grp_request);
+}
+
+
+void msn_group_add(MsnAccount *ma, const char *groupname)
+{
+	msn_group_add_with_cb(ma, groupname, NULL, NULL);
+}
+
+
+/* Delete group */
+static void msn_group_del_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	MsnGroup *group = cbdata;
+	LList *l = ma->buddies;
+
+	if(!strstr(data, "<ABGroupDeleteResponse")) {
+		fprintf(stderr, "Group Update failed. Response ::\n%s\n", data);
+		return;
+	}
+
+	ma->groups = l_list_remove(ma->groups, group);
+
+	while(l) {
+		MsnBuddy *bud = l->data;
+		if(bud->group == group)
+			bud->group = NULL;
+
+		l = l_list_next(l);
+	}
+
+	free(group->name);
+	free(group->guid);
+	free(group);
+}
+
+
+void msn_group_del(MsnAccount *ma, MsnGroup *group)
+{
+	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABGroupDelete";
+
+	char *grp_request = msn_soap_build_request(MSN_GROUP_DEL_REQUEST, 
+						ma->contact_ticket,
+						group->guid
+						);
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, grp_request, msn_group_del_response, NULL, group);
+
+	free(url);
+	free(grp_request);
+}
+
+
+/* Modify Group */
+static void msn_group_mod_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	if(!strstr(data, "<ABGroupUpdateResponse"))
+		fprintf(stderr, "Group Update failed. Response ::\n%s\n", data);
+}
+
+
+void msn_group_mod(MsnAccount *ma, MsnGroup *group, const char *groupname)
+{
+	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABGroupUpdate";
+
+	char *grp_request = msn_soap_build_request(MSN_GROUP_MOD_REQUEST, 
+						ma->contact_ticket,
+						group->guid,
+						groupname
+						);
+
+	free(group->name);
+	group->name = strdup(groupname);
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, grp_request, msn_group_mod_response, NULL, group);
+
+	free(url);
+	free(grp_request);
+}
+
+
+/* Contact group management */
+static void msn_group_buddy_remove_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	MsnBuddy *bud = cbdata;
+
+	if(!strstr(data, "<ABGroupContactDeleteResponse"))
+		ext_buddy_group_add_failed(ma, bud, bud->group);
+}
+
+
+void msn_remove_buddy_from_group(MsnAccount *ma, MsnBuddy *bud)
+{
+	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABGroupContactDelete";
+
+	char *ab_request = msn_soap_build_request(MSN_GROUP_CONTACT_REQUEST, 
+						ma->contact_ticket,
+						"Delete",
+						bud->group->guid,
+						bud->contact_id,
+						"Delete"
+						);
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_group_buddy_remove_response, NULL, bud);
+
+	free(url);
+	free(ab_request);
+}
+
+
+static void msn_group_buddy_add_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	MsnBuddy *bud = cbdata;
+
+	if(!strstr(data, "<guid>"))
+		ext_buddy_group_add_failed(ma, bud, bud->group);
+}
+
+
+void msn_add_buddy_to_group(MsnAccount *ma, MsnBuddy *bud, MsnGroup *newgrp)
+{
+	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABGroupContactAdd";
+
+	char *ab_request = msn_soap_build_request(MSN_GROUP_CONTACT_REQUEST, 
+						ma->contact_ticket,
+						"Add",
+						newgrp->guid,
+						bud->contact_id,
+						"Add"
+						);
+
+	bud->group = newgrp;
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_group_buddy_add_response, NULL, bud);
+
+	free(url);
+	free(ab_request);
+}
+
+
+void msn_change_buddy_group(MsnAccount *ma, MsnBuddy *bud, MsnGroup *newgrp)
+{
+	if(bud->group)
+		msn_remove_buddy_from_group(ma, bud);
+	msn_add_buddy_to_group(ma, bud, newgrp);
+}
+
+
+/* Add a contact */
 static const char *PASSPORT_CONTACT_INFO =
 	"<contactType>LivePending</contactType>"
 	"<passportName>%s</passportName>"
@@ -633,10 +948,38 @@ static const char *EMAIL_CONTACT_INFO =
 	"</emails>";
 
 
-void msn_buddy_allow(MsnAccount *ma, MsnBuddy *bud)
+static void msn_contact_add_response(MsnAccount *ma, char *data, int len, void *cbdata)
 {
+	char *start = NULL, *offset = NULL;
+	MsnBuddy *bud = cbdata;
+
+	if((start = strstr(data, "<guid>"))) {
+		start += 6;
+		offset = strstr(start, "</guid>");
+		if(offset) {
+			*offset = '\0';
+
+			bud->contact_id = strdup(start);
+
+			if(bud->group)
+				msn_add_buddy_to_group(ma, bud, bud->group);
+
+			bud->list &= ~MSN_BUDDY_PENDING;
+			bud->list |= MSN_BUDDY_ALLOW;
+			bud->list |= MSN_BUDDY_FORWARD;
+			ext_buddy_added(ma, bud);
+		}
+	}
+}
+
+
+static void msn_buddy_allow_response(MsnAccount *ma, int error, void *cbdata)
+{
+	/* TODO Check for validity of response */
+
 	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
 	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABContactAdd";
+	MsnBuddy *bud = cbdata;
 
 	char passport_tag[512];
 
@@ -652,10 +995,118 @@ void msn_buddy_allow(MsnAccount *ma, MsnBuddy *bud)
 						bud->friendlyname
 						);
 
-	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_buddy_allow_response, NULL, bud);
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_contact_add_response, NULL, bud);
 
 	free(url);
 	free(ab_request);
+}
+
+
+void msn_buddy_allow(MsnAccount *ma, MsnBuddy *bud)
+{
+	MsnMembershipData *mmbr = m_new0(MsnMembershipData, 1);
+
+	mmbr->add = 1;
+	mmbr->scenario = "ContactMsgrAPI";
+	mmbr->list = "Allow";
+	mmbr->callback = msn_buddy_allow_response;
+	mmbr->data = bud;
+
+	msn_membership_list_update(ma, bud, mmbr);
+}
+
+
+void msn_buddy_add_to_group(MsnAccount *ma, MsnGroup *group, void *data)
+{
+	MsnBuddy *bud = data;
+
+	if(!group) {
+		ext_buddy_add_failed(ma, bud->passport, bud->friendlyname);
+		return;
+	}
+
+	bud->group = group;
+
+	msn_buddy_allow(ma, bud);
+}
+
+
+void msn_buddy_add(MsnAccount *ma, const char *passport, const char *friendlyname, const char *grp)
+{
+	MsnGroup *group = NULL;
+	LList *groups = ma->groups;
+
+	MsnBuddy *buddy = m_new0(MsnBuddy, 1);
+
+	if(_is_passport_member(passport))
+		buddy->type = MSN_BUDDY_PASSPORT;
+	else
+		buddy->type = MSN_BUDDY_EMAIL;
+
+	buddy->passport = strdup(passport);
+	buddy->friendlyname = strdup(friendlyname);
+
+	while(groups) {
+		group = groups->data;
+
+		if(!strcmp(grp, group->name))
+			break;
+
+		groups = l_list_next(groups);
+	}
+
+	if(!groups)
+		msn_group_add_with_cb(ma, grp, msn_buddy_add_to_group, buddy);
+	else
+		msn_buddy_add_to_group(ma, group, buddy);
+}
+
+
+/* Remove buddy */
+static void msn_contact_remove_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	MsnBuddy *bud = cbdata;
+	char *offset;
+
+	if((offset = strstr(data, "<ABContactDeleteResponse"))) {
+		ext_buddy_removed(ma, bud->passport);
+
+		ma->buddies = l_list_remove(ma->buddies, bud);
+		msn_buddy_free(bud);
+	}
+}
+
+
+void msn_buddy_remove_response(MsnAccount *ma, int error, void *cbdata)
+{
+	/* TODO validate response */
+	MsnBuddy *bud = cbdata;
+	char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+	char *soap_action = "http://www.msn.com/webservices/AddressBook/ABContactDelete";
+
+	char *ab_request = msn_soap_build_request(MSN_CONTACT_DELETE_REQUEST, 
+						ma->contact_ticket,
+						bud->contact_id
+						);
+
+	msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_contact_remove_response, NULL, bud);
+
+	free(url);
+	free(ab_request);
+}
+
+
+void msn_buddy_remove(MsnAccount *ma, MsnBuddy *bud)
+{
+	MsnMembershipData *mmbr = m_new0(MsnMembershipData, 1);
+
+	mmbr->add = 0;
+	mmbr->scenario = "ContactMsgrAPI";
+	mmbr->list = "Allow";
+	mmbr->callback = msn_buddy_remove_response;
+	mmbr->data = bud;
+
+	msn_membership_list_update(ma, bud, mmbr);
 }
 
 

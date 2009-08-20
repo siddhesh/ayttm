@@ -6,6 +6,7 @@
 #include "msn-account.h"
 #include "msn-message.h"
 #include "msn-connection.h"
+#include "msn-sb.h"
 #include "msn-ext.h"
 #include "msn.h"
 
@@ -145,6 +146,25 @@ int msn_get_status_num(const char *state)
 void msn_set_state(MsnAccount *ma, int state)
 {
 	msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_CHG, msn_state_strings[state]);
+}
+
+
+void msn_buddy_free(MsnBuddy *bud)
+{
+	if(!bud)
+		return;
+
+	l_list_foreach(bud->mq, (LListFunc)msn_sb_disconnect, NULL);
+
+	free(bud->passport);
+	free(bud->friendlyname);
+	free(bud->contact_id);
+}
+
+
+void msn_buddy_reset(MsnBuddy *bud)
+{
+	bud->list = 0;
 }
 
 

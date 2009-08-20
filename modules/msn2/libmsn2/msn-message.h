@@ -99,8 +99,6 @@ int msn_command_handle(MsnConnection *mc);
 
 int msn_command_set_payload_size(MsnMessage *msg);
 
-void msn_command_build_payload (MsnMessage *msg);
-
 void msn_command_parse_payload (MsnMessage *msg);
 
 void msn_message_handle_incoming(MsnConnection *mc);
