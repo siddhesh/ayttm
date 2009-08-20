@@ -3875,15 +3875,18 @@ void yahoo_confirm_buddy(int id, const char *who, int reject, const char *msg)
 	yahoo_packet_hash(pkt, 5, who);
 	if(reject)
 		yahoo_packet_hash(pkt, 13, "2");
-	else
+	else {
+		yahoo_packet_hash(pkt, 241, "0");
 		yahoo_packet_hash(pkt, 13, "1");
+	}
+
 	yahoo_packet_hash(pkt, 334, "0");
-	if(msg) {
-		yahoo_packet_hash(pkt, 14, msg);
+
+	if(reject) {
+		yahoo_packet_hash(pkt, 14, msg?msg:"");
 		yahoo_packet_hash(pkt, 97, "1");
 	}
-	else
-		yahoo_packet_hash(pkt, 241, "0");
+
 	yahoo_send_packet(yid, pkt, 0);
 	yahoo_packet_free(pkt);
 }
