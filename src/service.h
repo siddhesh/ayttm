@@ -132,6 +132,7 @@ struct service_callbacks {
 	  are not available, this should return the empty string */
 
 	const char **(*get_status_pixmap)(eb_account * account);
+	const void **(*get_status_pixbuf)(eb_account *account);
 
 	/*set the idle time (set this to null if N/A)*/
 

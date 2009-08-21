@@ -390,18 +390,18 @@ static void create_log_window(void)
 	gtk_widget_realize(status_message_window_text);
 }
 
-static char *last_inserted = NULL;
-
 static void update_status_message(gchar *message)
 {
 	if (!status_message_window)
 		create_log_window();
 
 	if (status_bar) {
-		char *ch;
+		gchar *ch;
 		char *tstamp_mess = NULL;
 		time_t t;
 		struct tm *cur_time;
+		GtkWidget *label =
+				gtk_tool_button_get_label_widget(GTK_TOOL_BUTTON(status_message));
 
 		for (ch = message; *ch; ch++)
 			if (isspace(*ch))
@@ -413,21 +413,10 @@ static void update_status_message(gchar *message)
 				"<font color=#888888><b>%d:%.2d:%.2d</b></font> %s<br>",
 				cur_time->tm_hour, cur_time->tm_min, cur_time->tm_sec, message);
 
-		if (last_inserted) {
-			if (!strcmp(last_inserted, message))
-				return;
-			else {
-				free(last_inserted);
-				last_inserted = strdup(message);
-			}
-		}
-		else
-			last_inserted = strdup(message);
-
 		gtk_widget_hide(GTK_WIDGET(status_message));
-		gtk_tool_button_set_label(GTK_TOOL_BUTTON(status_message), message);
+		gtk_label_set_text(GTK_LABEL(label), message);
 
-		if (iGetLocalPref("do_noautoresize"))
+		if (!iGetLocalPref("do_noautoresize"))
 			gtk_widget_set_size_request(
 					GTK_WIDGET(status_message), status_bar->allocation.width - 10, -1);
 
@@ -1003,6 +992,34 @@ void reset_list(void)
 	for (grps = groups; grps; grps = grps->next)
 		remove_group_line(grps->data);
 }
+static GdkPixbuf *iconlogin_pb = NULL;
+static GdkPixbuf *iconblank_pb = NULL;
+static GdkPixbuf *iconlogoff_pb = NULL;
+
+void buddy_update_icon(eb_account *ea)
+{
+	/* update the icon if another timeout isn't about to change it */
+	if (ea->icon_handler != -1 || !(RUN_SERVICE(ea)))
+		return;
+
+	if (RUN_SERVICE(ea)->get_status_pixbuf)
+		ea->pix = RUN_SERVICE(ea)->get_status_pixbuf(ea);
+	else if (RUN_SERVICE(ea)->get_status_pixmap) {
+		GdkPixbuf *tmp = gdk_pixbuf_new_from_xpm_data(
+			(const char **)RUN_SERVICE(ea)->get_status_pixmap(ea));
+		ea->pix = tmp;
+	}
+	else
+		ea->pix = iconblank_pb;
+	
+	gtk_tree_store_set(
+			contact_list_store, ea->list_item,
+			MAIN_VIEW_ICON, ea->pix,
+			MAIN_VIEW_LABEL, ea->handle,
+			MAIN_VIEW_STATUS, ea->status,
+			MAIN_VIEW_STATUS_TIP, ea->tiptext,
+			-1);
+}
 
 /* General purpose update Contact List */
 void update_contact_list()
@@ -1045,11 +1062,11 @@ void update_contact_list()
 			for (accounts = con->accounts; accounts; accounts = accounts->next) {
 				ea = accounts->data;
 
-				if ((status_show == 0) ||(status_show == 1)) {
+				if (status_show == 0 || status_show == 1) {
 					/* definitely visible */
 
 					add_account_line(ea);
-					buddy_update_status(ea);
+					buddy_update_icon(ea);
 
 					if (!con->list_item)
 						fprintf(stderr, _("Account vanished after add_account_line.\n"));
@@ -1061,7 +1078,7 @@ void update_contact_list()
 				else {
 					/* Close it up */
 					if (ea->online) {
-						buddy_update_status(ea);
+						buddy_update_icon(ea);
 
 						if (con->list_item)
 							MAIN_VIEW_COLLAPSE_ROW(con->list_item);
@@ -1087,16 +1104,12 @@ void add_contact_and_accounts(struct contact *c)
 	LList *l;
 	for (l = c->accounts; l; l = l->next) {
 		eb_account *ea = l->data;
-		if ((status_show == 0) ||(status_show == 1) || ea->online) {
+		if (status_show == 0 || status_show == 1 || ea->online) {
 			add_account_line(ea);
-			buddy_update_status(ea);
+			buddy_update_icon(ea);
 		}
 	}
 }
-
-static GdkPixbuf *iconlogin_pb = NULL;
-static GdkPixbuf *iconblank_pb = NULL;
-static GdkPixbuf *iconlogoff_pb = NULL;
 
 static GtkTargetEntry drag_types[1] =
 {
@@ -1148,54 +1161,48 @@ void update_group_line(grouplist * eg)
 
 static void set_status_label(eb_account *ea, int update_contact)
 {
-	char *c = NULL, *tmp = NULL;
+	gchar *status;
+	gchar *tmp;
+	gchar *c;
 
-	c = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 40);
+	status = (RUN_SERVICE(ea)->get_status_string)
+		? RUN_SERVICE(ea)->get_status_string(ea)
+		: NULL;
 
-	/* Replace every newline with space. */
+	c = (status && status[0])
+		? g_strdup_printf("(%s)", status)
+		: g_strdup("");
+
 	for (tmp = c; *tmp; tmp++)
-		if (*tmp == '\n')
+		if (isspace(*tmp))
 			*tmp = ' ';
 
-	if (strlen(c) == 40)
-		c[39] = c[38] = c[37] = '.';
-
-	if (c && c[0])
-		tmp = g_strdup_printf("(%s)", c);
-	else
-		tmp = g_strdup("");
-
 	if (ea->status) {
-		eb_debug(DBG_CORE, "%s [%s|%s]\n", ea->account_contact->nick, ea->status, tmp);
-		if (strcmp(ea->status, tmp)) {
+		eb_debug(DBG_CORE, "%s [%s|%s]\n", ea->account_contact->nick, ea->status, c);
+		if (strcmp(ea->status, c)) {
 			char buff[1024];
 			g_snprintf(
 					buff, 1024, _("%s is now %s"),
-					ea->account_contact->nick, strlen(c) ? c : "Online");
+					ea->account_contact->nick, (c && c[0]) ? c : "Online");
 			update_status_message(buff);
 		}
 		g_free(ea->status);
 	}
 
-	ea->tiptext = ea->status = strdup(tmp);
+	ea->tiptext = ea->status = strdup(c);
 
 	if (update_contact) {
 		struct tm *mytime;
-		char buff[128];
-		char *status;
+		gchar buff[128];
 		struct contact *ac = ea->account_contact;
 
-		if (ac->status)
-			g_free(ac->status);
-		ac->status = strdup(tmp);
-
-		status = RUN_SERVICE(ea)->get_status_string(ea);
+		g_free(ac->status);
+		ac->status = strdup(c);
 
 		if (ac->last_status && strcmp(c, ac->last_status)) {
 			time(&ac->last_status_change);
-			if (ac->last_status)
-				free(ac->last_status);
-			ac->last_status = strdup(tmp);
+			g_free(ac->last_status);
+			ac->last_status = g_strdup(c);
 		}
 
 		if (ac->last_status_change) {
@@ -1209,14 +1216,12 @@ static void set_status_label(eb_account *ea, int update_contact)
 		}
 	}
 	g_free(c);
-	g_free(tmp);
 }
 
 /* makes an account visible on the buddy list, making the contact visible
    if necessary */
 void add_account_line(eb_account *ea)
 {
-	char *label;
 	GtkTreeIter iter;
 
 	if (ea->list_item)
@@ -1225,8 +1230,6 @@ void add_account_line(eb_account *ea)
 	add_contact_line(ea->account_contact);
 
 	ea->pix = iconblank_pb;
-	label = g_strdup(ea->handle);
-	set_status_label(ea, TRUE);
 
 	ea->icon_handler = -1;
 
@@ -1236,13 +1239,15 @@ void add_account_line(eb_account *ea)
 	gtk_tree_store_set(
 			contact_list_store, &iter,
 			MAIN_VIEW_ICON, ea->pix,
-			MAIN_VIEW_LABEL, label,
+			MAIN_VIEW_LABEL, ea->handle,
 			MAIN_VIEW_STATUS, ea->status,
 			MAIN_VIEW_STATUS_TIP, ea->tiptext,
 			MAIN_VIEW_ROW_DATA, ea,
 			MAIN_VIEW_ROW_TYPE, TARGET_TYPE_ACCOUNT,
-			MAIN_VIEW_HAS_TIP, FALSE,
+			MAIN_VIEW_HAS_TIP, TRUE,
 			-1);
+	if (ea->list_item)
+		gtk_tree_iter_free(ea->list_item);
 	ea->list_item = gtk_tree_iter_copy(&iter);
 }
 
@@ -1258,7 +1263,9 @@ void add_contact_line(struct contact *ec)
 
 	ec->pix = iconblank_pb;
 
+	g_free(ec->label);
 	ec->label = g_strdup(ec->nick);
+	g_free(ec->status);
 	ec->status = g_strdup("");
 
 	ec->icon_handler = -1;
@@ -1284,6 +1291,8 @@ void add_contact_line(struct contact *ec)
 			MAIN_VIEW_HAS_TIP, TRUE,
 			-1);
 
+	if (ec->list_item)
+		gtk_tree_iter_free(ec->list_item);
 	ec->list_item = gtk_tree_iter_copy(&iter);
 
 	if (!ec->group->contacts_shown) {
@@ -1387,11 +1396,13 @@ static gint hide_contact(struct contact *ec)
 
 	if (status_show == 2)
 		remove_contact_line(ec);
-	else
+	else {
 		for (l = ec->accounts; l; l = l->next) {
 			eb_account *account = l->data;
-			buddy_update_status(account);
+			buddy_update_icon(account);
 		}
+		contact_update_status(ec);
+	}
 
 	return FALSE;
 }
@@ -1422,7 +1433,7 @@ static gint hide_account(eb_account *ea)
 	if ((status_show == 2) /*||(status_show == 1)*/)
 		remove_account_line(ea);
 	else
-		buddy_update_status(ea);
+		buddy_update_icon(ea);
 
 	return FALSE;
 }
@@ -1435,8 +1446,6 @@ void contact_update_status(struct contact *ec)
 	int width, height;
 	int width2, height2;
 	int width3, height3;
-
-	GdkPixbuf *tmp = NULL;
 
 	/* find the account who's status information should be reflected in
 	   the contact line (preferably the default protocol account, but
@@ -1465,12 +1474,15 @@ void contact_update_status(struct contact *ec)
 
 	/* set the icon if there isn't another timeout about to alter the icon */
 	if (ec->icon_handler == -1) {
-		tmp = GDK_PIXBUF(ec->pix);
-
-		gtkut_set_pixbuf(
-			ea->ela, (const char **)RUN_SERVICE(ea)->get_status_pixmap(ea), &tmp);
-
-		ec->pix = tmp;
+		if (RUN_SERVICE(ea)->get_status_pixbuf)
+			ec->pix = RUN_SERVICE(ea)->get_status_pixbuf(ea);
+		else if (RUN_SERVICE(ea)->get_status_pixmap) {
+			GdkPixbuf *tmp = gdk_pixbuf_new_from_xpm_data(
+				(const char **)RUN_SERVICE(ea)->get_status_pixmap(ea));
+			ec->pix = tmp;
+		}
+		else
+			ec->pix = iconblank_pb;
 
 		gtk_tree_store_set(
 				contact_list_store, ec->list_item,
@@ -1519,7 +1531,6 @@ void buddy_update_status_and_log(eb_account *ea)
 void buddy_update_status(eb_account *ea)
 {
 	char *c, *tmp;
-	GdkPixbuf *tmpbuf = NULL;
 
 	if (!ea || !ea->list_item)
 		return;
@@ -1537,24 +1548,7 @@ void buddy_update_status(eb_account *ea)
 	g_free(c);
 	g_free(tmp);
 
-	/* update the icon if another timeout isn't about to change it */
-	if (ea->icon_handler == -1) {
-		tmpbuf = GDK_PIXBUF(ea->pix);
-		if (RUN_SERVICE(ea) && RUN_SERVICE(ea)->get_status_pixmap && ea->pix) {
-			gtkut_set_pixbuf(
-					ea->ela, (const char **)RUN_SERVICE(ea)->get_status_pixmap(ea), &tmpbuf);
-
-			ea->pix = tmpbuf;
-
-			gtk_tree_store_set(
-					contact_list_store, ea->list_item,
-					MAIN_VIEW_ICON, ea->pix,
-					MAIN_VIEW_LABEL, ea->handle,
-					MAIN_VIEW_STATUS, ea->status,
-					MAIN_VIEW_STATUS_TIP, ea->tiptext,
-					-1);
-		}
-	}
+	buddy_update_icon(ea);
 
 	/* since the contact's status info might be a copy of this
 	   account's status info, we should refresh that also */
@@ -1588,7 +1582,7 @@ static gint set_account_icon(eb_account *ea)
 	if (ea->account_contact->online == 1)
 		do_trigger_online(ea->account_contact);
 
-	buddy_update_status(ea);
+	buddy_update_icon(ea);
 	return FALSE;
 }
 
@@ -1731,7 +1725,7 @@ void buddy_login(eb_account *ea)
 	if (ea->account_contact->online == 1)
 		contact_login(ea->account_contact);
 
-	buddy_update_status(ea);
+	buddy_update_status_and_log(ea);
 
 	gtk_tree_store_set(
 			contact_list_store, ea->list_item,
@@ -1957,10 +1951,12 @@ static GtkWidget *MakeContactList()
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes(
 			NULL, renderer, "text", MAIN_VIEW_LABEL, NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(contact_list), column);
 
 	renderer = gtk_cell_renderer_text_new();
+	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	column = gtk_tree_view_column_new_with_attributes(
 			NULL, renderer, "text", MAIN_VIEW_STATUS, NULL);
 
@@ -2627,6 +2623,11 @@ void eb_status_window()
 
 	status_message = gtk_tool_button_new(NULL, _("Welcome To Ayttm"));
 
+	label = gtk_label_new(_("Welcome to Ayttm"));
+	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+	gtk_tool_button_set_label_widget(GTK_TOOL_BUTTON(status_message), label);
+	gtk_widget_show(label);
+
 	status_bar = gtk_toolbar_new();
 	gtk_toolbar_set_orientation(GTK_TOOLBAR(status_bar), GTK_ORIENTATION_HORIZONTAL);
 	gtk_toolbar_set_style(GTK_TOOLBAR(status_bar), GTK_TOOLBAR_TEXT);
@@ -2635,11 +2636,6 @@ void eb_status_window()
 	gtk_widget_show(GTK_WIDGET(status_message));
 	gtk_container_add(GTK_CONTAINER(hbox), status_bar);
 	gtk_widget_show(hbox);
-
-	gtk_widget_set_size_request(
-			GTK_WIDGET(status_message),
-			((status_bar->allocation.width - 10 >= -1) ? status_bar->allocation.width - 10 : -1),
-			-1);
 
 	create_log_window();
 
@@ -2671,4 +2667,9 @@ void eb_status_window()
 	g_signal_connect(statuswindow, "configure-event", G_CALLBACK(eb_save_size), NULL);
 
 	set_menu_sensitivity();
+
+	gtk_widget_set_size_request(
+			GTK_WIDGET(status_message),
+			((status_bar->allocation.width - 10 >= -1) ? status_bar->allocation.width - 10 : -1),
+			-1);
 }

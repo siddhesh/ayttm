@@ -81,8 +81,7 @@ typedef struct account {
 	int status_handler;
 	struct _info_window *infowindow;
  	int priority;
-	char *new_state;
-	char *new_status;
+	char *state;
 } eb_account;
 
 const char *decode_password(const char *pass_in, int enc_type);
