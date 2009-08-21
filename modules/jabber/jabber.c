@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.54 $",
-	"$Date: 2009/08/15 19:57:27 $",
+	"$Revision: 1.55 $",
+	"$Date: 2009/08/21 00:03:42 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -667,13 +667,31 @@ static eb_account * eb_jabber_new_account(eb_local_account *ela, const char * ac
 
 	return ea;
 }
+static GdkPixbuf *jabber_icon_online = NULL;
+static GdkPixbuf *jabber_icon_away = NULL;
+
+void eb_jabber_init_pixbufs()
+{
+	jabber_icon_online = gdk_pixbuf_new_from_xpm_data((const char **)jabber_online_xpm);
+	jabber_icon_away = gdk_pixbuf_new_from_xpm_data((const char **)jabber_away_xpm);
+}
+
+static const void **eb_jabber_get_status_pixbuf(eb_account *account)
+{
+	eb_jabber_account_data *jad = account->protocol_account_data;
+
+	if (!jabber_icon_online)
+		eb_jabber_init_pixbufs();
+
+	if (jad->status == JABBER_ONLINE)
+		return (void *)jabber_icon_online;
+	else
+		return (void *)jabber_icon_away;
+}
 
 static const char ** eb_jabber_get_status_pixmap( eb_account * account)
 {
 	eb_jabber_account_data * jad;
-
-	/*if (!pixmaps)
-		eb_jabber_init_pixmaps();*/
 	
 	jad = account->protocol_account_data;
 	
@@ -686,7 +704,7 @@ static const char ** eb_jabber_get_status_pixmap( eb_account * account)
 static char *eb_jabber_get_status_string(eb_account *account)
 {
 	eb_jabber_account_data *jad = account->protocol_account_data;
-	return jad->description ? jad->description : "";
+	return jad->description ? jad->description : jabber_state_strings[0];
 }
 
 static void eb_jabber_set_idle( eb_local_account * account, int idle )
@@ -901,6 +919,7 @@ struct service_callbacks * query_callbacks()
 	sc->new_account = eb_jabber_new_account;
 	sc->get_status_string = eb_jabber_get_status_string;
 	sc->get_status_pixmap = eb_jabber_get_status_pixmap;
+	sc->get_status_pixbuf = eb_jabber_get_status_pixbuf;
 	sc->set_idle = eb_jabber_set_idle;
 	sc->set_away = eb_jabber_set_away;
 	sc->send_chat_room_message = eb_jabber_send_chat_room_message;
@@ -1126,7 +1145,8 @@ void JABBERStatusChange(struct jabber_buddy *jb)
 	eb_local_account *ela;
 	int status;
 	char *old_desc;
-	
+	int update = 0;
+
 	if (!jb)
 		return;
 
@@ -1153,22 +1173,24 @@ void JABBERStatusChange(struct jabber_buddy *jb)
 
 	jad->JConn = jb->JConn;
 
-	if (jb->status != status)
-		ea->new_state = jabber_state_strings[jb->status];
+	if (jb->status != status) {
+		ea->state = jabber_state_strings[jb->status];
+		update = 1;
+	}
 
 	if ((!old_desc && jb->description && jb->description[0])
 	||  (old_desc && !jb->description && old_desc[0])
 	||  (old_desc && jb->description && strcmp(old_desc, jb->description))) {
 
 		eb_debug(DBG_JBR, "[%s|%s]\n", old_desc, jb->description);
-		ea->new_status = jad->description;
+		update = 1;
 	}
 
 	if (jb->status != JABBER_OFFLINE && status == JABBER_OFFLINE)
 		buddy_login(ea);
 	else if (jb->status == JABBER_OFFLINE && status != JABBER_OFFLINE)
 		buddy_logoff(ea);	
-	else if (ea->new_state || ea->new_status)
+	else if (update)
 		buddy_update_status_and_log(ea);
 
 	g_free(old_desc);
