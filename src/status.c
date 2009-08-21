@@ -1197,7 +1197,7 @@ static void set_status_label(eb_account *ea, int update_contact)
 		struct contact *ac = ea->account_contact;
 
 		g_free(ac->status);
-		ac->status = strdup(c);
+		ac->status = g_strdup(c);
 
 		if (ac->last_status && strcmp(c, ac->last_status)) {
 			time(&ac->last_status_change);
