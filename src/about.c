@@ -31,7 +31,7 @@
 
 /* Ayttm developers */
 
-#define	AYTTM_TEAM_SIZE	(6)
+#define	AYTTM_TEAM_SIZE	(7)
 
 static tDeveloperInfo sAyttmDevTeam[AYTTM_TEAM_SIZE] =
 {

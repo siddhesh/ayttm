@@ -234,7 +234,6 @@ void ext_jabber_disconnect(jconn j)
 
 	if(!conn) {
 		printf("WHAT THE HELL ARE WE TRYING TO FREE(%p)?!?!?!\n", j);
-		abort();
 		return;
 	}
 
@@ -1100,14 +1099,12 @@ void j_on_state_handler(jconn conn, int state) {
 			ay_connection_input_remove(JConn->listenerID);
 			/* FIXME: Do we need to free anything? */
 			j_remove_agents_from_host(JCgetServerName(JConn));
-			JConn->conn=NULL;
 		}
 		else if(!JConn->conn || JConn->conn->state==JCONN_STATE_OFF) {
 			snprintf(buff, 4096, _("Connection to the jabber server %s failed!"), conn->user->server);
 			JABBERError(buff, _("Jabber server not responding"));
 			JABBERLogout(JConn);
 			jab_delete(JConn->conn);
-			JConn->conn=NULL;
 		}
 		break;
 	case JCONN_STATE_CONNECTED:
