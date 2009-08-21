@@ -1,3 +1,19 @@
+* Fri Aug 21 2009 00:01 UTC [pstef]   0.5.0-129
+- ChangeLog, configure.ac, src/account.h, src/service.h, src/status.c,
+modules/jabber/jabber.c:
+ * Removed new_status and replaced new_state with state, because conception of
+ future state and status handling changed a little bit
+ * Added get_status_pixbuf() for services. If a service makes use of it, we
+ don't have to allocate new memory for icon pixbuf every time we update buddy
+ icon (which is a memory leak)
+ * Status column and status button now ellipsize too long texts on their own.
+ Former ellipsizing method caused layout errors and GTK warnings in some cases.
+ * Don't resize status button if do_noautoresize == 1
+ * Show tooltips for individual accounts too
+ * Fixed a few memory leaks and optimized some parts of code as well
+ * Auto-size for the first column (was "grow only")
+ * Jabber: make use of get_status_pixbuf()
+
 * Thu Aug 20 2009 12:45 UTC [siddheshp]   0.5.0-128
 - ChangeLog, configure.ac, modules/yahoo2/libyahoo2.c:
  * YMSGR: Fixed buddy confirm and reject... again.
