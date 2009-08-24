@@ -1,3 +1,8 @@
+* Mon Aug 24 2009 13:06 UTC [siddheshp]   0.5.0-132
+- ChangeLog, configure.ac, src/gtk/gtk_tree_view_tooltip.c,
+src/gtk/gtk_tree_view_tooltip.h:
+ * CORE: Added a delay to the status window tooltip popup
+
 * Mon Aug 24 2009 12:10 UTC [siddheshp]   0.5.0-131
 - ChangeLog, configure.ac, modules/msn2/libmsn2/msn-account.h,
 modules/msn2/libmsn2/msn-commands.c, modules/msn2/libmsn2/msn-connection.c,

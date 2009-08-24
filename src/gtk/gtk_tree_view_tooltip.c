@@ -41,6 +41,7 @@ void gtk_tree_view_tooltip_init(GtkTreeViewTooltip *tooltip)
 	tooltip->icon_column		= -1;
 	tooltip->title_column		= -1;
 	tooltip->tiptext_column		= -1;
+	tooltip->source			=  0;
 
 	tooltip->treeview	= NULL;
 	tooltip->active_path	= NULL;
@@ -51,6 +52,11 @@ void gtk_tree_view_tooltip_init(GtkTreeViewTooltip *tooltip)
 void gtk_tree_view_tooltip_reset(GtkTreeViewTooltip *tooltip)
 {
 	g_return_if_fail(tooltip!=NULL);
+
+	if(tooltip->source) {
+		g_source_remove(tooltip->source);
+		tooltip->source = 0;
+	}
 
 	if(tooltip->window && GTK_WIDGET_VISIBLE(tooltip->window))
 		gtk_widget_destroy(tooltip->window);
@@ -64,11 +70,21 @@ void gtk_tree_view_tooltip_reset(GtkTreeViewTooltip *tooltip)
 }
 
 /* Shows the tooltip window */
-void tooltip_show_tip(GtkTreeViewTooltip *tooltip, int x, int y)
+typedef struct {
+	GtkTreeViewTooltip *tooltip;
+	int x;
+	int y;
+} CoordData;
+
+static gboolean tooltip_show_tip(void *d)
 {
 	GtkWidget *hbox = NULL;
 	GtkWidget *vbox = NULL;
 	GtkWidget *iconwid = NULL;
+	CoordData *data = d;
+	GtkTreeViewTooltip *tooltip = data->tooltip;
+	int x = data->x;
+	int y = data->y;
 
 	/* We don't need to re-create it if it already exists, just update it in that case */
 	if(!tooltip->window) {
@@ -98,6 +114,10 @@ void tooltip_show_tip(GtkTreeViewTooltip *tooltip, int x, int y)
 	gtk_window_move(GTK_WINDOW(tooltip->window), x, y);
 
 	gtk_widget_show(tooltip->window);
+
+	tooltip->source = 0;
+
+	return FALSE;
 }
 
 /* All the funny stuff happens here... showing and hiding of the tooltip and all that */
@@ -109,6 +129,14 @@ static void treeview_tooltip_event_handler(GtkTreeView *treeview, GdkEvent *even
 		return;
 	
 	switch(event->type) {
+	case GDK_LEAVE_NOTIFY:
+	case GDK_BUTTON_PRESS:
+	case GDK_BUTTON_RELEASE:
+	case GDK_PROXIMITY_IN:
+	case GDK_SCROLL:
+	case GDK_DRAG_MOTION:
+		gtk_tree_view_tooltip_reset(tooltip);
+		return;
 	case GDK_MOTION_NOTIFY:
 	{	
 		GtkTreePath *path;
@@ -118,6 +146,7 @@ static void treeview_tooltip_event_handler(GtkTreeView *treeview, GdkEvent *even
 		GdkRectangle rect;
 		int x, y, wx, wy;
 		gboolean tips_enabled;
+		CoordData *cdata = NULL;
 		
 		GtkTreeIter iter;
 		GtkTreeModel *model = gtk_tree_view_get_model(treeview);
@@ -133,12 +162,14 @@ static void treeview_tooltip_event_handler(GtkTreeView *treeview, GdkEvent *even
 		}
 		
 		/* Have we moved on to the next row? */
-		if(tooltip->window && tooltip->active_path &&
+		if(tooltip->active_path &&
 		   !gtk_tree_path_compare(tooltip->active_path, path))
 		{
 			return;
 		}
 		
+		gtk_tree_view_tooltip_reset(tooltip);
+
 		gtk_tree_path_free(tooltip->active_path);
 		tooltip->active_path = gtk_tree_path_copy(path);
 		gtk_tree_path_free(path);
@@ -148,10 +179,8 @@ static void treeview_tooltip_event_handler(GtkTreeView *treeview, GdkEvent *even
 			gtk_tree_model_get(model, &iter,
 					   tooltip->tip_flag_column, &tips_enabled, -1);
 			
-			if(!tips_enabled) {
-				gtk_tree_view_tooltip_reset(tooltip);
+			if(!tips_enabled)
 				return;
-			}
 		}
 		if(tooltip->icon_column!=-1) {
 			gtk_tree_model_get(model, &iter,
@@ -188,17 +217,15 @@ static void treeview_tooltip_event_handler(GtkTreeView *treeview, GdkEvent *even
 		
 		y = eventmotion->y_root + rect.height - eventmotion->y + rect.y;
 		x = eventmotion->x_root - eventmotion->x + rect.width/2;
+
+		cdata = g_new0(CoordData, 1);
+		cdata->tooltip = tooltip;
+		cdata->x = x;
+		cdata->y = y;
 		
-		tooltip_show_tip(tooltip, x, y);
+		tooltip->source = g_timeout_add(1000, tooltip_show_tip, cdata);
 		return;
 	}
-	case GDK_LEAVE_NOTIFY:
-	case GDK_BUTTON_PRESS:
-	case GDK_BUTTON_RELEASE:
-	case GDK_PROXIMITY_IN:
-	case GDK_SCROLL:
-		gtk_tree_view_tooltip_reset(tooltip);
-		return;
 
 	default:
 		return;
