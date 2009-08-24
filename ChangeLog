@@ -1,3 +1,18 @@
+* Mon Aug 24 2009 12:10 UTC [siddheshp]   0.5.0-131
+- ChangeLog, configure.ac, modules/msn2/libmsn2/msn-account.h,
+modules/msn2/libmsn2/msn-commands.c, modules/msn2/libmsn2/msn-connection.c,
+modules/msn2/libmsn2/msn-connection.h, modules/msn2/libmsn2/msn-contacts.c,
+modules/msn2/libmsn2/msn-contacts.h, modules/msn2/libmsn2/msn-errors.c,
+modules/msn2/libmsn2/msn-errors.h, modules/msn2/libmsn2/msn-ext.h,
+modules/msn2/libmsn2/msn-http.c, modules/msn2/libmsn2/msn-http.h,
+modules/msn2/libmsn2/msn-login.c, modules/msn2/libmsn2/msn-login.h,
+modules/msn2/libmsn2/msn-message.c, modules/msn2/libmsn2/msn-message.h,
+modules/msn2/libmsn2/msn-sb.c, modules/msn2/libmsn2/msn-sb.h,
+modules/msn2/libmsn2/msn-soap.c, modules/msn2/libmsn2/msn-soap.h,
+modules/msn2/libmsn2/msn-util.c, modules/msn2/libmsn2/msn-util.h,
+modules/msn2/libmsn2/msn.c, modules/msn2/libmsn2/msn.h:
+ * MSN: Added copyright/license information in sources
+
 * Fri Aug 21 2009 07:35 UTC [siddheshp]   0.5.0-130
 - ChangeLog, configure.ac, modules/jabber/libEBjabber.c, src/about.c:
  * CORE: Actually show Piotr's name in the about box
