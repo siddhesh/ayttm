@@ -60,7 +60,9 @@ struct _GtkTreeViewTooltip
 	gint title_column;
 	gint tiptext_column;
 	gboolean enable_tips;
+
 	gint source;
+	gpointer data;
 };
 
 struct _GtkTreeViewTooltipClass

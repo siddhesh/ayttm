@@ -55,6 +55,7 @@ void gtk_tree_view_tooltip_reset(GtkTreeViewTooltip *tooltip)
 
 	if(tooltip->source) {
 		g_source_remove(tooltip->source);
+		g_free(tooltip->data);
 		tooltip->source = 0;
 	}
 
@@ -224,6 +225,8 @@ static void treeview_tooltip_event_handler(GtkTreeView *treeview, GdkEvent *even
 		cdata->tooltip = tooltip;
 		cdata->x = x;
 		cdata->y = y;
+
+		tooltip->data = cdata;
 		
 		tooltip->source = g_timeout_add(1000, tooltip_show_tip, cdata);
 		return;
