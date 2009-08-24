@@ -86,6 +86,8 @@ static gboolean tooltip_show_tip(void *d)
 	int x = data->x;
 	int y = data->y;
 
+	g_free(data);
+
 	/* We don't need to re-create it if it already exists, just update it in that case */
 	if(!tooltip->window) {
 		hbox = gtk_hbox_new(FALSE, 0);
