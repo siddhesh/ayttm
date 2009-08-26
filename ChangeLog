@@ -1,4 +1,4 @@
-* Wed Aug 26 2009  UTC [pstef]   0.5.0-133
+* Wed Aug 26 2009 09:26 UTC [pstef]   0.5.0-133
 - ChangeLog, configure.ac, modules/aycryption/aycryption.c, src/chat_room.c,
 src/chat_window.c, src/crash.c, src/gtk/gtkspell.c, src/gtk/prefs_window.C
 src/prefs.c, src/prefs.h, src/spellcheck.C:
