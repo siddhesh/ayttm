@@ -1,3 +1,10 @@
+* Wed Aug 26 2009  UTC [pstef]   0.5.0-133
+- ChangeLog, configure.ac, modules/aycryption/aycryption.c, src/chat_room.c,
+src/chat_window.c, src/crash.c, src/gtk/gtkspell.c, src/gtk/prefs_window.C
+src/prefs.c, src/prefs.h, src/spellcheck.C:
+ * Aspell takes place of pspell. This fixes #2830610
+ * Call gpgme_check_version() before using gpgme_new(). Fixes #2831024
+
 * Mon Aug 24 2009 13:06 UTC [siddheshp]   0.5.0-132
 - ChangeLog, configure.ac, src/gtk/gtk_tree_view_tooltip.c,
 src/gtk/gtk_tree_view_tooltip.h:

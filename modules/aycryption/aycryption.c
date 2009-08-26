@@ -96,8 +96,8 @@ PLUGIN_INFO plugin_info = {
 	"Aycryption",
 	"Encrypts messages with GPG.\n"
 	"WARNING: Apparently MSN servers randomly truncates GPG signed/encrypted messages.",
-	"$Revision: 1.25 $",
-	"$Date: 2009/08/19 04:07:04 $",
+	"$Revision: 1.26 $",
+	"$Date: 2009/08/26 09:26:14 $",
 	&ref_count,
 	aycryption_init,
 	aycryption_finish,
@@ -109,6 +109,8 @@ unsigned int module_version() {return CORE_VERSION;}
 
 static int aycryption_init()
 {
+	gpgme_check_version(NULL);
+
 	input_list *il = g_new0(input_list, 1);
 	plugin_info.prefs = il;
 

@@ -26,10 +26,10 @@
 #include "spellcheck.h"
 #include <stddef.h>
 
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 
 #define USE_ORIGINAL_MANAGER_FUNCS
-#include <pspell/pspell.h>
+#include <aspell.h>
 #undef USE_ORIGINAL_MANAGER_FUNCS
 #include <stdlib.h>
 #include <string.h>
@@ -38,10 +38,10 @@
 #include "debug.h"
 
 class AySpellChecker {
-	PspellConfig *spell_config;
-	PspellCanHaveError * possible_err;
-	PspellManager * spell_checker;
-	const char * language;
+	AspellConfig *spell_config;
+	AspellCanHaveError *possible_err;
+	AspellSpeller *spell_checker;
+	const char *language;
 
 	public:
 
@@ -81,26 +81,26 @@ static const char * get_language()
 
 AySpellChecker::AySpellChecker()
 {
-	spell_config = new_pspell_config();
+	spell_config = new_aspell_config();
 	reload();
 }
 
 void AySpellChecker::reload()
 {
 	if(!spell_config)
-		spell_config = new_pspell_config();
+		spell_config = new_aspell_config();
 
 	language = get_language();
-	pspell_config_replace(spell_config, "language-tag", language);
-	possible_err = new_pspell_manager(spell_config);
-	spell_checker=NULL;
-	if(pspell_error_number(possible_err) != 0) {
-		delete_pspell_config(spell_config);
-		eb_debug(DBG_CORE, "%s", pspell_error_message(possible_err));
-		spell_config=NULL;
-	} else {
-		spell_checker = to_pspell_manager(possible_err);
+	aspell_config_replace(spell_config, "lang", language);
+	possible_err = new_aspell_speller(spell_config);
+	spell_checker = NULL;
+	if (aspell_error_number(possible_err)) {
+		delete_aspell_config(spell_config);
+		eb_debug(DBG_CORE, "%s", aspell_error_message(possible_err));
+		spell_config = NULL;
 	}
+	else
+		spell_checker = to_aspell_speller(possible_err);
 }
 
 int AySpellChecker::check(const char * word)
@@ -108,7 +108,7 @@ int AySpellChecker::check(const char * word)
 	if(!word || !spell_checker)
 		return 1;
 	else
-		return pspell_manager_check(spell_checker, word);
+		return aspell_speller_check(spell_checker, word, -1);
 }
 
 LList * AySpellChecker::suggest(const char * word)
@@ -119,11 +119,11 @@ LList * AySpellChecker::suggest(const char * word)
 	LList * words = NULL;
 	const char *w;
 
-	const PspellWordList * suggestions = pspell_manager_suggest(spell_checker, word);
-	PspellStringEmulation * elements = pspell_word_list_elements(suggestions);
-	while( (w = pspell_string_emulation_next(elements)) != NULL)
+	const AspellWordList *suggestions = aspell_speller_suggest(spell_checker, word, -1);
+	AspellStringEnumeration *elements = aspell_word_list_elements(suggestions);
+	while ((w = aspell_string_enumeration_next(elements)))
 		words = l_list_append(words, strdup(w));
-	delete_pspell_string_emulation(elements);
+	delete_aspell_string_enumeration(elements);
 
 	return words;
 }
@@ -131,9 +131,9 @@ LList * AySpellChecker::suggest(const char * word)
 AySpellChecker::~AySpellChecker()
 {
 	if(spell_checker)
-		delete_pspell_manager(spell_checker);
+		delete_aspell_speller(spell_checker);
 	if(spell_config)
-		delete_pspell_config(spell_config);
+		delete_aspell_config(spell_config);
 }
 
 

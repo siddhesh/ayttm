@@ -960,7 +960,7 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_smiley=%d\n", iGetLocalPref("do_smiley" ) );
 	fprintf( fp, "FontFace=%s\n", cGetLocalPref("FontFace") );
 	fprintf( fp, "encodings=%s\n", cGetLocalPref("encodings") );
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
     fprintf( fp, "do_spell_checking=%d\n", iGetLocalPref("do_spell_checking") );
 	fprintf( fp, "spell_dictionary=%s\n", cGetLocalPref("spell_dictionary") );
 #endif
@@ -1055,7 +1055,7 @@ void	ayttm_prefs_show_window( int pagenum )
 	prefs->chat.do_auto_complete      = iGetLocalPref("do_auto_complete");
 	strncpy( prefs->chat.font_face, cGetLocalPref("FontFace"), MAX_PREF_LEN );
 
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 	prefs->chat.do_spell_checking     = iGetLocalPref("do_spell_checking");
 	strncpy( prefs->chat.spell_dictionary, cGetLocalPref("spell_dictionary"), MAX_PREF_LEN );
 #endif
@@ -1217,7 +1217,7 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	iSetLocalPref( "do_auto_complete", inPrefs->chat.do_auto_complete );
 	cSetLocalPref( "FontFace", inPrefs->chat.font_face );
 	
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 	iSetLocalPref( "do_spell_checking", inPrefs->chat.do_spell_checking );
 	cSetLocalPref( "spell_dictionary", inPrefs->chat.spell_dictionary );
 #endif

@@ -62,7 +62,7 @@
 #include "gtk/html_text_buffer.h"
 #include "gtk/gtkutils.h"
 
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 #include "gtk/gtkspell.h"
 #endif
 
@@ -2123,7 +2123,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(cw->entry), TRUE);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(cw->entry), GTK_WRAP_WORD_CHAR);
 
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 	if (iGetLocalPref("do_spell_checking"))
 		gtkspell_attach(GTK_TEXT_VIEW(cw->entry));
 #endif

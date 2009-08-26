@@ -75,7 +75,7 @@ struct prefs
 		int		do_auto_complete;
 		char	font_face[MAX_PREF_LEN];
 		
-		#ifdef HAVE_LIBPSPELL
+		#ifdef HAVE_LIBASPELL
 			int		do_spell_checking;
 			char	spell_dictionary[MAX_PREF_LEN];
 		#endif

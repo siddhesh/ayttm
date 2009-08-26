@@ -45,7 +45,7 @@
 
 #include "gtkutils.h"
 
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 #include "spellcheck.h"
 #endif
 
@@ -1218,7 +1218,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	GtkWidget *label = NULL;
 	GtkWidget *button = NULL;
 	
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
@@ -1313,7 +1313,7 @@ void	ay_chat_panel::Apply( void )
 	if ( ptr != NULL )
 		strncpy(m_prefs.font_face, ptr, MAX_PREF_LEN );
 		
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 	bool	needs_reload = false;
 	
 	if ( m_prefs.do_spell_checking )
@@ -1334,7 +1334,7 @@ void	ay_chat_panel::Apply( void )
 // SetActiveWidgets
 void	ay_chat_panel::SetActiveWidgets( void )
 {
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 	gtk_widget_set_sensitive( m_dictionary_entry, m_prefs.do_spell_checking );
 #endif
 }

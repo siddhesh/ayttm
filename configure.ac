@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=131
+RELEASE=133
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -106,14 +106,8 @@ AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.
 AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
 AC_CHECK_HEADERS([sys/utsname.h])
 
-#Checking for pspell
-AC_CHECK_HEADER([pspell/pspell.h], [have_pspell_header=yes], [have_pspell_header=no])
-AC_CHECK_LIB([pspell], [pspell_manager_check], [have_pspell=yes], [have_pspell=no])
-AC_CHECK_LIB([pspell], [aspell_speller_check], [have_aspell=yes], [have_aspell=no])
-
-if test "$have_pspell_header" = "no" || test "$have_aspell" = "no" && test "$have_pspell" = "no"; then
-	AC_MSG_WARN([PSpell not found. Ayttm will be built without spell check.])
-fi
+#Checking for aspell
+AC_CHECK_LIB([aspell], [aspell_speller_check])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T

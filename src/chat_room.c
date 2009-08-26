@@ -47,7 +47,7 @@
 #include "gtk/html_text_buffer.h"
 #include "gtk/gtkutils.h"
 
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 #include "gtk/gtkspell.h"
 #endif
 
@@ -1645,7 +1645,7 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(chat_room->entry), TRUE);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat_room->entry), GTK_WRAP_WORD_CHAR);
 
-#ifdef HAVE_LIBPSPELL
+#ifdef HAVE_LIBASPELL
 	if (iGetLocalPref("do_spell_checking"))
 		gtkspell_attach(GTK_TEXT_VIEW(chat_room->entry));
 #endif

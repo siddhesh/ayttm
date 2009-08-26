@@ -449,8 +449,8 @@ static const gchar *get_compiled_in_features(void)
 #ifdef HAVE_ICONV
 		   " iconv"
 #endif
-#ifdef HAVE_LIBPSPELL
-		   " pspell"
+#ifdef HAVE_LIBASPELL
+		   " aspell"
 #endif
 	"");
 }

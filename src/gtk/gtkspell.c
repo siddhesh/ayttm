@@ -1,6 +1,7 @@
 /* gtkspell - a spell-checking addon for GtkText
  * Copyright (c) 2000 Evan Martin.
  * Modified to use pspell by Philip S Tellis 2003/04/28
+ * Modified to use aspell by pigiron 2009/07/31
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
