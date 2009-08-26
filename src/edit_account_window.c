@@ -33,10 +33,6 @@
 #include "messages.h"
 #include "service.h"
 #include "chat_window.h"
-#include "gtk/gtkutils.h"
-
-#include "pixmaps/tb_preferences.xpm"
-#include "pixmaps/cancel.xpm"
 
 
 static gint window_open = 0;
@@ -48,12 +44,7 @@ static GtkWidget *group = NULL;
 
 #define COMBO_TEXT(x) gtk_entry_get_text(GTK_ENTRY(GTK_BIN(x)->child))
 
-static void destroy(GtkWidget *widget, gpointer data)
-{
-	window_open = 0;
-}
-
-static void ok_callback(GtkWidget *widget, gpointer data)
+static void ok_callback(void)
 {
 	grouplist *gl;
 	struct contact *con;
@@ -162,31 +153,23 @@ static void  group_changed(GtkEditable *editable, gpointer user_data)
 				account->handle);
 }
 
-static void draw_edit_account_window(eb_account *ea, char *window_title, char *frame_title, char *add_label)
+static void draw_edit_account_window(eb_account *ea, char *window_title, char *frame_title, gboolean add)
 {
 	gchar buff[1024];
 	static GtkWidget *frame;
+	GtkWidget *dialog_content_area;
 	char *cur_la = NULL;
 	account = ea;
 
 	if(!window_open) {
 		GtkWidget *vbox = NULL;
 		GtkWidget *hbox = NULL;
-		GtkWidget *hbox2 = NULL;
 		GtkWidget *label = NULL;
-		GtkWidget *button = NULL;
 		GtkWidget *table = NULL;
-		GtkWidget *separator = NULL;
 		GList *list = NULL;
 		LList *walk = NULL;
 		GList *gwalker;
 		
-		edit_account_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		gtk_window_set_transient_for(GTK_WINDOW(edit_account_window), GTK_WINDOW(statuswindow));
-		gtk_window_set_position(GTK_WINDOW(edit_account_window), GTK_WIN_POS_MOUSE);
-		gtk_widget_realize(edit_account_window);
-		gtk_container_set_border_width(GTK_CONTAINER(edit_account_window), 5);
-
 		table = gtk_table_new(3, 2, FALSE);
 		gtk_table_set_row_spacings(GTK_TABLE(table), 5);
 		gtk_table_set_row_spacings(GTK_TABLE(table), 5);
@@ -268,53 +251,27 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 		gtk_container_add(GTK_CONTAINER(frame), table);
 		gtk_widget_show(table);
 
-		gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
-		gtk_widget_show(frame);
+		edit_account_window = gtk_dialog_new_with_buttons(
+								"Ayttm",
+								GTK_WINDOW(statuswindow),
+								GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+								add?GTK_STOCK_ADD:GTK_STOCK_SAVE,
+								GTK_RESPONSE_ACCEPT,
+								GTK_STOCK_CANCEL,
+								GTK_RESPONSE_REJECT,
+								NULL
+								);
 
-		hbox = gtk_hbox_new(FALSE, 5);
-		hbox2 = gtk_hbox_new(TRUE, 5);
-		gtk_widget_set_size_request(hbox2, 200,25 );
+		gtk_dialog_set_default_response(GTK_DIALOG(edit_account_window), GTK_RESPONSE_ACCEPT);
 
-		/*Lets try adding a seperator*/
+#ifdef HAVE_GTK_2_14
+	        dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(edit_account_window));
+#else
+		dialog_content_area = GTK_DIALOG(edit_account_window)->vbox;
+#endif
 
-		separator = gtk_hseparator_new();
-		gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
-		gtk_widget_show(separator);
-
-		/*Add Button*/
-
-		button = gtkut_create_icon_button( add_label, tb_preferences_xpm, edit_account_window );
-		
-		g_signal_connect(button, "clicked", G_CALLBACK(ok_callback), NULL);
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-
-		/*Cancel Button*/
-
-		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_account_window );
-		
-		g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_widget_destroy),
-				edit_account_window);
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-
-		/*Buttons End*/
-
-		hbox = gtk_hbox_new(FALSE, 0);
-
-		gtk_box_pack_end(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
-		gtk_widget_show(hbox2);
-
-		gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-		gtk_widget_show(hbox);
-
-		gtk_widget_show(vbox);
-
-		gtk_container_add(GTK_CONTAINER (edit_account_window), vbox);
-
-		g_signal_connect(edit_account_window, "destroy", G_CALLBACK(destroy), NULL);
+		gtk_box_pack_start(GTK_BOX(dialog_content_area), frame, TRUE, TRUE, 5);
+		window_open = 1;
 	}
 
 	if(account->account_contact) {
@@ -346,14 +303,19 @@ static void draw_edit_account_window(eb_account *ea, char *window_title, char *f
 	g_snprintf(buff,1024,_("%s - Account edition"), account->handle);
 	gtk_window_set_title(GTK_WINDOW(edit_account_window), buff ); 
 	
-	gtk_widget_show(edit_account_window);
+	gtk_widget_show_all(edit_account_window);
 
-	window_open = 1;
+	if(GTK_RESPONSE_ACCEPT == gtk_dialog_run(GTK_DIALOG(edit_account_window)))
+		ok_callback();
+
+	gtk_widget_destroy(edit_account_window);
+	window_open = 0;
+
 }
 
 void add_unknown_account_window_new(eb_account *ea)
 {
-	draw_edit_account_window(ea, _("Add %s to Contact List"), _("Add Unknown Contact"), _("Add"));
+	draw_edit_account_window(ea, _("Add %s to Contact List"), _("Add Unknown Contact"), TRUE);
 }
 
 void edit_account_window_new(eb_account *ea)
@@ -361,6 +323,6 @@ void edit_account_window_new(eb_account *ea)
 	if(!strcmp(ea->account_contact->group->name, _("Unknown")))
 		add_unknown_account_window_new(ea);
 	else
-		draw_edit_account_window(ea, _("Edit %s"), _("Edit Account"), _("Save"));
+		draw_edit_account_window(ea, _("Edit %s"), _("Edit Account"), FALSE);
 }
 

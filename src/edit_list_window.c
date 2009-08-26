@@ -36,11 +36,6 @@
 #include "service.h"
 #include "messages.h"
 
-#include "gtk/gtkutils.h"
-
-#include "pixmaps/ok.xpm"
-#include "pixmaps/cancel.xpm"
-
 #ifndef MIN
 #define MIN(x, y)	((x)<(y)?(x):(y))
 #endif
@@ -228,6 +223,7 @@ void do_popup_menu(GtkTreeView *tree_view, GdkEventButton *event)
 	int event_time, button;
 	GtkWidget *menu = gtk_menu_new();
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(tree_view);
+	GtkWidget *menubutton;
 
 	if(event) {
 		GtkTreePath *path;
@@ -247,9 +243,11 @@ void do_popup_menu(GtkTreeView *tree_view, GdkEventButton *event)
 		button = 0;
 		event_time = gtk_get_current_event_time();
 	}
-	
-	gtkut_create_menu_button (GTK_MENU(menu), _("Delete"),
-		G_CALLBACK(delete_data_cb), NULL);
+
+	menubutton = gtk_menu_item_new_with_label( _("Delete") );
+	g_signal_connect( menubutton, "activate", G_CALLBACK(delete_data_cb), NULL);
+	gtk_menu_shell_append( GTK_MENU_SHELL(menu), menubutton );
+	gtk_widget_show( menubutton );
 
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, set_popup_menu_position, event,
 			button, event_time );
@@ -638,11 +636,12 @@ void show_data_choicewindow(
 
 		hbox2 = gtk_hbox_new(TRUE, 5);
 
-		gtk_widget_set_size_request(hbox2, 200, 25);
+		gtk_widget_set_size_request(hbox2, 200, 40);
 
 		/* put in the pixmap and label for the 'OK' button */
 
-		button = gtkut_create_icon_button( ok_button_label, ok_xpm, window ); 
+		button = gtk_button_new_from_stock(GTK_STOCK_OK); 
+		gtk_button_set_label(GTK_BUTTON(button), ok_button_label); 
 
 		g_signal_connect(button, "clicked", G_CALLBACK(ok_callback), NULL);
 
@@ -651,7 +650,7 @@ void show_data_choicewindow(
 
 		/* now start on the cancel button */
 
-		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, window );
+		button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
 
 		g_signal_connect(button, "clicked", G_CALLBACK(cancel_callback), NULL);
 
@@ -678,3 +677,5 @@ void show_data_choicewindow(
 	g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
 	data_open = 1; 
 }
+
+

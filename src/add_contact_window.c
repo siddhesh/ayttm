@@ -31,11 +31,7 @@
 #include "add_contact_window.h"
 #include "messages.h"
 
-#include "gtk/gtkutils.h"
 #include <gdk/gdkkeysyms.h>
-
-#include "pixmaps/tb_preferences.xpm"
-#include "pixmaps/cancel.xpm"
 
 /*
 * This is the GUI that gets created when you click on the "Add" button
@@ -53,11 +49,6 @@ static GtkWidget *group_name;
 static int contact_input_handler;
 
 #define COMBO_TEXT(x) gtk_combo_box_get_active_text(GTK_COMBO_BOX(x))
-
-static void destroy(GtkWidget *widget, gpointer data)
-{
-	window_open = 0;
-}
 
 static gint strcasecmp_glist(gconstpointer a, gconstpointer b)
 {
@@ -209,7 +200,7 @@ static void con_modified(GtkEditable *editable, gpointer user_data)
 	g_signal_handlers_disconnect_by_func(contact_name, G_CALLBACK(con_modified), NULL);
 }
 
-static void add_button_callback(GtkButton *button, gpointer userdata)
+static void add_button_callback(void)
 {
 	grouplist *gl;
 	struct contact *con;
@@ -281,7 +272,6 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 	add_account(con->nick, ea);
 /*	update_contact_list ();
 	write_contact_list(); */
-	gtk_widget_destroy(add_contact_window);
 }
 
 /*
@@ -293,16 +283,14 @@ static void add_button_callback(GtkButton *button, gpointer userdata)
 static void show_add_defined_contact_window(struct contact *cont, grouplist *grp, struct contact *con)
 {
 	GtkWidget *hbox;
-	GtkWidget *hbox2;
 	GtkWidget *vbox;
 	GtkWidget *label;
 	guint label_key;
-	GtkWidget *button;
 	GtkWidget *table;
 	GtkWidget *frame;
-	GtkAccelGroup *accel_group;
 	GList *list;
 	GList *gwalker = NULL;
+	GtkWidget *dialog_content_area;
 
 	LList *walk;
 
@@ -313,14 +301,6 @@ static void show_add_defined_contact_window(struct contact *cont, grouplist *grp
 		ay_do_error(_("No Local Accounts"), _("Cannot add contacts. You have not added any chat accounts yet"));
 		return;
 	}
-
-	accel_group = gtk_accel_group_new();
-
-	add_contact_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_transient_for(GTK_WINDOW(add_contact_window), GTK_WINDOW(statuswindow));
-	gtk_window_set_position(GTK_WINDOW(add_contact_window), GTK_WIN_POS_MOUSE);
-	gtk_widget_realize(add_contact_window);
-	gtk_container_set_border_width(GTK_CONTAINER(add_contact_window), 5);      
 
 	table = gtk_table_new(4, 2, FALSE);
 	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
@@ -344,8 +324,6 @@ static void show_add_defined_contact_window(struct contact *cont, grouplist *grp
 
 	gtk_table_attach(GTK_TABLE(table), account_name, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(account_name);
-	gtk_widget_add_accelerator(account_name, "grab_focus", accel_group,
-			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
 
 	/*Section for declaring the protocol & local account*/
       
@@ -375,8 +353,6 @@ static void show_add_defined_contact_window(struct contact *cont, grouplist *grp
 
 	gtk_table_attach(GTK_TABLE(table), service_list, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(service_list);
-	gtk_widget_add_accelerator(service_list, "grab_focus", accel_group,
-			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
 
 	/*Section for Contact Name*/
 
@@ -406,9 +382,6 @@ static void show_add_defined_contact_window(struct contact *cont, grouplist *grp
 	contact_input_handler = g_signal_connect(contact_name, "changed", G_CALLBACK(con_modified), NULL);
 	gtk_table_attach(GTK_TABLE(table), contact_name, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(contact_name);
-	gtk_widget_add_accelerator(contact_name, "grab_focus", accel_group,
-			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-
 
 	/*Section for Group declaration*/
 
@@ -441,9 +414,6 @@ static void show_add_defined_contact_window(struct contact *cont, grouplist *grp
 	g_signal_connect(group_name, "changed", G_CALLBACK(dif_group), NULL);
 	gtk_table_attach(GTK_TABLE(table), group_name, 1, 2, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(group_name);
-	gtk_widget_add_accelerator(group_name, "grab_focus", accel_group,
-			label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-
 
 	/*Lets create a frame to put all of this in*/
 
@@ -451,65 +421,39 @@ static void show_add_defined_contact_window(struct contact *cont, grouplist *grp
 	gtk_frame_set_label(GTK_FRAME(frame), _("Add Contact"));
 
 	gtk_container_add(GTK_CONTAINER(frame), table);
-	gtk_widget_show(table);
 
-	gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
-	gtk_widget_show(frame);
+	add_contact_window = gtk_dialog_new_with_buttons(
+							_("Ayttm - Add Contact"),
+							GTK_WINDOW(statuswindow),
+							GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+							GTK_STOCK_ADD,
+							GTK_RESPONSE_ACCEPT,
+							GTK_STOCK_CANCEL,
+							GTK_RESPONSE_REJECT,
+							NULL
+							);
 
-	hbox = gtk_hbox_new(FALSE, 5);
-	hbox2 = gtk_hbox_new(TRUE, 5);
+	gtk_dialog_set_default_response(GTK_DIALOG(add_contact_window), GTK_RESPONSE_ACCEPT);
 
-	gtk_widget_set_size_request(hbox2, 200,25);
+#ifdef HAVE_GTK_2_14
+        dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(add_contact_window));
+#else
+	dialog_content_area = GTK_DIALOG(add_contact_window)->vbox;
+#endif
 
-	/*Add/Save Button*/
-	button = gtkut_create_icon_button( _("Add"), tb_preferences_xpm, add_contact_window );
-	g_signal_connect(button, "clicked", G_CALLBACK(add_button_callback), NULL);
+	gtk_box_pack_start(GTK_BOX(dialog_content_area), frame, TRUE, TRUE, 5);
 
-	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-	gtk_widget_show(button);
-	gtk_widget_add_accelerator(button, "clicked", accel_group,
-			GDK_Return, 0, GTK_ACCEL_VISIBLE);
-	gtk_widget_add_accelerator(button, "clicked", accel_group,
-			GDK_KP_Enter, 0, GTK_ACCEL_VISIBLE);
-
-	/*Cancel Button*/
-	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, add_contact_window );
-
-	g_signal_connect_swapped(button, "clicked",
-			G_CALLBACK(gtk_widget_destroy),	add_contact_window);
- 	gtk_widget_show(hbox);     
-	gtk_widget_add_accelerator(button, "clicked", accel_group,
-			GDK_Escape, 0, GTK_ACCEL_VISIBLE);
-
-	gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-	gtk_widget_show(button);
-
-	/*Buttons End*/
-
-	hbox = gtk_hbox_new(FALSE, 0);
-	table = gtk_table_new(1, 1, FALSE);
-
-	gtk_box_pack_end(GTK_BOX(hbox),hbox2, FALSE, FALSE, 0);
-	gtk_widget_show(hbox2);      
-
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
-
-	gtk_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_widget_show(vbox);
-
-	gtk_container_add(GTK_CONTAINER(add_contact_window), table);
-	gtk_widget_show(table);
-
-	gtk_window_set_title(GTK_WINDOW(add_contact_window), _("Ayttm - Add Contact"));
 	gtk_widget_grab_focus(account_name);
 	
-	gtk_window_add_accel_group(GTK_WINDOW(add_contact_window), accel_group);
-	gtk_widget_show(add_contact_window);
-
-	g_signal_connect(add_contact_window, "destroy", G_CALLBACK(destroy), NULL);
-
+	gtk_widget_show_all(add_contact_window);
 	window_open = 1;
+
+	if(GTK_RESPONSE_ACCEPT == gtk_dialog_run(GTK_DIALOG(add_contact_window)))
+		add_button_callback();
+
+	gtk_widget_destroy(add_contact_window);
+
+	window_open = 0;
 }
 
 void show_add_contact_window()

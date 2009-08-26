@@ -35,10 +35,8 @@
 #include "util.h"
 #include "globals.h"
 #include "file_select.h"
-#include "ui_message_windows.h"
 #include "messages.h"
 
-#include "gtk/gtkutils.h"
 
 #include "pixmaps/tb_preferences.xpm"
 #include "pixmaps/cancel.xpm"

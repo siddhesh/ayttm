@@ -36,9 +36,6 @@
 #include "dialog.h"
 
 #include "gtk/html_text_buffer.h"
-#include "gtk/gtkutils.h"
-
-#include "pixmaps/cancel.xpm"
 
 
 static void iw_destroy_event(GtkWidget *widget, gpointer data)
@@ -69,16 +66,11 @@ info_window * eb_info_window_new(eb_local_account * local, struct account * remo
 {
 	GtkWidget *vbox;
         GtkWidget *hbox;
-        GtkWidget *buttonbox;
-        GtkWidget *label;
 	GtkWidget *ok_button;
-        GtkWidget *iconwid;
-	GdkPixbuf *icon;
 	info_window * iw;
 
         vbox = gtk_vbox_new(FALSE,0);
         hbox = gtk_hbox_new(FALSE,0);
-        buttonbox = gtk_hbox_new(FALSE,0);
 
 	iw = malloc(sizeof(info_window));
         iw->info_type = -1;
@@ -109,25 +101,15 @@ info_window * eb_info_window_new(eb_local_account * local, struct account * remo
 
         g_signal_connect(iw->window, "destroy", G_CALLBACK(iw_destroy_event), iw);
 
-        icon = gdk_pixbuf_new_from_xpm_data( (const char **) cancel_xpm);
-	iconwid = gtk_image_new_from_pixbuf(icon);
-	gtk_widget_show(iconwid);
+	ok_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
 
-        ok_button = gtk_button_new ();
         g_signal_connect(ok_button, "clicked", G_CALLBACK(iw_close_win), iw);
 
-        gtk_box_pack_start (GTK_BOX (buttonbox), iconwid,TRUE,TRUE,0);
-        label = gtk_label_new(_("Close"));
-        gtk_box_pack_start (GTK_BOX (buttonbox), label,TRUE,TRUE,5);
-        gtk_widget_show(buttonbox);
-        gtk_container_add(GTK_CONTAINER(ok_button), buttonbox);
- 
         gtk_box_pack_start(GTK_BOX(hbox), ok_button, TRUE,FALSE, 0);
         gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE,FALSE, 5);
 
 	gtk_container_add(GTK_CONTAINER(iw->window), vbox);
         gtk_widget_show(iw->info);
-        gtk_widget_show(label);
         gtk_widget_show(ok_button);
         gtk_widget_show(hbox);
  

@@ -24,43 +24,29 @@
 
 #include "intl.h"
 #include <string.h>
+#include <gtk/gtk.h>
 
 #include "status.h"
 #include "util.h"
 
-#include "gtk/gtkutils.h"
-
-#include "pixmaps/tb_edit.xpm"
-#include "pixmaps/cancel.xpm"
 
 extern GtkWidget * statuswindow;
 
 static gint window_open = 0;
 static GtkWidget * edit_group_window;
 static GtkWidget * group_name;
-static grouplist * current_group;
 
-static void destroy( GtkWidget *widget, gpointer data)
-{
-	window_open = 0;
-}
 
-static void ok_callback( GtkWidget * widget, gpointer data)
+static void ok_callback(grouplist *current_group)
 {
 	if (group_name == NULL || gtk_entry_get_text(GTK_ENTRY(group_name)) == NULL
-	||  strlen(gtk_entry_get_text(GTK_ENTRY(group_name))) == 0)
+			||  strlen(gtk_entry_get_text(GTK_ENTRY(group_name))) == 0)
 		return;
-	if (current_group) { /*edit*/
-		rename_group(current_group, gtk_entry_get_text(GTK_ENTRY(group_name)));
-	} else { /*add*/
-		add_group(gtk_entry_get_text(GTK_ENTRY(group_name)));
-	}
-	gtk_widget_destroy(edit_group_window);
-}
 
-static void cancel_callback( GtkWidget * widget, gpointer data)
-{
-	gtk_widget_destroy(edit_group_window);
+	if (current_group)
+		rename_group(current_group, gtk_entry_get_text(GTK_ENTRY(group_name)));
+	else
+		add_group(gtk_entry_get_text(GTK_ENTRY(group_name)));
 }
 
 void edit_group_window_new( grouplist * g)
@@ -73,80 +59,48 @@ void edit_group_window_new( grouplist * g)
 		name = "";
 	if ( !window_open )
 	{
-		GtkWidget * vbox = gtk_vbox_new( FALSE, 5 );
 		GtkWidget * hbox = gtk_hbox_new( FALSE, 5 );
-		GtkWidget * hbox2;
 		GtkWidget * label;
-		GtkWidget * button;
 		GtkWidget * frame;
-		GtkWidget * separator;
-		
-		edit_group_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		gtk_window_set_transient_for(GTK_WINDOW(edit_group_window), GTK_WINDOW(statuswindow));
-		gtk_window_set_position(GTK_WINDOW(edit_group_window), GTK_WIN_POS_MOUSE);
-		gtk_widget_realize(edit_group_window);
-		gtk_container_set_border_width(GTK_CONTAINER(edit_group_window), 5);
+		GtkWidget *dialog_content_area;
 		
 		label = gtk_label_new(_("Group Name:"));
 		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-		gtk_widget_show(label);
 
 		group_name = gtk_entry_new();
 		gtk_box_pack_start(GTK_BOX(hbox), group_name, TRUE, TRUE, 5);
 		gtk_entry_set_text(GTK_ENTRY(group_name), name);
-		gtk_widget_show(group_name);
 
 		frame = gtk_frame_new(NULL);
 
 		g_snprintf(buff,1024,_("%s group%s%s"), g?_("Edit"):_("Add"), g?" ":"", name);
 		
 		gtk_frame_set_label(GTK_FRAME(frame), buff);
+		gtk_container_add(GTK_CONTAINER(frame), hbox);
 
-		hbox2=gtk_vbox_new(FALSE,5);
-		gtk_box_pack_start(GTK_BOX(hbox2),hbox,TRUE,TRUE,5);
-		gtk_container_add(GTK_CONTAINER(frame), hbox2);
-		gtk_widget_show(hbox);
-		gtk_widget_show(hbox2);
-		
-		gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 5);
-		gtk_widget_show(frame);
+		edit_group_window = gtk_dialog_new_with_buttons(
+								"Ayttm",
+								GTK_WINDOW(statuswindow),
+								GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+								g?GTK_STOCK_SAVE:GTK_STOCK_ADD,
+								GTK_RESPONSE_ACCEPT,
+								GTK_STOCK_CANCEL,
+								GTK_RESPONSE_REJECT,
+								NULL
+								);
 
-		separator = gtk_hseparator_new();
-		gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
-		gtk_widget_show(separator);
+		gtk_dialog_set_default_response(GTK_DIALOG(edit_group_window), GTK_RESPONSE_ACCEPT);
 
-		hbox = gtk_hbox_new(TRUE, 5);
+#ifdef HAVE_GTK_2_14
+	        dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(edit_group_window));
+#else
+		dialog_content_area = GTK_DIALOG(edit_group_window)->vbox;
+#endif
 
-		/*Ok Button*/
-		hbox2=gtk_hbox_new(FALSE,5);
-		button = gtkut_create_icon_button( g?_("Save"):_("Add"), tb_edit_xpm, edit_group_window );
+		gtk_box_pack_start(GTK_BOX(dialog_content_area), frame, TRUE, TRUE, 5);
+		gtk_widget_show_all(edit_group_window);
 
-		g_signal_connect(button, "clicked",G_CALLBACK(ok_callback), NULL );
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-		
-		/*Cancel Button*/
-      
-		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_group_window );
-
-		g_signal_connect_swapped (button, "clicked", G_CALLBACK(cancel_callback), NULL);
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-		
-		hbox = gtk_hbox_new(FALSE, 5);
-		
-		gtk_box_pack_end(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0 );
-		gtk_widget_show(hbox);
-		gtk_widget_show(hbox2);
-		
-		gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
-		gtk_container_add(GTK_CONTAINER(edit_group_window), vbox);
-		gtk_widget_show(vbox);
-		
-		g_signal_connect( edit_group_window, "destroy", G_CALLBACK(destroy), NULL);
-		gtk_widget_show(edit_group_window);
+		window_open = 1;
 	}
 
 	gtk_entry_set_text(GTK_ENTRY(group_name), name);
@@ -154,12 +108,16 @@ void edit_group_window_new( grouplist * g)
 		g_snprintf(buff, 1024, _("Edit Properties for %s"), name);
 	else
 		g_snprintf(buff, 1024, _("Add group"));
-	gtk_window_set_title(GTK_WINDOW(edit_group_window), buff);
-	g_signal_connect(edit_group_window, "destroy", G_CALLBACK(destroy), NULL);
 
-	current_group = g;
-	window_open = 1;
+	gtk_window_set_title(GTK_WINDOW(edit_group_window), buff);
+
 	gtk_widget_grab_focus(group_name);
-	
+
+	if(GTK_RESPONSE_ACCEPT == gtk_dialog_run(GTK_DIALOG(edit_group_window)))
+		ok_callback(g);
+
+	gtk_widget_destroy(edit_group_window);
+	window_open = 0;
 }
+
 

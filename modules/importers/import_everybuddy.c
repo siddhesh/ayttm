@@ -25,6 +25,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <gtk/gtk.h>
+
 #ifdef __MINGW32__
 #define __IN_PLUGIN__ 1
 #endif
@@ -35,10 +37,6 @@
 #include "plugin_api.h"
 #include "messages.h"
 
-#include "gtk/gtkutils.h"
-
-#include "pixmaps/ok.xpm"
-#include "pixmaps/cancel.xpm"
 
 /*************************************************************************************
  *                             Begin Module Code
@@ -64,8 +62,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_IMPORTER, 
 	"Everybuddy Settings", 
 	"Imports your Everybuddy settings into Ayttm", 
-	"$Revision: 1.13 $",
-	"$Date: 2009/07/27 16:42:03 $",
+	"$Revision: 1.14 $",
+	"$Date: 2009/08/26 16:25:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -256,8 +254,8 @@ void import_eb_accounts(ebmCallbackData *data)
 		awaybutton      = gtk_check_button_new_with_label(
 					_("Import away messages"));
 		
-		okbutton = gtkut_create_icon_button(_("OK"), ok_xpm, window);
-		cancelbutton = gtkut_create_icon_button(_("Cancel"), cancel_xpm, window);
+		okbutton = gtk_button_new_from_stock(GTK_STOCK_OK);
+		cancelbutton = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
 
 		hbox = gtk_hbox_new(FALSE, 5);
 		gtk_box_pack_start(GTK_BOX(hbox), okbutton, FALSE, FALSE, 2);

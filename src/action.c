@@ -36,8 +36,6 @@
 #include "messages.h"
 #include "edit_list_window.h"
 
-#include "gtk/gtkutils.h"
-
 
 static void action_do_action(char * value, void * data)
 {

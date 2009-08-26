@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.109 $",
-	"$Date: 2009/08/18 12:25:29 $",
+	"$Revision: 1.110 $",
+	"$Date: 2009/08/26 16:25:56 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2796,7 +2796,7 @@ static void eb_yahoo_add_user(eb_account * ea)
 		yahoo_add_buddy(ylad->id, ea->handle, ea->account_contact->group->name, NULL);
 		eb_yahoo_set_buddy_nick(ylad, &b, ea->account_contact->nick);
 	}
-	yahoo_refresh(ylad->id);
+	/* yahoo_refresh(ylad->id);*/
 }
 
 static void eb_yahoo_del_user(eb_account * ea)

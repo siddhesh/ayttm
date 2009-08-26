@@ -30,27 +30,19 @@
 #include "status.h"
 #include "util.h"
 
-#include "gtk/gtkutils.h"
 #include <gdk/gdkkeysyms.h>
+#include <gtk/gtk.h>
 
-#include "pixmaps/tb_edit.xpm"
-#include "pixmaps/cancel.xpm"
 
 extern GtkWidget * statuswindow;
 
 static gint window_open = 0;
-static struct contact * my_contact = NULL;
 static GtkWidget * edit_contact_window = NULL;
 static GtkWidget * nick = NULL;
 static GtkWidget * service_list = NULL;
 static GtkWidget * group_list = NULL;
 
-static void destroy( GtkWidget *widget, gpointer data )
-{
-    window_open = 0;
-}
-
-static void ok_callback( GtkWidget * widget, gpointer data )
+static void ok_callback( struct contact *my_contact )
 {
 	gint service_id = get_service_id( gtk_combo_box_get_active_text(GTK_COMBO_BOX(service_list)) );
 	grouplist *g = my_contact->group;
@@ -74,27 +66,15 @@ void edit_contact_window_new( struct contact * c )
 {
 	gchar buff[1024];
 	if( !window_open ) {
-		GtkWidget * vbox = gtk_vbox_new( FALSE, 5 );
 		GtkWidget * hbox = gtk_hbox_new( FALSE, 0 );
-		GtkWidget * hbox2;
-		GtkWidget * button;
 		GtkWidget * label;
 		guint label_key;
 		GtkWidget * frame;
 		GtkWidget * table;
-		GtkWidget * separator;
-		GtkAccelGroup *accel_group;
 		GList * list;
 		GList *gwalker;
+		GtkWidget *dialog_content_area = NULL;
 
-		accel_group = gtk_accel_group_new();
-
-		edit_contact_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		gtk_window_set_transient_for(GTK_WINDOW(edit_contact_window), GTK_WINDOW(statuswindow));
-		gtk_window_set_position(GTK_WINDOW(edit_contact_window), GTK_WIN_POS_MOUSE);
-		gtk_widget_realize(edit_contact_window);
-		gtk_container_set_border_width(GTK_CONTAINER(edit_contact_window), 5);
-		
 		table = gtk_table_new(3, 2, FALSE);
 		gtk_table_set_row_spacings(GTK_TABLE(table), 5);
 		gtk_table_set_row_spacings(GTK_TABLE(table), 5);
@@ -116,9 +96,6 @@ void edit_contact_window_new( struct contact * c )
 		
 		gtk_entry_set_text(GTK_ENTRY(nick), c->nick );
 		gtk_widget_show(nick);
-		gtk_widget_add_accelerator(nick, "grab_focus", accel_group,
-				label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
-		
 		hbox = gtk_hbox_new( FALSE, 0 );
 
 		/* Group */
@@ -146,8 +123,6 @@ void edit_contact_window_new( struct contact * c )
 		gtk_widget_show(group_list);
 		gtk_entry_set_text(GTK_ENTRY(GTK_BIN(group_list)->child), 
 				c->group->name);
-		gtk_widget_add_accelerator(group_list, "grab_focus", accel_group,
-				label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
 
 		hbox = gtk_hbox_new(FALSE, 0);
 
@@ -161,7 +136,6 @@ void edit_contact_window_new( struct contact * c )
 				0, 0);
 		gtk_widget_show(hbox);
 
-		
 		{
 			LList *l, *l2;
 			int i, def=0;
@@ -181,8 +155,6 @@ void edit_contact_window_new( struct contact * c )
 		gtk_table_attach(GTK_TABLE(table), service_list, 1, 2, 2, 3,
 				GTK_FILL, GTK_FILL, 0, 0);
 		gtk_widget_show(service_list);
-		gtk_widget_add_accelerator(service_list, "grab_focus", accel_group,
-				label_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
 		
 		frame = gtk_frame_new(NULL);
 
@@ -190,65 +162,30 @@ void edit_contact_window_new( struct contact * c )
 		gtk_frame_set_label(GTK_FRAME(frame), buff);
 
 		gtk_container_add(GTK_CONTAINER(frame), table);
-		gtk_widget_show(table);
 
-		gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
-		gtk_widget_show(frame);
+		edit_contact_window = gtk_dialog_new_with_buttons(
+								"Ayttm",
+								GTK_WINDOW(statuswindow),
+								GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+								GTK_STOCK_SAVE,
+								GTK_RESPONSE_ACCEPT,
+								GTK_STOCK_CANCEL,
+								GTK_RESPONSE_REJECT,
+								NULL
+								);
 
-		separator = gtk_hseparator_new();
-		gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
-		gtk_widget_show(separator);
+		gtk_dialog_set_default_response(GTK_DIALOG(edit_contact_window), GTK_RESPONSE_ACCEPT);
 
-		hbox = gtk_hbox_new(FALSE, 5);
-		hbox2 = gtk_hbox_new(TRUE, 5);
-		gtk_widget_set_size_request(hbox2, 200,25 );
-		
-		/*Ok Button*/
-   
-		button = gtkut_create_icon_button( _("Save"), tb_edit_xpm, edit_contact_window );
+#ifdef HAVE_GTK_2_14
+	        dialog_content_area = gtk_dialog_get_content_area(GTK_DIALOG(edit_contact_window));
+#else
+		dialog_content_area = GTK_DIALOG(edit_contact_window)->vbox;
+#endif
 
-		g_signal_connect(button, "clicked", G_CALLBACK(ok_callback), NULL );
+		gtk_box_pack_start(GTK_BOX(dialog_content_area), frame, TRUE, TRUE, 5);
+		gtk_widget_show_all(edit_contact_window);
 
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-		gtk_widget_add_accelerator(button, "clicked", accel_group,
-				GDK_Return, 0, GTK_ACCEL_VISIBLE);
-		gtk_widget_add_accelerator(button, "clicked", accel_group,
-				GDK_KP_Enter, 0, GTK_ACCEL_VISIBLE);
-		
-		/*Cancel Button*/
-      
-		button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, edit_contact_window );
-
-		g_signal_connect_swapped(button, "clicked",
-				G_CALLBACK(gtk_widget_destroy),edit_contact_window);
-
-		gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
-		gtk_widget_add_accelerator(button, "clicked", accel_group,
-				GDK_Escape, 0, GTK_ACCEL_VISIBLE);
-		
-		/*Buttons End*/
-		
-		hbox = gtk_hbox_new(FALSE, 5);
-		
-		gtk_box_pack_end(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0 );
-		gtk_widget_show(hbox2);
-		
-		gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-		gtk_widget_show(hbox);
-		
-		table = gtk_table_new(1, 1, FALSE);
-		gtk_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 1,
-				GTK_FILL, GTK_FILL, 0, 0);
-		gtk_widget_show(vbox);
-		
-		gtk_container_add(GTK_CONTAINER(edit_contact_window), table);
-		gtk_widget_show(table);
-		
-		g_signal_connect(edit_contact_window, "destroy", G_CALLBACK(destroy), NULL );
-		gtk_window_add_accel_group(GTK_WINDOW(edit_contact_window), accel_group);
-		gtk_widget_show(edit_contact_window);
+		window_open = 1;
 	}
 	
 	g_snprintf(buff,1024,_("%s - Edit Contact"), c->nick);
@@ -267,8 +204,11 @@ void edit_contact_window_new( struct contact * c )
 		gtk_combo_box_set_active(GTK_COMBO_BOX(service_list), def);
 	}
 
-	g_signal_connect(edit_contact_window, "destroy", G_CALLBACK(destroy), NULL );
-	my_contact = c;
-	window_open = 1;
+	if(GTK_RESPONSE_ACCEPT == gtk_dialog_run(GTK_DIALOG(edit_contact_window)))
+		ok_callback(c);
+
+	gtk_widget_destroy(edit_contact_window);
+	window_open = 0;
 }
-			
+
+

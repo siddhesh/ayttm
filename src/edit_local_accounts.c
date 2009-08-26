@@ -38,15 +38,6 @@
 #include "dialog.h"
 #include "add_contact_window.h"
 #include "mem_util.h"
-#include "gtk/gtkutils.h"
-
-#include "pixmaps/ok.xpm"
-#include "pixmaps/cancel.xpm"
-#include "pixmaps/tb_trash.xpm"
-#include "pixmaps/tb_edit.xpm"
-#include "pixmaps/tb_preferences.xpm"
-
-#include "pixmaps/help.xpm"
 
 
 enum {
@@ -593,15 +584,12 @@ void	ay_edit_local_accounts( void )
 	GtkWidget *button_box;
 	GtkWidget *label;
 	guint label_key;
-	GtkWidget *iconwid;
 	GtkWidget *toolbar;
 	GtkToolItem *toolitem;
 	GtkToolItem *tool_sep;
 	GtkWidget *separator;
 	LList *list;
 	LList *l;
-
-	GdkPixbuf *icon;
 
 	GtkAccelGroup *accel_group;
 	GtkCellRenderer *renderer;
@@ -749,11 +737,8 @@ void	ay_edit_local_accounts( void )
 
 	/*Add Button */
 
-#define TOOLBAR_APPEND(titem,in_xpm,label,tip,callback,cb_data) { \
-	icon = gdk_pixbuf_new_from_xpm_data((const char **) in_xpm); \
-	iconwid = gtk_image_new_from_pixbuf(icon); \
-	gtk_widget_show(iconwid); \
-	titem = gtk_tool_button_new(iconwid, label); \
+#define TOOLBAR_APPEND(titem,stock,tip,callback,cb_data) { \
+	titem = gtk_tool_button_new_from_stock(stock); \
 	gtk_tool_item_set_tooltip_text(titem, tip); \
 	g_signal_connect(titem, "clicked", G_CALLBACK(callback), cb_data); \
 	gtk_widget_show(GTK_WIDGET(titem)); \
@@ -768,24 +753,24 @@ void	ay_edit_local_accounts( void )
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_sep, -1); \
 }
 
-	TOOLBAR_APPEND(toolitem, help_xpm, _("Help"), _("Help"), help_callback, NULL);
+	TOOLBAR_APPEND(toolitem, GTK_STOCK_HELP, _("Help"), help_callback, NULL);
 
 	TOOLBAR_APPEND_SEPARATOR(TRUE);
 
-	TOOLBAR_APPEND(toolitem, tb_preferences_xpm, _("Add"), _("Add Account"), add_callback, NULL);
+	TOOLBAR_APPEND(toolitem, GTK_STOCK_ADD, _("Add Account"), add_callback, NULL);
 
 	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/*Delete Button */
 
-	TOOLBAR_APPEND(del_button, tb_trash_xpm, _("Delete"), _("Delete Account"), remove_callback, NULL);
+	TOOLBAR_APPEND(del_button, GTK_STOCK_DELETE, _("Delete Account"), remove_callback, NULL);
 	
 	gtk_widget_set_sensitive(GTK_WIDGET(del_button), FALSE);
 	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/* Modify Button */
 
-	TOOLBAR_APPEND(mod_button, tb_edit_xpm, _("Modify"), _("Modify Account"), modify_callback, NULL);
+	TOOLBAR_APPEND(mod_button, GTK_STOCK_EDIT, _("Modify Account"), modify_callback, NULL);
 	
 	gtk_widget_set_sensitive(GTK_WIDGET(mod_button), FALSE);
 
@@ -793,13 +778,13 @@ void	ay_edit_local_accounts( void )
 
 	/*Okay Button */
 
-	TOOLBAR_APPEND(toolitem, ok_xpm, _("Ok"), _("Ok"), ok_callback, NULL);
+	TOOLBAR_APPEND(toolitem, GTK_STOCK_OK, _("Ok"), ok_callback, NULL);
 	
 	TOOLBAR_APPEND_SEPARATOR(FALSE);
 
 	/*Cancel Button */
 
-	TOOLBAR_APPEND(toolitem, cancel_xpm, _("Cancel"), _("Cancel"), cancel_callback, NULL);
+	TOOLBAR_APPEND(toolitem, GTK_STOCK_CANCEL, _("Cancel"), cancel_callback, NULL);
 
 #undef TOOLBAR_APPEND_SEPARATOR
 #undef TOOLBAR_APPEND

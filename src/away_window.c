@@ -38,8 +38,6 @@
 #include "messages.h"
 #include "dialog.h"
 
-#include "gtk/gtkutils.h"
-
 #ifndef MIN
 #define MIN(x, y)	((x)<(y)?(x):(y))
 #endif

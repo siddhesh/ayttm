@@ -1804,9 +1804,6 @@ static void yahoo_process_new_contact(struct yahoo_input_data *yid, struct yahoo
 	char *who = NULL;
 	char *msg = NULL;
 	int online = -1;
-	int away = 0;
-	int idle = 0;
-	int mobile = 0;
 
 	YList *l;
 
@@ -1901,8 +1898,6 @@ static void yahoo_process_buddyadd(struct yahoo_input_data *yid, struct yahoo_pa
 			status = strtol(pair->value, NULL, 10);
 	}
 
-	yahoo_dump_unhandled(pkt);
-
 	if(!who)
 		return;
 	if(!where)
@@ -1915,7 +1910,13 @@ static void yahoo_process_buddyadd(struct yahoo_input_data *yid, struct yahoo_pa
 
 	yd->buddies = y_list_append(yd->buddies, bud);
 
-/*	YAHOO_CALLBACK(ext_yahoo_status_changed)(yd->client_id, who, status, NULL, (status==YAHOO_STATUS_AVAILABLE?0:1)); */
+	/* A non-zero status (i've seen 2) seems to mean the buddy is already 
+	 * added and is online */
+	if(status) {
+		LOG(("Setting online see packet for info"));
+		yahoo_dump_unhandled(pkt);
+		YAHOO_CALLBACK(ext_yahoo_status_changed)(yd->client_id, who, YAHOO_STATUS_AVAILABLE, NULL, 0, 0, 0);
+	}
 }
 
 static void yahoo_process_buddydel(struct yahoo_input_data *yid, struct yahoo_packet *pkt)

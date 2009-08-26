@@ -5,7 +5,6 @@ void flash_title(GdkWindow *window)
 }
 #else
 #include "plugin_api.h"
-#include "gtk/gtkutils.h"
 #include <gdk/gdkwin32.h>
 
 void flash_title_stop(GdkWindow *window)
