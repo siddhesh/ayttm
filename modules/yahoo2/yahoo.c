@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.110 $",
-	"$Date: 2009/08/26 16:25:56 $",
+	"$Revision: 1.111 $",
+	"$Date: 2009/08/28 11:31:49 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -701,6 +701,7 @@ static void ext_yahoo_status_changed(int id, const char *who, int stat, const ch
 	eb_account *ea;
 	eb_yahoo_account_data *yad;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	int old_state;
 	
 	ea = find_account_with_ela(who, ela);
 	if(!ea) {
@@ -710,21 +711,22 @@ static void ext_yahoo_status_changed(int id, const char *who, int stat, const ch
 
 	yad = ea->protocol_account_data;
 	FREE(yad->status_message);
+	old_state = yad->status;
 	yad->status = stat;
 	yad->away = away;
 
-	if(stat == YAHOO_STATUS_OFFLINE) {
-		buddy_logoff(ea);
-	} else {
+	if (stat != YAHOO_STATUS_OFFLINE && old_state == YAHOO_STATUS_OFFLINE)
 		buddy_login(ea);
-	}
+	else if (stat == YAHOO_STATUS_OFFLINE && old_state != YAHOO_STATUS_OFFLINE)
+		buddy_logoff(ea);
 
 	if(msg) {
 		yad->status_message = g_new(char, strlen(msg) + 1);
-		strcpy(yad->status_message, msg);
+		g_strcpy(yad->status_message, msg);
 	}
 
-	buddy_update_status_and_log(ea);
+	if (stat != old_state || msg)
+		buddy_update_status_and_log(ea);
 }
 
 struct act_identity {
@@ -2952,12 +2954,39 @@ static eb_account *eb_yahoo_new_account(eb_local_account *ela, const char * acco
 	return ea;
 }
 
+static GdkPixbuf *yahoo_icon_online = NULL;
+static GdkPixbuf *yahoo_icon_away = NULL;
+static GdkPixbuf *yahoo_icon_sms = NULL;
+
+void eb_yahoo_init_pixbufs()
+{
+	yahoo_icon_online = gdk_pixbuf_new_from_xpm_data((const char **)yahoo_online_xpm);
+	yahoo_icon_away = gdk_pixbuf_new_from_xpm_data((const char **)yahoo_away_xpm);
+	yahoo_icon_sms = gdk_pixbuf_new_from_xpm_data((const char **)yahoo_sms_xpm);
+}
+
+static const void **eb_yahoo_get_status_pixbuf(eb_account *ea)
+{
+	eb_yahoo_account_data *yad = ea->protocol_account_data;
+
+	if (yad->away < 0)
+		WARNING(("%s->away is %d", ea->handle, yad->away));
+
+	if (!yahoo_icon_online)
+		eb_yahoo_init_pixbufs();
+
+	/* Don't translate this string */
+	if (yad->status_message && !strcmp(yad->status_message, "I'm on SMS"))
+		return (void *)yahoo_icon_sms;
+	else if (yad->away)
+		return (void *)yahoo_icon_away;
+	else
+		return (void *)yahoo_icon_online;
+}
+
 static const char **eb_yahoo_get_status_pixmap(eb_account * ea)
 {
 	eb_yahoo_account_data *yad;
-
-	/*if (!pixmaps)
-		eb_yahoo_init_pixmaps();*/
 
 	yad = ea->protocol_account_data;
 
@@ -3657,6 +3686,7 @@ struct service_callbacks *query_callbacks()
 
 	sc->get_status_string 		= eb_yahoo_get_status_string;
 	sc->get_status_pixmap 		= eb_yahoo_get_status_pixmap;
+	sc->get_status_pixbuf 		= eb_yahoo_get_status_pixbuf;
 
 	sc->set_idle 			= eb_yahoo_set_idle;
 	sc->set_away 			= eb_yahoo_set_away;
