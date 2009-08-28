@@ -1,3 +1,9 @@
+* Fri Aug 28 2009 11:30 UTC [pstef]   0.5.0-135
+- ChangeLog, configure.ac, src/account.h, src/contact.h, src/service.h,
+src/status.c, src/util.c, modules/jabber/jabber.c, modules/yahoo2/yahoo.c:
+ * New state and status handling method
+ * Yahoo: make use of get_status_pixbuf()
+
 * Wed Aug 26 2009 16:25 UTC [siddheshp]   0.5.0-134
 - ChangeLog, configure.ac, modules/importers/import_everybuddy.c,
 modules/yahoo2/yahoo.c, modules/yahoo2/libyahoo2/libyahoo2.c, po/POTFILES.in,
