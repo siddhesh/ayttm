@@ -57,9 +57,6 @@ struct contact {
 	void * status; /* GtkWidget */
 	void * label; /* GtkWidget */
 	int icon_handler;
-	
-	char *last_status;
-	time_t last_status_change;
 };
 
 

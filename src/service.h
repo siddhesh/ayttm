@@ -126,10 +126,7 @@ struct service_callbacks {
 	  are not available, this should return the empty string */
 
 	char *(*get_status_string)(eb_account * account);
-
-	/*This returns the string representing the status,
-	  this will get used on the Contact List, if statuses
-	  are not available, this should return the empty string */
+	char *(*get_state_string)(eb_account * account);
 
 	const char **(*get_status_pixmap)(eb_account * account);
 	const void **(*get_status_pixbuf)(eb_account *account);

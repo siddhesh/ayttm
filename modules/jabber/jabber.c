@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.55 $",
-	"$Date: 2009/08/21 00:03:42 $",
+	"$Revision: 1.56 $",
+	"$Date: 2009/08/28 11:30:33 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -707,6 +707,15 @@ static char *eb_jabber_get_status_string(eb_account *account)
 	return jad->description ? jad->description : jabber_state_strings[0];
 }
 
+static char *eb_jabber_get_state_string(eb_account *account)
+{
+	eb_jabber_account_data *jad = account->protocol_account_data;
+
+	return (jad->status == JABBER_ONLINE)
+		? "Online"
+		: jabber_state_strings[jad->status];
+}
+
 static void eb_jabber_set_idle( eb_local_account * account, int idle )
 {
 	if ((idle == 0) && eb_jabber_get_current_state(account) == JABBER_AWAY)
@@ -918,6 +927,7 @@ struct service_callbacks * query_callbacks()
 	sc->del_user = eb_jabber_del_user;
 	sc->new_account = eb_jabber_new_account;
 	sc->get_status_string = eb_jabber_get_status_string;
+	sc->get_state_string = eb_jabber_get_state_string;
 	sc->get_status_pixmap = eb_jabber_get_status_pixmap;
 	sc->get_status_pixbuf = eb_jabber_get_status_pixbuf;
 	sc->set_idle = eb_jabber_set_idle;
@@ -1173,24 +1183,21 @@ void JABBERStatusChange(struct jabber_buddy *jb)
 
 	jad->JConn = jb->JConn;
 
-	if (jb->status != status) {
-		ea->state = jabber_state_strings[jb->status];
+	if (jb->status != status)
 		update = 1;
-	}
 
 	if ((!old_desc && jb->description && jb->description[0])
 	||  (old_desc && !jb->description && old_desc[0])
-	||  (old_desc && jb->description && strcmp(old_desc, jb->description))) {
+	||  (old_desc && jb->description && strcmp(old_desc, jb->description)))
 
-		eb_debug(DBG_JBR, "[%s|%s]\n", old_desc, jb->description);
 		update = 1;
-	}
 
 	if (jb->status != JABBER_OFFLINE && status == JABBER_OFFLINE)
 		buddy_login(ea);
 	else if (jb->status == JABBER_OFFLINE && status != JABBER_OFFLINE)
 		buddy_logoff(ea);	
-	else if (update)
+
+	if (update)
 		buddy_update_status_and_log(ea);
 
 	g_free(old_desc);

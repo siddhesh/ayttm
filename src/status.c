@@ -998,27 +998,35 @@ static GdkPixbuf *iconlogoff_pb = NULL;
 
 void buddy_update_icon(eb_account *ea)
 {
-	/* update the icon if another timeout isn't about to change it */
-	if (ea->icon_handler != -1 || !(RUN_SERVICE(ea)))
+	if (!(RUN_SERVICE(ea)))
 		return;
 
-	if (RUN_SERVICE(ea)->get_status_pixbuf)
-		ea->pix = RUN_SERVICE(ea)->get_status_pixbuf(ea);
-	else if (RUN_SERVICE(ea)->get_status_pixmap) {
-		GdkPixbuf *tmp = gdk_pixbuf_new_from_xpm_data(
-			(const char **)RUN_SERVICE(ea)->get_status_pixmap(ea));
-		ea->pix = tmp;
+	if (ea->icon_handler == -1) {
+		if (RUN_SERVICE(ea)->get_status_pixbuf)
+			ea->pix = RUN_SERVICE(ea)->get_status_pixbuf(ea);
+		else if (RUN_SERVICE(ea)->get_status_pixmap) {
+			GdkPixbuf *tmp = gdk_pixbuf_new_from_xpm_data(
+				(const char **)RUN_SERVICE(ea)->get_status_pixmap(ea));
+			ea->pix = tmp;
+		}
+		else
+			ea->pix = iconblank_pb;
+
+		gtk_tree_store_set(
+				contact_list_store, ea->list_item,
+				MAIN_VIEW_ICON, ea->pix,
+				MAIN_VIEW_LABEL, ea->handle,
+				MAIN_VIEW_STATUS, ea->status,
+				MAIN_VIEW_STATUS_TIP, ea->tiptext,
+				-1);
 	}
 	else
-		ea->pix = iconblank_pb;
-	
-	gtk_tree_store_set(
-			contact_list_store, ea->list_item,
-			MAIN_VIEW_ICON, ea->pix,
-			MAIN_VIEW_LABEL, ea->handle,
-			MAIN_VIEW_STATUS, ea->status,
-			MAIN_VIEW_STATUS_TIP, ea->tiptext,
-			-1);
+		gtk_tree_store_set(
+				contact_list_store, ea->list_item,
+				MAIN_VIEW_LABEL, ea->handle,
+				MAIN_VIEW_STATUS, ea->status,
+				MAIN_VIEW_STATUS_TIP, ea->tiptext,
+				-1);
 }
 
 /* General purpose update Contact List */
@@ -1157,65 +1165,6 @@ void update_group_line(grouplist * eg)
 			MAIN_VIEW_LABEL, eg->name,
 			MAIN_VIEW_ROW_DATA, eg,
 			-1);
-}
-
-static void set_status_label(eb_account *ea, int update_contact)
-{
-	gchar *status;
-	gchar *tmp;
-	gchar *c;
-
-	status = (RUN_SERVICE(ea)->get_status_string)
-		? RUN_SERVICE(ea)->get_status_string(ea)
-		: NULL;
-
-	c = (status && status[0])
-		? g_strdup_printf("(%s)", status)
-		: g_strdup("");
-
-	for (tmp = c; *tmp; tmp++)
-		if (isspace(*tmp))
-			*tmp = ' ';
-
-	if (ea->status) {
-		eb_debug(DBG_CORE, "%s [%s|%s]\n", ea->account_contact->nick, ea->status, c);
-		if (strcmp(ea->status, c)) {
-			char buff[1024];
-			g_snprintf(
-					buff, 1024, _("%s is now %s"),
-					ea->account_contact->nick, (c && c[0]) ? c : "Online");
-			update_status_message(buff);
-		}
-		g_free(ea->status);
-	}
-
-	ea->tiptext = ea->status = strdup(c);
-
-	if (update_contact) {
-		struct tm *mytime;
-		gchar buff[128];
-		struct contact *ac = ea->account_contact;
-
-		g_free(ac->status);
-		ac->status = g_strdup(c);
-
-		if (ac->last_status && strcmp(c, ac->last_status)) {
-			time(&ac->last_status_change);
-			g_free(ac->last_status);
-			ac->last_status = g_strdup(c);
-		}
-
-		if (ac->last_status_change) {
-			mytime = localtime(&ac->last_status_change);
-			strftime(buff, 128, "%H:%M (%b %d)", mytime);
-			g_free(c);
-			c = g_markup_escape_text(status, -1);
-			ea->tiptext = g_strdup_printf(
-					_("%s\n<span size=\'small\'>Since %s</span>"),
-					(c && c[0]) ? c : "Online", buff);
-		}
-	}
-	g_free(c);
 }
 
 /* makes an account visible on the buddy list, making the contact visible
@@ -1443,9 +1392,6 @@ void contact_update_status(struct contact *ec)
 {
 	eb_account *ea = NULL;
 	LList *l;
-	int width, height;
-	int width2, height2;
-	int width3, height3;
 
 	/* find the account who's status information should be reflected in
 	   the contact line (preferably the default protocol account, but
@@ -1468,8 +1414,7 @@ void contact_update_status(struct contact *ec)
 	if (!ea)
 		return;
 
-	set_status_label(ea, TRUE);
-
+	ec->status = ea->status;
 	ec->label = ec->nick;
 
 	/* set the icon if there isn't another timeout about to alter the icon */
@@ -1492,20 +1437,27 @@ void contact_update_status(struct contact *ec)
 				MAIN_VIEW_STATUS_TIP, ea->tiptext,
 				-1);
 	}
-
-	width = contact_list->allocation.width;
-	height = contact_list->allocation.height;
-
-	if (GTK_WIDGET_VISIBLE(GTK_SCROLLED_WINDOW(contact_window)->vscrollbar)) {
-		width3 = GTK_SCROLLED_WINDOW(contact_window)->vscrollbar->allocation.width;
-		height3 = GTK_SCROLLED_WINDOW(contact_window)->vscrollbar->allocation.height;
-	}
-	else {
-		width3 = 0;
-		height3 = 0;
-	}
+	else
+		gtk_tree_store_set(
+			contact_list_store, ec->list_item,
+			MAIN_VIEW_LABEL, ec->label,
+			MAIN_VIEW_STATUS, ec->status,
+			MAIN_VIEW_STATUS_TIP, ea->tiptext,
+			-1);
 
 	if (!iGetLocalPref("do_noautoresize")) {
+		int width = contact_list->allocation.width;
+		int width2, height2;
+		int width3, height3;
+
+		if (GTK_WIDGET_VISIBLE(GTK_SCROLLED_WINDOW(contact_window)->vscrollbar)) {
+			width3 = GTK_SCROLLED_WINDOW(contact_window)->vscrollbar->allocation.width;
+			height3 = GTK_SCROLLED_WINDOW(contact_window)->vscrollbar->allocation.height;
+		}
+		else {
+			width3 = 0;
+			height3 = 0;
+		}
 		width2 = contact_window->allocation.width;
 		height2 = contact_window->allocation.height;
 
@@ -1522,32 +1474,70 @@ void buddy_update_status_and_log(eb_account *ea)
 {
 	eb_log_status_changed(ea, RUN_SERVICE(ea)->get_status_string(ea));
 	buddy_update_status(ea);
-
-	if (!ea->account_contact->last_status)
-		ea->account_contact->last_status = strdup("dummy");
 }
 
 /* update the status info(pixmap and state) of an account */
 void buddy_update_status(eb_account *ea)
 {
-	char *c, *tmp;
+	gchar *status, *state, *tmp, *c, buff[128], msgbuff[1024];
+	struct tm *mytime;
+	time_t last_status_change;
 
 	if (!ea || !ea->list_item)
 		return;
 
-	tmp = g_strndup(RUN_SERVICE(ea)->get_status_string(ea), 20);
+	state = (RUN_SERVICE(ea)->get_state_string)
+		? RUN_SERVICE(ea)->get_state_string(ea)
+		: NULL;
 
-	if (strlen(tmp))
-		c = g_strdup_printf("(%s)", tmp);
-	else
-		c = g_strdup("");
+	status = (RUN_SERVICE(ea)->get_status_string)
+		? RUN_SERVICE(ea)->get_status_string(ea)
+		: NULL;
 
-	set_status_label(ea, FALSE);
-	eb_update_status(ea, c);
+	c = (status && status[0])
+		? g_strdup_printf("(%s)", status)
+		: g_strdup("");
+
+	for (tmp = c; *tmp; tmp++)
+		if (isspace(*tmp))
+			*tmp = ' ';
+
+	eb_debug(DBG_CORE, "%s [%s|%s]\n", ea->handle, ea->status, c);
+
+	memset(msgbuff, 0, 1024);
+	g_strlcat(msgbuff, ea->handle, 1024);
+	g_strlcat(msgbuff, " is now ", 1024);
+	if (state)
+		g_strlcat(msgbuff, state, 1024);
+	if (state && status && status[0])
+		g_strlcat(msgbuff, ": ", 1024);
+	if (status && status[0])
+		g_strlcat(msgbuff, status, 1024);
+	else if (!state)
+		g_strlcat(msgbuff, "Online", 1024);
+	update_status_message(msgbuff);
+
+	g_free(ea->status);
+	ea->status = strdup(c);
+
+	time(&last_status_change);
+	mytime = localtime(&last_status_change);
+	strftime(buff, 128, "%H:%M (%b %d)", mytime);
+	g_free(c);
+	c = g_markup_escape_text(status, -1);
+	g_free(ea->tiptext);
+	ea->tiptext = g_strdup_printf(
+			_("%s\n%s\n<span size=\'small\'>Since %s</span>"),
+			(state && state[0]) ? state : "",
+			(c && c[0]) ? c : "",
+			buff);
+
+	eb_update_status(ea, state);
 
 	g_free(c);
-	g_free(tmp);
 
+ 	/* if there is only one account(this one) logged in under the
+ 	   parent contact, we must login the contact also */
 	buddy_update_icon(ea);
 
 	/* since the contact's status info might be a copy of this
@@ -1613,8 +1603,6 @@ static gint update_window_title(struct contact *ec)
 /* function called when a contact logs in */
 static void contact_login(struct contact *ec)
 {
-	char buff[1024];
-
 	ec->group->contacts_online++;
 
 	/* display the "open door" icon */
@@ -1639,9 +1627,7 @@ static void contact_login(struct contact *ec)
 	}
 
 	eb_chat_window_do_timestamp(ec, 1);
-	g_snprintf(buff, 1024, _("%s is now Online"), ec->nick);
 	update_window_title(ec);
-	update_status_message(buff);
 
 	gtk_tree_store_set(
 			contact_list_store, ec->list_item,
@@ -1653,8 +1639,6 @@ static void contact_login(struct contact *ec)
 /* function called when a contact logs off */
 static void contact_logoff(struct contact *ec)
 {
-	char buff[1024];
-
 	/* display the "closed door" icon */
 	ec->pix = iconlogoff_pb;
 	ec->group->contacts_online--;
@@ -1680,9 +1664,8 @@ static void contact_logoff(struct contact *ec)
 	do_trigger_offline(ec);
 
 	eb_chat_window_do_timestamp(ec, 0);
-	g_snprintf(buff, 1024, _("%s is now Offline"), ec->nick);
 	update_window_title(ec);
-	update_status_message(buff);
+
 	gtk_tree_store_set(
 			contact_list_store, ec->list_item,
 			MAIN_VIEW_ICON, ec->pix,
@@ -1701,9 +1684,6 @@ void buddy_login(eb_account *ea)
 
 	ea->account_contact->online++;
 	ea->online = TRUE;
-
-	if (!ea->account_contact->last_status)
-		ea->account_contact->last_status = strdup("dummy");
 
 	if (iGetLocalPref("do_ignore_unknown")
 	&&  !strcmp(_("Unknown"), ea->account_contact->group->name))
@@ -1725,8 +1705,6 @@ void buddy_login(eb_account *ea)
 	if (ea->account_contact->online == 1)
 		contact_login(ea->account_contact);
 
-	buddy_update_status_and_log(ea);
-
 	gtk_tree_store_set(
 			contact_list_store, ea->list_item,
 			MAIN_VIEW_ICON, ea->pix,
@@ -1744,9 +1722,6 @@ void buddy_logoff(eb_account *ea)
 
 	ea->account_contact->online--;
 	ea->online = FALSE;
-
-	if (!ea->account_contact->last_status)
-		ea->account_contact->last_status = strdup("dummy");
 
 	if (iGetLocalPref("do_ignore_unknown")
 	&&  !strcmp(_("Unknown"), ea->account_contact->group->name))

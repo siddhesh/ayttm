@@ -1796,8 +1796,6 @@ void ay_dump_cts (void)
 					"   status %p\n"
 					"   label %p\n"
 					"   icon_handler %d\n"
-					"   last_status %s\n"
-					"   last_status_change %ld\n"
 					"   accounts %p%s\n",
 					ct,
 					ct->nick,
@@ -1820,8 +1818,6 @@ void ay_dump_cts (void)
 					ct->status,
 					ct->label,
 					ct->icon_handler,
-					ct->last_status,
-					ct->last_status_change,
 					ct->accounts,
 					ct->accounts?":":"");
 			for (a = ct->accounts; a; a = a->next) {
