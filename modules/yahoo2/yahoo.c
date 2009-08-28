@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.111 $",
-	"$Date: 2009/08/28 11:31:49 $",
+	"$Revision: 1.112 $",
+	"$Date: 2009/08/28 13:46:55 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -722,7 +722,7 @@ static void ext_yahoo_status_changed(int id, const char *who, int stat, const ch
 
 	if(msg) {
 		yad->status_message = g_new(char, strlen(msg) + 1);
-		g_strcpy(yad->status_message, msg);
+		strcpy(yad->status_message, msg);
 	}
 
 	if (stat != old_state || msg)
