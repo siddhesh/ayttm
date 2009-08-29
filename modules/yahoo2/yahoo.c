@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.112 $",
-	"$Date: 2009/08/28 13:46:55 $",
+	"$Revision: 1.113 $",
+	"$Date: 2009/08/29 19:26:40 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1218,9 +1218,6 @@ static void ext_yahoo_conf_userjoin(int id, const char *me, const char *who,
 /*	char buff[1024];*/
 	YList * l;
 
-	if(!strcmp(who, ylad->act_id))
-		return;
-
 	chat_room = find_chat_room_by_id(room);
 
 	if(!chat_room)
@@ -1233,6 +1230,12 @@ static void ext_yahoo_conf_userjoin(int id, const char *me, const char *who,
 
 /*	snprintf(buff, sizeof(buff), _("%s has joined the conference."), who);
 	eb_chat_room_show_message(chat_room, _("Yahoo! Messenger"), buff);*/
+
+	/* I don't want myself in the members list */
+	if(!strcmp(who, ylad->act_id)) {
+		ycrd->connected = TRUE;
+		return;
+	}
 
 	for(l = ycrd->members; l; l=l->next) {
 		char * handle = l->data;
@@ -1276,15 +1279,29 @@ static void ext_yahoo_conf_userleave(int id, const char *me, const char *who,
 static void ext_yahoo_conf_userdecline(int id, const char*me, const char *who, 
 				       const char *room, const char *msg)
 {
+	char buff[1024];
+	YList *l = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data * ylad = ela->protocol_local_account_data;
-	char buff[1024];
+	eb_chat_room *chat_room = find_chat_room_by_id(room);
+	eb_yahoo_chat_room_data *ycrd = chat_room->protocol_local_chat_room_data;
 
 	if(!strcmp(ylad->act_id, who))
 		return;
 
 	snprintf(buff, sizeof(buff), _("The yahoo user %s declined your invitation to join conference %s, with the message: %s"),
 			who, room, msg);
+
+	for(l = ycrd->members; l; l=l->next) {
+		char * handle = l->data;
+		if(!strcmp(handle, who)) {
+			YList *yl = (YList *)l;
+			ycrd->members = y_list_remove_link(ycrd->members, l);
+			FREE(handle);
+			FREE(yl);
+			break;
+		}
+	}
 
 	ay_do_warning( _("Yahoo Error"), buff );
 }
@@ -1508,6 +1525,7 @@ static void eb_yahoo_leave_chat_room(eb_chat_room * room)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_yahoo_local_account_data *ylad;
+	YList *l = NULL;
 
 	if(!room) {
 		WARNING(("room is null"));
@@ -1517,12 +1535,26 @@ static void eb_yahoo_leave_chat_room(eb_chat_room * room)
 	ycrd = room->protocol_local_chat_room_data;
 	ylad = room->local_user->protocol_local_account_data;
 	yahoo_conference_logoff(ycrd->id, ylad->act_id, ycrd->members, ycrd->room);
+
+	for(l = ycrd->members; l;) {
+		FREE(l->data);
+		YList *yl = l;
+		l=l->next;
+		ycrd->members = y_list_remove(ycrd->members, yl);
+	}
+
+	free(ycrd->host);
+	free(ycrd->room);
+
+	free(ycrd);
 }
 
 static void eb_yahoo_send_invite(eb_local_account * ela, eb_chat_room * ecr, char *who, const char *message)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_yahoo_local_account_data *ylad;
+
+	LOG(("Sending Invite to %s\n", who));
 
 	if(!who || !*who) {
 		WARNING(("no one to invite"));
@@ -1534,14 +1566,13 @@ static void eb_yahoo_send_invite(eb_local_account * ela, eb_chat_room * ecr, cha
 
 	if(!message || !*message)
 		message = _("Join my conference");
-	if(ycrd->members->next)		/* already someone in here */
-		yahoo_conference_addinvite(ylad->id, ylad->act_id, who, ycrd->room, ycrd->members, message);
-	else {				/* first time */
-		YList * members = NULL;
-		members = y_list_append(members, who);
-		yahoo_conference_invite(ylad->id, ylad->act_id, members, ycrd->room, message);
-		y_list_free(members);
-	}
+
+	/* Wait till we logon to the conference. This has potential to explode :( */
+	while(!ycrd->connected)
+		gtk_main_iteration();
+
+	yahoo_conference_addinvite(ylad->id, ylad->act_id, who, ycrd->room, ycrd->members, message);
+	ycrd->members = y_list_append(ycrd->members, strdup(who));
 }
 
 static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela, int is_public)
@@ -1549,7 +1580,6 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela,
 	eb_chat_room *ecr = g_new0(eb_chat_room, 1);
 	eb_yahoo_chat_room_data *ycrd = g_new0(eb_yahoo_chat_room_data, 1);
 	eb_yahoo_local_account_data *ylad;
-	YList *members = NULL;
 
 	if(!ela) {
 		WARNING(("ela is null"));
@@ -1557,8 +1587,6 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela,
 	}
 
 	ylad = ela->protocol_local_account_data;
-
-	members = y_list_append(members, g_strdup(ylad->act_id));
 
 	if(name && *name)
 		strcpy(ecr->room_name, name);
@@ -1574,11 +1602,12 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account * ela,
 	ycrd->id = ylad->id;
 	ycrd->host = g_strdup(ylad->act_id);
 	ycrd->room = g_strdup(ecr->room_name);
-	ycrd->members = members;
+	ycrd->members = NULL;
 	ycrd->connected = FALSE;
 	
+	yahoo_conference_logon(ycrd->id, ylad->act_id, ycrd->members, ycrd->room);
+
 	eb_join_chat_room(ecr, TRUE);
-	eb_chat_room_buddy_arrive(ecr, ela->alias, ylad->act_id);
 	return ecr;
 }
 /*
@@ -2088,13 +2117,14 @@ static void ext_yahoo_contact_added(int id, const char *myid,
 	struct yahoo_authorize_data *ay = g_new0(struct yahoo_authorize_data, 1);
 	eb_local_account * ela = yahoo_find_local_account_by_id(id);
 
-	snprintf(buff, sizeof(buff), _("%s, the yahoo user %s has added you to their contact list"), (myid?myid:ela->handle), who);
+	snprintf(buff, sizeof(buff), _("%s, the yahoo user \n\n<b>%s</b>\n\nhas added you to their contact list"), 
+			(myid?myid:ela->handle), who);
 	if(msg) {
-		strcat(buff, _(" with the following message:\n"));
+		strcat(buff, _(" with the following message:\n\n<i>"));
 		strcat(buff, msg);
-		strcat(buff, "\n");
+		strcat(buff, "</i>\n\n");
 	} else {
-		strcat(buff, ".  ");
+		strcat(buff, ".\n\n");
 	}
 	strcat(buff, _("Do you want to allow this?"));
 

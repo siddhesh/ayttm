@@ -1,3 +1,13 @@
+* Sat Aug 29 2009 19:25 UTC [siddheshp]   0.5.0-136
+- ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
+modules/yahoo2/libyahoo2/libyahoo2.c, src/chat_room.c:
+ * YMSG: Fixed memory leak
+ * YMSG: Fixed conferencing to work with YMSG16
+ * YMSG: Prettier messages
+ * CORE: Fixed case where preferred account for a room would be reset when a
+ chat room is cloned out of it
+
+
 * Fri Aug 28 2009 11:30 UTC [pstef]   0.5.0-135
 - ChangeLog, configure.ac, src/account.h, src/contact.h, src/service.h,
 src/status.c, src/util.c, modules/jabber/jabber.c, modules/yahoo2/yahoo.c:

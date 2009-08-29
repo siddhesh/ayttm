@@ -1026,9 +1026,7 @@ static void yahoo_process_conference(struct yahoo_input_data *yid, struct yahoo_
 			YAHOO_CALLBACK(ext_yahoo_error)(yd->client_id, msg, 0, E_CONFNOTAVAIL);
 		break;
 	case YAHOO_SERVICE_CONFADDINVITE:
-		if(pkt->status == 2)
-			;
-		else
+		if(pkt->status == 1)
 			YAHOO_CALLBACK(ext_yahoo_got_conf_invite)(yd->client_id, id, host, room, msg, members);
 		break;
 	case YAHOO_SERVICE_CONFDECLINE:
@@ -4045,10 +4043,10 @@ void yahoo_conference_logon(int id, const char *from, YList *who, const char *ro
 	pkt = yahoo_packet_new(YAHOO_SERVICE_CONFLOGON, YPACKET_STATUS_DEFAULT, yd->session_id);
 
 	yahoo_packet_hash(pkt, 1, (from?from:yd->user));
-	for(; who; who = who->next) {
-		yahoo_packet_hash(pkt, 3, (char *)who->data);
-	}
+	yahoo_packet_hash(pkt, 3, (from?from:yd->user));
 	yahoo_packet_hash(pkt, 57, room);
+	for(; who; who = who->next)
+		yahoo_packet_hash(pkt, 3, (char *)who->data);
 
 	yahoo_send_packet(yid, pkt, 0);
 
@@ -4068,9 +4066,9 @@ void yahoo_conference_decline(int id, const char * from, YList *who, const char 
 	pkt = yahoo_packet_new(YAHOO_SERVICE_CONFDECLINE, YPACKET_STATUS_DEFAULT, yd->session_id);
 
 	yahoo_packet_hash(pkt, 1, (from?from:yd->user));
-	for(; who; who = who->next) {
+	yahoo_packet_hash(pkt, 3, (from?from:yd->user));
+	for(; who; who = who->next)
 		yahoo_packet_hash(pkt, 3, (char *)who->data);
-	}
 	yahoo_packet_hash(pkt, 57, room);
 	yahoo_packet_hash(pkt, 14, msg);
 
@@ -4092,9 +4090,10 @@ void yahoo_conference_logoff(int id, const char * from, YList *who, const char *
 	pkt = yahoo_packet_new(YAHOO_SERVICE_CONFLOGOFF, YPACKET_STATUS_DEFAULT, yd->session_id);
 
 	yahoo_packet_hash(pkt, 1, (from?from:yd->user));
-	for(; who; who = who->next) {
+	yahoo_packet_hash(pkt, 3, (from?from:yd->user));
+	for(; who; who = who->next)
 		yahoo_packet_hash(pkt, 3, (char *)who->data);
-	}
+
 	yahoo_packet_hash(pkt, 57, room);
 
 	yahoo_send_packet(yid, pkt, 0);
@@ -4115,9 +4114,10 @@ void yahoo_conference_message(int id, const char * from, YList *who, const char 
 	pkt = yahoo_packet_new(YAHOO_SERVICE_CONFMSG, YPACKET_STATUS_DEFAULT, yd->session_id);
 
 	yahoo_packet_hash(pkt, 1, (from?from:yd->user));
-	for(; who; who = who->next) {
+	yahoo_packet_hash(pkt, 53, (from?from:yd->user));
+	for(; who; who = who->next)
 		yahoo_packet_hash(pkt, 53, (char *)who->data);
-	}
+
 	yahoo_packet_hash(pkt, 57, room);
 	yahoo_packet_hash(pkt, 14, msg);
 
