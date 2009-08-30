@@ -110,8 +110,6 @@ typedef struct _ay_msn_local_account
 } ay_msn_local_account;
 
 
-static eb_chat_room * ay_msn_get_chat_room(MsnConnection *con);
-static void ay_msn_clean_up_chat_room(MsnConnection *con);
 static eb_account *ay_msn_new_account(eb_local_account *ela, const char * account );
 static eb_account *ay_msn_new_account_for_buddy(eb_local_account *ela, MsnBuddy *buddy);
 
@@ -127,7 +125,6 @@ static void msn_new_mail_run_script(eb_local_account *ela);
 static void ay_msn_format_message (MsnIM *msg);
 static char *ay_msn_get_color(void) { static char color[]="#aa0000"; return color; }
 static void ay_msn_change_group(eb_account * ea, const char *new_group);
-static void ay_msn_real_change_group(eb_local_account *ela, eb_account * ea, const char *old_group, const char *new_group);
 static void invite_gnomemeeting(ebmCallbackData * data);
 
 static LList *ay_msn_get_smileys(void) { return psmileys; }
@@ -145,8 +142,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.6 $",
-	"$Date: 2009/08/20 12:07:01 $",
+	"$Revision: 1.7 $",
+	"$Date: 2009/08/30 14:55:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -156,9 +153,9 @@ PLUGIN_INFO plugin_info = {
 struct service SERVICE_INFO = { 
 				"MSN", 
 				-1, 
-				SERVICE_CAN_OFFLINEMSG | 
+/*				SERVICE_CAN_OFFLINEMSG | */
 				SERVICE_CAN_GROUPCHAT | 
-				SERVICE_CAN_FILETRANSFER | 
+/*				SERVICE_CAN_FILETRANSFER | */
 				SERVICE_CAN_MULTIACCOUNT, 
 				NULL 
 			};
@@ -531,11 +528,12 @@ static const char *ay_msn_status_strings[] =
 { "",  "Hidden", "Busy", "Idle", "BRB", "Away", "Phone", "Lunch", "Offline"};
 
 
+/* TODO
 static void ay_html_to_im(MsnIM *msg)
 {
 
 }
-
+*/
 
 static gboolean ay_msn_query_connected( eb_account * account )
 {
@@ -965,7 +963,7 @@ static eb_chat_room * ay_msn_make_chat_room( gchar * name, eb_local_account * ac
 	mlad = account->protocol_local_account_data;
 
 	if(name && *name)
-		strcpy(ecr->room_name, name);
+		sprintf(ecr->room_name, "MSN Chat Room (#%s)", name);
 	else
 		sprintf(ecr->room_name, "MSN :: %s", mlad->ma->passport);
 
@@ -991,27 +989,34 @@ static eb_chat_room *ay_msn_find_chat_room(const char *name)
 }
 
 
-void ext_got_ans(MsnConnection *mc)
+void ext_new_sb(MsnConnection *mc)
 {
 	MsnBuddy *bud;
 	SBPayload *payload = mc->sbpayload;
 	eb_chat_room *ecr = NULL;
 
 	/* This should be a buddy */
-	if(!(bud = payload->data))
-		return;
+	bud = payload->data;
 
-	if(payload->num_members == 1) {
+	/* Create a chat room if the buddy already has an active switchboard with me */
+	if(bud && !bud->sb) {
 		bud->sb = mc;
-		ecr = ((eb_account *)bud->ext_data)->account_contact->chatwindow;
+		payload->data = NULL;
 	}
-	else
+	else {
 		ecr = ay_msn_find_chat_room(payload->session_id);
+		if(!ecr)
+			ecr = ay_msn_make_chat_room(payload->session_id, mc->account->ext_data, 0);
 
-	if(ecr) {
-		ecr->protocol_local_chat_room_data = mc;
 		mc->sbpayload->data = ecr;
+		ecr->protocol_local_chat_room_data = mc;
 	}
+}
+
+
+void ext_got_ans(MsnConnection *mc)
+{
+
 }
 
 
@@ -1030,16 +1035,17 @@ void ext_buddy_joined_chat(MsnConnection *mc, char *passport, char *friendlyname
 	SBPayload *payload = mc->sbpayload;
 	eb_chat_room *ecr;
 
-	/* We're not interested in making a room for individual chat */
-	if(payload->num_members == 1)
-		return;
+	/* We're not interested announcing arrivals in individual chat */
+/*	if(payload->num_members == 1)
+		return;*/
 
 	ecr = ay_msn_find_chat_room(payload->session_id);
 
-	if(!ecr)
+/*	if(!ecr)
 		ecr = ay_msn_make_chat_room(payload->session_id, mc->account->ext_data, 0);
-
-	eb_chat_room_buddy_arrive(ecr, friendlyname, passport);
+*/
+	if(ecr)
+		eb_chat_room_buddy_arrive(ecr, friendlyname, passport);
 }
 
 
@@ -1130,7 +1136,7 @@ static LList * ay_msn_get_states(void)
 	int i=0;
 
 	for(i=0; i<MSN_STATES_COUNT; i++)
-		list = l_list_append( list, ay_msn_status_strings[i][0]?ay_msn_status_strings[i]:"Online" );
+		list = l_list_append( list, (void *)(ay_msn_status_strings[i][0]?ay_msn_status_strings[i]:"Online") );
 
 	return list;
 }
@@ -1256,7 +1262,7 @@ static const char **ay_msn_get_status_pixmap( eb_account * account)
 }
 
 
-static char * ay_msn_get_status_string( eb_account * account )
+static const char * ay_msn_get_status_string( eb_account * account )
 {
 	MsnBuddy * mad = (MsnBuddy *)account->protocol_account_data;
 
@@ -1282,11 +1288,22 @@ static void ay_msn_set_away( eb_local_account * account, char * message, int awa
 static void ay_msn_send_chat_room_message( eb_chat_room * room, gchar * mess )
 {
 	MsnIM *im = m_new0(MsnIM, 1);
+	MsnConnection *sb = room->protocol_local_chat_room_data;
+	eb_local_account *ela;
+
+	if(!sb) {
+		eb_debug(DBG_MSN, "No Switchboard!\n");
+		return;
+	}
+	
+	ela= sb->account->ext_data;
 
 	im->body = strdup(mess);
 
-	if(room->protocol_local_chat_room_data)
-		msn_send_IM_to_sb(room->protocol_local_chat_room_data, im);
+	msn_send_IM_to_sb(sb, im);
+
+	/* We don't get the message back in msn */
+	eb_chat_room_show_message(room, ela->alias, mess);
 }
 
 
@@ -1300,6 +1317,73 @@ static void ay_msn_leave_chat_room( eb_chat_room * room )
 void ext_buddy_added(MsnAccount *ma, MsnBuddy *bud)
 {
 	ay_msn_add_buddy(ma->ext_data, bud);
+}
+
+
+void ext_buddy_unblock_response(MsnAccount *ma, int error, MsnBuddy *buddy)
+{
+	if(error) {
+		char buf[1024];
+
+		snprintf(buf, sizeof(buf), _("Could not unblock <i>%s</i>. Server returned an error."), buddy->passport);
+
+		ay_do_warning(_("MSN"), buf);
+	}
+}
+
+
+void ext_buddy_block_response(MsnAccount *ma, int error, MsnBuddy *buddy)
+{
+	if(error) {
+		char buf[1024];
+
+		snprintf(buf, sizeof(buf), _("Could not block <i>%s</i>. Server returned an error."), buddy->passport);
+
+		ay_do_warning(_("MSN"), buf);
+	}
+}
+
+
+void ext_buddy_group_remove_failed(MsnAccount *ma, MsnBuddy *bud, MsnGroup *group)
+{
+	char buf[1024];
+
+	snprintf(buf, sizeof(buf), _("Could not remove <i>%s</i> from group <i>%s</i>.\nServer returned an error."), 
+		bud->passport, group->name);
+
+	ay_do_warning(_("MSN"), buf);
+}
+
+
+void ext_buddy_group_add_failed(MsnAccount *ma, MsnBuddy *bud, MsnGroup *group)
+{
+	char buf[1024];
+
+	snprintf(buf, sizeof(buf), _("Could not add <i>%s</i> to group <i>%s</i>.\nServer returned an error."), 
+		bud->passport, group->name);
+
+	ay_do_warning(_("MSN"), buf);
+}
+
+
+void ext_group_add_failed(MsnAccount *ma, const char *group, char *msg)
+{
+	char buf[1024];
+
+	snprintf(buf, sizeof(buf), _("Unable to add group <b>%s</b>. Server returned error:\n\n<i>%s</i>"),
+		group, msg?msg:_("Unknown error"));
+
+	ay_do_warning(_("MSN"), buf);
+}
+
+
+void ext_buddy_add_failed(MsnAccount *ma, const char *passport, char *friendlyname)
+{
+	char buf[1024];
+
+	snprintf(buf, sizeof(buf), _("Could not add buddy %s(<i>%s</i>). Server returned an error."), passport, friendlyname);
+
+	ay_do_warning(_("MSN"), buf);
 }
 
 
@@ -1326,15 +1410,64 @@ static int ay_msn_authorize_user( eb_local_account *ela, MsnBuddy *bud )
 }
 
 
+static void ay_msn_invite_callback(MsnConnection *sb, int error, void *data)
+{
+	eb_chat_room *room = data;
+
+	if(error) {
+		const MsnError *err = msn_strerror(error);
+		ext_msn_error(sb, err);
+		room->protocol_local_chat_room_data = NULL;
+		return;
+	}
+
+	sprintf(room->room_name, "MSN Chat Room (#%s)", sb->sbpayload->session_id);
+	strcpy(room->id, room->room_name);
+
+	room->protocol_local_chat_room_data = sb;
+	sb->sbpayload->data = room;
+}
+
+
 static void ay_msn_send_invite( eb_local_account * account, eb_chat_room * room,
 						  char * user, const char * message )
 {
-	if (!room->protocol_local_chat_room_data) {
-		ay_do_warning( _("MSN Warning"), _("Cannot invite user: connection to the chatroom has been closed."));
+	MsnConnection *mc;
+
+	/* Get switchboard if we don't have one */
+	if (!(mc = room->protocol_local_chat_room_data)) {
+		ay_msn_local_account *mlad = account->protocol_local_account_data;
+
+		msn_get_sb(mlad->ma, user, room, ay_msn_invite_callback);
+		/* HACK! we're pointing to the NS connection till our SB is ready so that
+		 * we don't keep requesting a new one for every invite*/
+		room->protocol_local_chat_room_data = mlad->ma->ns_connection;
 		return;	
 	}
 
+	while(mc->type != MSN_CONNECTION_SB) {
+		gtk_main_iteration();
+		mc = room->protocol_local_chat_room_data;
+
+		/* Our SB connection failed. Cry. */
+		if(!mc) {
+			ay_do_error(_("MSN Invitation"), _("Invite failed!"));
+			return;
+		}
+	}
+
 	/* Invite */
+	msn_buddy_invite(room->protocol_local_chat_room_data, user);
+}
+
+
+int ext_confirm_invitation(MsnConnection *mc, const char *buddy)
+{
+	char msgbuf[1024];
+
+	snprintf(msgbuf, sizeof(msgbuf), _("%s has invited you to chat.\nDo you want to accept?"), buddy);
+
+	return eb_do_confirm_dialog(msgbuf, _("MSN Chat Invitation"));
 }
 
 
@@ -1390,15 +1523,6 @@ static void ay_msn_del_group(eb_local_account *ela, const char *group)
 
 	if(l)
 		msn_group_del(mlad->ma, grp);
-}
-
-
-void ext_group_add_failed(MsnAccount *ma, const char *group, const char *msg)
-{
-	char buf[1024];
-
-	snprintf(buf, sizeof(buf), _("Unable to add group <b>%s</b>. Server returned error:\n\n<i>%s</i>"),
-		group, msg?msg:_("Unknown error"));
 }
 
 
@@ -1668,21 +1792,50 @@ void ext_user_left(MsnConnection *mc, MsnBuddy *buddy)
 
 }
 
-static eb_chat_room * ay_msn_get_chat_room(MsnConnection *con)
-{
-	return NULL;
-}
-
-
 static void ay_msn_join_chat_room(eb_chat_room *ecr)
 {
 
 }
 
 
+void ext_got_unknown_IM(MsnConnection *mc, MsnIM *msg, const char *sender)
+{
+	eb_chat_room * ecr=mc->sbpayload->data;
+
+	eb_account *ea = NULL;
+	char *local_account_name=NULL;
+	eb_local_account *ela=NULL;
+
+	/* format message */
+	ay_msn_format_message (msg);
+
+	/* The username element is always valid, even if it's not an SB */
+	local_account_name=mc->account->passport;
+	ela = find_local_account_by_handle(local_account_name, SERVICE_INFO.protocol_id);
+
+	if(!ela) {
+		eb_debug(DBG_MSN, "Unable to find local account by handle: %s\n", local_account_name);
+		return;
+	}
+
+	if(ecr!=NULL)
+		eb_chat_room_show_message(ecr, sender, msg->body);
+	else {
+		ea = g_new0(eb_account, 1);
+		strncpy(ea->handle, sender, 255);
+		ea->service_id = ela->service_id;
+		ea->ela = ela;
+
+		add_dummy_contact(sender, ea);
+
+		eb_parse_incoming_message(ela, ea, msg->body);
+	}
+}
+
+
 void ext_got_IM(MsnConnection *mc, MsnIM *msg, MsnBuddy *buddy)
 {
-	eb_chat_room * ecr=ay_msn_get_chat_room(mc);
+	eb_chat_room * ecr=mc->sbpayload->data;
 
 	eb_account *sender = NULL;
 	char *local_account_name=NULL;
@@ -1916,9 +2069,11 @@ static void invite_gnomemeeting(ebmCallbackData * data)
 
 void msn_new_mail_run_script(eb_local_account *ela)
 {
+/*
 	ay_msn_local_account *mlad = (ay_msn_local_account *)ela->protocol_local_account_data;
 
 	ay_exec(mlad->do_mail_notify_script_name);
+*/
 }
 
 

@@ -25,6 +25,7 @@
 #include "msn-http.h"
 #include "msn-connection.h"
 #include "msn-util.h"
+#include "msn-ext.h"
 
 #include "llist.h"
 

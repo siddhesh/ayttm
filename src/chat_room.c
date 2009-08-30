@@ -1581,8 +1581,9 @@ static gboolean cr_handle_click(GtkWidget *widget, GdkEventButton *event,
 
 void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 {
-	GtkWidget *vbox, *vbox2, *hbox, *hbox2, *label, *toolbar, *icon, *iconwid;
+	GtkWidget *vbox, *vbox2, *hbox, *hbox2, *label, *toolbar, *iconwid;
 	GtkWidget *send_button, *close_button, *print_button, *separator;
+	GdkPixbuf *icon;
 	GtkWidget *scrollwindow = gtk_scrolled_window_new(NULL, NULL);
 	gboolean enableSoundButton = FALSE;
 	GtkCellRenderer *renderer;

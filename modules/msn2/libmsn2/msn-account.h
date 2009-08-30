@@ -125,8 +125,9 @@ void msn_buddy_reset(MsnBuddy *bud);
 void msn_account_free(MsnAccount *ma);
 
 void msn_account_cancel_connect(MsnAccount *ma);
-void msn_set_initial_presence(MsnAccount *ma, int state);
+MsnConnection *msn_account_get_sb_with_session_id(MsnAccount *ma, char *session_id);
 
+void msn_set_initial_presence(MsnAccount *ma, int state);
 void msn_set_state(MsnAccount *ma, int state);
 
 #endif

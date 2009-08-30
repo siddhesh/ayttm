@@ -1684,7 +1684,7 @@ void eb_chat_window_display_account(eb_account *remote_account)
 	remote_contact->chatwindow->preferred = remote_account;
 }
 
-void eb_log_status_changed(eb_account *ea, gchar *status)
+void eb_log_status_changed(eb_account *ea, const gchar *status)
 {
 	char buff[BUF_SIZE];
 	time_t my_time = time(NULL);

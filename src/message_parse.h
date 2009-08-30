@@ -46,7 +46,7 @@ void eb_parse_incoming_message( eb_local_account * account,
                                  char * message );
 
 void eb_update_status( eb_account * remote,
-                       char * message );
+                       const char * message );
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

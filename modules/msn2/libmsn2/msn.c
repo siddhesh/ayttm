@@ -71,7 +71,23 @@ void msn_account_cancel_connect(MsnAccount *ma)
 	msn_connection_free(ma->ns_connection);
 	ma->ns_connection = NULL;
 
-	l_list_foreach(ma->connections, msn_connection_free, NULL);
+	l_list_foreach(ma->connections, (LListFunc)msn_connection_free, NULL);
+}
+
+
+MsnConnection *msn_account_get_sb_with_session_id(MsnAccount *ma, char *session_id)
+{
+	LList *con = ma->connections;
+
+	while(con) {
+		MsnConnection *sb = con->data;
+
+		if(!strcmp(session_id, sb->sbpayload->session_id))
+			return sb;
+		con = l_list_next(con);
+	}
+
+	return NULL;
 }
 
 

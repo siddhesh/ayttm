@@ -33,10 +33,16 @@
 void msn_sb_got_join(MsnConnection *mc)
 {
 	SBPayload *payload = mc->sbpayload;
-	payload->callback(mc, 0, payload->data);
+
+	payload->num_members++;
+
+	if(payload->callback)
+		payload->callback(mc, 0, payload->data);
+
+	ext_buddy_joined_chat(mc, mc->current_message->argv[1], msn_urldecode(mc->current_message->argv[2]));
 }
 
-static void msn_sb_got_usr_response(MsnConnection *mc)
+static void msn_sb_got_usr_response(MsnConnection *mc, void *data)
 {
 	SBPayload *payload = mc->sbpayload;
 	MsnAccount *ma = mc->account;
@@ -67,7 +73,7 @@ static void msn_sb_got_usr_response(MsnConnection *mc)
 }
 
 
-static void msn_sb_got_ans_response(MsnConnection *mc)
+static void msn_sb_got_ans_response(MsnConnection *mc, void *data)
 {
 	SBPayload *payload = mc->sbpayload;
 
@@ -76,7 +82,7 @@ static void msn_sb_got_ans_response(MsnConnection *mc)
 
 		ext_buddy_joined_chat(mc, mc->current_message->argv[4], msn_urldecode(mc->current_message->argv[5]));
 
-		msn_connection_push_callback(mc, msn_sb_got_ans_response);
+		msn_connection_push_callback(mc, msn_sb_got_ans_response, NULL);
 	}
 	else if (mc->current_message->command == MSN_COMMAND_ANS) {
 		ext_got_ans(mc);
@@ -93,11 +99,12 @@ static void msn_sb_connected(MsnConnection *mc)
 
 	if(payload->incoming) {
 		msn_message_send(mc, NULL, MSN_COMMAND_ANS, mc->account->passport, payload->challenge, payload->session_id);
-		msn_connection_push_callback(mc, msn_sb_got_ans_response);
+		msn_connection_push_callback(mc, msn_sb_got_ans_response, NULL);
+		ext_new_sb(mc);
 	}
 	else {
 		msn_message_send(mc, NULL, MSN_COMMAND_USR, 2, mc->account->passport, payload->challenge);
-		msn_connection_push_callback(mc, msn_sb_got_usr_response);
+		msn_connection_push_callback(mc, msn_sb_got_usr_response, NULL);
 	}
 
 	free(payload->challenge);
@@ -150,7 +157,7 @@ void msn_connect_sb_with_info(MsnConnection *mc, char *room_name, void *data)
 }
 
 
-static void msn_got_sb_info(MsnConnection *mc)
+static void msn_got_sb_info(MsnConnection *mc, void *data)
 {
 	char *offset = NULL;
 	SBPayload *payload = mc->sbpayload;
@@ -178,7 +185,7 @@ void msn_get_sb(MsnAccount *ma, char *room_name, void *data, SBCallback callback
 
 	ma->ns_connection->sbpayload = payload;
 	msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_XFR, 1, MSN_SB);
-	msn_connection_push_callback(ma->ns_connection, msn_got_sb_info);
+	msn_connection_push_callback(ma->ns_connection, msn_got_sb_info, NULL);
 }
 
 

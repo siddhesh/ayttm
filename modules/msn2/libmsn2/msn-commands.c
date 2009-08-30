@@ -78,6 +78,9 @@ static void msn_command_got_JOI (MsnConnection *mc);
 static void msn_command_got_PRP (MsnConnection *mc);
 static void msn_command_got_BYE (MsnConnection *mc);
 
+static void msn_command_got_ACK (MsnConnection *mc);
+static void msn_command_got_NAK (MsnConnection *mc);
+
 static void msn_command_parse_payload_MSG (MsnMessage *msg);
 static void msn_command_parse_payload_GCF (MsnMessage *msg);
 static void msn_command_parse_payload_QRY (MsnMessage *msg);
@@ -141,7 +144,9 @@ MsnCommandInfo msn_commands[] = {
 	{ "CAL", MSN_COMMAND_CAL,  2, 0, msn_command_got_CAL, NULL },
 	{ "JOI", MSN_COMMAND_JOI,  2, 0, msn_command_got_JOI, NULL },
 	{ "BYE", MSN_COMMAND_BYE,  0, 0, msn_command_got_BYE, NULL },
-	{ "PRP", MSN_COMMAND_PRP,  3, 0, msn_command_got_PRP, NULL }
+	{ "PRP", MSN_COMMAND_PRP,  3, 0, msn_command_got_PRP, NULL },
+	{ "ACK", MSN_COMMAND_ACK,  0, 0, msn_command_got_ACK, NULL },
+	{ "NAK", MSN_COMMAND_NAK,  0, 0, msn_command_got_NAK, NULL }
 } ;
 
 
@@ -411,6 +416,13 @@ static void msn_command_got_MSG (MsnConnection *mc)
 			return;
 		}
 
+		if(!strcmp(payload_info->names[i], "Content-Type")) {
+			/* Not interested in non-IM messages right now */
+			if(strncmp(payload_info->values[i], "text/plain;", 11))
+				return;
+		}
+
+
 		if(!strcmp(payload_info->names[i], "X-MMS-IM-Format")) {
 			char *top, *start = NULL, *end = NULL;
 			im = m_new0(MsnIM, 1);
@@ -498,8 +510,10 @@ static void msn_command_got_MSG (MsnConnection *mc)
 
 	if(l && bud)
 		ext_got_IM(mc, im, bud);
-	else
+	else {
 		printf("%s is trying to message me despite not being in my list\n", nick);
+		ext_got_unknown_IM(mc, im, nick);
+	}
 
 	free(im->body);
 	free(im->color);
@@ -669,6 +683,7 @@ static void msn_command_got_NLN (MsnConnection *mc)
 static void msn_command_got_RNG (MsnConnection *mc)
 {
 	MsnBuddy *bud;
+	int do_connect = 1;
 	LList *buds = mc->account->buddies;
 
 	char *nick = mc->current_message->argv[5];
@@ -683,10 +698,13 @@ static void msn_command_got_RNG (MsnConnection *mc)
 	}
 
 	/* TODO Get confirmation from the user to know if she would like to chat with someone unknown */
-	if(!buds)
+	if(!buds) {
+		do_connect = ext_confirm_invitation(mc, nick);
 		bud = NULL;
+	}
 
-	msn_connect_sb_with_info(mc, nick, bud);
+	if(do_connect)
+		msn_connect_sb_with_info(mc, nick, bud);
 }
 
 
@@ -734,6 +752,18 @@ static void msn_command_got_BYE (MsnConnection *mc)
 {
 	mc->sbpayload->num_members--;
 	ext_buddy_left(mc, mc->current_message->argv[1]);
+}
+
+
+static void msn_command_got_ACK (MsnConnection *mc)
+{
+
+}
+
+
+static void msn_command_got_NAK (MsnConnection *mc)
+{
+
 }
 
 

@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.113 $",
-	"$Date: 2009/08/29 19:26:40 $",
+	"$Revision: 1.114 $",
+	"$Date: 2009/08/30 14:55:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -3032,7 +3032,7 @@ static const char **eb_yahoo_get_status_pixmap(eb_account * ea)
 		return yahoo_online_xpm;
 }
 
-static char *eb_yahoo_get_status_string(eb_account * ea)
+static const char *eb_yahoo_get_status_string(eb_account * ea)
 {
 	eb_yahoo_account_data *yad = ea->protocol_account_data;
 	int i;

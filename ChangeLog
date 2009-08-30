@@ -1,3 +1,21 @@
+* Sun Aug 30 2009 14:55 UTC [siddheshp]   0.5.0-138
+- ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c, modules/irc/irc.c,
+modules/irc/irc.h, modules/jabber/jabber.c, modules/msn2/msn.c,
+modules/msn2/libmsn2/msn-account.h, modules/msn2/libmsn2/msn-commands.c,
+modules/msn2/libmsn2/msn-connection.c, modules/msn2/libmsn2/msn-connection.h,
+modules/msn2/libmsn2/msn-contacts.c, modules/msn2/libmsn2/msn-contacts.h,
+modules/msn2/libmsn2/msn-ext.h, modules/msn2/libmsn2/msn-http.c,
+modules/msn2/libmsn2/msn-login.c, modules/msn2/libmsn2/msn-message.c,
+modules/msn2/libmsn2/msn-message.h, modules/msn2/libmsn2/msn-sb.c,
+modules/msn2/libmsn2/msn-sb.h, modules/msn2/libmsn2/msn.c,
+modules/yahoo2/yahoo.c, src/chat_room.c, src/chat_window.c, src/chat_window.h,
+src/message_parse.c, src/message_parse.h, src/service.h, src/status.c:
+ * CORE: get_state and get_status return const strings from modules in most
+ cases. updated function signature accordingly
+ * MSN: Conferencing and juggling between switchboards
+ * MSN: Added missing functions and fixed warnings
+ * MSN: Messaging improvements
+
 * Sun Aug 30 2009 13:58 UTC [pstef]   0.5.0-137
 - ChangeLog, configure.ac, modules/jabber/jabber.c,
 modules/jabber/libEBjabber.c, modules/jabber/libEBjabber.h, src/chat_room.c,

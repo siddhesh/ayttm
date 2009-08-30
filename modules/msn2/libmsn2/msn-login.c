@@ -53,7 +53,7 @@ char msn_host[512] = {'\0'};
 /* MSN Protocol Connection Explained inline. Start from the bottom */
 
 /* 8) Got the final USR response. Either we're in or we're out */
-static void msn_got_final_usr_response(MsnConnection *mc)
+static void msn_got_final_usr_response(MsnConnection *mc, void *data)
 {
 	MsnAccount *ma = mc->account;
 
@@ -82,7 +82,7 @@ static void msn_send_final_usr(MsnAccount *ma, const char *mash)
 				ma->ticket, 
 				mash);
 
-	msn_connection_push_callback(ma->ns_connection, msn_got_final_usr_response);
+	msn_connection_push_callback(ma->ns_connection, msn_got_final_usr_response, NULL);
 }
 
 
@@ -344,7 +344,7 @@ static void msn_sso_start (MsnAccount *ma)
 
 /* 4) If the NS is not busy it will ask us to go ahead for the Tweener
  * else it will XFR us to another server where we will restart from 1) */
-static void msn_got_usr_response(MsnConnection *mc)
+static void msn_got_usr_response(MsnConnection *mc, void *data)
 {
 	if ( mc->current_message->command == MSN_COMMAND_XFR ) {
 		/* Update the IP address and port and connect to the other place */
@@ -389,17 +389,17 @@ static void msn_got_usr_response(MsnConnection *mc)
 }
 
 /* 3) Send a USR with our passport */
-static void msn_got_client_info_response ( MsnConnection *mc )
+static void msn_got_client_info_response ( MsnConnection *mc, void *data )
 {
 	/* We don't care what msn recommends... Ayttm is teh rul3z!!!!111oneone */
 
 	msn_message_send ( mc, NULL, MSN_COMMAND_USR, 3, MSN_AUTH_SSO, MSN_AUTH_INITIAL, mc->account->passport );
 
-	msn_connection_push_callback(mc, msn_got_usr_response);
+	msn_connection_push_callback(mc, msn_got_usr_response, NULL);
 }
 
 /* 2) Send CVR with our MSN client information */
-static void msn_got_version_response(MsnConnection *mc)
+static void msn_got_version_response(MsnConnection *mc, void *data)
 {
 	if( mc->current_message->argc < 3 || strcmp(mc->current_message->argv[2], MSN_PROTOCOL_VERSION) ) {
 		ext_msn_login_response(mc->account, MSN_LOGIN_FAIL_VER);
@@ -424,7 +424,7 @@ static void msn_got_version_response(MsnConnection *mc)
 			MSN_OFFICIAL_CLIENT,
 			mc->account->passport );
 
-	msn_connection_push_callback(mc, msn_got_client_info_response);
+	msn_connection_push_callback(mc, msn_got_client_info_response, NULL);
 }
 
 /* 1) Send VER with our MSN client version */
@@ -432,7 +432,7 @@ static void msn_login_connected(MsnConnection *mc)
 {
 	msn_message_send(mc, NULL, MSN_COMMAND_VER, MSN_PROTOCOL_VERSION, MSN_PROTO_CVR0);
 
-	msn_connection_push_callback(mc, msn_got_version_response);
+	msn_connection_push_callback(mc, msn_got_version_response, NULL);
 }
 
 /* 0) We obviously begin with a connection to the server */
@@ -471,9 +471,9 @@ void msn_logout(MsnAccount *ma)
 
 	ma->status = MSN_STATE_OFFLINE;
 
-	l_list_foreach(ma->connections, msn_connection_free, NULL);
+	l_list_foreach(ma->connections, (LListFunc)msn_connection_free, NULL);
 
-	l_list_foreach(ma->buddies, msn_buddy_reset, NULL);
+	l_list_foreach(ma->buddies, (LListFunc)msn_buddy_reset, NULL);
 }
 
 

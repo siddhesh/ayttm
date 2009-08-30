@@ -31,7 +31,8 @@
 
 typedef struct {
 	int trid;
-	MsnCommandHandler handler;
+	MsnCallbackHandler handler;
+	void *data;
 } MsnCallback;
 
 
@@ -51,13 +52,13 @@ void msn_connection_destroy(MsnConnection *mc)
 	free(mc);
 }
 
-void msn_connection_push_callback(MsnConnection *mc, MsnCommandHandler handler)
+void msn_connection_push_callback(MsnConnection *mc, MsnCallbackHandler handler, void *data)
 {
 	MsnCallback *cb = m_new0(MsnCallback, 1);
 
 	cb->trid = mc->trid;
-
 	cb->handler = handler;
+	cb->data = data;
 
 	mc->callbacks = l_list_append(mc->callbacks, cb);
 }
@@ -78,7 +79,7 @@ int msn_connection_pop_callback(MsnConnection *mc)
 		MsnCallback *cb = l->data;
 		if ( cb->trid == cur_trid ) {
 			mc->callbacks = l_list_remove(mc->callbacks, cb);
-			cb->handler(mc);
+			cb->handler(mc, cb->data);
 			return 1;
 		}
 		l = l_list_next(l);

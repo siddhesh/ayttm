@@ -78,13 +78,13 @@ int _cmp_domains(const void *d1, const void *d2)
 }
 
 
-void msn_got_initial_adl_response(MsnConnection *mc)
+void msn_got_initial_adl_response(MsnConnection *mc, void *data)
 {
 	ext_msn_contacts_synced(mc->account);
 }
 
 
-void msn_got_initial_fqy_response(MsnConnection *mc)
+void msn_got_initial_fqy_response(MsnConnection *mc, void *data)
 {
 	MsnMessage *msg = mc->current_message;
 	char out[MAX_ADL_SIZE], bufsize[5];
@@ -143,7 +143,7 @@ void msn_got_initial_fqy_response(MsnConnection *mc)
 	sprintf(bufsize, "%d", offset+5);
 	msn_message_send(mc, out, MSN_COMMAND_ADL, bufsize);
 
-	msn_connection_push_callback(mc, msn_got_initial_adl_response);
+	msn_connection_push_callback(mc, msn_got_initial_adl_response, NULL);
 }
 
 
@@ -218,7 +218,7 @@ static void _send_adl(MsnAccount *ma)
 		else if ( cur_type != a->type ) {
 			snprintf(buf+offset, sizeof(buf)-offset, "</d></ml>");
 
-			snprintf(bufsize, sizeof(bufsize), "%d", strlen(buf));
+			snprintf(bufsize, sizeof(bufsize), "%d", (int)strlen(buf));
 
 			if(cur_type == MSN_BUDDY_PASSPORT)
 				msn_message_send(ma->ns_connection, buf, MSN_COMMAND_ADL, bufsize);
@@ -251,14 +251,14 @@ static void _send_adl(MsnAccount *ma)
 
 	if(count) {
 		snprintf(buf+offset, sizeof(buf)-offset, "</d></ml>");
-		snprintf(bufsize, sizeof(bufsize), "%d", strlen(buf));
+		snprintf(bufsize, sizeof(bufsize), "%d", (int)strlen(buf));
 		if(cur_type == MSN_BUDDY_PASSPORT)
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_ADL, bufsize);
 		else
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
 	}
 
-	msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response);
+	msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response, NULL);
 
 }
 
@@ -678,7 +678,7 @@ static void msn_unblock_response(MsnAccount *ma, int error, void *cbdata)
 {
 	MsnBuddy *bud = cbdata;
 
-	ext_msn_buddy_unblock_response(ma, error, bud);
+	ext_buddy_unblock_response(ma, error, bud);
 	bud->list = MSN_BUDDY_ALLOW;
 }
 
@@ -702,7 +702,7 @@ static void msn_block_response(MsnAccount *ma, int error, void *cbdata)
 {
 	MsnBuddy *bud = cbdata;
 
-	ext_msn_buddy_unblock_response(ma, error, bud);
+	ext_buddy_block_response(ma, error, bud);
 	bud->list = MSN_BUDDY_BLOCK;
 }
 
@@ -884,7 +884,7 @@ static void msn_group_buddy_remove_response(MsnAccount *ma, char *data, int len,
 	MsnBuddy *bud = cbdata;
 
 	if(!strstr(data, "<ABGroupContactDeleteResponse"))
-		ext_buddy_group_add_failed(ma, bud, bud->group);
+		ext_buddy_group_remove_failed(ma, bud, bud->group);
 }
 
 
@@ -1037,7 +1037,7 @@ void msn_buddy_allow(MsnAccount *ma, MsnBuddy *bud)
 }
 
 
-void msn_buddy_add_to_group(MsnAccount *ma, MsnGroup *group, void *data)
+static void msn_buddy_add_to_group(MsnAccount *ma, MsnGroup *group, void *data)
 {
 	MsnBuddy *bud = data;
 
@@ -1128,6 +1128,12 @@ void msn_buddy_remove(MsnAccount *ma, MsnBuddy *bud)
 	mmbr->data = bud;
 
 	msn_membership_list_update(ma, bud, mmbr);
+}
+
+
+void msn_buddy_invite(MsnConnection *mc, const char *passport)
+{
+	msn_message_send(mc, NULL, MSN_COMMAND_CAL, passport);
 }
 
 

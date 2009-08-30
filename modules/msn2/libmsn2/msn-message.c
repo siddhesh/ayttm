@@ -268,19 +268,68 @@ void msn_message_free(MsnMessage *msg)
 }
 
 
-void msn_message_check_ack(MsnConnection *mc)
+typedef struct {
+	MsnBuddy *bud;
+	MsnIM *im;
+} MsnAckData;
+static void msn_send_sb_IM(MsnConnection *sb, int error, void *data);
+
+
+static void msn_buddy_is_back(MsnConnection *mc, void *data)
 {
-	if(!strcmp(mc->current_message->argv[0], "NACK"))
-		ext_show_warning(mc->account, MSN_MESSAGE_DELIVERY_FAILED);
+	MsnAckData *cbdata = data;
+
+	if(mc->current_message->command == MSN_COMMAND_CAL) {
+		/* So that the subsequent JOI calls us */
+		cbdata->bud->mq = l_list_append(cbdata->bud->mq, cbdata->im);
+		mc->sbpayload->data = cbdata->bud;
+		mc->sbpayload->callback = msn_send_sb_IM;
+		free(cbdata);
+		return;
+	}
+	else {
+		const MsnError *error = msn_strerror(MSN_MESSAGE_DELIVERY_FAILED);
+		ext_msn_error(mc, error);
+		free(cbdata->im);
+		free(cbdata);
+	}
+
+}
+
+
+static void msn_message_check_ack(MsnConnection *mc, void *data)
+{
+	MsnAckData *cbdata = data;
+
+	if(mc->current_message->command == MSN_COMMAND_NAK) {
+		/* Buddy disconnected himself from SB. Get him back */
+		if(cbdata->bud) {
+			msn_buddy_invite(mc, cbdata->bud->passport);
+			msn_connection_push_callback(mc, msn_buddy_is_back, cbdata);
+			return;
+		}
+		else {
+			const MsnError *error = msn_strerror(MSN_MESSAGE_DELIVERY_FAILED);
+			ext_msn_error(mc, error);
+		}
+	}
+
+	free(cbdata->im);
+	free(cbdata);
 }
 
 
 /* TODO Rich text messages */
-void msn_send_IM_to_sb(MsnConnection *sb, MsnIM *im)
+
+static void msn_send_IM_to_sb_real(MsnConnection *sb, MsnIM *im, MsnBuddy *bud)
 {
 	char buf[2048];
 	char bufsize[5];
 	int len;
+	MsnAckData *cbdata = m_new0(MsnAckData, 1);
+
+	cbdata->bud = bud;
+	cbdata->im = im;
 
 	if(im->typing)
 		len = snprintf(buf, sizeof(buf), "MIME-Version: 1.0\r\n"
@@ -296,8 +345,13 @@ void msn_send_IM_to_sb(MsnConnection *sb, MsnIM *im)
 	sprintf(bufsize, "%d", len);
 
 	msn_message_send(sb, buf, MSN_COMMAND_MSG, 2, im->typing?MSN_MSG_NO_ACK:MSN_MSG_ACK_ALL, bufsize);
-	msn_connection_push_callback(sb, msn_message_check_ack);
-	free(im);
+	msn_connection_push_callback(sb, msn_message_check_ack, cbdata);
+}
+
+
+void msn_send_IM_to_sb(MsnConnection *sb, MsnIM *im)
+{
+	msn_send_IM_to_sb_real(sb, im, NULL);
 }
 
 
@@ -307,7 +361,8 @@ static void msn_send_sb_IM(MsnConnection *sb, int error, void *data)
 	LList *l;
 
 	if(error) {
-		ext_show_warning(sb->account, MSN_MESSAGE_DELIVERY_FAILED);
+		const MsnError *error = msn_strerror(MSN_MESSAGE_DELIVERY_FAILED);
+		ext_msn_error(sb, error);
 		return;
 	}
 
@@ -317,7 +372,7 @@ static void msn_send_sb_IM(MsnConnection *sb, int error, void *data)
 	ext_got_IM_sb(sb, buddy);
 
 	for(l = buddy->mq; l; l = l_list_remove(l, l->data) )
-		msn_send_IM_to_sb(sb, (MsnIM *)l->data);
+		msn_send_IM_to_sb_real(sb, (MsnIM *)l->data, buddy);
 
 	buddy->mq = NULL;
 }

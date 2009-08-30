@@ -48,15 +48,27 @@ void ext_buddy_added(MsnAccount *ma, MsnBuddy *bud);
 void ext_got_buddy_status(MsnConnection *mc, MsnBuddy *bud);
 void ext_buddy_joined_chat(MsnConnection *mc, char *passport, char *friendlyname);
 void ext_buddy_left(MsnConnection *mc, const char *passport);
+void ext_buddy_removed(MsnAccount *ma, const char *bud);
+
+void ext_buddy_unblock_response(MsnAccount *ma, int error, MsnBuddy *buddy);
+void ext_buddy_block_response(MsnAccount *ma, int error, MsnBuddy *buddy);
+void ext_buddy_group_remove_failed(MsnAccount *ma, MsnBuddy *bud, MsnGroup *group);
+void ext_buddy_group_add_failed(MsnAccount *ma, MsnBuddy *bud, MsnGroup *group);
+void ext_group_add_failed(MsnAccount *ma, const char *group, char *error);
+void ext_buddy_add_failed(MsnAccount *ma, const char *passport, char *friendlyname);
 
 void ext_got_status_change(MsnAccount *ma);
 void ext_update_friendlyname(MsnConnection *mc);
 
 void ext_got_IM_sb(MsnConnection *mc, MsnBuddy *bud);
 void ext_got_IM(MsnConnection *mc, MsnIM *im, MsnBuddy *bud);
+void ext_got_unknown_IM(MsnConnection *mc, MsnIM *im, const char *bud);
 void ext_got_typing(MsnConnection *mc, MsnBuddy *bud);
 
 void ext_got_ans(MsnConnection *mc);
+void ext_new_sb(MsnConnection *mc);
+
+int ext_confirm_invitation(MsnConnection *mc, const char *buddy);
 
 #endif
 

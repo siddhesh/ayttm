@@ -1479,7 +1479,8 @@ void buddy_update_status_and_log(eb_account *ea)
 /* update the status info(pixmap and state) of an account */
 void buddy_update_status(eb_account *ea)
 {
-	gchar *status, *state, *tmp, *c, buff[128], msgbuff[1024];
+	const gchar *status, *state;
+	gchar *tmp, *c, buff[128], msgbuff[1024];
 	struct tm *mytime;
 	time_t last_status_change;
 

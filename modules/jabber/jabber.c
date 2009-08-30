@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.57 $",
-	"$Date: 2009/08/30 13:55:35 $",
+	"$Revision: 1.58 $",
+	"$Date: 2009/08/30 14:55:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -685,13 +685,13 @@ static const char ** eb_jabber_get_status_pixmap( eb_account * account)
 		return jabber_away_xpm;
 }
 
-static char *eb_jabber_get_status_string(eb_account *account)
+static const char *eb_jabber_get_status_string(eb_account *account)
 {
 	eb_jabber_account_data *jad = account->protocol_account_data;
 	return jad->description ? jad->description : jabber_state_strings[0];
 }
 
-static char *eb_jabber_get_state_string(eb_account *account)
+static const char *eb_jabber_get_state_string(eb_account *account)
 {
 	eb_jabber_account_data *jad = account->protocol_account_data;
 

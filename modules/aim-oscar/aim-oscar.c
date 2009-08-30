@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.30 $",
-	"$Date: 2009/08/13 20:20:37 $",
+	"$Revision: 1.31 $",
+	"$Date: 2009/08/30 14:55:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2114,7 +2114,7 @@ ay_aim_get_status_pixmap (eb_account * account)
 }
 
 
-static gchar *
+static const gchar *
 ay_aim_get_status_string (eb_account *account)
 {
 	static gchar string[255], buf[255];

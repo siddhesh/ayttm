@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.58 $",
-	"$Date: 2009/08/13 20:20:37 $",
+	"$Revision: 1.59 $",
+	"$Date: 2009/08/30 14:55:58 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -842,7 +842,7 @@ static eb_account *ay_irc_new_account(eb_local_account *ela, const char *account
 	return ea;
 }
 
-static char *ay_irc_get_status_string(eb_account *account)
+static const char *ay_irc_get_status_string(eb_account *account)
 {
 	ay_irc_account *eia = (ay_irc_account *)account->protocol_account_data;
 	static char string[255];

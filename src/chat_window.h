@@ -126,7 +126,7 @@ void eb_chat_window_display_status( eb_account * remote, gchar * message );
 void eb_chat_window_display_contact( struct contact * remote_contact );
 void eb_chat_window_display_account( eb_account * remote_account );
 void eb_chat_window_display_error( eb_account * remote, gchar * message );
-void eb_log_status_changed(eb_account *ea, gchar *status );
+void eb_log_status_changed(eb_account *ea, const gchar *status );
 void eb_chat_window_do_timestamp( struct contact * c, gboolean online );
 void eb_restore_last_conv(gchar *file_name, chat_window* cw);
 void send_message(GtkWidget *widget, gpointer d);

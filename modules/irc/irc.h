@@ -114,7 +114,7 @@ static void ay_irc_add_user( eb_account * account );
 static void ay_irc_del_user( eb_account * account );
 static int ay_irc_is_suitable (eb_local_account *local, eb_account *remote);
 static eb_account * ay_irc_new_account(eb_local_account *ela, const char * account );
-static char * ay_irc_get_status_string( eb_account * account );
+static const char * ay_irc_get_status_string( eb_account * account );
 static const char ** ay_irc_get_status_pixmap( eb_account * account);
 static void ay_irc_set_idle(eb_local_account * account, int idle );
 static void ay_irc_set_away( eb_local_account * account, char * message, int away);
