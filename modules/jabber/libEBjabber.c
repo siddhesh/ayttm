@@ -262,7 +262,7 @@ int ext_jabber_write(jconn j, const char *buf, int len)
 
 /* Functions called from the ayttm jabber.c file */
 
-int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, int use_ssl, int port) {
+int JABBER_Login(char *handle, char *passwd, char *host, eb_jabber_local_account_data *jlad, int port) {
 	/* At this point, we don't care about host and port */
 	char jid[256+1];
 	int tag;
@@ -271,9 +271,9 @@ int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, i
 	JABBER_Conn *JConn=NULL;
 
 	/* If a different connect server is not specified then atleast connect to the default */
-	if( !strcmp(connect_server, "") ) {
-		eb_debug(DBG_JBR, "connect_server is BLANK!\n\n");
-		strcpy(connect_server, host);
+	if( !strcmp(jlad->connect_server, "") ) {
+		eb_debug(DBG_JBR, "jlad->connect_server is BLANK!\n\n");
+		strcpy(jlad->connect_server, host);
 	}
 
 	eb_debug(DBG_JBR,  "%s %s %i\n", handle, host, port);
@@ -307,7 +307,7 @@ int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, i
 	strncpy(JConn->jid,jid, LINE_LENGTH);
 	/* We assume we have an account, and don't need to register one */
 	JConn->reg_flag = 0;
-	JConn->conn=jab_new(jid, passwd, connect_server);
+	JConn->conn=jab_new(jid, passwd, jlad->connect_server);
 	if(!JConn->conn) {
 		snprintf(buff, 4096, "Connection to server '%s' failed.", host);
 		JABBERError(buff, _("Jabber Error"));
@@ -328,7 +328,8 @@ int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, i
 	jab_state_handler(JConn->conn, j_on_state_handler);
 
 	JConn->conn->user->port = port;
-	JConn->conn->usessl = use_ssl;
+	JConn->conn->usessl = jlad->use_ssl;
+	JConn->do_request_gmail = jlad->request_gmail;
 
 	tag = jab_start(JConn->conn);
 
@@ -377,6 +378,8 @@ int JABBER_SendMessage(JABBER_Conn *JConn, char *handle, char *message) {
 		eb_debug(DBG_JBR, "******Called with NULL JConn for user %s!!!\n", handle);
 		return(0);
 	}
+	if (!strcmp(handle, "mailbox@gmail"))
+		return 0;
 	eb_debug(DBG_JBR,  "%s -> %s:\nOUT.msg: %s\n", JConn->jid, handle, message);
 	/* We always want to chat.  :) */
 	x = jutil_msgnew(TMSG_CHAT, handle, NULL, message);
@@ -590,6 +593,77 @@ int JABBER_LeaveChatRoom(JABBER_Conn *JConn, char *room_name, char *nick)
 	jab_send(JConn->conn, z);
 	xmlnode_free(z);
 	return(0);
+}
+
+static char nt_time[13] = "0";
+
+void request_new_gmail(JABBER_Conn *JConn, char *id)
+{
+	gchar *request, *stime;
+
+	if (!JConn->do_request_gmail)
+		return;
+
+	stime = (strcmp(nt_time, "0"))
+		? g_strdup_printf(" newer-than-time='%s'", nt_time)
+		: g_strdup("");
+
+	request = g_strdup_printf(
+		"<iq type='get' "
+			"from='%s' "
+			"to='%s@%s' "
+			"id='mail-request-%s'>"
+		"<query xmlns='google:mail:notify'"
+			"%s"
+		"/></iq>",
+		JConn->jid,
+		JConn->conn->user->user,
+		JConn->conn->user->server,
+		id,
+		stime
+	);
+	jab_send_raw(JConn->conn, request);
+	g_free(request);
+	g_free(stime);
+}
+
+void print_new_gmail(JABBER_Conn *JConn, xmlnode x)
+{
+	xmlnode y, z;
+	char *subject, *snippet;
+	JABBER_InstantMessage JIM;
+	struct jabber_buddy JB;
+	char *total_matched, *result_time;
+	int new_mail;
+
+	result_time = xmlnode_get_attrib(x, "result-time");
+	total_matched = xmlnode_get_attrib(x, "total-matched");
+	new_mail = strcmp(total_matched, "0");
+	JB.description = total_matched;
+	JB.jid = "mailbox@gmail";
+	JB.status = new_mail ? JABBER_ONLINE : JABBER_AWAY;
+	JB.JConn = JConn;
+	JABBERStatusChange(&JB);
+
+	if (!new_mail)
+		return;
+
+	for (y = xmlnode_get_tag(x, "mail-thread-info"); y; y = xmlnode_get_nextsibling(y)) {
+		if (strcmp(nt_time, xmlnode_get_attrib(y, "date")) > 0)
+			/* if nt_time > date of email, then I don't want to know about it */
+			continue;
+		z = xmlnode_get_tag(y, "subject");
+		subject = xmlnode_get_data(z);
+		z = xmlnode_get_tag(y, "snippet");
+		snippet = xmlnode_get_data(z);
+		JIM.msg = g_strconcat(_("You have new email: \n"), subject, "\n", snippet, NULL);
+		JIM.JConn = JConn;
+		JIM.sender = "mailbox@gmail";
+		JABBERInstantMessage(&JIM);
+		g_free(JIM.msg);
+	}
+	eb_debug(DBG_JBR, "old %s, new %s\n", nt_time, result_time);
+	strncpy(nt_time, result_time, 13);
 }
 
 void JABBER_Send_typing(JABBER_Conn *JConn, const char *from, const char *to, int typing)
@@ -863,8 +937,8 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 			return;
 		}
 		if (!strcmp(type, "result")) {
-			if (!(x = xmlnode_get_tag(packet->x, "query"))) {
-				/* If there is no <query/>, <id> is the only way to recognize IQ */
+			if (!(x = xmlnode_get_firstchild(packet->x))) {
+				/* If there is no child, <id> is the only way to recognize IQ */
 				if (!strcmp(id, "id_auth")) {
 					eb_debug(DBG_JBR, "Authorization successful, announcing presence\n");
 					jab_send_raw(conn, "<presence/>");
@@ -919,14 +993,34 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				for (y = xmlnode_get_tag(x, "feature"); y; y = xmlnode_get_nextsibling(y)) {
 					name = xmlnode_get_attrib(y, "var");
 					eb_debug(DBG_JBR, "Feature: %s\n", name);
+					if (!strcmp(name, "google:mail:notify"))
+						JConn->server_features |= F_GMAIL_NOTIFY;
+					/* More to come? */
+				}
+				if ((JConn->server_features & F_GMAIL_NOTIFY) && JConn->do_request_gmail) {
+					JB.jid = strdup("mailbox@gmail");
+					JB.name = strdup("GMailbox");
+					JB.sub = strdup("both");
+					JB.status = JABBER_AWAY;
+					JB.JConn = JConn;
+					JABBERAddBuddy(&JB);
+					free(JB.name);
+					free(JB.sub);
+					free(JB.jid);
+					request_new_gmail(JConn, "0");
 				}
 			}
+			else if (!strcmp(ns, "google:mail:notify"))
+				if ((x = xmlnode_get_tag(packet->x, "mailbox")))
+					print_new_gmail(JConn, x);
+
 			eb_debug(DBG_JBR, "<\n");
 			return;
 		}
-		else
-		if (!strcmp(type, "set")) {
-			x = xmlnode_get_tag(packet->x, "query");
+		else if (!strcmp(type, "set")) {
+			if (!(x = xmlnode_get_firstchild(packet->x)))
+				return;
+
 			ns = xmlnode_get_attrib(x, "xmlns");
 			if (!strcmp(ns, NS_ROSTER)) {
 				y = xmlnode_get_tag(x, "item");
@@ -938,16 +1032,35 @@ void j_on_packet_handler(jconn conn, jpacket packet) {
 				if (sub && !strcmp(sub, "remove")) 
 					eb_debug(DBG_JBR, "Need to remove a buddy: %s\n", alias);
 			}
+			else if (!strcmp(ns, "google:mail:notify")) {
+				gchar *success;
+
+				success = g_strdup_printf(
+					"<iq type='result' "
+						"from='%s' "
+						"to='%s@%s' "
+						"id='%s' />",
+					JConn->jid,
+					JConn->conn->user->user,
+					JConn->conn->user->server,
+					id
+				);
+				jab_send_raw(JConn->conn, success);
+				g_free(success);
+				request_new_gmail(JConn, id);
+			}
 		}
-		else
-		if (!strcmp(type, "error")) {
+		else if (!strcmp(type, "error")) {
 			x = xmlnode_get_tag(packet->x, "error");
 			from = xmlnode_get_attrib(packet->x, "from");
 			to=xmlnode_get_attrib(packet->x, "to");
 			code = xmlnode_get_attrib(x, "code");
 			name = xmlnode_get_attrib(x, "id");
 			desc = xmlnode_get_tag_data(packet->x, "error");
-			eb_debug(DBG_JBR, "Received error: [%i]%s from %s[%s], sent to %s\n", atoi(code), desc, from, name, to);
+			eb_debug(
+					DBG_JBR, "Received error: [%i]%s from %s[%s], sent to %s\n",
+					atoi(code), desc, from, name, to);
+
 			switch (atoi(code)) {
 			case 401: /* Unauthorized */
 				if (JConn->reg_flag)

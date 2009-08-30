@@ -7,10 +7,11 @@
 
 #define DEFAULT_HOST "jabber.com"
 #define DEFAULT_PORT 5222
-
 #define LINE_LENGTH 513
-
 #define DBG_JBR do_jabber_debug
+
+#define F_GMAIL_NOTIFY (1 << 0)
+
 extern int do_jabber_debug;
 
 extern GList *agent_list;
@@ -50,19 +51,39 @@ typedef struct JABBERCONN {
     struct JABBERCONN *next;
     AyConnection *connection;
     int state;
+	int server_features;
+	int do_request_gmail;
 } JABBER_Conn;
 
 typedef struct INSTANT_MESSAGE {
-    int year;                    /* six fields used for time stamping */
-    int month;                   
-    int day;                 
-    int hour;
-    int minute;
-    int sec;            
     char *msg;                   /* message itself             */
     char *sender;                /* sender of the message      */
     JABBER_Conn *JConn;
 } JABBER_InstantMessage, *JABBER_InstantMessage_PTR;
+
+
+/* Use this struct to hold any service specific information you need about
+ * local accounts
+ * below are just some suggested values
+ */
+
+typedef struct _eb_jabber_local_account_data
+{
+	char password[MAX_PREF_LEN];	// account password
+	int fd;				// the file descriptor
+	int status;			// the current status of the user
+	int prompt_password;
+	JABBER_Conn	*JConn;
+	int activity_tag;
+	int connect_tag;
+	int typing_tag;
+	int use_ssl;
+	int request_gmail;
+	char server_port[MAX_PREF_LEN];
+	char ssl_server_port[MAX_PREF_LEN];
+        char connect_server[MAX_PREF_LEN];
+	LList *jabber_contacts;
+} eb_jabber_local_account_data;
 
 struct jabber_buddy
 {
@@ -119,7 +140,7 @@ int JABBER_AuthorizeContact(JABBER_Conn *conn, char *handle);
 ** Output:  0 on success, -1 on failure
 */
 
-int JABBER_Login(char *handle, char *passwd, char *host, char *connect_server, int use_ssl, int port);
+int JABBER_Login(char *handle, char *passwd, char *host, eb_jabber_local_account_data *jlad, int port);
 /*
 ** Name:    JABBER_SendMessage
 ** Purpose: This function encapuslates the sending of an instant message

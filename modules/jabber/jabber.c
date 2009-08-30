@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.56 $",
-	"$Date: 2009/08/28 11:30:33 $",
+	"$Revision: 1.57 $",
+	"$Date: 2009/08/30 13:55:35 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -157,29 +157,6 @@ typedef struct _jabber_info_data
 {
 	char *profile;
 } jabber_info_data;
-
-
-/* Use this struct to hold any service specific information you need about
- * local accounts
- * below are just some suggested values
- */
-
-typedef struct _eb_jabber_local_account_data
-{
-	char password[MAX_PREF_LEN];	// account password
-	int fd;				// the file descriptor
-	int status;			// the current status of the user
-	int prompt_password;
-	JABBER_Conn	*JConn;
-	int activity_tag;
-	int connect_tag;
-	int typing_tag;
-	int use_ssl;
-	char server_port[MAX_PREF_LEN];
-	char ssl_server_port[MAX_PREF_LEN];
-        char connect_server[MAX_PREF_LEN];
-	LList *jabber_contacts;
-} eb_jabber_local_account_data;
 
 static void eb_jabber_terminate_chat( eb_account * account );
 static void eb_jabber_add_user( eb_account * account );
@@ -317,8 +294,8 @@ static void eb_jabber_finish_login(const char *password, void *data)
 #endif
 		port = atoi(jlad->server_port);
 
-	jlad->connect_tag = JABBER_Login(account->handle, (char *)password,
-			jabber_server, jlad->connect_server, jlad->use_ssl, port);
+	jlad->connect_tag = JABBER_Login(
+			account->handle, (char *)password, jabber_server, jlad, port);
 }
 
 static void eb_jabber_login( eb_local_account * account )
@@ -491,7 +468,7 @@ static void jabber_account_prefs_init(eb_local_account *ela)
 	il->name = "USE_SSL";
 	il->label= _("Use _SSL");
 	il->type = EB_INPUT_CHECKBOX;
-#endif	
+#endif
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.entry.value = jlad->server_port;
@@ -506,7 +483,14 @@ static void jabber_account_prefs_init(eb_local_account *ela)
 	il->name = "SSL_PORT";
 	il->label= _("SSL Po_rt:");
 	il->type = EB_INPUT_ENTRY;
-#endif	
+#endif
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &jlad->request_gmail;
+	il->name = "gmail_request";
+	il->label= _("Request mail information (GMail only)");
+	il->type = EB_INPUT_CHECKBOX;
 }
 
 static eb_local_account * eb_jabber_read_local_account_config( LList * values )
