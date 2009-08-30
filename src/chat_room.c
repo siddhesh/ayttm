@@ -106,6 +106,8 @@ static void	free_chat_room(eb_chat_room *chat_room)
 {
 	LList *history = NULL;
 
+	eb_debug(DBG_CORE, "Freeing chat room %p\n");
+
 	if (!chat_room)
 		return;
 
@@ -527,7 +529,9 @@ static void invite_callback(GtkWidget *widget, gpointer data)
 		third = find_account_by_handle(acc, ecr->local_user->service_id);
 		if (third) {
 			chat_window_to_chat_room(ecr, third, gtk_entry_get_text(GTK_ENTRY(ecr->invite_message)));
+			/* Why do we do this? It breaks stuff
 			ecr->preferred = NULL;
+			*/
 		}
 	} else {
 		acc = strstr(invited, "(")+1;
