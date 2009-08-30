@@ -1,3 +1,15 @@
+* Sun Aug 30 2009 14:55 UTC [siddheshp]   0.5.0-139
+- ChangeLog, configure.ac, modules/msn2/msn.c,
+modules/msn2/libmsn2/msn-connection.c, modules/msn2/libmsn2/msn-contacts.c,
+modules/msn2/libmsn2/msn-errors.c, modules/msn2/libmsn2/msn-login.c,
+modules/msn2/libmsn2/msn-soap.c, modules/msn2/libmsn2/msn-soap.h,
+modules/msn2/libmsn2/msn.c:
+ * MSN: Create Address book if it does not exist
+ * MSN: New users do not have any BLP setting by default
+ * MSN: Fixed memory corruption when an invalid username/password is provided
+ * MSN: Fixed a couple of corner cases where freeing a connection could cause
+ a crash
+
 * Sun Aug 30 2009 14:55 UTC [siddheshp]   0.5.0-138
 - ChangeLog, configure.ac, modules/aim-oscar/aim-oscar.c, modules/irc/irc.c,
 modules/irc/irc.h, modules/jabber/jabber.c, modules/msn2/msn.c,

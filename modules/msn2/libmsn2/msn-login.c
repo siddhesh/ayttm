@@ -464,6 +464,8 @@ void msn_login(MsnAccount *ma)
 
 void msn_logout(MsnAccount *ma)
 {
+	LList *l = NULL;
+
 	msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_OUT);
 
 	msn_connection_free(ma->ns_connection);
@@ -471,7 +473,24 @@ void msn_logout(MsnAccount *ma)
 
 	ma->status = MSN_STATE_OFFLINE;
 
-	l_list_foreach(ma->connections, (LListFunc)msn_connection_free, NULL);
+	free(ma->ticket);
+	free(ma->nonce);
+	free(ma->secret);
+	free(ma->contact_ticket);
+	free(ma->policy);
+
+	ma->ticket = NULL;
+	ma->nonce = NULL;
+	ma->secret = NULL;
+	ma->contact_ticket = NULL;
+	ma->policy = NULL;
+
+	for(l = ma->connections; l; l = l_list_next(l)) {
+		MsnConnection *con = l->data;
+		/* HTTP connections clean up themselves. Don't bother. */
+		if(con->type != MSN_CONNECTION_HTTP)
+			msn_connection_free(con);
+	}
 
 	l_list_foreach(ma->buddies, (LListFunc)msn_buddy_reset, NULL);
 }

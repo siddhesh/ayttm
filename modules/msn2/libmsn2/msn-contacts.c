@@ -159,6 +159,7 @@ static void _send_adl(MsnAccount *ma)
 	int offset = 0;
 	char *cur_domain = NULL;
 	int cur_type = 0;
+	int sent = 0;
 
 	/* Sort the list */
 	while(in) {
@@ -225,6 +226,7 @@ static void _send_adl(MsnAccount *ma)
 			else
 				msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
 
+			sent = 1;
 			buf[0] = '\0';
 			offset = 0;
 			count = 0;
@@ -256,9 +258,14 @@ static void _send_adl(MsnAccount *ma)
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_ADL, bufsize);
 		else
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
+
+		sent = 1;
 	}
 
-	msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response, NULL);
+	if(sent)
+		msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response, NULL);
+	else
+		ext_msn_contacts_synced(ma);
 
 }
 
@@ -270,11 +277,12 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 	char *chunk;
 	char *blp_offset;
 
+
 	/* Pick groups */
 	_get_next_tag_chunk(&chunk, &offset, "groups");
 
 	if(!chunk)
-		return;
+		goto ret;
 
 	while(chunk) {
 		char *in_offset = chunk;
@@ -302,17 +310,15 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 
 	_get_next_tag_chunk(&chunk, &offset, "contacts");
 	if(!chunk)
-		return;
+		goto ret;
 
 	/* HACK! Get BLP. We don't seem to need GTC anymore */
 	blp_offset = strstr(chunk, "MSN.IM.BLP");
-	if(!blp_offset) {
-		ext_show_error(ma->ns_connection, "Invalid Address book data from server");
+	if(blp_offset) {
+		blp_offset = strstr(blp_offset, "<Value>");
+		blp_offset += 7;
+		ma->blp = blp_offset[0] - '0';
 	}
-
-	blp_offset = strstr(blp_offset, "<Value>");
-	blp_offset += 7;
-	ma->blp = blp_offset[0] - '0';
 
 	msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_BLP, ma->blp?MSN_PRIVACY_ALLOW:MSN_PRIVACY_BLOCK);
 
@@ -412,6 +418,7 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 		}
 	}
 
+ret:
 	_send_adl(ma);
 
 	/* Send your friendly name */
@@ -433,10 +440,32 @@ void msn_download_address_book(MsnAccount *ma)
 }
 
 
+static void msn_ab_create_response(MsnAccount *ma, char *data, int len, void *cbdata)
+{
+	/* Give it another shot */
+	msn_sync_contacts(ma);
+}
+
+
 static void msn_membership_response(MsnAccount *ma, char *data, int len, void *cbdata)
 {
 	char *offset = data;
 	MsnBuddyType cur_type = -1;
+
+	/* Does not have an address book. Create one. */
+	if(strstr(data, "ABDoesNotExist")) {
+		char *url = strdup("https://contacts.msn.com/abservice/abservice.asmx");
+		char *soap_action = "http://www.msn.com/webservices/AddressBook/ABAdd";
+        
+		char *ab_request = msn_soap_build_request(MSN_CREATE_ADDRESS_BOOK, ma->contact_ticket, ma->passport);	
+        
+		msn_http_request(ma, MSN_HTTP_POST, soap_action, url, ab_request, msn_ab_create_response, NULL, NULL);
+        
+		free(url);
+		free(ab_request);
+
+		return;
+	}
 
 	while (offset) {
 		char *chunk;

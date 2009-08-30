@@ -74,7 +74,7 @@ static const MsnError errors[] = {
 
 			{MSN_ERROR_CONNECTION_RESET, "Server closed connection", 1, 0},
 			{MSN_LOGIN_FAIL_PASSPORT, "Invalid username", 1, 1},
-			{MSN_LOGIN_FAIL_SSO, "Authentication failed", 1, 1},
+			{MSN_LOGIN_FAIL_SSO, "Invalid Username or password", 1, 1},
 			{MSN_LOGIN_FAIL_VER, "Error during login", 1, 1},
 			{MSN_LOGIN_FAIL_OTHER, "Login failed due to unknown reasons", 1, 1},
 			{MSN_MESSAGE_DELIVERY_FAILED, "Failed to deliver message", 0, 0},

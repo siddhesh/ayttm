@@ -142,8 +142,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.7 $",
-	"$Date: 2009/08/30 14:55:58 $",
+	"$Revision: 1.8 $",
+	"$Date: 2009/08/30 19:37:32 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -677,6 +677,8 @@ void ay_msn_connected(AyConnection *fd, int error, void *data)
 	MsnConnectionCallback callback = ((struct ay_msn_cbdata *)data)->callback;
 	eb_local_account *ela = (eb_local_account *)mc->account->ext_data;
 
+	mc->ext_data = fd;
+	
 	if(!fd || error) {
 		char errbuf[1024];
 
@@ -703,8 +705,6 @@ void ay_msn_connected(AyConnection *fd, int error, void *data)
 
 	mc->tag_c = 0;
 
-	mc->ext_data = fd;
-	
 	ext_register_read(mc);
 
 	ay_msn_connect_status(_("Connected, sending login information"), mc);

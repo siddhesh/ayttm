@@ -26,6 +26,7 @@
 extern const char *MSN_SOAP_LOGIN_REQUEST;
 extern const char *MSN_MEMBERSHIP_LIST_REQUEST;
 extern const char *MSN_MEMBERSHIP_LIST_MODIFY;
+extern const char *MSN_CREATE_ADDRESS_BOOK;
 extern const char *MSN_CONTACT_LIST_REQUEST;
 extern const char *MSN_CONTACT_ADD_REQUEST;
 extern const char *MSN_CONTACT_UPDATE_REQUEST;

@@ -117,6 +117,8 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 
 	}
 	else if (mc->type == MSN_CONNECTION_NS || mc->type == MSN_CONNECTION_SB) {
+		MsnAccount *ma = mc->account;
+
 		if(len == 0) {
 			const MsnError *error = msn_strerror(MSN_ERROR_CONNECTION_RESET);
 			ext_msn_error(mc, error);
@@ -143,11 +145,13 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 				if( !msn_message_is_error(mc) && msn_connection_pop_callback(mc) == 0 ) 
 					msn_message_handle_incoming(mc);
                                 
-				if( mc->account ) {
+				/* Connection could have been freed earlier */
+				if( ma->ns_connection ) {
 					msn_connection_free_current_message(mc);
-				}
-				else {
-					msn_connection_free(mc);
+
+					/* Orphaned so that it can be freed */
+					if(!mc->account)
+						msn_connection_free(mc);
 				}
 			}
 		} while(remaining > 0);
@@ -163,7 +167,10 @@ void msn_connection_send_data (MsnConnection *mc,char *data,int len)
 }
 
 void msn_connection_free(MsnConnection *mc)
-{ 
+{
+	if(!mc)
+		return;
+
 	ext_msn_free(mc); 
 	msn_connection_free_current_message(mc); 
 	l_list_free(mc->callbacks); 

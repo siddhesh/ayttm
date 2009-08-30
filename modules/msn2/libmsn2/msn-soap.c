@@ -117,6 +117,38 @@ const char *MSN_MEMBERSHIP_LIST_REQUEST =
 "</soap:Envelope>";
 
 
+const char *MSN_CREATE_ADDRESS_BOOK = 
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+"<soap:Envelope"
+	" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\""
+	" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+	" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
+	" xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\">"
+	"<soap:Header>"
+		"<ABApplicationHeader xmlns=\"http://www.msn.com/webservices/AddressBook\">"
+			"<ApplicationId>CFE80F9D-180F-4399-82AB-413F33A1FA11</ApplicationId>"
+			"<IsMigration>false</IsMigration>"
+			"<PartnerScenario>Initial</PartnerScenario>"
+		"</ABApplicationHeader>"
+		"<ABAuthHeader xmlns=\"http://www.msn.com/webservices/AddressBook\">"
+			"<ManagedGroupRequest>false</ManagedGroupRequest>"
+			"<TicketToken>%s</TicketToken>"
+		"</ABAuthHeader>"
+	"</soap:Header>"
+	"<soap:Body>"
+		"<ABAdd xmlns=\"http://www.msn.com/webservices/AddressBook\">"
+			"<abInfo>"
+				"<name/>"
+				"<ownerPuid>0</ownerPuid>"
+				"<ownerEmail>%s</ownerEmail>"
+				"<fDefault>true</fDefault>"
+			"</abInfo>"
+		"</ABAdd>"
+	"</soap:Body>"
+"</soap:Envelope>";
+
+
+
 const char *MSN_CONTACT_LIST_REQUEST = 
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\">"
