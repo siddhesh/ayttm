@@ -1,3 +1,11 @@
+* Sun Aug 30 2009 13:58 UTC [pstef]   0.5.0-137
+- ChangeLog, configure.ac, modules/jabber/jabber.c,
+modules/jabber/libEBjabber.c, modules/jabber/libEBjabber.h, src/chat_room.c,
+src/chat_window.c, src/chat_window.h , src/prefs.c, src/prefs.c,
+src/gtk/prefs_window.C:
+ * Jabber: Gmail Notifications support
+ * Only raise window on particular regex. This closes #856326
+
 * Sat Aug 29 2009 19:25 UTC [siddheshp]   0.5.0-136
 - ChangeLog, configure.ac, modules/yahoo2/yahoo.c,
 modules/yahoo2/libyahoo2/libyahoo2.c, src/chat_room.c:
@@ -6,7 +14,6 @@ modules/yahoo2/libyahoo2/libyahoo2.c, src/chat_room.c:
  * YMSG: Prettier messages
  * CORE: Fixed case where preferred account for a room would be reset when a
  chat room is cloned out of it
-
 
 * Fri Aug 28 2009 11:30 UTC [pstef]   0.5.0-135
 - ChangeLog, configure.ac, src/account.h, src/contact.h, src/service.h,
