@@ -66,6 +66,7 @@ struct prefs
 	{
 		int		do_ignore_unknown;
 		int		do_raise_window;
+		char	regex_pattern[MAX_PREF_LEN];
 		int		do_send_idle_time;
 		int		do_convo_timestamp;
 		int		do_smiley;

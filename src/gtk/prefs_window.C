@@ -212,6 +212,7 @@ class ay_chat_panel : public ay_prefs_window_panel
 		struct prefs::chat &m_prefs;
 		
 		GtkWidget	*m_dictionary_entry;
+		GtkWidget	*m_regex_entry;
 		GtkWidget	*m_font_face_entry;
 		GtkWidget	*m_font_sel_win;
 		int			 m_font_sel_conn_id;
@@ -1196,6 +1197,7 @@ ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &in
 :	ay_prefs_window_panel( inTopFrameText ),
 	m_prefs( inPrefs ),
 	m_dictionary_entry( NULL ),
+	m_regex_entry( NULL ),
 	m_font_face_entry( NULL ),
 	m_font_sel_win( NULL ),
 	m_font_sel_conn_id( 0 )
@@ -1205,19 +1207,45 @@ ay_chat_panel::ay_chat_panel( const char *inTopFrameText, struct prefs::chat &in
 // Build
 void	ay_chat_panel::Build( GtkWidget *inParent )
 {
-	_gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
-	_gtkut_button( _("Show timestamps in chat window"), &m_prefs.do_convo_timestamp, m_top_vbox );
-	_gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, m_top_vbox );
-	_gtkut_button( _("Enable Smileys"), &m_prefs.do_smiley, m_top_vbox );
-	_gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
-	_gtkut_button( _("On the fly chat completion"), &m_prefs.do_auto_complete, m_top_vbox );
-	
-	
 	GtkWidget *hbox = NULL;
 	GtkWidget *spacer = NULL;
 	GtkWidget *label = NULL;
 	GtkWidget *button = NULL;
+
+	_gtkut_button( _("Send idle/away status to servers"), &m_prefs.do_send_idle_time, m_top_vbox );
+	_gtkut_button( _("Show timestamps in chat window"), &m_prefs.do_convo_timestamp, m_top_vbox );
+
+        // raise button
+	hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
+	button = _gtkut_button( _("Raise chat-window when receiving a message"), &m_prefs.do_raise_window, hbox );
+	gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(s_toggle_checkbox), this );
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
+
+        // regex dialog
+	hbox = gtk_hbox_new( FALSE, 0 );
+	gtk_widget_show( hbox );
 	
+	spacer = gtk_label_new( "" );
+	gtk_widget_show( spacer );
+	gtk_widget_set_usize( spacer, 15, -1 );
+	gtk_box_pack_start( GTK_BOX(hbox), spacer, FALSE, FALSE, 0 );
+
+	label = gtk_label_new( _("Only on regex:") );
+	gtk_widget_show( label );
+	gtk_box_pack_start( GTK_BOX(hbox), label, FALSE, FALSE, 0 );
+
+	m_regex_entry = gtk_entry_new();
+	gtk_widget_show( m_regex_entry );
+	gtk_entry_set_text( GTK_ENTRY(m_regex_entry), m_prefs.regex_pattern );
+	gtk_box_pack_start( GTK_BOX(hbox), m_regex_entry, TRUE, TRUE, 10 );
+	
+	gtk_box_pack_start( GTK_BOX(m_top_vbox), hbox, FALSE, FALSE, 0 );
+
+
+	_gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
+	_gtkut_button( _("On the fly chat completion"), &m_prefs.do_auto_complete, m_top_vbox );
+
 #ifdef HAVE_LIBASPELL
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
@@ -1325,7 +1353,8 @@ void	ay_chat_panel::Apply( void )
 	}
 	
 	strncpy( m_prefs.spell_dictionary, gtk_entry_get_text(GTK_ENTRY(m_dictionary_entry)), MAX_PREF_LEN );
-	
+	strncpy( m_prefs.regex_pattern, gtk_entry_get_text(GTK_ENTRY(m_regex_entry)), MAX_PREF_LEN );
+
 	if ( needs_reload )
 		ay_spell_check_reload();
 #endif
@@ -1334,6 +1363,7 @@ void	ay_chat_panel::Apply( void )
 // SetActiveWidgets
 void	ay_chat_panel::SetActiveWidgets( void )
 {
+	gtk_widget_set_sensitive( m_regex_entry, m_prefs.do_raise_window );
 #ifdef HAVE_LIBASPELL
 	gtk_widget_set_sensitive( m_dictionary_entry, m_prefs.do_spell_checking );
 #endif

@@ -677,6 +677,7 @@ void	ayttm_prefs_init( void )
 	iSetLocalPref( "do_ignore_unknown", 0 );
 	iSetLocalPref( "do_multi_line", 1 );
 	iSetLocalPref( "do_raise_window", 0 );
+	cSetLocalPref( "regex_pattern", "" );
 	iSetLocalPref( "do_send_idle_time", 0 );
 	iSetLocalPref( "do_timestamp", 0 );
 	iSetLocalPref( "do_ignore_fore", 1 );
@@ -950,6 +951,7 @@ void	ayttm_prefs_write( void )
 	fprintf( fp, "do_ignore_unknown=%d\n", iGetLocalPref("do_ignore_unknown") );
 	fprintf( fp, "do_multi_line=%d\n", iGetLocalPref("do_multi_line") );
 	fprintf( fp, "do_raise_window=%d\n", iGetLocalPref("do_raise_window") );
+	fprintf( fp, "regex_pattern=%s\n", cGetLocalPref("regex_pattern") );
 	fprintf( fp, "do_smiley=%d\n", iGetLocalPref("do_smiley") );
 	fprintf( fp, "do_send_idle_time=%d\n", iGetLocalPref("do_send_idle_time") );
 	fprintf( fp, "do_timestamp=%d\n", iGetLocalPref("do_timestamp") );
@@ -1046,7 +1048,8 @@ void	ayttm_prefs_show_window( int pagenum )
 	/* chat prefs */
 	prefs->chat.do_convo_timestamp    = iGetLocalPref("do_convo_timestamp");
 	prefs->chat.do_ignore_unknown     = iGetLocalPref("do_ignore_unknown");
-	prefs->chat.do_raise_window       = iGetLocalPref("do_raise_window");	
+	prefs->chat.do_raise_window       = iGetLocalPref("do_raise_window");
+	strncpy( prefs->chat.regex_pattern, cGetLocalPref("regex_pattern"), MAX_PREF_LEN );
 	prefs->chat.do_smiley             = iGetLocalPref("do_smiley");	
 	prefs->chat.do_send_idle_time     = iGetLocalPref("do_send_idle_time");
 	prefs->chat.do_ignore_fore        = iGetLocalPref("do_ignore_fore");
@@ -1209,6 +1212,7 @@ void	ayttm_prefs_apply( struct prefs *inPrefs )
 	iSetLocalPref( "do_convo_timestamp", inPrefs->chat.do_convo_timestamp );
 	iSetLocalPref( "do_ignore_unknown", inPrefs->chat.do_ignore_unknown );
 	iSetLocalPref( "do_raise_window", inPrefs->chat.do_raise_window );
+	cSetLocalPref( "regex_pattern", inPrefs->chat.regex_pattern );
 	iSetLocalPref( "do_smiley", inPrefs->chat.do_smiley );
 	iSetLocalPref( "do_send_idle_time", inPrefs->chat.do_send_idle_time );
 	iSetLocalPref( "do_ignore_fore", inPrefs->chat.do_ignore_fore );

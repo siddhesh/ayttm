@@ -106,8 +106,6 @@ static void	free_chat_room(eb_chat_room *chat_room)
 {
 	LList *history = NULL;
 
-	eb_debug(DBG_CORE, "Freeing chat room %p\n");
-
 	if (!chat_room)
 		return;
 
@@ -529,9 +527,7 @@ static void invite_callback(GtkWidget *widget, gpointer data)
 		third = find_account_by_handle(acc, ecr->local_user->service_id);
 		if (third) {
 			chat_window_to_chat_room(ecr, third, gtk_entry_get_text(GTK_ENTRY(ecr->invite_message)));
-			/* Why do we do this? It breaks stuff 
 			ecr->preferred = NULL;
-			 */
 		}
 	} else {
 		acc = strstr(invited, "(")+1;
@@ -1441,7 +1437,7 @@ void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user, const
 		}
 		if (!gtk_window_is_active(GTK_WINDOW(chat_room->window)))
 			eb_chat_room_update_window_title(chat_room, TRUE);
-		if (iGetLocalPref("do_raise_window"))
+		if (should_window_raise(message))
 			gdk_window_raise(chat_room->window->window);
 		if (chat_room->notebook) {
 			int current_num = gtk_notebook_get_current_page(GTK_NOTEBOOK(chat_room->notebook));

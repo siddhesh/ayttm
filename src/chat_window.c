@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include <ctype.h>
+#include <regex.h>
 
 #include "auto_complete.h"
 
@@ -1341,6 +1342,28 @@ void eb_chat_window_do_timestamp(struct contact *c, gboolean online)
 	html_text_buffer_append(GTK_TEXT_VIEW(c->chatwindow->chat), buff, HTML_IGNORE_NONE);
 }
 
+int should_window_raise(const char *message)
+{
+	if (iGetLocalPref("do_raise_window")) {
+		char *thepattern = cGetLocalPref("regex_pattern");
+
+		if (thepattern && thepattern[0]) {
+			regex_t myreg;
+			regmatch_t pmatch;
+			int rc = regcomp(&myreg, thepattern, REG_EXTENDED | REG_ICASE);
+
+			if (!rc) {
+				rc = regexec(&myreg, message, 1, &pmatch, 0);
+				if (!rc)
+					return 1;
+			}
+		}
+		else
+			/* no pattern specified. Assume always. */
+			return 1;
+	}
+	return 0;
+}
 
 void eb_chat_window_display_remote_message(eb_local_account *account,
 					   eb_account *remote, gchar *o_message)
@@ -1451,8 +1474,6 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 
 			set_tab_red(remote_contact->chatwindow);
 	}
-	else if (iGetLocalPref("do_raise_window"))
-			gdk_window_show(remote_contact->chatwindow->window->window);	  
 
 	if (!gtk_window_is_active(GTK_WINDOW(remote_contact->chatwindow->window)))
 		EB_UPDATE_WINDOW_TITLE(remote_contact->chatwindow, TRUE);
@@ -1466,9 +1487,9 @@ void eb_chat_window_display_remote_message(eb_local_account *account,
 			play_sound(SOUND_RECEIVE);
 	}
 
-	/* for raising the window*/
-	if (iGetLocalPref("do_raise_window"))
-		gdk_window_show(remote_contact->chatwindow->window->window);
+	/* for raising the window */
+	if (should_window_raise(o_message))
+		gdk_window_raise(remote_contact->chatwindow->window->window);
 
 	if (iGetLocalPref("do_convo_timestamp")) {
 		gchar *color;

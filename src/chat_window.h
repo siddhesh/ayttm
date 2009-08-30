@@ -121,8 +121,8 @@ chat_window * eb_chat_window_new( eb_local_account * local, struct contact * rem
 void eb_chat_window_display_remote_message( eb_local_account * account, eb_account * remote, 
 						gchar * message);
 
+int should_window_raise(const char *message);
 void eb_chat_window_display_status( eb_account * remote, gchar * message );
-
 void eb_chat_window_display_contact( struct contact * remote_contact );
 void eb_chat_window_display_account( eb_account * remote_account );
 void eb_chat_window_display_error( eb_account * remote, gchar * message );
