@@ -475,6 +475,10 @@ static void msn_membership_response(MsnAccount *ma, char *data, int len, void *c
 		if(!chunk)
 			break;
 
+#if __DEBUG__
+		printf("Processing List :: %s\n", chunk);
+#endif
+
 		if(!strcmp(chunk, "Forward"))
 			cur_type = MSN_BUDDY_FORWARD;
 		else if(!strcmp(chunk, "Allow"))
@@ -486,12 +490,12 @@ static void msn_membership_response(MsnAccount *ma, char *data, int len, void *c
 		else if(!strcmp(chunk, "Pending"))
 			cur_type = MSN_BUDDY_PENDING;
 		else
-			break;	/* We don't really care about anything else */
+			continue;	/* We don't really care about anything else */
 
 		/* Now Pick members in the list */
 		_get_next_tag_chunk(&chunk, &offset, "Members");
 		if(!chunk)
-			break;
+			continue;
 
 		while(chunk) {
 			int type = 0;

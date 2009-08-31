@@ -142,8 +142,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.8 $",
-	"$Date: 2009/08/30 19:37:32 $",
+	"$Revision: 1.9 $",
+	"$Date: 2009/08/31 11:10:01 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -828,7 +828,8 @@ void ext_msn_contacts_synced(MsnAccount *ma)
 		MsnBuddy *bud = buds->data;
 		int changed = FALSE;
 
-		if (bud->list & MSN_BUDDY_PENDING) {
+		/* I got a case when buddy was in allow as well as pending. Weird. */
+		if (!(bud->list & MSN_BUDDY_ALLOW) && bud->list & MSN_BUDDY_PENDING) {
 			changed = ay_msn_authorize_user(ela, bud);
 			if(!changed)
 				continue;

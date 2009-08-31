@@ -1,3 +1,9 @@
+* Mon Aug 31 2009 11:05 UTC [siddheshp]   0.5.0-141
+- ChangeLog, configure.ac, modules/msn2/msn.c,
+modules/msn2/libmsn2/msn-contacts.c:
+ * MSN: Handle case when buddy is in Allow list as well as Pending
+ * MSN: Continue processing all Member roles
+
 * Mon Aug 31 2009 08:45 UTC [siddheshp]   0.5.0-140
 - ChangeLog, configure.ac, modules/msn2/libmsn2/msn-connection.c,
 modules/msn2/libmsn2/msn-login.c:
