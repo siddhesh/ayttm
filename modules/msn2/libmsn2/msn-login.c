@@ -361,7 +361,7 @@ static void msn_got_usr_response(MsnConnection *mc, void *data)
 			ma->ns_connection = NULL;
 
 			ext_msn_login_response(mc->account, MSN_LOGIN_FAIL_OTHER);
-			mc->account = NULL;
+			msn_connection_free(mc);
 
 			return;
 		}

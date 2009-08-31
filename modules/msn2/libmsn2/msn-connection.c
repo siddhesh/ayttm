@@ -142,7 +142,7 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 				 * Check if this is a response to a previous message
 				 * Otherwise look for the default handler for the message
 				 */
-				if( !msn_message_is_error(mc) && msn_connection_pop_callback(mc) == 0 ) 
+				if( msn_connection_pop_callback(mc) == 0 ) 
 					msn_message_handle_incoming(mc);
                                 
 				/* Connection could have been freed earlier */
@@ -150,8 +150,10 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 					msn_connection_free_current_message(mc);
 
 					/* Orphaned so that it can be freed */
-					if(!mc->account)
+					if(!mc->account) {
 						msn_connection_free(mc);
+						return 1;
+					}
 				}
 			}
 		} while(remaining > 0);

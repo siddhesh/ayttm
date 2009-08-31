@@ -1,3 +1,8 @@
+* Mon Aug 31 2009 08:45 UTC [siddheshp]   0.5.0-140
+- ChangeLog, configure.ac, modules/msn2/libmsn2/msn-connection.c,
+modules/msn2/libmsn2/msn-login.c:
+ * MSN: Cease polling immediately after freeing connection
+
 * Sun Aug 30 2009 14:55 UTC [siddheshp]   0.5.0-139
 - ChangeLog, configure.ac, modules/msn2/msn.c,
 modules/msn2/libmsn2/msn-connection.c, modules/msn2/libmsn2/msn-contacts.c,
