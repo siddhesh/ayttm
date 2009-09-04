@@ -81,7 +81,7 @@ typedef void (*MsnCallbackHandler)(MsnConnection *mc, void *data);
 void msn_connection_push_callback(MsnConnection *mc, MsnCallbackHandler handle, void *data);
 int msn_connection_pop_callback(MsnConnection *mc);
 
-#define msn_connection_new() ( m_new0(MsnConnection, 1) )
+MsnConnection *msn_connection_new();
 
 #define msn_connection_free_current_message(mc) { \
 	if (mc->current_message) { \

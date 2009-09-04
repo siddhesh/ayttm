@@ -29,6 +29,8 @@
 #include "msn-http.h"
 #include "msn-ext.h"
 
+#define __DEBUG__ 0
+
 typedef struct {
 	int trid;
 	MsnCallbackHandler handler;
@@ -151,6 +153,9 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 
 					/* Orphaned so that it can be freed */
 					if(!mc->account) {
+						if(mc->type != MSN_CONNECTION_NS)
+							ma->connections = l_list_remove(ma->connections, mc);
+
 						msn_connection_free(mc);
 						return 1;
 					}
@@ -168,8 +173,21 @@ void msn_connection_send_data (MsnConnection *mc,char *data,int len)
 	ext_msn_send_data(mc,data,len);
 }
 
+MsnConnection *msn_connection_new()
+{
+	MsnConnection *mc = m_new0(MsnConnection, 1);
+#if __DEBUG__
+	fprintf(stderr, "Creating %p\n", mc);
+#endif
+
+	return mc;
+}
+
 void msn_connection_free(MsnConnection *mc)
 {
+#if __DEBUG__
+	fprintf(stderr, "Freeing %p\n", mc);
+#endif
 	if(!mc)
 		return;
 

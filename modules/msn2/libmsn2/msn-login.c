@@ -248,11 +248,7 @@ static void msn_sso_response(MsnAccount *ma, char *data, int len, void *cbdata)
 
 	if(!ma->ticket) {
 		/* Flag Error */
-		msn_connection_free(ma->ns_connection);
-		ma->ns_connection = NULL;
-
 		fprintf(stderr, "No ticket!!\n");
-
 		ext_msn_login_response(ma, MSN_LOGIN_FAIL_SSO);
 
 		return;
@@ -274,9 +270,6 @@ static void msn_sso_response(MsnAccount *ma, char *data, int len, void *cbdata)
 
 	if(!ma->secret) {
 		/* Flag Error */
-		msn_connection_free(ma->ns_connection);
-		ma->ns_connection = NULL;
-
 		fprintf(stderr, "No secret!!\n");
 
 		ext_msn_login_response(ma, MSN_LOGIN_FAIL_SSO);
@@ -302,9 +295,6 @@ static void msn_sso_response(MsnAccount *ma, char *data, int len, void *cbdata)
 
 	if(!ma->contact_ticket) {
 		/* Flag Error */
-		msn_connection_free(ma->ns_connection);
-		ma->ns_connection = NULL;
-
 		fprintf(stderr, "No contact ticket!!\n");
 
 		ext_msn_login_response(ma, MSN_LOGIN_FAIL_SSO);
@@ -466,7 +456,9 @@ void msn_logout(MsnAccount *ma)
 {
 	LList *l = NULL;
 
-	msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_OUT);
+	/* Don't bother if the connection has already been freed */
+	if(ma->ns_connection)
+		msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_OUT);
 
 	msn_connection_free(ma->ns_connection);
 	ma->ns_connection = NULL;
@@ -487,10 +479,11 @@ void msn_logout(MsnAccount *ma)
 
 	for(l = ma->connections; l; l = l_list_next(l)) {
 		MsnConnection *con = l->data;
-		/* HTTP connections clean up themselves. Don't bother. */
-		if(con->type != MSN_CONNECTION_HTTP)
-			msn_connection_free(con);
+		msn_connection_free(con);
 	}
+
+	l_list_free(ma->connections);
+	ma->connections = NULL;
 
 	l_list_foreach(ma->buddies, (LListFunc)msn_buddy_reset, NULL);
 }

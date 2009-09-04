@@ -1,3 +1,9 @@
+* Fri Sep 04 2009 17:30 UTC [siddheshp]   0.5.0-142
+- ChangeLog, configure.ac, modules/msn2/msn.c,
+modules/msn2/libmsn2/msn-connection.c, modules/msn2/libmsn2/msn-connection.h,
+modules/msn2/libmsn2/msn-login.c, modules/msn2/libmsn2/msn.c:
+ * MSN: Fix random crashes on connection cancellation
+
 * Mon Aug 31 2009 11:05 UTC [siddheshp]   0.5.0-141
 - ChangeLog, configure.ac, modules/msn2/msn.c,
 modules/msn2/libmsn2/msn-contacts.c:

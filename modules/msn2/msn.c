@@ -142,8 +142,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.9 $",
-	"$Date: 2009/08/31 11:10:01 $",
+	"$Revision: 1.10 $",
+	"$Date: 2009/09/04 17:30:26 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1584,7 +1584,8 @@ static void ay_msn_incoming(AyConnection *source, eb_input_condition condition, 
 
 	memset(buf, 0, sizeof(buf));
 
-	if(!ela->connecting && !ela->connected) {
+	/* We're logged out. Clean up. */
+	if((!ela->connecting && !ela->connected) || !mc->account->ns_connection) {
 		ay_msn_logout(ela);
 		return;
 	}

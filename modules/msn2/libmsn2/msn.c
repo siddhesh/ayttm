@@ -75,10 +75,11 @@ void msn_account_cancel_connect(MsnAccount *ma)
 
 	for(l = ma->connections; l; l = l_list_next(l)) {
 		MsnConnection *con = l->data;
-		/* HTTP connections clean up themselves. Don't bother. */
-		if(con->type != MSN_CONNECTION_HTTP)
-			msn_connection_free(con);
+		msn_connection_free(con);
 	}
+
+	l_list_free(ma->connections);
+	ma->connections = NULL;
 }
 
 
