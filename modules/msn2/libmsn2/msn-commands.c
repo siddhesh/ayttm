@@ -127,7 +127,7 @@ MsnCommandInfo msn_commands[] = {
 	{ "QRY", MSN_COMMAND_QRY,  3, 3, msn_command_got_QRY, msn_command_parse_payload_QRY },
 	{ "SBS", MSN_COMMAND_SBS,  2, 0, msn_command_got_SBS, NULL },
 	{ "REA", MSN_COMMAND_REA,  0, 0, msn_command_got_REA, NULL },
-	{ "RML", MSN_COMMAND_RML,  0, 0, msn_command_got_RML, NULL },
+	{ "RML", MSN_COMMAND_RML,  2, 2, msn_command_got_RML, NULL },
 	{ "RMG", MSN_COMMAND_RMG,  0, 0, msn_command_got_RMG, NULL },
 	{ "UBX", MSN_COMMAND_UBX,  3, 3, msn_command_got_UBX, msn_command_parse_payload_UBX },
 	{ "SDC", MSN_COMMAND_SDC,  0, 0, msn_command_got_SDC, NULL },
@@ -168,41 +168,88 @@ MsnCommand msn_command_get_from_string(char *cmd)
 
 static void msn_command_parse_payload_FQY (MsnMessage *msg)
 {
-	if(!msg->payload_info) {
-		msg->payload_info = m_new0(MsnMessagePayload, 1);
-	}
+
 }
 
 
 static void msn_command_parse_payload_ADL (MsnMessage *msg)
 {
-	if(!msg->payload_info) {
-		msg->payload_info = m_new0(MsnMessagePayload, 1);
+	char *start = NULL;
+	LList *newbuds = NULL;
+	start = strstr(msg->payload, "<d n=");
+
+	while(start) {
+		char *users = NULL, *user = NULL;
+		char *domain = start+6;
+		char *end = strchr(domain, '>');
+
+		*(end-1) = '\0';
+		users = end+1;
+		end = strstr(end, "</d>");
+		*end = '\0';
+
+		while((user = strstr(users, "<c "))) {
+			char buddy_buf[255];
+			char *buddy_name;
+			char *attr = NULL, *attr_end = NULL;
+			int type = 0;
+			int list = 0;
+			char *uend = strstr(user, "/>");
+
+			MsnBuddy *bud = m_new0(MsnBuddy, 1);
+
+			user += 3;
+			*uend = '\0';
+
+			attr = strstr(user, "n=\"");
+			attr += 3;
+			attr_end = strchr(attr, '\"');
+
+			*attr_end = '\0';
+			buddy_name = strdup(attr);
+			*attr_end = '\"';
+
+			if((attr = strstr(user, "t=\"")))
+				type = attr[3] - '0';
+
+			if((attr = strstr(user, "l=\"")))
+				list = attr[3] - '0';
+
+			snprintf(buddy_buf, sizeof(buddy_buf), "%s@%s", buddy_name, domain);
+
+			bud->passport = strdup(buddy_buf);
+			bud->type = (type == 1)?MSN_BUDDY_PASSPORT:MSN_BUDDY_EMAIL;
+			bud->list = list;
+
+			newbuds = l_list_append(newbuds, bud);
+
+			free(buddy_name);
+
+			users = uend+1;
+		}
+
+		start = strstr(end+1, "<d n=");
 	}
+
+	msg->payload_info = newbuds;
 }
 
 
 static void msn_command_parse_payload_GCF (MsnMessage *msg)
 {
-	if(!msg->payload_info) {
-		msg->payload_info = m_new0(MsnMessagePayload, 1);
-	}
+
 }
 
 
 static void msn_command_parse_payload_UBX (MsnMessage *msg)
 {
-	if(!msg->payload_info) {
-		msg->payload_info = m_new0(MsnMessagePayload, 1);
-	}
+
 }
 
 
 static void msn_command_parse_payload_QRY (MsnMessage *msg)
 {
-	if(!msg->payload_info) {
-		msg->payload_info = m_new0(MsnMessagePayload, 1);
-	}
+
 }
 
 
@@ -360,7 +407,7 @@ static void msn_command_got_ILN (MsnConnection *mc)
 		bud = buds->data;
 
 		if(!strcmp(bud->passport, msg->argv[3])) {
-			if(strcmp(bud->friendlyname, msg->argv[5])) {
+			if(!bud->friendlyname || strcmp(bud->friendlyname, msg->argv[5])) {
 				free(bud->friendlyname);
 				bud->friendlyname = msn_urldecode(msg->argv[5]);
 			}
@@ -515,16 +562,51 @@ static void msn_command_got_MSG (MsnConnection *mc)
 		ext_got_unknown_IM(mc, im, nick);
 	}
 
+	free(payload_info);
 	free(im->body);
 	free(im->color);
 	free(im->font);
 	free(im);
+
+	mc->current_message->payload_info = NULL;
 }
 
                    
 static void msn_command_got_ADL (MsnConnection *mc)
 {
+	LList *l1, *l2;
+	LList *newbuds = mc->current_message->payload_info;
+	MsnAccount *ma = mc->account;
 
+	for(l1 = newbuds; l1; l1 = l_list_next(l1)) {
+		int exists = 0;
+		MsnBuddy *newbud = l1->data;
+
+		/* See if this buddy exists */
+		for(l2 = ma->buddies; l2; l2 = l_list_next(l2)) {
+			MsnBuddy *bud = l2->data;
+			if(!strcmp(newbud->passport, bud->passport)) {
+				/* Don't want to mess up the allow and block lists accidentally */
+				if(!(bud->list & MSN_BUDDY_ALLOW || bud->list & MSN_BUDDY_BLOCK))
+					bud->list = newbud->list;
+
+				msn_buddy_free(newbud);
+				exists = 1;
+				break;
+			}
+		}
+
+		if(exists)
+			continue;
+
+		if(ext_buddy_request(ma, newbud))
+			msn_buddy_allow(ma, newbud);
+
+		ma->buddies = l_list_append(ma->buddies, newbud);
+	}
+
+	l_list_free(newbuds);
+	mc->current_message->payload_info = NULL;
 }
 
 

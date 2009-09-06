@@ -142,8 +142,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.10 $",
-	"$Date: 2009/09/04 17:30:26 $",
+	"$Revision: 1.11 $",
+	"$Date: 2009/09/06 13:11:04 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1036,16 +1036,7 @@ void ext_buddy_joined_chat(MsnConnection *mc, char *passport, char *friendlyname
 	SBPayload *payload = mc->sbpayload;
 	eb_chat_room *ecr;
 
-	/* We're not interested announcing arrivals in individual chat */
-/*	if(payload->num_members == 1)
-		return;*/
-
-	ecr = ay_msn_find_chat_room(payload->session_id);
-
-/*	if(!ecr)
-		ecr = ay_msn_make_chat_room(payload->session_id, mc->account->ext_data, 0);
-*/
-	if(ecr)
+	if((ecr = ay_msn_find_chat_room(payload->session_id)))
 		eb_chat_room_buddy_arrive(ecr, friendlyname, passport);
 }
 
@@ -1317,7 +1308,18 @@ static void ay_msn_leave_chat_room( eb_chat_room * room )
 
 void ext_buddy_added(MsnAccount *ma, MsnBuddy *bud)
 {
-	ay_msn_add_buddy(ma->ext_data, bud);
+	eb_debug(DBG_MSN, "Added buddy %s\n", bud->passport);
+
+	/* Associate an eb_account if it has not been done already */
+	if(!bud->ext_data) {
+		eb_local_account *ela = ma->ext_data;
+		eb_account *ea = find_account_with_ela(bud->passport, ela);
+		if(!ea) {
+			eb_debug(DBG_MSN, "Could not find account!\n");
+		}
+		bud->ext_data = ea;
+		ea->protocol_account_data = bud;
+	}
 }
 
 
@@ -1388,9 +1390,20 @@ void ext_buddy_add_failed(MsnAccount *ma, const char *passport, char *friendlyna
 }
 
 
+void ext_buddy_request(MsnAccount *ma, MsnBuddy *bud)
+{
+	if(ay_msn_authorize_user(ma->ext_data, bud)) {
+		update_contact_list();
+		write_contact_list();
+	}
+
+}
+
+
 static int ay_msn_authorize_user( eb_local_account *ela, MsnBuddy *bud )
 {
 	char buff[1024];
+	int result;
 
 	ay_msn_local_account *mlad = ela->protocol_local_account_data;
 
@@ -1398,14 +1411,10 @@ static int ay_msn_authorize_user( eb_local_account *ela, MsnBuddy *bud )
 			_("The MSN user:\n\n <b>%s(%s)</b>\n\nhas added you to their contact list.\nDo you want to allow this?"), 
 			bud->friendlyname?bud->friendlyname:bud->passport, bud->passport);
 
-	int result = eb_do_confirm_dialog(buff, _("MSN New Contact"));
-
-	if(result) {
-		msn_buddy_allow(mlad->ma, bud);
-	}
-	else {
+	if((result = eb_do_confirm_dialog(buff, _("MSN New Contact"))))
+		ay_msn_add_buddy(ela, bud);
+	else
 		msn_buddy_remove_pending(mlad->ma, bud);
-	}
 
 	return result;
 }
@@ -1765,6 +1774,7 @@ void ext_got_buddy_status(MsnConnection *mc, MsnBuddy *buddy)
 
 	if(!ea) {
 		eb_debug(DBG_MSN, "Server has gone crazy. Sending me status for some %s\n", buddy->passport);
+		return;
 	}
 
 	if(strcmp(ea->account_contact->nick, buddy->friendlyname))

@@ -1,3 +1,11 @@
+* Sun Sep 06 2009 13:10 UTC [siddheshp]   0.5.0-143
+- ChangeLog, configure.ac, modules/msn2/msn.c,
+modules/msn2/libmsn2/msn-commands.c, modules/msn2/libmsn2/msn-contacts.c,
+modules/msn2/libmsn2/msn-message.h:
+ * MSN: Dynamically add and remove buddies
+ * MSN: Free message payload in the end
+ * MSN: Fixed double adding of buddy when someone else adds us
+
 * Fri Sep 04 2009 17:30 UTC [siddheshp]   0.5.0-142
 - ChangeLog, configure.ac, modules/msn2/msn.c,
 modules/msn2/libmsn2/msn-connection.c, modules/msn2/libmsn2/msn-connection.h,

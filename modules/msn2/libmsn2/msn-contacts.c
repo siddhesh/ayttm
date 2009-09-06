@@ -84,7 +84,14 @@ void msn_got_initial_adl_response(MsnConnection *mc, void *data)
 }
 
 
-void msn_got_initial_fqy_response(MsnConnection *mc, void *data)
+void msn_got_adl_response(MsnConnection *mc, void *data)
+{
+	/* Do nothing for now */
+}
+
+
+/* Saved for FQY parsing
+void msn_buddies_send_adl(MsnConnection *ma, LList *buddies)
 {
 	MsnMessage *msg = mc->current_message;
 	char out[MAX_ADL_SIZE], bufsize[5];
@@ -145,14 +152,14 @@ void msn_got_initial_fqy_response(MsnConnection *mc, void *data)
 
 	msn_connection_push_callback(mc, msn_got_initial_adl_response, NULL);
 }
+*/
 
 
 /* This has become a convoluted piece of crap. Need to rework */
-static void _send_adl(MsnAccount *ma)
+void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 {
 	char buf[MAX_ADL_SIZE];
 	char bufsize[5];
-	LList *in = ma->buddies;
 	LList *l = NULL;
 	int count = 0;
 	int init = 0;
@@ -209,9 +216,10 @@ static void _send_adl(MsnAccount *ma)
 		}
 
 		if( (count < MAX_ADL_CONTACTS - 1 && !strcmp(cur_domain, a->domain)) ) {
-			if(cur_type == MSN_BUDDY_PASSPORT)
+			if(!initial || cur_type == MSN_BUDDY_PASSPORT)
 				snprintf(buf + offset, sizeof(buf) - offset, 
-					"<c n=\"%s\" l=\"%u\" t=\"1\"/>", a->name, a->mask);
+					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, 
+					(cur_type==MSN_BUDDY_PASSPORT)?1:4);
 			else
 				snprintf(buf + offset, sizeof(buf) - offset, 
 					"<c n=\"%s\"/>", a->name);
@@ -221,7 +229,7 @@ static void _send_adl(MsnAccount *ma)
 
 			snprintf(bufsize, sizeof(bufsize), "%d", (int)strlen(buf));
 
-			if(cur_type == MSN_BUDDY_PASSPORT)
+			if(!initial || cur_type == MSN_BUDDY_PASSPORT)
 				msn_message_send(ma->ns_connection, buf, MSN_COMMAND_ADL, bufsize);
 			else
 				msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
@@ -231,14 +239,29 @@ static void _send_adl(MsnAccount *ma)
 			offset = 0;
 			count = 0;
 
-			snprintf(buf, sizeof(buf), "<ml><d n=\"%s\"><c n=\"%s\"/>", a->domain, a->name);
+			offset = snprintf(buf, sizeof(buf), "<ml><d n=\"%s\">", a->domain);
 
 			cur_domain = a->domain;
 			cur_type = a->type;
+
+			if(!initial || cur_type == MSN_BUDDY_PASSPORT)
+				snprintf(buf + offset, sizeof(buf) - offset, 
+					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, 
+					(cur_type==MSN_BUDDY_PASSPORT)?1:4);
+			else
+				snprintf(buf + offset, sizeof(buf) - offset, 
+					"<c n=\"%s\"/>", a->name);
 		}
 		else {
-			snprintf(buf+offset, sizeof(buf)-offset, "</d><d n=\"%s\"><c n=\"%s\" l=\"%u\" t=\"1\"/>", 
-					a->domain, a->name, a->mask);
+			offset += snprintf(buf+offset, sizeof(buf)-offset, "</d><d n=\"%s\">", a->domain);
+
+			if(!initial || cur_type == MSN_BUDDY_PASSPORT)
+				snprintf(buf + offset, sizeof(buf) - offset, 
+					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, 
+					(cur_type==MSN_BUDDY_PASSPORT)?1:4);
+			else
+				snprintf(buf + offset, sizeof(buf) - offset, 
+					"<c n=\"%s\"/>", a->name);
 
 			cur_domain = a->domain;
 		}
@@ -254,7 +277,7 @@ static void _send_adl(MsnAccount *ma)
 	if(count) {
 		snprintf(buf+offset, sizeof(buf)-offset, "</d></ml>");
 		snprintf(bufsize, sizeof(bufsize), "%d", (int)strlen(buf));
-		if(cur_type == MSN_BUDDY_PASSPORT)
+		if(!initial || cur_type == MSN_BUDDY_PASSPORT)
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_ADL, bufsize);
 		else
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
@@ -262,11 +285,14 @@ static void _send_adl(MsnAccount *ma)
 		sent = 1;
 	}
 
-	if(sent)
-		msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response, NULL);
-	else
-		ext_msn_contacts_synced(ma);
-
+	if(initial) {
+		if(sent)
+			msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response, NULL);
+		else
+			ext_msn_contacts_synced(ma);
+	}
+	else if(add)
+		msn_connection_push_callback(ma->ns_connection, msn_got_adl_response, in);
 }
 
 
@@ -419,7 +445,7 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 	}
 
 ret:
-	_send_adl(ma);
+	msn_buddies_send_adl(ma, ma->buddies, 1, 0);
 
 	/* Send your friendly name */
 	msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_PRP, "MFN", ma->friendlyname);
@@ -1011,6 +1037,8 @@ static void msn_contact_add_response(MsnAccount *ma, char *data, int len, void *
 		start += 6;
 		offset = strstr(start, "</guid>");
 		if(offset) {
+			LList *l = NULL;
+
 			*offset = '\0';
 
 			bud->contact_id = strdup(start);
@@ -1021,7 +1049,15 @@ static void msn_contact_add_response(MsnAccount *ma, char *data, int len, void *
 			bud->list &= ~MSN_BUDDY_PENDING;
 			bud->list |= MSN_BUDDY_ALLOW;
 			bud->list |= MSN_BUDDY_FORWARD;
+
+			l = l_list_append(l, bud);
+
+			ma->buddies = l_list_append(ma->buddies, bud);
+
 			ext_buddy_added(ma, bud);
+			msn_buddies_send_adl(ma, l, 0, 1);
+
+			l_list_free(l);
 		}
 	}
 }
@@ -1058,7 +1094,13 @@ static void msn_buddy_allow_response(MsnAccount *ma, int error, void *cbdata)
 
 void msn_buddy_allow(MsnAccount *ma, MsnBuddy *bud)
 {
-	MsnMembershipData *mmbr = m_new0(MsnMembershipData, 1);
+	MsnMembershipData *mmbr;
+	
+	/* Why allow again? */
+	if(bud->list & MSN_BUDDY_ALLOW)
+		return;
+
+	mmbr = m_new0(MsnMembershipData, 1);
 
 	mmbr->add = 1;
 	mmbr->scenario = "ContactMsgrAPI";
@@ -1117,12 +1159,31 @@ void msn_buddy_add(MsnAccount *ma, const char *passport, const char *friendlynam
 
 
 /* Remove buddy */
+static void msn_buddy_rml(MsnAccount *ma, MsnBuddy *bud)
+{
+	char buf[255];
+	int size = 0;
+	char bufsize[4];
+	char *sep = strchr(bud->passport, '@');
+
+	*sep = '\0';
+	size = snprintf(buf, sizeof(buf), "<ml><d n=\"%s\"><c n=\"%s\" t=\"%d\" l=\"%d\"/></d></ml>",
+				sep+1, bud->passport, 1, 
+				(bud->list & (MSN_BUDDY_ALLOW | MSN_BUDDY_FORWARD | MSN_BUDDY_BLOCK)));
+
+	sprintf(bufsize, "%d", size);
+
+	msn_message_send(ma->ns_connection, buf, MSN_COMMAND_RML, bufsize);
+}
+
+
 static void msn_contact_remove_response(MsnAccount *ma, char *data, int len, void *cbdata)
 {
 	MsnBuddy *bud = cbdata;
 	char *offset;
 
 	if((offset = strstr(data, "<ABContactDeleteResponse"))) {
+		msn_buddy_rml(ma, bud);
 		ext_buddy_removed(ma, bud->passport);
 
 		ma->buddies = l_list_remove(ma->buddies, bud);

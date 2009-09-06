@@ -83,8 +83,8 @@ struct _MsnMessage {
 	char *payload;				/* Payload Data */
 	int payload_offset;			/* Current size of the payload */
 	int state;				/* State of the message. 0 when complete. */
-	void *payload_info;			/* Payload parsed into message-specific information.
-							For now it only houses objects of MsnMessagePayload */
+	void *payload_info;			/* Payload parsed into message-specific information. */
+
 	int capacity;				/* Capacity of the payload */
 };
 
