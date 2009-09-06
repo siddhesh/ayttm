@@ -129,7 +129,7 @@ struct service_callbacks {
 	const char *(*get_state_string)(eb_account * account);
 
 	const char **(*get_status_pixmap)(eb_account * account);
-	const void **(*get_status_pixbuf)(eb_account *account);
+	const void *(*get_status_pixbuf)(eb_account *account);
 
 	/*set the idle time (set this to null if N/A)*/
 

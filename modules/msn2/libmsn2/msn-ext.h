@@ -49,6 +49,7 @@ void ext_got_buddy_status(MsnConnection *mc, MsnBuddy *bud);
 void ext_buddy_joined_chat(MsnConnection *mc, char *passport, char *friendlyname);
 void ext_buddy_left(MsnConnection *mc, const char *passport);
 void ext_buddy_removed(MsnAccount *ma, const char *bud);
+int  ext_buddy_request(MsnAccount *ma, MsnBuddy *bud);
 
 void ext_buddy_unblock_response(MsnAccount *ma, int error, MsnBuddy *buddy);
 void ext_buddy_block_response(MsnAccount *ma, int error, MsnBuddy *buddy);

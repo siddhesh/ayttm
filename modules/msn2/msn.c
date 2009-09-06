@@ -142,8 +142,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.11 $",
-	"$Date: 2009/09/06 13:11:04 $",
+	"$Revision: 1.12 $",
+	"$Date: 2009/09/06 13:36:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1243,14 +1243,23 @@ static void ay_msn_unignore_user(eb_account *ea, const char *new_group)
 }
 
 
-static const char **ay_msn_get_status_pixmap( eb_account * account)
+static GdkPixbuf *msn_icon_online = NULL;
+static GdkPixbuf *msn_icon_away = NULL;
+
+
+static const void *ay_msn_get_status_pixbuf( eb_account * account)
 {
 	MsnBuddy * mad = (MsnBuddy *)account->protocol_account_data;
 
+	if(!msn_icon_online) {
+		msn_icon_online = gdk_pixbuf_new_from_xpm_data((const char **)msn_online_xpm);
+		msn_icon_away = gdk_pixbuf_new_from_xpm_data((const char **)msn_away_xpm);
+	}
+
 	if (mad && mad->status == MSN_STATE_ONLINE)
-		return msn_online_xpm;
+		return msn_icon_online;
 	else 
-		return msn_away_xpm;
+		return msn_icon_away;
 }
 
 
@@ -1390,13 +1399,15 @@ void ext_buddy_add_failed(MsnAccount *ma, const char *passport, char *friendlyna
 }
 
 
-void ext_buddy_request(MsnAccount *ma, MsnBuddy *bud)
+int ext_buddy_request(MsnAccount *ma, MsnBuddy *bud)
 {
 	if(ay_msn_authorize_user(ma->ext_data, bud)) {
 		update_contact_list();
 		write_contact_list();
-	}
 
+		return 1;
+	}
+	return 0;
 }
 
 
@@ -2127,7 +2138,7 @@ struct service_callbacks * query_callbacks()
 	sc->ignore_user = ay_msn_ignore_user;
 	sc->unignore_user = ay_msn_unignore_user;
 	sc->get_status_string = ay_msn_get_status_string;
-	sc->get_status_pixmap = ay_msn_get_status_pixmap;
+	sc->get_status_pixbuf = ay_msn_get_status_pixbuf;
 	sc->set_idle = ay_msn_set_idle;
 	sc->set_away = ay_msn_set_away;
 	sc->send_chat_room_message = ay_msn_send_chat_room_message;

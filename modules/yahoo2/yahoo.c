@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.114 $",
-	"$Date: 2009/08/30 14:55:58 $",
+	"$Revision: 1.115 $",
+	"$Date: 2009/09/06 13:36:28 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2995,7 +2995,7 @@ void eb_yahoo_init_pixbufs()
 	yahoo_icon_sms = gdk_pixbuf_new_from_xpm_data((const char **)yahoo_sms_xpm);
 }
 
-static const void **eb_yahoo_get_status_pixbuf(eb_account *ea)
+static const void *eb_yahoo_get_status_pixbuf(eb_account *ea)
 {
 	eb_yahoo_account_data *yad = ea->protocol_account_data;
 

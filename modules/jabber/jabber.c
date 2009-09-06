@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.58 $",
-	"$Date: 2009/08/30 14:55:58 $",
+	"$Revision: 1.59 $",
+	"$Date: 2009/09/06 13:36:27 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -660,7 +660,7 @@ void eb_jabber_init_pixbufs()
 	jabber_icon_away = gdk_pixbuf_new_from_xpm_data((const char **)jabber_away_xpm);
 }
 
-static const void **eb_jabber_get_status_pixbuf(eb_account *account)
+static const void *eb_jabber_get_status_pixbuf(eb_account *account)
 {
 	eb_jabber_account_data *jad = account->protocol_account_data;
 
