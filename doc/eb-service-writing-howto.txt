@@ -3,8 +3,8 @@ by Philip S Tellis, philip dot tellis at gmx dot net
 v1.0, a very hot 18th May 2002
 v1.1, a sultry, and slightly rainy 3rd August 2002
 
-$Revision: 1.1 $
-$Date: 2003/04/01 07:24:13 $
+$Revision: 1.2 $
+$Date: 2009/09/06 18:23:07 $
 
 I recently wrote the new Yahoo2 module for everybuddy, and well, to say the
 least, the early parts were just one stumbling block after another.  There's
@@ -141,8 +141,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Test Service",
 	"Test Service Module",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:13 $",
+	"$Revision: 1.2 $",
+	"$Date: 2009/09/06 18:23:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -214,7 +214,7 @@ struct service_callbacks *query_callbacks()
 	sc->is_suitable			= NULL;
 
 	sc->get_status_string 		= NULL;
-	sc->get_status_pixmap 		= NULL;
+	sc->get_status_pixbuf 		= NULL;
 
 	sc->set_idle 			= NULL;
 	sc->set_away 			= NULL;
@@ -767,35 +767,30 @@ will have to modify some of the existing pixmaps to make your own.
 #include "pixmaps/test_away.xpm"
 
 static gint pixmaps = 0;
-static GdkPixmap *eb_test_pixmap[2];
-static GdkBitmap *eb_test_bitmap[2];
+static GdkPixbuf *eb_test_pixbuf[2];
 
-void eb_test_init_pixmaps()
+void eb_test_init_pixbufs()
 {
-	eb_test_pixmap[0] = gdk_pixmap_create_from_xpm_d(statuswindow->window,
-			&eb_test_bitmap[0], NULL, test_online_xpm);
+	eb_test_pixbuf[0] = gdk_pixbuf_new_from_xpm_data(test_online_xpm);
 
-	eb_test_pixmap[1] = gdk_pixmap_create_from_xpm_d(statuswindow->window,
-			&eb_test_bitmap[1], NULL, test_away_xpm);
+	eb_test_pixbuf[1] = gdk_pixbuf_new_from_xpm_data(test_away_xpm);
 
 	pixmaps = 1;
 }
 
-void eb_test_get_status_pixmap(eb_account * account, GdkPixmap ** pm, GdkBitmap ** bm)
+void *eb_test_get_status_pixbuf(eb_account * account)
 {
 	eb_test_account_data *tad;
 
 	if (!pixmaps)
-		eb_test_init_pixmaps();
+		eb_test_init_pixbufs();
 
 	tad = account->protocol_account_data;
 
 	if(tad->status == TEST_STATE_ONLINE) {
-		*pm = eb_test_pixmap[0];
-		*bm = eb_test_bitmap[0];
+		return eb_test_pixbuf[0];
 	} else {
-		*pm = eb_test_pixmap[1];
-		*bm = eb_test_bitmap[1];
+		return eb_test_pixbuf[1];
 	}
 
 }
@@ -1033,8 +1028,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Test Service",
 	"Test Service Module",
-	"$Revision: 1.1 $",
-	"$Date: 2003/04/01 07:24:13 $",
+	"$Revision: 1.2 $",
+	"$Date: 2009/09/06 18:23:07 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1267,35 +1262,30 @@ gchar *eb_test_get_status_string(eb_account * account)
 #include "pixmaps/nomodule_away.xpm"
 
 static gint pixmaps = 0;
-static GdkPixmap *eb_test_pixmap[2];
-static GdkBitmap *eb_test_bitmap[2];
+static GdkPixbuf *eb_test_pixbuf[2];
 
-void eb_test_init_pixmaps()
+void eb_test_init_pixbufs()
 {
-	eb_test_pixmap[0] = gdk_pixmap_create_from_xpm_d(statuswindow->window,
-			&eb_test_bitmap[0], NULL, nomodule_online_xpm);
+	eb_test_pixbuf[0] = gdk_pixbuf_new_from_xpm_data(test_online_xpm);
 
-	eb_test_pixmap[1] = gdk_pixmap_create_from_xpm_d(statuswindow->window,
-			&eb_test_bitmap[1], NULL, nomodule_away_xpm);
+	eb_test_pixbuf[1] = gdk_pixbuf_new_from_xpm_data(test_away_xpm);
 
 	pixmaps = 1;
 }
 
-void eb_test_get_status_pixmap(eb_account * account, GdkPixmap ** pm, GdkBitmap ** bm)
+void *eb_test_get_status_pixbuf(eb_account * account)
 {
 	eb_test_account_data *tad;
 
 	if (!pixmaps)
-		eb_test_init_pixmaps();
+		eb_test_init_pixbufs();
 
 	tad = account->protocol_account_data;
 
 	if(tad->status == TEST_STATE_ONLINE) {
-		*pm = eb_test_pixmap[0];
-		*bm = eb_test_bitmap[0];
+		return eb_test_pixbuf[0];
 	} else {
-		*pm = eb_test_pixmap[1];
-		*bm = eb_test_bitmap[1];
+		return eb_test_pixbuf[1];
 	}
 
 }
@@ -1361,7 +1351,7 @@ struct service_callbacks *query_callbacks()
 	sc->is_suitable			= NULL;
 
 	sc->get_status_string 		= eb_test_get_status_string;
-	sc->get_status_pixmap 		= eb_test_get_status_pixmap;
+	sc->get_status_pixbuf 		= eb_test_get_status_pixbuf;
 
 	sc->set_idle 			= NULL;
 	sc->set_away 			= NULL;

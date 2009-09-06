@@ -142,8 +142,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.12 $",
-	"$Date: 2009/09/06 13:36:28 $",
+	"$Revision: 1.13 $",
+	"$Date: 2009/09/06 18:23:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -1247,7 +1247,7 @@ static GdkPixbuf *msn_icon_online = NULL;
 static GdkPixbuf *msn_icon_away = NULL;
 
 
-static const void *ay_msn_get_status_pixbuf( eb_account * account)
+static void *ay_msn_get_status_pixbuf( eb_account * account)
 {
 	MsnBuddy * mad = (MsnBuddy *)account->protocol_account_data;
 

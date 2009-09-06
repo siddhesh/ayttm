@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.59 $",
-	"$Date: 2009/08/30 14:55:58 $",
+	"$Revision: 1.60 $",
+	"$Date: 2009/09/06 18:23:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -874,12 +874,17 @@ static const char *ay_irc_get_status_string(eb_account *account)
 	return string;
 }
 
-static const char **ay_irc_get_status_pixmap(eb_account *account)
+static GdkPixbuf *irc_icon_online = NULL;
+static GdkPixbuf *irc_icon_away = NULL;
+
+static void *ay_irc_get_status_pixbuf(eb_account *account)
 {
 	ay_irc_account *eia;
 
-	/* if (!pixmaps)
-		irc_init_pixmaps(); */
+	if (!irc_icon_online) {
+		irc_icon_online = gdk_pixbuf_new_from_xpm_data(irc_online_xpm);
+		irc_icon_away = gdk_pixbuf_new_from_xpm_data(irc_away_xpm);
+	}
 
 	eia = account->protocol_account_data;
 
@@ -2198,7 +2203,7 @@ struct service_callbacks *query_callbacks(void)
 	/* Done */ sc->is_suitable = ay_irc_is_suitable;
 	/* Done */ sc->new_account = ay_irc_new_account;
 	/* Done */ sc->get_status_string = ay_irc_get_status_string;
-	/* Done */ sc->get_status_pixmap = ay_irc_get_status_pixmap;
+	/* Done */ sc->get_status_pixbuf = ay_irc_get_status_pixbuf;
 	/* Done */ sc->set_idle = ay_irc_set_idle;
 	/* Done */ sc->set_away = ay_irc_set_away;
 	sc->send_file = ay_irc_send_file;

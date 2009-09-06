@@ -1,7 +1,5 @@
-DIST_SUBDIRS = aim-oscar aim-toc icq icq-toc \
-irc jabber msn2 yahoo2 smtp importers \
-livejournal utility aycryption smileys \
-image_filter
+DIST_SUBDIRS = aim-oscar irc jabber msn2 yahoo2 smtp importers \
+livejournal utility aycryption smileys image_filter
 
 SUBDIRS = @OPTIONAL_PLUG_DIR@ importers utility smileys image_filter
 

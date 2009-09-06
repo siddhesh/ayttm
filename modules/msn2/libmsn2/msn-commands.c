@@ -168,7 +168,61 @@ MsnCommand msn_command_get_from_string(char *cmd)
 
 static void msn_command_parse_payload_FQY (MsnMessage *msg)
 {
+	char *start = NULL;
+	LList *newbuds = NULL;
+	start = strstr(msg->payload, "<d n=");
 
+	while(start) {
+		char *users = NULL, *user = NULL;
+		char *domain = start+6;
+		char *end = strchr(domain, '>');
+
+		*(end-1) = '\0';
+		users = end+1;
+		end = strstr(end, "</d>");
+		*end = '\0';
+
+		while((user = strstr(users, "<c "))) {
+			char buddy_buf[255];
+			char *buddy_name;
+			char *attr = NULL, *attr_end = NULL;
+			int type = 0;
+			int list = 0;
+			char *uend = strstr(user, "/>");
+
+			MsnBuddy *bud = m_new0(MsnBuddy, 1);
+
+			user += 3;
+			*uend = '\0';
+
+			attr = strstr(user, "n=\"");
+			attr += 3;
+			attr_end = strchr(attr, '\"');
+
+			*attr_end = '\0';
+			buddy_name = strdup(attr);
+			*attr_end = '\"';
+
+			if((attr = strstr(user, "t=\"")))
+				type = atoi(attr+3);
+
+			snprintf(buddy_buf, sizeof(buddy_buf), "%s@%s", buddy_name, domain);
+
+			bud->passport = strdup(buddy_buf);
+			bud->type = type;
+			bud->list = list;
+
+			newbuds = l_list_append(newbuds, bud);
+
+			free(buddy_name);
+
+			users = uend+1;
+		}
+
+		start = strstr(end+1, "<d n=");
+	}
+
+	msg->payload_info = newbuds;
 }
 
 
@@ -210,10 +264,10 @@ static void msn_command_parse_payload_ADL (MsnMessage *msg)
 			*attr_end = '\"';
 
 			if((attr = strstr(user, "t=\"")))
-				type = attr[3] - '0';
+				type = atoi(attr+3);
 
 			if((attr = strstr(user, "l=\"")))
-				list = attr[3] - '0';
+				list = atoi(attr+3);
 
 			snprintf(buddy_buf, sizeof(buddy_buf), "%s@%s", buddy_name, domain);
 
@@ -626,7 +680,30 @@ static void msn_command_got_CHG (MsnConnection *mc)
 
 static void msn_command_got_FQY (MsnConnection *mc)
 {
+	LList *l1, *l2;
+	LList *newbuds = mc->current_message->payload_info;
+	MsnAccount *ma = mc->account;
 
+	for(l1 = newbuds; l1; l1 = l_list_next(l1)) {
+		MsnBuddy *newbud = l1->data;
+
+		/* See if this buddy exists */
+		for(l2 = ma->buddies; l2; l2 = l_list_next(l2)) {
+			MsnBuddy *bud = l2->data;
+			if(!strcmp(newbud->passport, bud->passport)) {
+				newbud->list = bud->list;
+				break;
+			}
+		}
+	}
+
+	msn_buddies_send_adl(mc->account, newbuds, 0, 0);
+
+	for(l1 = newbuds; l1; l1 = l_list_next(l1))
+		msn_buddy_free(l1->data);
+
+	l_list_free(newbuds);
+	mc->current_message->payload_info = NULL;
 }
 
 

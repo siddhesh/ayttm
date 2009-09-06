@@ -31,7 +31,6 @@
 
 #include "service.h"
 #include "plugin_api.h"
-#include "tcp_util.h"
 
 #include "input_list.h"
 #include "value_pair.h"
@@ -72,8 +71,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"SMTP",
 	"Provides Simple Mail Transfer Protocol (SMTP) support",
-	"$Revision: 1.23 $",
-	"$Date: 2009/07/27 16:42:04 $",
+	"$Revision: 1.24 $",
+	"$Date: 2009/09/06 18:23:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

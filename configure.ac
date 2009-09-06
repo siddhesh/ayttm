@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.5.0], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=143
+RELEASE=144
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -541,16 +541,10 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  po/Makefile.in
                  m4/Makefile 
 		 modules/Makefile
-                 modules/aim-toc/Makefile
-                 modules/aim-toc/libtoc/Makefile
-                 modules/icq-toc/Makefile
-                 modules/icq-toc/libtoc/Makefile
                  modules/aim-oscar/Makefile
 		 modules/aim-oscar/libfaim/Makefile
 		 modules/aim-oscar/libfaim/include/Makefile
 		 modules/aim-oscar/libfaim/src/Makefile
-                 modules/icq/Makefile
-                 modules/icq/libicq/Makefile
                  modules/importers/Makefile
                  modules/irc/Makefile
 		 modules/irc/libirc/Makefile

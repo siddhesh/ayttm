@@ -137,8 +137,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"Yahoo",
 	"Provides Yahoo Instant Messenger support",
-	"$Revision: 1.115 $",
-	"$Date: 2009/09/06 13:36:28 $",
+	"$Revision: 1.116 $",
+	"$Date: 2009/09/06 18:23:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2995,7 +2995,7 @@ void eb_yahoo_init_pixbufs()
 	yahoo_icon_sms = gdk_pixbuf_new_from_xpm_data((const char **)yahoo_sms_xpm);
 }
 
-static const void *eb_yahoo_get_status_pixbuf(eb_account *ea)
+static void *eb_yahoo_get_status_pixbuf(eb_account *ea)
 {
 	eb_yahoo_account_data *yad = ea->protocol_account_data;
 
@@ -3014,23 +3014,6 @@ static const void *eb_yahoo_get_status_pixbuf(eb_account *ea)
 		return (void *)yahoo_icon_online;
 }
 
-static const char **eb_yahoo_get_status_pixmap(eb_account * ea)
-{
-	eb_yahoo_account_data *yad;
-
-	yad = ea->protocol_account_data;
-
-	if(yad->away < 0)
-		WARNING(("%s->away is %d", ea->handle, yad->away));
-
-	/* Don't translate this string */
-	if (yad->status_message && !strcmp(yad->status_message, "I'm on SMS"))
-		return yahoo_sms_xpm;
-	else if (yad->away )
-		return yahoo_away_xpm;
-	else
-		return yahoo_online_xpm;
-}
 
 static const char *eb_yahoo_get_status_string(eb_account * ea)
 {
@@ -3715,7 +3698,6 @@ struct service_callbacks *query_callbacks()
 	sc->new_account 		= eb_yahoo_new_account;
 
 	sc->get_status_string 		= eb_yahoo_get_status_string;
-	sc->get_status_pixmap 		= eb_yahoo_get_status_pixmap;
 	sc->get_status_pixbuf 		= eb_yahoo_get_status_pixbuf;
 
 	sc->set_idle 			= eb_yahoo_set_idle;

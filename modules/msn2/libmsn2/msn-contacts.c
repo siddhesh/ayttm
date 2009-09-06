@@ -78,84 +78,6 @@ int _cmp_domains(const void *d1, const void *d2)
 }
 
 
-void msn_got_initial_adl_response(MsnConnection *mc, void *data)
-{
-	ext_msn_contacts_synced(mc->account);
-}
-
-
-void msn_got_adl_response(MsnConnection *mc, void *data)
-{
-	/* Do nothing for now */
-}
-
-
-/* Saved for FQY parsing
-void msn_buddies_send_adl(MsnConnection *ma, LList *buddies)
-{
-	MsnMessage *msg = mc->current_message;
-	char out[MAX_ADL_SIZE], bufsize[5];
-	int offset = 0;
-	char *domain = msg->payload;
-
-	sprintf(out, "<ml l=\"1\">");
-	offset = strlen(out);
-
-	while(domain) {
-		char *contact, *contact_end, *end;
-
-		domain = strstr(domain, "<d ");
-
-		if(!domain)
-			break;
-
-		end = strchr(domain, '>');
-		end++;
-
-		strncat(out, domain, end-domain);
-		offset += end-domain;
-
-		contact = end;
-		contact_end = strstr(contact, "</d>");
-		*contact_end = '\0';
-		domain = contact_end+1;
-
-		while(contact) {
-			char *t;
-			contact = strstr(contact, "c ");
-
-			if(!contact)
-				break;
-
-			contact +=5;
-			end = strchr(contact, '\"');
-			*end = '\0';
-
-			t=strstr(end+1, "t=\"");
-			t += 3;
-			end = strchr(t, '\"');
-			*end = '\0';
-
-			sprintf(out+offset, "<c n=\"%s\" l=\"3\" t=\"%s\"/>", contact, t);
-			offset += strlen(out+offset);
-			contact = end + 1;
-		}
-
-		strcat(out, "</d>");
-		offset += 4;
-	}
-
-	strcat(out, "</ml>");
-
-	sprintf(bufsize, "%d", offset+5);
-	msn_message_send(mc, out, MSN_COMMAND_ADL, bufsize);
-
-	msn_connection_push_callback(mc, msn_got_initial_adl_response, NULL);
-}
-*/
-
-
-/* This has become a convoluted piece of crap. Need to rework */
 void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 {
 	char buf[MAX_ADL_SIZE];
@@ -166,7 +88,7 @@ void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 	int offset = 0;
 	char *cur_domain = NULL;
 	int cur_type = 0;
-	int sent = 0;
+	int push_callback = 0;
 
 	/* Sort the list */
 	while(in) {
@@ -218,8 +140,7 @@ void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 		if( (count < MAX_ADL_CONTACTS - 1 && !strcmp(cur_domain, a->domain)) ) {
 			if(!initial || cur_type == MSN_BUDDY_PASSPORT)
 				snprintf(buf + offset, sizeof(buf) - offset, 
-					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, 
-					(cur_type==MSN_BUDDY_PASSPORT)?1:4);
+					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, cur_type);
 			else
 				snprintf(buf + offset, sizeof(buf) - offset, 
 					"<c n=\"%s\"/>", a->name);
@@ -234,7 +155,6 @@ void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 			else
 				msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
 
-			sent = 1;
 			buf[0] = '\0';
 			offset = 0;
 			count = 0;
@@ -246,8 +166,7 @@ void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 
 			if(!initial || cur_type == MSN_BUDDY_PASSPORT)
 				snprintf(buf + offset, sizeof(buf) - offset, 
-					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, 
-					(cur_type==MSN_BUDDY_PASSPORT)?1:4);
+					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, cur_type);
 			else
 				snprintf(buf + offset, sizeof(buf) - offset, 
 					"<c n=\"%s\"/>", a->name);
@@ -257,8 +176,7 @@ void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 
 			if(!initial || cur_type == MSN_BUDDY_PASSPORT)
 				snprintf(buf + offset, sizeof(buf) - offset, 
-					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, 
-					(cur_type==MSN_BUDDY_PASSPORT)?1:4);
+					"<c n=\"%s\" l=\"%u\" t=\"%d\"/>", a->name, a->mask, cur_type);
 			else
 				snprintf(buf + offset, sizeof(buf) - offset, 
 					"<c n=\"%s\"/>", a->name);
@@ -281,18 +199,10 @@ void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_ADL, bufsize);
 		else
 			msn_message_send(ma->ns_connection, buf, MSN_COMMAND_FQY, bufsize);
-
-		sent = 1;
 	}
 
-	if(initial) {
-		if(sent)
-			msn_connection_push_callback(ma->ns_connection, msn_got_initial_adl_response, NULL);
-		else
-			ext_msn_contacts_synced(ma);
-	}
-	else if(add)
-		msn_connection_push_callback(ma->ns_connection, msn_got_adl_response, in);
+	if(initial)
+		ext_msn_contacts_synced(ma);
 }
 
 

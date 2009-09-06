@@ -55,7 +55,7 @@ typedef enum {
 
 typedef enum {
 	MSN_BUDDY_PASSPORT	= 1,
-	MSN_BUDDY_EMAIL		= 1 << 1,
+	MSN_BUDDY_EMAIL		= 1 << 5,	/* At least for yahoo. Would probably be different for something else */
 } MsnBuddyType;
 
 struct _MsnBuddy {

@@ -2128,7 +2128,7 @@ char *ay_base64_encode(const unsigned char *in, int len)
 {
 	int i=0, j=0;
 
-	unsigned char *out = (char *)calloc((len + len % 3) * 4 / 3 + 1, sizeof(char));
+	unsigned char *out = (unsigned char *)calloc((len + len % 3) * 4 / 3 + 1, sizeof(unsigned char));
 
 	for(i = 0, j = 0; i < len; i += 3, j+= 4) {
 
@@ -2152,7 +2152,7 @@ char *ay_base64_encode(const unsigned char *in, int len)
 		}
 	}
 
-	return out;
+	return (char *)out;
 }
 
 

@@ -1,3 +1,24 @@
+* Sun Sep 06 2009 18:18 UTC [siddheshp]   0.5.0-144
+- ChangeLog, configure.ac, doc/eb-service-writing-howto.txt,
+modules/Makefile.am, modules/aim-oscar/aim-oscar.c, modules/irc/irc.c,
+modules/irc/irc.h, modules/jabber/jabber.c, modules/msn2/msn.c,
+modules/msn2/libmsn2/Makefile.am, modules/msn2/libmsn2/msn-account.h,
+modules/msn2/libmsn2/msn-commands.c, modules/msn2/libmsn2/msn-contacts.c,
+modules/msn2/libmsn2/msn-contacts.h, modules/smtp/smtp.c,
+modules/yahoo2/yahoo.c, po/de.po, po/en_GB.po, po/es.po, po/fr.po, po/hi.po,
+po/nl.po, po/pt_BR.po, po/sv.po, src/message_parse.c, src/nomodule.c,
+src/service.h, src/util.c:
+ * MSN: Added missing headers in Makefile.am
+ * MSN: Response to FQY (Federated Queries)
+ * MSN: Clean up. Third party messenger buddies have type 1 << 5.
+ * CORE: Replaced status_pixmap with status_pixbuf in irc and aim-oscar
+ * CORE: Removed deprecated icq, aim-toc and icq-toc from build
+ * CORE: Updated plugin writing howto with status_pixbuf instead of
+ status_pixmap
+ * CORE: Updated messages in .po files
+ * CORE: Fixed some build warnings
+ * SMTP: Fixed build failure. It still won't work though
+
 * Sun Sep 06 2009 13:10 UTC [siddheshp]   0.5.0-143
 - ChangeLog, configure.ac, modules/msn2/msn.c,
 modules/msn2/libmsn2/msn-commands.c, modules/msn2/libmsn2/msn-contacts.c,

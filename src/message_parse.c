@@ -244,7 +244,7 @@ static void send_file( char * filename, int s )
 			break;
 		}
 	}
-	snprintf(buff, 1025, "%05d", strlen(filename+i+1));
+	snprintf(buff, 1025, "%05ld", strlen(filename+i+1));
 	write(s,buff,5);
 	write(s,filename+i+1,strlen(filename+i+1));
 	filelen = htonl(fileinfo.st_size);
@@ -271,7 +271,7 @@ static void send_file( char * filename, int s )
 		char label[1024];
 		xfer_in_progress = 1;
 		fp = fopen(filename,"rb");
-		printf("%s %s %d %5d %p\n", filename, filename+i+1, strlen(filename), htons(strlen(filename+i+1)), fp);
+		printf("%s %s %ld %5d %p\n", filename, filename+i+1, strlen(filename), htons(strlen(filename+i+1)), fp);
 		snprintf(label,1024,"Transferring %s...", filename);
 		pcd->tag = ay_progress_bar_add(label,fileinfo.st_size,NULL,NULL);
 #ifdef HAVE_PTHREAD
@@ -329,7 +329,7 @@ static void accept_file( void *data, int result )
 	if(result)
 	{
 		char val[10] = "ACCEPT";
-		printf("write: %d\n", write(fd, val, 10));
+		printf("write: %ld\n", write(fd, val, 10));
 #ifndef __MINGW32__
 		fsync(fd);
 #endif

@@ -94,8 +94,8 @@ PLUGIN_INFO plugin_info =
 	PLUGIN_SERVICE,
 	"AIM/ICQ Oscar",
 	"Provides AOL Instant Messenger and ICQ support via the Oscar protocol",
-	"$Revision: 1.31 $",
-	"$Date: 2009/08/30 14:55:58 $",
+	"$Revision: 1.32 $",
+	"$Date: 2009/09/06 18:23:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -2100,17 +2100,25 @@ ay_aim_set_current_state (eb_local_account * account, gint state)
 	alad->status = state;
 }
 
-static const char **
-ay_aim_get_status_pixmap (eb_account * account)
+static GdkPixbuf *aim_icon_away = NULL;
+static GdkPixbuf *aim_icon_online = NULL;
+
+static void *
+ay_aim_get_status_pixbuf (eb_account * account)
 {
 	struct eb_aim_account_data *aad;
 	
 	aad = (struct eb_aim_account_data *)account->protocol_account_data;
 	
+	if(!aim_icon_away) {
+		aim_icon_away = gdk_pixbuf_new_from_xpm_data(aim_away_xpm);
+		aim_icon_online = gdk_pixbuf_new_from_xpm_data(aim_online_xpm);
+	}
+
 	if (aad->status == AIM_AWAY || aad->status == AIM_OFFLINE)
-		return aim_away_xpm;
+		return aim_icon_away;
 	else
-		return aim_online_xpm;
+		return aim_icon_online;
 }
 
 
@@ -2349,7 +2357,7 @@ query_callbacks ()
 	sc->new_account = ay_aim_new_account;
 
 	sc->get_status_string = ay_aim_get_status_string;
-	sc->get_status_pixmap = ay_aim_get_status_pixmap;
+	sc->get_status_pixbuf = ay_aim_get_status_pixbuf;
 
 	sc->set_idle = NULL; /* eb_aim_set_idle; */
 	sc->set_away = ay_oscar_set_away;

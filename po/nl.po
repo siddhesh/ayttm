@@ -2,12 +2,12 @@
 # translation of nl.po to Nederlands
 # Sander Devrieze <s.devrieze@pandora.be>, 2004.
 #
-#: modules/aycryption/select-keys.c:593
+#: modules/aycryption/select-keys.c:592
 msgid ""
 msgstr ""
 "Project-Id-Version: nl\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-14 00:35+0530\n"
+"POT-Creation-Date: 2009-09-06 23:29+0530\n"
 "PO-Revision-Date: 24/06/04 23:24\n"
 "Last-Translator: Sander Devrieze <s.devrieze@pandora.be>\n"
 "Language-Team: Nederlands <i18n@kde.nl>\n"
@@ -16,36 +16,21 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.3.1\n"
 
-#: libproxy/proxy.c:437
-#, fuzzy, c-format
-msgid "Cancelling connection"
-msgstr "Kan niet verbinden"
-
-#: libproxy/proxy.c:539 libproxy/proxy.c:570
-#, fuzzy, c-format
-msgid "Connecting to %s"
-msgstr "Verbinden met %s:%d..."
-
-#: libproxy/proxy.c:556
-#, fuzzy, c-format
-msgid "Connecting to proxy %s"
-msgstr "Verbinden met %s:%d..."
-
 #: modules/aim-toc/aim-toc.c:120 modules/icq/icq.c:122
-#: modules/icq-toc/icq-toc.c:122 modules/msn2/msn.c:185
-#: modules/workwizu/workwizu.c:143 src/gtk/prefs_window.C:2216
+#: modules/icq-toc/icq-toc.c:122 modules/msn2/msn.c:184
+#: modules/workwizu/workwizu.c:143 src/gtk/prefs_window.C:2246
 msgid "Server:"
 msgstr "Server:"
 
 #: modules/aim-toc/aim-toc.c:127 modules/icq/icq.c:129
-#: modules/icq-toc/icq-toc.c:129 modules/msn2/msn.c:192
-#: modules/workwizu/workwizu.c:150 src/gtk/prefs_window.C:2232
+#: modules/icq-toc/icq-toc.c:129 modules/msn2/msn.c:191
+#: modules/workwizu/workwizu.c:150 src/gtk/prefs_window.C:2262
 msgid "Port:"
 msgstr "Poort:"
 
-#: modules/aim-toc/aim-toc.c:134 modules/aycryption/aycryption.c:132
+#: modules/aim-toc/aim-toc.c:134 modules/aycryption/aycryption.c:133
 #: modules/icq/icq.c:136 modules/icq-toc/icq-toc.c:136 modules/irc/irc.c:118
-#: modules/jabber/jabber.c:117 modules/msn2/msn.c:213 modules/smtp/smtp.c:102
+#: modules/jabber/jabber.c:117 modules/msn2/msn.c:212 modules/smtp/smtp.c:102
 #: modules/workwizu/workwizu.c:164 modules/yahoo2/yahoo.c:242
 msgid "Enable debugging"
 msgstr "Zet debuging aan"
@@ -95,21 +80,21 @@ msgid "_Screen Name:"
 msgstr "_Schermnaam:"
 
 #: modules/aim-toc/aim-toc.c:1049 modules/icq-toc/icq-toc.c:983
-#: modules/irc/irc.c:601 modules/jabber/jabber.c:462 modules/msn2/msn.c:460
-#: modules/smtp/smtp.c:190 modules/yahoo2/yahoo.c:2490
-#: src/edit_local_accounts.c:677
+#: modules/irc/irc.c:596 modules/jabber/jabber.c:440 modules/msn2/msn.c:459
+#: modules/smtp/smtp.c:190 modules/yahoo2/yahoo.c:2528
+#: src/edit_local_accounts.c:665
 msgid "_Password:"
 msgstr "_Wachtwoord:"
 
 #: modules/aim-toc/aim-toc.c:1056 modules/icq-toc/icq-toc.c:990
-#: modules/jabber/jabber.c:476 modules/msn2/msn.c:467
-#: modules/yahoo2/yahoo.c:2497
+#: modules/jabber/jabber.c:454 modules/msn2/msn.c:466
+#: modules/yahoo2/yahoo.c:2535
 msgid "_Ask for password at Login time"
 msgstr "_Vraag wachtwoord tijdens aanmelden"
 
 #: modules/aim-toc/aim-toc.c:1063 modules/icq-toc/icq-toc.c:997
-#: modules/irc/irc.c:608 modules/jabber/jabber.c:483 modules/msn2/msn.c:474
-#: modules/yahoo2/yahoo.c:2504 src/edit_local_accounts.c:714
+#: modules/irc/irc.c:603 modules/jabber/jabber.c:461 modules/msn2/msn.c:473
+#: modules/yahoo2/yahoo.c:2542 src/edit_local_accounts.c:702
 msgid "_Connect at startup"
 msgstr "Verbinden _bij opstarten"
 
@@ -121,17 +106,17 @@ msgstr "_Profiel:"
 msgid "User is currently away"
 msgstr "De gebruiker is momenteel afwezig"
 
-#: modules/aim-toc/aim-toc.c:1348 modules/msn2/msn.c:796
-#: modules/msn2/msn.c:808 src/chat_window.c:896 src/chat_window.c:1371
-#: src/chat_window.c:1375 src/chat_window.c:1378 src/chat_window.c:2056
-#: src/chat_window.c:2184 src/contact_util.C:417 src/crash.c:468
-#: src/crash.c:487 src/edit_account_window.c:330 src/edit_account_window.c:361
-#: src/status.c:1301 src/status.c:1724 src/status.c:1766 src/util.c:1067
+#: modules/aim-toc/aim-toc.c:1348 modules/msn2/msn.c:786
+#: modules/msn2/msn.c:798 src/chat_window.c:896 src/chat_window.c:1394
+#: src/chat_window.c:1398 src/chat_window.c:1401 src/chat_window.c:2075
+#: src/chat_window.c:2203 src/contact_util.C:417 src/crash.c:468
+#: src/crash.c:487 src/edit_account_window.c:287 src/edit_account_window.c:323
+#: src/status.c:1249 src/status.c:1690 src/status.c:1728 src/util.c:1067
 #: src/util.c:1095 src/util.c:1204
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: modules/aim-toc/aim-toc.c:1374 src/add_contact_window.c:437
+#: modules/aim-toc/aim-toc.c:1374 src/add_contact_window.c:410
 msgid "Buddies"
 msgstr "Contactpersonen"
 
@@ -139,81 +124,81 @@ msgstr "Contactpersonen"
 msgid "This URL isn't supported by AIM module."
 msgstr "Deze URL wordt niet ondersteund door de AIM-module."
 
-#: modules/aycryption/aycryption.c:118
+#: modules/aycryption/aycryption.c:119
 msgid "Store passphrase in memory"
 msgstr "Bewaar passphrase in geheugen"
 
-#: modules/aycryption/aycryption.c:125
+#: modules/aycryption/aycryption.c:126
 msgid "Private key for signing:"
 msgstr "Persoonlijke sleutel voor het plaatsen van een handtekening:"
 
-#: modules/aycryption/aycryption.c:142
+#: modules/aycryption/aycryption.c:143
 msgid "Aycryption - status"
 msgstr "Aycryption - status"
 
-#: modules/aycryption/aycryption.c:160 modules/aycryption/aycryption.c:165
+#: modules/aycryption/aycryption.c:161 modules/aycryption/aycryption.c:166
 msgid "GPG settings..."
 msgstr "GPG instellingen..."
 
-#: modules/aycryption/aycryption.c:171 modules/aycryption/aycryption.c:178
+#: modules/aycryption/aycryption.c:172 modules/aycryption/aycryption.c:179
 msgid "GPG status..."
 msgstr "GPG status..."
 
-#: modules/aycryption/aycryption.c:311
+#: modules/aycryption/aycryption.c:312
 #, c-format
 msgid "<font color=%s><b>%s</b>: %s</font><br>"
 msgstr "<font color=%s><b>%s</b>: %s</font><br>"
 
-#: modules/aycryption/aycryption.c:547
+#: modules/aycryption/aycryption.c:548
 msgid "Got an "
 msgstr "Kreeg een "
 
-#: modules/aycryption/aycryption.c:548
+#: modules/aycryption/aycryption.c:549
 msgid "encrypted"
 msgstr "versleuteld"
 
-#: modules/aycryption/aycryption.c:548
+#: modules/aycryption/aycryption.c:549
 #, fuzzy
 msgid "unencrypted"
 msgstr "versleuteld"
 
-#: modules/aycryption/aycryption.c:552
+#: modules/aycryption/aycryption.c:553
 msgid ", unsigned message."
 msgstr ", ongehandtekend bericht."
 
-#: modules/aycryption/aycryption.c:555
+#: modules/aycryption/aycryption.c:556
 msgid ", correctly signed (by "
 msgstr ", goed gehandtekend (door "
 
-#: modules/aycryption/aycryption.c:560
+#: modules/aycryption/aycryption.c:561
 msgid ", badly signed (by "
 msgstr ", foutief gehandtekend (door "
 
-#: modules/aycryption/aycryption.c:565
+#: modules/aycryption/aycryption.c:566
 msgid " message with no key."
 msgstr " bericht zonder sleutel."
 
-#: modules/aycryption/aycryption.c:568
+#: modules/aycryption/aycryption.c:569
 msgid " message ; signature is valid but  the signing key has been revoked"
 msgstr ""
 
-#: modules/aycryption/aycryption.c:571 modules/aycryption/aycryption.c:576
+#: modules/aycryption/aycryption.c:572 modules/aycryption/aycryption.c:577
 msgid " correctly signed (by "
 msgstr " goed gehandtekend (door "
 
-#: modules/aycryption/aycryption.c:573
+#: modules/aycryption/aycryption.c:574
 msgid ") message, but signature has expired."
 msgstr ") bericht, maar handtekening is verlopen."
 
-#: modules/aycryption/aycryption.c:578
+#: modules/aycryption/aycryption.c:579
 msgid ") message, but key has expired."
 msgstr ") bericht, maar sleutel is verlopen."
 
-#: modules/aycryption/aycryption.c:581
+#: modules/aycryption/aycryption.c:582
 msgid ") message, but there was an error verifying the signature"
 msgstr ""
 
-#: modules/aycryption/aycryption.c:584
+#: modules/aycryption/aycryption.c:585
 msgid " message - Unknown signature status (file a bugreport)!"
 msgstr " bericht - Onbekende status van handtekening (dien een bugrapport in)!"
 
@@ -255,13 +240,9 @@ msgstr "Waarde"
 msgid "Select"
 msgstr "Selecteer"
 
-#: modules/aycryption/select-keys.c:451 modules/aycryption/select-keys.c:709
-#: modules/importers/import_everybuddy.c:260 src/activity_bar.C:136
-#: src/add_contact_window.c:476 src/chat_room.c:628 src/chat_room.c:986
-#: src/dialog.c:470 src/edit_account_window.c:295
-#: src/edit_contact_window.c:221 src/edit_group_window.c:131
-#: src/edit_list_window.c:654 src/edit_local_accounts.c:802
-#: src/gtk/prefs_window.C:678 src/trigger.c:425
+#: modules/aycryption/select-keys.c:451 modules/aycryption/select-keys.c:708
+#: src/activity_bar.C:136 src/chat_room.c:626 src/chat_room.c:984
+#: src/edit_local_accounts.c:787 src/gtk/prefs_window.C:679 src/trigger.c:423
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -281,11 +262,11 @@ msgstr "Zet handtekenen aan"
 msgid "Enter another user or key ID:"
 msgstr "Voer een andere gebruikersnaam of sleutel-ID in:"
 
-#: modules/aycryption/select-keys.c:639
+#: modules/aycryption/select-keys.c:638
 msgid "[no user id]"
 msgstr "[geen gebruikersnaam]"
 
-#: modules/aycryption/select-keys.c:641
+#: modules/aycryption/select-keys.c:640
 #, fuzzy, c-format
 msgid ""
 "%sPlease enter the passphrase for:\n"
@@ -297,7 +278,7 @@ msgstr ""
 "  %.*s  \n"
 "(%.*s)\n"
 
-#: modules/aycryption/select-keys.c:643
+#: modules/aycryption/select-keys.c:642
 msgid ""
 "Bad passphrase! Try again...\n"
 "\n"
@@ -305,13 +286,11 @@ msgstr ""
 "Verkeerde passphrase! Probeer opnieuw...\n"
 "\n"
 
-#: modules/aycryption/select-keys.c:666
+#: modules/aycryption/select-keys.c:665
 msgid "Passphrase"
 msgstr "Passphrase"
 
-#: modules/aycryption/select-keys.c:706
-#: modules/importers/import_everybuddy.c:259 src/dialog.c:460
-#: src/gtk/message_windows.c:145 src/gtk/prefs_window.C:668
+#: modules/aycryption/select-keys.c:705 src/gtk/prefs_window.C:669
 msgid "OK"
 msgstr "OK"
 
@@ -466,15 +445,15 @@ msgstr "ICQ-waarschuwing"
 msgid "ICQ _UIN:"
 msgstr "ICQ _UIN:"
 
-#: modules/importers/import_everybuddy.c:125
-#: modules/importers/import_everybuddy.c:135
-#: modules/importers/import_everybuddy.c:171
-#: modules/importers/import_everybuddy.c:186
-#: modules/importers/import_everybuddy.c:198
+#: modules/importers/import_everybuddy.c:123
+#: modules/importers/import_everybuddy.c:133
+#: modules/importers/import_everybuddy.c:169
+#: modules/importers/import_everybuddy.c:184
+#: modules/importers/import_everybuddy.c:196
 msgid "Import error"
 msgstr "Fout tijdens importeren"
 
-#: modules/importers/import_everybuddy.c:125
+#: modules/importers/import_everybuddy.c:123
 msgid ""
 "Cannot import accounts.\n"
 "Check that ~/.everybuddy/accounts exists and is readable."
@@ -482,7 +461,7 @@ msgstr ""
 "Kan geen accounts importeren.\n"
 "Verzeker u ervan dat ~/.everybuddy/accounts bestaat en leesbaar is."
 
-#: modules/importers/import_everybuddy.c:135
+#: modules/importers/import_everybuddy.c:133
 msgid ""
 "Cannot import contacts.\n"
 "Check that ~/.everybuddy/contacts exists and is readable."
@@ -490,7 +469,7 @@ msgstr ""
 "Kan geen contactpersonen importeren.\n"
 "Verzeker u ervan dat ~/.everybuddy/contacts bestaat en leesbaar is."
 
-#: modules/importers/import_everybuddy.c:172
+#: modules/importers/import_everybuddy.c:170
 msgid ""
 "Cannot import preferences.\n"
 "Check that ~/.everybuddy/preferences exists and is readable."
@@ -498,7 +477,7 @@ msgstr ""
 "Kan geen voorkeuren importeren.\n"
 "Verzeker u ervan dat ~/.everybuddy/preferences bestaat en leesbaar is."
 
-#: modules/importers/import_everybuddy.c:187
+#: modules/importers/import_everybuddy.c:185
 msgid ""
 "Cannot save away messages.\n"
 "Check that ~/.ayttm/away_messages is writable."
@@ -506,7 +485,7 @@ msgstr ""
 "Kan geen afwezigheidsberichten opslaan.\n"
 "Verzeker u ervan dat ~/.ayttm/away_messages bestaat en beschrijfbaar is."
 
-#: modules/importers/import_everybuddy.c:199
+#: modules/importers/import_everybuddy.c:197
 msgid ""
 "Cannot import away messages.\n"
 "Check that ~/.everybuddy/away_messages exists and is readable."
@@ -514,37 +493,37 @@ msgstr ""
 "Kan geen afwezigheidsberichten importeren.\n"
 "Verzeker u ervan dat ~/.everybuddy/away_messages bestaat en leesbaar is."
 
-#: modules/importers/import_everybuddy.c:219
+#: modules/importers/import_everybuddy.c:217
 msgid "Import success"
 msgstr "Importeren gelukt"
 
-#: modules/importers/import_everybuddy.c:241
+#: modules/importers/import_everybuddy.c:239
 msgid "Import parameters"
 msgstr "Parameters voor importeerhandeling"
 
-#: modules/importers/import_everybuddy.c:247
+#: modules/importers/import_everybuddy.c:245
 msgid "Select which parts of your everybuddy configuration to import.\n"
 msgstr ""
 "Selecteer de delen van uw configuratie van Everybuddy die u wilt "
 "importeren.\n"
 
-#: modules/importers/import_everybuddy.c:251
+#: modules/importers/import_everybuddy.c:249
 msgid "Import local accounts"
 msgstr "Importeer lokale accounts"
 
-#: modules/importers/import_everybuddy.c:253
+#: modules/importers/import_everybuddy.c:251
 msgid "Import contacts"
 msgstr "Importeer contactpersonen"
 
-#: modules/importers/import_everybuddy.c:255
+#: modules/importers/import_everybuddy.c:253
 msgid "Import preferences"
 msgstr "Importeer instellingen"
 
-#: modules/importers/import_everybuddy.c:257
+#: modules/importers/import_everybuddy.c:255
 msgid "Import away messages"
 msgstr "Importeer afwezigheidsberichten"
 
-#: modules/irc/irc.c:218 modules/irc/irc.c:281 modules/irc/irc.c:384
+#: modules/irc/irc.c:218 modules/irc/irc.c:278 modules/irc/irc.c:379
 msgid "IRC Error"
 msgstr "IRC-fout"
 
@@ -553,49 +532,49 @@ msgstr "IRC-fout"
 msgid "IRC Warning"
 msgstr "ICQ-waarschuwing"
 
-#: modules/irc/irc.c:268
+#: modules/irc/irc.c:265
 #, c-format
 msgid "Logging in to IRC account: %s"
 msgstr "Aanmelden op IRC-account: %s"
 
-#: modules/irc/irc.c:280 modules/irc/irc.c:383 modules/msn2/msn.c:731
+#: modules/irc/irc.c:277 modules/irc/irc.c:378 modules/msn2/msn.c:740
 #, c-format
 msgid "Cannot connect to %s."
 msgstr "Kan niet verbinden met %s."
 
-#: modules/irc/irc.c:310
+#: modules/irc/irc.c:304
 #, c-format
 msgid "Connection closed by %s."
 msgstr "Verbinding beëindigd door %s."
 
-#: modules/irc/irc.c:341
+#: modules/irc/irc.c:336
 #, fuzzy, c-format
 msgid "Not Connected to server"
 msgstr "Standaard server:"
 
-#: modules/irc/irc.c:366
+#: modules/irc/irc.c:361
 #, c-format
 msgid "Error occurred while sending data to %s: %s"
 msgstr ""
 
-#: modules/irc/irc.c:435
+#: modules/irc/irc.c:430
 #, fuzzy, c-format
 msgid "<font color=\"#AA77AA\">%s</font>"
 msgstr "<font color=%s><b>%s</b>: %s</font><br>"
 
-#: modules/irc/irc.c:594
+#: modules/irc/irc.c:589
 msgid "_Nick:"
 msgstr "_Bijnaam:"
 
-#: modules/irc/irc.c:615
+#: modules/irc/irc.c:610
 msgid "IRC _Host:"
 msgstr "IRC _Host:"
 
-#: modules/irc/irc.c:622
+#: modules/irc/irc.c:617
 msgid "IRC P_ort:"
 msgstr "IRC P_oort:"
 
-#: modules/irc/irc.c:717
+#: modules/irc/irc.c:712
 msgid "No hostname found in your login (which should be in user@host form)."
 msgstr ""
 "Geen hostnaam gevonden in uw aanmeldgegevens (moet in de vorm "
@@ -698,67 +677,76 @@ msgstr ""
 msgid "Default Server:"
 msgstr "Standaard server:"
 
-#: modules/jabber/jabber.c:303
+#: modules/jabber/jabber.c:281
 #, c-format
 msgid "Logging in to Jabber account: %s"
 msgstr "Aanmelden op Jabber-account: %s"
 
-#: modules/jabber/jabber.c:333
+#: modules/jabber/jabber.c:311
 #, c-format
 msgid "Jabber password for: %s"
 msgstr "Wachtwoord van Jabber voor: %s"
 
-#: modules/jabber/jabber.c:455
+#: modules/jabber/jabber.c:433
 msgid "_Username:"
 msgstr "_Gebruikersnaam:"
 
-#: modules/jabber/jabber.c:469
+#: modules/jabber/jabber.c:447
 #, fuzzy
 msgid "Co_nnect Server:"
 msgstr "Standaard server:"
 
-#: modules/jabber/jabber.c:491
+#: modules/jabber/jabber.c:469
 msgid "Use _SSL"
 msgstr "Gebruik _SSL"
 
-#: modules/jabber/jabber.c:498 modules/smtp/smtp.c:204
+#: modules/jabber/jabber.c:476 modules/smtp/smtp.c:204
 msgid "P_ort:"
 msgstr "P_oort:"
 
-#: modules/jabber/jabber.c:506
+#: modules/jabber/jabber.c:484
 msgid "SSL Po_rt:"
 msgstr "Poo_rt van SSL:"
 
-#: modules/jabber/jabber.c:1250 modules/msn2/msn.c:1670
-#: modules/workwizu/workwizu.c:328 modules/yahoo2/yahoo.c:2159
-#: src/chat_room.c:1944 src/chat_room.c:1962
+#: modules/jabber/jabber.c:492
+msgid "Request mail information (GMail only)"
+msgstr ""
+
+#: modules/jabber/jabber.c:1266 modules/msn2/msn.c:1988
+#: modules/workwizu/workwizu.c:328 modules/yahoo2/yahoo.c:2197
+#: src/chat_room.c:1943 src/chat_room.c:1961
 msgid "typing..."
 msgstr "Bezig met typen..."
 
-#: modules/jabber/libEBjabber.c:290
+#: modules/jabber/libEBjabber.c:289
 msgid "No jabber server specified."
 msgstr "Geen Jabberserver gespecificeerd."
 
-#: modules/jabber/libEBjabber.c:290
+#: modules/jabber/libEBjabber.c:289
 msgid "Cannot login"
 msgstr "Kan niet anmelden"
 
-#: modules/jabber/libEBjabber.c:314 modules/jabber/libEBjabber.c:322
-#: modules/jabber/libEBjabber.c:800 modules/jabber/libEBjabber.c:993
+#: modules/jabber/libEBjabber.c:313 modules/jabber/libEBjabber.c:321
+#: modules/jabber/libEBjabber.c:872 modules/jabber/libEBjabber.c:1098
 msgid "Jabber Error"
 msgstr "Jabber-fout"
 
-#: modules/jabber/libEBjabber.c:967
+#: modules/jabber/libEBjabber.c:659
+#, fuzzy
+msgid "You have new email: \n"
+msgstr "U hebt een nieuwe e-mail van %s betreffende %s\n"
+
+#: modules/jabber/libEBjabber.c:1072
 msgid "Register? You're not authorized"
 msgstr "U bent nog niet geautoriseerd. Wilt u registreren?"
 
-#: modules/jabber/libEBjabber.c:968
+#: modules/jabber/libEBjabber.c:1073
 #, c-format
 msgid ""
 "Do you want to try to create the account \"%s\" on the jabber server %s?"
 msgstr "Wilt u de account \"%s\" proberen aan te maken op de Jabberserver %s?"
 
-#: modules/jabber/libEBjabber.c:1051
+#: modules/jabber/libEBjabber.c:1154
 #, c-format
 msgid ""
 "%s wants to add you to his friends' list.\n"
@@ -769,49 +757,49 @@ msgstr ""
 "\n"
 "Staat u dit toe?"
 
-#: modules/jabber/libEBjabber.c:1110
+#: modules/jabber/libEBjabber.c:1208
 #, c-format
 msgid "The Jabber server %s has disconnected you."
 msgstr "De Jabberserver %s heeft de verbinding verbroken."
 
-#: modules/jabber/libEBjabber.c:1112 src/gtk/prefs_window.C:2924
+#: modules/jabber/libEBjabber.c:1210 src/gtk/prefs_window.C:2954
 msgid "Disconnect"
 msgstr "Verbinding verbroken"
 
-#: modules/jabber/libEBjabber.c:1120
+#: modules/jabber/libEBjabber.c:1217
 #, c-format
 msgid "Connection to the jabber server %s failed!"
 msgstr "Verbinding maken met Jabberserver %s is mislukt!"
 
-#: modules/jabber/libEBjabber.c:1121
+#: modules/jabber/libEBjabber.c:1218
 msgid "Jabber server not responding"
 msgstr "Jabberserver antwoordt niet"
 
-#: modules/msn2/msn.c:199 modules/yahoo2/yahoo.c:228
+#: modules/msn2/msn.c:198 modules/yahoo2/yahoo.c:228
 msgid "Guess status from Away messages"
 msgstr "Gis status via afwezigheidsberichten"
 
-#: modules/msn2/msn.c:206
+#: modules/msn2/msn.c:205
 msgid "Rename my MSN-only contacts whenever they change their alias"
 msgstr "Hernoem MSN-contactpersonen wanneer ze hun bijnaam wijzigen"
 
-#: modules/msn2/msn.c:408 modules/msn2/msn.c:413
+#: modules/msn2/msn.c:407 modules/msn2/msn.c:412
 msgid "Invite to Gnomemeeting"
 msgstr "Uitnodigen op GnomeMeeting"
 
-#: modules/msn2/msn.c:453
+#: modules/msn2/msn.c:452
 msgid "_MSN Login:"
 msgstr "Aanmeldgegevens _MSN:"
 
-#: modules/msn2/msn.c:481
+#: modules/msn2/msn.c:480
 msgid "_Login invisible"
 msgstr "_Onzichtbaar aanmelden"
 
-#: modules/msn2/msn.c:488
+#: modules/msn2/msn.c:487
 msgid "Friendly Name:"
 msgstr "Bijnaam:"
 
-#: modules/msn2/msn.c:495
+#: modules/msn2/msn.c:494
 msgid "Tell me about new Hotmail/MSN mail"
 msgstr "Waarschuw bij nieuwe e-mails bij Hotmail/MSN"
 
@@ -820,24 +808,24 @@ msgstr "Waarschuw bij nieuwe e-mails bij Hotmail/MSN"
 msgid "Logging in to MSN account: %s"
 msgstr "Aanmelden op MSN-account: %s"
 
-#: modules/msn2/msn.c:618
+#: modules/msn2/msn.c:621
 #, c-format
 msgid "MSN password for: %s"
 msgstr "Wachtwoord van MSN voor: %s"
 
-#: modules/msn2/msn.c:687 modules/msn2/msn.c:732
+#: modules/msn2/msn.c:698 modules/msn2/msn.c:741 modules/msn2/msn.c:1744
 msgid "MSN Error"
 msgstr "MSN-fout"
 
-#: modules/msn2/msn.c:701
+#: modules/msn2/msn.c:710
 msgid "Connected, sending login information"
 msgstr ""
 
-#: modules/msn2/msn.c:843
+#: modules/msn2/msn.c:878
 msgid "Logged in. Downloading contact information."
 msgstr ""
 
-#: modules/msn2/msn.c:851
+#: modules/msn2/msn.c:888
 #, fuzzy, c-format
 msgid ""
 "MSN Login Failed:\n"
@@ -845,32 +833,123 @@ msgid ""
 "%s"
 msgstr "Aanmeldgegevens _MSN:"
 
-#: modules/msn2/msn.c:853
+#: modules/msn2/msn.c:890
 #, fuzzy
 msgid "Login Failed"
 msgstr "_Onzichtbaar aanmelden"
 
-#: modules/msn2/msn.c:1133
+#: modules/msn2/msn.c:1170
 msgid ""
 "MSN passport ID must have @domain.tld part. For example foo@live.com or "
 "bar@hotmail.com"
 msgstr ""
 
-#: modules/msn2/msn.c:1261
-msgid "MSN Warning"
-msgstr "MSN-waarschuwing"
-
-#: modules/msn2/msn.c:1261
-msgid "Cannot invite user: connection to the chatroom has been closed."
+#: modules/msn2/msn.c:1340
+#, c-format
+msgid "Could not unblock <i>%s</i>. Server returned an error."
 msgstr ""
-"Kan geen gebruiker uitnodigen: verbinding met de chatruimte werd gesloten."
 
-#: modules/msn2/msn.c:1365
+#: modules/msn2/msn.c:1342 modules/msn2/msn.c:1354 modules/msn2/msn.c:1366
+#: modules/msn2/msn.c:1377 modules/msn2/msn.c:1388 modules/msn2/msn.c:1398
+#: modules/msn2/msn.c:1497
+msgid "MSN"
+msgstr ""
+
+#: modules/msn2/msn.c:1352
+#, c-format
+msgid "Could not block <i>%s</i>. Server returned an error."
+msgstr ""
+
+#: modules/msn2/msn.c:1363
+#, c-format
+msgid ""
+"Could not remove <i>%s</i> from group <i>%s</i>.\n"
+"Server returned an error."
+msgstr ""
+
+#: modules/msn2/msn.c:1374
+#, c-format
+msgid ""
+"Could not add <i>%s</i> to group <i>%s</i>.\n"
+"Server returned an error."
+msgstr ""
+
+#: modules/msn2/msn.c:1385
+#, c-format
+msgid ""
+"Unable to add group <b>%s</b>. Server returned error:\n"
+"\n"
+"<i>%s</i>"
+msgstr ""
+
+#: modules/msn2/msn.c:1386
+#, fuzzy
+msgid "Unknown error"
+msgstr "Onbekend"
+
+#: modules/msn2/msn.c:1396
+#, c-format
+msgid "Could not add buddy %s(<i>%s</i>). Server returned an error."
+msgstr ""
+
+#: modules/msn2/msn.c:1422
+#, fuzzy, c-format
+msgid ""
+"The MSN user:\n"
+"\n"
+" <b>%s(%s)</b>\n"
+"\n"
+"has added you to their contact list.\n"
+"Do you want to allow this?"
+msgstr ""
+"%s, MSN-gebruiker %s (%s) wilt u toevoegen aan zijn/haar contactenlijst.\n"
+"\n"
+"Staat u het hem toe dat hij kan zien wanneer u online bent?"
+
+#: modules/msn2/msn.c:1425
+#, fuzzy
+msgid "MSN New Contact"
+msgstr "Nieuwe Yahoo-contactpersoon"
+
+#: modules/msn2/msn.c:1475
+#, fuzzy
+msgid "MSN Invitation"
+msgstr "Accepteer uitnodiging"
+
+#: modules/msn2/msn.c:1475
+#, fuzzy
+msgid "Invite failed!"
+msgstr "Gebruiker uitnodigen"
+
+#: modules/msn2/msn.c:1489
+#, fuzzy, c-format
+msgid ""
+"%s has invited you to chat.\n"
+"Do you want to accept?"
+msgstr ""
+"%s wilt u toevoegen aan zijn/haar contactenlijst.\n"
+"\n"
+"Staat u dit toe?"
+
+#: modules/msn2/msn.c:1491
+#, fuzzy
+msgid "MSN Chat Invitation"
+msgstr "Uitnodigen op chat"
+
+#: modules/msn2/msn.c:1497
+msgid "Not Implemented"
+msgstr ""
+
+#: modules/msn2/msn.c:1646
 #, fuzzy, c-format
 msgid "Connection error: %s"
 msgstr "Verbindingstype:"
 
-#: modules/msn2/msn.c:1644 modules/msn2/msn.c:1658
+#: modules/msn2/msn.c:1746
+msgid "MSN :: Operation failed"
+msgstr ""
+
+#: modules/msn2/msn.c:1962 modules/msn2/msn.c:1976
 msgid "MSN Mail"
 msgstr "E-mail bij MSN"
 
@@ -906,23 +985,23 @@ msgstr "Fout tijdens het verzenden van een bericht via SMTP."
 msgid "SMTP logins must have @domain.tld part."
 msgstr "Aanmeldingen via SMTP moeten een @domein gedeelte hebben."
 
-#: modules/utility/autotrans.c:114
+#: modules/utility/autotrans.c:113
 msgid "Enable automatic translation"
 msgstr "Gebruik automatische vertaling"
 
-#: modules/utility/autotrans.c:121
+#: modules/utility/autotrans.c:120
 msgid "My language code:"
 msgstr "Mijn taalcode:"
 
-#: modules/utility/autotrans.c:139 modules/utility/autotrans.c:145
+#: modules/utility/autotrans.c:138 modules/utility/autotrans.c:144
 msgid "Set Language"
 msgstr "Stel taal in"
 
-#: modules/utility/autotrans.c:201
+#: modules/utility/autotrans.c:200
 msgid "Auto-Translation Warning"
 msgstr "Waarschuwing bij automatische vertaling"
 
-#: modules/utility/autotrans.c:201
+#: modules/utility/autotrans.c:200
 msgid ""
 "You have just selected a language with which to talk to a buddy. This will "
 "only affect you if you have the auto-translatorplugin turned on. If you do, "
@@ -935,12 +1014,12 @@ msgstr ""
 "Ayttm elke keer zal bevriezen als u een bericht verzend of ontvangt. Dit kan "
 "verscheidene seconden duren."
 
-#: modules/utility/autotrans.c:223
+#: modules/utility/autotrans.c:222
 #, c-format
 msgid "Select the code for the language to use when talking to %s"
 msgstr "Selecteer de taalcode die u wilt gebruiken als u chat met %s"
 
-#: modules/utility/autotrans.c:226
+#: modules/utility/autotrans.c:225
 msgid "Select Language"
 msgstr "Selecteer taal"
 
@@ -1031,7 +1110,7 @@ msgstr ""
 msgid "The login is empty."
 msgstr "De aanmeldgegevens zijn niet ingevoerd."
 
-#: modules/workwizu/workwizu.c:957 src/nomodule.c:194
+#: modules/workwizu/workwizu.c:957 src/nomodule.c:195
 #, c-format
 msgid "Offline"
 msgstr "Offline"
@@ -1089,31 +1168,31 @@ msgstr "Vraag achter overgedragen bestandsnaam"
 msgid "Show how long contact has been away"
 msgstr "Toon hoe lang contactpersonen afwezig waren"
 
-#: modules/yahoo2/yahoo.c:928
+#: modules/yahoo2/yahoo.c:930
 #, c-format
 msgid "<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"
 msgstr "<FONT COLOR=\"#0000FF\">[Offline-bericht op %s]</FONT><BR>%s"
 
-#: modules/yahoo2/yahoo.c:1070
+#: modules/yahoo2/yahoo.c:1072
 msgid "Save file as"
 msgstr "Bestand opslaan als"
 
-#: modules/yahoo2/yahoo.c:1094
+#: modules/yahoo2/yahoo.c:1096
 #, c-format
 msgid ""
 "%s, the yahoo user %s has sent you a file%s%s, Do you want to accept it?"
 msgstr ""
 "%s, Yahoo-gebruiker %s heeft u een bestand%s%s toegezonden, Accepteert u het?"
 
-#: modules/yahoo2/yahoo.c:1096
+#: modules/yahoo2/yahoo.c:1098
 msgid " with the message "
 msgstr " met het bericht "
 
-#: modules/yahoo2/yahoo.c:1106
+#: modules/yahoo2/yahoo.c:1108
 msgid "Yahoo File Transfer"
 msgstr "Yahoo-bestandsoverdracht"
 
-#: modules/yahoo2/yahoo.c:1284
+#: modules/yahoo2/yahoo.c:1292
 #, c-format
 msgid ""
 "The yahoo user %s declined your invitation to join conference %s, with the "
@@ -1122,18 +1201,18 @@ msgstr ""
 "Yahoo-gebruiker %s weigerde uw uitnodiging om toe te treden tot chatruimte %"
 "s met volgend bericht: %s"
 
-#: modules/yahoo2/yahoo.c:1287 modules/yahoo2/yahoo.c:1743
-#: modules/yahoo2/yahoo.c:2030 modules/yahoo2/yahoo.c:2073
-#: modules/yahoo2/yahoo.c:2224 modules/yahoo2/yahoo.c:2370
-#: modules/yahoo2/yahoo.c:3276
+#: modules/yahoo2/yahoo.c:1306 modules/yahoo2/yahoo.c:1774
+#: modules/yahoo2/yahoo.c:2061 modules/yahoo2/yahoo.c:2109
+#: modules/yahoo2/yahoo.c:2262 modules/yahoo2/yahoo.c:2408
+#: modules/yahoo2/yahoo.c:3324
 msgid "Yahoo Error"
 msgstr "Yahoo-fout"
 
-#: modules/yahoo2/yahoo.c:1316 modules/yahoo2/yahoo.c:1393
+#: modules/yahoo2/yahoo.c:1335 modules/yahoo2/yahoo.c:1412
 msgid "Thanks, but no thanks"
 msgstr "Nee dank u, maar toch bedankt."
 
-#: modules/yahoo2/yahoo.c:1330
+#: modules/yahoo2/yahoo.c:1349
 #, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to a conference - %s, the topic is %"
@@ -1142,31 +1221,31 @@ msgstr ""
 "%s, Yahoo-gebruiker %s heeft u uitgenodigd op een chatruimte - %s met het "
 "onderwerp %s.\n"
 
-#: modules/yahoo2/yahoo.c:1331
+#: modules/yahoo2/yahoo.c:1350
 #, c-format
 msgid "Do you want to join?"
 msgstr "Wilt u de kamer betreden?"
 
-#: modules/yahoo2/yahoo.c:1337
+#: modules/yahoo2/yahoo.c:1356
 msgid "Yahoo Join Conference"
 msgstr "Yahoo betreed chatruimte"
 
-#: modules/yahoo2/yahoo.c:1534
+#: modules/yahoo2/yahoo.c:1568
 msgid "Join my conference"
 msgstr "Betreed mijn chatruimte"
 
-#: modules/yahoo2/yahoo.c:1668
+#: modules/yahoo2/yahoo.c:1699
 #, c-format
 msgid "%s's webcam"
 msgstr "webcam van %s"
 
-#: modules/yahoo2/yahoo.c:1743 modules/yahoo2/yahoo.c:2030
+#: modules/yahoo2/yahoo.c:1774 modules/yahoo2/yahoo.c:2061
 msgid "Cannot find a valid local account to view user's webcam."
 msgstr ""
 "Kan geen geldige lokale account vinden om de webcam van de gebruiker te "
 "bekijken."
 
-#: modules/yahoo2/yahoo.c:1758
+#: modules/yahoo2/yahoo.c:1789
 #, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to view their webcam.Do you want to "
@@ -1175,36 +1254,36 @@ msgstr ""
 "%s, Yahoo-gebruiker %s heeft u uitgenodigd om zijn/haar webcam te bekijken. "
 "Accepteert u dit?"
 
-#: modules/yahoo2/yahoo.c:1763
+#: modules/yahoo2/yahoo.c:1794
 msgid "Yahoo Webcam Invitation"
 msgstr "Yahoo Webcam uitnodiging"
 
-#: modules/yahoo2/yahoo.c:1791
+#: modules/yahoo2/yahoo.c:1822
 #, c-format
 msgid "%s, webcam connection closed. %s "
 msgstr "%s, webcamverbinding gesloten. %s "
 
-#: modules/yahoo2/yahoo.c:1793
+#: modules/yahoo2/yahoo.c:1824
 msgid "stopped broadcasting."
 msgstr "uitzending gestopt."
 
-#: modules/yahoo2/yahoo.c:1795
+#: modules/yahoo2/yahoo.c:1826
 msgid "cancelled viewing permission."
 msgstr "bekijken van permissie geannuleerd"
 
-#: modules/yahoo2/yahoo.c:1797
+#: modules/yahoo2/yahoo.c:1828
 msgid "declined you permission."
 msgstr "weigerde uw permissie."
 
-#: modules/yahoo2/yahoo.c:1799
+#: modules/yahoo2/yahoo.c:1830
 msgid "does not have their webcam online."
 msgstr "heeft zijn webcam niet online."
 
-#: modules/yahoo2/yahoo.c:1801
+#: modules/yahoo2/yahoo.c:1832
 msgid "did something we don't know about."
 msgstr "deed iets waar we niets over weten."
 
-#: modules/yahoo2/yahoo.c:1807
+#: modules/yahoo2/yahoo.c:1838
 msgid ""
 "\n"
 "Close image window?"
@@ -1212,26 +1291,26 @@ msgstr ""
 "\n"
 "Afbeeldingenvenster sluiten?"
 
-#: modules/yahoo2/yahoo.c:1808 modules/yahoo2/yahoo.c:1810
+#: modules/yahoo2/yahoo.c:1839 modules/yahoo2/yahoo.c:1841
 msgid "Webcam connection closed"
 msgstr "Webcamverbinding beëindigd"
 
-#: modules/yahoo2/yahoo.c:1858 modules/yahoo2/yahoo.c:1927
+#: modules/yahoo2/yahoo.c:1889 modules/yahoo2/yahoo.c:1958
 #, c-format
 msgid "My webcam (%d viewer%s)"
 msgstr "Mijn webcam (%d weergave %s)"
 
-#: modules/yahoo2/yahoo.c:1903
+#: modules/yahoo2/yahoo.c:1934
 #, c-format
 msgid "%s, the yahoo user %s has stopped viewing your webcam."
 msgstr "%s, Yahoo-gebruiker %s stopte met het kijken naar uw webcam."
 
-#: modules/yahoo2/yahoo.c:1908
+#: modules/yahoo2/yahoo.c:1939
 #, c-format
 msgid "%s, the yahoo user %s is viewing your webcam."
 msgstr "%s, Yahoo-gebruiker %s is bezig met het kijken naar uw webcam."
 
-#: modules/yahoo2/yahoo.c:1913
+#: modules/yahoo2/yahoo.c:1944
 #, c-format
 msgid ""
 "%s, the yahoo user %s wants to view your webcam.\n"
@@ -1240,7 +1319,7 @@ msgstr ""
 "%s, de Yahoo-gebruiker %s wilt uw webcam bekijken.\n"
 "Staat u dit toe?"
 
-#: modules/yahoo2/yahoo.c:1917
+#: modules/yahoo2/yahoo.c:1948
 #, c-format
 msgid ""
 "%s, the yahoo user %s wants to %d your webcam.  Tell the ayttm devels about "
@@ -1249,96 +1328,105 @@ msgstr ""
 "%s, Yahoo-gebruiker %s wilt uw webcam %d.  Vertel de ontwikkelaars van ayttm "
 "hierover."
 
-#: modules/yahoo2/yahoo.c:1925 modules/yahoo2/yahoo.c:1951
+#: modules/yahoo2/yahoo.c:1956 modules/yahoo2/yahoo.c:1982
 msgid "Yahoo Webcam"
 msgstr "Yahoo webcam"
 
-#: modules/yahoo2/yahoo.c:1935
+#: modules/yahoo2/yahoo.c:1966
 msgid "Yahoo Webcam Request"
 msgstr "Yahoo webcamaanvraag"
 
-#: modules/yahoo2/yahoo.c:1951
+#: modules/yahoo2/yahoo.c:1982
 #, fuzzy
 msgid "Could not read images from your webcam, could not find a video grabber."
 msgstr ""
 "Kon geen afbeeldingen lezen van uw webcam, kon geen video grabber vinden."
 
-#: modules/yahoo2/yahoo.c:2006
+#: modules/yahoo2/yahoo.c:2037
 #, c-format
 msgid "%s, the yahoo user %s has declined your invitation to view your webcam."
 msgstr ""
 "%s, Yahoo-gebruiker %s heeft uw uitnodiging om te kijken naar uw webcam "
 "geweigerd."
 
-#: modules/yahoo2/yahoo.c:2007
+#: modules/yahoo2/yahoo.c:2038
 msgid "Webcam invite declined"
 msgstr "Webcam-uitnodiging geweigerd"
 
-#: modules/yahoo2/yahoo.c:2071
+#: modules/yahoo2/yahoo.c:2107
 #, c-format
 msgid "%s has rejected your request to be added as a buddy%s%s"
 msgstr ""
 "%s heeft uw aanvraag om toegevoegd te worden als contactpersoon geweigerd%s%s"
 
-#: modules/yahoo2/yahoo.c:2072
+#: modules/yahoo2/yahoo.c:2108
 msgid " with the message:\n"
 msgstr " met het bericht:\n"
 
-#: modules/yahoo2/yahoo.c:2083
-#, c-format
-msgid "%s, the yahoo user %s has added you to their contact list"
+#: modules/yahoo2/yahoo.c:2120
+#, fuzzy, c-format
+msgid ""
+"%s, the yahoo user \n"
+"\n"
+"<b>%s</b>\n"
+"\n"
+"has added you to their contact list"
 msgstr "%s, Yahoo-gebruiker %s heeft u toegevoegd aan zijn/haar contactenlijst"
 
-#: modules/yahoo2/yahoo.c:2085
-msgid " with the following message:\n"
+#: modules/yahoo2/yahoo.c:2123
+#, fuzzy
+msgid ""
+" with the following message:\n"
+"\n"
+"<i>"
 msgstr " met het volgende bericht:\n"
 
-#: modules/yahoo2/yahoo.c:2091
+#: modules/yahoo2/yahoo.c:2129
 msgid "Do you want to allow this?"
 msgstr "Staat u dit werkelijk toe?"
 
-#: modules/yahoo2/yahoo.c:2095
+#: modules/yahoo2/yahoo.c:2133
 msgid "Yahoo New Contact"
 msgstr "Nieuwe Yahoo-contactpersoon"
 
-#: modules/yahoo2/yahoo.c:2190
+#: modules/yahoo2/yahoo.c:2228
 #, c-format
 msgid "You have new mail from %s about %s\n"
 msgstr "U hebt een nieuwe e-mail van %s betreffende %s\n"
 
-#: modules/yahoo2/yahoo.c:2196
+#: modules/yahoo2/yahoo.c:2234
 #, c-format
 msgid "You have %d message%s\n"
 msgstr "U hebt %d bericht%s\n"
 
-#: modules/yahoo2/yahoo.c:2197
+#: modules/yahoo2/yahoo.c:2235
 msgid "s"
 msgstr "en"
 
-#: modules/yahoo2/yahoo.c:2202
+#: modules/yahoo2/yahoo.c:2240
 msgid "Yahoo Mail"
 msgstr "E-mail van Yahoo"
 
-#: modules/yahoo2/yahoo.c:2214
+#: modules/yahoo2/yahoo.c:2252
 #, fuzzy, c-format
 msgid "%s: Yahoo System Message"
 msgstr "Yahoo systeembericht"
 
-#: modules/yahoo2/yahoo.c:2284
+#: modules/yahoo2/yahoo.c:2322
 #, c-format
 msgid "Logging in to Yahoo account: %s"
 msgstr "Aanmelden op Yahoo-account: %s"
 
-#: modules/yahoo2/yahoo.c:2313
+#: modules/yahoo2/yahoo.c:2351
 #, c-format
 msgid "Yahoo! password for: %s"
 msgstr "Wachtwoord van Yahoo! voor: %s"
 
-#: modules/yahoo2/yahoo.c:2336
+#: modules/yahoo2/yahoo.c:2374
 msgid "Fetching buddies..."
 msgstr "Afhalen contactenlijst..."
 
-#: modules/yahoo2/yahoo.c:2349
+#: modules/yahoo2/yahoo.c:2387
 #, c-format
 msgid ""
 "Could not log into Yahoo service - username not recognised.  Please verify "
@@ -1347,7 +1435,7 @@ msgstr ""
 "Kon niet aanmelden op Yahoo-dienst - gebruikersnaam is niet herkend. "
 "Controleer of u uw gebruikersnaam juist hebt ingevoerd."
 
-#: modules/yahoo2/yahoo.c:2352
+#: modules/yahoo2/yahoo.c:2390
 #, c-format
 msgid ""
 "Could not log into Yahoo service - incorrect password.  Please verify that "
@@ -1356,7 +1444,7 @@ msgstr ""
 "Kon niet aanmelden op Yahoo-dienst - onjuist wachtwoord. Controleer of u uw "
 "wachtwoord juist hebt ingevoerd."
 
-#: modules/yahoo2/yahoo.c:2356
+#: modules/yahoo2/yahoo.c:2394
 #, c-format
 msgid ""
 "Could not log into Yahoo service.  Your account has been locked.\n"
@@ -1365,7 +1453,7 @@ msgstr ""
 "Kon niet aanmelden op Yahoo-service. Uw account is geblokkeerd.\n"
 "Bezoek %s om hem terug te activeren."
 
-#: modules/yahoo2/yahoo.c:2359
+#: modules/yahoo2/yahoo.c:2397
 #, c-format
 msgid ""
 "You have been logged out of the yahoo service, possibly due to a duplicate "
@@ -1374,7 +1462,7 @@ msgstr ""
 "U bent afgemeld van de Yahoo-service, mogelijk is dit veroorzaakt door een "
 "dubbele aanmelding."
 
-#: modules/yahoo2/yahoo.c:2361
+#: modules/yahoo2/yahoo.c:2399
 #, c-format
 msgid ""
 "Could not connect to Yahoo server.  Please verify that you are connected to "
@@ -1383,120 +1471,120 @@ msgstr ""
 "Kon niet verbinden met Yahoo-server. Controleer of u verbonden bent met het "
 "internet en of host en poort van de pieper juist ingevoerd zijn."
 
-#: modules/yahoo2/yahoo.c:2363
+#: modules/yahoo2/yahoo.c:2401
 #, c-format
 msgid "Could not log into Yahoo service due to unknown state: %d\n"
 msgstr ""
 "Kon niet aanmelden op Yahoo-dienst omwille van een onbekende status: %d\n"
 
-#: modules/yahoo2/yahoo.c:2483
+#: modules/yahoo2/yahoo.c:2521
 msgid "_Yahoo Id:"
 msgstr "_Yahoo ID:"
 
-#: modules/yahoo2/yahoo.c:2511
+#: modules/yahoo2/yahoo.c:2549
 msgid "Yahoo _Mail Notification"
 msgstr "Waarschuwing bij e-_mail van Yahoo"
 
-#: modules/yahoo2/yahoo.c:2518
+#: modules/yahoo2/yahoo.c:2556
 msgid "Login _invisible"
 msgstr "Aanmelden als onz_ichtbaar"
 
-#: modules/yahoo2/yahoo.c:2525
+#: modules/yahoo2/yahoo.c:2563
 msgid "Ignore _System Messages"
 msgstr "Negeer _Systeemberichten"
 
-#: modules/yahoo2/yahoo.c:2784 modules/yahoo2/yahoo.c:2827
-#: src/chat_window.c:706 src/chat_window.c:1379 src/contact_util.C:600
+#: modules/yahoo2/yahoo.c:2822 modules/yahoo2/yahoo.c:2865
+#: src/chat_window.c:706 src/chat_window.c:1402 src/contact_util.C:600
 #: src/contact_util.C:604 src/offline_queue_mgmt.c:161
-#: src/offline_queue_mgmt.c:163 src/status.c:1302 src/status.c:1651
-#: src/status.c:1690 src/util.c:1102 src/util.c:1234 src/util.c:1238
+#: src/offline_queue_mgmt.c:163 src/status.c:1250 src/status.c:1624
+#: src/status.c:1659 src/util.c:1102 src/util.c:1234 src/util.c:1238
 msgid "Ignore"
 msgstr "Negeren"
 
-#: modules/yahoo2/yahoo.c:2983
+#: modules/yahoo2/yahoo.c:3031
 #, c-format
 msgid "%s for %d:%02d:%02d"
 msgstr "%s voor %d:%02d:%02d"
 
-#: modules/yahoo2/yahoo.c:3248
+#: modules/yahoo2/yahoo.c:3296
 #, c-format
 msgid "Yahoo read error (%d): %s"
 msgstr "Yahoo-leesfout (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3252
+#: modules/yahoo2/yahoo.c:3300
 #, c-format
 msgid "Yahoo read error: Server closed socket"
 msgstr "Yahoo-leesfout: server sloot socket"
 
-#: modules/yahoo2/yahoo.c:3263
+#: modules/yahoo2/yahoo.c:3311
 #, c-format
 msgid "Yahoo write error (%d): %s"
 msgstr "Yahoo-schrijffout (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3267
+#: modules/yahoo2/yahoo.c:3315
 #, c-format
 msgid "Yahoo write error: Server closed socket"
 msgstr "Yahoo-schrijffout: server sloot socket"
 
-#: modules/yahoo2/yahoo.c:3682 modules/yahoo2/yahoo.c:3687
+#: modules/yahoo2/yahoo.c:3736 modules/yahoo2/yahoo.c:3741
 msgid "Invite to view Webcam"
 msgstr "Nodig uit om de webcam te bekijken"
 
-#: modules/yahoo2/yahoo.c:3696 modules/yahoo2/yahoo.c:3701
+#: modules/yahoo2/yahoo.c:3750 modules/yahoo2/yahoo.c:3755
 msgid "View Webcam"
 msgstr "Bekijk webcam"
 
-#: src/action.c:82 src/action.c:95 src/action.c:128 src/action.c:141
-#: src/action.c:173 src/action.c:246 src/action.c:262
+#: src/action.c:80 src/action.c:93 src/action.c:126 src/action.c:139
+#: src/action.c:171 src/action.c:244 src/action.c:260
 msgid "Action Error"
 msgstr "Actiefout"
 
-#: src/action.c:82
+#: src/action.c:80
 #, c-format
 msgid "Command line is invalid (missing %s and %p)."
 msgstr "Commandoregel is ongeldig (mist %s en %p)."
 
-#: src/action.c:95
+#: src/action.c:93
 msgid "Cannot run command : fork() failed."
 msgstr "Kan commando niet uitvoeren: fork() mislukte."
 
-#: src/action.c:128
+#: src/action.c:126
 #, fuzzy
 msgid "Cannot use log: no logfile available."
 msgstr "Kan geen log gebruiken: geen logbestand beschikbaar."
 
-#: src/action.c:141
+#: src/action.c:139
 #, fuzzy
 msgid "Cannot use log: logfile too short (!?)."
 msgstr "Kan geen log gebruiken: logbestand te klein (!?)."
 
-#: src/action.c:173
+#: src/action.c:171
 #, fuzzy
 msgid "Cannot use log: Impossible to create temporary file."
 msgstr ""
 "Kan geen log gebruiken: Onmogelijk om een tijdelijk bestand aan te maken."
 
-#: src/action.c:187 src/gtk/log_window.C:439
+#: src/action.c:185 src/gtk/log_window.C:439
 msgid "Conversation ended on "
 msgstr "Conversatie beëindigd op"
 
-#: src/action.c:189 src/gtk/log_window.C:394 src/gtk/log_window.C:400
+#: src/action.c:187 src/gtk/log_window.C:394 src/gtk/log_window.C:400
 msgid "Conversation started on "
 msgstr "Conversatie gestart op "
 
-#: src/action.c:262
+#: src/action.c:260
 msgid "No data available to use."
 msgstr "Geen datum beschikbaar om te gebruiken."
 
-#: src/action.c:268
+#: src/action.c:266
 msgid "Action"
 msgstr "Actie"
 
-#: src/action.c:268
+#: src/action.c:266
 msgid "Execute"
 msgstr "Uitvoeren"
 
-#: src/action.c:269
+#: src/action.c:267
 #, fuzzy, c-format
 msgid ""
 "Enter the command to run here:\n"
@@ -1507,30 +1595,30 @@ msgstr ""
 " %s = toonde bestand van conversatie (als HTML)\n"
 " %p = toonde bestand van conversatie (als tekst)"
 
-#: src/add_contact_window.c:225 src/add_contact_window.c:229
-#: src/add_contact_window.c:241 src/edit_account_window.c:77
-#: src/edit_account_window.c:88
+#: src/add_contact_window.c:216 src/add_contact_window.c:220
+#: src/add_contact_window.c:232 src/edit_account_window.c:68
+#: src/edit_account_window.c:79
 msgid "Account error"
 msgstr "Account-fout"
 
-#: src/add_contact_window.c:225
+#: src/add_contact_window.c:216
 #, fuzzy
 msgid "No Account Name specified."
 msgstr "Geen lokale account opgegeven."
 
-#: src/add_contact_window.c:229 src/chat_room.c:757
+#: src/add_contact_window.c:220 src/chat_room.c:755
 msgid "No local account specified."
 msgstr "Geen lokale account opgegeven."
 
-#: src/add_contact_window.c:241
+#: src/add_contact_window.c:232
 msgid "Local account doesn't exist."
 msgstr "Lokale account bestaat niet."
 
-#: src/add_contact_window.c:249 src/crash.c:532
+#: src/add_contact_window.c:240 src/crash.c:532
 msgid "Error"
 msgstr "Fout"
 
-#: src/add_contact_window.c:249
+#: src/add_contact_window.c:240
 msgid ""
 "Creation of this contact is impossible.\n"
 "The service chosen is unavailable."
@@ -1538,8 +1626,8 @@ msgstr ""
 "Creatie van deze contactpersoon is onmogelijk.\n"
 "De gekozen dienst is niet beschikbaar."
 
-#: src/add_contact_window.c:261 src/edit_local_accounts.c:347
-#: src/edit_local_accounts.c:400
+#: src/add_contact_window.c:252 src/edit_local_accounts.c:338
+#: src/edit_local_accounts.c:391
 #, c-format
 msgid ""
 "This account is not a valid %s account: \n"
@@ -1550,68 +1638,62 @@ msgstr ""
 "\n"
 " %s"
 
-#: src/add_contact_window.c:264 src/edit_local_accounts.c:350
-#: src/edit_local_accounts.c:364 src/edit_local_accounts.c:403
-#: src/edit_local_accounts.c:415 src/edit_local_accounts.c:531
+#: src/add_contact_window.c:255 src/edit_local_accounts.c:341
+#: src/edit_local_accounts.c:355 src/edit_local_accounts.c:394
+#: src/edit_local_accounts.c:406 src/edit_local_accounts.c:522
 #: src/service.c:133
 msgid "Invalid Account"
 msgstr "Ongeldige account"
 
-#: src/add_contact_window.c:313
+#: src/add_contact_window.c:301
 #, fuzzy
 msgid "No Local Accounts"
 msgstr "Lokale account wijzigen"
 
-#: src/add_contact_window.c:313
+#: src/add_contact_window.c:301
 msgid "Cannot add contacts. You have not added any chat accounts yet"
 msgstr ""
 
-#: src/add_contact_window.c:334
+#: src/add_contact_window.c:314
 msgid "_Account: "
 msgstr "_Account: "
 
-#: src/add_contact_window.c:354
+#: src/add_contact_window.c:332
 msgid "_Local account: "
 msgstr "_Lokale account: "
 
-#: src/add_contact_window.c:385
+#: src/add_contact_window.c:361
 #, fuzzy
 msgid "Contact: "
 msgstr "_Contactpersoon: "
 
-#: src/add_contact_window.c:417 src/edit_contact_window.c:126
+#: src/add_contact_window.c:390 src/edit_contact_window.c:103
 msgid "_Group: "
 msgstr "_Groep: "
 
-#: src/add_contact_window.c:451 src/chat_window.c:898 src/chat_window.c:2187
+#: src/add_contact_window.c:421 src/chat_window.c:898 src/chat_window.c:2206
 msgid "Add Contact"
 msgstr "Contactpersoon toevoegen"
 
-#: src/add_contact_window.c:465 src/edit_account_window.c:356
-#: src/edit_group_window.c:101 src/edit_group_window.c:122
-#: src/edit_local_accounts.c:775
-msgid "Add"
-msgstr "Toevoegen"
-
-#: src/add_contact_window.c:504
+#: src/add_contact_window.c:426
 msgid "Ayttm - Add Contact"
 msgstr "Ayttm - Contactpersoon toevoegen"
 
-#: src/away_window.c:72
+#: src/away_window.c:70
 msgid "Away message"
 msgstr "Afwezigheidsbericht"
 
-#: src/away_window.c:72
+#: src/away_window.c:70
 msgid "Set away"
 msgstr "Status op \"Afwezig\" zetten"
 
-#: src/away_window.c:106
+#: src/away_window.c:104
 msgid "You are currently away, click \"I'm back\" to return"
 msgstr ""
 "Uw status is momenteel \"Afwezig\", klik op \"Ik ben terug!\" wanneer u "
 "terug bent."
 
-#: src/away_window.c:111
+#: src/away_window.c:109
 msgid ""
 "This is the away message that will \n"
 "be sent to people messaging you.\n"
@@ -1621,114 +1703,114 @@ msgstr ""
 "worden naar contactpersonen die met u proberen te chatten.\n"
 "Als u wilt kan u dit bericht aanpassen."
 
-#: src/away_window.c:127
+#: src/away_window.c:125
 msgid "I'm Back"
 msgstr "Ik ben terug"
 
-#: src/away_window.c:143 src/chat_window.c:1074
+#: src/away_window.c:141 src/chat_window.c:1085
 msgid "Away"
 msgstr "Afwezig"
 
-#: src/chat_room.c:566
+#: src/chat_room.c:564
 msgid "Chatroom error"
 msgstr "Fout in chatruimte"
 
-#: src/chat_room.c:566
+#: src/chat_room.c:564
 msgid "Cannot invite a third party until a protocol has been chosen."
 msgstr "Kan geen derde partij uitnodigen voordat een protocol gekozen is."
 
-#: src/chat_room.c:574 src/chat_room.c:613
+#: src/chat_room.c:572 src/chat_room.c:611
 msgid "Invite a contact"
 msgstr "Nodig een contactpersoon uit"
 
-#: src/chat_room.c:586
+#: src/chat_room.c:584
 msgid "Handle: "
 msgstr ""
 
-#: src/chat_room.c:600
+#: src/chat_room.c:598
 msgid "Message: "
 msgstr "Bericht: "
 
-#: src/chat_room.c:623 src/chat_room.c:1556 src/chat_window.c:958
+#: src/chat_room.c:621 src/chat_room.c:1554 src/chat_window.c:958
 msgid "Invite"
 msgstr "Uitnodigen"
 
-#: src/chat_room.c:662
+#: src/chat_room.c:660
 #, c-format
 msgid "Chatroom %d"
 msgstr "Chatruimte %d"
 
-#: src/chat_room.c:757 src/chat_room.c:774
+#: src/chat_room.c:755 src/chat_room.c:772
 msgid "Cannot join"
 msgstr "Kan chatruimte niet betreden"
 
-#: src/chat_room.c:774 src/chat_room.c:864 src/edit_account_window.c:77
-#: src/edit_account_window.c:88
+#: src/chat_room.c:772 src/chat_room.c:862 src/edit_account_window.c:68
+#: src/edit_account_window.c:79
 msgid "The local account doesn't exist."
 msgstr "De lokale account bestaat niet."
 
-#: src/chat_room.c:828 src/chat_room.c:864
+#: src/chat_room.c:826 src/chat_room.c:862
 msgid "Cannot list chatrooms"
 msgstr "Kan chatruimte niet tonen"
 
-#: src/chat_room.c:828
+#: src/chat_room.c:826
 msgid "No list available."
 msgstr "Geen lijst beschikbaar."
 
-#: src/chat_room.c:832
+#: src/chat_room.c:830
 msgid "Select a chatroom."
 msgstr "Selecteer een chatruimte."
 
-#: src/chat_room.c:832
+#: src/chat_room.c:830
 msgid "Public chatrooms list"
 msgstr "Publieke chatruimtelijst"
 
-#: src/chat_room.c:834 src/chat_room.c:933
+#: src/chat_room.c:832 src/chat_room.c:931
 msgid "List public chatrooms..."
 msgstr "Toon publieke chatruimtes..."
 
-#: src/chat_room.c:868
+#: src/chat_room.c:866
 msgid "Loading List. This may take a while..."
 msgstr ""
 
-#: src/chat_room.c:903
+#: src/chat_room.c:901
 msgid "Chat Room Name: "
 msgstr "Naam chatruimte: "
 
-#: src/chat_room.c:914 src/edit_account_window.c:237
+#: src/chat_room.c:912 src/edit_account_window.c:220
 msgid "Local account: "
 msgstr "Lokale account: "
 
-#: src/chat_room.c:924 src/chat_room.c:1770 src/chat_room.c:1771
+#: src/chat_room.c:922 src/chat_room.c:1769 src/chat_room.c:1770
 #, fuzzy
 msgid "Reconnect at login"
 msgstr "Herverbinden bij aanmelden"
 
-#: src/chat_room.c:928
+#: src/chat_room.c:926
 msgid "Chatroom is public"
 msgstr "Chatruimte is publiek"
 
-#: src/chat_room.c:940
+#: src/chat_room.c:938
 msgid "Join a Chat Room"
 msgstr "Betreed een chatruimte"
 
-#: src/chat_room.c:972
+#: src/chat_room.c:970
 msgid "Join"
 msgstr "Chatruimte betreden"
 
-#: src/chat_room.c:1118 src/chat_room.c:1139
+#: src/chat_room.c:1116 src/chat_room.c:1137
 #, fuzzy, c-format
 msgid "Online: %i"
 msgstr "Online"
 
-#: src/chat_room.c:1203
+#: src/chat_room.c:1201
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s has joined the chat.</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) heeft de chatruimte betreden.</b></"
 "body>"
 
-#: src/chat_room.c:1206
+#: src/chat_room.c:1204
 #, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) has joined the chat.</b></body>"
@@ -1736,20 +1818,20 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) heeft de chatruimte betreden.</b></"
 "body>"
 
-#: src/chat_room.c:1238
+#: src/chat_room.c:1236
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s is now known as %s</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s heeft zich %sgemeld @ %s.\n"
 "</b></body>"
 
-#: src/chat_room.c:1283 src/chat_room.c:1289
+#: src/chat_room.c:1281 src/chat_room.c:1287
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s has left the chat%s</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s heeft de chatruimte verlaten.</b></body>"
 
-#: src/chat_room.c:1286
+#: src/chat_room.c:1284
 #, fuzzy, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat%s</b></body>"
@@ -1757,56 +1839,55 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) heeft de chatruimte verlaten.</b></"
 "body>"
 
-#: src/chat_room.c:1537 src/chat_window.c:918
+#: src/chat_room.c:1535 src/chat_window.c:918
 msgid "Disable Sounds"
 msgstr "Geluiden uitschakelen"
 
-#: src/chat_room.c:1545 src/chat_window.c:926
+#: src/chat_room.c:1543 src/chat_window.c:926
 #, c-format
 msgid "Set Character Encoding (%s)"
 msgstr ""
 
-#: src/chat_room.c:1547 src/chat_window.c:928
+#: src/chat_room.c:1545 src/chat_window.c:928
 #, c-format
 msgid "Set Character Encoding"
 msgstr ""
 
-#: src/chat_room.c:1562 src/chat_room.c:1807 src/chat_window.c:970
+#: src/chat_room.c:1560 src/chat_room.c:1806 src/chat_window.c:970
 msgid "Send Message"
 msgstr "Bericht verzenden"
 
-#: src/chat_room.c:1568 src/chat_room.c:1811 src/chat_window.c:988
+#: src/chat_room.c:1566 src/chat_room.c:1810 src/chat_window.c:988
 #: src/crash.c:268 src/gtk/about_window.c:193 src/image_window.c:149
-#: src/info_window.c:120
 msgid "Close"
 msgstr "Sluiten"
 
-#: src/chat_room.c:1611 src/status.c:2595
+#: src/chat_room.c:1610 src/status.c:2561
 msgid "Online"
 msgstr "Online"
 
-#: src/chat_room.c:1683
+#: src/chat_room.c:1682
 msgid "Invite User"
 msgstr "Gebruiker uitnodigen"
 
-#: src/chat_room.c:1760 src/chat_window.c:2224
+#: src/chat_room.c:1759 src/chat_window.c:2243
 msgid "Insert Smiley"
 msgstr "Smiley invoegen"
 
-#: src/chat_room.c:1782 src/chat_window.c:2237 src/gtk/prefs_window.C:498
+#: src/chat_room.c:1781 src/chat_window.c:2256 src/gtk/prefs_window.C:499
 msgid "Sound"
 msgstr "Geluid"
 
-#: src/chat_room.c:1783
+#: src/chat_room.c:1782
 msgid "Enable Sounds"
 msgstr "Geluiden activeren"
 
-#: src/chat_room.c:1804 src/chat_window.c:943 src/chat_window.c:2270
+#: src/chat_room.c:1803 src/chat_window.c:943 src/chat_window.c:2289
 #: src/gtk/log_window.C:264
 msgid "Actions..."
 msgstr "Akties..."
 
-#: src/chat_window.c:499 src/chat_window.c:505 src/chat_window.c:732
+#: src/chat_window.c:501 src/chat_window.c:507 src/chat_window.c:732
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> Cannot send message - user is offline.</"
 "b></body>\n"
@@ -1814,7 +1895,7 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> Kan geen bericht zenden - gebruiker is "
 "offline.</b></body>\n"
 
-#: src/chat_window.c:521
+#: src/chat_window.c:523
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> Cannot send message - no local account "
 "found.</b></body>\n"
@@ -1839,15 +1920,15 @@ msgstr "Lokale account wijzigen"
 msgid "Offline Messaging"
 msgstr "Berichten offline verzenden"
 
-#: src/chat_window.c:937 src/status.c:674
+#: src/chat_window.c:937 src/status.c:652
 msgid "View Log"
 msgstr "Bekijk log"
 
-#: src/chat_window.c:952 src/status.c:665
+#: src/chat_window.c:952 src/status.c:643
 msgid "Send File"
 msgstr "Bestand verzenden"
 
-#: src/chat_window.c:1073
+#: src/chat_window.c:1084
 msgid ""
 "You are currently away. \n"
 "\n"
@@ -1878,7 +1959,7 @@ msgstr "aan"
 msgid "out"
 msgstr "af"
 
-#: src/chat_window.c:1683
+#: src/chat_window.c:1702
 #, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s changed status to %s @ %s.</b></body>"
@@ -1886,102 +1967,102 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s heeft zijn status gewijzigd naar %s @ %"
 "s.</b></body>"
 
-#: src/chat_window.c:1684
+#: src/chat_window.c:1703
 msgid "(Online)"
 msgstr "(Online)"
 
-#: src/chat_window.c:1709 src/chat_window.c:1790
+#: src/chat_window.c:1728 src/chat_window.c:1809
 msgid "Conversation started"
 msgstr "Conversatie gestart"
 
-#: src/chat_window.c:1710 src/chat_window.c:1711
+#: src/chat_window.c:1729 src/chat_window.c:1730
 #, c-format
 msgid "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversatie gestart"
 
-#: src/chat_window.c:1712 src/chat_window.c:1713
+#: src/chat_window.c:1731 src/chat_window.c:1732
 msgid "<HR WIDTH=\"100%\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%\"><B>Conversatie gestart"
 
-#: src/chat_window.c:1745 src/chat_window.c:1751 src/chat_window.c:1756
-#: src/chat_window.c:1782 src/chat_window.c:1791 src/chat_window.c:1795
+#: src/chat_window.c:1764 src/chat_window.c:1770 src/chat_window.c:1775
+#: src/chat_window.c:1801 src/chat_window.c:1810 src/chat_window.c:1814
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s</b></body>"
 
-#: src/chat_window.c:1760 src/chat_window.c:1761
+#: src/chat_window.c:1779 src/chat_window.c:1780
 msgid "<B>Conversation "
 msgstr "<B>Conversatie "
 
-#: src/chat_window.c:1761 src/chat_window.c:1768
+#: src/chat_window.c:1780 src/chat_window.c:1787
 msgid "ended on"
 msgstr "beëindigd op"
 
-#: src/chat_window.c:1762 src/chat_window.c:1769
+#: src/chat_window.c:1781 src/chat_window.c:1788
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"
 
-#: src/chat_window.c:1767 src/chat_window.c:1768
+#: src/chat_window.c:1786 src/chat_window.c:1787
 msgid "<P ALIGN=\"CENTER\"><B>Conversation "
 msgstr "<P ALIGN=\"CENTER\"><B>Conversatie "
 
-#: src/chat_window.c:1775 src/chat_window.c:1776 src/chat_window.c:1780
+#: src/chat_window.c:1794 src/chat_window.c:1795 src/chat_window.c:1799
 msgid "<P><hr><b>"
 msgstr "<P><hr><b>"
 
-#: src/chat_window.c:1777
+#: src/chat_window.c:1796
 msgid "changed status to"
 msgstr "wijzigde status naar"
 
-#: src/chat_window.c:1794
+#: src/chat_window.c:1813
 msgid "Conversation ended"
 msgstr "Conversatie beëindigd"
 
-#: src/chat_window.c:1859
+#: src/chat_window.c:1878
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*>%sConversation ended%s</body>\n"
 msgstr "<body bgcolor=#F9E589 width=*>%sConversatie beëindigd%s</body>\n"
 
-#: src/chat_window.c:2197
+#: src/chat_window.c:2216
 msgid "Allow"
 msgstr "Toestaan"
 
-#: src/chat_window.c:2202
+#: src/chat_window.c:2221
 #, fuzzy
 msgid "Allow Offline Messaging Ctrl+O"
 msgstr "Laat verzenden van offline berichten toe CTRL+O"
 
-#: src/chat_window.c:2242
+#: src/chat_window.c:2261
 #, fuzzy
 msgid "Enable Sounds Ctrl+S"
 msgstr "Zet geluiden aan STRG+S"
 
-#: src/chat_window.c:2262
+#: src/chat_window.c:2281
 msgid "View Log CTRL+L"
 msgstr "Bekijk log STRG+L"
 
-#: src/chat_window.c:2279
+#: src/chat_window.c:2298
 msgid "Send File CTRL+T"
 msgstr "Bestand verzenden STRG+T"
 
-#: src/chat_window.c:2287
+#: src/chat_window.c:2306
 msgid "Invite CTRL+I"
 msgstr "Uitnodigen STRG+I"
 
-#: src/chat_window.c:2295
+#: src/chat_window.c:2314
 msgid "Ignore CTRL+G"
 msgstr "Negeren STRG+G"
 
-#: src/chat_window.c:2303
+#: src/chat_window.c:2322
 msgid "Send Message CTRL+R"
 msgstr "Bericht verzenden STRG+R"
 
-#: src/chat_window.c:2311 src/chat_window.c:2313
+#: src/chat_window.c:2330 src/chat_window.c:2332
 msgid "Close CTRL+Q"
 msgstr "Sluiten STRG+Q"
 
-#: src/chat_window.c:2427
+#: src/chat_window.c:2446
 #, c-format
 msgid "Character Encoding for %s"
 msgstr ""
@@ -2040,153 +2121,153 @@ msgstr ""
 "Merkwaardig signaal opgevangen (%d). Dit is vermoedelijk\n"
 "veroorzaakt door een gebroken compilatie; Bezig met afsluiten van Ayttm."
 
-#: src/dialog.c:229
-msgid "No"
-msgstr "Nee"
+#: src/dialog.c:232 src/dialog.c:306
+#, fuzzy
+msgid "Ayttm"
+msgstr "Over Ayttm"
 
-#: src/dialog.c:242
-msgid "Yes"
-msgstr "Ja"
-
-#: src/edit_account_window.c:69 src/edit_account_window.c:83
-#: src/edit_account_window.c:257 src/edit_account_window.c:258
-#: src/edit_account_window.c:341
+#: src/edit_account_window.c:60 src/edit_account_window.c:74
+#: src/edit_account_window.c:240 src/edit_account_window.c:241
+#: src/edit_account_window.c:298
 msgid "[None]"
 msgstr "[Geen]"
 
-#: src/edit_account_window.c:201
+#: src/edit_account_window.c:184
 msgid "Contact Name: "
 msgstr "Naam van contactpersoon: "
 
-#: src/edit_account_window.c:216
+#: src/edit_account_window.c:199
 msgid "Group Name: "
 msgstr "Groepsnaam: "
 
-#: src/edit_account_window.c:346
+#: src/edit_account_window.c:303
 #, c-format
 msgid "%s - Account edition"
 msgstr "%s - Bewerking van accounts"
 
-#: src/edit_account_window.c:356
+#: src/edit_account_window.c:318
 #, c-format
 msgid "Add %s to Contact List"
 msgstr "Voeg %s toe aan uw contactenlijst (roster)"
 
-#: src/edit_account_window.c:356
+#: src/edit_account_window.c:318
 msgid "Add Unknown Contact"
 msgstr "Voeg onbekende contactpersoon toe"
 
-#: src/edit_account_window.c:364
+#: src/edit_account_window.c:326
 #, c-format
 msgid "Edit %s"
 msgstr "Bewerk %s"
 
-#: src/edit_account_window.c:364
+#: src/edit_account_window.c:326
 msgid "Edit Account"
 msgstr "Bewerk account"
 
-#: src/edit_account_window.c:364 src/edit_contact_window.c:208
-#: src/edit_group_window.c:122 src/edit_list_window.c:431
-#: src/edit_list_window.c:436 src/edit_list_window.c:595
-msgid "Save"
-msgstr "Opslaan"
-
-#: src/edit_contact_window.c:105
+#: src/edit_contact_window.c:85
 #, fuzzy
 msgid "_Contact:"
 msgstr "_Contactpersoon: "
 
-#: src/edit_contact_window.c:156
+#: src/edit_contact_window.c:131
 msgid "Default _Protocol: "
 msgstr "Standaard _Protocol: "
 
-#: src/edit_contact_window.c:189 src/edit_group_window.c:154
+#: src/edit_contact_window.c:161 src/edit_group_window.c:108
 #, c-format
 msgid "Edit Properties for %s"
 msgstr "Bewerk eigenschappen van %s"
 
-#: src/edit_contact_window.c:254
+#: src/edit_contact_window.c:191
 #, c-format
 msgid "%s - Edit Contact"
 msgstr "%s - Contactpersoon bewerken"
 
-#: src/edit_group_window.c:90
+#: src/edit_group_window.c:67
 msgid "Group Name:"
 msgstr "Groepsnaam:"
 
-#: src/edit_group_window.c:101
+#: src/edit_group_window.c:76
 #, c-format
 msgid "%s group%s%s"
 msgstr "%s Groep%s%s"
 
-#: src/edit_group_window.c:101
+#: src/edit_group_window.c:76
 msgid "Edit"
 msgstr "Bewerk"
 
-#: src/edit_group_window.c:156
+#: src/edit_group_window.c:76
+msgid "Add"
+msgstr "Toevoegen"
+
+#: src/edit_group_window.c:110
 msgid "Add group"
 msgstr "Voeg groep toe"
 
-#: src/edit_list_window.c:251 src/edit_local_accounts.c:781
+#: src/edit_list_window.c:247
 msgid "Delete"
 msgstr "Verwijderen"
 
-#: src/edit_list_window.c:295
+#: src/edit_list_window.c:293
 msgid "Title"
 msgstr "Titel"
 
-#: src/edit_list_window.c:433 src/edit_list_window.c:434
+#: src/edit_list_window.c:429 src/edit_list_window.c:434
+#: src/edit_list_window.c:593
+msgid "Save"
+msgstr "Opslaan"
+
+#: src/edit_list_window.c:431 src/edit_list_window.c:432
 #, fuzzy
 msgid "Replace saved"
 msgstr "Vervang opgeslagene"
 
-#: src/edit_list_window.c:469
+#: src/edit_list_window.c:467
 #, c-format
 msgid "You have to fill in \"%s\"."
 msgstr "U moet \"%s\" invullen."
 
-#: src/edit_list_window.c:470
+#: src/edit_list_window.c:468
 msgid "Input missing"
 msgstr "Invoer missende"
 
-#: src/edit_list_window.c:553
+#: src/edit_list_window.c:551
 msgid "Title: "
 msgstr "Titel: "
 
-#: src/edit_list_window.c:568
+#: src/edit_list_window.c:566
 msgid "Value:"
 msgstr "Waarde:"
 
-#: src/edit_list_window.c:600
+#: src/edit_list_window.c:598
 #, c-format
 msgid "New %s"
 msgstr "Nieuw: %s"
 
-#: src/edit_list_window.c:622
+#: src/edit_list_window.c:620
 #, c-format
 msgid "Existing %ss"
 msgstr "Bestaande %ss"
 
-#: src/edit_list_window.c:676
+#: src/edit_list_window.c:675
 #, c-format
 msgid "Edit %ss"
 msgstr "Bewerk %ss"
 
-#: src/edit_local_accounts.c:160 src/edit_local_accounts.c:585
+#: src/edit_local_accounts.c:151 src/edit_local_accounts.c:576
 msgid "C"
 msgstr "C"
 
-#: src/edit_local_accounts.c:241
+#: src/edit_local_accounts.c:232
 #, fuzzy
 msgid "Please enter an account name."
 msgstr "U moet een account invoeren."
 
-#: src/edit_local_accounts.c:244
+#: src/edit_local_accounts.c:235
 #, fuzzy
 msgid "Please select an account type."
 msgstr "Selecteer een, sleutel voor `%s'"
 
-#: src/edit_local_accounts.c:259
+#: src/edit_local_accounts.c:250
 #, fuzzy
 msgid ""
 "<b><big>How to create and register accounts:</big></b>\n"
@@ -2223,11 +2304,11 @@ msgstr ""
 "Stel de server in om te gebruiken prefs. Wachtwoord word nog niet "
 "ondersteund."
 
-#: src/edit_local_accounts.c:276 src/edit_local_accounts.c:771
+#: src/edit_local_accounts.c:267 src/edit_local_accounts.c:756
 msgid "Help"
 msgstr "Help"
 
-#: src/edit_local_accounts.c:361 src/edit_local_accounts.c:412
+#: src/edit_local_accounts.c:352 src/edit_local_accounts.c:403
 #, c-format
 msgid ""
 "You already have an account for %s service.\n"
@@ -2238,59 +2319,55 @@ msgstr ""
 "\n"
 "Meerdere accounts voor deze dienst worden nog niet ondersteund."
 
-#: src/edit_local_accounts.c:506
+#: src/edit_local_accounts.c:497
 msgid "Invalid Service"
 msgstr "Ongeldige dienst"
 
-#: src/edit_local_accounts.c:506
+#: src/edit_local_accounts.c:497
 msgid "Can't add account : unknown service"
 msgstr "Kan geen account toevoegen : onbekende dienst"
 
-#: src/edit_local_accounts.c:531
+#: src/edit_local_accounts.c:522
 msgid "You didn't define an account."
 msgstr "U hebt geen account gedefiniëerd."
 
-#: src/edit_local_accounts.c:586
+#: src/edit_local_accounts.c:577
 msgid "Screen Name"
 msgstr "Schermnaam"
 
-#: src/edit_local_accounts.c:587
+#: src/edit_local_accounts.c:578
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: src/edit_local_accounts.c:588
+#: src/edit_local_accounts.c:579
 msgid "Service"
 msgstr "Dienst"
 
-#: src/edit_local_accounts.c:664
+#: src/edit_local_accounts.c:652
 msgid "Screen _Name:"
 msgstr "Scherm_naam:"
 
-#: src/edit_local_accounts.c:691
+#: src/edit_local_accounts.c:679
 msgid "Service _Type:"
 msgstr "Dienst_type:"
 
-#: src/edit_local_accounts.c:775
+#: src/edit_local_accounts.c:760
 msgid "Add Account"
 msgstr "Account toevoegen"
 
-#: src/edit_local_accounts.c:781 src/status.c:324
+#: src/edit_local_accounts.c:766 src/status.c:317
 msgid "Delete Account"
 msgstr "Account verwijderen"
 
-#: src/edit_local_accounts.c:788
-msgid "Modify"
-msgstr "Veranderen"
-
-#: src/edit_local_accounts.c:788
+#: src/edit_local_accounts.c:773
 msgid "Modify Account"
 msgstr "Account veranderen"
 
-#: src/edit_local_accounts.c:796
+#: src/edit_local_accounts.c:781
 msgid "Ok"
 msgstr "Ok"
 
-#: src/edit_local_accounts.c:821
+#: src/edit_local_accounts.c:806
 msgid "Ayttm Account Editor"
 msgstr "Ayttm-accountbewerker"
 
@@ -2310,16 +2387,16 @@ msgstr "\"Met dank aan\":"
 msgid "Ayttm is based on Everybuddy 0.4.3 which was brought to you by:"
 msgstr "Ayttm is gebasseerd op Everybuddy 0.4.3 wat u gebracht werd door:"
 
-#: src/gtk/gtkspell.c:258
+#: src/gtk/gtkspell.c:259
 #, c-format
 msgid "Not in dictionary: %s"
 msgstr "Niet in woordenboek: %s"
 
-#: src/gtk/gtkspell.c:272
+#: src/gtk/gtkspell.c:273
 msgid "(no suggestions)"
 msgstr "(geen suggesties)"
 
-#: src/gtk/gtkspell.c:282
+#: src/gtk/gtkspell.c:283
 msgid "Other Possibilities..."
 msgstr "Andere mogelijkheden..."
 
@@ -2356,65 +2433,65 @@ msgstr "' niet gevonden in de logs."
 msgid "Log Search"
 msgstr "Log doorzoeken"
 
-#: src/gtk/prefs_window.C:495
+#: src/gtk/prefs_window.C:496
 msgid "Chat"
 msgstr "Chat"
 
-#: src/gtk/prefs_window.C:496
+#: src/gtk/prefs_window.C:497
 msgid "Chat:Logs"
 msgstr "Chat:Logs"
 
-#: src/gtk/prefs_window.C:497
+#: src/gtk/prefs_window.C:498
 msgid "Chat:Tabs"
 msgstr "Chat:Tabbladen"
 
-#: src/gtk/prefs_window.C:499
+#: src/gtk/prefs_window.C:500
 msgid "Sound:Files"
 msgstr "Geluid: Bestanden"
 
-#: src/gtk/prefs_window.C:500
+#: src/gtk/prefs_window.C:501
 msgid "Misc"
 msgstr "Div"
 
-#: src/gtk/prefs_window.C:501
+#: src/gtk/prefs_window.C:502
 msgid "Advanced"
 msgstr "Uitgebreide opties"
 
-#: src/gtk/prefs_window.C:503
+#: src/gtk/prefs_window.C:504
 msgid "Advanced:Encoding"
 msgstr "Geavanceerd:Encodering"
 
-#: src/gtk/prefs_window.C:505
+#: src/gtk/prefs_window.C:506
 msgid "Advanced:Proxy"
 msgstr "Geavanceerd:Proxy"
 
-#: src/gtk/prefs_window.C:506 src/gtk/prefs_window.C:1080 src/status.c:2609
+#: src/gtk/prefs_window.C:507 src/gtk/prefs_window.C:1081 src/status.c:2575
 msgid "Accounts"
 msgstr "Accounts"
 
-#: src/gtk/prefs_window.C:507 src/gtk/prefs_window.C:1050
+#: src/gtk/prefs_window.C:508 src/gtk/prefs_window.C:1051
 msgid "Services"
 msgstr "Diensten"
 
-#: src/gtk/prefs_window.C:508 src/gtk/prefs_window.C:1052
+#: src/gtk/prefs_window.C:509 src/gtk/prefs_window.C:1053
 msgid "Filters"
 msgstr "Filters"
 
-#: src/gtk/prefs_window.C:509 src/gtk/prefs_window.C:1056
-#: src/gtk/prefs_window.C:1058
+#: src/gtk/prefs_window.C:510 src/gtk/prefs_window.C:1057
+#: src/gtk/prefs_window.C:1059
 msgid "Utilities"
 msgstr "Hulpmiddelen"
 
-#: src/gtk/prefs_window.C:510 src/gtk/prefs_window.C:1054
+#: src/gtk/prefs_window.C:511 src/gtk/prefs_window.C:1055
 #, fuzzy
 msgid "Importers"
 msgstr "Importeerfilter"
 
-#: src/gtk/prefs_window.C:528
+#: src/gtk/prefs_window.C:529
 msgid "Ayttm Preferences"
 msgstr "Ayttm-voorkeuren"
 
-#: src/gtk/prefs_window.C:988
+#: src/gtk/prefs_window.C:989
 msgid ""
 "This section is for configuration of advanced options such as proxy\n"
 "servers and encoding conversion [if your system supports them]."
@@ -2422,7 +2499,7 @@ msgstr ""
 "Dit onderdeel is voor de configuratie van geavanceerde opties zoals proxy\n"
 "servers en encoderingsconversies [als uw systeem ze ondersteund]."
 
-#: src/gtk/prefs_window.C:1002
+#: src/gtk/prefs_window.C:1003
 #, fuzzy
 msgid ""
 "All your messenger accounts are listed here.  You may change\n"
@@ -2432,7 +2509,7 @@ msgstr ""
 "instellingen\n"
 "wijzigen en aanmelden/afmelden."
 
-#: src/gtk/prefs_window.C:1006
+#: src/gtk/prefs_window.C:1007
 msgid ""
 "Services allow you to connect to and chat with people using a\n"
 "variety of messenger protocols."
@@ -2441,11 +2518,11 @@ msgstr ""
 "gebruik te maken\n"
 "van een verscheidenheid aan instant messaging-protocollen."
 
-#: src/gtk/prefs_window.C:1010
+#: src/gtk/prefs_window.C:1011
 msgid "Utilities add additional capabilities to Ayttm."
 msgstr "Hulpmiddelen en bijkomende capaciteiten van Ayttm."
 
-#: src/gtk/prefs_window.C:1014
+#: src/gtk/prefs_window.C:1015
 msgid ""
 "Filters change messages when sending and/or receiving them.\n"
 "This may be used to add functionality such as translation and\n"
@@ -2455,7 +2532,7 @@ msgstr ""
 "Dit kan gebruikt worden om functionaliteit zoals vertaling en\n"
 "versleuteling toe te voegen."
 
-#: src/gtk/prefs_window.C:1018
+#: src/gtk/prefs_window.C:1019
 msgid ""
 "Importers allow you to import contacts and other preferences\n"
 "into Ayttm from a variety of other applications."
@@ -2463,246 +2540,245 @@ msgstr ""
 "Importeerfilters laten het u toe om contactpersonen en andere voorkeuren\n"
 "vanuit andere programma's te importeren in Ayttm."
 
-#: src/gtk/prefs_window.C:1060
+#: src/gtk/prefs_window.C:1061
 msgid "Other Plugins"
 msgstr "Andere plugins"
 
-#: src/gtk/prefs_window.C:1185
+#: src/gtk/prefs_window.C:1186
 #, c-format
 msgid "[There are no general preferences for the %s section]"
 msgstr "[Er zijn geen algemene voorkeuren voor het onderdeel %s]"
 
-#: src/gtk/prefs_window.C:1208
+#: src/gtk/prefs_window.C:1215
 msgid "Send idle/away status to servers"
 msgstr "Verzend inactief/afwezig-status naar de servers"
 
-#: src/gtk/prefs_window.C:1209
+#: src/gtk/prefs_window.C:1216
 msgid "Show timestamps in chat window"
 msgstr "Toon tijdsaanduidingen in chatvenster"
 
-#: src/gtk/prefs_window.C:1210
+#: src/gtk/prefs_window.C:1221
 msgid "Raise chat-window when receiving a message"
 msgstr "Breng chatvenster naar de voorgrond bij het ontvangen van een bericht"
 
-#: src/gtk/prefs_window.C:1211
-#, fuzzy
-msgid "Enable Smileys"
-msgstr "Smiley invoegen"
+#: src/gtk/prefs_window.C:1234
+msgid "Only on regex:"
+msgstr ""
 
-#: src/gtk/prefs_window.C:1212
+#: src/gtk/prefs_window.C:1246
 msgid "Ignore unknown people"
 msgstr "Onbekende contactpersonen negeren"
 
-#: src/gtk/prefs_window.C:1213
+#: src/gtk/prefs_window.C:1247
 msgid "On the fly chat completion"
 msgstr "On-the-fly chat-aanvulling"
 
-#: src/gtk/prefs_window.C:1225
+#: src/gtk/prefs_window.C:1253
 msgid "Use spell checking"
 msgstr "Gebruik spellingscontrole"
 
-#: src/gtk/prefs_window.C:1238
+#: src/gtk/prefs_window.C:1266
 msgid "Alternate dictionary:"
 msgstr "Alternatief woordenboek:"
 
-#: src/gtk/prefs_window.C:1257
+#: src/gtk/prefs_window.C:1285
 msgid "In messages I receive:"
 msgstr "In de berichten die ik ontving:"
 
-#: src/gtk/prefs_window.C:1264
+#: src/gtk/prefs_window.C:1292
 msgid "Ignore fonts"
 msgstr "Lettertypes negeren"
 
-#: src/gtk/prefs_window.C:1265
+#: src/gtk/prefs_window.C:1293
 msgid "Ignore foreground colors"
 msgstr "Voorgrondkleuren negeren"
 
-#: src/gtk/prefs_window.C:1266
+#: src/gtk/prefs_window.C:1294
 msgid "Ignore background colors"
 msgstr "Achtergrondkleuren negeren"
 
-#: src/gtk/prefs_window.C:1279
+#: src/gtk/prefs_window.C:1307
 msgid "Font: "
 msgstr "Lettertype: "
 
-#: src/gtk/prefs_window.C:1286
+#: src/gtk/prefs_window.C:1314
 msgid "Choose"
 msgstr "Kies"
 
-#: src/gtk/prefs_window.C:1364
+#: src/gtk/prefs_window.C:1394
 msgid "Font selection"
 msgstr "Selectie van lettertype"
 
-#: src/gtk/prefs_window.C:1424
+#: src/gtk/prefs_window.C:1454
 msgid "Save all conversations to logfiles"
 msgstr "Alle conversaties in logbestanden opslaan"
 
-#: src/gtk/prefs_window.C:1425
+#: src/gtk/prefs_window.C:1455
 msgid "Restore last conversation when opening a chat window"
 msgstr "Laatste conversatie herstellen bij openen van een chatvenster"
 
-#: src/gtk/prefs_window.C:1446
+#: src/gtk/prefs_window.C:1476
 msgid "Use tabs in chat windows"
 msgstr "Tabbladen in chatvensters gebruiken"
 
-#: src/gtk/prefs_window.C:1450
+#: src/gtk/prefs_window.C:1480
 msgid "Tab Position"
 msgstr "Positie van tabblad"
 
-#: src/gtk/prefs_window.C:1469
+#: src/gtk/prefs_window.C:1499
 msgid "Bottom"
 msgstr "Onderkant"
 
-#: src/gtk/prefs_window.C:1476
+#: src/gtk/prefs_window.C:1506
 msgid "Top"
 msgstr "Bovenkant"
 
-#: src/gtk/prefs_window.C:1483
+#: src/gtk/prefs_window.C:1513
 msgid "Left"
 msgstr "Links"
 
-#: src/gtk/prefs_window.C:1490
+#: src/gtk/prefs_window.C:1520
 msgid "Right"
 msgstr "Rechts"
 
-#: src/gtk/prefs_window.C:1503
+#: src/gtk/prefs_window.C:1533
 msgid "Hotkeys"
 msgstr "Sneltoetsen"
 
-#: src/gtk/prefs_window.C:1513
+#: src/gtk/prefs_window.C:1543
 msgid "Previous tab:"
 msgstr "Vorige tabblad:"
 
-#: src/gtk/prefs_window.C:1517
+#: src/gtk/prefs_window.C:1547
 msgid "Next tab:"
 msgstr "Volgende tabblad:"
 
-#: src/gtk/prefs_window.C:1686
+#: src/gtk/prefs_window.C:1716
 #, fuzzy
 msgid "<Press modifier + key or escape to cancel>"
 msgstr "<Druk bewerktoets + toets of ESC om te annuleren>"
 
-#: src/gtk/prefs_window.C:1714
+#: src/gtk/prefs_window.C:1744
 msgid "Disable sounds when I am away"
 msgstr "Zet geluiden af wanneer afwezig"
 
-#: src/gtk/prefs_window.C:1715
+#: src/gtk/prefs_window.C:1745
 msgid "Disable sounds for Ignored people"
 msgstr "Zet geluiden af voor genegeerde mensen"
 
-#: src/gtk/prefs_window.C:1716
+#: src/gtk/prefs_window.C:1746
 msgid "Play sounds when people sign on or off"
 msgstr "Speel geluiden af wanneer mensen aan- of afmelden"
 
-#: src/gtk/prefs_window.C:1717
+#: src/gtk/prefs_window.C:1747
 msgid "Play a sound when sending a message"
 msgstr "Speel een geluid bij het verzenden van een bericht"
 
-#: src/gtk/prefs_window.C:1718
+#: src/gtk/prefs_window.C:1748
 msgid "Play a sound when receiving a message"
 msgstr "Speel een geluid af bij het ontvangen van een bericht"
 
-#: src/gtk/prefs_window.C:1719
+#: src/gtk/prefs_window.C:1749
 msgid "Play a special sound when receiving first message"
 msgstr "Speel een speciaal geluid af bij het ontvangen van een eerste bericht"
 
-#: src/gtk/prefs_window.C:1742
+#: src/gtk/prefs_window.C:1772
 msgid "Contact signs on: "
 msgstr "Contactpersoon meldt aan: "
 
-#: src/gtk/prefs_window.C:1744
+#: src/gtk/prefs_window.C:1774
 msgid "Contact goes away: "
 msgstr "Contactpersoon gaat weg: "
 
-#: src/gtk/prefs_window.C:1746
+#: src/gtk/prefs_window.C:1776
 msgid "Contact signs off: "
 msgstr "Contactpersoon meldt zich af: "
 
-#: src/gtk/prefs_window.C:1748
+#: src/gtk/prefs_window.C:1778
 msgid "Message sent: "
 msgstr "Bericht verzonden: "
 
-#: src/gtk/prefs_window.C:1750
+#: src/gtk/prefs_window.C:1780
 msgid "Message received: "
 msgstr "Bericht ontvangen: "
 
-#: src/gtk/prefs_window.C:1752
+#: src/gtk/prefs_window.C:1782
 msgid "First message received: "
 msgstr "Eerste bericht ontvangen: "
 
-#: src/gtk/prefs_window.C:1754
+#: src/gtk/prefs_window.C:1784
 msgid "Relative volume (dB)"
 msgstr "Relatief volume (dB)"
 
-#: src/gtk/prefs_window.C:1788
+#: src/gtk/prefs_window.C:1818
 msgid "Preview"
 msgstr "Voorbeeld"
 
-#: src/gtk/prefs_window.C:1810 src/gtk/prefs_window.C:2050 src/trigger.c:369
+#: src/gtk/prefs_window.C:1840 src/gtk/prefs_window.C:2080 src/trigger.c:367
 msgid "Browse"
 msgstr "Bladeren"
 
-#: src/gtk/prefs_window.C:1956
+#: src/gtk/prefs_window.C:1986
 msgid "Select a file to use"
 msgstr "Selecteer een bestand om te gebruiken"
 
-#: src/gtk/prefs_window.C:2029
+#: src/gtk/prefs_window.C:2059
 msgid "Use alternate browser"
 msgstr "Andere webbrowser gebruiken"
 
-#: src/gtk/prefs_window.C:2040
+#: src/gtk/prefs_window.C:2070
 msgid "Browser command:"
 msgstr "Command om de webbrowser te starten:"
 
-#: src/gtk/prefs_window.C:2057
+#: src/gtk/prefs_window.C:2087
 msgid "Enable debug messages"
 msgstr "Zet debug-berichten aan"
 
-#: src/gtk/prefs_window.C:2059
+#: src/gtk/prefs_window.C:2089
 msgid "Show tooltips in status window"
 msgstr "Toon knopinfo in statusvenster"
 
-#: src/gtk/prefs_window.C:2061
+#: src/gtk/prefs_window.C:2091
 msgid "Check for latest version when signing on all"
 msgstr "Controleer voor nieuwere versie bij aanmelden van alle accounts"
 
-#: src/gtk/prefs_window.C:2122
+#: src/gtk/prefs_window.C:2152
 msgid "Select your browser"
 msgstr "Selecteer uw webbrowser"
 
-#: src/gtk/prefs_window.C:2162
+#: src/gtk/prefs_window.C:2192
 msgid "Use a proxy server"
 msgstr "Een proxy-server gebruiken"
 
-#: src/gtk/prefs_window.C:2165
+#: src/gtk/prefs_window.C:2195
 msgid "Proxy Type"
 msgstr "Soort proxy"
 
-#: src/gtk/prefs_window.C:2186
+#: src/gtk/prefs_window.C:2216
 msgid "HTTP"
 msgstr "HTTP"
 
-#: src/gtk/prefs_window.C:2194
+#: src/gtk/prefs_window.C:2224
 msgid "SOCKS4"
 msgstr "SOCKS4"
 
-#: src/gtk/prefs_window.C:2202
+#: src/gtk/prefs_window.C:2232
 msgid "SOCKS5"
 msgstr "SOCKS5"
 
-#: src/gtk/prefs_window.C:2252
+#: src/gtk/prefs_window.C:2282
 msgid "Proxy requires authentication"
 msgstr "Proxy vereist autenticatie"
 
-#: src/gtk/prefs_window.C:2266
+#: src/gtk/prefs_window.C:2296
 msgid "User ID:"
 msgstr "Gebruikers ID:"
 
-#: src/gtk/prefs_window.C:2288
+#: src/gtk/prefs_window.C:2318
 msgid "Password:"
 msgstr "Wachtwoord:"
 
-#: src/gtk/prefs_window.C:2394
+#: src/gtk/prefs_window.C:2424
 msgid ""
 "Note: Conversion is made using iconv() which is UNIX98 standard.\n"
 "For list of possible encodings run 'iconv --list'."
@@ -2710,71 +2786,71 @@ msgstr ""
 "Melding: Conversie is gemaakt m.b.v. iconv(), een UNIX98-standaard.\n"
 "Voer 'iconv --list' uit om een lijst met mogelijke encoderingen te krijgen."
 
-#: src/gtk/prefs_window.C:2398
+#: src/gtk/prefs_window.C:2428
 msgid "Use recoding in conversations"
 msgstr "Gebruik hercodering in conversaties"
 
-#: src/gtk/prefs_window.C:2413
+#: src/gtk/prefs_window.C:2443
 msgid "Local encoding:"
 msgstr "Lokale encodering:"
 
-#: src/gtk/prefs_window.C:2434
+#: src/gtk/prefs_window.C:2464
 msgid "Remote encoding:"
 msgstr "Encodering op afstand:"
 
-#: src/gtk/prefs_window.C:2500 src/status.c:679
+#: src/gtk/prefs_window.C:2530 src/status.c:657
 msgid "Info"
 msgstr "Informatie"
 
-#: src/gtk/prefs_window.C:2510
+#: src/gtk/prefs_window.C:2540
 msgid "Description:"
 msgstr "Beschrijving:"
 
-#: src/gtk/prefs_window.C:2511
+#: src/gtk/prefs_window.C:2541
 msgid "Version:"
 msgstr "Versie:"
 
-#: src/gtk/prefs_window.C:2512
+#: src/gtk/prefs_window.C:2542
 msgid "Date:"
 msgstr "Datum:"
 
-#: src/gtk/prefs_window.C:2513
+#: src/gtk/prefs_window.C:2543
 msgid "Path:"
 msgstr "Pad:"
 
-#: src/gtk/prefs_window.C:2514
+#: src/gtk/prefs_window.C:2544
 msgid "Status:"
 msgstr "Status:"
 
-#: src/gtk/prefs_window.C:2526
+#: src/gtk/prefs_window.C:2556
 msgid "Plugin Error"
 msgstr "Plugin-fout"
 
-#: src/gtk/prefs_window.C:2562
+#: src/gtk/prefs_window.C:2592
 msgid "[The module '"
 msgstr "[Module '"
 
-#: src/gtk/prefs_window.C:2566
+#: src/gtk/prefs_window.C:2596
 msgid "' is not loaded]"
 msgstr "' is niet geladen]"
 
-#: src/gtk/prefs_window.C:2568 src/gtk/prefs_window.C:2912
+#: src/gtk/prefs_window.C:2598 src/gtk/prefs_window.C:2942
 msgid "' has no preferences]"
 msgstr "' heeft geen voorkeuren]"
 
-#: src/gtk/prefs_window.C:2658
+#: src/gtk/prefs_window.C:2688
 msgid "Unload Module"
 msgstr "Module uit geheugen halen"
 
-#: src/gtk/prefs_window.C:2662
+#: src/gtk/prefs_window.C:2692
 msgid "Load Module"
 msgstr "Module laden"
 
-#: src/gtk/prefs_window.C:2910
+#: src/gtk/prefs_window.C:2940
 msgid "[The account '"
 msgstr "[Account '"
 
-#: src/gtk/prefs_window.C:2920
+#: src/gtk/prefs_window.C:2950
 msgid "Connect"
 msgstr "Verbinden"
 
@@ -2782,7 +2858,7 @@ msgstr "Verbinden"
 msgid "Viewing Image"
 msgstr "Afbeelding bekijken"
 
-#: src/info_window.c:161
+#: src/info_window.c:143
 msgid "<font color=red> (Invalid UTF-8 characters in response)</font>"
 msgstr ""
 
@@ -2942,83 +3018,83 @@ msgstr ""
 "Kan geen account creëren voor %s.\n"
 "Controleer uw configuratiebestand."
 
-#: src/status.c:277
+#: src/status.c:270
 #, c-format
 msgid "Do you really want to delete group \"%s\"?"
 msgstr "Wilt u werkelijk groep \"%s\" verwijderen?"
 
-#: src/status.c:278 src/status.c:559
+#: src/status.c:271 src/status.c:537
 msgid "Delete Group"
 msgstr "Groep verwijderen"
 
-#: src/status.c:301
+#: src/status.c:294
 #, c-format
 msgid "Do you really want to delete contact \"%s\"?"
 msgstr "Wilt u werkelijk contactpersoon \"%s\" verwijderen?"
 
-#: src/status.c:302 src/status.c:659
+#: src/status.c:295 src/status.c:637
 msgid "Delete Contact"
 msgstr "Contactpersoon verwijderen"
 
-#: src/status.c:323
+#: src/status.c:316
 #, c-format
 msgid "Do you really want to delete account \"%s\"?"
 msgstr "Wilt u werkelijk account \"%s\" verwijderen?"
 
-#: src/status.c:381
+#: src/status.c:372
 msgid "Ayttm - history"
 msgstr "Ayttm - geschiedenis"
 
-#: src/status.c:550
+#: src/status.c:528
 #, fuzzy
 msgid "Add contact to group"
 msgstr "Voeg contactpersoon toe aan groep..."
 
-#: src/status.c:556
+#: src/status.c:534
 #, fuzzy
 msgid "Edit Group"
 msgstr "Bewerk groep..."
 
-#: src/status.c:562
+#: src/status.c:540
 msgid "Sort"
 msgstr "Sorteren"
 
-#: src/status.c:615
+#: src/status.c:593
 #, c-format
 msgid "%s options"
 msgstr "%s opties"
 
-#: src/status.c:653
+#: src/status.c:631
 #, fuzzy
 msgid "Add Account to Contact"
 msgstr "Voeg account toe aan contactpersoon..."
 
-#: src/status.c:656
+#: src/status.c:634
 #, fuzzy
 msgid "Edit Contact"
 msgstr "Bewerk contactpersoon..."
 
-#: src/status.c:668 src/trigger.c:381
+#: src/status.c:646 src/trigger.c:379
 msgid "Edit Trigger"
 msgstr "Bewerk teweegbrenger"
 
-#: src/status.c:710
+#: src/status.c:688
 msgid "Edit Account..."
 msgstr "Bewerk account..."
 
-#: src/status.c:713
+#: src/status.c:691
 msgid "Delete Account..."
 msgstr "Verwijder account..."
 
-#: src/status.c:719
+#: src/status.c:697
 msgid "Send File..."
 msgstr "Verzend bestand..."
 
-#: src/status.c:722
+#: src/status.c:700
 msgid "Info..."
 msgstr "Informatie..."
 
-#: src/status.c:860
+#: src/status.c:838
 #, c-format
 msgid ""
 "A new release of ayttm is available.\n"
@@ -3027,232 +3103,208 @@ msgstr ""
 "Er is een nieuwe versie van ayttm beschikbaar.\n"
 "Nieuwste versie is %s en u hebt %s.\n"
 
-#: src/status.c:864
+#: src/status.c:842
 #, fuzzy
 msgid "New release available!"
 msgstr "Er is een nieuwe versie beschikbaar!"
 
-#: src/status.c:870
+#: src/status.c:848
 msgid "No new release"
 msgstr "Geen nieuwe versie"
 
-#: src/status.c:870
+#: src/status.c:848
 msgid "You have the latest release of ayttm installed."
 msgstr "U gebruikt de laatste versie van ayttm."
 
-#: src/status.c:924
+#: src/status.c:902
 #, fuzzy, c-format
-msgid "Setting %s(on %s) to %s"
+msgid "Setting %s (on %s) to %s"
 msgstr "Bezig met %s (op %s) in te stellen op %s"
 
-#: src/status.c:964
+#: src/status.c:942
 #, fuzzy, c-format
-msgid "Setting %s(on %s) to Online"
+msgid "Setting %s (on %s) to Online"
 msgstr "Bezig met %s (op %s) in te stellen op online"
 
-#: src/status.c:996
+#: src/status.c:974
 #, fuzzy, c-format
-msgid "Setting %s(on %s) to Offline"
+msgid "Setting %s (on %s) to Offline"
 msgstr "Bezig met %s (op %s) in te stellen op online"
 
-#: src/status.c:1066
+#: src/status.c:1080
 #, fuzzy, c-format
 msgid "Account vanished after add_account_line.\n"
 msgstr "Account verdween na account_line.\n"
 
-#: src/status.c:1080
+#: src/status.c:1094
 #, fuzzy, c-format
 msgid "Account missing while online?\n"
 msgstr "Account antbrekende wanneer online?\n"
 
-#: src/status.c:1184
-#, c-format
-msgid "%s is now %s"
-msgstr "%s is nu %s"
-
-#: src/status.c:1215
+#: src/status.c:1531
 #, c-format
 msgid ""
+"%s\n"
 "%s\n"
 "<span size='small'>Since %s</span>"
 msgstr ""
 
-#: src/status.c:1619 src/status.c:2656
+#: src/status.c:1594 src/status.c:2622
 msgid "-"
 msgstr "-"
 
-#: src/status.c:1658
-#, c-format
-msgid "%s is now Online"
-msgstr "%s is nu online"
-
-#: src/status.c:1699
-#, c-format
-msgid "%s is now Offline"
-msgstr "%s is nu offline"
-
-#: src/status.c:2094
+#: src/status.c:2056
 #, c-format
 msgid "eb_smiley_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2103
+#: src/status.c:2065
 #, c-format
 msgid "eb_import_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2114
+#: src/status.c:2076
 #, c-format
 msgid "eb_profile_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2266
+#: src/status.c:2228
 #, fuzzy
 msgid "Sign o_n all"
 msgstr "/Chat/Alles _aanmelden"
 
-#: src/status.c:2268
+#: src/status.c:2230
 #, fuzzy
 msgid "Sign onto all accounts"
 msgstr "Importeer lokale accounts"
 
-#: src/status.c:2272
+#: src/status.c:2234
 #, fuzzy
 msgid "Sign o_ff all"
 msgstr "/Chat/Alles a_fmelden"
 
-#: src/status.c:2274
+#: src/status.c:2236
 #, fuzzy
 msgid "Sign off all accounts"
 msgstr "Importeer lokale accounts"
 
-#: src/status.c:2278
+#: src/status.c:2240
 #, fuzzy
 msgid "New group chat"
 msgstr "/Chat/Nieuwe groepchat..."
 
-#: src/status.c:2280
+#: src/status.c:2242
 msgid "Start a chat room for a group chat"
 msgstr ""
 
-#: src/status.c:2284
+#: src/status.c:2246
 #, fuzzy
 msgid "Set as _away"
 msgstr "Status op \"Afwezig\" zetten"
 
-#: src/status.c:2286
+#: src/status.c:2248
 msgid "Set a Custom \"Away\" status"
 msgstr ""
 
-#: src/status.c:2290
+#: src/status.c:2252
 #, fuzzy
 msgid "_Quit"
 msgstr "/Chat/_Sluiten"
 
-#: src/status.c:2292
+#: src/status.c:2254
 #, fuzzy
 msgid "Close Ayttm"
 msgstr "Welkom bij Ayttm"
 
-#: src/status.c:2296
+#: src/status.c:2258
 #, fuzzy
 msgid "_Preferences"
 msgstr "Ayttm-voorkeuren"
 
-#: src/status.c:2298
+#: src/status.c:2260
 #, fuzzy
 msgid "Customize your Ayttm"
 msgstr "Welkom bij Ayttm"
 
-#: src/status.c:2302
+#: src/status.c:2264
 #, fuzzy
 msgid "Add or _delete accounts"
 msgstr "/Bewerken/Accounts toevoegen of _verwijderen..."
 
-#: src/status.c:2304
+#: src/status.c:2266
 #, fuzzy
 msgid "Add or Delete chat accounts"
 msgstr "/Bewerken/Accounts toevoegen of _verwijderen..."
 
-#: src/status.c:2308
+#: src/status.c:2270
 #, fuzzy
 msgid "Edit _accounts"
 msgstr "Bewerk account"
 
-#: src/status.c:2310
+#: src/status.c:2272
 #, fuzzy
 msgid "Edit your account details"
 msgstr "Fout: account bestaat"
 
-#: src/status.c:2314
+#: src/status.c:2276
 #, fuzzy
 msgid "Add a _contact account"
 msgstr "/Bewerken/Voeg een _contactpersoon toe aan account..."
 
-#: src/status.c:2316
+#: src/status.c:2278
 #, fuzzy
 msgid "Add an account for a contact"
 msgstr "Voeg account toe aan contactpersoon..."
 
-#: src/status.c:2320
+#: src/status.c:2282
 #, fuzzy
 msgid "Add a _group"
 msgstr "Voeg groep toe"
 
-#: src/status.c:2322
+#: src/status.c:2284
 #, fuzzy
 msgid "Add a contact group"
 msgstr "Voeg contactpersoon toe aan groep..."
 
-#: src/status.c:2327
+#: src/status.c:2289
 #, fuzzy
 msgid "_Web site"
 msgstr "/Help/_Website..."
 
-#: src/status.c:2333
+#: src/status.c:2295
 #, fuzzy
 msgid "_Manual"
 msgstr "/Help/_Handboek..."
 
-#: src/status.c:2340
+#: src/status.c:2302
 #, fuzzy
 msgid "_About Ayttm"
 msgstr "Over Ayttm"
 
-#: src/status.c:2346
+#: src/status.c:2308
 #, fuzzy
 msgid "Check for new _release"
 msgstr "/Help/Controleer voor nieuwere _versie"
 
-#: src/status.c:2354
+#: src/status.c:2316
 #, fuzzy
 msgid "Dump structures"
 msgstr "/Help/Dump structures"
 
-#: src/status.c:2602
+#: src/status.c:2568
 msgid "Contacts"
 msgstr "Contactpersonen"
 
-#: src/status.c:2634
+#: src/status.c:2600
 msgid "Welcome To Ayttm"
 msgstr "Welkom bij Ayttm"
 
-#: src/tcp_util.c:295
-#, c-format
-msgid "Looking for %s..."
-msgstr "Zoeken naar %s..."
+#: src/status.c:2602
+#, fuzzy
+msgid "Welcome to Ayttm"
+msgstr "Welkom bij Ayttm"
 
-#: src/tcp_util.c:323
-#, c-format
-msgid "Connecting to %s:%d..."
-msgstr "Verbinden met %s:%d..."
-
-#: src/tcp_util.c:340
-#, c-format
-msgid "Connected to %s:%d..."
-msgstr "Verbonden met %s:%d..."
-
-#: src/trigger.c:59
+#: src/trigger.c:57
 #, c-format
 msgid ""
 "%s just came %s.\n"
@@ -3263,77 +3315,77 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/trigger.c:59 src/trigger.c:102
+#: src/trigger.c:57 src/trigger.c:100
 msgid "online"
 msgstr "online"
 
-#: src/trigger.c:59 src/trigger.c:102
+#: src/trigger.c:57 src/trigger.c:100
 msgid "offline"
 msgstr "offline"
 
-#: src/trigger.c:60
+#: src/trigger.c:58
 #, fuzzy
 msgid "Online trigger"
 msgstr "Online teweegbrenger"
 
-#: src/trigger.c:179
+#: src/trigger.c:177
 msgid "Select parameter"
 msgstr "Selecteer parameter"
 
-#: src/trigger.c:256 src/trigger.c:264
+#: src/trigger.c:254 src/trigger.c:262
 msgid "None"
 msgstr "Geen"
 
-#: src/trigger.c:257
+#: src/trigger.c:255
 msgid "User goes online"
 msgstr "Gebruiker meldt zich aan"
 
-#: src/trigger.c:258
+#: src/trigger.c:256
 msgid "User goes offline"
 msgstr "Gebruiker meldt zich af"
 
-#: src/trigger.c:259
+#: src/trigger.c:257
 msgid "User goes on or offline"
 msgstr "Gebruiker meldt zich aan of af"
 
-#: src/trigger.c:265
+#: src/trigger.c:263
 msgid "Play sound"
 msgstr "Geluid afspelen"
 
-#: src/trigger.c:266
+#: src/trigger.c:264
 msgid "Execute command"
 msgstr "Commande uitvoeren"
 
-#: src/trigger.c:267
+#: src/trigger.c:265
 msgid "Show alert dialog"
 msgstr "Toon waarschuwingsvenster"
 
-#: src/trigger.c:268
+#: src/trigger.c:266
 msgid "Send message"
 msgstr "Bericht verzenden"
 
-#: src/trigger.c:304
+#: src/trigger.c:302
 msgid "User: "
 msgstr "Gebruiker: "
 
-#: src/trigger.c:318
+#: src/trigger.c:316
 #, fuzzy
 msgid "Trigger: "
 msgstr "Teweegbrenger: "
 
-#: src/trigger.c:337
+#: src/trigger.c:335
 msgid "Action: "
 msgstr "Actie: "
 
-#: src/trigger.c:355
+#: src/trigger.c:353
 msgid "Parameter: "
 msgstr "Parameter: "
 
-#: src/trigger.c:402
+#: src/trigger.c:400
 msgid "Update"
 msgstr "Bijwerken"
 
-#: src/trigger.c:465
+#: src/trigger.c:463
 #, fuzzy
 msgid "Ayttm - Edit Trigger"
 msgstr "Ayttm - Bewerk teweegbrenger"
@@ -3393,19 +3445,69 @@ msgstr ""
 "Geen terugbellen gedifiniëerd in aanroep naar eb_generic_menu_function, "
 "negeren van aanroep!"
 
-#: src/util.c:1954
+#: src/util.c:1950
 msgid "Can't connect"
 msgstr "Kan niet verbinden"
 
-#: src/util.c:1954
+#: src/util.c:1950
 msgid "Connection to the server failed."
 msgstr "Verbinding met de server mislukt."
 
-#: src/util.c:2115
+#: src/util.c:2114
 msgid ""
 "<font color=\"#f00\">(truncated message since it was in an unknown encoding)"
 "</font>"
 msgstr ""
+
+#, fuzzy
+#~ msgid "Cancelling connection"
+#~ msgstr "Kan niet verbinden"
+
+#, fuzzy
+#~ msgid "Connecting to %s"
+#~ msgstr "Verbinden met %s:%d..."
+
+#, fuzzy
+#~ msgid "Connecting to proxy %s"
+#~ msgstr "Verbinden met %s:%d..."
+
+#~ msgid "MSN Warning"
+#~ msgstr "MSN-waarschuwing"
+
+#~ msgid "Cannot invite user: connection to the chatroom has been closed."
+#~ msgstr ""
+#~ "Kan geen gebruiker uitnodigen: verbinding met de chatruimte werd gesloten."
+
+#~ msgid "No"
+#~ msgstr "Nee"
+
+#~ msgid "Yes"
+#~ msgstr "Ja"
+
+#~ msgid "Modify"
+#~ msgstr "Veranderen"
+
+#, fuzzy
+#~ msgid "Enable Smileys"
+#~ msgstr "Smiley invoegen"
+
+#~ msgid "%s is now %s"
+#~ msgstr "%s is nu %s"
+
+#~ msgid "%s is now Online"
+#~ msgstr "%s is nu online"
+
+#~ msgid "%s is now Offline"
+#~ msgstr "%s is nu offline"
+
+#~ msgid "Looking for %s..."
+#~ msgstr "Zoeken naar %s..."
+
+#~ msgid "Connecting to %s:%d..."
+#~ msgstr "Verbinden met %s:%d..."
+
+#~ msgid "Connected to %s:%d..."
+#~ msgstr "Verbonden met %s:%d..."
 
 #~ msgid "Check the connection state"
 #~ msgstr "Controleer de verbindingsstatus"
@@ -3429,15 +3531,6 @@ msgstr ""
 
 #~ msgid "The file %s has been successfully transfered."
 #~ msgstr "Het bestand %s is met succes overgebracht."
-
-#~ msgid ""
-#~ "%s, the MSN user %s (%s) would like to add you to their contact list.\n"
-#~ "\n"
-#~ "Do you want to allow them to see when you are online?"
-#~ msgstr ""
-#~ "%s, MSN-gebruiker %s (%s) wilt u toevoegen aan zijn/haar contactenlijst.\n"
-#~ "\n"
-#~ "Staat u het hem toe dat hij kan zien wanneer u online bent?"
 
 #~ msgid "Authorize MSN User"
 #~ msgstr "Autoriseer MSN-gebruiker"
@@ -3487,9 +3580,6 @@ msgstr ""
 #~ "MSN-gebruiker %s (%s) wilt met u spreken via (Gnome|Net)Meeting.\n"
 #~ "\n"
 #~ "Staat u dit toe?"
-
-#~ msgid "Accept invitation"
-#~ msgstr "Accepteer uitnodiging"
 
 #~ msgid "Cannot find a valid local account to invite your contact."
 #~ msgstr ""

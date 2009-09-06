@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <gtk/gtk.h>
 
 #include "value_pair.h"
 #include "service.h"
@@ -187,7 +188,7 @@ static eb_account * eb_nomodule_new_account(eb_local_account *ela, const char * 
 	return NULL;
 }
 
-static char * eb_nomodule_get_status_string( eb_account * account )
+static const char * eb_nomodule_get_status_string( eb_account * account )
 {
 	static char string[255];
 
@@ -196,9 +197,13 @@ static char * eb_nomodule_get_status_string( eb_account * account )
 	return string;
 }
 
-static const char **eb_nomodule_get_status_pixmap( eb_account * account)
+static GdkPixbuf *nomodule_icon_away = NULL;
+static void *eb_nomodule_get_status_pixbuf( eb_account * account)
 {
-	return nomodule_away_xpm;
+	if(!nomodule_icon_away)
+		nomodule_icon_away = gdk_pixbuf_new_from_xpm_data(nomodule_away_xpm);
+
+	return nomodule_icon_away;
 }
 
 static void eb_nomodule_set_idle( eb_local_account * ela, int idle )
@@ -260,7 +265,7 @@ struct service_callbacks * eb_nomodule_query_callbacks()
 	sc->del_user = eb_nomodule_del_user;
 	sc->new_account = eb_nomodule_new_account;
 	sc->get_status_string = eb_nomodule_get_status_string;
-	sc->get_status_pixmap = eb_nomodule_get_status_pixmap;
+	sc->get_status_pixbuf = eb_nomodule_get_status_pixbuf;
 	sc->set_idle = eb_nomodule_set_idle;
 	sc->set_away = eb_nomodule_set_away;
 	sc->send_chat_room_message = NULL;

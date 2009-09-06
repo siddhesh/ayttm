@@ -83,8 +83,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE, 
 	"Jabber", 
 	"Provides Jabber Messenger support", 
-	"$Revision: 1.59 $",
-	"$Date: 2009/09/06 13:36:27 $",
+	"$Revision: 1.60 $",
+	"$Date: 2009/09/06 18:23:08 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,
@@ -654,13 +654,13 @@ static eb_account * eb_jabber_new_account(eb_local_account *ela, const char * ac
 static GdkPixbuf *jabber_icon_online = NULL;
 static GdkPixbuf *jabber_icon_away = NULL;
 
-void eb_jabber_init_pixbufs()
+static void eb_jabber_init_pixbufs()
 {
 	jabber_icon_online = gdk_pixbuf_new_from_xpm_data((const char **)jabber_online_xpm);
 	jabber_icon_away = gdk_pixbuf_new_from_xpm_data((const char **)jabber_away_xpm);
 }
 
-static const void *eb_jabber_get_status_pixbuf(eb_account *account)
+static void *eb_jabber_get_status_pixbuf(eb_account *account)
 {
 	eb_jabber_account_data *jad = account->protocol_account_data;
 
@@ -671,18 +671,6 @@ static const void *eb_jabber_get_status_pixbuf(eb_account *account)
 		return (void *)jabber_icon_online;
 	else
 		return (void *)jabber_icon_away;
-}
-
-static const char ** eb_jabber_get_status_pixmap( eb_account * account)
-{
-	eb_jabber_account_data * jad;
-	
-	jad = account->protocol_account_data;
-	
-	if(jad->status == JABBER_ONLINE)
-		return jabber_online_xpm;
-	else
-		return jabber_away_xpm;
 }
 
 static const char *eb_jabber_get_status_string(eb_account *account)
@@ -912,7 +900,6 @@ struct service_callbacks * query_callbacks()
 	sc->new_account = eb_jabber_new_account;
 	sc->get_status_string = eb_jabber_get_status_string;
 	sc->get_state_string = eb_jabber_get_state_string;
-	sc->get_status_pixmap = eb_jabber_get_status_pixmap;
 	sc->get_status_pixbuf = eb_jabber_get_status_pixbuf;
 	sc->set_idle = eb_jabber_set_idle;
 	sc->set_away = eb_jabber_set_away;
