@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.61 $",
-	"$Date: 2009/09/07 07:13:02 $",
+	"$Revision: 1.62 $",
+	"$Date: 2009/09/07 08:21:20 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -896,9 +896,9 @@ static void *ay_irc_get_status_pixbuf(eb_account *account)
 	eia = account->protocol_account_data;
 
 	if (eia->status == IRC_ONLINE)
-		return irc_online_xpm;
+		return irc_icon_online;
 	else
-		return irc_away_xpm;
+		return irc_icon_away;
 }
 
 /* Not needed with IRC, the server detects our idleness */
