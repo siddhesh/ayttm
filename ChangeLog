@@ -1,3 +1,17 @@
+* Mon Sep 07 2009 07:19 UTC [pstef]   0.5.0-145
+- ChangeLog, configure.ac, src/chat_room.c, src/main.c,
+src/gtk/html_text_buffer.c, modules/irc/irc.c, modules/irc/libirc/irc_message.c,
+modules/irc/libirc/libirc.c, modules/irc/libirc/libirc.h:
+ * IRC: Fixed some build warnings
+ * IRC: Now message gets highlighted when someone mentions our nickname, regardless
+ of where it is mentioned
+ * IRC: Fixed a couple of memory leaks
+ * IRC: Removed printing messages from servers
+ * CORE: Removed unnecessary path separator when opening files like
+ chatroom_autoconnect
+ * CORE: Hopefully, fixed memory leak in HTML text buffer
+ * CORE: Replaced '/' with G_DIR_SEPARATOR
+
 * Sun Sep 06 2009 18:18 UTC [siddheshp]   0.5.0-144
 - ChangeLog, configure.ac, doc/eb-service-writing-howto.txt,
 modules/Makefile.am, modules/aim-oscar/aim-oscar.c, modules/irc/irc.c,
