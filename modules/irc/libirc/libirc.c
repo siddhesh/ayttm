@@ -19,11 +19,19 @@
  *
  */
 
-
-
 #include "libirc.h"
 #include "ctcp.h"
 
+static char irc_modes[] =
+{
+	'a',
+	'i',
+	'w',
+	'r',
+	'o',
+	'O',
+	's'
+};
 
 /* LOGIN */
 void irc_login( const char *password, int mode, irc_account *ia )
@@ -404,9 +412,9 @@ int irc_recv (irc_account *ia, char *buf, int len)
 			return 0;
 
 		buf[len-1]='\0';
-//#ifdef IRCDEBUG
-		fprintf(stderr, "irc> %s\n", buf);
-//#endif
+
+//		fprintf(stderr, "irc> %s\n", buf);
+
 		irc_message_parse(buf, ia);
 
 		return 1;

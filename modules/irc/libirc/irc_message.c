@@ -845,6 +845,14 @@ void irc_message_parse ( char *incoming, irc_account *ia )
 	}
 
 	if (prefix) {
+		if (prefix->user)
+			 free(prefix->user);
+		if (prefix->hostname)
+			 free(prefix->hostname);
+		if (prefix->servername)
+			 free(prefix->servername);
+		if (prefix->nick)
+			 free(prefix->nick);
 		free(prefix);
 		prefix = NULL;
 	}

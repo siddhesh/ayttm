@@ -84,8 +84,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"IRC",
 	"Provides Internet Relay Chat (IRC) support",
-	"$Revision: 1.60 $",
-	"$Date: 2009/09/06 18:23:08 $",
+	"$Revision: 1.61 $",
+	"$Date: 2009/09/07 07:13:02 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish
@@ -131,6 +131,13 @@ static int plugin_finish()
  *                             End Module Code
  ******************************************************************************/
 
+static char *irc_states[] =
+{
+	"Online",
+	"Away",
+	"Invisible",
+	"Offline"
+};
 
 /* taken from X-Chat 1.6.4: src/common/util.c */
 /* Added: stripping of CTCP/2 color/formatting attributes, which is
@@ -331,7 +338,7 @@ void ay_irc_send_data(void *buf, int len, irc_account *ia)
 	if(!ila->connection) {
 		char buff[1024];
 
-		eb_debug(DBG_IRC, "COnnection is NULL... HOW?!?!? %p\n", ila->connection);
+		eb_debug(DBG_IRC, "Connection is NULL... HOW?!?!? %p\n", ila->connection);
 
 		snprintf(buff, sizeof(buff), _("Not Connected to server"));
 
@@ -1624,17 +1631,11 @@ void ay_irc_process_incoming_message (const char *recipient, const char *message
 		if ((ecr = find_chat_room_by_id(room_name))) {
 			msg = (char *)strip_color((unsigned char *)message);
 
-			/* Highlight my nickname if someone has mentioned it */
-			if (!strncmp(msg, ia->nick, strlen(ia->nick))) {
-				out_msg = g_strdup_printf("<font color=\"#ff0000\">%s</font> %s",
-						ia->nick, msg+strlen(ia->nick));
-
+			/* Highlight the message if someone has mentioned my nickname */
+			if (g_strrstr(msg, ia->nick)) {
+				out_msg = g_strdup_printf("<font color=\"#0000ff\">%s</font> ", msg);
 				eb_chat_room_show_message(ecr, prefix->nick, out_msg);
-
-				if (out_msg) {
-					free(out_msg);
-					out_msg = NULL;
-				}
+				g_free(out_msg);
 			}
 			else
 				eb_chat_room_show_message(ecr, prefix->nick, msg);
@@ -1734,6 +1735,8 @@ static void ay_irc_got_privmsg(const char *recipient, const char *message,
 			data_list = data_list->next;
 		}
 	}
+
+	ctcp_free_extended_data(data_list);
 }
 
 

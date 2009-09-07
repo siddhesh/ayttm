@@ -73,14 +73,6 @@ enum {
 	IRC_SIGNON_INVISIBLE = 8
 };
 
-static char *irc_states[] =
-{
-	"Online",
-	"Away",
-	"Invisible",
-	"Offline"
-};
-
 /* User modes */
 enum {
 	IRC_USER_MODE_AWAY = 1,
@@ -105,18 +97,6 @@ typedef struct _irc_param_list {
 	char *param;
 	struct _irc_param_list *next;
 } irc_param_list ;
-
-static char irc_modes[] =
-{
-	'a',
-	'i',
-	'w',
-	'r',
-	'o',
-	'O',
-	's'
-};
-
 
 struct _irc_callbacks;
 
