@@ -221,7 +221,8 @@ int main(int argc, char *argv[])
 	}
 #else
 	gtk_set_locale ();
-	g_snprintf(config_dir, 1024, "%s/.ayttm/",getenv("HOME"));
+	g_snprintf(
+			config_dir, 1024, "%s%c.ayttm%c", getenv("HOME"), G_DIR_SEPARATOR, G_DIR_SEPARATOR);
 #endif
 
 	g_thread_init(NULL);
@@ -232,7 +233,7 @@ int main(int argc, char *argv[])
 		static struct option long_options[] = 
 		{
 	    	{"version", no_argument, NULL, 'v'},
-		{"help", no_argument, NULL, 'h'},
+	    	{"help", no_argument, NULL, 'h'},
 	    	{"geometry", required_argument, NULL, 'g'},
 	    	{"activate-goad-server", required_argument, NULL, 'a'},
 	    	{"disable-server", no_argument, NULL, 'D'},
@@ -309,11 +310,11 @@ int main(int argc, char *argv[])
 			strncpy(config_dir, optarg, sizeof(config_dir));
 			/*Make sure we have directory delimiter */
 #if defined( _WIN32 )
-			if (config_dir[strlen(config_dir)-1]!='\\')
+			if (config_dir[strlen(config_dir)-1] != '\\')
 				strcat(config_dir, "\\");
 #else
-			if (config_dir[strlen(config_dir)-1]!='/')
-				strcat(config_dir, "/");
+			if (config_dir[strlen(config_dir)-1] != G_DIR_SEPARATOR)
+				strcat(config_dir, (char *)G_DIR_SEPARATOR);
 #endif
 			if (stat(config_dir, &stat_buf)==-1)
 			{

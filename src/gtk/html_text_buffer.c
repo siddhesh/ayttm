@@ -762,13 +762,14 @@ void html_text_buffer_append ( GtkTextView *text_view, char *txt, int ignore )
 	gtk_text_buffer_insert(buffer, &iter, text, -1);
 	parse_html(text_view, *insert_mark, ignore);
 
-	if(iter_loc.y <= visible_rect.y+visible_rect.height) {
+	if (iter_loc.y <= visible_rect.y + visible_rect.height) {
 		gtk_text_buffer_get_end_iter(buffer, &end);
 
-		gtk_text_view_scroll_mark_onscreen( text_view, 
-				gtk_text_buffer_create_mark(buffer, NULL, &end, TRUE) );
+		gtk_text_view_scroll_mark_onscreen(
+				text_view, gtk_text_buffer_create_mark(buffer, NULL, &end, TRUE));
 	}
 
+	gtk_text_buffer_delete_mark(buffer, insert_mark);
 	g_free(text);
 }
 

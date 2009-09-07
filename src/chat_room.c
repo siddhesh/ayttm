@@ -353,9 +353,7 @@ void start_auto_chatrooms(eb_local_account *ela)
 {
 	FILE *fp;
 	char buff [4096];
-	snprintf(buff, 4095, "%s%cchatroom_autoconnect",
-				config_dir,
-				G_DIR_SEPARATOR);
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
 	if (!ela)
 		return;
 
@@ -381,9 +379,7 @@ static int eb_is_chatroom_auto(eb_chat_room *cr)
 {
 	FILE *fp;
 	char buff [4096];
-	snprintf(buff, 4095, "%s%cchatroom_autoconnect",
-				config_dir,
-				G_DIR_SEPARATOR);
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
 	if (!cr->local_user || !cr->room_name)
 		return FALSE;
 
@@ -416,7 +412,7 @@ static void eb_add_auto_chatroom(eb_local_account *ela, const char *name, int pu
 {
 	FILE *fp;
 	char buff[4096];
-	snprintf(buff, 4095, "%s%cchatroom_autoconnect", config_dir, G_DIR_SEPARATOR);
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
 
 	if (!ela || !name) 
 		return;
@@ -439,7 +435,7 @@ static void eb_add_auto_chatroom(eb_local_account *ela, const char *name, int pu
 		fclose(fp);
 	}
 
-	snprintf(buff, 4095, "%s%cchatroom_autoconnect", config_dir, G_DIR_SEPARATOR);
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
 	fp = fopen(buff, "a");
 	if (!fp) 
 		return;
@@ -451,16 +447,12 @@ static void eb_remove_auto_chatroom(eb_local_account *ela, const char *name, int
 {
 	FILE *fp, *tmp;
 	char buffin[4095], bufftmp[4095], buff[4095];
-	snprintf(bufftmp, 4095, "%s%cchatroom_autoconnect.tmp",
-				config_dir, 
-				G_DIR_SEPARATOR);
-	snprintf(buffin, 4095, "%s%cchatroom_autoconnect",
-				config_dir,
-				G_DIR_SEPARATOR);
+	snprintf(bufftmp, 4095, "%schatroom_autoconnect.tmp", config_dir);
+	snprintf(buffin, 4095, "%schatroom_autoconnect", config_dir);
 	if (!ela || !name)
 		return;
 
-	eb_debug(DBG_CORE, "buff %s\n", buff);
+	eb_debug(DBG_CORE, "buff %s\n", buffin);
 	fp = fopen(buffin, "r");
 	tmp = fopen(bufftmp, "w");
 
@@ -666,9 +658,7 @@ static LList *get_chatroom_mru(void)
 	char buff [4096];
 	FILE *fp = NULL;
 
-	snprintf(buff, 4095, "%s%cchatroom_mru",
-				config_dir,
-				G_DIR_SEPARATOR);
+	snprintf(buff, 4095, "%schatroom_mru", config_dir);
 
 	fp = fopen(buff, "r");
 	memset(buff, 0, 4096);
@@ -691,9 +681,7 @@ static void load_chatroom_mru(GtkComboBox *combo)
 	char buff [4096];
 	FILE *fp = NULL;
 
-	snprintf(buff, 4095, "%s%cchatroom_mru",
-				config_dir,
-				G_DIR_SEPARATOR);
+	snprintf(buff, 4095, "%schatroom_mru", config_dir);
 
 	fp = fopen(buff, "r");
 	memset (buff, 0, 4096);
@@ -718,9 +706,7 @@ static void add_chatroom_mru(const char *name)
 	FILE *fp = NULL;
 	int i = 0;
 
-	snprintf(buff, 4095, "%s%cchatroom_mru",
-				config_dir,
-				G_DIR_SEPARATOR);
+	snprintf(buff, 4095, "%schatroom_mru", config_dir);
 
 	fp = fopen(buff, "w");
 	memset(buff, 0, 4096);
