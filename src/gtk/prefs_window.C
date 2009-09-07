@@ -49,10 +49,6 @@
 #include "spellcheck.h"
 #endif
 
-#include "pixmaps/ok.xpm"
-#include "pixmaps/cancel.xpm"
-#include "pixmaps/error.xpm"
-
 enum {
 	PANEL_NAME_COL,
 	PANEL_POINTER_COL,
@@ -662,11 +658,10 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 	// OK Button
 	GtkWidget	*hbox2 = gtk_hbox_new( TRUE, 5 );
 	gtk_widget_show( hbox2 );
-	gtk_widget_set_size_request( hbox2, 200, 25 );
 
 	GtkAccelGroup *accel_group = gtk_accel_group_new();
 
-	GtkWidget	*button = gtkut_create_icon_button( _("OK"), ok_xpm, m_prefs_window_widget );
+	GtkWidget	*button = gtk_button_new_from_stock(GTK_STOCK_OK);
 	gtk_widget_show( button );
 	g_signal_connect( button, "clicked", G_CALLBACK( s_ok_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
@@ -676,7 +671,7 @@ ay_prefs_window::ay_prefs_window( struct prefs &inPrefs )
 			GDK_KP_Enter, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
 	// Cancel Button
-	button = gtkut_create_icon_button( _("Cancel"), cancel_xpm, m_prefs_window_widget );
+	button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
 	gtk_widget_show( button );
 	g_signal_connect( button, "clicked", G_CALLBACK( s_cancel_callback ), this );
 	gtk_box_pack_start( GTK_BOX(hbox2), button, TRUE, TRUE, 5 );
@@ -2559,8 +2554,7 @@ void	ay_module_panel::Build( GtkWidget *inParent )
 		GtkWidget	*hbox = gtk_hbox_new( FALSE, 0 );
 		gtk_widget_show( hbox );
 		
-		GdkPixbuf	*icon = gdk_pixbuf_new_from_xpm_data( (const char **) error_xpm );
-		GtkWidget	*icon_widget = gtk_image_new_from_pixbuf( icon );
+		GtkWidget	*icon_widget = gtk_image_new_from_stock(GTK_STOCK_DIALOG_ERROR, GTK_ICON_SIZE_DIALOG);
 		gtk_widget_show( icon_widget );
 		gtk_box_pack_start( GTK_BOX(hbox), icon_widget, FALSE, FALSE, 0 );
 

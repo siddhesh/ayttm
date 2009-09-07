@@ -67,16 +67,7 @@
 #include "gtk/gtkspell.h"
 #endif
 
-#include "pixmaps/tb_book_red.xpm"
-#include "pixmaps/tb_open.xpm"
 #include "pixmaps/tb_volume.xpm"
-#include "pixmaps/tb_edit.xpm"
-#include "pixmaps/tb_search.xpm"
-#include "pixmaps/tb_no.xpm"
-#include "pixmaps/tb_mail_send.xpm"
-#include "pixmaps/cancel.xpm"
-#include "pixmaps/smiley_button.xpm"
-#include "pixmaps/action.xpm"
 #include "pixmaps/invite_btn.xpm"
 
 #define BUF_SIZE 1024  /* Maximum message length */
@@ -2186,9 +2177,12 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(tool_btn),txt);\
 	g_signal_connect(tool_btn,"clicked",G_CALLBACK(cbk),cwx); \
 	gtk_widget_show(tool_btn); }
-#define ICON_CREATE(icon,iconwid,xpm) {\
+#define ICON_CREATE_XPM(icon,iconwid,xpm) {\
 	icon = gdk_pixbuf_new_from_xpm_data((const char **) xpm); \
 	iconwid = gtk_image_new_from_pixbuf(icon); \
+	gtk_widget_show(iconwid); }
+#define ICON_CREATE(iconwid,stock) {\
+	iconwid = gtk_image_new_from_stock(stock, GTK_ICON_SIZE_SMALL_TOOLBAR); \
 	gtk_widget_show(iconwid); }
 
 /* line will tell whether to draw the separator line or not */
@@ -2202,7 +2196,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	/* This is where we decide whether or not the add button should be displayed*/
 	if (!strcmp(cw->contact->group->name, _("Unknown"))
 	||  !strncmp(cw->contact->group->name, "__Ayttm_Dummy_Group__", strlen("__Ayttm_Dummy_Group__"))) {
-		ICON_CREATE(icon, iconwid, tb_book_red_xpm);
+		ICON_CREATE(iconwid, GTK_STOCK_ADD);
 		TOOLBAR_APPEND(add_button, _("Add Contact"),iconwid,add_unknown_callback,cw);
 
 		TOOLBAR_APPEND_SPACE(TRUE);
@@ -2210,7 +2204,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 
 	/* Decide whether the offline messaging button should be displayed*/
 	if (can_offline_message(remote)) {
-		ICON_CREATE(icon, iconwid, tb_edit_xpm);
+		ICON_CREATE(iconwid, GTK_STOCK_EDIT);
 		cw->offline_button = GTK_WIDGET(gtk_toggle_tool_button_new());
 		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(cw->offline_button), iconwid);
 		gtk_tool_button_set_label(GTK_TOOL_BUTTON(cw->offline_button), _("Allow"));
@@ -2219,6 +2213,8 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 
 		gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(cw->offline_button),
 				_("Allow Offline Messaging Ctrl+O"));
+
+		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(cw->offline_button), TRUE);
 
 		g_signal_connect(cw->offline_button, "clicked", G_CALLBACK(allow_offline_callback), cw);
 		gtk_widget_show(cw->offline_button);
@@ -2231,7 +2227,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 
 		TOOLBAR_APPEND_SPACE(TRUE);
 
-		cw_set_offline_active(cw, FALSE);
+		cw_set_offline_active(cw, TRUE);
 	}
 
 	/* smileys */
@@ -2239,7 +2235,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 		smiley_callback_data *scd = g_new0(smiley_callback_data,1);
 		scd->c_window = cw;
 
-		ICON_CREATE(icon, iconwid, smiley_button_xpm);
+		ICON_CREATE(iconwid, "ayttm_smileys");
 		TOOLBAR_APPEND(cw->smiley_button, _("Insert Smiley"), iconwid,
 				_show_smileys_cb, scd);
 		g_signal_connect(cw->smiley_button, "destroy", G_CALLBACK(destroy_smiley_cb_data), scd);
@@ -2249,7 +2245,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	}
 	/* This is the sound toggle button*/
 
-	ICON_CREATE(icon, iconwid, tb_volume_xpm);
+	ICON_CREATE_XPM(icon, iconwid, tb_volume_xpm);
 
 	cw->sound_button = GTK_WIDGET(gtk_toggle_tool_button_new());
 	gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(cw->sound_button), iconwid);
@@ -2277,7 +2273,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 
 	cw_set_sound_active(cw, enableSoundButton);
 
-	ICON_CREATE(icon, iconwid, tb_search_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_FIND);
 	TOOLBAR_APPEND(view_log_button, _("View Log CTRL+L"), iconwid, view_log_callback, cw);
 	gtk_widget_add_accelerator(view_log_button, "clicked", accel_group, 
 				   GDK_l, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -2285,7 +2281,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	TOOLBAR_APPEND_SPACE(TRUE);
 
 #ifndef __MINGW32__
-	ICON_CREATE(icon, iconwid, action_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_EXECUTE);
 	TOOLBAR_APPEND(print_button, _("Actions..."), iconwid, action_callback, cw);
 	gtk_widget_add_accelerator(print_button, "clicked", accel_group, 
 				   GDK_p, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -2294,7 +2290,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 #endif
 
 	/* This is the send file button*/
-	ICON_CREATE(icon, iconwid, tb_open_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_OPEN);
 	TOOLBAR_APPEND(sendf_button, _("Send File CTRL+T"), iconwid, send_file, cw);
 	gtk_widget_add_accelerator(sendf_button, "clicked", accel_group, 
 				   GDK_t, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -2302,7 +2298,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	TOOLBAR_APPEND_SPACE(TRUE);
 
 	/* This is the invite button*/
-	ICON_CREATE(icon, iconwid, invite_btn_xpm);
+	ICON_CREATE_XPM(icon, iconwid, invite_btn_xpm);
 	TOOLBAR_APPEND(invite_button, _("Invite CTRL+I"), iconwid, do_invite_window, cw);
 	gtk_widget_add_accelerator(invite_button, "clicked", accel_group, 
 				   GDK_i, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -2310,7 +2306,7 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	TOOLBAR_APPEND_SPACE(TRUE);
 
 	/* This is the ignore button*/
-	ICON_CREATE(icon, iconwid, tb_no_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_REMOVE);
 	TOOLBAR_APPEND(ignore_button, _("Ignore CTRL+G"), iconwid, ignore_callback, cw);
 	gtk_widget_add_accelerator(ignore_button, "clicked", accel_group,
 				   GDK_g, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -2318,13 +2314,13 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 	TOOLBAR_APPEND_SPACE(TRUE);
 
 	/* This is the send button*/
-	ICON_CREATE(icon, iconwid, tb_mail_send_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_OK);
 	TOOLBAR_APPEND(send_button, _("Send Message CTRL+R"), iconwid, send_message, cw);
 	gtk_widget_add_accelerator(send_button, "clicked", accel_group, 
 				   GDK_r, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
 	/* This is the close button*/
-	ICON_CREATE(icon, iconwid, cancel_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_CLOSE);
 
 	if (tabbedChat) {
 		TOOLBAR_APPEND(close_button, _("Close CTRL+Q"), iconwid, close_tab_callback, cw);

@@ -62,6 +62,27 @@ GtkWidget *gtkut_create_icon_widget( const char **inXPM, GtkWidget *inParent )
 	return (iconwid);
 }
 
+
+GtkWidget *gtkut_stock_button_new_with_label(const char *label, const char *stock)
+{
+	GtkWidget *hbox = gtk_hbox_new(FALSE, 5);
+	GtkWidget *button = gtk_button_new();
+	GtkWidget *iconwid = gtk_image_new_from_stock(stock, GTK_ICON_SIZE_BUTTON);
+	GtkWidget *labelwid = gtk_label_new(label);
+ 
+	gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), labelwid, FALSE, FALSE, 2);
+	gtk_container_add(GTK_CONTAINER(button), hbox);		
+    
+	gtk_widget_show(iconwid);
+	gtk_widget_show(labelwid);
+	gtk_widget_show(hbox);
+	gtk_widget_show(button);
+
+	return button;
+}
+
+
 GtkWidget *gtkut_create_icon_button( const char *inLabel,  const char **inXPM, GtkWidget *inParent )
 {
 	GtkWidget	*button = NULL;

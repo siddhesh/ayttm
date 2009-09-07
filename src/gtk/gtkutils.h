@@ -53,6 +53,16 @@ GtkWidget	*gtkut_create_icon_widget( const char **inXPM, GtkWidget *inParent );
 */
 GtkWidget	*gtkut_create_icon_button( const char *inLabel, const char **inXPM, GtkWidget *inParent );
 
+/** Create a button with a stock icon and custom label.
+
+	@param	inLabel		optional label for the button
+	@param	inXPM		the pixmap
+	@param	inParent	the parent whose window we'll use to create the pixmap
+	
+	@returns the new button
+*/
+GtkWidget *gtkut_stock_button_new_with_label(const char *label, const char *stock);
+
 void gtkut_set_pixbuf_from_xpm( const char **inXPM, GdkPixbuf **outPixbuf );
 
 void gtkut_set_pixbuf( eb_local_account *ela, const char **inXPM, GdkPixbuf **outPixbuf );

@@ -640,7 +640,7 @@ create_description (const gchar *desc, int prev_was_bad)
 	buf = g_strdup_printf (_("%sPlease enter the passphrase for:\n\n"
 				 "  %.*s  \n"),
 			       prev_was_bad ? _("Bad passphrase! Try again...\n\n") : "",
-			       strlen (uid), uid);
+			       (int)strlen (uid), uid);
 
 	label = gtk_label_new (buf);
 	g_free (buf);

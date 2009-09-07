@@ -38,9 +38,6 @@
 #include "messages.h"
 
 
-#include "pixmaps/tb_preferences.xpm"
-#include "pixmaps/cancel.xpm"
-
 static gint window_open = 0;
 static GtkWidget *edit_trigger_window;
 static GtkWidget *trigger_list;
@@ -274,11 +271,9 @@ void show_trigger_window(struct contact * con)
   GtkWidget *vbox;
   GtkWidget *label;
   GtkWidget *button;
-  GtkWidget *iconwid;
   GtkWidget *table;
   GtkWidget *frame;
   GtkWidget *separator;
-  GdkPixbuf *icon;
   GtkWidget *hbox_param;
   GtkWidget *browse_button;
      
@@ -389,55 +384,19 @@ void show_trigger_window(struct contact * con)
   gtk_box_pack_start(GTK_BOX(vbox), separator, FALSE, FALSE, 5);
   gtk_widget_show(separator);
 		
-  hbox = gtk_hbox_new(FALSE, 5);
   hbox2 = gtk_hbox_new(TRUE, 5);
      
   /*Add Button*/
-  gtk_widget_set_size_request(hbox2, 200,25);
-      
-  icon = gdk_pixbuf_new_from_xpm_data( (const char **) tb_preferences_xpm);
-  iconwid = gtk_image_new_from_pixbuf(icon);
-  label = gtk_label_new(_("Update"));
-      
-  gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 2);
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-      
-  gtk_widget_show(iconwid);
-  gtk_widget_show(label);
-      
-  button = gtk_button_new();
-      
+  button = gtkut_stock_button_new_with_label(_("Update"), GTK_STOCK_PREFERENCES);
   g_signal_connect(button, "clicked", G_CALLBACK(set_button_callback), con);
-  gtk_widget_show(hbox);     
-     
-  gtk_container_add(GTK_CONTAINER(button), hbox);		
-     
   gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-  gtk_widget_show(button);
-      
+
   /*Cancel Button*/
       
-  hbox = gtk_hbox_new(FALSE, 5);
-  icon = gdk_pixbuf_new_from_xpm_data( (const char **) cancel_xpm);
-  iconwid = gtk_image_new_from_pixbuf(icon);
-  label = gtk_label_new(_("Cancel"));
-     
-  gtk_box_pack_start(GTK_BOX(hbox), iconwid, FALSE, FALSE, 2);
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-     
-  gtk_widget_show(iconwid);
-  gtk_widget_show(label);
-     
-  button = gtk_button_new();
-     
-  g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_widget_destroy),
-		  edit_trigger_window);
-  gtk_widget_show(hbox);     
-     
-  gtk_container_add(GTK_CONTAINER (button), hbox);		
+  button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+  g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_widget_destroy), edit_trigger_window);
      
   gtk_box_pack_start(GTK_BOX(hbox2), button, TRUE, TRUE, 0);
-  gtk_widget_show(button);
       
   /*Buttons End*/
       

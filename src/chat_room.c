@@ -51,9 +51,6 @@
 #include "gtk/gtkspell.h"
 #endif
 
-#include "pixmaps/tb_mail_send.xpm"
-#include "pixmaps/cancel.xpm"
-#include "pixmaps/ok.xpm"
 #include "pixmaps/tb_volume.xpm"
 #include "pixmaps/smiley_button.xpm"
 #include "pixmaps/action.xpm"
@@ -610,12 +607,12 @@ void do_invite_window(void *widget, eb_chat_room *room)
 	gtk_widget_show(frame);
 	gtk_widget_show(table);
 
-	label = gtkut_create_icon_button(_("Invite"), invite_btn_xpm, room->invite_window);
+	label = gtkut_stock_button_new_with_label(_("Invite"), GTK_STOCK_ADD);
 	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
 	g_signal_connect(label, "clicked", G_CALLBACK(invite_callback), room);
 
-	label = gtkut_create_icon_button(_("Cancel"), cancel_xpm, room->invite_window);
+	label = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
 	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
 	g_signal_connect_swapped(label, "clicked", G_CALLBACK(gtk_widget_destroy),
@@ -953,7 +950,7 @@ void open_join_chat_window()
 	gtk_widget_set_size_request(hbox2, 200, 25);
 
 	/* stuff for the join button */
-	button = gtkut_create_icon_button(_("Join"), ok_xpm, join_chat_window);
+	button = gtkut_stock_button_new_with_label(_("Join"), GTK_STOCK_OK);
 
 	g_signal_connect(button, "clicked", G_CALLBACK(join_chat_callback), NULL);
 
@@ -967,7 +964,7 @@ void open_join_chat_window()
 	gtk_widget_show(button);
 
 	/* stuff for the cancel button */
-	button = gtkut_create_icon_button(_("Cancel"), cancel_xpm, join_chat_window);
+	button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
 
 	g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_widget_destroy),
 			join_chat_window);
@@ -1732,16 +1729,19 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(tool_btn), txt);\
 	g_signal_connect(tool_btn,"clicked", G_CALLBACK(cbk), cwx); \
 	gtk_widget_show(tool_btn); }
-#define ICON_CREATE(icon,iconwid,xpm) {\
-	icon = gdk_pixbuf_new_from_xpm_data((const char **)xpm); \
-	iconwid = gtk_image_new_from_pixbuf(icon); \
+#define ICON_CREATE(iconwid,stock) {\
+	iconwid = gtk_image_new_from_stock(stock, GTK_ICON_SIZE_SMALL_TOOLBAR); \
+	gtk_widget_show(iconwid); }
+#define ICON_CREATE_XPM(icon,iconwid,xpm) {\
+	icon = gdk_pixbuf_new_from_xpm_data(xpm); \
+	iconwid = gtk_image_new_from_pixbuf(icon);\
 	gtk_widget_show(iconwid); }
 
 	/* smileys */
 	if (iGetLocalPref("do_smiley")) {
 		smiley_callback_data *scd = g_new0(smiley_callback_data, 1);
 		scd->c_window = chat_room;
-		ICON_CREATE(icon, iconwid, smiley_button_xpm);
+		ICON_CREATE(iconwid, "ayttm_smileys");
 		TOOLBAR_APPEND(chat_room->smiley_button, _("Insert Smiley"),
 				iconwid, _show_smileys_cb, scd);
 
@@ -1750,7 +1750,7 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 		/*Create the separator for the toolbar*/
 	}
 
-	ICON_CREATE(icon, iconwid, reconnect_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_REFRESH);
 	TOOLBAR_APPEND_TOGGLE_BUTTON(chat_room->reconnect_button,
 			_("Reconnect at login"),
 			_("Reconnect at login"),
@@ -1762,7 +1762,7 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(chat_room->reconnect_button),
 				     eb_is_chatroom_auto(chat_room));
 
-	ICON_CREATE(icon, iconwid, tb_volume_xpm);
+	ICON_CREATE_XPM(icon, iconwid, tb_volume_xpm);
 	TOOLBAR_APPEND_TOGGLE_BUTTON(chat_room->sound_button,
 			_("Sound"),
 			_("Enable Sounds"),
@@ -1785,13 +1785,13 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 				     enableSoundButton);
 
 	TOOLBAR_APPEND_SPACE();
-	ICON_CREATE(icon, iconwid, action_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_EXECUTE);
 	TOOLBAR_APPEND(print_button, _("Actions..."), iconwid, action_callback, chat_room);
 
-	ICON_CREATE(icon, iconwid, tb_mail_send_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_OK);
 	TOOLBAR_APPEND(send_button, _("Send Message"), iconwid, send_cr_message, chat_room);
 
-	ICON_CREATE(icon, iconwid, cancel_xpm);
+	ICON_CREATE(iconwid, GTK_STOCK_CLOSE);
 
 	TOOLBAR_APPEND(close_button,_("Close"), iconwid, destroy_chat_room, chat_room);
 

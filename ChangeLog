@@ -1,3 +1,10 @@
+* Mon Sep 07 2009 07:50 UTC [siddheshp]   0.5.0-146
+- ChangeLog, configure.ac, configure.ac, modules/aycryption/select-keys.c,
+src/chat_room.c, src/chat_window.c, src/trigger.c, src/gtk/gtkutils.c,
+src/gtk/gtkutils.h, src/gtk/prefs_window.C:
+ * CORE: Fixed a minor build warning
+ * CORE: Replaced xpms with stock icons wherever possible
+
 * Mon Sep 07 2009 07:19 UTC [pstef]   0.5.0-145
 - ChangeLog, configure.ac, src/chat_room.c, src/main.c,
 src/gtk/html_text_buffer.c, modules/irc/irc.c, modules/irc/libirc/irc_message.c,
