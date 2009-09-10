@@ -1257,6 +1257,29 @@ static void yahoo_process_message(struct yahoo_input_data *yid, struct yahoo_pac
 }
 
 
+/*
+ * Here's what multi-level packets look like. Data in brackets is the value.
+ *
+ * 3 level:
+ * =======
+ * 
+ * 302 (318) - Beginning level 1
+ * 	300 (318) - Begin level 2
+ * 	302 (319) - End level 2 header
+ * 		300 (319) - Begin level 3
+ * 		301 (319) - End level 3
+ * 	303 (319) - End level 2
+ * 303 (318) - End level 1
+ *
+ * 2 level:
+ * =======
+ *
+ * 302 (315) - Beginning level 1
+ * 	300 (315) - Begin level 2
+ * 	301 (315) - End level 2
+ * 303 (315) - End level 1
+ *
+ */
 static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_packet *pkt)
 {
 	YList *l;
@@ -1295,6 +1318,12 @@ static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_pack
 		struct yahoo_pair *pair = l->data;
 
 		switch (pair->key) {
+		case 300: /* Begin buddy */
+			u = y_new0(struct user, 1);
+			break;
+		case 301: /* End buddy */
+			users = y_list_prepend(users, u);
+			break;
 		case 0: /* we won't actually do anything with this */
 			NOTICE(("key %d:%s", pair->key, pair->value));
 			break;
@@ -1310,61 +1339,59 @@ static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_pack
 			NOTICE(("key %d:%s", pair->key, pair->value));
 			break;
 		case 7: /* the current buddy */
-			u = y_new0(struct user, 1);
 			u->name = pair->value;
-			users = y_list_prepend(users, u);
 			break;
 		case 10: /* state */
-			((struct user*)users->data)->state = strtol(pair->value, NULL, 10);
+			u->state = strtol(pair->value, NULL, 10);
 			break;
 		case 19: /* custom status message */
-			((struct user*)users->data)->msg = pair->value;
+			u->msg = pair->value;
 			break;
 		case 47: /* is it an away message or not. Not applicable for YMSG16 anymore */
-			((struct user*)users->data)->away = atoi(pair->value);
+			u->away = atoi(pair->value);
 			break;
 		case 137: /* seconds idle */
-			((struct user*)users->data)->idle = atoi(pair->value);
+			u->idle = atoi(pair->value);
 			break;
 		case 11: /* this is the buddy's session id */
-			((struct user*)users->data)->buddy_session = atoi(pair->value);
+			u->buddy_session = atoi(pair->value);
 			break;
 		case 17: /* in chat? */
-			((struct user*)users->data)->f17 = atoi(pair->value);
+			u->f17 = atoi(pair->value);
 			break;
 		case 13: /* bitmask, bit 0 = pager, bit 1 = chat, bit 2 = game */
-			((struct user*)users->data)->flags = atoi(pair->value);
+			u->flags = atoi(pair->value);
 			break;
 		case 60: /* SMS -> 1 MOBILE USER */
 			/* sometimes going offline makes this 2, but invisible never sends it */
-			((struct user*)users->data)->mobile = atoi(pair->value);
+			u->mobile = atoi(pair->value);
 			break;
 		case 138:
-			((struct user*)users->data)->f138 = atoi(pair->value);
+			u->f138 = atoi(pair->value);
 			break;
 		case 184:
-			((struct user*)users->data)->f184 = pair->value;
+			u->f184 = pair->value;
 			break;
 		case 192:
-			((struct user*)users->data)->f192 = atoi(pair->value);
+			u->f192 = atoi(pair->value);
 			break;
 		case 10001:
-			((struct user*)users->data)->f10001 = atoi(pair->value);
+			u->f10001 = atoi(pair->value);
 			break;
 		case 10002:
-			((struct user*)users->data)->f10002 = atoi(pair->value);
+			u->f10002 = atoi(pair->value);
 			break;
 		case 198:
-			((struct user*)users->data)->f198 = atoi(pair->value);
+			u->f198 = atoi(pair->value);
 			break;
 		case 197:
-			((struct user*)users->data)->f197 = pair->value;
+			u->f197 = pair->value;
 			break;
 		case 205:
-			((struct user*)users->data)->f205 = pair->value;
+			u->f205 = pair->value;
 			break;
 		case 213:
-			((struct user*)users->data)->f213 = atoi(pair->value);
+			u->f213 = atoi(pair->value);
 			break;
 		case 16: /* Custom error message */
 			YAHOO_CALLBACK(ext_yahoo_error)(yd->client_id, pair->value, 0, E_CUSTOM);
