@@ -1314,15 +1314,20 @@ static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_pack
 		return;
 	}
 
+	u = NULL;
+
 	for (l = pkt->hash; l; l = l->next) {
 		struct yahoo_pair *pair = l->data;
 
 		switch (pair->key) {
 		case 300: /* Begin buddy */
-			u = y_new0(struct user, 1);
+			if(!u)
+				u = y_new0(struct user, 1);
 			break;
 		case 301: /* End buddy */
-			users = y_list_prepend(users, u);
+			if(u)
+				users = y_list_prepend(users, u);
+			u = NULL;
 			break;
 		case 0: /* we won't actually do anything with this */
 			NOTICE(("key %d:%s", pair->key, pair->value));
@@ -1339,6 +1344,11 @@ static void yahoo_process_status(struct yahoo_input_data *yid, struct yahoo_pack
 			NOTICE(("key %d:%s", pair->key, pair->value));
 			break;
 		case 7: /* the current buddy */
+			if(!u) {
+				/* This will only happen in case of a single level message */
+				u = y_new0(struct user, 1);
+				users = y_list_prepend(users, u);
+			}
 			u->name = pair->value;
 			break;
 		case 10: /* state */

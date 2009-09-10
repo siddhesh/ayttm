@@ -178,7 +178,7 @@ void focus_statuswindow(void)
 	gdk_window_raise(statuswindow->window);
 }
 
-gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
+static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
 	hide_status_window();
 	return TRUE;
@@ -1770,10 +1770,10 @@ void update_contact_window_length()
 
 /* DND Callbacks and supporting functions */
 
-struct contact *drag_data = NULL;
-int drag_data_type = -1;
+static struct contact *drag_data = NULL;
+static int drag_data_type = -1;
 
-int get_target_type(GtkTreeView *tree_view, GtkTreePath *path)
+static int get_target_type(GtkTreeView *tree_view, GtkTreePath *path)
 {
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
 	GtkTreeIter iter;
@@ -1786,7 +1786,7 @@ int get_target_type(GtkTreeView *tree_view, GtkTreePath *path)
 }
 
 
-void drag_begin_callback(GtkWidget *widget, GdkDragContext *c, gpointer data)
+static void drag_begin_callback(GtkWidget *widget, GdkDragContext *c, gpointer data)
 {
 	GtkTreePath *path;
 	GdkPixmap *pix;
@@ -1812,7 +1812,7 @@ void drag_begin_callback(GtkWidget *widget, GdkDragContext *c, gpointer data)
 			-1);
 }
 
-void drag_motion_callback(
+static void drag_motion_callback(
 		GtkWidget *widget, GdkDragContext *c, guint x, guint y, guint time, gpointer data)
 {
 	/* TODO
@@ -1849,7 +1849,7 @@ void drag_motion_callback(
 }
 
 
-gboolean drag_drop_callback(
+static gboolean drag_drop_callback(
 		GtkWidget *widget, GdkDragContext *c, guint x, guint y, guint time, gpointer data)
 {
 	GtkTreePath *path;
