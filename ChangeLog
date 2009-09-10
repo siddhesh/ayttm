@@ -1,3 +1,9 @@
+* Thu Sep 10 2009 11:35 UTC [siddheshp]   0.5.0-147
+- ChangeLog, src/status.c, modules/yahoo2/libyahoo2.c:
+ * YMSG: Last update broken single level messages. Fixed now.
+ * CORE: Marked drag and drop functions and others as static since they're not
+ used outside
+
 * Thu Sep 10 2009 10:55 UTC [siddheshp]   0.5.0-147
 - ChangeLog, configure.ac, modules/yahoo2/libyahoo2/libyahoo2.c:
  * YMSG: Fixed process status packet parsing to use the level information keys. 
