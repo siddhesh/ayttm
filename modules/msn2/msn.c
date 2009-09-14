@@ -79,11 +79,13 @@
  *			     Begin Module Code
  ************************************************************************************/
 /*  Module defines */
-#define plugin_info msn2_LTX_plugin_info
-#define SERVICE_INFO msn2_LTX_SERVICE_INFO
-#define plugin_init msn2_LTX_plugin_init
-#define plugin_finish msn2_LTX_plugin_finish
-#define module_version msn2_LTX_module_version
+#ifndef USE_POSIX_DLOPEN
+	#define plugin_info msn2_LTX_plugin_info
+	#define SERVICE_INFO msn2_LTX_SERVICE_INFO
+	#define plugin_init msn2_LTX_plugin_init
+	#define plugin_finish msn2_LTX_plugin_finish
+	#define module_version msn2_LTX_module_version
+#endif
 
 
 typedef struct _ay_msn_local_account
@@ -142,8 +144,8 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
 	"MSN",
 	"Provides MSN Messenger support",
-	"$Revision: 1.13 $",
-	"$Date: 2009/09/06 18:23:08 $",
+	"$Revision: 1.14 $",
+	"$Date: 2009/09/14 10:40:36 $",
 	&ref_count,
 	plugin_init,
 	plugin_finish,

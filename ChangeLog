@@ -1,3 +1,8 @@
+* Mon Sep 14 2009 10:35 UTC [siddheshp]   0.6.0-1
+- ChangeLog, configure.ac, modules/msn2/msn.c:
+ * MSN: Do not put in the libtool prefix for plugin_info if
+ --enable-posix-dlopen is used
+
 * Thu Sep 10 2009 11:35 UTC [siddheshp]   0.5.0-147
 - ChangeLog, src/status.c, modules/yahoo2/libyahoo2.c:
  * YMSG: Last update broken single level messages. Fixed now.
