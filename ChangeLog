@@ -1,3 +1,9 @@
+* Tue Sep 15 2009 16:30 UTC [siddheshp]   0.6.0-2
+- ChangeLog, configure.ac, src/Makefile.am:
+ * CORE: Updated configure script to disable yahoo as well as msn if openssl
+ is not found
+ * CORE: Build libproxy into core, not just statically link against it.
+
 * Mon Sep 14 2009 10:35 UTC [siddheshp]   0.6.0-1
 - ChangeLog, configure.ac, modules/msn2/msn.c:
  * MSN: Do not put in the libtool prefix for plugin_info if
