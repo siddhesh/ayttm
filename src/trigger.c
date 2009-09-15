@@ -36,6 +36,7 @@
 #include "globals.h"
 #include "file_select.h"
 #include "messages.h"
+#include "gtk/gtkutils.h"
 
 
 static gint window_open = 0;
