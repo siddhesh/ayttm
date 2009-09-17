@@ -23,33 +23,29 @@
  *
  */
 
-
 #ifndef __PROXY_H__
 #define __PROXY_H__
 
 #define AY_DEFAULT_PROXY_PORT 3128
 
 /* Proxy Types */
-typedef enum
-{
-	PROXY_NONE = 0,	/* No Proxy */
-	PROXY_HTTP,	/* HTTP */
-	PROXY_SOCKS4,	/* Socks 4 */
-	PROXY_SOCKS5,	/* Socks 5 */
-	
-	PROXY_MAX	/* Number of proxies supported */
-} AyProxyType ;
+typedef enum {
+	PROXY_NONE = 0,		/* No Proxy */
+	PROXY_HTTP,		/* HTTP */
+	PROXY_SOCKS4,		/* Socks 4 */
+	PROXY_SOCKS5,		/* Socks 5 */
 
+	PROXY_MAX		/* Number of proxies supported */
+} AyProxyType;
 
 /* Proxy Structure */
-typedef struct
-{
+typedef struct {
 	char *host;		/* Proxy Host */
 	int port;		/* Port */
 	AyProxyType type;	/* Proxy Type, see eProxyType for types supported */
 	char *username;		/* Proxy username. NULL if the proxy requires no authentication */
 	char *password;		/* Proxy Password */
-} AyProxyData ;
+} AyProxyData;
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,15 +55,14 @@ extern "C" {
 #define extern __declspec(dllimport)
 #endif
 
-int ay_proxy_set_default ( AyProxyType type, const char *host, int port, char *username, char *password) ;
+	int ay_proxy_set_default(AyProxyType type, const char *host, int port,
+		char *username, char *password);
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 #define extern extern
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif
-
 #endif

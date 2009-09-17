@@ -54,6 +54,4 @@
  */
 #define WIN32_STATIC
 
-#endif /* __FAIMCONFIG_H__ */
-
-
+#endif				/* __FAIMCONFIG_H__ */

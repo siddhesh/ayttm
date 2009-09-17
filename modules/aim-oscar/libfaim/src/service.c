@@ -39,7 +39,9 @@ faim_export int aim_clientready(aim_session_t *sess, aim_conn_t *conn)
 			aimbs_put16(&fr->data, mod->toolid);
 			aimbs_put16(&fr->data, mod->toolversion);
 		} else
-			faimdprintf(sess, 1, "aim_clientready: server supports group 0x%04x but we don't!\n", sg->group);
+			faimdprintf(sess, 1,
+				"aim_clientready: server supports group 0x%04x but we don't!\n",
+				sg->group);
 	}
 
 	aim_tx_enqueue(sess, fr);
@@ -61,11 +63,11 @@ faim_export int aim_clientready(aim_session_t *sess, aim_conn_t *conn)
  * shortly after the rate information is acknowledged.
  * 
  */
-static int hostonline(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int hostonline(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	fu16_t *families;
 	int famcount;
-
 
 	if (!(families = malloc(aim_bstream_empty(bs))))
 		return 0;
@@ -77,7 +79,6 @@ static int hostonline(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 
 	free(families);
 
-
 	/*
 	 * Next step is in the Host Versions handler.
 	 *
@@ -88,17 +89,19 @@ static int hostonline(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 	 */
 	aim_setversions(sess, rx->conn);
 
-	return 1; 
+	return 1;
 }
 
 /* Subtype 0x0004 - Service request */
-faim_export int aim_reqservice(aim_session_t *sess, aim_conn_t *conn, fu16_t serviceid)
+faim_export int aim_reqservice(aim_session_t *sess, aim_conn_t *conn,
+	fu16_t serviceid)
 {
 	return aim_genericreq_s(sess, conn, 0x0001, 0x0004, &serviceid);
 }
 
 /* Subtype 0x0005 - Redirect */
-static int redirect(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int redirect(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	struct aim_redirect_data redir;
 	aim_rxcallback_t userfunc;
@@ -111,8 +114,8 @@ static int redirect(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 	tlvlist = aim_readtlvchain(bs);
 
 	if (!aim_gettlv(tlvlist, 0x000d, 1) ||
-			!aim_gettlv(tlvlist, 0x0005, 1) ||
-			!aim_gettlv(tlvlist, 0x0006, 1)) {
+		!aim_gettlv(tlvlist, 0x0005, 1) ||
+		!aim_gettlv(tlvlist, 0x0006, 1)) {
 		aim_freetlvchain(&tlvlist);
 		return 0;
 	}
@@ -126,14 +129,16 @@ static int redirect(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 	origsnac = aim_remsnac(sess, snac->id);
 
 	if ((redir.group == AIM_CONN_TYPE_CHAT) && origsnac) {
-		struct chatsnacinfo *csi = (struct chatsnacinfo *)origsnac->data;
+		struct chatsnacinfo *csi =
+			(struct chatsnacinfo *)origsnac->data;
 
 		redir.chat.exchange = csi->exchange;
 		redir.chat.room = csi->name;
 		redir.chat.instance = csi->instance;
 	}
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, &redir);
 
 	free((void *)redir.ip);
@@ -212,8 +217,7 @@ static void rc_addclass(struct rateclass **head, struct rateclass *inrc)
 	memcpy(rc, inrc, sizeof(struct rateclass));
 	rc->next = NULL;
 
-	for (rc2 = *head; rc2 && rc2->next; rc2 = rc2->next)
-		;
+	for (rc2 = *head; rc2 && rc2->next; rc2 = rc2->next) ;
 
 	if (!rc2)
 		*head = rc;
@@ -247,8 +251,7 @@ static void rc_addpair(struct rateclass *rc, fu16_t group, fu16_t type)
 	sp->subtype = type;
 	sp->next = NULL;
 
-	for (sp2 = rc->members; sp2 && sp2->next; sp2 = sp2->next)
-		;
+	for (sp2 = rc->members; sp2 && sp2->next; sp2 = sp2->next) ;
 
 	if (!sp2)
 		rc->members = sp;
@@ -259,12 +262,12 @@ static void rc_addpair(struct rateclass *rc, fu16_t group, fu16_t type)
 }
 
 /* Subtype 0x0007 - Rate Parameters */
-static int rateresp(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int rateresp(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_conn_inside_t *ins = (aim_conn_inside_t *)rx->conn->inside;
 	fu16_t numclasses, i;
 	aim_rxcallback_t userfunc;
-
 
 	/*
 	 * First are the parameters for each rate class.
@@ -294,7 +297,10 @@ static int rateresp(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 		if (mod->version >= 3)
 			aimbs_getrawbuf(bs, rc.unknown, sizeof(rc.unknown));
 
-		faimdprintf(sess, 1, "--- Adding rate class %d to connection type %d: window size = %ld, clear = %ld, alert = %ld, limit = %ld, disconnect = %ld, current = %ld, max = %ld\n", rx->conn->type, rc.classid, rc.windowsize, rc.clear, rc.alert, rc.limit, rc.disconnect, rc.current, rc.max);
+		faimdprintf(sess, 1,
+			"--- Adding rate class %d to connection type %d: window size = %ld, clear = %ld, alert = %ld, limit = %ld, disconnect = %ld, current = %ld, max = %ld\n",
+			rx->conn->type, rc.classid, rc.windowsize, rc.clear,
+			rc.alert, rc.limit, rc.disconnect, rc.current, rc.max);
 
 		rc_addclass(&ins->rates, &rc);
 	}
@@ -338,9 +344,9 @@ static int rateresp(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 	/*
 	 * Finally, tell the client it's ready to go...
 	 */
-	if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_SPECIAL, AIM_CB_SPECIAL_CONNINITDONE)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_SPECIAL,
+				AIM_CB_SPECIAL_CONNINITDONE)))
 		userfunc(sess, rx);
-
 
 	return 1;
 }
@@ -349,12 +355,12 @@ static int rateresp(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 faim_internal int aim_rates_addparam(aim_session_t *sess, aim_conn_t *conn)
 {
 	aim_conn_inside_t *ins = (aim_conn_inside_t *)conn->inside;
-	aim_frame_t *fr;	
+	aim_frame_t *fr;
 	aim_snacid_t snacid;
 	struct rateclass *rc;
 
 	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 512)))
-		return -ENOMEM; 
+		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0001, 0x0008, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0001, 0x0008, 0x0000, snacid);
@@ -371,12 +377,12 @@ faim_internal int aim_rates_addparam(aim_session_t *sess, aim_conn_t *conn)
 faim_internal int aim_rates_delparam(aim_session_t *sess, aim_conn_t *conn)
 {
 	aim_conn_inside_t *ins = (aim_conn_inside_t *)conn->inside;
-	aim_frame_t *fr;	
+	aim_frame_t *fr;
 	aim_snacid_t snacid;
 	struct rateclass *rc;
 
 	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 512)))
-		return -ENOMEM; 
+		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0001, 0x0009, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0001, 0x0009, 0x0000, snacid);
@@ -390,7 +396,8 @@ faim_internal int aim_rates_delparam(aim_session_t *sess, aim_conn_t *conn)
 }
 
 /* Subtype 0x000a - Rate Change */
-static int ratechange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int ratechange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
@@ -399,7 +406,7 @@ static int ratechange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 
 	code = aimbs_get16(bs);
 	rateclass = aimbs_get16(bs);
-	
+
 	windowsize = aimbs_get32(bs);
 	clear = aimbs_get32(bs);
 	alert = aimbs_get32(bs);
@@ -408,8 +415,10 @@ static int ratechange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 	currentavg = aimbs_get32(bs);
 	maxavg = aimbs_get32(bs);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
-		ret = userfunc(sess, rx, code, rateclass, windowsize, clear, alert, limit, disconnect, currentavg, maxavg);
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
+		ret = userfunc(sess, rx, code, rateclass, windowsize, clear,
+			alert, limit, disconnect, currentavg, maxavg);
 
 	return ret;
 }
@@ -428,12 +437,14 @@ static int ratechange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
  */
 
 /* Subtype 0x000b - Service Pause */
-static int serverpause(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int serverpause(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx);
 
 	return ret;
@@ -477,12 +488,14 @@ faim_export int aim_sendpauseack(aim_session_t *sess, aim_conn_t *conn)
 }
 
 /* Subtype 0x000d - Service Resume */
-static int serverresume(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int serverresume(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx);
 
 	return ret;
@@ -495,7 +508,8 @@ faim_export int aim_reqpersonalinfo(aim_session_t *sess, aim_conn_t *conn)
 }
 
 /* Subtype 0x000f - Self User Info */
-static int selfinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int selfinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
@@ -503,7 +517,8 @@ static int selfinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 
 	aim_info_extract(sess, bs, &userinfo);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, &userinfo);
 
 	aim_info_free(&userinfo);
@@ -512,7 +527,8 @@ static int selfinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 }
 
 /* Subtype 0x0010 - Evil Notification */
-static int evilnotify(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int evilnotify(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
@@ -520,13 +536,14 @@ static int evilnotify(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 	aim_userinfo_t userinfo;
 
 	memset(&userinfo, 0, sizeof(aim_userinfo_t));
-	
+
 	newevil = aimbs_get16(bs);
 
 	if (aim_bstream_empty(bs))
 		aim_info_extract(sess, bs, &userinfo);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, newevil, &userinfo);
 
 	aim_info_free(&userinfo);
@@ -543,7 +560,8 @@ static int evilnotify(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
  * call it again with zero when you're back.
  *
  */
-faim_export int aim_bos_setidle(aim_session_t *sess, aim_conn_t *conn, fu32_t idletime)
+faim_export int aim_bos_setidle(aim_session_t *sess, aim_conn_t *conn,
+	fu32_t idletime)
 {
 	return aim_genericreq_l(sess, conn, 0x0001, 0x0011, &idletime);
 }
@@ -556,7 +574,8 @@ faim_export int aim_bos_setidle(aim_session_t *sess, aim_conn_t *conn, fu32_t id
  * optionally a list of the SNAC groups being migrated.
  *
  */
-static int migrate(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int migrate(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_rxcallback_t userfunc;
 	int ret = 0;
@@ -582,7 +601,9 @@ static int migrate(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_
 
 		group = aimbs_get16(bs);
 
-		faimdprintf(sess, 0, "bifurcated migration unsupported -- group 0x%04x\n", group);
+		faimdprintf(sess, 0,
+			"bifurcated migration unsupported -- group 0x%04x\n",
+			group);
 	}
 
 	tl = aim_readtlvchain(bs);
@@ -592,7 +613,8 @@ static int migrate(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_
 
 	cktlv = aim_gettlv(tl, 0x0006, 1);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, ip, cktlv ? cktlv->value : NULL);
 
 	aim_freetlvchain(&tl);
@@ -602,7 +624,8 @@ static int migrate(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_
 }
 
 /* Subtype 0x0013 - Message of the Day */
-static int motd(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int motd(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_rxcallback_t userfunc;
 	char *msg = NULL;
@@ -630,7 +653,8 @@ static int motd(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_mod
 
 	msg = aim_gettlv_str(tlvlist, 0x000b, 1);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, id, msg);
 
 	free(msg);
@@ -649,7 +673,8 @@ static int motd(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_mod
  *  Bit 2:  Allows other AIM users to see how long you've been a member.
  *
  */
-faim_export int aim_bos_setprivacyflags(aim_session_t *sess, aim_conn_t *conn, fu32_t flags)
+faim_export int aim_bos_setprivacyflags(aim_session_t *sess, aim_conn_t *conn,
+	fu32_t flags)
 {
 	return aim_genericreq_l(sess, conn, 0x0001, 0x0014, &flags);
 }
@@ -706,7 +731,9 @@ faim_internal int aim_setversions(aim_session_t *sess, aim_conn_t *conn)
 			aimbs_put16(&fr->data, mod->family);
 			aimbs_put16(&fr->data, mod->version);
 		} else
-			faimdprintf(sess, 1, "aim_setversions: server supports group 0x%04x but we don't!\n", sg->group);
+			faimdprintf(sess, 1,
+				"aim_setversions: server supports group 0x%04x but we don't!\n",
+				sg->group);
 	}
 
 	aim_tx_enqueue(sess, fr);
@@ -715,13 +742,14 @@ faim_internal int aim_setversions(aim_session_t *sess, aim_conn_t *conn)
 }
 
 /* Subtype 0x0018 - Host versions */
-static int hostversions(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int hostversions(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int vercount;
 	fu8_t *versions;
 
 	/* This is frivolous. (Thank you SmarterChild.) */
-	vercount = aim_bstream_empty(bs)/4;
+	vercount = aim_bstream_empty(bs) / 4;
 	versions = aimbs_getraw(bs, aim_bstream_empty(bs));
 	free(versions);
 
@@ -752,18 +780,18 @@ faim_export int aim_setextstatus(aim_session_t *sess, fu32_t status)
 	if (!sess || !(conn = aim_conn_findbygroup(sess, 0x0004)))
 		return -EINVAL;
 
-	data = AIM_ICQ_STATE_HIDEIP | AIM_ICQ_STATE_WEBAWARE | status; /* yay for error checking ;^) */
+	data = AIM_ICQ_STATE_HIDEIP | AIM_ICQ_STATE_WEBAWARE | status;	/* yay for error checking ;^) */
 
 	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 8)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0001, 0x001e, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0001, 0x001e, 0x0000, snacid);
-	
+
 	aim_addtlvtochain32(&tl, 0x0006, data);
 	aim_writetlvchain(&fr->data, &tl);
 	aim_freetlvchain(&tl);
-	
+
 	aim_tx_enqueue(sess, fr);
 
 	return 0;
@@ -788,22 +816,24 @@ faim_export int aim_srv_setavailmsg(aim_session_t *sess, char *msg)
 		return -EINVAL;
 
 	if (msg) {
-		if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + strlen(msg) + 8)))
+		if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+					10 + 4 + strlen(msg) + 8)))
 			return -ENOMEM;
 
 		snacid = aim_cachesnac(sess, 0x0001, 0x001e, 0x0000, NULL, 0);
 		aim_putsnac(&fr->data, 0x0001, 0x001e, 0x0000, snacid);
 
 		aimbs_put16(&fr->data, 0x001d);
-		aimbs_put16(&fr->data, strlen(msg)+8);
+		aimbs_put16(&fr->data, strlen(msg) + 8);
 		aimbs_put16(&fr->data, 0x0002);
 		aimbs_put8(&fr->data, 0x04);
-		aimbs_put8(&fr->data, strlen(msg)+4);
+		aimbs_put8(&fr->data, strlen(msg) + 4);
 		aimbs_put16(&fr->data, strlen(msg));
 		aimbs_putraw(&fr->data, msg, strlen(msg));
 		aimbs_put16(&fr->data, 0x0000);
 	} else {
-		if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + 8)))
+		if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+					10 + 4 + 8)))
 			return -ENOMEM;
 
 		snacid = aim_cachesnac(sess, 0x0001, 0x001e, 0x0000, NULL, 0);
@@ -860,7 +890,8 @@ faim_export int aim_srv_setavailmsg(aim_session_t *sess, char *msg)
  *
  */
 /* Subtype 0x001f - Client verification */
-static int memrequest(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int memrequest(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
@@ -874,9 +905,11 @@ static int memrequest(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 
 	modname = aim_gettlv_str(list, 0x0001, 1);
 
-	faimdprintf(sess, 1, "data at 0x%08lx (%d bytes) of requested\n", offset, len, modname ? modname : "aim.exe");
+	faimdprintf(sess, 1, "data at 0x%08lx (%d bytes) of requested\n",
+		offset, len, modname ? modname : "aim.exe");
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, offset, len, modname);
 
 	free(modname);
@@ -909,7 +942,8 @@ static void dumpbox(aim_session_t *sess, unsigned char *buf, int len)
 #endif
 
 /* Subtype 0x0020 - Client verification reply */
-faim_export int aim_sendmemblock(aim_session_t *sess, aim_conn_t *conn, fu32_t offset, fu32_t len, const fu8_t *buf, fu8_t flag)
+faim_export int aim_sendmemblock(aim_session_t *sess, aim_conn_t *conn,
+	fu32_t offset, fu32_t len, const fu8_t *buf, fu8_t flag)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -917,29 +951,30 @@ faim_export int aim_sendmemblock(aim_session_t *sess, aim_conn_t *conn, fu32_t o
 	if (!sess || !conn)
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+2+16)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 2 + 16)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0001, 0x0020, 0x0000, NULL, 0);
 
 	aim_putsnac(&fr->data, 0x0001, 0x0020, 0x0000, snacid);
-	aimbs_put16(&fr->data, 0x0010); /* md5 is always 16 bytes */
+	aimbs_put16(&fr->data, 0x0010);	/* md5 is always 16 bytes */
 
-	if ((flag == AIM_SENDMEMBLOCK_FLAG_ISHASH) && buf && (len == 0x10)) { /* we're getting a hash */
+	if ((flag == AIM_SENDMEMBLOCK_FLAG_ISHASH) && buf && (len == 0x10)) {	/* we're getting a hash */
 
-		aimbs_putraw(&fr->data, buf, 0x10); 
+		aimbs_putraw(&fr->data, buf, 0x10);
 
-	} else if (buf && (len > 0)) { /* use input buffer */
+	} else if (buf && (len > 0)) {	/* use input buffer */
 		md5_state_t state;
 		md5_byte_t digest[0x10];
 
-		md5_init(&state);	
+		md5_init(&state);
 		md5_append(&state, (const md5_byte_t *)buf, len);
 		md5_finish(&state, digest);
 
 		aimbs_putraw(&fr->data, (fu8_t *)digest, 0x10);
 
-	} else if (len == 0) { /* no length, just hash NULL (buf is optional) */
+	} else if (len == 0) {	/* no length, just hash NULL (buf is optional) */
 		md5_state_t state;
 		fu8_t nil = '\0';
 		md5_byte_t digest[0x10];
@@ -966,12 +1001,12 @@ faim_export int aim_sendmemblock(aim_session_t *sess, aim_conn_t *conn, fu32_t o
 		 */
 		if ((offset == 0x03ffffff) && (len == 0x03ffffff)) {
 
-#if 1 /* with "AnrbnrAqhfzcd" */
+#if 1				/* with "AnrbnrAqhfzcd" */
 			aimbs_put32(&fr->data, 0x44a95d26);
 			aimbs_put32(&fr->data, 0xd2490423);
 			aimbs_put32(&fr->data, 0x93b8821f);
 			aimbs_put32(&fr->data, 0x51c54b01);
-#else /* no filename */
+#else				/* no filename */
 			aimbs_put32(&fr->data, 0x1df8cbae);
 			aimbs_put32(&fr->data, 0x5523b839);
 			aimbs_put32(&fr->data, 0xa0e10db3);
@@ -986,7 +1021,8 @@ faim_export int aim_sendmemblock(aim_session_t *sess, aim_conn_t *conn, fu32_t o
 			aimbs_put32(&fr->data, 0xecf8427e);
 
 		} else
-			faimdprintf(sess, 0, "sendmemblock: WARNING: unknown hash request\n");
+			faimdprintf(sess, 0,
+				"sendmemblock: WARNING: unknown hash request\n");
 
 	}
 
@@ -1002,31 +1038,35 @@ faim_export int aim_sendmemblock(aim_session_t *sess, aim_conn_t *conn, fu32_t o
  * status messages?  It's also used to tell the client whether or not it 
  * needs to upload an SSI buddy icon... who engineers this stuff, anyway?
  */
-static int aim_parse_extstatus(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int aim_parse_extstatus(aim_session_t *sess, aim_module_t *mod,
+	aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
 	fu16_t type;
 	fu8_t flags, length;
 
-	type = aimbs_get16(bs); 
+	type = aimbs_get16(bs);
 	flags = aimbs_get8(bs);
 	length = aimbs_get8(bs);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype))) {
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype))) {
 		switch (type) {
 		case 0x0000:
-		case 0x0001: { /* buddy icon checksum */
-			/* not sure what the difference between 1 and 0 is */
-			fu8_t *md5 = aimbs_getraw(bs, length);
-			ret = userfunc(sess, rx, type, flags, length, md5);
-			free(md5);
-			} break;
-		case 0x0002: { /* available message */
-			/* there is a second length that is just for the message */
-			char *msg = aimbs_getstr(bs, aimbs_get16(bs));
-			ret = userfunc(sess, rx, msg);
-			free(msg);
+		case 0x0001:{	/* buddy icon checksum */
+				/* not sure what the difference between 1 and 0 is */
+				fu8_t *md5 = aimbs_getraw(bs, length);
+				ret = userfunc(sess, rx, type, flags, length,
+					md5);
+				free(md5);
+			}
+			break;
+		case 0x0002:{	/* available message */
+				/* there is a second length that is just for the message */
+				char *msg = aimbs_getstr(bs, aimbs_get16(bs));
+				ret = userfunc(sess, rx, msg);
+				free(msg);
 			} break;
 		}
 	}
@@ -1034,7 +1074,8 @@ static int aim_parse_extstatus(aim_session_t *sess, aim_module_t *mod, aim_frame
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0003)

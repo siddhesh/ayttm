@@ -26,19 +26,19 @@
 #define _DEBUG_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #define eb_debug(type, format, args...) {if(type) {EB_DEBUG(__FUNCTION__, __FILE__, __LINE__, format, ##args);}}
 #ifdef __STDC__
-int EB_DEBUG(const char *func, char *file, int line, const char *fmt, ...);
+	int EB_DEBUG(const char *func, char *file, int line, const char *fmt,
+		...);
 #else
-int EB_DEBUG(const char *func, char *file, int line, const char *fmt, va_alist);
+	int EB_DEBUG(const char *func, char *file, int line, const char *fmt,
+		va_alist);
 #endif
 
 #ifdef __cplusplus
-}  /* end extern "C" */
+}				/* end extern "C" */
 #endif
-
 #endif

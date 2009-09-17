@@ -23,7 +23,6 @@
  *
  */
 
-
 #ifndef __NETWORKING_H__
 #define __NETWORKING_H__
 
@@ -31,27 +30,27 @@
 #include "net_constants.h"
 #include "plugin_api.h"
 
-
 typedef struct _AyConnectionPrivate AyConnectionPrivate;
 
 /* An Opaque Connection object */
 typedef struct {
 	AyConnectionPrivate *priv;
-} AyConnection ;
-
+} AyConnection;
 
 /* Update connection status in requestor */
-typedef void ( *AyStatusCallback )(const char *msg, void *callback_data);
+typedef void (*AyStatusCallback) (const char *msg, void *callback_data);
 
 /* Callback function to be called once connection completes */
-typedef void ( *AyConnectCallback )(AyConnection *con, AyConnectionStatus error, void *callback_data);
+typedef void (*AyConnectCallback) (AyConnection *con, AyConnectionStatus error,
+	void *callback_data);
 
 /* Callback when input/output fd is ready */
-typedef void ( *AyInputCallback )(AyConnection *con, eb_input_condition cond, void *data);
+typedef void (*AyInputCallback) (AyConnection *con, eb_input_condition cond,
+	void *data);
 
 /* Callback function to be called to make decisions regarding Certificates.
  * Returning a non-zero value results in validation of certificate */
-typedef int ( *AyCertVerifyCallback )(const char *message, const char *title);
+typedef int (*AyCertVerifyCallback) (const char *message, const char *title);
 
 #define AY_CONNECTION(con) ((AyConnection *)con)
 
@@ -63,52 +62,43 @@ extern "C" {
 #define extern __declspec(dllimport)
 #endif
 
-AyConnection *ay_connection_new ( 
-		const char *host, 
-		int port, 
-		AyConnectionType type ) ;
+	AyConnection *ay_connection_new(const char *host,
+		int port, AyConnectionType type);
 
-void ay_connection_free (AyConnection *con);
+	void ay_connection_free(AyConnection *con);
 
-int ay_connection_connect ( 
-		AyConnection *con, 
-		AyConnectCallback callback, 
-		AyStatusCallback status_callback, 
-		AyCertVerifyCallback verify_callback,
-		void *cb_data ) ;
+	int ay_connection_connect(AyConnection *con,
+		AyConnectCallback callback,
+		AyStatusCallback status_callback,
+		AyCertVerifyCallback verify_callback, void *cb_data);
 
 #define ay_connection_accept ay_connection_connect
 
-void ay_connection_disconnect (AyConnection *con);
+	void ay_connection_disconnect(AyConnection *con);
 
-void ay_connection_cancel_connect (int tag);
+	void ay_connection_cancel_connect(int tag);
 
-gboolean ay_connection_is_active(AyConnection *con);
+	gboolean ay_connection_is_active(AyConnection *con);
 
-int ay_connection_read (
-		AyConnection *con,
-		void *buff,
-		int len ) ;
+	int ay_connection_read(AyConnection *con, void *buff, int len);
 
-int ay_connection_write (
-		AyConnection *con,
-		const void *buff,
-		int len ) ;
+	int ay_connection_write(AyConnection *con, const void *buff, int len);
 
-int ay_connection_input_add(AyConnection *con, eb_input_condition cond, AyInputCallback function, void *data);
-void ay_connection_input_remove(int tag);
+	int ay_connection_input_add(AyConnection *con, eb_input_condition cond,
+		AyInputCallback function, void *data);
+	void ay_connection_input_remove(int tag);
 
-int ay_connect_host(const char *host, int port, void *callback, void *scb, void *data);
+	int ay_connect_host(const char *host, int port, void *callback,
+		void *scb, void *data);
 
-void ay_connection_free_no_close(AyConnection *con);
-int ay_connection_get_fd(AyConnection *con);
+	void ay_connection_free_no_close(AyConnection *con);
+	int ay_connection_get_fd(AyConnection *con);
 
-int ay_connection_listen(AyConnection *con);
+	int ay_connection_listen(AyConnection *con);
 
-AyConnectionType ay_connection_get_type(AyConnection *con);
+	AyConnectionType ay_connection_get_type(AyConnection *con);
 
-const char *ay_connection_strerror(int error_num);
-
+	const char *ay_connection_strerror(int error_num);
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
 #define extern extern
@@ -117,5 +107,4 @@ const char *ay_connection_strerror(int error_num);
 #ifdef __cplusplus
 }
 #endif
-
 #endif

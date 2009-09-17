@@ -22,13 +22,10 @@
  *
  */
 
-
 #ifndef __NOMODULE_H__
 #define __NOMODULE_H__
 
-
-extern struct service_callbacks * eb_nomodule_query_callbacks();
+extern struct service_callbacks *eb_nomodule_query_callbacks();
 extern struct service nomodule_SERVICE_INFO;
 
-
-#endif /* _NOMODULE_H */
+#endif				/* _NOMODULE_H */

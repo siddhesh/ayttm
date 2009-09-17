@@ -32,24 +32,19 @@
 
 #include "contact.h"
 
-
 /* forward declarations */
 struct service;
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void eb_parse_incoming_message( eb_local_account * account,
-                                 eb_account * remote,
-                                 char * message );
+	void eb_parse_incoming_message(eb_local_account *account,
+		eb_account *remote, char *message);
 
-void eb_update_status( eb_account * remote,
-                       const char * message );
+	void eb_update_status(eb_account *remote, const char *message);
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 extern char filename[1024];
 #endif

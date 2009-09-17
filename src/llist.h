@@ -33,38 +33,40 @@
 extern "C" {
 #endif
 
-typedef struct _LList {
-	struct _LList *next;
-	struct _LList *prev;
-	void *data;
-} LList;
+	typedef struct _LList {
+		struct _LList *next;
+		struct _LList *prev;
+		void *data;
+	} LList;
 
-typedef int (*LListCompFunc) (const void *, const void *);
-typedef void (*LListFunc) (void *, void *);
+	typedef int (*LListCompFunc) (const void *, const void *);
+	typedef void (*LListFunc) (void *, void *);
 
-LList *l_list_append(LList * list, void *data);
-LList *l_list_prepend(LList * list, void *data);
-LList *l_list_remove_link(LList * list, const LList * link);
-LList *l_list_remove(LList * list, void *data);
+	LList *l_list_append(LList *list, void *data);
+	LList *l_list_prepend(LList *list, void *data);
+	LList *l_list_remove_link(LList *list, const LList *link);
+	LList *l_list_remove(LList *list, void *data);
 
-LList *l_list_insert_sorted(LList * list, void * data, LListCompFunc comp);
+	LList *l_list_insert_sorted(LList *list, void *data,
+		LListCompFunc comp);
 
-LList *l_list_copy(LList * list);
+	LList *l_list_copy(LList *list);
 
-LList *l_list_concat(LList * list, LList * add);
+	LList *l_list_concat(LList *list, LList *add);
 
-LList *l_list_find(LList * list, const void *data);
-LList *l_list_find_custom(LList * list, const void *data, LListCompFunc comp);
+	LList *l_list_find(LList *list, const void *data);
+	LList *l_list_find_custom(LList *list, const void *data,
+		LListCompFunc comp);
 
-LList *l_list_nth(LList * list, int n);
+	LList *l_list_nth(LList *list, int n);
 
-void l_list_foreach(LList * list, LListFunc fn, void *user_data);
+	void l_list_foreach(LList *list, LListFunc fn, void *user_data);
 
-void l_list_free_1(LList * list);
-void l_list_free(LList * list);
-int  l_list_length(const LList * list);
-int  l_list_empty(const LList * list);
-int  l_list_singleton(const LList * list);
+	void l_list_free_1(LList *list);
+	void l_list_free(LList *list);
+	int l_list_length(const LList *list);
+	int l_list_empty(const LList *list);
+	int l_list_singleton(const LList *list);
 
 #define l_list_next(list)	list->next
 

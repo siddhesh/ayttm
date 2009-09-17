@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 #ifndef __ICQ_H__
 #define __ICQ_H__
 
@@ -37,50 +36,44 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PACKET_DIRECTION_SEND    4
 #define PACKET_DIRECTION_RECEIVE 8
 
-
-typedef struct
-{
-  guint8 dummy[2]; /* to fix alignment problem */
-  guint8 ver[2];
-  guint8 rand[2];
-  guint8 zero[2];
-  guint8 cmd[2];
-  guint8 seq[2];
-  guint8 seq2[2];
-  guint8  UIN[4];
-  guint8 checkcode[4];
+typedef struct {
+	guint8 dummy[2];	/* to fix alignment problem */
+	guint8 ver[2];
+	guint8 rand[2];
+	guint8 zero[2];
+	guint8 cmd[2];
+	guint8 seq[2];
+	guint8 seq2[2];
+	guint8 UIN[4];
+	guint8 checkcode[4];
 } ICQ_pak, *ICQ_PAK_PTR;
 
-typedef struct
-{
-  guint16 dummy; /* to fix alignment problem */
-  guint8 ver[2];
-  guint8 cmd[2];
-  guint8 seq[2];
-  guint8 seq2[2];
-  guint8 UIN[4];
-  guint8 check[4];
+typedef struct {
+	guint16 dummy;		/* to fix alignment problem */
+	guint8 ver[2];
+	guint8 cmd[2];
+	guint8 seq[2];
+	guint8 seq2[2];
+	guint8 UIN[4];
+	guint8 check[4];
 } SRV_ICQ_pak, *SRV_ICQ_PAK_PTR;
 
-
-typedef struct
-{
-   ICQ_pak  head;
-   unsigned char  data[1024];
+typedef struct {
+	ICQ_pak head;
+	unsigned char data[1024];
 } net_icq_pak, *NET_ICQ_PTR;
 
-typedef struct
-{
-   SRV_ICQ_pak  head;
-   unsigned char  data[1024];
+typedef struct {
+	SRV_ICQ_pak head;
+	unsigned char data[1024];
 } srv_net_icq_pak, *SRV_NET_ICQ_PTR;
 
-#define CMD_ACK            0x000A 	/* Just an acknowledgement */
+#define CMD_ACK            0x000A	/* Just an acknowledgement */
 #define CMD_SENDM          0x010E
 #define CMD_LOGIN          0x03E8	/* Send password and port to server */
 #define CMD_REG_NEW_USER   0x03FC	/* Send password (after 04EC) for new */
 #define CMD_NEW_USER_REG   0x03FC
-#define CMD_CONT_LIST      0x0406	/* Send list of users for status check*/
+#define CMD_CONT_LIST      0x0406	/* Send list of users for status check */
 #define CMD_SEARCH_UIN     0x041a
 #define CMD_SEARCH_USER    0x0424
 #define CMD_KEEP_ALIVE     0x042e	/* Keep alive */
@@ -93,7 +86,7 @@ typedef struct
 #define CMD_CHANGE_PW      0x049c
 #define CMD_ACK_MESSAGES   0x0442
 #define CMD_NEW_USER_INFO  0x04A6	/* Request info on a new user */
-#define CMD_UPDATE_EXT_INFO 0x04B0	/* Rest of info (new user) after 00B4*/
+#define CMD_UPDATE_EXT_INFO 0x04B0	/* Rest of info (new user) after 00B4 */
 #define CMD_QUERY_SERVERS  0x04BA	/* Send after 04C4 when creating new */
 #define CMD_QUERY_ADDONS   0x04C4	/* Send after 044C when creating new */
 #define CMD_STATUS_CHANGE  0x04D8
@@ -128,27 +121,25 @@ typedef struct
 #define SRV_STATUS_UPDATE  0x01A4
 #define SRV_SYSTEM_MESSAGE 0x01C2
 #define SRV_UPDATE         0x01E0
-#define SRV_X1             0x021C	/* Received after 0212 when create ID*/
+#define SRV_X1             0x021C	/* Received after 0212 when create ID */
 #define SRV_MULTI_PACKET   0x0212	/* Full / user / app info receive */
 #define SRV_RND_USER_INFO  0x024E	/* Receive info on random user */
 #define SRV_BAD_PASS       0x6400
 
-typedef struct
-{
-  guint8 time[4];
-  guint8 port[4];
-  guint8 len[2];
+typedef struct {
+	guint8 time[4];
+	guint8 port[4];
+	guint8 len[2];
 } login_1, *LOGIN_1_PTR;
 
-typedef struct
-{
-  guint8 X1[4];
-  guint8 ip[4];
-  guint8  X2[1];
-  guint8  status[4];
-  guint8 X3[4];
-  guint8  X4[4];
-  guint8 X5[4];
+typedef struct {
+	guint8 X1[4];
+	guint8 ip[4];
+	guint8 X2[1];
+	guint8 status[4];
+	guint8 X3[4];
+	guint8 X4[4];
+	guint8 X5[4];
 } login_2, *LOGIN_2_PTR;
 
 #define LOGIN_X1_DEF 0x00000098
@@ -158,24 +149,21 @@ typedef struct
 //#define LOGIN_X5_DEF 0x00980000
 #define LOGIN_X5_DEF 0x00980010
 
-
-typedef struct
-{
-  guint8 uin[4];
-  guint8 year[2];
-  guint8 month;
-  guint8 day;
-  guint8 hour;
-  guint8 minute;
-  guint8 type[2];
-  guint8 len[2];
+typedef struct {
+	guint8 uin[4];
+	guint8 year[2];
+	guint8 month;
+	guint8 day;
+	guint8 hour;
+	guint8 minute;
+	guint8 type[2];
+	guint8 len[2];
 } RECV_MESSAGE, *RECV_MESSAGE_PTR;
 
-typedef struct
-{
-  guint8 uin[4];
-  guint8 type[2]; 
-  guint8 len[2];
+typedef struct {
+	guint8 uin[4];
+	guint8 type[2];
+	guint8 len[2];
 } SIMPLE_MESSAGE, *SIMPLE_MESSAGE_PTR;
 
-#endif /* __ICQ_H__ */
+#endif				/* __ICQ_H__ */

@@ -20,15 +20,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */ 
+ */
 
-void show_data_choicewindow(
-		char *file,
-		char *dtype,
-		char *ok_button_label,
-		char *help,
-		char *entityname,
-		char *valuename,
-		void (*cb)(char *msg, void *data),
-		void *cbdata
-		);
+void show_data_choicewindow(char *file,
+	char *dtype,
+	char *ok_button_label,
+	char *help,
+	char *entityname,
+	char *valuename, void (*cb) (char *msg, void *data), void *cbdata);

@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifndef _MSN_SOAP_H_
 #define _MSN_SOAP_H_
 
@@ -36,7 +35,6 @@ extern const char *MSN_GROUP_MOD_REQUEST;
 extern const char *MSN_GROUP_DEL_REQUEST;
 extern const char *MSN_GROUP_CONTACT_REQUEST;
 
-
 /* 
  * Provide values for the format specifiers in the skeleton
  * Returns a newly allocated string. Free it.
@@ -44,4 +42,3 @@ extern const char *MSN_GROUP_CONTACT_REQUEST;
 char *msn_soap_build_request(const char *skel, ...);
 
 #endif
-

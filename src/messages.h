@@ -22,17 +22,15 @@
 #ifndef __MESSAGES_H__
 #define __MESSAGES_H__
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void	ay_do_info( const char *inTitle, const char *inMessage );
-void	ay_do_warning( const char *inTitle, const char *inMessage );
-void	ay_do_error( const char *inTitle, const char *inMessage );
+	void ay_do_info(const char *inTitle, const char *inMessage);
+	void ay_do_warning(const char *inTitle, const char *inMessage);
+	void ay_do_error(const char *inTitle, const char *inMessage);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

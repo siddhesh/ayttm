@@ -31,56 +31,56 @@
 #include "globals.h"
 #include "service.h"
 #include "mem_util.h"
-#include "offline_queue_mgmt.h"  /* so the compiler tells us about type mismatches */
+#include "offline_queue_mgmt.h"	/* so the compiler tells us about type mismatches */
 #include "chat_room.h"
 
 /* FIXME: temporary UGLY !!! */
-eb_account * find_account_by_handle( const char * handle, int type );
+eb_account *find_account_by_handle(const char *handle, int type);
 /* end FIXME */
 
-void contact_mgmt_queue_add(const eb_account *ea, int action, const char *new_group)
+void contact_mgmt_queue_add(const eb_account *ea, int action,
+	const char *new_group)
 {
 	FILE *fp;
-	char buff [NAME_MAX];
-	snprintf(buff, NAME_MAX, "%s%ccontact_actions_queue", 
-				config_dir, 
-				G_DIR_SEPARATOR);
-	fp = fopen(buff,"a");
+	char buff[NAME_MAX];
+	snprintf(buff, NAME_MAX, "%s%ccontact_actions_queue",
+		config_dir, G_DIR_SEPARATOR);
+	fp = fopen(buff, "a");
 	if (!fp) {
 		perror(buff);
 		return;
 	}
-	
+
 	fprintf(fp, "%s\t%d\t%s\t%s\t%s\n",
-		ea->ela? ea->ela->handle:"____NULL____",
+		ea->ela ? ea->ela->handle : "____NULL____",
 		action,
 		ea->handle,
-		(action!=MGMT_ADD ? ea->account_contact->group->name:"NULL"),
-		(new_group!=NULL ? new_group:"NULL"));
-	
+		(action !=
+			MGMT_ADD ? ea->account_contact->group->name : "NULL"),
+		(new_group != NULL ? new_group : "NULL"));
+
 	fclose(fp);
 }
 
-
-void group_mgmt_queue_add(const eb_local_account *ela, const char *old_group, int action, const char *new_group)
+void group_mgmt_queue_add(const eb_local_account *ela, const char *old_group,
+	int action, const char *new_group)
 {
 	FILE *fp;
-	char buff [NAME_MAX];
-	snprintf(buff, NAME_MAX, "%s%cgroup_actions_queue", 
-				config_dir, 
-				G_DIR_SEPARATOR);
-	fp = fopen(buff,"a");
+	char buff[NAME_MAX];
+	snprintf(buff, NAME_MAX, "%s%cgroup_actions_queue",
+		config_dir, G_DIR_SEPARATOR);
+	fp = fopen(buff, "a");
 	if (!fp) {
 		perror(buff);
 		return;
 	}
-	
+
 	fprintf(fp, "%s\t%d\t%s\t%s\n",
 		ela->handle,
 		action,
-		(old_group!=NULL ? old_group:"NULL"),
-		(new_group!=NULL ? new_group:"NULL"));
-	
+		(old_group != NULL ? old_group : "NULL"),
+		(new_group != NULL ? new_group : "NULL"));
+
 	fclose(fp);
 }
 
@@ -95,59 +95,57 @@ int contact_mgmt_flush(eb_local_account *ela)
 	char **tokens = NULL;
 
 	if (ela->connecting) {
-		eb_debug(DBG_CORE,"connecting on %s (trying again later)\n",ela->handle);
+		eb_debug(DBG_CORE, "connecting on %s (trying again later)\n",
+			ela->handle);
 		return 1;
 	}
-	
-	ela->mgmt_flush_tag = 0; /* we can now consider it won't be called a second time */
-	
+
+	ela->mgmt_flush_tag = 0;	/* we can now consider it won't be called a second time */
+
 	if (!ela->connected) {
-		eb_debug(DBG_CORE,"disconnected on %s (cancelling flush)\n",ela->handle);
+		eb_debug(DBG_CORE, "disconnected on %s (cancelling flush)\n",
+			ela->handle);
 		return 0;
 	}
-	
-	eb_debug(DBG_CORE,"connected on %s (flushing)\n",ela->handle);
+
+	eb_debug(DBG_CORE, "connected on %s (flushing)\n", ela->handle);
 
 	/* flush groups, too */
 	group_mgmt_flush(ela);
-	
-	snprintf(queue_name, NAME_MAX, "%s%ccontact_actions_queue", 
-				config_dir, 
-				G_DIR_SEPARATOR);
-	
+
+	snprintf(queue_name, NAME_MAX, "%s%ccontact_actions_queue",
+		config_dir, G_DIR_SEPARATOR);
+
 	queue = fopen(queue_name, "r");
 
-	snprintf(temp_name, NAME_MAX, "%s%ccontact_actions_queue.new", 
-				config_dir, 
-				G_DIR_SEPARATOR);
-	
+	snprintf(temp_name, NAME_MAX, "%s%ccontact_actions_queue.new",
+		config_dir, G_DIR_SEPARATOR);
+
 	temp = fopen(temp_name, "w");
-	
+
 	if (!temp) {
 		perror(buff);
 		return 0;
 	}
-	
-	while( queue && fgets(buff, sizeof(buff), queue)  != NULL )
-	{		
+
+	while (queue && fgets(buff, sizeof(buff), queue) != NULL) {
 		char buff_backup[NAME_MAX];
 		strncpy(buff_backup, buff, NAME_MAX);
-		tokens = ay_strsplit( buff, "\t", -1 );
-		if(!strcmp(tokens[0], ela->handle)) {
-			int action     = atoi(tokens[1]);
-			char *handle   = tokens[2];
+		tokens = ay_strsplit(buff, "\t", -1);
+		if (!strcmp(tokens[0], ela->handle)) {
+			int action = atoi(tokens[1]);
+			char *handle = tokens[2];
 			char *oldgroup = tokens[3];
 			char *newgroup = tokens[4];
 			eb_account *ea = NULL;
 			int ea_recreated = TRUE;
-			
-			if (strstr(newgroup,"\n")) {
-				char *t = strstr(newgroup,"\n");
+
+			if (strstr(newgroup, "\n")) {
+				char *t = strstr(newgroup, "\n");
 				*t = '\0';
 			}
-			
-			ea = find_account_by_handle(handle, 
-						    ela->service_id);
+
+			ea = find_account_by_handle(handle, ela->service_id);
 
 			if (ea && action == MGMT_ADD && CAN(ea, add_user)) {
 				RUN_SERVICE(ea)->add_user(ea);
@@ -155,20 +153,31 @@ int contact_mgmt_flush(eb_local_account *ela)
 			if (ea && action == MGMT_MOV) {
 				char realgrp[NAME_MAX];
 				/* this is "a bit" ugly :-( */
-				strncpy(realgrp,ea->account_contact->group->name, sizeof(realgrp));
-				strncpy(ea->account_contact->group->name,oldgroup, 
-					sizeof(ea->account_contact->group->name));
-				if (!strcmp(newgroup, _("Ignore")) && CAN(ea, ignore_user))
+				strncpy(realgrp,
+					ea->account_contact->group->name,
+					sizeof(realgrp));
+				strncpy(ea->account_contact->group->name,
+					oldgroup,
+					sizeof(ea->account_contact->group->
+						name));
+				if (!strcmp(newgroup, _("Ignore"))
+					&& CAN(ea, ignore_user))
 					RUN_SERVICE(ea)->ignore_user(ea);
-				else if (!strcmp(oldgroup, _("Ignore")) && CAN(ea, unignore_user))
-					RUN_SERVICE(ea)->unignore_user(ea, newgroup);
+				else if (!strcmp(oldgroup, _("Ignore"))
+					&& CAN(ea, unignore_user))
+					RUN_SERVICE(ea)->unignore_user(ea,
+						newgroup);
 				else if (CAN(ea, change_group))
-					RUN_SERVICE(ea)->change_group(ea, newgroup);
-				strncpy(ea->account_contact->group->name, realgrp,
-					sizeof(ea->account_contact->group->name));
+					RUN_SERVICE(ea)->change_group(ea,
+						newgroup);
+				strncpy(ea->account_contact->group->name,
+					realgrp,
+					sizeof(ea->account_contact->group->
+						name));
 			}
-			
-			if (ea && action == MGMT_REN && CAN(ea, change_user_name)) {
+
+			if (ea && action == MGMT_REN
+				&& CAN(ea, change_user_name)) {
 				RUN_SERVICE(ea)->change_user_name(ea, newgroup);
 			}
 
@@ -182,12 +191,14 @@ int contact_mgmt_flush(eb_local_account *ela)
 				   automatically re-added our deleted 
 				   account */
 				if (ea_recreated) {
-					if (l_list_singleton(ea->account_contact->accounts))
-						remove_contact(ea->account_contact);
+					if (l_list_singleton(ea->
+							account_contact->
+							accounts))
+						remove_contact(ea->
+							account_contact);
 					else
 						remove_account(ea);
-				}
-				else if (CAN(ea, del_user))
+				} else if (CAN(ea, del_user))
 					RUN_SERVICE(ea)->del_user(ea);
 			}
 		} else {
@@ -198,12 +209,12 @@ int contact_mgmt_flush(eb_local_account *ela)
 		ay_strfreev(tokens);
 	}
 	start_auto_chatrooms(ela);
-	fclose (temp);
+	fclose(temp);
 
-	if(queue)
-		fclose (queue);
+	if (queue)
+		fclose(queue);
 
-	rename (temp_name, queue_name);
+	rename(temp_name, queue_name);
 	return 0;
 }
 
@@ -211,29 +222,27 @@ int group_mgmt_check_moved(const char *groupname)
 {
 	FILE *queue;
 	char buff[NAME_MAX], queue_name[NAME_MAX];
-	snprintf(queue_name, NAME_MAX, "%s%cgroup_actions_queue", 
-				config_dir, 
-				G_DIR_SEPARATOR);
-	
+	snprintf(queue_name, NAME_MAX, "%s%cgroup_actions_queue",
+		config_dir, G_DIR_SEPARATOR);
+
 	queue = fopen(queue_name, "r");
 	if (!queue)
 		return 0;
 
-	while( fgets(buff, sizeof(buff), queue)  != NULL )
-	{		
-		char **tokens  = ay_strsplit( buff, "\t", -1 );
-	/*	int action     = atoi(tokens[1]); */
+	while (fgets(buff, sizeof(buff), queue) != NULL) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		/*      int action     = atoi(tokens[1]); */
 		char *oldgroup = tokens[2];
-	/*	char *newgroup = tokens[3]; */
-				
+		/*      char *newgroup = tokens[3]; */
+
 		if (oldgroup && !strcmp(oldgroup, groupname)) {
 			fclose(queue);
 			return 1;
 		}
 		ay_strfreev(tokens);
 	}
-	
-	fclose (queue);
+
+	fclose(queue);
 	return 0;
 }
 
@@ -242,44 +251,42 @@ int group_mgmt_flush(eb_local_account *ela)
 	FILE *queue, *temp;
 	char buff[NAME_MAX], queue_name[NAME_MAX], temp_name[NAME_MAX];
 	char **tokens = NULL;
-	snprintf(queue_name, NAME_MAX, "%s%cgroup_actions_queue", 
-				config_dir, 
-				G_DIR_SEPARATOR);
-	
+	snprintf(queue_name, NAME_MAX, "%s%cgroup_actions_queue",
+		config_dir, G_DIR_SEPARATOR);
+
 	queue = fopen(queue_name, "r");
 	if (!queue)
 		return 0;
-	snprintf(temp_name, NAME_MAX, "%s%cgroup_actions_queue.new", 
-				config_dir, 
-				G_DIR_SEPARATOR);
-	
+	snprintf(temp_name, NAME_MAX, "%s%cgroup_actions_queue.new",
+		config_dir, G_DIR_SEPARATOR);
+
 	temp = fopen(temp_name, "w");
-	
+
 	if (!temp) {
 		perror(buff);
 		return 0;
 	}
-	
-	while( fgets(buff, sizeof(buff), queue)  != NULL )
-	{		
+
+	while (fgets(buff, sizeof(buff), queue) != NULL) {
 		char buff_backup[NAME_MAX];
 		strncpy(buff_backup, buff, NAME_MAX);
-		tokens = ay_strsplit( buff, "\t", -1 );
-		if(!strcmp(tokens[0], ela->handle)) {
-			int action     = atoi(tokens[1]);
+		tokens = ay_strsplit(buff, "\t", -1);
+		if (!strcmp(tokens[0], ela->handle)) {
+			int action = atoi(tokens[1]);
 			char *oldgroup = tokens[2];
 			char *newgroup = tokens[3];
-			
-			if (strstr(newgroup,"\n")) {
-				char *t = strstr(newgroup,"\n");
+
+			if (strstr(newgroup, "\n")) {
+				char *t = strstr(newgroup, "\n");
 				*t = '\0';
 			}
-			
+
 			if (action == MGMT_GRP_ADD && CAN(ela, add_group)) {
 				RUN_SERVICE(ela)->add_group(ela, newgroup);
 			}
 			if (action == MGMT_GRP_REN && CAN(ela, rename_group)) {
-				RUN_SERVICE(ela)->rename_group(ela, oldgroup,newgroup);					
+				RUN_SERVICE(ela)->rename_group(ela, oldgroup,
+					newgroup);
 			}
 			if (action == MGMT_GRP_DEL && CAN(ela, del_group)) {
 				RUN_SERVICE(ela)->del_group(ela, oldgroup);
@@ -290,12 +297,9 @@ int group_mgmt_flush(eb_local_account *ela)
 		}
 		ay_strfreev(tokens);
 	}
-	
-	fclose (temp);
-	fclose (queue);
-	rename (temp_name, queue_name);
+
+	fclose(temp);
+	fclose(queue);
+	rename(temp_name, queue_name);
 	return 0;
 }
-
-
-

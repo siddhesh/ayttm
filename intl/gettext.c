@@ -51,14 +51,13 @@
 /* Look up MSGID in the current default message catalog for the current
    LC_MESSAGES locale.  If not found, returns MSGID itself (the default
    text).  */
-char *
-GETTEXT (msgid)
-     const char *msgid;
+char *GETTEXT(msgid)
+const char *msgid;
 {
-  return DCGETTEXT (NULL, msgid, LC_MESSAGES);
+	return DCGETTEXT(NULL, msgid, LC_MESSAGES);
 }
 
 #ifdef _LIBC
 /* Alias for function name in GNU C Library.  */
-weak_alias (__gettext, gettext);
+weak_alias(__gettext, gettext);
 #endif

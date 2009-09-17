@@ -33,29 +33,28 @@
 
 #define DEFAULTMESSAGEBODYVOICE "`v2"
 
-void speak_message(eb_account * remote,
-		   gchar * voice,
-		   gchar * message) {
+void speak_message(eb_account *remote, gchar *voice, gchar *message)
+{
 
-  char xbuff[1024];
-  char mbuff[256];
+	char xbuff[1024];
+	char mbuff[256];
 
-  if (do_no_sound_when_away && is_away) return;
+	if (do_no_sound_when_away && is_away)
+		return;
 
-  strncpy(xbuff, message, sizeof(xbuff));
-  strip_html(xbuff);
-  // todo: convert "LOL" to "ha ha ha"?
-  snprintf(mbuff, sizeof(mbuff), "%s says: ", remote->handle);
-  say_strings(mbuff, 
-	      (voice == NULL ? DEFAULTMESSAGEBODYVOICE : voice), 
-	      xbuff);
+	strncpy(xbuff, message, sizeof(xbuff));
+	strip_html(xbuff);
+	// todo: convert "LOL" to "ha ha ha"?
+	snprintf(mbuff, sizeof(mbuff), "%s says: ", remote->handle);
+	say_strings(mbuff,
+		(voice == NULL ? DEFAULTMESSAGEBODYVOICE : voice), xbuff);
 }
 
-void say_strings(gchar *s1, gchar *s2, gchar *s3) 
+void say_strings(gchar *s1, gchar *s2, gchar *s3)
 {
-     pid_t p = fork();
-     if (p == 0) {
-	  execl(SpeechProgramFilename, SpeechProgramFilename,
-		s1, s2, s3, NULL);
-     }
+	pid_t p = fork();
+	if (p == 0) {
+		execl(SpeechProgramFilename, SpeechProgramFilename,
+			s1, s2, s3, NULL);
+	}
 }

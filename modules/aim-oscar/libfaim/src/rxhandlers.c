@@ -18,7 +18,8 @@ struct aim_rxcblist_s {
 	struct aim_rxcblist_s *next;
 };
 
-faim_internal aim_module_t *aim__findmodulebygroup(aim_session_t *sess, fu16_t group)
+faim_internal aim_module_t *aim__findmodulebygroup(aim_session_t *sess,
+	fu16_t group)
 {
 	aim_module_t *cur;
 
@@ -30,7 +31,8 @@ faim_internal aim_module_t *aim__findmodulebygroup(aim_session_t *sess, fu16_t g
 	return NULL;
 }
 
-faim_internal aim_module_t *aim__findmodule(aim_session_t *sess, const char *name)
+faim_internal aim_module_t *aim__findmodule(aim_session_t *sess,
+	const char *name)
 {
 	aim_module_t *cur;
 
@@ -42,7 +44,8 @@ faim_internal aim_module_t *aim__findmodule(aim_session_t *sess, const char *nam
 	return NULL;
 }
 
-faim_internal int aim__registermodule(aim_session_t *sess, int (*modfirst)(aim_session_t *, aim_module_t *))
+faim_internal int aim__registermodule(aim_session_t *sess,
+	int (*modfirst) (aim_session_t *, aim_module_t *))
 {
 	aim_module_t *mod;
 
@@ -68,7 +71,10 @@ faim_internal int aim__registermodule(aim_session_t *sess, int (*modfirst)(aim_s
 	mod->next = (aim_module_t *)sess->modlistv;
 	sess->modlistv = mod;
 
-	faimdprintf(sess, 1, "registered module %s (family 0x%04x, version = 0x%04x, tool 0x%04x, tool version 0x%04x)\n", mod->name, mod->family, mod->version, mod->toolid, mod->toolversion);
+	faimdprintf(sess, 1,
+		"registered module %s (family 0x%04x, version = 0x%04x, tool 0x%04x, tool version 0x%04x)\n",
+		mod->name, mod->family, mod->version, mod->toolid,
+		mod->toolversion);
 
 	return 0;
 }
@@ -77,7 +83,7 @@ faim_internal void aim__shutdownmodules(aim_session_t *sess)
 {
 	aim_module_t *cur;
 
-	for (cur = (aim_module_t *)sess->modlistv; cur; ) {
+	for (cur = (aim_module_t *)sess->modlistv; cur;) {
 		aim_module_t *tmp;
 
 		tmp = cur->next;
@@ -131,8 +137,8 @@ static int consumesnac(aim_session_t *sess, aim_frame_t *rx)
 
 	for (cur = (aim_module_t *)sess->modlistv; cur; cur = cur->next) {
 
-		if (!(cur->flags & AIM_MODFLAG_MULTIFAMILY) && 
-				(cur->family != snac.family))
+		if (!(cur->flags & AIM_MODFLAG_MULTIFAMILY) &&
+			(cur->family != snac.family))
 			continue;
 
 		if (cur->snachandler(sess, cur, rx, &snac, &rx->data))
@@ -143,7 +149,8 @@ static int consumesnac(aim_session_t *sess, aim_frame_t *rx)
 	return 0;
 }
 
-static int consumenonsnac(aim_session_t *sess, aim_frame_t *rx, fu16_t family, fu16_t subtype)
+static int consumenonsnac(aim_session_t *sess, aim_frame_t *rx, fu16_t family,
+	fu16_t subtype)
 {
 	aim_module_t *cur;
 	aim_modsnac_t snac;
@@ -154,8 +161,8 @@ static int consumenonsnac(aim_session_t *sess, aim_frame_t *rx, fu16_t family, f
 
 	for (cur = (aim_module_t *)sess->modlistv; cur; cur = cur->next) {
 
-		if (!(cur->flags & AIM_MODFLAG_MULTIFAMILY) && 
-				(cur->family != snac.family))
+		if (!(cur->flags & AIM_MODFLAG_MULTIFAMILY) &&
+			(cur->family != snac.family))
 			continue;
 
 		if (cur->snachandler(sess, cur, rx, &snac, &rx->data))
@@ -192,7 +199,8 @@ static int negchan_middle(aim_session_t *sess, aim_frame_t *fr)
 	if (aim_gettlv(tlvlist, 0x000b, 1))
 		msg = aim_gettlv_str(tlvlist, 0x000b, 1);
 
-	if ((userfunc = aim_callhandler(sess, fr->conn, AIM_CB_FAM_SPECIAL, AIM_CB_SPECIAL_CONNERR))) 
+	if ((userfunc = aim_callhandler(sess, fr->conn, AIM_CB_FAM_SPECIAL,
+				AIM_CB_SPECIAL_CONNERR)))
 		ret = userfunc(sess, fr, code, msg);
 
 	aim_freetlvchain(&tlvlist);
@@ -220,151 +228,139 @@ faim_internal int bleck(aim_session_t *sess, aim_frame_t *frame, ...)
 		"FLAP NOP"
 	};
 	static const int maxchannels = 5;
-	
+
 	/* XXX: this is ugly. and big just for debugging. */
 	static const char *literals[14][25] = {
-		{"Invalid", 
-		 NULL
-		},
-		{"General", 
-		 "Invalid",
-		 "Error",
-		 "Client Ready",
-		 "Server Ready",
-		 "Service Request",
-		 "Redirect",
-		 "Rate Information Request",
-		 "Rate Information",
-		 "Rate Information Ack",
-		 NULL,
-		 "Rate Information Change",
-		 "Server Pause",
-		 NULL,
-		 "Server Resume",
-		 "Request Personal User Information",
-		 "Personal User Information",
-		 "Evil Notification",
-		 NULL,
-		 "Migration notice",
-		 "Message of the Day",
-		 "Set Privacy Flags",
-		 "Well Known URL",
-		 "NOP"
-		},
-		{"Location", 
-		 "Invalid",
-		 "Error",
-		 "Request Rights",
-		 "Rights Information", 
-		 "Set user information", 
-		 "Request User Information", 
-		 "User Information", 
-		 "Watcher Sub Request",
-		 "Watcher Notification"
-		},
-		{"Buddy List Management", 
-		 "Invalid", 
-		 "Error", 
-		 "Request Rights",
-		 "Rights Information",
-		 "Add Buddy", 
-		 "Remove Buddy", 
-		 "Watcher List Query", 
-		 "Watcher List Response", 
-		 "Watcher SubRequest", 
-		 "Watcher Notification", 
-		 "Reject Notification", 
-		 "Oncoming Buddy", 
-		 "Offgoing Buddy"
-		},
-		{"Messeging", 
-		 "Invalid",
-		 "Error", 
-		 "Add ICBM Parameter",
-		 "Remove ICBM Parameter", 
-		 "Request Parameter Information",
-		 "Parameter Information",
-		 "Outgoing Message", 
-		 "Incoming Message",
-		 "Evil Request",
-		 "Evil Reply", 
-		 "Missed Calls",
-		 "Message Error", 
-		 "Host Ack"
-		},
-		{"Advertisements", 
-		 "Invalid", 
-		 "Error", 
-		 "Request Ad",
-		 "Ad Data (GIFs)"
-		},
-		{"Invitation / Client-to-Client", 
-		 "Invalid",
-		 "Error",
-		 "Invite a Friend",
-		 "Invitation Ack"
-		},
-		{"Administrative", 
-		 "Invalid",
-		 "Error",
-		 "Information Request",
-		 "Information Reply",
-		 "Information Change Request",
-		 "Information Chat Reply",
-		 "Account Confirm Request",
-		 "Account Confirm Reply",
-		 "Account Delete Request",
-		 "Account Delete Reply"
-		},
-		{"Popups", 
-		 "Invalid",
-		 "Error",
-		 "Display Popup"
-		},
-		{"BOS", 
-		 "Invalid",
-		 "Error",
-		 "Request Rights",
-		 "Rights Response",
-		 "Set group permission mask",
-		 "Add permission list entries",
-		 "Delete permission list entries",
-		 "Add deny list entries",
-		 "Delete deny list entries",
-		 "Server Error"
-		},
-		{"User Lookup", 
-		 "Invalid",
-		 "Error",
-		 "Search Request",
-		 "Search Response"
-		},
-		{"Stats", 
-		 "Invalid",
-		 "Error",
-		 "Set minimum report interval",
-		 "Report Events"
-		},
-		{"Translate", 
-		 "Invalid",
-		 "Error",
-		 "Translate Request",
-		 "Translate Reply",
-		},
-		{"Chat Navigation", 
-		 "Invalid",
-		 "Error",
-		 "Request rights",
-		 "Request Exchange Information",
-		 "Request Room Information",
-		 "Request Occupant List",
-		 "Search for Room",
-		 "Outgoing Message", 
-		 "Incoming Message",
-		 "Evil Request", 
-		 "Evil Reply", 
-		 "Chat Error",
-		}
+		{"Invalid",
+			NULL},
+		{"General",
+				"Invalid",
+				"Error",
+				"Client Ready",
+				"Server Ready",
+				"Service Request",
+				"Redirect",
+				"Rate Information Request",
+				"Rate Information",
+				"Rate Information Ack",
+				NULL,
+				"Rate Information Change",
+				"Server Pause",
+				NULL,
+				"Server Resume",
+				"Request Personal User Information",
+				"Personal User Information",
+				"Evil Notification",
+				NULL,
+				"Migration notice",
+				"Message of the Day",
+				"Set Privacy Flags",
+				"Well Known URL",
+			"NOP"},
+		{"Location",
+				"Invalid",
+				"Error",
+				"Request Rights",
+				"Rights Information",
+				"Set user information",
+				"Request User Information",
+				"User Information",
+				"Watcher Sub Request",
+			"Watcher Notification"},
+		{"Buddy List Management",
+				"Invalid",
+				"Error",
+				"Request Rights",
+				"Rights Information",
+				"Add Buddy",
+				"Remove Buddy",
+				"Watcher List Query",
+				"Watcher List Response",
+				"Watcher SubRequest",
+				"Watcher Notification",
+				"Reject Notification",
+				"Oncoming Buddy",
+			"Offgoing Buddy"},
+		{"Messeging",
+				"Invalid",
+				"Error",
+				"Add ICBM Parameter",
+				"Remove ICBM Parameter",
+				"Request Parameter Information",
+				"Parameter Information",
+				"Outgoing Message",
+				"Incoming Message",
+				"Evil Request",
+				"Evil Reply",
+				"Missed Calls",
+				"Message Error",
+			"Host Ack"},
+		{"Advertisements",
+				"Invalid",
+				"Error",
+				"Request Ad",
+			"Ad Data (GIFs)"},
+		{"Invitation / Client-to-Client",
+				"Invalid",
+				"Error",
+				"Invite a Friend",
+			"Invitation Ack"},
+		{"Administrative",
+				"Invalid",
+				"Error",
+				"Information Request",
+				"Information Reply",
+				"Information Change Request",
+				"Information Chat Reply",
+				"Account Confirm Request",
+				"Account Confirm Reply",
+				"Account Delete Request",
+			"Account Delete Reply"},
+		{"Popups",
+				"Invalid",
+				"Error",
+			"Display Popup"},
+		{"BOS",
+				"Invalid",
+				"Error",
+				"Request Rights",
+				"Rights Response",
+				"Set group permission mask",
+				"Add permission list entries",
+				"Delete permission list entries",
+				"Add deny list entries",
+				"Delete deny list entries",
+			"Server Error"},
+		{"User Lookup",
+				"Invalid",
+				"Error",
+				"Search Request",
+			"Search Response"},
+		{"Stats",
+				"Invalid",
+				"Error",
+				"Set minimum report interval",
+			"Report Events"},
+		{"Translate",
+				"Invalid",
+				"Error",
+				"Translate Request",
+				"Translate Reply",
+			},
+		{"Chat Navigation",
+				"Invalid",
+				"Error",
+				"Request rights",
+				"Request Exchange Information",
+				"Request Room Information",
+				"Request Occupant List",
+				"Search for Room",
+				"Outgoing Message",
+				"Incoming Message",
+				"Evil Request",
+				"Evil Reply",
+				"Chat Error",
+			}
 	};
 
 	maxf = sizeof(literals) / sizeof(literals[0]);
@@ -374,33 +370,46 @@ faim_internal int bleck(aim_session_t *sess, aim_frame_t *frame, ...)
 
 		family = aimbs_get16(&frame->data);
 		subtype = aimbs_get16(&frame->data);
-		
-		if ((family < maxf) && (subtype+1 < maxs) && (literals[family][subtype] != NULL))
-			faimdprintf(sess, 0, "bleck: channel %s: null handler for %04x/%04x (%s)\n", channels[frame->hdr.flap.type], family, subtype, literals[family][subtype+1]);
+
+		if ((family < maxf) && (subtype + 1 < maxs)
+			&& (literals[family][subtype] != NULL))
+			faimdprintf(sess, 0,
+				"bleck: channel %s: null handler for %04x/%04x (%s)\n",
+				channels[frame->hdr.flap.type], family, subtype,
+				literals[family][subtype + 1]);
 		else
-			faimdprintf(sess, 0, "bleck: channel %s: null handler for %04x/%04x (no literal)\n", channels[frame->hdr.flap.type], family, subtype);
+			faimdprintf(sess, 0,
+				"bleck: channel %s: null handler for %04x/%04x (no literal)\n",
+				channels[frame->hdr.flap.type], family,
+				subtype);
 	} else {
 
 		if (frame->hdr.flap.type <= maxchannels)
-			faimdprintf(sess, 0, "bleck: channel %s (0x%02x)\n", channels[frame->hdr.flap.type], frame->hdr.flap.type);
+			faimdprintf(sess, 0, "bleck: channel %s (0x%02x)\n",
+				channels[frame->hdr.flap.type],
+				frame->hdr.flap.type);
 		else
-			faimdprintf(sess, 0, "bleck: unknown channel 0x%02x\n", frame->hdr.flap.type);
+			faimdprintf(sess, 0, "bleck: unknown channel 0x%02x\n",
+				frame->hdr.flap.type);
 
 	}
-		
+
 	return 1;
 }
 
-faim_export int aim_conn_addhandler(aim_session_t *sess, aim_conn_t *conn, fu16_t family, fu16_t type, aim_rxcallback_t newhandler, fu16_t flags)
+faim_export int aim_conn_addhandler(aim_session_t *sess, aim_conn_t *conn,
+	fu16_t family, fu16_t type, aim_rxcallback_t newhandler, fu16_t flags)
 {
 	struct aim_rxcblist_s *newcb;
 
 	if (!conn)
 		return -1;
 
-	faimdprintf(sess, 1, "aim_conn_addhandler: adding for %04x/%04x\n", family, type);
+	faimdprintf(sess, 1, "aim_conn_addhandler: adding for %04x/%04x\n",
+		family, type);
 
-	if (!(newcb = (struct aim_rxcblist_s *)calloc(1, sizeof(struct aim_rxcblist_s))))
+	if (!(newcb = (struct aim_rxcblist_s *)calloc(1,
+				sizeof(struct aim_rxcblist_s))))
 		return -1;
 
 	newcb->family = family;
@@ -414,8 +423,8 @@ faim_export int aim_conn_addhandler(aim_session_t *sess, aim_conn_t *conn, fu16_
 	else {
 		struct aim_rxcblist_s *cur;
 
-		for (cur = (struct aim_rxcblist_s *)conn->handlerlist; cur->next; cur = cur->next)
-			;
+		for (cur = (struct aim_rxcblist_s *)conn->handlerlist;
+			cur->next; cur = cur->next) ;
 		cur->next = newcb;
 	}
 
@@ -429,7 +438,7 @@ faim_export int aim_clearhandlers(aim_conn_t *conn)
 	if (!conn)
 		return -1;
 
-	for (cur = (struct aim_rxcblist_s *)conn->handlerlist; cur; ) {
+	for (cur = (struct aim_rxcblist_s *)conn->handlerlist; cur;) {
 		struct aim_rxcblist_s *tmp;
 
 		tmp = cur->next;
@@ -441,50 +450,59 @@ faim_export int aim_clearhandlers(aim_conn_t *conn)
 	return 0;
 }
 
-faim_internal aim_rxcallback_t aim_callhandler(aim_session_t *sess, aim_conn_t *conn, fu16_t family, fu16_t type)
+faim_internal aim_rxcallback_t aim_callhandler(aim_session_t *sess,
+	aim_conn_t *conn, fu16_t family, fu16_t type)
 {
 	struct aim_rxcblist_s *cur;
 
 	if (!conn)
 		return NULL;
 
-	faimdprintf(sess, 1, "aim_callhandler: calling for %04x/%04x\n", family, type);
+	faimdprintf(sess, 1, "aim_callhandler: calling for %04x/%04x\n", family,
+		type);
 
-	for (cur = (struct aim_rxcblist_s *)conn->handlerlist; cur; cur = cur->next) {
+	for (cur = (struct aim_rxcblist_s *)conn->handlerlist; cur;
+		cur = cur->next) {
 		if ((cur->family == family) && (cur->type == type))
 			return cur->handler;
 	}
 
 	if (type == AIM_CB_SPECIAL_DEFAULT) {
-		faimdprintf(sess, 1, "aim_callhandler: no default handler for family 0x%04x\n", family);
-		return NULL; /* prevent infinite recursion */
+		faimdprintf(sess, 1,
+			"aim_callhandler: no default handler for family 0x%04x\n",
+			family);
+		return NULL;	/* prevent infinite recursion */
 	}
 
-	faimdprintf(sess, 1, "aim_callhandler: no handler for  0x%04x/0x%04x\n", family, type);
+	faimdprintf(sess, 1, "aim_callhandler: no handler for  0x%04x/0x%04x\n",
+		family, type);
 
 	return aim_callhandler(sess, conn, family, AIM_CB_SPECIAL_DEFAULT);
 }
 
-faim_internal void aim_clonehandlers(aim_session_t *sess, aim_conn_t *dest, aim_conn_t *src)
+faim_internal void aim_clonehandlers(aim_session_t *sess, aim_conn_t *dest,
+	aim_conn_t *src)
 {
 	struct aim_rxcblist_s *cur;
 
-	for (cur = (struct aim_rxcblist_s *)src->handlerlist; cur; cur = cur->next) {
-		aim_conn_addhandler(sess, dest, cur->family, cur->type, 
-						cur->handler, cur->flags);
+	for (cur = (struct aim_rxcblist_s *)src->handlerlist; cur;
+		cur = cur->next) {
+		aim_conn_addhandler(sess, dest, cur->family, cur->type,
+			cur->handler, cur->flags);
 	}
 
 	return;
 }
 
-faim_internal int aim_callhandler_noparam(aim_session_t *sess, aim_conn_t *conn,fu16_t family, fu16_t type, aim_frame_t *ptr)
+faim_internal int aim_callhandler_noparam(aim_session_t *sess, aim_conn_t *conn,
+	fu16_t family, fu16_t type, aim_frame_t *ptr)
 {
 	aim_rxcallback_t userfunc;
 
 	if ((userfunc = aim_callhandler(sess, conn, family, type)))
 		return userfunc(sess, ptr);
 
-	return 1; /* XXX */
+	return 1;		/* XXX */
 }
 
 /*
@@ -518,7 +536,7 @@ faim_export void aim_rxdispatch(aim_session_t *sess)
 
 		if (cur->hdrtype == AIM_FRAMETYPE_FLAP) {
 			if (cur->hdr.flap.type == 0x01) {
-				cur->handled = aim_callhandler_noparam(sess, cur->conn, AIM_CB_FAM_SPECIAL, AIM_CB_SPECIAL_FLAPVER, cur); /* XXX use consumenonsnac */
+				cur->handled = aim_callhandler_noparam(sess, cur->conn, AIM_CB_FAM_SPECIAL, AIM_CB_SPECIAL_FLAPVER, cur);	/* XXX use consumenonsnac */
 				continue;
 
 			} else if (cur->hdr.flap.type == 0x02) {
@@ -541,14 +559,15 @@ faim_export void aim_rxdispatch(aim_session_t *sess)
 
 			} else if (cur->conn->type == AIM_CONN_TYPE_LISTENER) {
 				/* not possible */
-				faimdprintf(sess, 0, "rxdispatch called on LISTENER connection!\n");
+				faimdprintf(sess, 0,
+					"rxdispatch called on LISTENER connection!\n");
 				cur->handled = 1;
 				continue;
 			}
 		}
 
 		if (!cur->handled) {
-			consumenonsnac(sess, cur, 0xffff, 0xffff); /* last chance! */
+			consumenonsnac(sess, cur, 0xffff, 0xffff);	/* last chance! */
 			cur->handled = 1;
 		}
 	}
@@ -564,7 +583,8 @@ faim_export void aim_rxdispatch(aim_session_t *sess)
 	return;
 }
 
-faim_internal int aim_parse_unknown(aim_session_t *sess, aim_frame_t *frame, ...)
+faim_internal int aim_parse_unknown(aim_session_t *sess, aim_frame_t *frame,
+	...)
 {
 	int i;
 

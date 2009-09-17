@@ -16,7 +16,8 @@ faim_export int aim_bos_reqrights(aim_session_t *sess, aim_conn_t *conn)
 }
 
 /* Subtype 0x0003 - BOS Rights. */
-static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_rxcallback_t userfunc;
 	aim_tlvlist_t *tlvlist;
@@ -37,15 +38,16 @@ static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_m
 	/*
 	 * TLV type 0x0002: Maximum number of buddies on deny list.
 	 */
-	if (aim_gettlv(tlvlist, 0x0002, 1)) 
+	if (aim_gettlv(tlvlist, 0x0002, 1))
 		maxdenies = aim_gettlv16(tlvlist, 0x0002, 1);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, maxpermits, maxdenies);
 
 	aim_freetlvchain(&tlvlist);
 
-	return ret;  
+	return ret;
 }
 
 /* 
@@ -58,7 +60,8 @@ static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_m
  * a bitwise OR of all the user classes you want to see you.
  *
  */
-faim_export int aim_bos_setgroupperm(aim_session_t *sess, aim_conn_t *conn, fu32_t mask)
+faim_export int aim_bos_setgroupperm(aim_session_t *sess, aim_conn_t *conn,
+	fu32_t mask)
 {
 	return aim_genericreq_l(sess, conn, 0x0009, 0x0004, &mask);
 }
@@ -91,7 +94,8 @@ faim_export int aim_bos_setgroupperm(aim_session_t *sess, aim_conn_t *conn, fu32
  *
  * XXX ye gods.
  */
-faim_export int aim_bos_changevisibility(aim_session_t *sess, aim_conn_t *conn, int changetype, const char *denylist)
+faim_export int aim_bos_changevisibility(aim_session_t *sess, aim_conn_t *conn,
+	int changetype, const char *denylist)
 {
 	aim_frame_t *fr;
 	int packlen = 0;
@@ -132,7 +136,8 @@ faim_export int aim_bos_changevisibility(aim_session_t *sess, aim_conn_t *conn, 
 		tmpptr = aimutil_itemindex(localcpy, i, '&');
 
 		aimbs_put8(&fr->data, strlen(tmpptr));
-		aimbs_putraw(&fr->data, (unsigned char *)tmpptr, strlen(tmpptr));
+		aimbs_putraw(&fr->data, (unsigned char *)tmpptr,
+			strlen(tmpptr));
 
 		free(tmpptr);
 	}
@@ -143,7 +148,8 @@ faim_export int aim_bos_changevisibility(aim_session_t *sess, aim_conn_t *conn, 
 	return 0;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0003)

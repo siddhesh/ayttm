@@ -19,7 +19,6 @@
  *
  */
 
-
 /*
  * The general design is as follows:
  *
@@ -38,7 +37,6 @@
  * each time a message is sent.
  */
 
-
 #ifndef _MSN_ACCOUNT_H_
 #define _MSN_ACCOUNT_H_
 
@@ -46,16 +44,16 @@
 #include "llist.h"
 
 typedef enum {
-	MSN_BUDDY_FORWARD	= 1,
-	MSN_BUDDY_ALLOW		= 1 << 1,
-	MSN_BUDDY_BLOCK		= 1 << 2,
-	MSN_BUDDY_REVERSE	= 1 << 3,
-	MSN_BUDDY_PENDING	= 1 << 4
+	MSN_BUDDY_FORWARD = 1,
+	MSN_BUDDY_ALLOW = 1 << 1,
+	MSN_BUDDY_BLOCK = 1 << 2,
+	MSN_BUDDY_REVERSE = 1 << 3,
+	MSN_BUDDY_PENDING = 1 << 4
 } MsnBuddyList;
 
 typedef enum {
-	MSN_BUDDY_PASSPORT	= 1,
-	MSN_BUDDY_EMAIL		= 1 << 5,	/* At least for yahoo. Would probably be different for something else */
+	MSN_BUDDY_PASSPORT = 1,
+	MSN_BUDDY_EMAIL = 1 << 5,	/* At least for yahoo. Would probably be different for something else */
 } MsnBuddyType;
 
 struct _MsnBuddy {
@@ -72,7 +70,7 @@ struct _MsnBuddy {
 	MsnConnection *sb;
 	int connecting;
 
-	LList *mq;	/* Messages queued to send */
+	LList *mq;		/* Messages queued to send */
 
 	void *ext_data;
 };
@@ -90,33 +88,33 @@ struct _MsnIM {
 	char *font;
 	char *color;
 	int typing;
-} ;
+};
 
 struct _MsnAccount {
-	char *passport;			/* The passport email address: foo@hotmail.com or bar@msn.com */
-	char *friendlyname;		/* Friendly name: Foo Bar */
-	char *password;			/* The password (duh) */
+	char *passport;		/* The passport email address: foo@hotmail.com or bar@msn.com */
+	char *friendlyname;	/* Friendly name: Foo Bar */
+	char *password;		/* The password (duh) */
 
-	void *ext_data;			/* Any external data you want to attach? */
-	char *policy;			/* Cookie. Used for SSO */
-	unsigned char *nonce;			/* Used for SSO */
-	int nonce_len;			/* Length of the nonce */
-	char *ticket;			/* Ticket for the messenger */
-	unsigned char *secret;			/* Secret. Used for final USR */
-	int secret_len;			/* Length of the secret */
-	char *contact_ticket;		/* Used when you want to get and/or modify address book */
+	void *ext_data;		/* Any external data you want to attach? */
+	char *policy;		/* Cookie. Used for SSO */
+	unsigned char *nonce;	/* Used for SSO */
+	int nonce_len;		/* Length of the nonce */
+	char *ticket;		/* Ticket for the messenger */
+	unsigned char *secret;	/* Secret. Used for final USR */
+	int secret_len;		/* Length of the secret */
+	char *contact_ticket;	/* Used when you want to get and/or modify address book */
 
 	MsnConnection *ns_connection;	/* The notification server connection */
-	LList *connections;		/* All the connections this account is holding right now */
+	LList *connections;	/* All the connections this account is holding right now */
 
-	LList *buddies;			/* List of buddies */
-	LList *groups;			/* List of groups */
+	LList *buddies;		/* List of buddies */
+	LList *groups;		/* List of groups */
 
 	char *cache_key;
 
 	int blp;
-	int status;			/* Messenger Status */
-} ;
+	int status;		/* Messenger Status */
+};
 
 #define msn_account_new() (m_new0(MsnAccount, 1))
 
@@ -125,10 +123,10 @@ void msn_buddy_reset(MsnBuddy *bud);
 void msn_account_free(MsnAccount *ma);
 
 void msn_account_cancel_connect(MsnAccount *ma);
-MsnConnection *msn_account_get_sb_with_session_id(MsnAccount *ma, char *session_id);
+MsnConnection *msn_account_get_sb_with_session_id(MsnAccount *ma,
+	char *session_id);
 
 void msn_set_initial_presence(MsnAccount *ma, int state);
 void msn_set_state(MsnAccount *ma, int state);
 
 #endif
-

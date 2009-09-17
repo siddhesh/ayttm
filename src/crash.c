@@ -57,7 +57,6 @@
 #include "util.h"
 #include "messages.h"
 
-
 /*
  * NOTE: the crash dialog is called when ayttm is not 
  * initialized, so do not assume settings are available.
@@ -67,22 +66,20 @@
 
 /***/
 
-static GtkWidget	*crash_dialog_show		(const gchar *text, 
-							 const gchar *debug_output,
-							 long sig);
-static void		 crash_create_debugger_file	(void);
-static void		 crash_save_crash_log		(GtkButton *, const gchar *);
-static void		 crash_create_bug_report	(GtkButton *, const gchar *);
-static void		 crash_debug			(unsigned long crash_pid, 
-							 gchar   *exe_image,
-							 GString *debug_output);
-static const gchar	*get_compiled_in_features	(void);
-static const gchar	*get_lib_version		(void);
-static const gchar	*get_operating_system		(void);
-static gboolean		 is_crash_dialog_allowed	(void);
-static void		 crash_handler			(int sig);
-static void		 dummy_handler			(int sig);
-static void		 crash_cleanup_exit		(void);
+static GtkWidget *crash_dialog_show(const gchar *text,
+	const gchar *debug_output, long sig);
+static void crash_create_debugger_file(void);
+static void crash_save_crash_log(GtkButton *, const gchar *);
+static void crash_create_bug_report(GtkButton *, const gchar *);
+static void crash_debug(unsigned long crash_pid,
+	gchar *exe_image, GString *debug_output);
+static const gchar *get_compiled_in_features(void);
+static const gchar *get_lib_version(void);
+static const gchar *get_operating_system(void);
+static gboolean is_crash_dialog_allowed(void);
+static void crash_handler(int sig);
+static void dummy_handler(int sig);
+static void crash_cleanup_exit(void);
 
 /***/
 
@@ -95,17 +92,18 @@ static const gchar *DEBUG_SCRIPT = "bt\nkill\nq";
  */
 void crash_install_handlers(void)
 {
-#if CRASH_DIALOG 
+#if CRASH_DIALOG
 	sigset_t mask;
 
-	if (!is_crash_dialog_allowed()) return;
+	if (!is_crash_dialog_allowed())
+		return;
 	sigemptyset(&mask);
 
 #ifdef SIGSEGV
 	signal(SIGSEGV, crash_handler);
 	sigaddset(&mask, SIGSEGV);
 #endif
-	
+
 #ifdef SIGFPE
 	signal(SIGFPE, crash_handler);
 	sigaddset(&mask, SIGFPE);
@@ -136,7 +134,7 @@ void crash_install_handlers(void)
 #endif
 
 	sigprocmask(SIG_UNBLOCK, &mask, 0);
-#endif /* CRASH_DIALOG */	
+#endif				/* CRASH_DIALOG */
 }
 
 /***/
@@ -144,7 +142,7 @@ void crash_install_handlers(void)
 /*!
  *\brief	crash dialog entry point 
  */
-void crash_main(const char *arg) 
+void crash_main(const char *arg)
 {
 	gchar *text;
 	gchar **tokens;
@@ -156,9 +154,9 @@ void crash_main(const char *arg)
 
 	pid = atol(tokens[0]);
 	text = g_strdup_printf(_("Ayttm process (%ld) received signal %ld"),
-			       pid, atol(tokens[1]));
+		pid, atol(tokens[1]));
 
-	output = g_string_new("");     
+	output = g_string_new("");
 	crash_debug(pid, tokens[2], output);
 
 	crash_dialog_show(text, output->str, atol(tokens[1]));
@@ -175,7 +173,8 @@ void crash_main(const char *arg)
  *
  *\return	GtkWidget * Dialog widget
  */
-static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output, long sig)
+static GtkWidget *crash_dialog_show(const gchar *text,
+	const gchar *debug_output, long sig)
 {
 	GtkWidget *window1;
 	GtkWidget *vbox1;
@@ -189,16 +188,15 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	GtkWidget *button3;
 	GtkWidget *button4;
 	GtkWidget *button5;
-	gchar	  *crash_report;
-	gchar     *version = NULL;
-	
+	gchar *crash_report;
+	gchar *version = NULL;
+
 	window1 = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_container_set_border_width(GTK_CONTAINER(window1), 5);
 	gtk_window_set_title(GTK_WINDOW(window1), _("Ayttm has crashed"));
 	gtk_window_set_position(GTK_WINDOW(window1), GTK_WIN_POS_CENTER);
 	gtk_window_set_modal(GTK_WINDOW(window1), TRUE);
 	gtk_window_set_default_size(GTK_WINDOW(window1), 460, 272);
-
 
 	vbox1 = gtk_vbox_new(FALSE, 2);
 	gtk_widget_show(vbox1);
@@ -212,11 +210,14 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	version = ay_get_last_version();
 	if (version && version_cmp(version, VERSION "-" RELEASE) > 0)
 		label1 = gtk_label_new
-			(g_strdup_printf(_("%s.\nA newer version (%s) is available; please do not file a bugreport before upgrading."),
+			(g_strdup_printf(_
+				("%s.\nA newer version (%s) is available; please do not file a bugreport before upgrading."),
 				text, version));
 	else
 		label1 = gtk_label_new
-		    (g_strdup_printf(_("%s.\nPlease file a bug report and include the information below."), text));
+			(g_strdup_printf(_
+				("%s.\nPlease file a bug report and include the information below."),
+				text));
 	gtk_widget_show(label1);
 	gtk_box_pack_start(GTK_BOX(hbox1), label1, TRUE, TRUE, 0);
 	gtk_misc_set_alignment(GTK_MISC(label1), 7.45058e-09, 0.5);
@@ -230,15 +231,14 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_container_add(GTK_CONTAINER(frame1), scrolledwindow1);
 	gtk_container_set_border_width(GTK_CONTAINER(scrolledwindow1), 3);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwindow1),
-				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+		GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
 	text1 = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text1), FALSE);
 	gtk_widget_show(text1);
 	gtk_container_add(GTK_CONTAINER(scrolledwindow1), text1);
-	
-	crash_report = g_strdup_printf(
-		"Ayttm version %s-%s\n"
+
+	crash_report = g_strdup_printf("Ayttm version %s-%s\n"
 		"GTK+ version %d.%d.%d\n"
 		"Features:%s\n"
 		"Operating system: %s\n"
@@ -248,14 +248,10 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 		VERSION, RELEASE,
 		gtk_major_version, gtk_minor_version, gtk_micro_version,
 		get_compiled_in_features(),
-		get_operating_system(),
-		get_lib_version(),
-		sig,
-		debug_output
-	);
+		get_operating_system(), get_lib_version(), sig, debug_output);
 
-	gtk_text_buffer_insert_at_cursor(gtk_text_view_get_buffer(GTK_TEXT_VIEW(text1)),
-			crash_report, -1);
+	gtk_text_buffer_insert_at_cursor(gtk_text_view_get_buffer(GTK_TEXT_VIEW
+			(text1)), crash_report, -1);
 
 	hbuttonbox3 = gtk_hbutton_box_new();
 	gtk_widget_show(hbuttonbox3);
@@ -275,23 +271,25 @@ static GtkWidget *crash_dialog_show(const gchar *text, const gchar *debug_output
 	gtk_container_add(GTK_CONTAINER(hbuttonbox4), button4);
 	GTK_WIDGET_SET_FLAGS(button4, GTK_CAN_DEFAULT);
 
-	g_signal_connect(window1, "delete-event", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(window1, "delete-event", G_CALLBACK(gtk_main_quit),
+		NULL);
 	g_signal_connect(button3, "clicked", G_CALLBACK(gtk_main_quit), NULL);
-	g_signal_connect(button4, "clicked", G_CALLBACK(crash_save_crash_log), crash_report);
+	g_signal_connect(button4, "clicked", G_CALLBACK(crash_save_crash_log),
+		crash_report);
 	if (!version || !strcmp(version, VERSION)) {
 		button5 = gtk_button_new_with_label(_("Create bug report"));
 		gtk_widget_show(button5);
 		gtk_container_add(GTK_CONTAINER(hbuttonbox4), button5);
 		GTK_WIDGET_SET_FLAGS(button5, GTK_CAN_DEFAULT);
-		g_signal_connect(button5, "clicked", G_CALLBACK(crash_create_bug_report), NULL);
+		g_signal_connect(button5, "clicked",
+			G_CALLBACK(crash_create_bug_report), NULL);
 	}
-	
+
 	gtk_widget_show(window1);
 
 	gtk_main();
 	return window1;
 }
-
 
 static int str_write_to_file(const gchar *str, const gchar *file)
 {
@@ -328,7 +326,6 @@ static int str_write_to_file(const gchar *str, const gchar *file)
 	return 0;
 }
 
-
 /*!
  *\brief	create debugger script file in ayttm directory.
  *		all the other options (creating temp files) looked too 
@@ -336,8 +333,9 @@ static int str_write_to_file(const gchar *str, const gchar *file)
  */
 static void crash_create_debugger_file(void)
 {
-	gchar *filespec = g_strconcat(config_dir, G_DIR_SEPARATOR_S, DEBUGGERRC, NULL);
-	
+	gchar *filespec =
+		g_strconcat(config_dir, G_DIR_SEPARATOR_S, DEBUGGERRC, NULL);
+
 	str_write_to_file(DEBUG_SCRIPT, filespec);
 	g_free(filespec);
 }
@@ -351,7 +349,7 @@ static void crash_save_crash_log(GtkButton *button, const gchar *text)
 	timer = time(NULL);
 	lt = localtime(&timer);
 	strftime(buf, sizeof buf, "ayttm-crash-log-%Y-%m-%d-%H-%M-%S.txt", lt);
-	printf("saving crash log to %s\n",buf);
+	printf("saving crash log to %s\n", buf);
 	str_write_to_file(text, buf);
 }
 
@@ -360,15 +358,15 @@ static void crash_save_crash_log(GtkButton *button, const gchar *text)
  */
 static void crash_create_bug_report(GtkButton *button, const gchar *data)
 {
-	open_url(NULL,"http://sourceforge.net/tracker/?func=add&group_id=77614&atid=550744");
+	open_url(NULL,
+		"http://sourceforge.net/tracker/?func=add&group_id=77614&atid=550744");
 }
 
 /*!
  *\brief	launches debugger and attaches it to crashed ayttm
  */
-static void crash_debug(unsigned long crash_pid, 
-			gchar *exe_image,
-			GString *debug_output)
+static void crash_debug(unsigned long crash_pid,
+	gchar *exe_image, GString *debug_output)
 {
 	int choutput[2];
 	pid_t pid;
@@ -378,7 +376,9 @@ static void crash_debug(unsigned long crash_pid,
 	if (0 == (pid = fork())) {
 		char *argp[10];
 		char **argptr = argp;
-		gchar *filespec = g_strconcat(config_dir, G_DIR_SEPARATOR_S, DEBUGGERRC, NULL);
+		gchar *filespec =
+			g_strconcat(config_dir, G_DIR_SEPARATOR_S, DEBUGGERRC,
+			NULL);
 
 		setgid(getgid());
 		setuid(getuid());
@@ -386,7 +386,7 @@ static void crash_debug(unsigned long crash_pid,
 		/*
 		 * setup debugger to attach to crashed ayttm
 		 */
-		*argptr++ = "gdb"; 
+		*argptr++ = "gdb";
 		*argptr++ = "--nw";
 		*argptr++ = "--nx";
 		*argptr++ = "--quiet";
@@ -395,7 +395,7 @@ static void crash_debug(unsigned long crash_pid,
 		*argptr++ = filespec;
 		*argptr++ = exe_image;
 		*argptr++ = g_strdup_printf("%ld", crash_pid);
-		*argptr   = NULL;
+		*argptr = NULL;
 
 		/*
 		 * redirect output to write end of pipe
@@ -403,12 +403,12 @@ static void crash_debug(unsigned long crash_pid,
 		close(1);
 		dup(choutput[1]);
 		close(choutput[0]);
-		if (-1 == execvp("gdb", argp)) 
+		if (-1 == execvp("gdb", argp))
 			puts("error execvp\n");
 	} else {
 		char buf[100];
 		int r;
-	
+
 		waitpid(pid, NULL, 0);
 
 		/*
@@ -427,14 +427,14 @@ static void crash_debug(unsigned long crash_pid,
 				g_string_append(debug_output, buf);
 			}
 		} while (r > 0);
-		
+
 		close(choutput[0]);
 		close(choutput[1]);
-		
+
 		/*
 		 * kill the process we attached to
 		 */
-		kill(crash_pid, SIGCONT); 
+		kill(crash_pid, SIGCONT);
 	}
 }
 
@@ -447,12 +447,12 @@ static const gchar *get_compiled_in_features(void)
 {
 	return g_strdup_printf("%s",
 #ifdef HAVE_ICONV
-		   " iconv"
+		" iconv"
 #endif
 #ifdef HAVE_LIBASPELL
-		   " aspell"
+		" aspell"
 #endif
-	"");
+		"");
 }
 
 /***/
@@ -480,12 +480,10 @@ static const gchar *get_operating_system(void)
 	struct utsname utsbuf;
 	uname(&utsbuf);
 	return g_strdup_printf("%s %s (%s)",
-			       utsbuf.sysname,
-			       utsbuf.release,
-			       utsbuf.machine);
+		utsbuf.sysname, utsbuf.release, utsbuf.machine);
 #else
 	return g_strdup(_("Unknown"));
-	
+
 #endif
 }
 
@@ -524,12 +522,12 @@ static void crash_handler(int sig)
 	extern gchar *startup_dir;
 	extern gchar *argv0;
 
-
-	if (sig < 0 || sig > 32) { /* what's that ? */
-		char *buf = g_strdup_printf(
-				_("Caught strange signal (%d). This is probably\n"
-				  "due to a broken compilation; Exiting."), sig);
-		ay_do_error( _("Error"), buf );
+	if (sig < 0 || sig > 32) {	/* what's that ? */
+		char *buf =
+			g_strdup_printf(_
+			("Caught strange signal (%d). This is probably\n"
+				"due to a broken compilation; Exiting."), sig);
+		ay_do_error(_("Error"), buf);
 		g_free(buf);
 		_exit(0);
 	}
@@ -537,12 +535,13 @@ static void crash_handler(int sig)
 	 * besides guarding entrancy it's probably also better 
 	 * to mask off signals
 	 */
-	if (crashed_) return;
+	if (crashed_)
+		return;
 
 	crashed_++;
 
 #ifdef SIGTERM
-	if (sig == SIGTERM) 
+	if (sig == SIGTERM)
 		exit(1);
 #endif
 
@@ -556,13 +555,13 @@ static void crash_handler(int sig)
 	if (0 == (pid = fork())) {
 		char buf[50];
 		char *args[4];
-	
+
 		/*
 		 * probably also some other parameters (like GTK+ ones).
 		 * also we pass the full startup dir and the real command
 		 * line typed in (argv0)
 		 */
-		args[0] = argv0; 
+		args[0] = argv0;
 		args[1] = "-C";
 		snprintf(buf, sizeof(buf), "%d,%d,%s", getppid(), sig, argv0);
 		args[2] = buf;
@@ -587,9 +586,11 @@ static void crash_handler(int sig)
  */
 static void crash_cleanup_exit(void)
 {
-	char *filename = g_strdup_printf("%s%c%s", config_dir, G_DIR_SEPARATOR,"eb_socket");
+	char *filename =
+		g_strdup_printf("%s%c%s", config_dir, G_DIR_SEPARATOR,
+		"eb_socket");
 	unlink(filename);
 	g_free(filename);
 }
 
-#endif	/* CRASH_DIALOG */
+#endif				/* CRASH_DIALOG */

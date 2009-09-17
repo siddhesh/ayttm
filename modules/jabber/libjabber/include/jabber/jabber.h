@@ -69,26 +69,24 @@ extern "C" {
 #define JID_USER     2
 #define JID_SERVER   4
 
-typedef struct jid_struct
-{ 
-    pool               p;
-    char*              resource;
-    char*              user;
-    char*              server;
-    unsigned short     port;
-    char*              full;
-    struct jid_struct *next; /* for lists of jids */
-} *jid;
-  
-jid     jid_new(pool p, char *idstr);	       /* Creates a jabber id from the idstr */
-void    jid_set(jid id, char *str, int item);  /* Individually sets jid components */
-char*   jid_full(jid id);		       /* Builds a string type=user/resource@server from the jid data */
-int     jid_cmp(jid a, jid b);		       /* Compares two jid's, returns 0 for perfect match */
-int     jid_cmpx(jid a, jid b, int parts);     /* Compares just the parts specified as JID_|JID_ */
-jid     jid_append(jid a, jid b);	       /* Appending b to a (list), no dups */
-xmlnode jid_xres(jid id);		       /* Returns xmlnode representation of the resource?query=string */
-xmlnode jid_nodescan(jid id, xmlnode x);       /* Scans the children of the node for a matching jid attribute */
+	typedef struct jid_struct {
+		pool p;
+		char *resource;
+		char *user;
+		char *server;
+		unsigned short port;
+		char *full;
+		struct jid_struct *next;	/* for lists of jids */
+	} *jid;
 
+	jid jid_new(pool p, char *idstr);	/* Creates a jabber id from the idstr */
+	void jid_set(jid id, char *str, int item);	/* Individually sets jid components */
+	char *jid_full(jid id);	/* Builds a string type=user/resource@server from the jid data */
+	int jid_cmp(jid a, jid b);	/* Compares two jid's, returns 0 for perfect match */
+	int jid_cmpx(jid a, jid b, int parts);	/* Compares just the parts specified as JID_|JID_ */
+	jid jid_append(jid a, jid b);	/* Appending b to a (list), no dups */
+	xmlnode jid_xres(jid id);	/* Returns xmlnode representation of the resource?query=string */
+	xmlnode jid_nodescan(jid id, xmlnode x);	/* Scans the children of the node for a matching jid attribute */
 
 /* --------------------------------------------------------- */
 /*                                                           */
@@ -119,76 +117,69 @@ xmlnode jid_nodescan(jid id, xmlnode x);       /* Scans the children of the node
 #define JPACKET__HEADLINE     15
 #define JPACKET__INVISIBLE    16
 
-typedef struct jpacket_struct
-{
-    unsigned char type;
-    int           subtype;
-    int           flag;
-    void*         aux1;
-    xmlnode       x;
-    jid           to;
-    jid           from;
-    char*         iqns;
-    xmlnode       iq;
-    pool          p;
-} *jpacket, _jpacket;
- 
-jpacket jpacket_new(xmlnode x);	    /* Creates a jabber packet from the xmlnode */
-jpacket jpacket_reset(jpacket p);   /* Resets the jpacket values based on the xmlnode */
-int     jpacket_subtype(jpacket p); /* Returns the subtype value (looks at xmlnode for it) */
+	typedef struct jpacket_struct {
+		unsigned char type;
+		int subtype;
+		int flag;
+		void *aux1;
+		xmlnode x;
+		jid to;
+		jid from;
+		char *iqns;
+		xmlnode iq;
+		pool p;
+	} *jpacket, _jpacket;
 
+	jpacket jpacket_new(xmlnode x);	/* Creates a jabber packet from the xmlnode */
+	jpacket jpacket_reset(jpacket p);	/* Resets the jpacket values based on the xmlnode */
+	int jpacket_subtype(jpacket p);	/* Returns the subtype value (looks at xmlnode for it) */
 
 /* --------------------------------------------------------- */
 /*                                                           */
 /* Presence Proxy DB structures & constants                  */
 /*                                                           */
 /* --------------------------------------------------------- */
-typedef struct ppdb_struct
-{			      
-    jid     id;		       /* entry data */
-    int     pri;
-    xmlnode x;
-    struct ppdb_struct* user;  /* linked list for user@server */
-    pool                p;     /* db-level data */
-    struct ppdb_struct* next;
-} _ppdb, *ppdb;
+	typedef struct ppdb_struct {
+		jid id;		/* entry data */
+		int pri;
+		xmlnode x;
+		struct ppdb_struct *user;	/* linked list for user@server */
+		pool p;		/* db-level data */
+		struct ppdb_struct *next;
+	} _ppdb, *ppdb;
 
-ppdb    ppdb_insert(ppdb db, jid id, xmlnode x); /* Inserts presence into the proxy */
-xmlnode ppdb_primary(ppdb db, jid id);		 /* Fetches the matching primary presence for the id */
-void    ppdb_free(ppdb db);			 /* Frees the db and all entries */
-xmlnode ppdb_get(ppdb db, jid id);		 /* Called successively to return each presence xmlnode */
-						 /*   for the id and children, returns NULL at the end */
-
+	ppdb ppdb_insert(ppdb db, jid id, xmlnode x);	/* Inserts presence into the proxy */
+	xmlnode ppdb_primary(ppdb db, jid id);	/* Fetches the matching primary presence for the id */
+	void ppdb_free(ppdb db);	/* Frees the db and all entries */
+	xmlnode ppdb_get(ppdb db, jid id);	/* Called successively to return each presence xmlnode */
+	/*   for the id and children, returns NULL at the end */
 
 /* --------------------------------------------------------- */
 /*                                                           */
 /* Simple Jabber Rate limit functions                        */
 /*                                                           */
 /* --------------------------------------------------------- */
-typedef struct jlimit_struct
-{
-    char *key;
-    int start;
-    int points;
-    int maxt, maxp;
-    pool p;
-} *jlimit, _jlimit;
- 
-jlimit jlimit_new(int maxt, int maxp);
-void jlimit_free(jlimit r);
-int jlimit_check(jlimit r, char *key, int points);
+	typedef struct jlimit_struct {
+		char *key;
+		int start;
+		int points;
+		int maxt, maxp;
+		pool p;
+	} *jlimit, _jlimit;
 
+	jlimit jlimit_new(int maxt, int maxp);
+	void jlimit_free(jlimit r);
+	int jlimit_check(jlimit r, char *key, int points);
 
 /* --------------------------------------------------------- */
 /*                                                           */
 /* Error structures & constants                              */
 /*                                                           */
 /* --------------------------------------------------------- */
-typedef struct terror_struct
-{
-    int  code;
-    char msg[64];
-} terror;
+	typedef struct terror_struct {
+		int code;
+		char msg[64];
+	} terror;
 
 #define TERROR_BAD           (terror){400,"Bad Request"}
 #define TERROR_AUTH          (terror){401,"Unauthorized"}
@@ -250,8 +241,6 @@ typedef struct terror_struct
 
 #define NS_DISCOINFO  "http://jabber.org/protocol/disco#info"
 
-
-
 /* --------------------------------------------------------- */
 /*                                                           */
 /* Message Types                                             */
@@ -263,25 +252,23 @@ typedef struct terror_struct
 #define TMSG_GROUPCHAT	"groupchat"
 #define TMSG_HEADLINE	"headline"
 
-
 /* --------------------------------------------------------- */
 /*                                                           */
 /* JUtil functions                                           */
 /*                                                           */
 /* --------------------------------------------------------- */
-xmlnode jutil_presnew(int type, char *to, char *status); /* Create a skeleton presence packet */
-xmlnode jutil_iqnew(int type, char *ns);		 /* Create a skeleton iq packet */
-xmlnode jutil_msgnew(char *type, char *to, char *subj, char *body);
-							 /* Create a skeleton message packet */
-xmlnode jutil_header(char* xmlns, char* server);	 /* Create a skeleton stream packet */
-int     jutil_priority(xmlnode x);			 /* Determine priority of this packet */
-void    jutil_tofrom(xmlnode x);			 /* Swaps to/from fields on a packet */
-xmlnode jutil_iqresult(xmlnode x);			 /* Generate a skeleton iq/result, given a iq/query */
-char*   jutil_timestamp(void);				 /* Get stringified timestamp */
-void    jutil_error(xmlnode x, terror E);		 /* Append an <error> node to x */
-void    jutil_delay(xmlnode msg, char *reason);		 /* Append a delay packet to msg */
-char*   jutil_regkey(char *key, char *seed);		 /* pass a seed to generate a key, pass the key again to validate (returns it) */
-
+	xmlnode jutil_presnew(int type, char *to, char *status);	/* Create a skeleton presence packet */
+	xmlnode jutil_iqnew(int type, char *ns);	/* Create a skeleton iq packet */
+	xmlnode jutil_msgnew(char *type, char *to, char *subj, char *body);
+	/* Create a skeleton message packet */
+	xmlnode jutil_header(char *xmlns, char *server);	/* Create a skeleton stream packet */
+	int jutil_priority(xmlnode x);	/* Determine priority of this packet */
+	void jutil_tofrom(xmlnode x);	/* Swaps to/from fields on a packet */
+	xmlnode jutil_iqresult(xmlnode x);	/* Generate a skeleton iq/result, given a iq/query */
+	char *jutil_timestamp(void);	/* Get stringified timestamp */
+	void jutil_error(xmlnode x, terror E);	/* Append an <error> node to x */
+	void jutil_delay(xmlnode msg, char *reason);	/* Append a delay packet to msg */
+	char *jutil_regkey(char *key, char *seed);	/* pass a seed to generate a key, pass the key again to validate (returns it) */
 
 /* --------------------------------------------------------- */
 /*                                                           */
@@ -293,54 +280,49 @@ char*   jutil_regkey(char *key, char *seed);		 /* pass a seed to generate a key,
 #define JCONN_STATE_ON        2
 #define JCONN_STATE_AUTH      3
 
-typedef struct jconn_struct
-{
-    /* Core structure */
-    pool        p;	       /* Memory allocation pool */
-    int         state;	   /* Connection state flag */
-    jid         user;      /* User info */
-    char        *pass;     /* User passwd */
-    char        *serv;     /* Server to connect to (overrides one in JID) */
+	typedef struct jconn_struct {
+		/* Core structure */
+		pool p;		/* Memory allocation pool */
+		int state;	/* Connection state flag */
+		jid user;	/* User info */
+		char *pass;	/* User passwd */
+		char *serv;	/* Server to connect to (overrides one in JID) */
 
-    /* Stream stuff */
-    char        *sid;      /* stream id from server, for digest auth */
-    XML_Parser  parser;    /* Parser instance */
-    xmlnode     current;   /* Current node in parsing instance.. */
+		/* Stream stuff */
+		char *sid;	/* stream id from server, for digest auth */
+		XML_Parser parser;	/* Parser instance */
+		xmlnode current;	/* Current node in parsing instance.. */
 
-    /* Event callback ptrs */
-    void (*on_state)(struct jconn_struct *j, int state);
-    void (*on_packet)(struct jconn_struct *j, jpacket p);
+		/* Event callback ptrs */
+		void (*on_state) (struct jconn_struct *j, int state);
+		void (*on_packet) (struct jconn_struct *j, jpacket p);
 
-    int usessl;
-} *jconn, jconn_struct;
+		int usessl;
+	} *jconn, jconn_struct;
 
-typedef void (*jconn_state_h)(jconn j, int state);
-typedef void (*jconn_packet_h)(jconn j, jpacket p);
+	typedef void (*jconn_state_h) (jconn j, int state);
+	typedef void (*jconn_packet_h) (jconn j, jpacket p);
 
-
-jconn jab_new(char *user, char *pass, char *serv);
-void jab_delete(jconn j);
-void jab_state_handler(jconn j, jconn_state_h h);
-void jab_packet_handler(jconn j, jconn_packet_h h);
-int jab_start(jconn j);
-void jab_stop(jconn j);
+	jconn jab_new(char *user, char *pass, char *serv);
+	void jab_delete(jconn j);
+	void jab_state_handler(jconn j, jconn_state_h h);
+	void jab_packet_handler(jconn j, jconn_packet_h h);
+	int jab_start(jconn j);
+	void jab_stop(jconn j);
 
 //int jab_getfd(jconn j);
-jid jab_getjid(jconn j);
-char *jab_getsid(jconn j);
+	jid jab_getjid(jconn j);
+	char *jab_getsid(jconn j);
 
-void jab_send(jconn j, xmlnode x);
-void jab_send_raw(jconn j, const char *str);
-int jab_recv(jconn j);
-void jab_poll(jconn j);
+	void jab_send(jconn j, xmlnode x);
+	void jab_send_raw(jconn j, const char *str);
+	int jab_recv(jconn j);
+	void jab_poll(jconn j);
 
-void jab_auth(jconn j);
-void jab_reg(jconn j);
-
-
+	void jab_auth(jconn j);
+	void jab_reg(jconn j);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif	/* INCL_JABBER_H */
+#endif				/* INCL_JABBER_H */

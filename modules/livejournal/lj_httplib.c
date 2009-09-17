@@ -40,9 +40,9 @@
 
 int url_to_host_port_path(const char *url, char *host, int *port, char *path)
 {
-	char *urlcopy=NULL;
-	char *slash=NULL;
-	char *colon=NULL;
+	char *urlcopy = NULL;
+	char *slash = NULL;
+	char *colon = NULL;
 
 	/*
 	 * http://hostname
@@ -55,24 +55,24 @@ int url_to_host_port_path(const char *url, char *host, int *port, char *path)
 	 * http://hostname:port/path:foo
 	 */
 
-	if(strstr(url, "http://") == url) {
-		urlcopy = strdup(url+7);
+	if (strstr(url, "http://") == url) {
+		urlcopy = strdup(url + 7);
 	} else {
-		/*WARNING(("Weird url - unknown protocol: %s", url));*/
+		/*WARNING(("Weird url - unknown protocol: %s", url)); */
 		return 0;
 	}
 
 	slash = strchr(urlcopy, '/');
 	colon = strchr(urlcopy, ':');
 
-	if(!colon || (slash && slash < colon)) {
+	if (!colon || (slash && slash < colon)) {
 		*port = 80;
 	} else {
 		*colon = 0;
-		*port = atoi(colon+1);
+		*port = atoi(colon + 1);
 	}
 
-	if(!slash) {
+	if (!slash) {
 		strcpy(path, "/");
 	} else {
 		strcpy(path, slash);
@@ -93,71 +93,71 @@ static int isurlchar(unsigned char c)
 
 char *urlencode(const char *instr)
 {
-	int ipos=0, bpos=0;
+	int ipos = 0, bpos = 0;
 	char *str = NULL;
 	int len = strlen(instr);
 
-	if(!(str = malloc(sizeof(char) * (3*len + 1)) ))
+	if (!(str = malloc(sizeof(char) * (3 * len + 1))))
 		return "";
 
-	while(instr[ipos]) {
-		while(isurlchar(instr[ipos]))
+	while (instr[ipos]) {
+		while (isurlchar(instr[ipos]))
 			str[bpos++] = instr[ipos++];
-		if(!instr[ipos])
+		if (!instr[ipos])
 			break;
 
 		snprintf(&str[bpos], 4, "%%%.2x", instr[ipos]);
-		bpos+=3;
+		bpos += 3;
 		ipos++;
 	}
-	str[bpos]='\0';
+	str[bpos] = '\0';
 
 	/* free extra alloc'ed mem. */
 	len = strlen(str);
-	str = realloc(str, sizeof(char) * (len+1));
+	str = realloc(str, sizeof(char) * (len + 1));
 
 	return (str);
 }
 
 char *urldecode(const char *instr)
 {
-	int ipos=0, bpos=0;
+	int ipos = 0, bpos = 0;
 	char *str = NULL;
-	char entity[3]={0,0,0};
+	char entity[3] = { 0, 0, 0 };
 	unsigned dec;
 	int len = strlen(instr);
 
-	if(!(str = malloc(sizeof(char) * (len+1)) ))
+	if (!(str = malloc(sizeof(char) * (len + 1))))
 		return "";
 
-	while(instr[ipos]) {
-		while(instr[ipos] && instr[ipos]!='%')
-			if(instr[ipos]=='+') {
-				str[bpos++]=' ';
+	while (instr[ipos]) {
+		while (instr[ipos] && instr[ipos] != '%')
+			if (instr[ipos] == '+') {
+				str[bpos++] = ' ';
 				ipos++;
 			} else
 				str[bpos++] = instr[ipos++];
-		if(!instr[ipos])
+		if (!instr[ipos])
 			break;
 		ipos++;
 
-		entity[0]=instr[ipos++];
-		entity[1]=instr[ipos++];
+		entity[0] = instr[ipos++];
+		entity[1] = instr[ipos++];
 		sscanf(entity, "%2x", &dec);
 		str[bpos++] = (char)dec;
 	}
-	str[bpos]='\0';
+	str[bpos] = '\0';
 
 	/* free extra alloc'ed mem. */
 	len = strlen(str);
-	str = realloc(str, sizeof(char) * (len+1));
+	str = realloc(str, sizeof(char) * (len + 1));
 
 	return (str);
 }
 
 struct callback_data {
 	int tag;
-	lj_callback  callback;
+	lj_callback callback;
 	eb_local_account *ela;
 	char *request;
 };
@@ -167,27 +167,28 @@ static void read_http_response(void *data, int fd, eb_input_condition cond)
 	struct callback_data *ccd = data;
 
 	char buff[MAX_PREF_LEN];
-	int n=0;
+	int n = 0;
 
-	LList *pairs=NULL;
-	char key[MAX_PREF_NAME_LEN]="";
+	LList *pairs = NULL;
+	char key[MAX_PREF_NAME_LEN] = "";
 
-	int success=LJ_HTTP_NETWORK;
+	int success = LJ_HTTP_NETWORK;
 
-	while(success != LJ_HTTP_OK && (n=ay_tcp_readline(buff, sizeof(buff), fd)) > 0) {
+	while (success != LJ_HTTP_OK
+		&& (n = ay_tcp_readline(buff, sizeof(buff), fd)) > 0) {
 		/* read up to blank line */
-		if(!strcmp(buff, ""))
-			success=LJ_HTTP_OK;
-		else if(!strncmp(buff, "HTTP/", strlen("HTTP/")))
-			if(!strstr(buff, " 200 "))
-				success=LJ_HTTP_NOK;
+		if (!strcmp(buff, ""))
+			success = LJ_HTTP_OK;
+		else if (!strncmp(buff, "HTTP/", strlen("HTTP/")))
+			if (!strstr(buff, " 200 "))
+				success = LJ_HTTP_NOK;
 	}
 
-	if(n==0)
+	if (n == 0)
 		goto end_of_read;
 
-	while((n=ay_tcp_readline(buff, sizeof(buff), fd)) > 0) {
-		if(!strcmp(key, "")) {
+	while ((n = ay_tcp_readline(buff, sizeof(buff), fd)) > 0) {
+		if (!strcmp(key, "")) {
 			strncpy(key, buff, sizeof(key));
 		} else {
 			pairs = value_pair_add(pairs, key, buff);
@@ -195,8 +196,8 @@ static void read_http_response(void *data, int fd, eb_input_condition cond)
 		}
 	}
 
-end_of_read:
-	if(ccd->callback)
+ end_of_read:
+	if (ccd->callback)
 		ccd->callback(success, ccd->ela, pairs);
 
 	value_pair_free(pairs);
@@ -210,7 +211,7 @@ end_of_read:
 static void lj_got_connected(int fd, int error, void *data)
 {
 	struct callback_data *ccd = data;
-	if(error == 0 && fd > 0) {
+	if (error == 0 && fd > 0) {
 		write(fd, ccd->request, strlen(ccd->request));
 		fsync(fd);
 	}
@@ -218,23 +219,24 @@ static void lj_got_connected(int fd, int error, void *data)
 	ccd->tag = eb_input_add(fd, EB_INPUT_READ, read_http_response, ccd);
 }
 
-void send_http_request(const char *request, lj_callback callback, eb_local_account *ela)
+void send_http_request(const char *request, lj_callback callback,
+	eb_local_account *ela)
 {
 	char buff[1024];
-	struct callback_data *ccd=calloc(1, sizeof(struct callback_data));
+	struct callback_data *ccd = calloc(1, sizeof(struct callback_data));
 	snprintf(buff, sizeof(buff),
-			"POST %s HTTP/1.0\r\n"
-			"Host: %s\r\n"
-			"Content-Type: application/x-www-form-urlencoded\r\n"
-			"Content-Length: %u\r\n"
-			"\r\n"
-			"%s",
-			ext_lj_path(), ext_lj_host(), strlen(request), request);
+		"POST %s HTTP/1.0\r\n"
+		"Host: %s\r\n"
+		"Content-Type: application/x-www-form-urlencoded\r\n"
+		"Content-Length: %u\r\n"
+		"\r\n"
+		"%s", ext_lj_path(), ext_lj_host(), strlen(request), request);
 
 	ccd->callback = callback;
 	ccd->request = strdup(buff);
 	ccd->ela = ela;
 
-	ccd->tag = ay_socket_new_async(ext_lj_host(), ext_lj_port(), lj_got_connected, ccd, NULL);
+	ccd->tag =
+		ay_socket_new_async(ext_lj_host(), ext_lj_port(),
+		lj_got_connected, ccd, NULL);
 }
-

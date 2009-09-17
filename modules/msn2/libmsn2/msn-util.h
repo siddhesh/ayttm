@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifndef _MSN_UTIL_H_
 #define _MSN_UTIL_H_
 
@@ -36,4 +35,3 @@ char *msn_urlencode(const char *in);
 char *msn_urldecode(const char *in);
 
 #endif
-

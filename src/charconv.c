@@ -46,23 +46,22 @@ char *StrToUtf8(const char *in)
 	char *result = NULL;
 
 	/* Is it already in the right format? */
-	if(g_utf8_validate(in, -1, NULL))
+	if (g_utf8_validate(in, -1, NULL))
 		return (char *)in;
 
 	eb_debug(DBG_CORE, "Converting %s\n", in);
 
-	result = (char *) malloc(strlen(in) * 2 + 1);
+	result = (char *)malloc(strlen(in) * 2 + 1);
 
 	/* convert a string to UTF-8 Format */
 	for (n = 0; n < strlen(in); n++) {
 		unsigned char c = (unsigned char)in[n];
 
 		if (c < 128) {
-			result[i++] = (char) c;
-		}
-		else {
-			result[i++] = (char) ((c >> 6) | 192);
-			result[i++] = (char) ((c & 63) | 128);
+			result[i++] = (char)c;
+		} else {
+			result[i++] = (char)((c >> 6) | 192);
+			result[i++] = (char)((c & 63) | 128);
 		}
 	}
 	result[i] = '\0';
@@ -82,22 +81,21 @@ char *Utf8ToStr(const char *in)
 	char *result = NULL;
 
 	/* Is it in UTF? */
-	if( !g_utf8_validate(in, -1, NULL) )
+	if (!g_utf8_validate(in, -1, NULL))
 		return (char *)in;
 
-	if(in == NULL)
+	if (in == NULL)
 		return "";
 
-	result = (char *) malloc(strlen(in) + 1);
+	result = (char *)malloc(strlen(in) + 1);
 
 	/* convert a string from UTF-8 Format */
 	for (n = 0; n < strlen(in); n++) {
 		unsigned char c = in[n];
 
 		if (c < 128) {
-                        result[i++] = (char) c;
-		}
-		else {
+			result[i++] = (char)c;
+		} else {
 			result[i++] = (c << 6) | (in[++n] & 63);
 		}
 	}

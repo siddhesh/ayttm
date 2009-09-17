@@ -30,150 +30,159 @@ static const struct {
 	/*
 	 * These are in ascending numerical order.
 	 */
-	{AIM_CAPS_ICHAT,
-	 {0x09, 0x46, 0x00, 0x00, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_SECUREIM,
-	 {0x09, 0x46, 0x00, 0x01, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	/*
-	 * Not really sure about this one.  In an email from 
-	 * 26 Sep 2003, Matthew Sachs suggested that, "this 
-	 * is probably the capability for the SMS features."
-	 */
-	{AIM_CAPS_SMS,
-	 {0x09, 0x46, 0x01, 0xff, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_GENERICUNKNOWN,
-	 {0x09, 0x46, 0xf0, 0x03, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_GENERICUNKNOWN,
-	 {0x09, 0x46, 0xf0, 0x04, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_GENERICUNKNOWN,
-	 {0x09, 0x46, 0xf0, 0x05, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_HIPTOP,
-	 {0x09, 0x46, 0x13, 0x23, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_VOICE,
-	 {0x09, 0x46, 0x13, 0x41, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_SENDFILE,
-	 {0x09, 0x46, 0x13, 0x43, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	/*
-	 * Advertised by the EveryBuddy client.
-	 */
-	{AIM_CAPS_ICQ,
-	 {0x09, 0x46, 0x13, 0x44, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_DIRECTIM,
-	 {0x09, 0x46, 0x13, 0x45, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_BUDDYICON,
-	 {0x09, 0x46, 0x13, 0x46, 0x4c, 0x7f, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	/*
-	 * Windows AIM calls this "Add-ins," which is probably more accurate
-	 */
-	{AIM_CAPS_SAVESTOCKS,
-	 {0x09, 0x46, 0x13, 0x47, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_GETFILE,
-	 {0x09, 0x46, 0x13, 0x48, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_ICQSERVERRELAY,
-	 {0x09, 0x46, 0x13, 0x49, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	/*
-	 * Indeed, there are two of these.  The former appears to be correct, 
-	 * but in some versions of winaim, the second one is set.  Either they 
-	 * forgot to fix endianness, or they made a typo. It really doesn't 
-	 * matter which.
-	 */
-	{AIM_CAPS_GAMES,
-	 {0x09, 0x46, 0x13, 0x4a, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-	{AIM_CAPS_GAMES2,
-	 {0x09, 0x46, 0x13, 0x4a, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x22, 0x82, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_SENDBUDDYLIST,
-	 {0x09, 0x46, 0x13, 0x4b, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	/*
-	 * Setting this lets AIM users receive messages from ICQ users, and ICQ 
-	 * users receive messages from AIM users.  It also lets ICQ users show 
-	 * up in buddy lists for AIM users, and AIM users show up in buddy lists 
-	 * for ICQ users.  And ICQ privacy/invisibility acts like AIM privacy, 
-	 * in that if you add a user to your deny list, you will not be able to 
-	 * see them as online (previous you could still see them, but they 
-	 * couldn't see you.
-	 */
-	{AIM_CAPS_INTEROPERATE,
-	 {0x09, 0x46, 0x13, 0x4d, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_ICQUTF8,
-	 {0x09, 0x46, 0x13, 0x4e, 0x4c, 0x7f, 0x11, 0xd1,
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	{AIM_CAPS_ICQUTF8OLD,
-	 {0x2e, 0x7a, 0x64, 0x75, 0xfa, 0xdf, 0x4d, 0xc8,
-	  0x88, 0x6f, 0xea, 0x35, 0x95, 0xfd, 0xb6, 0xdf}},
-
-	/*
-	 * Chat is oddball.
-	 */
-	{AIM_CAPS_CHAT,
-	 {0x74, 0x8f, 0x24, 0x20, 0x62, 0x87, 0x11, 0xd1, 
-	  0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00}},
-
-	/*
-	{AIM_CAPS_ICQ2GO,
-	 {0x56, 0x3f, 0xc8, 0x09, 0x0b, 0x6f, 0x41, 0xbd,
-	  0x9f, 0x79, 0x42, 0x26, 0x09, 0xdf, 0xa2, 0xf3}},
-	*/
-
-	{AIM_CAPS_ICQRTF,
-	 {0x97, 0xb1, 0x27, 0x51, 0x24, 0x3c, 0x43, 0x34,
-	  0xad, 0x22, 0xd6, 0xab, 0xf7, 0x3f, 0x14, 0x92}},
-
-	/* This is added by the servers and it only shows up for ourselves... */
-	{AIM_CAPS_GENERICUNKNOWN,
-	 {0x97, 0xb1, 0x27, 0x51, 0x24, 0x3c, 0x43, 0x34, 
-	  0xad, 0x22, 0xd6, 0xab, 0xf7, 0x3f, 0x14, 0x09}},
-
-	{AIM_CAPS_APINFO, 
-	 {0xaa, 0x4a, 0x32, 0xb5, 0xf8, 0x84, 0x48, 0xc6,
-	  0xa3, 0xd7, 0x8c, 0x50, 0x97, 0x19, 0xfd, 0x5b}},
-
-	{AIM_CAPS_TRILLIANCRYPT,
-	 {0xf2, 0xe7, 0xc7, 0xf4, 0xfe, 0xad, 0x4d, 0xfb,
-	  0xb2, 0x35, 0x36, 0x79, 0x8b, 0xdf, 0x00, 0x00}},
-
-	{AIM_CAPS_EMPTY,
-	 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
-
-	{AIM_CAPS_LAST}
+	{
+		AIM_CAPS_ICHAT, {
+	0x09, 0x46, 0x00, 0x00, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_SECUREIM, {
+	0x09, 0x46, 0x00, 0x01, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}},
+		/*
+		 * Not really sure about this one.  In an email from 
+		 * 26 Sep 2003, Matthew Sachs suggested that, "this 
+		 * is probably the capability for the SMS features."
+		 */
+	{
+		AIM_CAPS_SMS, {
+	0x09, 0x46, 0x01, 0xff, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_GENERICUNKNOWN, {
+	0x09, 0x46, 0xf0, 0x03, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_GENERICUNKNOWN, {
+	0x09, 0x46, 0xf0, 0x04, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_GENERICUNKNOWN, {
+	0x09, 0x46, 0xf0, 0x05, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_HIPTOP, {
+	0x09, 0x46, 0x13, 0x23, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_VOICE, {
+	0x09, 0x46, 0x13, 0x41, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_SENDFILE, {
+	0x09, 0x46, 0x13, 0x43, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}},
+		/*
+		 * Advertised by the EveryBuddy client.
+		 */
+	{
+		AIM_CAPS_ICQ, {
+	0x09, 0x46, 0x13, 0x44, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_DIRECTIM, {
+	0x09, 0x46, 0x13, 0x45, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_BUDDYICON, {
+	0x09, 0x46, 0x13, 0x46, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}},
+		/*
+		 * Windows AIM calls this "Add-ins," which is probably more accurate
+		 */
+	{
+		AIM_CAPS_SAVESTOCKS, {
+	0x09, 0x46, 0x13, 0x47, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_GETFILE, {
+	0x09, 0x46, 0x13, 0x48, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_ICQSERVERRELAY, {
+	0x09, 0x46, 0x13, 0x49, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}},
+		/*
+		 * Indeed, there are two of these.  The former appears to be correct, 
+		 * but in some versions of winaim, the second one is set.  Either they 
+		 * forgot to fix endianness, or they made a typo. It really doesn't 
+		 * matter which.
+		 */
+	{
+		AIM_CAPS_GAMES, {
+	0x09, 0x46, 0x13, 0x4a, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_GAMES2, {
+	0x09, 0x46, 0x13, 0x4a, 0x4c, 0x7f, 0x11, 0xd1,
+				0x22, 0x82, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_SENDBUDDYLIST, {
+	0x09, 0x46, 0x13, 0x4b, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}},
+		/*
+		 * Setting this lets AIM users receive messages from ICQ users, and ICQ 
+		 * users receive messages from AIM users.  It also lets ICQ users show 
+		 * up in buddy lists for AIM users, and AIM users show up in buddy lists 
+		 * for ICQ users.  And ICQ privacy/invisibility acts like AIM privacy, 
+		 * in that if you add a user to your deny list, you will not be able to 
+		 * see them as online (previous you could still see them, but they 
+		 * couldn't see you.
+		 */
+	{
+		AIM_CAPS_INTEROPERATE, {
+	0x09, 0x46, 0x13, 0x4d, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_ICQUTF8, {
+	0x09, 0x46, 0x13, 0x4e, 0x4c, 0x7f, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}}, {
+		AIM_CAPS_ICQUTF8OLD, {
+	0x2e, 0x7a, 0x64, 0x75, 0xfa, 0xdf, 0x4d, 0xc8,
+				0x88, 0x6f, 0xea, 0x35, 0x95,
+				0xfd, 0xb6, 0xdf}},
+		/*
+		 * Chat is oddball.
+		 */
+	{
+		AIM_CAPS_CHAT, {
+	0x74, 0x8f, 0x24, 0x20, 0x62, 0x87, 0x11, 0xd1,
+				0x82, 0x22, 0x44, 0x45, 0x53,
+				0x54, 0x00, 0x00}},
+		/*
+		   {AIM_CAPS_ICQ2GO,
+		   {0x56, 0x3f, 0xc8, 0x09, 0x0b, 0x6f, 0x41, 0xbd,
+		   0x9f, 0x79, 0x42, 0x26, 0x09, 0xdf, 0xa2, 0xf3}},
+		 */
+	{
+		AIM_CAPS_ICQRTF, {
+	0x97, 0xb1, 0x27, 0x51, 0x24, 0x3c, 0x43, 0x34,
+				0xad, 0x22, 0xd6, 0xab, 0xf7,
+				0x3f, 0x14, 0x92}},
+		/* This is added by the servers and it only shows up for ourselves... */
+	{
+		AIM_CAPS_GENERICUNKNOWN, {
+	0x97, 0xb1, 0x27, 0x51, 0x24, 0x3c, 0x43, 0x34,
+				0xad, 0x22, 0xd6, 0xab, 0xf7,
+				0x3f, 0x14, 0x09}}, {
+		AIM_CAPS_APINFO, {
+	0xaa, 0x4a, 0x32, 0xb5, 0xf8, 0x84, 0x48, 0xc6,
+				0xa3, 0xd7, 0x8c, 0x50, 0x97,
+				0x19, 0xfd, 0x5b}}, {
+		AIM_CAPS_TRILLIANCRYPT, {
+	0xf2, 0xe7, 0xc7, 0xf4, 0xfe, 0xad, 0x4d, 0xfb,
+				0xb2, 0x35, 0x36, 0x79, 0x8b,
+				0xdf, 0x00, 0x00}}, {
+		AIM_CAPS_EMPTY, {
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00}}, {
+	AIM_CAPS_LAST}
 };
 
 /*
@@ -181,7 +190,9 @@ static const struct {
  * for this buddy, then just overwrite parts of the old data.
  * @param userinfo Contains the new information for the buddy.
  */
-static void aim_locate_adduserinfo(aim_session_t *sess, aim_userinfo_t *userinfo) {
+static void aim_locate_adduserinfo(aim_session_t *sess,
+	aim_userinfo_t *userinfo)
+{
 	aim_userinfo_t *cur;
 
 	cur = aim_locate_finduserinfo(sess, userinfo->sn);
@@ -212,7 +223,8 @@ static void aim_locate_adduserinfo(aim_session_t *sess, aim_userinfo_t *userinfo
 	if (userinfo->iconcsumlen > 0) {
 		free(cur->iconcsum);
 		cur->iconcsum = (fu8_t *)malloc(userinfo->iconcsumlen);
-		memcpy(cur->iconcsum, userinfo->iconcsum, userinfo->iconcsumlen);
+		memcpy(cur->iconcsum, userinfo->iconcsum,
+			userinfo->iconcsumlen);
 		cur->iconcsumlen = userinfo->iconcsumlen;
 	}
 
@@ -221,7 +233,7 @@ static void aim_locate_adduserinfo(aim_session_t *sess, aim_userinfo_t *userinfo
 		free(cur->info_encoding);
 		cur->info = (char *)malloc(userinfo->info_len);
 		memcpy(cur->info, userinfo->info, userinfo->info_len);
-		cur->info_encoding = strdup(userinfo->info_encoding); /* XXX - This seems to leak occasionally */
+		cur->info_encoding = strdup(userinfo->info_encoding);	/* XXX - This seems to leak occasionally */
 		cur->info_len = userinfo->info_len;
 	}
 
@@ -230,12 +242,13 @@ static void aim_locate_adduserinfo(aim_session_t *sess, aim_userinfo_t *userinfo
 		free(cur->away_encoding);
 		cur->away = (char *)malloc(userinfo->away_len);
 		memcpy(cur->away, userinfo->away, userinfo->away_len);
-		cur->away_encoding = strdup(userinfo->away_encoding); /* XXX - This seems to leak occasionally */
+		cur->away_encoding = strdup(userinfo->away_encoding);	/* XXX - This seems to leak occasionally */
 		cur->away_len = userinfo->away_len;
 	}
 }
 
-static void aim_locate_dorequest(aim_session_t *sess) {
+static void aim_locate_dorequest(aim_session_t *sess)
+{
 	struct userinfo_node *cur = sess->locate.request_queue;
 
 	if (cur == NULL)
@@ -248,7 +261,9 @@ static void aim_locate_dorequest(aim_session_t *sess) {
 	aim_locate_getinfoshort(sess, cur->sn, 0x00000007);
 }
 
-faim_internal void aim_locate_requestuserinfo(aim_session_t *sess, const char *sn) {
+faim_internal void aim_locate_requestuserinfo(aim_session_t *sess,
+	const char *sn)
+{
 	struct userinfo_node *cur;
 
 	cur = (struct userinfo_node *)malloc(sizeof(struct userinfo_node));
@@ -259,7 +274,9 @@ faim_internal void aim_locate_requestuserinfo(aim_session_t *sess, const char *s
 	aim_locate_dorequest(sess);
 }
 
-faim_export aim_userinfo_t *aim_locate_finduserinfo(aim_session_t *sess, const char *sn) {
+faim_export aim_userinfo_t *aim_locate_finduserinfo(aim_session_t *sess,
+	const char *sn)
+{
 	aim_userinfo_t *cur = sess->locate.userinfo;
 
 	while (cur != NULL) {
@@ -280,30 +297,30 @@ faim_internal fu32_t aim_getcap(aim_session_t *sess, aim_bstream_t *bs, int len)
 	fu32_t flags = 0;
 	int offset;
 
-	for (offset = 0; aim_bstream_empty(bs) && (offset < len); offset += 0x10) {
+	for (offset = 0; aim_bstream_empty(bs) && (offset < len);
+		offset += 0x10) {
 		fu8_t *cap;
 		int i, identified;
 
 		cap = aimbs_getraw(bs, 0x10);
 
-		for (i = 0, identified = 0; !(aim_caps[i].flag & AIM_CAPS_LAST); i++) {
+		for (i = 0, identified = 0; !(aim_caps[i].flag & AIM_CAPS_LAST);
+			i++) {
 
 			if (memcmp(&aim_caps[i].data, cap, 0x10) == 0) {
 				flags |= aim_caps[i].flag;
 				identified++;
-				break; /* should only match once... */
+				break;	/* should only match once... */
 
 			}
 		}
 
 		if (!identified) {
-			faimdprintf(sess, 0, "unknown capability: {%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x}\n",
-					cap[0], cap[1], cap[2], cap[3],
-					cap[4], cap[5],
-					cap[6], cap[7],
-					cap[8], cap[9],
-					cap[10], cap[11], cap[12], cap[13],
-					cap[14], cap[15]);
+			faimdprintf(sess, 0,
+				"unknown capability: {%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x}\n",
+				cap[0], cap[1], cap[2], cap[3], cap[4], cap[5],
+				cap[6], cap[7], cap[8], cap[9], cap[10],
+				cap[11], cap[12], cap[13], cap[14], cap[15]);
 		}
 
 		free(cap);
@@ -332,7 +349,8 @@ faim_internal int aim_putcap(aim_bstream_t *bs, fu32_t caps)
 	return 0;
 }
 
-static void dumptlv(aim_session_t *sess, fu16_t type, aim_bstream_t *bs, fu8_t len)
+static void dumptlv(aim_session_t *sess, fu16_t type, aim_bstream_t *bs,
+	fu8_t len)
 {
 	int i;
 
@@ -370,7 +388,8 @@ faim_internal void aim_info_free(aim_userinfo_t *info)
  * AIM is fairly regular about providing user info.  This is a generic 
  * routine to extract it in its standard form.
  */
-faim_internal int aim_info_extract(aim_session_t *sess, aim_bstream_t *bs, aim_userinfo_t *outinfo)
+faim_internal int aim_info_extract(aim_session_t *sess, aim_bstream_t *bs,
+	aim_userinfo_t *outinfo)
 {
 	int curtlv, tlvcnt;
 	fu8_t snlen;
@@ -587,39 +606,63 @@ faim_internal int aim_info_extract(aim_session_t *sess, aim_bstream_t *bs, aim_u
 				length2 = aimbs_get8(bs);
 
 				switch (type2) {
-					case 0x0000: { /* This is an official buddy icon? */
+				case 0x0000:{	/* This is an official buddy icon? */
 						/* This is always 5 bytes of "0x02 01 d2 04 72"? */
-						aim_bstream_advance(bs, length2);
-					} break;
+						aim_bstream_advance(bs,
+							length2);
+					}
+					break;
 
-					case 0x0001: { /* A buddy icon checksum */
-						if ((length2 > 0) && (number == 0x01)) {
+				case 0x0001:{	/* A buddy icon checksum */
+						if ((length2 > 0)
+							&& (number == 0x01)) {
 							free(outinfo->iconcsum);
-							outinfo->iconcsum = aimbs_getraw(bs, length2);
-							outinfo->iconcsumlen = length2;
+							outinfo->iconcsum =
+								aimbs_getraw(bs,
+								length2);
+							outinfo->iconcsumlen =
+								length2;
 						} else
-							aim_bstream_advance(bs, length2);
-					} break;
+							aim_bstream_advance(bs,
+								length2);
+					}
+					break;
 
-					case 0x0002: { /* An available message */
+				case 0x0002:{	/* An available message */
 						if (length2 > 4) {
 							free(outinfo->avail);
-							outinfo->avail_len = aimbs_get16(bs);
-							outinfo->avail = aimbs_getstr(bs, outinfo->avail_len);
-							if (aimbs_get16(bs) == 0x0001) { /* We have an encoding */
+							outinfo->avail_len =
 								aimbs_get16(bs);
-								outinfo->avail_encoding = aimbs_getstr(bs, aimbs_get16(bs));
+							outinfo->avail =
+								aimbs_getstr(bs,
+								outinfo->
+								avail_len);
+							if (aimbs_get16(bs) == 0x0001) {	/* We have an encoding */
+								aimbs_get16(bs);
+								outinfo->
+									avail_encoding
+									=
+									aimbs_getstr
+									(bs,
+									aimbs_get16
+									(bs));
 							} else {
 								/* No explicit encoding, client should use UTF-8 */
-								outinfo->avail_encoding = NULL;
+								outinfo->
+									avail_encoding
+									= NULL;
 							}
 						} else
-							aim_bstream_advance(bs, length2);
-					} break;
+							aim_bstream_advance(bs,
+								length2);
+					}
+					break;
 
-					default: {
-						aim_bstream_advance(bs, length2);
-					} break;
+				default:{
+						aim_bstream_advance(bs,
+							length2);
+					}
+					break;
 				}
 			}
 
@@ -649,8 +692,10 @@ faim_internal int aim_info_extract(aim_session_t *sess, aim_bstream_t *bs, aim_u
 			 * recovery.
 			 *
 			 */
-			faimdprintf(sess, 0, "userinfo: **warning: unexpected TLV:\n");
-			faimdprintf(sess, 0, "userinfo:   sn    =%s\n", outinfo->sn);
+			faimdprintf(sess, 0,
+				"userinfo: **warning: unexpected TLV:\n");
+			faimdprintf(sess, 0, "userinfo:   sn    =%s\n",
+				outinfo->sn);
 			dumptlv(sess, type, bs, length);
 		}
 
@@ -691,17 +736,22 @@ faim_internal int aim_putuserinfo(aim_bstream_t *bs, aim_userinfo_t *info)
 #if ICQ_OSCAR_SUPPORT
 	if (atoi(info->sn) != 0) {
 		if (info->present & AIM_USERINFO_PRESENT_ICQEXTSTATUS)
-			aim_addtlvtochain16(&tlvlist, 0x0006, info->icqinfo.status);
+			aim_addtlvtochain16(&tlvlist, 0x0006,
+				info->icqinfo.status);
 		if (info->present & AIM_USERINFO_PRESENT_ICQIPADDR)
-			aim_addtlvtochain32(&tlvlist, 0x000a, info->icqinfo.ipaddr);
+			aim_addtlvtochain32(&tlvlist, 0x000a,
+				info->icqinfo.ipaddr);
 	}
 #endif
 
 	if (info->present & AIM_USERINFO_PRESENT_CAPABILITIES)
 		aim_addtlvtochain_caps(&tlvlist, 0x000d, info->capabilities);
- 
+
 	if (info->present & AIM_USERINFO_PRESENT_SESSIONLEN)
-		aim_addtlvtochain32(&tlvlist, (fu16_t)((info->flags & AIM_FLAG_AOL) ? 0x0010 : 0x000f), info->sessionlen);
+		aim_addtlvtochain32(&tlvlist,
+			(fu16_t) ((info->
+					flags & AIM_FLAG_AOL) ? 0x0010 :
+				0x000f), info->sessionlen);
 
 	aimbs_put16(bs, aim_counttlvchain(&tlvlist));
 	aim_writetlvchain(bs, &tlvlist);
@@ -723,7 +773,8 @@ faim_export int aim_locate_reqrights(aim_session_t *sess)
 	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC)))
 		return -EINVAL;
 
-	return aim_genericreq_n(sess, conn, AIM_CB_FAM_LOC, AIM_CB_LOC_REQRIGHTS);
+	return aim_genericreq_n(sess, conn, AIM_CB_FAM_LOC,
+		AIM_CB_LOC_REQRIGHTS);
 }
 
 /*
@@ -735,7 +786,8 @@ faim_export int aim_locate_reqrights(aim_session_t *sess)
  *   t(0003)  - short - unknown (value = 10)
  *   t(0004)  - short - unknown (value = 2048) [ICQ only?]
  */
-static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_tlvlist_t *tlvlist;
 	aim_rxcallback_t userfunc;
@@ -747,7 +799,8 @@ static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_m
 	if (aim_gettlv(tlvlist, 0x0001, 1))
 		maxsiglen = aim_gettlv16(tlvlist, 0x0001, 1);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, maxsiglen);
 
 	aim_freetlvchain(&tlvlist);
@@ -776,32 +829,36 @@ static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_m
  * 
  */
 faim_export int aim_locate_setprofile(aim_session_t *sess,
-				  const char *profile_encoding, const char *profile, const int profile_len,
-				  const char *awaymsg_encoding, const char *awaymsg, const int awaymsg_len,
-				  fu32_t caps)
+	const char *profile_encoding, const char *profile,
+	const int profile_len, const char *awaymsg_encoding,
+	const char *awaymsg, const int awaymsg_len, fu32_t caps)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 	aim_tlvlist_t *tl = NULL;
 	char *encoding;
-	static const char defencoding[] = {"text/aolrtf; charset=\"%s\""};
+	static const char defencoding[] = { "text/aolrtf; charset=\"%s\"" };
 
 	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC)))
 		return -EINVAL;
 
-	if ((profile && profile_encoding == NULL) || (awaymsg && awaymsg_len && awaymsg_encoding == NULL)) {
+	if ((profile && profile_encoding == NULL) || (awaymsg && awaymsg_len
+			&& awaymsg_encoding == NULL)) {
 		return -EINVAL;
 	}
 
 	/* Build the packet first to get real length */
 	if (profile) {
 		/* no + 1 here because of %s */
-		encoding = malloc(strlen(defencoding) + strlen(profile_encoding));
+		encoding =
+			malloc(strlen(defencoding) + strlen(profile_encoding));
 		if (encoding == NULL) {
 			return -ENOMEM;
 		}
-		snprintf(encoding, strlen(defencoding) + strlen(profile_encoding), defencoding, profile_encoding);
+		snprintf(encoding,
+			strlen(defencoding) + strlen(profile_encoding),
+			defencoding, profile_encoding);
 		aim_addtlvtochain_raw(&tl, 0x0001, strlen(encoding), encoding);
 		aim_addtlvtochain_raw(&tl, 0x0002, profile_len, profile);
 		free(encoding);
@@ -817,13 +874,19 @@ faim_export int aim_locate_setprofile(aim_session_t *sess,
 	 */
 	if (awaymsg) {
 		if (awaymsg_len) {
-			encoding = malloc(strlen(defencoding) + strlen(awaymsg_encoding));
+			encoding =
+				malloc(strlen(defencoding) +
+				strlen(awaymsg_encoding));
 			if (encoding == NULL) {
 				return -ENOMEM;
 			}
-			snprintf(encoding, strlen(defencoding) + strlen(awaymsg_encoding), defencoding, awaymsg_encoding);
-			aim_addtlvtochain_raw(&tl, 0x0003, strlen(encoding), encoding);
-			aim_addtlvtochain_raw(&tl, 0x0004, awaymsg_len, awaymsg);
+			snprintf(encoding,
+				strlen(defencoding) + strlen(awaymsg_encoding),
+				defencoding, awaymsg_encoding);
+			aim_addtlvtochain_raw(&tl, 0x0003, strlen(encoding),
+				encoding);
+			aim_addtlvtochain_raw(&tl, 0x0004, awaymsg_len,
+				awaymsg);
 			free(encoding);
 		} else
 			aim_addtlvtochain_noval(&tl, 0x0004);
@@ -831,7 +894,8 @@ faim_export int aim_locate_setprofile(aim_session_t *sess,
 
 	aim_addtlvtochain_caps(&tl, 0x0005, caps);
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + aim_sizetlvchain(&tl))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + aim_sizetlvchain(&tl))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0002, 0x0004, 0x0000, NULL, 0);
@@ -854,20 +918,23 @@ faim_export int aim_locate_setprofile(aim_session_t *sess,
  *        0x0003 - Away message
  *        0x0004 - Capabilities
  */
-faim_export int aim_locate_getinfo(aim_session_t *sess, const char *sn, fu16_t infotype)
+faim_export int aim_locate_getinfo(aim_session_t *sess, const char *sn,
+	fu16_t infotype)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 
-	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC)) || !sn)
+	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC))
+		|| !sn)
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 12+1+strlen(sn))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				12 + 1 + strlen(sn))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0002, 0x0005, 0x0000, NULL, 0);
-	
+
 	aim_putsnac(&fr->data, 0x0002, 0x0005, 0x0000, snacid);
 	aimbs_put16(&fr->data, infotype);
 	aimbs_put8(&fr->data, strlen(sn));
@@ -879,7 +946,8 @@ faim_export int aim_locate_getinfo(aim_session_t *sess, const char *sn, fu16_t i
 }
 
 /* Subtype 0x0006 */
-static int userinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int userinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
@@ -929,7 +997,9 @@ static int userinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 	 * for this buddy.
 	 */
 	was_explicit = TRUE;
-	while ((sess->locate.request_queue != NULL) && (aim_sncmp(userinfo2->sn, sess->locate.request_queue->sn) == 0)) {
+	while ((sess->locate.request_queue != NULL)
+		&& (aim_sncmp(userinfo2->sn,
+				sess->locate.request_queue->sn) == 0)) {
 		del = sess->locate.request_queue;
 		sess->locate.request_queue = del->next;
 		was_explicit = FALSE;
@@ -949,7 +1019,8 @@ static int userinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
 	}
 
 	if (was_explicit == TRUE) {
-		if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+		if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+					snac->subtype)))
 			ret = userfunc(sess, rx, userinfo2);
 	} else {
 		sess->locate.waiting_for_response = FALSE;
@@ -966,7 +1037,10 @@ static int userinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim
  * privacy: 1 to allow searching, 0 to disallow.
  *
  */
-faim_export int aim_locate_setdirinfo(aim_session_t *sess, const char *first, const char *middle, const char *last, const char *maiden, const char *nickname, const char *street, const char *city, const char *state, const char *zip, int country, fu16_t privacy) 
+faim_export int aim_locate_setdirinfo(aim_session_t *sess, const char *first,
+	const char *middle, const char *last, const char *maiden,
+	const char *nickname, const char *street, const char *city,
+	const char *state, const char *zip, int country, fu16_t privacy)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
@@ -1000,7 +1074,8 @@ faim_export int aim_locate_setdirinfo(aim_session_t *sess, const char *first, co
 	if (street)
 		aim_addtlvtochain_raw(&tl, 0x0021, strlen(street), street);
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+aim_sizetlvchain(&tl))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + aim_sizetlvchain(&tl))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0002, 0x0009, 0x0000, NULL, 0);
@@ -1023,16 +1098,18 @@ faim_export int aim_locate_000b(aim_session_t *sess, const char *sn)
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 
+	return -EINVAL;
+
+	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC))
+		|| !sn)
 		return -EINVAL;
 
-	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC)) || !sn)
-		return -EINVAL;
-
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+1+strlen(sn))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 1 + strlen(sn))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0002, 0x000b, 0x0000, NULL, 0);
-	
+
 	aim_putsnac(&fr->data, 0x0002, 0x000b, 0x0000, snacid);
 	aimbs_put8(&fr->data, strlen(sn));
 	aimbs_putraw(&fr->data, sn, strlen(sn));
@@ -1048,7 +1125,9 @@ faim_export int aim_locate_000b(aim_session_t *sess, const char *sn)
  * XXX pass these in better
  *
  */
-faim_export int aim_locate_setinterests(aim_session_t *sess, const char *interest1, const char *interest2, const char *interest3, const char *interest4, const char *interest5, fu16_t privacy)
+faim_export int aim_locate_setinterests(aim_session_t *sess,
+	const char *interest1, const char *interest2, const char *interest3,
+	const char *interest4, const char *interest5, fu16_t privacy)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
@@ -1062,17 +1141,23 @@ faim_export int aim_locate_setinterests(aim_session_t *sess, const char *interes
 	aim_addtlvtochain16(&tl, 0x000a, privacy);
 
 	if (interest1)
-		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest1), interest1);
+		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest1),
+			interest1);
 	if (interest2)
-		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest2), interest2);
+		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest2),
+			interest2);
 	if (interest3)
-		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest3), interest3);
+		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest3),
+			interest3);
 	if (interest4)
-		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest4), interest4);
+		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest4),
+			interest4);
 	if (interest5)
-		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest5), interest5);
+		aim_addtlvtochain_raw(&tl, 0x0000b, strlen(interest5),
+			interest5);
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+aim_sizetlvchain(&tl))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + aim_sizetlvchain(&tl))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0002, 0x000f, 0x0000, NULL, 0);
@@ -1098,16 +1183,19 @@ faim_export int aim_locate_setinterests(aim_session_t *sess, const char *interes
  *        0x00000008 - Certification.
  * @return Return 0 if no errors, otherwise return the error number.
  */
-faim_export int aim_locate_getinfoshort(aim_session_t *sess, const char *sn, fu32_t flags)
+faim_export int aim_locate_getinfoshort(aim_session_t *sess, const char *sn,
+	fu32_t flags)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 
-	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC)) || !sn)
+	if (!sess || !(conn = aim_conn_findbygroup(sess, AIM_CB_FAM_LOC))
+		|| !sn)
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+4+1+strlen(sn))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + 1 + strlen(sn))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0002, 0x0015, 0x0000, NULL, 0);
@@ -1122,7 +1210,8 @@ faim_export int aim_locate_getinfoshort(aim_session_t *sess, const char *sn, fu3
 	return 0;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0003)

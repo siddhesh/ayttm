@@ -18,7 +18,7 @@ static void freetlv(aim_tlv_t **oldtlv)
 
 	if (!oldtlv || !*oldtlv)
 		return;
-	
+
 	free((*oldtlv)->value);
 	free(*oldtlv);
 	*oldtlv = NULL;
@@ -45,14 +45,14 @@ static void freetlv(aim_tlv_t **oldtlv)
 faim_internal aim_tlvlist_t *aim_readtlvchain(aim_bstream_t *bs)
 {
 	aim_tlvlist_t *list = NULL, *cur;
-	
+
 	while (aim_bstream_empty(bs) > 0) {
 		fu16_t type, length;
 
 		type = aimbs_get16(bs);
 		length = aimbs_get16(bs);
 
-#if 0 /* temporarily disabled until I know if they're still doing it or not */
+#if 0				/* temporarily disabled until I know if they're still doing it or not */
 		/*
 		 * Okay, so now AOL has decided that any TLV of
 		 * type 0x0013 can only be two bytes, despite
@@ -64,8 +64,7 @@ faim_internal aim_tlvlist_t *aim_readtlvchain(aim_bstream_t *bs)
 		if ((type == 0x0013) && (length != 0x0002))
 			length = 0x0002;
 #else
-		if (0)
-			;
+		if (0) ;
 #endif
 		else {
 
@@ -90,13 +89,13 @@ faim_internal aim_tlvlist_t *aim_readtlvchain(aim_bstream_t *bs)
 			}
 			cur->tlv->type = type;
 			if ((cur->tlv->length = length)) {
-			       cur->tlv->value = aimbs_getraw(bs, length);	
-			       if (!cur->tlv->value) {
-				       freetlv(&cur->tlv);
-				       free(cur);
-				       aim_freetlvchain(&list);
-				       return NULL;
-			       }
+				cur->tlv->value = aimbs_getraw(bs, length);
+				if (!cur->tlv->value) {
+					freetlv(&cur->tlv);
+					free(cur);
+					aim_freetlvchain(&list);
+					return NULL;
+				}
 			}
 
 			cur->next = list;
@@ -158,13 +157,13 @@ faim_internal aim_tlvlist_t *aim_readtlvchain_num(aim_bstream_t *bs, fu16_t num)
 		}
 		cur->tlv->type = type;
 		if ((cur->tlv->length = length)) {
-		       cur->tlv->value = aimbs_getraw(bs, length);
-		       if (!cur->tlv->value) {
-			       freetlv(&cur->tlv);
-			       free(cur);
-			       aim_freetlvchain(&list);
-			       return NULL;
-		       }
+			cur->tlv->value = aimbs_getraw(bs, length);
+			if (!cur->tlv->value) {
+				freetlv(&cur->tlv);
+				free(cur);
+				aim_freetlvchain(&list);
+				return NULL;
+			}
 		}
 
 		num--;
@@ -226,13 +225,13 @@ faim_internal aim_tlvlist_t *aim_readtlvchain_len(aim_bstream_t *bs, fu16_t len)
 		}
 		cur->tlv->type = type;
 		if ((cur->tlv->length = length)) {
-		       cur->tlv->value = aimbs_getraw(bs, length);
-		       if (!cur->tlv->value) {
-			       freetlv(&cur->tlv);
-			       free(cur);
-			       aim_freetlvchain(&list);
-			       return NULL;
-		       }
+			cur->tlv->value = aimbs_getraw(bs, length);
+			if (!cur->tlv->value) {
+				freetlv(&cur->tlv);
+				free(cur);
+				aim_freetlvchain(&list);
+				return NULL;
+			}
 		}
 
 		len -= aim_sizetlvchain(&cur);
@@ -255,7 +254,8 @@ faim_internal aim_tlvlist_t *aim_tlvlist_copy(aim_tlvlist_t *orig)
 	aim_tlvlist_t *new = NULL;
 
 	while (orig) {
-		aim_addtlvtochain_raw(&new, orig->tlv->type, orig->tlv->length, orig->tlv->value);
+		aim_addtlvtochain_raw(&new, orig->tlv->type, orig->tlv->length,
+			orig->tlv->value);
 		orig = orig->next;
 	}
 
@@ -277,8 +277,12 @@ faim_internal int aim_tlvlist_cmp(aim_tlvlist_t *one, aim_tlvlist_t *two)
 	if (aim_sizetlvchain(&one) != aim_sizetlvchain(&two))
 		return 1;
 
-	aim_bstream_init(&bs1, ((fu8_t *)malloc(aim_sizetlvchain(&one)*sizeof(fu8_t))), aim_sizetlvchain(&one));
-	aim_bstream_init(&bs2, ((fu8_t *)malloc(aim_sizetlvchain(&two)*sizeof(fu8_t))), aim_sizetlvchain(&two));
+	aim_bstream_init(&bs1,
+		((fu8_t *)malloc(aim_sizetlvchain(&one) * sizeof(fu8_t))),
+		aim_sizetlvchain(&one));
+	aim_bstream_init(&bs2,
+		((fu8_t *)malloc(aim_sizetlvchain(&two) * sizeof(fu8_t))),
+		aim_sizetlvchain(&two));
 
 	aim_writetlvchain(&bs1, &one);
 	aim_writetlvchain(&bs2, &two);
@@ -311,9 +315,9 @@ faim_internal void aim_freetlvchain(aim_tlvlist_t **list)
 	if (!list || !*list)
 		return;
 
-	for (cur = *list; cur; ) {
+	for (cur = *list; cur;) {
 		aim_tlvlist_t *tmp;
-		
+
 		freetlv(&cur->tlv);
 
 		tmp = cur->next;
@@ -380,7 +384,8 @@ faim_internal int aim_sizetlvchain(aim_tlvlist_t **list)
  * to the TLV chain.
  *
  */
-faim_internal int aim_addtlvtochain_raw(aim_tlvlist_t **list, const fu16_t t, const fu16_t l, const fu8_t *v)
+faim_internal int aim_addtlvtochain_raw(aim_tlvlist_t **list, const fu16_t t,
+	const fu16_t l, const fu8_t *v)
 {
 	aim_tlvlist_t *newtlv, *cur;
 
@@ -404,8 +409,7 @@ faim_internal int aim_addtlvtochain_raw(aim_tlvlist_t **list, const fu16_t t, co
 	if (!*list)
 		*list = newtlv;
 	else {
-		for(cur = *list; cur->next; cur = cur->next)
-			;
+		for (cur = *list; cur->next; cur = cur->next) ;
 		cur->next = newtlv;
 	}
 
@@ -421,7 +425,8 @@ faim_internal int aim_addtlvtochain_raw(aim_tlvlist_t **list, const fu16_t t, co
  * Adds a one-byte unsigned integer to a TLV chain.
  *
  */
-faim_internal int aim_addtlvtochain8(aim_tlvlist_t **list, const fu16_t t, const fu8_t v)
+faim_internal int aim_addtlvtochain8(aim_tlvlist_t **list, const fu16_t t,
+	const fu8_t v)
 {
 	fu8_t v8[1];
 
@@ -439,7 +444,8 @@ faim_internal int aim_addtlvtochain8(aim_tlvlist_t **list, const fu16_t t, const
  * Adds a two-byte unsigned integer to a TLV chain.
  *
  */
-faim_internal int aim_addtlvtochain16(aim_tlvlist_t **list, const fu16_t t, const fu16_t v)
+faim_internal int aim_addtlvtochain16(aim_tlvlist_t **list, const fu16_t t,
+	const fu16_t v)
 {
 	fu8_t v16[2];
 
@@ -457,7 +463,8 @@ faim_internal int aim_addtlvtochain16(aim_tlvlist_t **list, const fu16_t t, cons
  * Adds a four-byte unsigned integer to a TLV chain.
  *
  */
-faim_internal int aim_addtlvtochain32(aim_tlvlist_t **list, const fu16_t t, const fu32_t v)
+faim_internal int aim_addtlvtochain32(aim_tlvlist_t **list, const fu16_t t,
+	const fu32_t v)
 {
 	fu8_t v32[4];
 
@@ -488,13 +495,14 @@ faim_internal int aim_addtlvtochain32(aim_tlvlist_t **list, const fu16_t t, cons
  *      %AIM_CAPS_SENDFILE    Supports Send File functions
  *
  */
-faim_internal int aim_addtlvtochain_caps(aim_tlvlist_t **list, const fu16_t t, const fu32_t caps)
+faim_internal int aim_addtlvtochain_caps(aim_tlvlist_t **list, const fu16_t t,
+	const fu32_t caps)
 {
-	fu8_t buf[16*16]; /* XXX icky fixed length buffer */
+	fu8_t buf[16 * 16];	/* XXX icky fixed length buffer */
 	aim_bstream_t bs;
 
 	if (!caps)
-		return 0; /* nothing there anyway */
+		return 0;	/* nothing there anyway */
 
 	aim_bstream_init(&bs, buf, sizeof(buf));
 
@@ -503,9 +511,10 @@ faim_internal int aim_addtlvtochain_caps(aim_tlvlist_t **list, const fu16_t t, c
 	return aim_addtlvtochain_raw(list, t, aim_bstream_curpos(&bs), buf);
 }
 
-faim_internal int aim_addtlvtochain_userinfo(aim_tlvlist_t **list, fu16_t type, aim_userinfo_t *ui)
+faim_internal int aim_addtlvtochain_userinfo(aim_tlvlist_t **list, fu16_t type,
+	aim_userinfo_t *ui)
 {
-	fu8_t buf[1024]; /* bleh */
+	fu8_t buf[1024];	/* bleh */
 	aim_bstream_t bs;
 
 	aim_bstream_init(&bs, buf, sizeof(buf));
@@ -538,7 +547,8 @@ faim_internal int aim_addtlvtochain_noval(aim_tlvlist_t **list, const fu16_t t)
  * This is so neat.
  *
  */
-faim_internal int aim_addtlvtochain_frozentlvlist(aim_tlvlist_t **list, fu16_t type, aim_tlvlist_t **tl)
+faim_internal int aim_addtlvtochain_frozentlvlist(aim_tlvlist_t **list,
+	fu16_t type, aim_tlvlist_t **tl)
 {
 	fu8_t *buf;
 	int buflen;
@@ -585,7 +595,7 @@ faim_internal int aim_writetlvchain(aim_bstream_t *bs, aim_tlvlist_t **list)
 	goodbuflen = aim_sizetlvchain(list);
 
 	if (goodbuflen > aim_bstream_empty(bs))
-		return 0; /* not enough buffer */
+		return 0;	/* not enough buffer */
 
 	/* do the real write-out */
 	for (cur = *list; cur; cur = cur->next) {
@@ -595,9 +605,8 @@ faim_internal int aim_writetlvchain(aim_bstream_t *bs, aim_tlvlist_t **list)
 			aimbs_putraw(bs, cur->tlv->value, cur->tlv->length);
 	}
 
-	return 1; /* XXX this is a nonsensical return */
+	return 1;		/* XXX this is a nonsensical return */
 }
-
 
 /**
  * aim_gettlv - Grab the Nth TLV of type type in the TLV list list.
@@ -611,7 +620,8 @@ faim_internal int aim_writetlvchain(aim_bstream_t *bs, aim_tlvlist_t **list)
  * in a chain.
  *
  */
-faim_internal aim_tlv_t *aim_gettlv(aim_tlvlist_t *list, const fu16_t t, const int n)
+faim_internal aim_tlv_t *aim_gettlv(aim_tlvlist_t *list, const fu16_t t,
+	const int n)
 {
 	aim_tlvlist_t *cur;
 	int i;
@@ -639,7 +649,8 @@ faim_internal aim_tlv_t *aim_gettlv(aim_tlvlist_t *list, const fu16_t t, const i
  * dynamic buffer and must be freed by the caller.
  *
  */
-faim_internal char *aim_gettlv_str(aim_tlvlist_t *list, const fu16_t t, const int n)
+faim_internal char *aim_gettlv_str(aim_tlvlist_t *list, const fu16_t t,
+	const int n)
 {
 	aim_tlv_t *tlv;
 	char *newstr;
@@ -647,7 +658,7 @@ faim_internal char *aim_gettlv_str(aim_tlvlist_t *list, const fu16_t t, const in
 	if (!(tlv = aim_gettlv(list, t, n)))
 		return NULL;
 
-	newstr = (char *) malloc(tlv->length + 1);
+	newstr = (char *)malloc(tlv->length + 1);
 	memcpy(newstr, tlv->value, tlv->length);
 	newstr[tlv->length] = '\0';
 
@@ -664,12 +675,13 @@ faim_internal char *aim_gettlv_str(aim_tlvlist_t *list, const fu16_t t, const in
  * 8bit integer instead of an aim_tlv_t. 
  *
  */
-faim_internal fu8_t aim_gettlv8(aim_tlvlist_t *list, const fu16_t t, const int n)
+faim_internal fu8_t aim_gettlv8(aim_tlvlist_t *list, const fu16_t t,
+	const int n)
 {
 	aim_tlv_t *tlv;
 
 	if (!(tlv = aim_gettlv(list, t, n)))
-		return 0; /* erm */
+		return 0;	/* erm */
 	return aimutil_get8(tlv->value);
 }
 
@@ -683,12 +695,13 @@ faim_internal fu8_t aim_gettlv8(aim_tlvlist_t *list, const fu16_t t, const int n
  * 16bit integer instead of an aim_tlv_t. 
  *
  */
-faim_internal fu16_t aim_gettlv16(aim_tlvlist_t *list, const fu16_t t, const int n)
+faim_internal fu16_t aim_gettlv16(aim_tlvlist_t *list, const fu16_t t,
+	const int n)
 {
 	aim_tlv_t *tlv;
 
 	if (!(tlv = aim_gettlv(list, t, n)))
-		return 0; /* erm */
+		return 0;	/* erm */
 	return aimutil_get16(tlv->value);
 }
 
@@ -702,12 +715,13 @@ faim_internal fu16_t aim_gettlv16(aim_tlvlist_t *list, const fu16_t t, const int
  * 32bit integer instead of an aim_tlv_t. 
  *
  */
-faim_internal fu32_t aim_gettlv32(aim_tlvlist_t *list, const fu16_t t, const int n)
+faim_internal fu32_t aim_gettlv32(aim_tlvlist_t *list, const fu16_t t,
+	const int n)
 {
 	aim_tlv_t *tlv;
 
 	if (!(tlv = aim_gettlv(list, t, n)))
-		return 0; /* erm */
+		return 0;	/* erm */
 	return aimutil_get32(tlv->value);
 }
 
@@ -748,7 +762,6 @@ faim_export int aim_puttlv_16(fu8_t *buf, const fu16_t t, const fu16_t v)
 	return aim_puttlv_raw(buf, t, 2, v16);
 }
 
-
 /**
  * aim_puttlv_32 - Write a four-byte TLV.
  * @buf: Destination buffer
@@ -779,14 +792,15 @@ faim_export int aim_puttlv_32(fu8_t *buf, const fu16_t t, const fu32_t v)
  * include a terminating NULL.)
  *
  */
-faim_export int aim_puttlv_raw(fu8_t *buf, const fu16_t t, const fu16_t l, const fu8_t *v)
+faim_export int aim_puttlv_raw(fu8_t *buf, const fu16_t t, const fu16_t l,
+	const fu8_t *v)
 {
 	int i;
 
 	i = aimutil_put16(buf, t);
-	i += aimutil_put16(buf+i, l);
+	i += aimutil_put16(buf + i, l);
 	if (l)
-		memcpy(buf+i, v, l);
+		memcpy(buf + i, v, l);
 	i += l;
 
 	return i;

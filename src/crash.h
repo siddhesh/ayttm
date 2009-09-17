@@ -22,8 +22,7 @@
 
 #define DEBUGGERRC	"debuggerrc"
 
-void		 crash_install_handlers	(void);
-void		 crash_main		(const char *arg); 
+void crash_install_handlers(void);
+void crash_main(const char *arg);
 
-#endif /* CRASH_H__ */
- 
+#endif				/* CRASH_H__ */

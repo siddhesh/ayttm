@@ -22,17 +22,18 @@
 #ifndef __UI_MESSAGE_WINDOWS_H__
 #define __UI_MESSAGE_WINDOWS_H__
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void	ay_ui_info_window_create( const char *inTitle, const char *inMessage );
-void	ay_ui_warning_window_create( const char *inTitle, const char *inMessage );
-void	ay_ui_error_window_create( const char *inTitle, const char *inMessage );
+	void ay_ui_info_window_create(const char *inTitle,
+		const char *inMessage);
+	void ay_ui_warning_window_create(const char *inTitle,
+		const char *inMessage);
+	void ay_ui_error_window_create(const char *inTitle,
+		const char *inMessage);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

@@ -20,28 +20,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */ 
+ */
 
 #ifndef _FILE_SELECT_H__
 #define _FILE_SELECT_H__
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef	void	(t_file_selection_callback)( const char *inSelectedFile, void *inData );
+	typedef void (t_file_selection_callback) (const char *inSelectedFile,
+		void *inData);
 
 #define ay_do_file_selection ay_do_file_selection_open
 
-void	ay_do_file_selection_open( const char *inDefaultFile, const char *inWindowTitle, 
-			 t_file_selection_callback *inCallback, void *inData );
+	void ay_do_file_selection_open(const char *inDefaultFile,
+		const char *inWindowTitle,
+		t_file_selection_callback *inCallback, void *inData);
 
-void	ay_do_file_selection_save( const char *inDefaultFile, const char *inWindowTitle, 
-			 t_file_selection_callback *inCallback, void *inData );
+	void ay_do_file_selection_save(const char *inDefaultFile,
+		const char *inWindowTitle,
+		t_file_selection_callback *inCallback, void *inData);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

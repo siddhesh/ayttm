@@ -27,7 +27,6 @@
  *
  */
 
-
 #ifndef __GTK_GLOBALS_H__
 #define __GTK_GLOBALS_H__
 

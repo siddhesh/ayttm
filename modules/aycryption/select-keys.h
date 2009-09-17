@@ -23,25 +23,26 @@
 #include <gpgme.h>
 
 struct select_keys_s {
-    int okay;
-    void *window;
-    void *toplabel;
-    void *clist;
-    const char *pattern;
-    gpgme_key_t *kset;
-    unsigned int num_keys;
-    gpgme_ctx_t select_ctx;
-    char *key;
-    int sort_type;
-    int sort_column;
-    int do_crypt;
-    int do_sign;
+	int okay;
+	void *window;
+	void *toplabel;
+	void *clist;
+	const char *pattern;
+	gpgme_key_t *kset;
+	unsigned int num_keys;
+	gpgme_ctx_t select_ctx;
+	char *key;
+	int sort_type;
+	int sort_column;
+	int do_crypt;
+	int do_sign;
 };
 
 extern char *aycrypt_last_pass;
 extern int aycrypt_pass_ack;
 
-struct select_keys_s gpgmegtk_recipient_selection (GSList *recp_names, int crypt, int sign);
-const char *passphrase_mbox (const char *desc, int prev_was_bad);
+struct select_keys_s gpgmegtk_recipient_selection(GSList *recp_names, int crypt,
+	int sign);
+const char *passphrase_mbox(const char *desc, int prev_was_bad);
 
-#endif /* GPGMEGTK_SELECT_KEYS_H */
+#endif				/* GPGMEGTK_SELECT_KEYS_H */

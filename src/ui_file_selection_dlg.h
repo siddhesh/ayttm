@@ -20,23 +20,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */ 
+ */
 
 #ifndef __UI_FILE_SELECTION_DLG_H__
 #define __UI_FILE_SELECTION_DLG_H__
 
 #include "file_select.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void	ay_ui_do_file_selection( const char *inDefaultFile, const char *inWindowTitle, 
-			 t_file_selection_callback *inCallback, void *inData );
+	void ay_ui_do_file_selection(const char *inDefaultFile,
+		const char *inWindowTitle,
+		t_file_selection_callback *inCallback, void *inData);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

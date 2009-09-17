@@ -23,7 +23,8 @@ faim_export int aim_bos_reqbuddyrights(aim_session_t *sess, aim_conn_t *conn)
  * Subtype 0x0003 - Rights.
  *
  */
-static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_rxcallback_t userfunc;
 	aim_tlvlist_t *tlvlist;
@@ -58,12 +59,13 @@ static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_m
 	 * ICQ only?
 	 */
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, maxbuddies, maxwatchers);
 
 	aim_freetlvchain(&tlvlist);
 
-	return ret;  
+	return ret;
 }
 
 /*
@@ -73,7 +75,8 @@ static int rights(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_m
  * XXX This should just be an extension of setbuddylist()
  *
  */
-faim_export int aim_add_buddy(aim_session_t *sess, aim_conn_t *conn, const char *sn)
+faim_export int aim_add_buddy(aim_session_t *sess, aim_conn_t *conn,
+	const char *sn)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -81,10 +84,12 @@ faim_export int aim_add_buddy(aim_session_t *sess, aim_conn_t *conn, const char 
 	if (!sn || !strlen(sn))
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+1+strlen(sn))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 1 + strlen(sn))))
 		return -ENOMEM;
 
-	snacid = aim_cachesnac(sess, 0x0003, 0x0004, 0x0000, sn, strlen(sn)+1);
+	snacid = aim_cachesnac(sess, 0x0003, 0x0004, 0x0000, sn,
+		strlen(sn) + 1);
 	aim_putsnac(&fr->data, 0x0003, 0x0004, 0x0000, snacid);
 
 	aimbs_put8(&fr->data, strlen(sn));
@@ -105,7 +110,8 @@ faim_export int aim_add_buddy(aim_session_t *sess, aim_conn_t *conn, const char 
  * XXX Clean this up.  
  *
  */
-faim_export int aim_bos_setbuddylist(aim_session_t *sess, aim_conn_t *conn, const char *buddy_list)
+faim_export int aim_bos_setbuddylist(aim_session_t *sess, aim_conn_t *conn,
+	const char *buddy_list)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -113,16 +119,17 @@ faim_export int aim_bos_setbuddylist(aim_session_t *sess, aim_conn_t *conn, cons
 	char *localcpy = NULL;
 	char *tmpptr = NULL;
 
-	if (!buddy_list || !(localcpy = strdup(buddy_list))) 
+	if (!buddy_list || !(localcpy = strdup(buddy_list)))
 		return -EINVAL;
 
-	for (tmpptr = strtok(localcpy, "&"); tmpptr; ) {
-		faimdprintf(sess, 2, "---adding: %s (%d)\n", tmpptr, strlen(tmpptr));
+	for (tmpptr = strtok(localcpy, "&"); tmpptr;) {
+		faimdprintf(sess, 2, "---adding: %s (%d)\n", tmpptr,
+			strlen(tmpptr));
 		len += 1 + strlen(tmpptr);
 		tmpptr = strtok(NULL, "&");
 	}
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+len)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + len)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0003, 0x0004, 0x0000, NULL, 0);
@@ -130,9 +137,10 @@ faim_export int aim_bos_setbuddylist(aim_session_t *sess, aim_conn_t *conn, cons
 
 	strncpy(localcpy, buddy_list, strlen(buddy_list) + 1);
 
-	for (tmpptr = strtok(localcpy, "&"); tmpptr; ) {
+	for (tmpptr = strtok(localcpy, "&"); tmpptr;) {
 
-		faimdprintf(sess, 2, "---adding: %s (%d)\n", tmpptr, strlen(tmpptr));
+		faimdprintf(sess, 2, "---adding: %s (%d)\n", tmpptr,
+			strlen(tmpptr));
 
 		aimbs_put8(&fr->data, strlen(tmpptr));
 		aimbs_putraw(&fr->data, tmpptr, strlen(tmpptr));
@@ -153,7 +161,8 @@ faim_export int aim_bos_setbuddylist(aim_session_t *sess, aim_conn_t *conn, cons
  * the same as setbuddylist() but with a different snac subtype).
  *
  */
-faim_export int aim_remove_buddy(aim_session_t *sess, aim_conn_t *conn, const char *sn)
+faim_export int aim_remove_buddy(aim_session_t *sess, aim_conn_t *conn,
+	const char *sn)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -161,10 +170,12 @@ faim_export int aim_remove_buddy(aim_session_t *sess, aim_conn_t *conn, const ch
 	if (!sn || !strlen(sn))
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+1+strlen(sn))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 1 + strlen(sn))))
 		return -ENOMEM;
 
-	snacid = aim_cachesnac(sess, 0x0003, 0x0005, 0x0000, sn, strlen(sn)+1);
+	snacid = aim_cachesnac(sess, 0x0003, 0x0005, 0x0000, sn,
+		strlen(sn) + 1);
 	aim_putsnac(&fr->data, 0x0003, 0x0005, 0x0000, snacid);
 
 	aimbs_put8(&fr->data, strlen(sn));
@@ -181,7 +192,8 @@ faim_export int aim_remove_buddy(aim_session_t *sess, aim_conn_t *conn, const ch
  * XXX Why would we send this?
  *
  */
-faim_export int aim_sendbuddyoncoming(aim_session_t *sess, aim_conn_t *conn, aim_userinfo_t *info)
+faim_export int aim_sendbuddyoncoming(aim_session_t *sess, aim_conn_t *conn,
+	aim_userinfo_t *info)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -193,7 +205,7 @@ faim_export int aim_sendbuddyoncoming(aim_session_t *sess, aim_conn_t *conn, aim
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0003, 0x000b, 0x0000, NULL, 0);
-	
+
 	aim_putsnac(&fr->data, 0x0003, 0x000b, 0x0000, snacid);
 	aim_putuserinfo(&fr->data, info);
 
@@ -208,7 +220,8 @@ faim_export int aim_sendbuddyoncoming(aim_session_t *sess, aim_conn_t *conn, aim
  * XXX Why would we send this?
  *
  */
-faim_export int aim_sendbuddyoffgoing(aim_session_t *sess, aim_conn_t *conn, const char *sn)
+faim_export int aim_sendbuddyoffgoing(aim_session_t *sess, aim_conn_t *conn,
+	const char *sn)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -216,11 +229,12 @@ faim_export int aim_sendbuddyoffgoing(aim_session_t *sess, aim_conn_t *conn, con
 	if (!sess || !conn || !sn)
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+1+strlen(sn))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 1 + strlen(sn))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0003, 0x000c, 0x0000, NULL, 0);
-	
+
 	aim_putsnac(&fr->data, 0x0003, 0x000c, 0x0000, snacid);
 	aimbs_put8(&fr->data, strlen(sn));
 	aimbs_putraw(&fr->data, sn, strlen(sn));
@@ -241,7 +255,8 @@ faim_export int aim_sendbuddyoffgoing(aim_session_t *sess, aim_conn_t *conn, con
  * it is still in a format parsable by aim_info_extract().
  *
  */
-static int buddychange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int buddychange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_userinfo_t userinfo;
@@ -249,7 +264,8 @@ static int buddychange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, 
 
 	aim_info_extract(sess, bs, &userinfo);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, &userinfo);
 
 	if (snac->subtype == 0x000b)
@@ -259,7 +275,8 @@ static int buddychange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, 
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0003)

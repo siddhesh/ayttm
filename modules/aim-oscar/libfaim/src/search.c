@@ -13,7 +13,8 @@
  *
  * XXX can this be integrated with the rest of the error handling?
  */
-static int error(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int error(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
@@ -21,12 +22,15 @@ static int error(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_mo
 
 	/* XXX the modules interface should have already retrieved this for us */
 	if (!(snac2 = aim_remsnac(sess, snac->id))) {
-		faimdprintf(sess, 2, "search error: couldn't get a snac for 0x%08lx\n", snac->id);
+		faimdprintf(sess, 2,
+			"search error: couldn't get a snac for 0x%08lx\n",
+			snac->id);
 		return 0;
 	}
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
-		ret = userfunc(sess, rx, snac2->data /* address */);
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
+		ret = userfunc(sess, rx, snac2->data /* address */ );
 
 	/* XXX freesnac()? */
 	if (snac2)
@@ -40,7 +44,8 @@ static int error(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_mo
  * Subtype 0x0002
  *
  */
-faim_export int aim_search_address(aim_session_t *sess, aim_conn_t *conn, const char *address)
+faim_export int aim_search_address(aim_session_t *sess, aim_conn_t *conn,
+	const char *address)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -48,13 +53,15 @@ faim_export int aim_search_address(aim_session_t *sess, aim_conn_t *conn, const 
 	if (!sess || !conn || !address)
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+strlen(address))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + strlen(address))))
 		return -ENOMEM;
 
-	snacid = aim_cachesnac(sess, 0x000a, 0x0002, 0x0000, strdup(address), strlen(address)+1);
+	snacid = aim_cachesnac(sess, 0x000a, 0x0002, 0x0000, strdup(address),
+		strlen(address) + 1);
 	aim_putsnac(&fr->data, 0x000a, 0x0002, 0x0000, snacid);
-	
-	aimbs_putraw(&fr->data, address, strlen(address)); 
+
+	aimbs_putraw(&fr->data, address, strlen(address));
 
 	aim_tx_enqueue(sess, fr);
 
@@ -65,7 +72,8 @@ faim_export int aim_search_address(aim_session_t *sess, aim_conn_t *conn, const 
  * Subtype 0x0003
  *
  */
-static int reply(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int reply(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int j = 0, m, ret = 0;
 	aim_tlvlist_t *tlvlist;
@@ -81,18 +89,19 @@ static int reply(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_mo
 	m = aim_counttlvchain(&tlvlist);
 
 	/* XXX uhm. */
-	while ((cur = aim_gettlv_str(tlvlist, 0x0001, j+1)) && j < m) {
-		buf = realloc(buf, (j+1) * (MAXSNLEN+1));
+	while ((cur = aim_gettlv_str(tlvlist, 0x0001, j + 1)) && j < m) {
+		buf = realloc(buf, (j + 1) * (MAXSNLEN + 1));
 
-		strncpy(&buf[j * (MAXSNLEN+1)], cur, MAXSNLEN);
+		strncpy(&buf[j * (MAXSNLEN + 1)], cur, MAXSNLEN);
 		free(cur);
 
-		j++; 
+		j++;
 	}
 
 	aim_freetlvchain(&tlvlist);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, searchaddr, j, buf);
 
 	/* XXX freesnac()? */
@@ -105,7 +114,8 @@ static int reply(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_mo
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0001)

@@ -14,7 +14,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 #ifndef __TCP_H__
 #define __TCP_H__
 
@@ -62,25 +61,23 @@ int set_nonblock(int sock);
 
 gint TCP_Ack(gint sock, guint16 cmd, gint seq);
 void TCP_SendHelloPacket(gint sock);
-void TCP_ProcessPacket(guint8* packet, gint packet_length, gint sock);
+void TCP_ProcessPacket(guint8 *packet, gint packet_length, gint sock);
 gint TCP_ReadPacket(gint sock);
 gint TCP_Connect(guint32 ip, guint32 port);
-gint TCP_SendMessage(guint32 uin, char* msg);
-gint TCP_SendURL(guint32 uin, char* url, char *text);
+gint TCP_SendMessage(guint32 uin, char *msg);
+gint TCP_SendURL(guint32 uin, char *url, char *text);
 gint TCP_GetAwayMessage(guint32 uin);
 
 gint TCP_ChatServerHandshake(gint sock);
 gint TCP_ChatClientHandshake(gint sock);
 gint TCP_ChatReadClient(gint sock);
 gint TCP_ChatReadServer(gint sock);
-gint TCP_SendChatRequest(guint32 uin, gchar* text);
+gint TCP_SendChatRequest(guint32 uin, gchar *text);
 gint TCP_AcceptChat(guint32 uin);
 gint TCP_RefuseChat(guint32 uin);
-gint TCP_ChatSend(guint32 uin, gchar* text);
+gint TCP_ChatSend(guint32 uin, gchar *text);
 gint TCP_ConnectChat(guint32 port, guint32 uin);
 gint TCP_TerminateChat(guint32 uin);
-gint TCP_AcceptFile( int sock, int uin, guint32 seq);
+gint TCP_AcceptFile(int sock, int uin, guint32 seq);
 
-
-#endif /* __TCP_H__ */
-
+#endif				/* __TCP_H__ */

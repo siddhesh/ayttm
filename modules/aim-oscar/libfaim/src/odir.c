@@ -19,22 +19,25 @@
  * @param email The email address you want to search for.
  * @return Return 0 if no errors, otherwise return the error number.
  */
-faim_export int aim_odir_email(aim_session_t *sess, const char *region, const char *email)
+faim_export int aim_odir_email(aim_session_t *sess, const char *region,
+	const char *email)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 	aim_tlvlist_t *tl = NULL;
 
-	if (!sess || !(conn = aim_conn_findbygroup(sess, 0x000f)) || !region || !email)
+	if (!sess || !(conn = aim_conn_findbygroup(sess, 0x000f)) || !region
+		|| !email)
 		return -EINVAL;
 
 	/* Create a TLV chain, write it to the outgoing frame, then free the chain */
 	aim_addtlvtochain_raw(&tl, 0x001c, strlen(region), region);
-	aim_addtlvtochain16(&tl, 0x000a, 0x0001); /* Type of search */
+	aim_addtlvtochain16(&tl, 0x000a, 0x0001);	/* Type of search */
 	aim_addtlvtochain_raw(&tl, 0x0005, strlen(email), email);
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+aim_sizetlvchain(&tl))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + aim_sizetlvchain(&tl))))
 		return -ENOMEM;
 	snacid = aim_cachesnac(sess, 0x000f, 0x0002, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x000f, 0x0002, 0x0000, snacid);
@@ -46,7 +49,6 @@ faim_export int aim_odir_email(aim_session_t *sess, const char *region, const ch
 
 	return 0;
 }
-
 
 /**
  * Subtype 0x0002 - Submit a User Search Request
@@ -68,7 +70,11 @@ faim_export int aim_odir_email(aim_session_t *sess, const char *region, const ch
  * @param address The street address where the person you want to seach for resides.
  * @return Return 0 if no errors, otherwise return the error number.
  */
-faim_export int aim_odir_name(aim_session_t *sess, const char *region, const char *first, const char *middle, const char *last, const char *maiden, const char *nick, const char *city, const char *state, const char *country, const char *zip, const char *address)
+faim_export int aim_odir_name(aim_session_t *sess, const char *region,
+	const char *first, const char *middle, const char *last,
+	const char *maiden, const char *nick, const char *city,
+	const char *state, const char *country, const char *zip,
+	const char *address)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
@@ -80,7 +86,7 @@ faim_export int aim_odir_name(aim_session_t *sess, const char *region, const cha
 
 	/* Create a TLV chain, write it to the outgoing frame, then free the chain */
 	aim_addtlvtochain_raw(&tl, 0x001c, strlen(region), region);
-	aim_addtlvtochain16(&tl, 0x000a, 0x0000); /* Type of search */
+	aim_addtlvtochain16(&tl, 0x000a, 0x0000);	/* Type of search */
 	if (first)
 		aim_addtlvtochain_raw(&tl, 0x0001, strlen(first), first);
 	if (last)
@@ -102,7 +108,8 @@ faim_export int aim_odir_name(aim_session_t *sess, const char *region, const cha
 	if (address)
 		aim_addtlvtochain_raw(&tl, 0x0021, strlen(address), address);
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+aim_sizetlvchain(&tl))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + aim_sizetlvchain(&tl))))
 		return -ENOMEM;
 	snacid = aim_cachesnac(sess, 0x000f, 0x0002, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x000f, 0x0002, 0x0000, snacid);
@@ -115,7 +122,6 @@ faim_export int aim_odir_name(aim_session_t *sess, const char *region, const cha
 	return 0;
 }
 
-
 /**
  * Subtype 0x0002 - Submit a User Search Request
  *
@@ -123,7 +129,8 @@ faim_export int aim_odir_name(aim_session_t *sess, const char *region, const cha
  * @param interest1 An interest you want to search for.
  * @return Return 0 if no errors, otherwise return the error number.
  */
-faim_export int aim_odir_interest(aim_session_t *sess, const char *region, const char *interest)
+faim_export int aim_odir_interest(aim_session_t *sess, const char *region,
+	const char *interest)
 {
 	aim_conn_t *conn;
 	aim_frame_t *fr;
@@ -135,11 +142,12 @@ faim_export int aim_odir_interest(aim_session_t *sess, const char *region, const
 
 	/* Create a TLV chain, write it to the outgoing frame, then free the chain */
 	aim_addtlvtochain_raw(&tl, 0x001c, strlen(region), region);
-	aim_addtlvtochain16(&tl, 0x000a, 0x0001); /* Type of search */
+	aim_addtlvtochain16(&tl, 0x000a, 0x0001);	/* Type of search */
 	if (interest)
 		aim_addtlvtochain_raw(&tl, 0x0001, strlen(interest), interest);
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+aim_sizetlvchain(&tl))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + aim_sizetlvchain(&tl))))
 		return -ENOMEM;
 	snacid = aim_cachesnac(sess, 0x000f, 0x0002, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x000f, 0x0002, 0x0000, snacid);
@@ -152,23 +160,23 @@ faim_export int aim_odir_interest(aim_session_t *sess, const char *region, const
 	return 0;
 }
 
-
 /**
  * Subtype 0x0003 - Receive Reply From a User Search
  *
  */
-static int parseresults(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int parseresults(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
 	fu16_t tmp, numresults;
 	struct aim_odir *results = NULL;
 
-	tmp = aimbs_get16(bs); /* Unknown */
-	tmp = aimbs_get16(bs); /* Unknown */
+	tmp = aimbs_get16(bs);	/* Unknown */
+	tmp = aimbs_get16(bs);	/* Unknown */
 	aim_bstream_advance(bs, tmp);
 
-	numresults = aimbs_get16(bs); /* Number of results to follow */
+	numresults = aimbs_get16(bs);	/* Number of results to follow */
 
 	/* Allocate a linked list, 1 node per result */
 	while (numresults) {
@@ -194,7 +202,8 @@ static int parseresults(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
 		numresults--;
 	}
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, results);
 
 	/* Now free everything from above */
@@ -221,7 +230,8 @@ static int parseresults(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0003)

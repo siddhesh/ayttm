@@ -30,7 +30,6 @@
 #ifndef _CHAR_CONV_C_
 #define _CHAR_CONV_C_
 
-
 /*
 ** Name:    Str2Utf8
 ** Purpose: convert a string in UTF-8 format
@@ -46,6 +45,5 @@ char *StrToUtf8(const char *in);
 ** Output:  a new decoded string
 */
 char *Utf8ToStr(const char *in);
-
 
 #endif

@@ -25,15 +25,14 @@
 #ifndef __SOUND_H__
 #define __SOUND_H__
 
-enum eSoundID
-{
+enum eSoundID {
 	SOUND_BUDDY_ARRIVE = 0,
 	SOUND_BUDDY_LEAVE,
 	SOUND_BUDDY_AWAY,
 	SOUND_SEND,
 	SOUND_RECEIVE,
 	SOUND_FIRSTMSG,
-	
+
 	SOUND_MAX
 };
 
@@ -41,13 +40,12 @@ enum eSoundID
 extern "C" {
 #endif
 
-void play_sound(int sound);
-void playsoundfile(char *soundfile);
-void sound_init();
-void sound_shutdown();
+	void play_sound(int sound);
+	void playsoundfile(char *soundfile);
+	void sound_init();
+	void sound_shutdown();
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
-#endif /* __SOUND_H__ */
+#endif				/* __SOUND_H__ */

@@ -53,21 +53,21 @@
 # define ay_new0(type, n)	(type *)calloc((n), sizeof(type))
 # define ay_renew(type, mem, n)	(type *)realloc(mem, n)
 
-void * ay_memdup(const void * addr, int n);
-char ** ay_strsplit(const char * str, const char * sep, int nelem);
-void ay_strfreev(char ** vector);
+void *ay_memdup(const void *addr, int n);
+char **ay_strsplit(const char *str, const char *sep, int nelem);
+void ay_strfreev(char **vector);
 
-int strncasecmp(const char * s1, const char * s2, size_t n);
-int strcasecmp(const char * s1, const char * s2);
+int strncasecmp(const char *s1, const char *s2, size_t n);
+int strcasecmp(const char *s1, const char *s2);
 
-char * strdup(const char *s);
+char *strdup(const char *s);
 
 #endif
 
 #include "llist.h"
 
 #if !defined(TRUE) && !defined(FALSE)
-enum {FALSE, TRUE};
+enum { FALSE, TRUE };
 #endif
 
 #ifndef MIN
@@ -82,8 +82,7 @@ enum {FALSE, TRUE};
  * The following three functions return newly allocated memory.
  * You must free it yourself
  */
-char * ay_string_append(char * str, const char * append);
-char * ay_str_to_utf8(const char * in);
-char * ay_utf8_to_str(const char * in);
+char *ay_string_append(char *str, const char *append);
+char *ay_str_to_utf8(const char *in);
+char *ay_utf8_to_str(const char *in);
 #endif
-

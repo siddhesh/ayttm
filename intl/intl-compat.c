@@ -68,7 +68,6 @@
    to 1. compile libintl.a with -fPIC, 2. remove -lintl from his linker
    command line.  */
 
-
 #undef gettext
 #undef dgettext
 #undef dcgettext
@@ -79,88 +78,70 @@
 #undef bindtextdomain
 #undef bind_textdomain_codeset
 
-
-char *
-gettext (msgid)
-     const char *msgid;
+char *gettext(msgid)
+const char *msgid;
 {
-  return gettext__ (msgid);
+	return gettext__(msgid);
 }
 
-
-char *
-dgettext (domainname, msgid)
-     const char *domainname;
-     const char *msgid;
+char *dgettext(domainname, msgid)
+const char *domainname;
+const char *msgid;
 {
-  return dgettext__ (domainname, msgid);
+	return dgettext__(domainname, msgid);
 }
 
-
-char *
-dcgettext (domainname, msgid, category)
-     const char *domainname;
-     const char *msgid;
-     int category;
+char *dcgettext(domainname, msgid, category)
+const char *domainname;
+const char *msgid;
+int category;
 {
-  return dcgettext__ (domainname, msgid, category);
+	return dcgettext__(domainname, msgid, category);
 }
 
-
-char *
-ngettext (msgid1, msgid2, n)
-     const char *msgid1;
-     const char *msgid2;
-     unsigned long int n;
+char *ngettext(msgid1, msgid2, n)
+const char *msgid1;
+const char *msgid2;
+unsigned long int n;
 {
-  return ngettext__ (msgid1, msgid2, n);
+	return ngettext__(msgid1, msgid2, n);
 }
 
-
-char *
-dngettext (domainname, msgid1, msgid2, n)
-     const char *domainname;
-     const char *msgid1;
-     const char *msgid2;
-     unsigned long int n;
+char *dngettext(domainname, msgid1, msgid2, n)
+const char *domainname;
+const char *msgid1;
+const char *msgid2;
+unsigned long int n;
 {
-  return dngettext__ (domainname, msgid1, msgid2, n);
+	return dngettext__(domainname, msgid1, msgid2, n);
 }
 
-
-char *
-dcngettext (domainname, msgid1, msgid2, n, category)
-     const char *domainname;
-     const char *msgid1;
-     const char *msgid2;
-     unsigned long int n;
-     int category;
+char *dcngettext(domainname, msgid1, msgid2, n, category)
+const char *domainname;
+const char *msgid1;
+const char *msgid2;
+unsigned long int n;
+int category;
 {
-  return dcngettext__ (domainname, msgid1, msgid2, n, category);
+	return dcngettext__(domainname, msgid1, msgid2, n, category);
 }
 
-
-char *
-textdomain (domainname)
-     const char *domainname;
+char *textdomain(domainname)
+const char *domainname;
 {
-  return textdomain__ (domainname);
+	return textdomain__(domainname);
 }
 
-
-char *
-bindtextdomain (domainname, dirname)
-     const char *domainname;
-     const char *dirname;
+char *bindtextdomain(domainname, dirname)
+const char *domainname;
+const char *dirname;
 {
-  return bindtextdomain__ (domainname, dirname);
+	return bindtextdomain__(domainname, dirname);
 }
 
-
-char *
-bind_textdomain_codeset (domainname, codeset)
-     const char *domainname;
-     const char *codeset;
+char *bind_textdomain_codeset(domainname, codeset)
+const char *domainname;
+const char *codeset;
 {
-  return bind_textdomain_codeset__ (domainname, codeset);
+	return bind_textdomain_codeset__(domainname, codeset);
 }

@@ -30,9 +30,7 @@
 #include "prefs.h"
 #include "llist.h"
 
-
-typedef struct _value_pair
-{
+typedef struct _value_pair {
 	char key[MAX_PREF_NAME_LEN];
 	char value[MAX_PREF_LEN];
 } value_pair;
@@ -41,15 +39,14 @@ typedef struct _value_pair
 extern "C" {
 #endif
 
-char * value_pair_get_value( LList * pairs, const char * key );
-void value_pair_print_values( LList * pairs, FILE * file, int indent );
-void value_pair_free( LList * pairs );
-LList * value_pair_update(LList * pairs, LList * new_list);
-LList * value_pair_add(LList * list, const char * key, const char * value); 
-LList * value_pair_remove(LList * list, const char * key); 
+	char *value_pair_get_value(LList *pairs, const char *key);
+	void value_pair_print_values(LList *pairs, FILE *file, int indent);
+	void value_pair_free(LList *pairs);
+	LList *value_pair_update(LList *pairs, LList *new_list);
+	LList *value_pair_add(LList *list, const char *key, const char *value);
+	LList *value_pair_remove(LList *list, const char *key);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
-#endif /* __VALUE_PAIR_H__ */
+#endif				/* __VALUE_PAIR_H__ */

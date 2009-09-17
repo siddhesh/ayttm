@@ -16,8 +16,7 @@ extern int do_jabber_debug;
 
 extern GList *agent_list;
 
-enum
-{
+enum {
 	JABBER_ONLINE,
 	JABBER_AWAY,
 	JABBER_DND,
@@ -43,37 +42,35 @@ typedef struct {
 */
 
 typedef struct JABBERCONN {
-    char   passwd[LINE_LENGTH+1];
-    char   jid[LINE_LENGTH+1];	/* The jabber id, of the form user@host/resource */
-    int	   listenerID;
-    jconn  conn;		/* The actualy jabber connection struct */
-    int    reg_flag;		/* Indicates whether we have registered successfully with the jabber server */
-    struct JABBERCONN *next;
-    AyConnection *connection;
-    int state;
+	char passwd[LINE_LENGTH + 1];
+	char jid[LINE_LENGTH + 1];	/* The jabber id, of the form user@host/resource */
+	int listenerID;
+	jconn conn;		/* The actualy jabber connection struct */
+	int reg_flag;		/* Indicates whether we have registered successfully with the jabber server */
+	struct JABBERCONN *next;
+	AyConnection *connection;
+	int state;
 	int server_features;
 	int do_request_gmail;
 } JABBER_Conn;
 
 typedef struct INSTANT_MESSAGE {
-    char *msg;                   /* message itself             */
-    char *sender;                /* sender of the message      */
-    JABBER_Conn *JConn;
+	char *msg;		/* message itself             */
+	char *sender;		/* sender of the message      */
+	JABBER_Conn *JConn;
 } JABBER_InstantMessage, *JABBER_InstantMessage_PTR;
-
 
 /* Use this struct to hold any service specific information you need about
  * local accounts
  * below are just some suggested values
  */
 
-typedef struct _eb_jabber_local_account_data
-{
+typedef struct _eb_jabber_local_account_data {
 	char password[MAX_PREF_LEN];	// account password
-	int fd;				// the file descriptor
-	int status;			// the current status of the user
+	int fd;			// the file descriptor
+	int status;		// the current status of the user
 	int prompt_password;
-	JABBER_Conn	*JConn;
+	JABBER_Conn *JConn;
 	int activity_tag;
 	int connect_tag;
 	int typing_tag;
@@ -81,33 +78,31 @@ typedef struct _eb_jabber_local_account_data
 	int request_gmail;
 	char server_port[MAX_PREF_LEN];
 	char ssl_server_port[MAX_PREF_LEN];
-        char connect_server[MAX_PREF_LEN];
+	char connect_server[MAX_PREF_LEN];
 	LList *jabber_contacts;
 } eb_jabber_local_account_data;
 
-struct jabber_buddy
-{
-	char *name;				/* Users name */
-	char *jid;				/* the buddy's id */
-	char *sub;				/* Subscriptions state */
-	int  status;			/* Their current state */
-	char *description;		/* Their current status */
+struct jabber_buddy {
+	char *name;		/* Users name */
+	char *jid;		/* the buddy's id */
+	char *sub;		/* Subscriptions state */
+	int status;		/* Their current state */
+	char *description;	/* Their current status */
 	JABBER_Conn *JConn;
 };
-
 
 /*
 ** Dialog message
 */
 
 typedef struct DIALOG_MSG {
-    char     *handle;
-    char     *requestor;
-    char     *message;
-    char     *heading;
-    char     *response;
-    JABBER_Conn *JConn;
-    void     (*callback)(void *data);
+	char *handle;
+	char *requestor;
+	char *message;
+	char *heading;
+	char *response;
+	JABBER_Conn *JConn;
+	void (*callback) (void *data);
 } JABBER_Dialog, *JABBER_Dialog_PTR;
 
 /*
@@ -115,11 +110,11 @@ typedef struct DIALOG_MSG {
 */
 
 typedef struct AUTH_MSG {
-    char     *handle;
-    char     *requestor;
-    JABBER_Conn *conn;
+	char *handle;
+	char *requestor;
+	JABBER_Conn *conn;
 } JABBER_AuthMessage, *JABBER_AuthMessage_PTR;
- 
+
 /*
 ** Name:    JABBER_AuthorizeContact
 ** Purpose: This function sends an authorize message to the server
@@ -140,7 +135,8 @@ int JABBER_AuthorizeContact(JABBER_Conn *conn, char *handle);
 ** Output:  0 on success, -1 on failure
 */
 
-int JABBER_Login(char *handle, char *passwd, char *host, eb_jabber_local_account_data *jlad, int port);
+int JABBER_Login(char *handle, char *passwd, char *host,
+	eb_jabber_local_account_data *jlad, int port);
 /*
 ** Name:    JABBER_SendMessage
 ** Purpose: This function encapuslates the sending of an instant message
@@ -228,10 +224,12 @@ int JABBER_JoinChatRoom(JABBER_Conn *JConn, char *room_name, char *nick);
 ** Output:  0 on success, -1 on failure
 */
 
-int JABBER_SendChatRoomMessage(JABBER_Conn *JConn, char *room_name, char *message, char *nick);
+int JABBER_SendChatRoomMessage(JABBER_Conn *JConn, char *room_name,
+	char *message, char *nick);
 
 /* Debugging routines */
 void j_list_agents();
-void JABBER_Send_typing (JABBER_Conn *JConn, const char *from, const char *to, int typing);
+void JABBER_Send_typing(JABBER_Conn *JConn, const char *from, const char *to,
+	int typing);
 
-#endif /* __LIB_JABBER__ */
+#endif				/* __LIB_JABBER__ */

@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */  
+ */
 
 #ifndef __BROWSER_H__
 #define __BROWSER_H__
@@ -28,16 +28,15 @@ extern "C" {
 
 #include <gdk/gdk.h>
 
-void open_url(GdkWindow *w, char *url);
+	void open_url(GdkWindow *w, char *url);
 
 #else
 
-void open_url(void *w, char *url);
+	void open_url(void *w, char *url);
 
-#endif	/* __MINGW32__ */
+#endif				/* __MINGW32__ */
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif

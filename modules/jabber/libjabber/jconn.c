@@ -31,10 +31,11 @@ int ext_jabber_read(jconn j, char *buf, int len);
 int ext_jabber_write(jconn j, const char *buf, int len);
 
 /* prototypes of the local functions */
-static void startElement(void *userdata, const char *name, const char **attribs);
+static void startElement(void *userdata, const char *name,
+	const char **attribs);
 static void endElement(void *userdata, const char *name);
 static void charData(void *userdata, const char *s, int slen);
-void jab_continue (void *data, int error, jconn j);
+void jab_continue(void *data, int error, jconn j);
 
 /*
  *  jab_new -- initialize a new jabber connection
@@ -50,24 +51,27 @@ void jab_continue (void *data, int error, jconn j);
  */
 jconn jab_new(char *user, char *pass, char *serv)
 {
-    pool p;
-    jconn j;
+	pool p;
+	jconn j;
 
-    if(!user) return(NULL);
+	if (!user)
+		return (NULL);
 
-    p = pool_new();
-    if(!p) return(NULL);
-    j = pmalloc_x(p, sizeof(jconn_struct), 0);
-    if(!j) return(NULL);
-    j->p = p;
+	p = pool_new();
+	if (!p)
+		return (NULL);
+	j = pmalloc_x(p, sizeof(jconn_struct), 0);
+	if (!j)
+		return (NULL);
+	j->p = p;
 
-    j->user = jid_new(p, user);
-    j->pass = pstrdup(p, pass);
-    j->serv = pstrdup(p, serv);
-    
-    j->state = JCONN_STATE_OFF;
+	j->user = jid_new(p, user);
+	j->pass = pstrdup(p, pass);
+	j->serv = pstrdup(p, serv);
 
-    return j;
+	j->state = JCONN_STATE_OFF;
+
+	return j;
 }
 
 /*
@@ -79,10 +83,11 @@ jconn jab_new(char *user, char *pass, char *serv)
  */
 void jab_delete(jconn j)
 {
-    if(!j) return;
+	if (!j)
+		return;
 
-    jab_stop(j);
-    pool_free(j->p);
+	jab_stop(j);
+	pool_free(j->p);
 }
 
 /*
@@ -94,9 +99,10 @@ void jab_delete(jconn j)
  */
 void jab_state_handler(jconn j, jconn_state_h h)
 {
-    if(!j) return;
+	if (!j)
+		return;
 
-    j->on_state = h;
+	j->on_state = h;
 }
 
 /*
@@ -108,11 +114,11 @@ void jab_state_handler(jconn j, jconn_state_h h)
  */
 void jab_packet_handler(jconn j, jconn_packet_h h)
 {
-    if(!j) return;
+	if (!j)
+		return;
 
-    j->on_packet = h;
+	j->on_packet = h;
 }
-
 
 /*
  *  jab_start -- start connection
@@ -123,53 +129,52 @@ void jab_packet_handler(jconn j, jconn_packet_h h)
  */
 int jab_start(jconn j)
 {
-    int tag = 0;
-    if(!j || j->state != JCONN_STATE_OFF) return 0;
+	int tag = 0;
+	if (!j || j->state != JCONN_STATE_OFF)
+		return 0;
 
-    j->parser = XML_ParserCreate(NULL);
-    XML_SetUserData(j->parser, (void *)j);
-    XML_SetElementHandler(j->parser, startElement, endElement);
-    XML_SetCharacterDataHandler(j->parser, charData);
+	j->parser = XML_ParserCreate(NULL);
+	XML_SetUserData(j->parser, (void *)j);
+	XML_SetElementHandler(j->parser, startElement, endElement);
+	XML_SetCharacterDataHandler(j->parser, charData);
 
-    if (!j->serv || !strlen(j->serv))
-      j->serv = j->user->server;
+	if (!j->serv || !strlen(j->serv))
+		j->serv = j->user->server;
 
-    if ((tag = ext_jabber_connect(j, jab_continue)) < 0) {
-	    STATE_EVT(JCONN_STATE_OFF);
-	    return 0;
-    }
-    return tag; 
+	if ((tag = ext_jabber_connect(j, jab_continue)) < 0) {
+		STATE_EVT(JCONN_STATE_OFF);
+		return 0;
+	}
+	return tag;
 }
 
-
-void jab_continue (void *data, int error, jconn j)
+void jab_continue(void *data, int error, jconn j)
 {
-    xmlnode x;
-    char *t,*t2;
+	xmlnode x;
+	char *t, *t2;
 
+	if (error) {
+		ext_jabber_connect_error(data, error, j);
+		return;
+	}
 
-    if(error) {
-    	ext_jabber_connect_error(data, error, j);
-        return;
-    }
+	j->state = JCONN_STATE_CONNECTED;
+	STATE_EVT(JCONN_STATE_CONNECTED)
 
-    j->state = JCONN_STATE_CONNECTED;
-    STATE_EVT(JCONN_STATE_CONNECTED)
+		/* start stream */
+		x = jutil_header(NS_CLIENT, j->user->server);
+	t = xmlnode2str(x);
+	/* this is ugly, we can create the string here instead of jutil_header */
+	/* what do you think about it? -madcat */
+	t2 = strstr(t, "/>");
+	*t2++ = '>';
+	*t2 = '\0';
+	jab_send_raw(j, "<?xml version='1.0'?>");
+	jab_send_raw(j, t);
+	xmlnode_free(x);
 
-    /* start stream */
-    x = jutil_header(NS_CLIENT, j->user->server);
-    t = xmlnode2str(x);
-    /* this is ugly, we can create the string here instead of jutil_header */
-    /* what do you think about it? -madcat */
-    t2 = strstr(t,"/>");
-    *t2++ = '>';
-    *t2 = '\0';
-    jab_send_raw(j,"<?xml version='1.0'?>");
-    jab_send_raw(j,t);
-    xmlnode_free(x);
-
-    j->state = JCONN_STATE_ON;
-    STATE_EVT(JCONN_STATE_ON)
+	j->state = JCONN_STATE_ON;
+	STATE_EVT(JCONN_STATE_ON)
 }
 
 /*
@@ -180,12 +185,13 @@ void jab_continue (void *data, int error, jconn j)
  */
 void jab_stop(jconn j)
 {
-    if(!j || j->state == JCONN_STATE_OFF) return;
+	if (!j || j->state == JCONN_STATE_OFF)
+		return;
 
-    j->state = JCONN_STATE_OFF;
-    ext_jabber_disconnect(j);
+	j->state = JCONN_STATE_OFF;
+	ext_jabber_disconnect(j);
 
-    XML_ParserFree(j->parser);
+	XML_ParserFree(j->parser);
 }
 
 /* UNUSED
@@ -213,10 +219,10 @@ void jab_stop(jconn j)
  */
 jid jab_getjid(jconn j)
 {
-    if(j)
-        return(j->user);
-    else
-        return NULL;
+	if (j)
+		return (j->user);
+	else
+		return NULL;
 }
 
 /*  jab_getsid -- get stream id
@@ -228,10 +234,10 @@ jid jab_getjid(jconn j)
  */
 char *jab_getsid(jconn j)
 {
-    if(j)
-        return(j->sid);
-    else
-        return NULL;
+	if (j)
+		return (j->sid);
+	else
+		return NULL;
 }
 
 /*
@@ -244,16 +250,15 @@ char *jab_getsid(jconn j)
 
 void jab_send(jconn j, xmlnode x)
 {
-    if (j && j->state != JCONN_STATE_OFF)
-    {
-	    char *buf = xmlnode2str(x);
+	if (j && j->state != JCONN_STATE_OFF) {
+		char *buf = xmlnode2str(x);
 
-	    ext_jabber_write(j, buf, strlen(buf));
+		ext_jabber_write(j, buf, strlen(buf));
 
 #ifdef JDEBUG
-	    fprintf(stderr, "jab<%s %s\n", j->user->user, buf);
+		fprintf(stderr, "jab<%s %s\n", j->user->user, buf);
 #endif
-    }
+	}
 }
 
 /*
@@ -265,11 +270,11 @@ void jab_send(jconn j, xmlnode x)
  */
 void jab_send_raw(jconn j, const char *str)
 {
-    if (j && j->state != JCONN_STATE_OFF) {
-	    ext_jabber_write(j, str, strlen(str));
-    }
+	if (j && j->state != JCONN_STATE_OFF) {
+		ext_jabber_write(j, str, strlen(str));
+	}
 #ifdef JDEBUG
-    fprintf(stderr, "rjab<%s %s\n", j->user->user, str);
+	fprintf(stderr, "rjab<%s %s\n", j->user->user, str);
 #endif
 }
 
@@ -281,35 +286,33 @@ void jab_send_raw(jconn j, const char *str)
  */
 int jab_recv(jconn j)
 {
-    static char buf[4096];
-    int len = 0;
+	static char buf[4096];
+	int len = 0;
 
-    if(!j || j->state == JCONN_STATE_OFF)
-        return -1;
+	if (!j || j->state == JCONN_STATE_OFF)
+		return -1;
 
 /*    do {
     	ret = ext_jabber_read(j, buf, sizeof(buf)-1);
     } while( ret > 0 && (len+=ret) );
 */
 
-    len = ext_jabber_read(j, buf, sizeof(buf) - 1 );
+	len = ext_jabber_read(j, buf, sizeof(buf) - 1);
 
-    if(len>0)
-    {
-        buf[len] = '\0';
+	if (len > 0) {
+		buf[len] = '\0';
 #ifdef JDEBUG
-        fprintf(stderr, "jab>%s %s\n", j->user->user, buf);
+		fprintf(stderr, "jab>%s %s\n", j->user->user, buf);
 #endif
-        XML_Parse(j->parser, buf, len, 0);
-    }
-    else if( len<0 && errno != EAGAIN )
-    {
-        STATE_EVT(JCONN_STATE_OFF);
-        jab_stop(j);
-    }
+		XML_Parse(j->parser, buf, len, 0);
+	} else if (len < 0 && errno != EAGAIN) {
+		STATE_EVT(JCONN_STATE_OFF);
+		jab_stop(j);
+	}
 
-    return len;
+	return len;
 }
+
 //#undef JDEBUG
 /*
  *  jab_poll -- check socket for incoming data
@@ -320,7 +323,7 @@ int jab_recv(jconn j)
  */
 void jab_poll(jconn j)
 {
-    jab_recv(j);
+	jab_recv(j);
 }
 
 /*
@@ -331,41 +334,40 @@ void jab_poll(jconn j)
  */
 void jab_auth(jconn j)
 {
-    xmlnode x,y,z;
-    char *hash, *user;
+	xmlnode x, y, z;
+	char *hash, *user;
 
-    if (!j)
+	if (!j)
 		return;
 
-    x = jutil_iqnew(JPACKET__SET, NS_AUTH);
-    xmlnode_put_attrib(x, "id", "id_auth");
-    y = xmlnode_get_tag(x,"query");
+	x = jutil_iqnew(JPACKET__SET, NS_AUTH);
+	xmlnode_put_attrib(x, "id", "id_auth");
+	y = xmlnode_get_tag(x, "query");
 
-    user = j->user->user;
+	user = j->user->user;
 
-    if (user) {
-        z = xmlnode_insert_tag(y, "username");
-        xmlnode_insert_cdata(z, user, -1);
-    }
+	if (user) {
+		z = xmlnode_insert_tag(y, "username");
+		xmlnode_insert_cdata(z, user, -1);
+	}
 
-    z = xmlnode_insert_tag(y, "resource");
-    xmlnode_insert_cdata(z, j->user->resource, -1);
+	z = xmlnode_insert_tag(y, "resource");
+	xmlnode_insert_cdata(z, j->user->resource, -1);
 
-    if (j->sid) {
-        z = xmlnode_insert_tag(y, "digest");
-        hash = pmalloc(x->p, strlen(j->sid)+strlen(j->pass)+1);
-        strcpy(hash, j->sid);
-        strcat(hash, j->pass);
-        hash = shahash(hash);
-        xmlnode_insert_cdata(z, hash, 40);
-    }
-    else {
+	if (j->sid) {
+		z = xmlnode_insert_tag(y, "digest");
+		hash = pmalloc(x->p, strlen(j->sid) + strlen(j->pass) + 1);
+		strcpy(hash, j->sid);
+		strcat(hash, j->pass);
+		hash = shahash(hash);
+		xmlnode_insert_cdata(z, hash, 40);
+	} else {
 		z = xmlnode_insert_tag(y, "password");
 		xmlnode_insert_cdata(z, j->pass, -1);
-    }
+	}
 
-    jab_send(j, x);
-    xmlnode_free(x);
+	jab_send(j, x);
+	xmlnode_free(x);
 }
 
 /*
@@ -376,100 +378,95 @@ void jab_auth(jconn j)
  */
 void jab_reg(jconn j)
 {
-    xmlnode x,y,z;
-    char *user;
+	xmlnode x, y, z;
+	char *user;
 
-    if (!j)
+	if (!j)
 		return;
 
-    x = jutil_iqnew(JPACKET__SET, NS_REGISTER);
-    xmlnode_put_attrib(x, "id", "id_reg");
-    y = xmlnode_get_tag(x, "query");
+	x = jutil_iqnew(JPACKET__SET, NS_REGISTER);
+	xmlnode_put_attrib(x, "id", "id_reg");
+	y = xmlnode_get_tag(x, "query");
 
-    user = j->user->user;
+	user = j->user->user;
 
-    if (user){
-        z = xmlnode_insert_tag(y, "username");
-        xmlnode_insert_cdata(z, user, -1);
-    }
+	if (user) {
+		z = xmlnode_insert_tag(y, "username");
+		xmlnode_insert_cdata(z, user, -1);
+	}
 
-    z = xmlnode_insert_tag(y, "resource");
-    xmlnode_insert_cdata(z, j->user->resource, -1);
+	z = xmlnode_insert_tag(y, "resource");
+	xmlnode_insert_cdata(z, j->user->resource, -1);
 
-    if (j->pass){
+	if (j->pass) {
 		z = xmlnode_insert_tag(y, "password");
 		xmlnode_insert_cdata(z, j->pass, -1);
-    }
+	}
 
-    jab_send(j, x);
-    xmlnode_free(x);
-    j->state = JCONN_STATE_ON;
-    STATE_EVT(JCONN_STATE_ON)
+	jab_send(j, x);
+	xmlnode_free(x);
+	j->state = JCONN_STATE_ON;
+	STATE_EVT(JCONN_STATE_ON)
 }
-
 
 /* local functions */
 
 static void startElement(void *userdata, const char *name, const char **attribs)
 {
-    xmlnode x;
-    jconn j = (jconn)userdata;
+	xmlnode x;
+	jconn j = (jconn) userdata;
 
-    if(j->current)
-    {
-        /* Append the node to the current one */
-        x = xmlnode_insert_tag(j->current, name);
-        xmlnode_put_expat_attribs(x, attribs);
+	if (j->current) {
+		/* Append the node to the current one */
+		x = xmlnode_insert_tag(j->current, name);
+		xmlnode_put_expat_attribs(x, attribs);
 
-        j->current = x;
-    }
-    else
-    {
-        x = xmlnode_new_tag(name);
-        xmlnode_put_expat_attribs(x, attribs);
-        if(strcmp(name, "stream:stream") == 0) {
-            /* special case: name == stream:stream */
-            /* id attrib of stream is stored for digest auth */
-            j->sid = xmlnode_get_attrib(x, "id");
-            /* STATE_EVT(JCONN_STATE_AUTH) */
-	    xmlnode_free(x);
-        } else {
-            j->current = x;
-        }
-    }
+		j->current = x;
+	} else {
+		x = xmlnode_new_tag(name);
+		xmlnode_put_expat_attribs(x, attribs);
+		if (strcmp(name, "stream:stream") == 0) {
+			/* special case: name == stream:stream */
+			/* id attrib of stream is stored for digest auth */
+			j->sid = xmlnode_get_attrib(x, "id");
+			/* STATE_EVT(JCONN_STATE_AUTH) */
+			xmlnode_free(x);
+		} else {
+			j->current = x;
+		}
+	}
 }
 
 static void endElement(void *userdata, const char *name)
 {
-    jconn j = (jconn)userdata;
-    xmlnode x;
-    jpacket p;
+	jconn j = (jconn) userdata;
+	xmlnode x;
+	jpacket p;
 
-    if(j->current == NULL) {
-        /* we got </stream:stream> */
-        STATE_EVT(JCONN_STATE_OFF)
-        return;
-    }
+	if (j->current == NULL) {
+		/* we got </stream:stream> */
+		STATE_EVT(JCONN_STATE_OFF)
+			return;
+	}
 
-    x = xmlnode_get_parent(j->current);
+	x = xmlnode_get_parent(j->current);
 
-    if(x == NULL)
-    {
-        /* it is time to fire the event */
-        p = jpacket_new(j->current);
+	if (x == NULL) {
+		/* it is time to fire the event */
+		p = jpacket_new(j->current);
 
-        if(j->on_packet)
-            (j->on_packet)(j, p);
-        xmlnode_free(j->current);
-    }
+		if (j->on_packet)
+			(j->on_packet) (j, p);
+		xmlnode_free(j->current);
+	}
 
-    j->current = x;
+	j->current = x;
 }
 
 static void charData(void *userdata, const char *s, int slen)
 {
-    jconn j = (jconn)userdata;
+	jconn j = (jconn) userdata;
 
-    if (j->current)
-        xmlnode_insert_cdata(j->current, s, slen);
+	if (j->current)
+		xmlnode_insert_cdata(j->current, s, slen);
 }

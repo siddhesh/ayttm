@@ -23,7 +23,6 @@
  *
  */
 
-
 #ifndef __COMMON_NET_H__
 #define __COMMON_NET_H__
 
@@ -32,16 +31,16 @@ extern "C" {
 #endif
 
 /* Lookup address */
-struct addrinfo *lookup_address(const char *host, int port_num, int family);
+	struct addrinfo *lookup_address(const char *host, int port_num,
+		int family);
 
 /* Connect to an address on a port */
-int connect_address( const char *host, int port_num );
+	int connect_address(const char *host, int port_num);
 
 /* Receive a line of data from socket */
-int ay_recv_line( int sock, char **resultp );
+	int ay_recv_line(int sock, char **resultp);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

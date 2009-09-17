@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */ 
+ */
 
 #ifndef __UI_LOG_WINDOW_H__
 #define __UI_LOG_WINDOW_H__
@@ -31,11 +31,11 @@
 extern "C" {
 #endif
 
-t_log_window_id		ay_ui_log_window_contact_create( struct contact *inRemoteContact );
-t_log_window_id		ay_ui_log_window_file_create( const char *inFileName );
+	t_log_window_id ay_ui_log_window_contact_create(struct contact
+		*inRemoteContact);
+	t_log_window_id ay_ui_log_window_file_create(const char *inFileName);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif

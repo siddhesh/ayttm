@@ -27,8 +27,6 @@
 #ifndef __ICONS_H__
 #define __ICONS_H__
 
-void ay_register_icons () ;
+void ay_register_icons();
 
 #endif
-
-

@@ -33,13 +33,12 @@
 #  define strchr index
 #  define strrchr rindex
 # endif
-char *strchr (), *strrchr ();
+char *strchr(), *strrchr();
 # if !HAVE_MEMCPY
 #  define memcpy(d, s, n) bcopy ((s), (d), (n))
 #  define memmove(d, s, n) bcopy ((s), (d), (n))
 # endif
 #endif
-
 
 #include <errno.h>
 #include <unistd.h>
@@ -72,11 +71,11 @@ int yahoo_tcp_readline(char *ptr, int maxlen, void *fd)
 	for (n = 1; n < maxlen; n++) {
 
 		do {
-			rc = YAHOO_CALLBACK(ext_yahoo_read)(fd, &c, 1);
-		} while(rc == -1 && (errno == EINTR || errno == EAGAIN)); /* this is bad - it should be done asynchronously */
+			rc = YAHOO_CALLBACK(ext_yahoo_read) (fd, &c, 1);
+		} while (rc == -1 && (errno == EINTR || errno == EAGAIN));	/* this is bad - it should be done asynchronously */
 
 		if (rc == 1) {
-			if(c == '\r')			/* get rid of \r */
+			if (c == '\r')	/* get rid of \r */
 				continue;
 			*ptr = c;
 			if (c == '\n')
@@ -84,9 +83,9 @@ int yahoo_tcp_readline(char *ptr, int maxlen, void *fd)
 			ptr++;
 		} else if (rc == 0) {
 			if (n == 1)
-				return (0);		/* EOF, no data */
+				return (0);	/* EOF, no data */
 			else
-				break;			/* EOF, w/ data */
+				break;	/* EOF, w/ data */
 		} else {
 			return -1;
 		}
@@ -97,12 +96,12 @@ int yahoo_tcp_readline(char *ptr, int maxlen, void *fd)
 }
 
 static int url_to_host_port_path(const char *url,
-		char *host, int *port, char *path, int *ssl)
+	char *host, int *port, char *path, int *ssl)
 {
-	char *urlcopy=NULL;
-	char *slash=NULL;
-	char *colon=NULL;
-	
+	char *urlcopy = NULL;
+	char *slash = NULL;
+	char *colon = NULL;
+
 	/*
 	 * http://hostname
 	 * http://hostname/
@@ -115,11 +114,11 @@ static int url_to_host_port_path(const char *url,
 	 * and https:// variants of the above
 	 */
 
-	if(strstr(url, "http://") == url) {
-		urlcopy = strdup(url+7);
-	} else if(strstr(url, "https://") == url) {
-		urlcopy = strdup(url+8);
-		*ssl=1;
+	if (strstr(url, "http://") == url) {
+		urlcopy = strdup(url + 7);
+	} else if (strstr(url, "https://") == url) {
+		urlcopy = strdup(url + 8);
+		*ssl = 1;
 	} else {
 		WARNING(("Weird url - unknown protocol: %s", url));
 		return 0;
@@ -128,17 +127,17 @@ static int url_to_host_port_path(const char *url,
 	slash = strchr(urlcopy, '/');
 	colon = strchr(urlcopy, ':');
 
-	if(!colon || (slash && slash < colon)) {
+	if (!colon || (slash && slash < colon)) {
 		if (*ssl)
 			*port = 443;
 		else
 			*port = 80;
 	} else {
 		*colon = 0;
-		*port = atoi(colon+1);
+		*port = atoi(colon + 1);
 	}
 
-	if(!slash) {
+	if (!slash) {
 		strcpy(path, "/");
 	} else {
 		strcpy(path, slash);
@@ -146,7 +145,7 @@ static int url_to_host_port_path(const char *url,
 	}
 
 	strcpy(host, urlcopy);
-	
+
 	FREE(urlcopy);
 
 	return 1;
@@ -159,130 +158,130 @@ static int isurlchar(unsigned char c)
 
 char *yahoo_urlencode(const char *instr)
 {
-	int ipos=0, bpos=0;
+	int ipos = 0, bpos = 0;
 	char *str = NULL;
 	int len = strlen(instr);
 
-	if(!(str = y_new(char, 3*len + 1) ))
-		return "";
+	if (!(str = y_new(char, 3 *len + 1)))
+		 return "";
 
-	while(instr[ipos]) {
-		while(isurlchar(instr[ipos]))
+	while (instr[ipos]) {
+		while (isurlchar(instr[ipos]))
 			str[bpos++] = instr[ipos++];
-		if(!instr[ipos])
+		if (!instr[ipos])
 			break;
-		
+
 		snprintf(&str[bpos], 4, "%%%.2x", instr[ipos]);
-		bpos+=3;
+		bpos += 3;
 		ipos++;
 	}
-	str[bpos]='\0';
+	str[bpos] = '\0';
 
 	/* free extra alloc'ed mem. */
 	len = strlen(str);
-	str = y_renew(char, str, len+1);
+	str = y_renew(char, str, len + 1);
 
 	return (str);
 }
 
 char *yahoo_urldecode(const char *instr)
 {
-	int ipos=0, bpos=0;
+	int ipos = 0, bpos = 0;
 	char *str = NULL;
-	char entity[3]={0,0,0};
+	char entity[3] = { 0, 0, 0 };
 	unsigned dec;
 	int len = strlen(instr);
 
-	if(!(str = y_new(char, len+1) ))
-		return "";
+	if (!(str = y_new(char, len + 1)))
+		 return "";
 
-	while(instr[ipos]) {
-		while(instr[ipos] && instr[ipos]!='%')
-			if(instr[ipos]=='+') {
-				str[bpos++]=' ';
+	while (instr[ipos]) {
+		while (instr[ipos] && instr[ipos] != '%')
+			if (instr[ipos] == '+') {
+				str[bpos++] = ' ';
 				ipos++;
 			} else
 				str[bpos++] = instr[ipos++];
-		if(!instr[ipos])
+		if (!instr[ipos])
 			break;
-		
-		if(instr[ipos+1] && instr[ipos+2]) {
+
+		if (instr[ipos + 1] && instr[ipos + 2]) {
 			ipos++;
-			entity[0]=instr[ipos++];
-			entity[1]=instr[ipos++];
+			entity[0] = instr[ipos++];
+			entity[1] = instr[ipos++];
 			sscanf(entity, "%2x", &dec);
 			str[bpos++] = (char)dec;
 		} else {
 			str[bpos++] = instr[ipos++];
 		}
 	}
-	str[bpos]='\0';
+	str[bpos] = '\0';
 
 	/* free extra alloc'ed mem. */
 	len = strlen(str);
-	str = y_renew(char, str, len+1);
+	str = y_renew(char, str, len + 1);
 
 	return (str);
 }
 
 char *yahoo_xmldecode(const char *instr)
 {
-	int ipos=0, bpos=0, epos=0;
+	int ipos = 0, bpos = 0, epos = 0;
 	char *str = NULL;
-	char entity[4]={0,0,0,0};
-	char *entitymap[5][2]={
-		{"amp;",  "&"}, 
+	char entity[4] = { 0, 0, 0, 0 };
+	char *entitymap[5][2] = {
+		{"amp;", "&"},
 		{"quot;", "\""},
-		{"lt;",   "<"}, 
-		{"gt;",   "<"}, 
+		{"lt;", "<"},
+		{"gt;", "<"},
 		{"nbsp;", " "}
 	};
 	unsigned dec;
 	int len = strlen(instr);
 
-	if(!(str = y_new(char, len+1) ))
-		return "";
+	if (!(str = y_new(char, len + 1)))
+		 return "";
 
-	while(instr[ipos]) {
-		while(instr[ipos] && instr[ipos]!='&')
-			if(instr[ipos]=='+') {
-				str[bpos++]=' ';
+	while (instr[ipos]) {
+		while (instr[ipos] && instr[ipos] != '&')
+			if (instr[ipos] == '+') {
+				str[bpos++] = ' ';
 				ipos++;
 			} else
 				str[bpos++] = instr[ipos++];
-		if(!instr[ipos] || !instr[ipos+1])
+		if (!instr[ipos] || !instr[ipos + 1])
 			break;
 		ipos++;
 
-		if(instr[ipos] == '#') {
+		if (instr[ipos] == '#') {
 			ipos++;
-			epos=0;
-			while(instr[ipos] != ';')
-				entity[epos++]=instr[ipos++];
+			epos = 0;
+			while (instr[ipos] != ';')
+				entity[epos++] = instr[ipos++];
 			sscanf(entity, "%u", &dec);
 			str[bpos++] = (char)dec;
 			ipos++;
 		} else {
 			int i;
-			for (i=0; i<5; i++) 
-				if(!strncmp(instr+ipos, entitymap[i][0], 
-					       strlen(entitymap[i][0]))) {
-				       	str[bpos++] = entitymap[i][1][0];
+			for (i = 0; i < 5; i++)
+				if (!strncmp(instr + ipos, entitymap[i][0],
+						strlen(entitymap[i][0]))) {
+					str[bpos++] = entitymap[i][1][0];
 					ipos += strlen(entitymap[i][0]);
 					break;
 				}
 		}
 	}
-	str[bpos]='\0';
+	str[bpos] = '\0';
 
 	/* free extra alloc'ed mem. */
 	len = strlen(str);
-	str = y_renew(char, str, len+1);
+	str = y_renew(char, str, len + 1);
 
 	return (str);
 }
 
-typedef void (*http_connected)(int id, void *fd, int error);
+typedef void (*http_connected) (int id, void *fd, int error);
 
 struct callback_data {
 	int id;
@@ -294,55 +293,54 @@ struct callback_data {
 static void connect_complete(void *fd, int error, void *data)
 {
 	struct callback_data *ccd = data;
-	if(error == 0)
-		YAHOO_CALLBACK(ext_yahoo_write)(fd, ccd->request, strlen(ccd->request));
+	if (error == 0)
+		YAHOO_CALLBACK(ext_yahoo_write) (fd, ccd->request,
+			strlen(ccd->request));
 	FREE(ccd->request);
 	ccd->callback(ccd->id, fd, error, ccd->user_data);
 	FREE(ccd);
 }
 
-static void yahoo_send_http_request(int id, char *host, int port, char *request, 
-		yahoo_get_fd_callback callback, void *data, int use_ssl)
+static void yahoo_send_http_request(int id, char *host, int port, char *request,
+	yahoo_get_fd_callback callback, void *data, int use_ssl)
 {
-	struct callback_data *ccd=y_new0(struct callback_data, 1);
+	struct callback_data *ccd = y_new0(struct callback_data, 1);
 	ccd->callback = callback;
 	ccd->id = id;
 	ccd->request = strdup(request);
 	ccd->user_data = data;
 
-	YAHOO_CALLBACK(ext_yahoo_connect_async)(id, host, port, connect_complete, ccd, use_ssl);
+	YAHOO_CALLBACK(ext_yahoo_connect_async) (id, host, port,
+		connect_complete, ccd, use_ssl);
 }
 
-void yahoo_http_post(int id, const char *url, const char *cookies, long content_length,
-		yahoo_get_fd_callback callback, void *data)
+void yahoo_http_post(int id, const char *url, const char *cookies,
+	long content_length, yahoo_get_fd_callback callback, void *data)
 {
 	char host[255];
 	int port = 80;
 	char path[255];
 	char buff[1024];
 	int ssl = 0;
-	
-	if(!url_to_host_port_path(url, host, &port, path, &ssl))
+
+	if (!url_to_host_port_path(url, host, &port, path, &ssl))
 		return;
 
 	/* thanks to kopete dumpcap */
-	snprintf(buff, sizeof(buff), 
-			"POST %s HTTP/1.1\r\n"
-			"Cookie: %s\r\n"
-			"User-Agent: Mozilla/4.0 [en] (" PACKAGE "/" VERSION ")\r\n"
-			"Host: %s:%d\r\n"
-			"Content-length: %ld\r\n"
-			"Cache-Control: no-cache\r\n"
-			"\r\n",
-			url, cookies,
-			host, port,
-			content_length);
+	snprintf(buff, sizeof(buff),
+		"POST %s HTTP/1.1\r\n"
+		"Cookie: %s\r\n"
+		"User-Agent: Mozilla/4.0 [en] (" PACKAGE "/" VERSION ")\r\n"
+		"Host: %s:%d\r\n"
+		"Content-length: %ld\r\n"
+		"Cache-Control: no-cache\r\n"
+		"\r\n", url, cookies, host, port, content_length);
 
 	yahoo_send_http_request(id, host, port, buff, callback, data, ssl);
 }
 
 void yahoo_http_get(int id, const char *url, const char *cookies,
-		yahoo_get_fd_callback callback, void *data)
+	yahoo_get_fd_callback callback, void *data)
 {
 	char host[255];
 	int port = 80;
@@ -350,23 +348,22 @@ void yahoo_http_get(int id, const char *url, const char *cookies,
 	char buff[2048];
 	char cookiebuff[1024];
 	int ssl = 0;
-	
-	if(!url_to_host_port_path(url, host, &port, path, &ssl))
+
+	if (!url_to_host_port_path(url, host, &port, path, &ssl))
 		return;
 
 	/* Allow cases when we don't need to send a cookie */
-	if(cookies)
-		snprintf(cookiebuff, sizeof(cookiebuff), "Cookie: %s\r\n", cookies);
+	if (cookies)
+		snprintf(cookiebuff, sizeof(cookiebuff), "Cookie: %s\r\n",
+			cookies);
 	else
-		cookiebuff[0]='\0';
+		cookiebuff[0] = '\0';
 
-	snprintf(buff, sizeof(buff), 
-			"GET %s HTTP/1.0\r\n"
-			"Host: %s:%d\r\n"
-			"User-Agent: Mozilla/4.5 [en] (" PACKAGE "/" VERSION ")\r\n"
-			"%s"
-			"\r\n",
-			path, host, port, cookiebuff);
+	snprintf(buff, sizeof(buff),
+		"GET %s HTTP/1.0\r\n"
+		"Host: %s:%d\r\n"
+		"User-Agent: Mozilla/4.5 [en] (" PACKAGE "/" VERSION ")\r\n"
+		"%s" "\r\n", path, host, port, cookiebuff);
 
 	yahoo_send_http_request(id, host, port, buff, callback, data, ssl);
 }
@@ -378,51 +375,51 @@ struct url_data {
 
 static void yahoo_got_url_fd(int id, void *fd, int error, void *data)
 {
-	char *tmp=NULL;
+	char *tmp = NULL;
 	char buff[1024];
-	unsigned long filesize=0;
-	char *filename=NULL;
+	unsigned long filesize = 0;
+	char *filename = NULL;
 	int n;
 
 	struct url_data *ud = data;
 
-	if(error || fd == NULL) {
+	if (error || fd == NULL) {
 		ud->callback(id, fd, error, filename, filesize, ud->user_data);
 		FREE(ud);
 		return;
 	}
 
-	while((n=yahoo_tcp_readline(buff, sizeof(buff), fd)) > 0) {
+	while ((n = yahoo_tcp_readline(buff, sizeof(buff), fd)) > 0) {
 		LOG(("Read:%s:\n", buff));
-		if(!strcmp(buff, ""))
+		if (!strcmp(buff, ""))
 			break;
 
-		if( !strncasecmp(buff, "Content-length:", 
-				strlen("Content-length:")) ) {
+		if (!strncasecmp(buff, "Content-length:",
+				strlen("Content-length:"))) {
 			tmp = strrchr(buff, ' ');
-			if(tmp)
+			if (tmp)
 				filesize = atol(tmp);
 		}
 
-		if( !strncasecmp(buff, "Content-disposition:", 
-				strlen("Content-disposition:")) ) {
+		if (!strncasecmp(buff, "Content-disposition:",
+				strlen("Content-disposition:"))) {
 			tmp = strstr(buff, "name=");
-			if(tmp) {
-				tmp+=strlen("name=");
-				if(tmp[0] == '"') {
+			if (tmp) {
+				tmp += strlen("name=");
+				if (tmp[0] == '"') {
 					char *tmp2;
 					tmp++;
 					tmp2 = strchr(tmp, '"');
-					if(tmp2)
+					if (tmp2)
 						*tmp2 = '\0';
 				} else {
 					char *tmp2;
 					tmp2 = strchr(tmp, ';');
-					if(!tmp2)
+					if (!tmp2)
 						tmp2 = strchr(tmp, '\r');
-					if(!tmp2)
+					if (!tmp2)
 						tmp2 = strchr(tmp, '\n');
-					if(tmp2)
+					if (tmp2)
 						*tmp2 = '\0';
 				}
 
@@ -439,7 +436,7 @@ static void yahoo_got_url_fd(int id, void *fd, int error, void *data)
 }
 
 void yahoo_get_url_fd(int id, const char *url, const struct yahoo_data *yd,
-		yahoo_get_url_handle_callback callback, void *data)
+	yahoo_get_url_handle_callback callback, void *data)
 {
 	char buff[1024];
 	struct url_data *ud = y_new0(struct url_data, 1);
@@ -448,4 +445,3 @@ void yahoo_get_url_fd(int id, const char *url, const struct yahoo_data *yd,
 	ud->user_data = data;
 	yahoo_http_get(id, url, buff, yahoo_got_url_fd, ud);
 }
-

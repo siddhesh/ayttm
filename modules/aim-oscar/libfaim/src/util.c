@@ -13,10 +13,12 @@
 #include "win32dep.h"
 #endif
 
-faim_internal void faimdprintf(aim_session_t *sess, int dlevel, const char *format, ...)
+faim_internal void faimdprintf(aim_session_t *sess, int dlevel,
+	const char *format, ...)
 {
 	if (!sess) {
-		fprintf(stderr, "faimdprintf: no session! boo! (%d, %s)\n", dlevel, format);
+		fprintf(stderr, "faimdprintf: no session! boo! (%d, %s)\n",
+			dlevel, format);
 		return;
 	}
 	if ((dlevel <= sess->debug) && sess->debugcb) {
@@ -50,7 +52,7 @@ faim_export int aimutil_tokslen(char *toSearch, int theindex, char dl)
 	last = toSearch;
 	next = strchr(toSearch, dl);
 
-	while(curCount < theindex && next != NULL) {
+	while (curCount < theindex && next != NULL) {
 		curCount++;
 		last = next + 1;
 		next = strchr(last, dl);
@@ -73,7 +75,7 @@ faim_export int aimutil_itemcnt(char *toSearch, char dl)
 
 	next = strchr(toSearch, dl);
 
-	while(next != NULL) {
+	while (next != NULL) {
 		curCount++;
 		next = strchr(next + 1, dl);
 	}
@@ -130,8 +132,8 @@ faim_export fu16_t aimutil_iconsum(const fu8_t *buf, int buflen)
 	fu32_t sum;
 	int i;
 
-	for (i=0, sum=0; i+1<buflen; i+=2)
-		sum += (buf[i+1] << 8) + buf[i];
+	for (i = 0, sum = 0; i + 1 < buflen; i += 2)
+		sum += (buf[i + 1] << 8) + buf[i];
 	if (i < buflen)
 		sum += buf[i];
 	sum = ((sum & 0xffff0000) >> 16) + (sum & 0x0000ffff);

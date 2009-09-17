@@ -20,65 +20,69 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */  
+ */
 
 //#include "ui_file_selection_dlg.h"
 #include <gtk/gtk.h>
 #include "file_select.h"
 
-void ay_do_file_selection_open( const char *inDefaultFile, const char *inWindowTitle, 
-			 t_file_selection_callback *inCallback, void *inData )
+void ay_do_file_selection_open(const char *inDefaultFile,
+	const char *inWindowTitle, t_file_selection_callback *inCallback,
+	void *inData)
 {
 	const char *selected_file = NULL;
 	GtkWidget *dialog = NULL;
 
-	dialog = gtk_file_chooser_dialog_new( inWindowTitle, NULL,
-			GTK_FILE_CHOOSER_ACTION_OPEN,
-			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-			NULL);
+	dialog = gtk_file_chooser_dialog_new(inWindowTitle, NULL,
+		GTK_FILE_CHOOSER_ACTION_OPEN,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
-	if(inDefaultFile)
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), inDefaultFile);
+	if (inDefaultFile)
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog),
+			inDefaultFile);
 
-	if(gtk_dialog_run(GTK_DIALOG(dialog))  == GTK_RESPONSE_ACCEPT) 
-		selected_file = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER(dialog) );
-	else 
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+		selected_file =
+			gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+	else
 		selected_file = NULL;
 
-	(inCallback)( selected_file, inData );
+	(inCallback) (selected_file, inData);
 	gtk_widget_destroy(dialog);
 }
 
-
-void ay_do_file_selection_save( const char *inDefaultFile, const char *inWindowTitle, 
-			 t_file_selection_callback *inCallback, void *inData )
+void ay_do_file_selection_save(const char *inDefaultFile,
+	const char *inWindowTitle, t_file_selection_callback *inCallback,
+	void *inData)
 {
 	const char *selected_file = NULL;
 	GtkWidget *dialog = NULL;
 	char url[255];
 	char *curr_folder = NULL;
 
-	dialog = gtk_file_chooser_dialog_new( inWindowTitle, NULL,
-			GTK_FILE_CHOOSER_ACTION_SAVE,
-			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-			NULL);
+	dialog = gtk_file_chooser_dialog_new(inWindowTitle, NULL,
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 
-	if ( (curr_folder = gtk_file_chooser_get_current_folder ( GTK_FILE_CHOOSER(dialog) ) ) )
-		snprintf(url, sizeof(url), "%s/%s", curr_folder, (inDefaultFile?inDefaultFile:""));
+	if ((curr_folder =
+			gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER
+				(dialog))))
+		snprintf(url, sizeof(url), "%s/%s", curr_folder,
+			(inDefaultFile ? inDefaultFile : ""));
 	else
-		snprintf(url, sizeof(url), "/%s", (inDefaultFile?inDefaultFile:""));
+		snprintf(url, sizeof(url), "/%s",
+			(inDefaultFile ? inDefaultFile : ""));
 
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), url);
 
-	if(gtk_dialog_run(GTK_DIALOG(dialog))  == GTK_RESPONSE_ACCEPT) 
-		selected_file = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER(dialog) );
-	else 
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+		selected_file =
+			gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+	else
 		selected_file = NULL;
 
-	(inCallback)( selected_file, inData );
+	(inCallback) (selected_file, inData);
 	gtk_widget_destroy(dialog);
 }
-
-

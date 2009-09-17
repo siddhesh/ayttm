@@ -60,50 +60,42 @@
 #define CEN_SPECIFIC	(CEN_REVISION|CEN_SPONSOR|CEN_SPECIAL|CEN_AUDIENCE)
 #define XPG_SPECIFIC	(XPG_CODESET|XPG_NORM_CODESET|XPG_MODIFIER)
 
+struct loaded_l10nfile {
+	const char *filename;
+	int decided;
 
-struct loaded_l10nfile
-{
-  const char *filename;
-  int decided;
+	const void *data;
 
-  const void *data;
-
-  struct loaded_l10nfile *next;
-  struct loaded_l10nfile *successor[1];
+	struct loaded_l10nfile *next;
+	struct loaded_l10nfile *successor[1];
 };
-
 
 /* Normalize codeset name.  There is no standard for the codeset
    names.  Normalization allows the user to use any of the common
    names.  The return value is dynamically allocated and has to be
    freed by the caller.  */
-extern const char *_nl_normalize_codeset PARAMS ((const char *codeset,
-						  size_t name_len));
+extern const char *_nl_normalize_codeset PARAMS((const char *codeset,
+		size_t name_len));
 
-extern struct loaded_l10nfile *
-_nl_make_l10nflist PARAMS ((struct loaded_l10nfile **l10nfile_list,
-			    const char *dirlist, size_t dirlist_len, int mask,
-			    const char *language, const char *territory,
-			    const char *codeset,
-			    const char *normalized_codeset,
-			    const char *modifier, const char *special,
-			    const char *sponsor, const char *revision,
-			    const char *filename, int do_allocate));
+extern struct loaded_l10nfile *_nl_make_l10nflist PARAMS((struct loaded_l10nfile
+		**l10nfile_list, const char *dirlist, size_t dirlist_len,
+		int mask, const char *language, const char *territory,
+		const char *codeset, const char *normalized_codeset,
+		const char *modifier, const char *special, const char *sponsor,
+		const char *revision, const char *filename, int do_allocate));
 
-
-extern const char *_nl_expand_alias PARAMS ((const char *name));
+extern const char *_nl_expand_alias PARAMS((const char *name));
 
 /* normalized_codeset is dynamically allocated and has to be freed by
    the caller.  */
-extern int _nl_explode_name PARAMS ((char *name, const char **language,
-				     const char **modifier,
-				     const char **territory,
-				     const char **codeset,
-				     const char **normalized_codeset,
-				     const char **special,
-				     const char **sponsor,
-				     const char **revision));
+extern int _nl_explode_name PARAMS((char *name, const char **language,
+		const char **modifier,
+		const char **territory,
+		const char **codeset,
+		const char **normalized_codeset,
+		const char **special,
+		const char **sponsor, const char **revision));
 
-extern char *_nl_find_language PARAMS ((const char *name));
+extern char *_nl_find_language PARAMS((const char *name));
 
-#endif	/* loadinfo.h */
+#endif				/* loadinfo.h */

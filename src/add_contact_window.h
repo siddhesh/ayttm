@@ -29,19 +29,18 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif	
-void show_add_contact_window();
-void show_add_contact_to_group_window(grouplist *g);
-void show_add_group_window();
-void show_add_account_to_contact_window(struct contact * cont);
-void edit_contact_window_new( struct contact * c );
-void edit_account_window_new( eb_account * ea );
-void add_unknown_account_window_new( eb_account * ea );
-void edit_group_window_new( grouplist * g);
-LList * get_all_accounts(int service);
-LList * get_all_contacts();
+#endif
+	void show_add_contact_window();
+	void show_add_contact_to_group_window(grouplist *g);
+	void show_add_group_window();
+	void show_add_account_to_contact_window(struct contact *cont);
+	void edit_contact_window_new(struct contact *c);
+	void edit_account_window_new(eb_account *ea);
+	void add_unknown_account_window_new(eb_account *ea);
+	void edit_group_window_new(grouplist *g);
+	LList *get_all_accounts(int service);
+	LList *get_all_contacts();
 #ifdef __cplusplus
 }
-#endif	
-
+#endif
 #endif

@@ -29,19 +29,28 @@
 #include "debug.h"
 
 /* these two have to be outside the #ifdef */
-unsigned char *(*image_2_jpg)(const unsigned char *, long *) = NULL;
-unsigned char *(*image_2_jpc)(const unsigned char *, long *) = NULL;
+unsigned char *(*image_2_jpg) (const unsigned char *, long *) = NULL;
+unsigned char *(*image_2_jpc) (const unsigned char *, long *) = NULL;
 
 #ifndef HAVE_GDK_PIXBUF
 #include "globals.h"
 
-int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data)
-{ 
+int ay_image_window_new(int width, int height, const char *title,
+	ay_image_window_cancel_callback callback, void *callback_data)
+{
 	eb_debug(DBG_CORE, "Image window support not included\n");
-	return 0; 
+	return 0;
 }
-int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new) { return 0; }
-void ay_image_window_close(int tag) { }
+
+int ay_image_window_add_data(int tag, const unsigned char *buf, long count,
+	int new)
+{
+	return 0;
+}
+
+void ay_image_window_close(int tag)
+{
+}
 
 #else
 
@@ -68,38 +77,36 @@ struct ay_image_wnd {
 static int last_tag = 0;
 static LList *images = NULL;
 
-
-static struct ay_image_wnd * get_image_wnd_by_tag(int tag)
+static struct ay_image_wnd *get_image_wnd_by_tag(int tag)
 {
-	LList * l;
+	LList *l;
 	for (l = images; l; l = l_list_next(l)) {
-		struct ay_image_wnd * aiw = l->data;
-		if(aiw->tag == tag)
+		struct ay_image_wnd *aiw = l->data;
+		if (aiw->tag == tag)
 			return aiw;
 	}
 	return NULL;
 }
-
 
 static void ay_image_window_destroy(GtkWidget *widget, gpointer data)
 {
 	struct ay_image_wnd *aiw = data;
 	GError *error = NULL;
 
-	if(!aiw)
+	if (!aiw)
 		return;
 
 	images = l_list_remove(images, aiw);
 
-	if(aiw->loader_open) {
+	if (aiw->loader_open) {
 		gdk_pixbuf_loader_close(aiw->loader, &error);
-		aiw->loader_open=0;
+		aiw->loader_open = 0;
 	}
 
-	if(aiw->callback)
+	if (aiw->callback)
 		aiw->callback(aiw->tag, aiw->callback_data);
 
-	if(aiw->tag == last_tag)
+	if (aiw->tag == last_tag)
 		last_tag--;
 
 	g_free(aiw);
@@ -111,20 +118,22 @@ static char *dummy_pixmap_xpm[] = {
 	" "
 };
 
-static GtkWidget *create_dummy_pixmap(GtkWidget * widget)
+static GtkWidget *create_dummy_pixmap(GtkWidget *widget)
 {
 	GdkPixbuf *gdkpixbuf;
 	GtkWidget *image;
 
-	gdkpixbuf = gdk_pixbuf_new_from_xpm_data((const char **)dummy_pixmap_xpm);
+	gdkpixbuf =
+		gdk_pixbuf_new_from_xpm_data((const char **)dummy_pixmap_xpm);
 	image = gtk_image_new_from_pixbuf(gdkpixbuf);
 	gdk_pixbuf_unref(gdkpixbuf);
 	return image;
 }
 
-int ay_image_window_new(int width, int height, const char *title, ay_image_window_cancel_callback callback, void *callback_data)
+int ay_image_window_new(int width, int height, const char *title,
+	ay_image_window_cancel_callback callback, void *callback_data)
 {
-	struct ay_image_wnd * aiw;
+	struct ay_image_wnd *aiw;
 	GtkWidget *wndImage;
 	GtkWidget *vbox1;
 	GtkWidget *pixImage;
@@ -147,10 +156,10 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 	gtk_widget_set_size_request(pixImage, width, height);
 
 	btnClose = gtk_button_new_with_label(_("Close"));
-	g_signal_connect_swapped(btnClose, "clicked", G_CALLBACK(gtk_widget_destroy), wndImage);
+	g_signal_connect_swapped(btnClose, "clicked",
+		G_CALLBACK(gtk_widget_destroy), wndImage);
 	gtk_widget_show(btnClose);
 	gtk_box_pack_start(GTK_BOX(vbox1), btnClose, FALSE, FALSE, 0);
-
 
 	aiw = g_new0(struct ay_image_wnd, 1);
 	aiw->window = wndImage;
@@ -161,13 +170,13 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
 
 	images = l_list_prepend(images, aiw);
 
-	g_signal_connect(wndImage, "destroy", G_CALLBACK(ay_image_window_destroy), aiw);
+	g_signal_connect(wndImage, "destroy",
+		G_CALLBACK(ay_image_window_destroy), aiw);
 
 	gtk_widget_show(wndImage);
 
 	return aiw->tag;
 }
-
 
 /*
  * tag   - identifies the window
@@ -177,20 +186,21 @@ int ay_image_window_new(int width, int height, const char *title, ay_image_windo
  *
  * returns: 1 on success, 0 on failure (window already closed?)
  */
-int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int new)
+int ay_image_window_add_data(int tag, const unsigned char *buf, long count,
+	int new)
 {
-	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);
+	struct ay_image_wnd *aiw = get_image_wnd_by_tag(tag);
 	unsigned char *jpg_buf;
 	GdkPixbuf *pixbuf;
 	GdkPixmap *gdkpixmap;
 	GdkBitmap *mask;
 	GError *error = NULL;
 
-	if(!aiw || !buf) {
+	if (!aiw || !buf) {
 		return 0;
 	}
 
-	if(image_2_jpg)
+	if (image_2_jpg)
 		jpg_buf = image_2_jpg(buf, &count);
 	else {
 		eb_debug(DBG_CORE, "image decoder not loaded\n");
@@ -205,7 +215,7 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(aiw->loader);
 
-	if(!pixbuf) {
+	if (!pixbuf) {
 		return 0;
 	}
 
@@ -222,9 +232,9 @@ int ay_image_window_add_data(int tag, const unsigned char *buf, long count, int 
 
 void ay_image_window_update_title(int tag, const char *title)
 {
-	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);
+	struct ay_image_wnd *aiw = get_image_wnd_by_tag(tag);
 
-	if(!aiw)
+	if (!aiw)
 		return;
 
 	gtk_window_set_title(GTK_WINDOW(aiw->window), title);
@@ -232,13 +242,13 @@ void ay_image_window_update_title(int tag, const char *title)
 
 void ay_image_window_close(int tag)
 {
-	struct ay_image_wnd * aiw = get_image_wnd_by_tag(tag);
+	struct ay_image_wnd *aiw = get_image_wnd_by_tag(tag);
 
-	if(!aiw)
+	if (!aiw)
 		return;
 
 	aiw->callback = aiw->callback_data = NULL;
-	
+
 	gtk_widget_destroy(aiw->window);
 }
 
@@ -250,9 +260,10 @@ static int _cycle(void *data)
 	char fn[100];
 	static int i;
 	unsigned char *in_img;
-	snprintf(fn, sizeof(fn), "/home/philip/webcam-images/ayttm-img-%03d.jpc", i);
+	snprintf(fn, sizeof(fn),
+		"/home/philip/webcam-images/ayttm-img-%03d.jpc", i);
 	img = fopen(fn, "rb");
-	if(!img) {
+	if (!img) {
 		fprintf(stderr, "Could not open %s\n", fn);
 		return 1;
 	}
@@ -261,7 +272,8 @@ static int _cycle(void *data)
 	fseek(img, 0, SEEK_SET);
 
 	in_img = malloc(size);
-	fprintf(stderr, "Wanted %d, got %d\n", size, fread(in_img, 1, size, img));
+	fprintf(stderr, "Wanted %d, got %d\n", size, fread(in_img, 1, size,
+			img));
 	fclose(img);
 
 	ay_image_window_add_data(tag, in_img, size, 1);
@@ -271,16 +283,16 @@ static int _cycle(void *data)
 
 	i++;
 
-	if(i==65)
+	if (i == 65)
 		return 0;
 
 	return 1;
 }
 
-int eb_timeout_add(int, int (*callback)(void *), void *);
+int eb_timeout_add(int, int (*callback) (void *), void *);
 void ay_image_window_test()
 {
-	int tag = ay_image_window_new(320, 240, 0,0,0);
+	int tag = ay_image_window_new(320, 240, 0, 0, 0);
 	eb_timeout_add(500, _cycle, (void *)tag);
 }
-#endif	/* HAVE_GDK_PIXBUF */
+#endif				/* HAVE_GDK_PIXBUF */

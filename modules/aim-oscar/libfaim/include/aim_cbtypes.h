@@ -21,16 +21,16 @@
 #define AIM_CB_FAM_LOK 0x000a
 #define AIM_CB_FAM_STS 0x000b
 #define AIM_CB_FAM_TRN 0x000c
-#define AIM_CB_FAM_CTN 0x000d /* ChatNav */
-#define AIM_CB_FAM_CHT 0x000e /* Chat */
-#define AIM_CB_FAM_SCH 0x000f /* "New" search */
-#define AIM_CB_FAM_ICO 0x0010 /* Used for uploading buddy icons */
-#define AIM_CB_FAM_SSI 0x0013 /* Server stored information */
+#define AIM_CB_FAM_CTN 0x000d	/* ChatNav */
+#define AIM_CB_FAM_CHT 0x000e	/* Chat */
+#define AIM_CB_FAM_SCH 0x000f	/* "New" search */
+#define AIM_CB_FAM_ICO 0x0010	/* Used for uploading buddy icons */
+#define AIM_CB_FAM_SSI 0x0013	/* Server stored information */
 #define AIM_CB_FAM_ICQ 0x0015
 #define AIM_CB_FAM_ATH 0x0017
 #define AIM_CB_FAM_EML 0x0018
-#define AIM_CB_FAM_OFT 0xfffe /* OFT/Rvous */
-#define AIM_CB_FAM_SPECIAL 0xffff /* Internal libfaim use */
+#define AIM_CB_FAM_OFT 0xfffe	/* OFT/Rvous */
+#define AIM_CB_FAM_SPECIAL 0xffff	/* Internal libfaim use */
 
 /*
  * SNAC Family: Ack.
@@ -43,7 +43,7 @@
 
 /*
  * SNAC Family: General.
- */ 
+ */
 #define AIM_CB_GEN_ERROR 0x0001
 #define AIM_CB_GEN_CLIENTREADY 0x0002
 #define AIM_CB_GEN_SERVERREADY 0x0003
@@ -68,7 +68,7 @@
 
 /*
  * SNAC Family: Location Services.
- */ 
+ */
 #define AIM_CB_LOC_ERROR 0x0001
 #define AIM_CB_LOC_REQRIGHTS 0x0002
 #define AIM_CB_LOC_RIGHTSINFO 0x0003
@@ -81,7 +81,7 @@
 
 /*
  * SNAC Family: Buddy List Management Services.
- */ 
+ */
 #define AIM_CB_BUD_ERROR 0x0001
 #define AIM_CB_BUD_REQRIGHTS 0x0002
 #define AIM_CB_BUD_RIGHTSINFO 0x0003
@@ -94,7 +94,7 @@
 
 /*
  * SNAC Family: Messeging Services.
- */ 
+ */
 #define AIM_CB_MSG_ERROR 0x0001
 #define AIM_CB_MSG_PARAMINFO 0x0005
 #define AIM_CB_MSG_INCOMING 0x0007
@@ -107,32 +107,32 @@
 
 /*
  * SNAC Family: Advertisement Services
- */ 
+ */
 #define AIM_CB_ADS_ERROR 0x0001
 #define AIM_CB_ADS_DEFAULT 0xffff
 
 /*
  * SNAC Family: Invitation Services.
- */ 
+ */
 #define AIM_CB_INV_ERROR 0x0001
 #define AIM_CB_INV_DEFAULT 0xffff
 
 /*
  * SNAC Family: Administrative Services.
- */ 
+ */
 #define AIM_CB_ADM_ERROR 0x0001
 #define AIM_CB_ADM_INFOCHANGE_REPLY 0x0005
 #define AIM_CB_ADM_DEFAULT 0xffff
 
 /*
  * SNAC Family: Popup Messages
- */ 
+ */
 #define AIM_CB_POP_ERROR 0x0001
 #define AIM_CB_POP_DEFAULT 0xffff
 
 /*
  * SNAC Family: Misc BOS Services.
- */ 
+ */
 #define AIM_CB_BOS_ERROR 0x0001
 #define AIM_CB_BOS_RIGHTSQUERY 0x0002
 #define AIM_CB_BOS_RIGHTS 0x0003
@@ -140,13 +140,13 @@
 
 /*
  * SNAC Family: User Lookup Services
- */ 
+ */
 #define AIM_CB_LOK_ERROR 0x0001
 #define AIM_CB_LOK_DEFAULT 0xffff
 
 /*
  * SNAC Family: User Status Services
- */ 
+ */
 #define AIM_CB_STS_ERROR 0x0001
 #define AIM_CB_STS_SETREPORTINTERVAL 0x0002
 #define AIM_CB_STS_REPORTACK 0x0004
@@ -154,13 +154,13 @@
 
 /*
  * SNAC Family: Translation Services
- */ 
+ */
 #define AIM_CB_TRN_ERROR 0x0001
 #define AIM_CB_TRN_DEFAULT 0xffff
 
 /*
  * SNAC Family: Chat Navigation Services
- */ 
+ */
 #define AIM_CB_CTN_ERROR 0x0001
 #define AIM_CB_CTN_CREATE 0x0008
 #define AIM_CB_CTN_INFO 0x0009
@@ -168,7 +168,7 @@
 
 /*
  * SNAC Family: Chat Services
- */ 
+ */
 #define AIM_CB_CHT_ERROR 0x0001
 #define AIM_CB_CHT_ROOMINFOUPDATE 0x0002
 #define AIM_CB_CHT_USERJOIN 0x0003
@@ -179,14 +179,14 @@
 
 /*
  * SNAC Family: "New" Search
- */ 
+ */
 #define AIM_CB_SCH_ERROR 0x0001
 #define AIM_CB_SCH_SEARCH 0x0002
 #define AIM_CB_SCH_RESULTS 0x0003
 
 /*
  * SNAC Family: Buddy icons
- */ 
+ */
 #define AIM_CB_ICO_ERROR 0x0001
 #define AIM_CB_ICO_REQUEST 0x0004
 #define AIM_CB_ICO_RESPONSE 0x0005
@@ -195,7 +195,7 @@
  * SNAC Family: ICQ
  *
  * Most of these are actually special.
- */ 
+ */
 #define AIM_CB_ICQ_ERROR 0x0001
 #define AIM_CB_ICQ_OFFLINEMSG 0x00f0
 #define AIM_CB_ICQ_OFFLINEMSGCOMPLETE 0x00f1
@@ -269,20 +269,20 @@
 #define AIM_CB_OFT_DIRECTIMTYPING 0x0004
 #define AIM_CB_OFT_DIRECTIM_ESTABLISHED 0x0005
 
-#define AIM_CB_OFT_PROMPT 0x0101		/* "I am going to send you this file, is that ok?" */
+#define AIM_CB_OFT_PROMPT 0x0101	/* "I am going to send you this file, is that ok?" */
 #define AIM_CB_OFT_RESUMESOMETHING 0x0106	/* I really don't know */
-#define AIM_CB_OFT_ACK 0x0202			/* "Yes, it is ok for you to send me that file" */
-#define AIM_CB_OFT_DONE 0x0204			/* "I received that file with no problems, thanks a bunch" */
-#define AIM_CB_OFT_RESUME 0x0205		/* Resume transferring, sent by whoever paused? */
-#define AIM_CB_OFT_RESUMEACK 0x0207		/* Not really sure */
+#define AIM_CB_OFT_ACK 0x0202	/* "Yes, it is ok for you to send me that file" */
+#define AIM_CB_OFT_DONE 0x0204	/* "I received that file with no problems, thanks a bunch" */
+#define AIM_CB_OFT_RESUME 0x0205	/* Resume transferring, sent by whoever paused? */
+#define AIM_CB_OFT_RESUMEACK 0x0207	/* Not really sure */
 
-#define AIM_CB_OFT_GETFILE_REQUESTLISTING 0x1108 /* "I have a listing.txt file, do you want it?" */
-#define AIM_CB_OFT_GETFILE_RECEIVELISTING 0x1209 /* "Yes, please send me your listing.txt file" */
-#define AIM_CB_OFT_GETFILE_RECEIVEDLISTING 0x120a /* received corrupt listing.txt file? */ /* I'm just guessing about this one... */
+#define AIM_CB_OFT_GETFILE_REQUESTLISTING 0x1108	/* "I have a listing.txt file, do you want it?" */
+#define AIM_CB_OFT_GETFILE_RECEIVELISTING 0x1209	/* "Yes, please send me your listing.txt file" */
+#define AIM_CB_OFT_GETFILE_RECEIVEDLISTING 0x120a /* received corrupt listing.txt file? */	/* I'm just guessing about this one... */
 #define AIM_CB_OFT_GETFILE_ACKLISTING 0x120b	/* "I received the listing.txt file successfully" */
 #define AIM_CB_OFT_GETFILE_REQUESTFILE 0x120c	/* "Please send me this file" */
 
-#define AIM_CB_OFT_ESTABLISHED 0xFFFF		/* connection to buddy initiated */
+#define AIM_CB_OFT_ESTABLISHED 0xFFFF	/* connection to buddy initiated */
 
 /*
  * SNAC Family: Internal Messages
@@ -291,7 +291,7 @@
  * these, we can integrated non-SNAC services into
  * the SNAC-centered libfaim callback structure.
  *
- */ 
+ */
 #define AIM_CB_SPECIAL_AUTHSUCCESS 0x0001
 #define AIM_CB_SPECIAL_AUTHOTHER 0x0002
 #define AIM_CB_SPECIAL_CONNERR 0x0003

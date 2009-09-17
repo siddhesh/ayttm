@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */  
+ */
 
 #include "console_session.h"
 
@@ -30,7 +30,7 @@
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
-#include <sys/types.h>	/* for darwin - un.h does not include it */
+#include <sys/types.h>		/* for darwin - un.h does not include it */
 #include <sys/socket.h>
 #include <sys/un.h>
 #endif
@@ -39,86 +39,80 @@
 #include "util.h"
 #include "status.h"
 
-
-static void console_session_close(int * session)
+static void console_session_close(int *session)
 {
-	eb_input_remove(*((int*)session));
+	eb_input_remove(*((int *)session));
 	g_free(session);
 }
 
-static void console_session_get_command(void *data, int source, eb_input_condition condition )
+static void console_session_get_command(void *data, int source,
+	eb_input_condition condition)
 {
-	char * contact_name;
-	char * message;
-	struct contact * remote_contact;
+	char *contact_name;
+	char *message;
+	struct contact *remote_contact;
 	short len;
 	int pos = 0;
 	int ret;
 
-	if(read(source, &len, sizeof(short))<=0)
-	{
-		console_session_close((int*)data);
+	if (read(source, &len, sizeof(short)) <= 0) {
+		console_session_close((int *)data);
 		return;
 	}
 	contact_name = alloca(len);
-	if(read(source, contact_name, len)<=0)
-	{
-		console_session_close((int*)data);
+	if (read(source, contact_name, len) <= 0) {
+		console_session_close((int *)data);
 		return;
 	}
-	if(!strcmp(contact_name,"URL-ayttm")) {
-		if(read(source, &len, sizeof(short))<=0)
-		{
-			console_session_close((int*)data);
+	if (!strcmp(contact_name, "URL-ayttm")) {
+		if (read(source, &len, sizeof(short)) <= 0) {
+			console_session_close((int *)data);
 			return;
 		}
 		message = alloca(len);
-		if(read(source, message, len)<=0)
-		{
-			console_session_close((int*)data);
+		if (read(source, message, len) <= 0) {
+			console_session_close((int *)data);
 			return;
 		}
-		
+
 		ret = send_url(message);
 		write(source, &ret, sizeof(int));
-		return;		
-	} else if(strcmp(contact_name, "focus-ayttm")) {
-		if(read(source, &len, sizeof(short))<=0)
-		{
-			console_session_close((int*)data);
+		return;
+	} else if (strcmp(contact_name, "focus-ayttm")) {
+		if (read(source, &len, sizeof(short)) <= 0) {
+			console_session_close((int *)data);
 			return;
 		}
 		message = alloca(len);
-		if(read(source, message, len)<=0)
-		{
-			console_session_close((int*)data);
+		if (read(source, message, len) <= 0) {
+			console_session_close((int *)data);
 			return;
 		}
 
 		remote_contact = find_contact_by_nick(contact_name);
-		if(!remote_contact)
-		{
+		if (!remote_contact) {
 			ret = -1;
 			write(source, &ret, sizeof(int));
 			return;
 		}
 		eb_chat_window_display_contact(remote_contact);
-		remote_contact->chatwindow->preferred= 
-				find_suitable_remote_account(remote_contact->chatwindow->preferred, 
-											remote_contact->chatwindow->contact);
-		if(!remote_contact->chatwindow->preferred)
-		{
+		remote_contact->chatwindow->preferred =
+			find_suitable_remote_account(remote_contact->
+			chatwindow->preferred,
+			remote_contact->chatwindow->contact);
+		if (!remote_contact->chatwindow->preferred) {
 			ret = -2;
 			write(source, &ret, sizeof(int));
 			return;
 		}
 
-		gtk_editable_insert_text(GTK_EDITABLE(remote_contact->chatwindow->entry),
-								 message, strlen(message), &pos);
+		gtk_editable_insert_text(GTK_EDITABLE(remote_contact->
+				chatwindow->entry), message, strlen(message),
+			&pos);
 	} else {
 		focus_statuswindow();
 	}
-	
+
 	ret = 0;
 	write(source, &ret, sizeof(int));
 
@@ -130,11 +124,10 @@ void console_session_init(void *data, int source, eb_input_condition condition)
 	struct sockaddr_un remote;
 	unsigned int len;
 	int sock;
-	int * listener = g_new0(int, 1);
-	
+	int *listener = g_new0(int, 1);
+
 	sock = accept(source, (struct sockaddr *)&remote, &len);
 	*listener = eb_input_add(sock, EB_INPUT_READ,
-					console_session_get_command, 
-					(gpointer)listener);
+		console_session_get_command, (gpointer) listener);
 #endif
 }

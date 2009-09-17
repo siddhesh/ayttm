@@ -36,24 +36,21 @@
 #include "prefs.h"
 #include "platform_defs.h"
 
-
 /*******************************************************************************
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
 #ifndef USE_POSIX_DLOPEN
-	#define plugin_info rainbow_LTX_plugin_info
-	#define plugin_init rainbow_LTX_plugin_init
-	#define plugin_finish rainbow_LTX_plugin_finish
-	#define module_version rainbow_LTX_module_version
+#define plugin_info rainbow_LTX_plugin_info
+#define plugin_init rainbow_LTX_plugin_init
+#define plugin_finish rainbow_LTX_plugin_finish
+#define module_version rainbow_LTX_module_version
 #endif
-
 
 /* Function Prototypes */
 /* ebmCallbackData is a parent struct, the child of which will be an ebmContactData */
-static char *dorainbow(const eb_local_account * local,
-		       const eb_account * remote,
-		       const struct contact *contact, const char *s);
+static char *dorainbow(const eb_local_account *local,
+	const eb_account *remote, const struct contact *contact, const char *s);
 static int rainbow_init();
 static int rainbow_finish();
 
@@ -68,8 +65,10 @@ static char send_g[MAX_PREF_LEN] = "0";
 static char send_b[MAX_PREF_LEN] = "255";
 
 static char *html_tags[] =
-    { "html", "body", "font", "p", "i", "b", "u", "img", "a", "br", "hr",
-"head" };
+	{ "html", "body", "font", "p", "i", "b", "u", "img", "a", "br", "hr",
+	"head"
+};
+
 static int num_tags = 12;
 
 static int ref_count = 0;
@@ -79,16 +78,20 @@ PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Rainbow",
 	"Turns all outgoing messages into rainbow colours using HTML",
-	"$Revision: 1.9 $",
-	"$Date: 2009/07/27 16:42:04 $",
+	"$Revision: 1.10 $",
+	"$Date: 2009/09/17 12:04:59 $",
 	&ref_count,
 	rainbow_init,
 	rainbow_finish,
 	NULL
 };
+
 /* End Module Exports */
 
-unsigned int module_version() {return CORE_VERSION;}
+unsigned int module_version()
+{
+	return CORE_VERSION;
+}
 
 static int rainbow_init()
 {
@@ -141,7 +144,7 @@ static int rainbow_init()
 	eb_debug(DBG_MOD, "Rainbow initialised\n");
 
 	outgoing_message_filters =
-	    l_list_append(outgoing_message_filters, &dorainbow);
+		l_list_append(outgoing_message_filters, &dorainbow);
 
 	return 0;
 }
@@ -150,9 +153,9 @@ static int rainbow_finish()
 {
 	eb_debug(DBG_MOD, "Rainbow shutting down\n");
 	outgoing_message_filters =
-	    l_list_remove(outgoing_message_filters, &dorainbow);
-	
-	while(plugin_info.prefs) {
+		l_list_remove(outgoing_message_filters, &dorainbow);
+
+	while (plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
 		free(plugin_info.prefs);
 		plugin_info.prefs = il;
@@ -164,9 +167,8 @@ static int rainbow_finish()
 /*******************************************************************************
  *                             End Module Code
  ******************************************************************************/
-static char *dorainbow(const eb_local_account * local,
-		       const eb_account * remote,
-		       const struct contact *contact, const char *s)
+static char *dorainbow(const eb_local_account *local,
+	const eb_account *remote, const struct contact *contact, const char *s)
 {
 	char *retval;
 	char *wptr;
@@ -214,8 +216,8 @@ static char *dorainbow(const eb_local_account * local,
 			}	// strip space before HTML tag
 			for (a = 0; a < num_tags; a++) {
 				if (!strncasecmp
-				    (s + p2, html_tags[a],
-				     strlen(html_tags[a]))) {
+					(s + p2, html_tags[a],
+						strlen(html_tags[a]))) {
 					found = 1;
 					break;
 				}
@@ -225,7 +227,7 @@ static char *dorainbow(const eb_local_account * local,
 				while (1) {
 					*(wptr++) = s[pos++];
 					if (s[pos - 1] == '\0'
-					    || s[pos - 1] == '>') {
+						|| s[pos - 1] == '>') {
 						break;
 					}
 				}
@@ -235,16 +237,13 @@ static char *dorainbow(const eb_local_account * local,
 			}
 		}
 
-		wptr +=
-		    snprintf(wptr, 22 * (len - pos),
-			       "<font color=#%02x%02x%02x>%c",
-			       (pos * end_r + (len - pos) * start_r) / len,
-			       (pos * end_g + (len - pos) * start_g) / len,
-			       (pos * end_b + (len - pos) * start_b) / len,
-			       s[pos]);
+		wptr += snprintf(wptr, 22 * (len - pos),
+			"<font color=#%02x%02x%02x>%c",
+			(pos * end_r + (len - pos) * start_r) / len,
+			(pos * end_g + (len - pos) * start_g) / len,
+			(pos * end_b + (len - pos) * start_b) / len, s[pos]);
 		pos++;
 	}
-
 
 	return retval;
 }

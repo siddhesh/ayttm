@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	int fd;
 	FILE *f;
 	int cnt;
-	int res,x;
+	int res, x;
 	char buf[BUF_SIZE];
 
 	fd = open(argv[1], O_RDONLY);
@@ -24,18 +24,18 @@ int main(int argc, char *argv[])
 		perror("fopen");
 		exit(1);
 	}
-	/* we will use arg[3] for the name of the C object*/
+	/* we will use arg[3] for the name of the C object */
 	fprintf(f, "static unsigned char %s[] = {\n", argv[3]);
-	read(fd, buf, 8); /* id & offset */
-	read(fd, buf, 8); /* len & encoding */
-	read(fd, buf, 8); /* rate & count */
+	read(fd, buf, 8);	/* id & offset */
+	read(fd, buf, 8);	/* len & encoding */
+	read(fd, buf, 8);	/* rate & count */
 	/*  no more click :) */
-	
-	while((res = read(fd, buf, BUF_SIZE)) > 0) {
-		for (x=0;x<res;x++)
+
+	while ((res = read(fd, buf, BUF_SIZE)) > 0) {
+		for (x = 0; x < res; x++)
 			fprintf(f, "%#x, ", buf[x] & 0xff);
 		fprintf(f, "\n");
 	}
-	fprintf(f,"};\n");
+	fprintf(f, "};\n");
 	return 0;
 }

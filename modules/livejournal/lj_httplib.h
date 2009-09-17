@@ -14,13 +14,15 @@ enum lj_http_success {
 extern "C" {
 #endif
 
-typedef void (*lj_callback)(int success, eb_local_account *ela, LList *pairs);
+	typedef void (*lj_callback) (int success, eb_local_account *ela,
+		LList *pairs);
 
-void send_http_request(const char *request, lj_callback callback, eb_local_account *ela);
-int url_to_host_port_path(const char *url, char *host, int *port, char *path);
+	void send_http_request(const char *request, lj_callback callback,
+		eb_local_account *ela);
+	int url_to_host_port_path(const char *url, char *host, int *port,
+		char *path);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

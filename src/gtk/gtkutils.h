@@ -32,7 +32,8 @@
 extern "C" {
 #endif
 
-GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage, GtkAccelGroup *inAccelGroup );
+	GtkWidget *gtkut_button(const char *inText, int *inValue,
+		GtkWidget *inPage, GtkAccelGroup *inAccelGroup);
 
 /** Create a widget with an xpm.
 	
@@ -41,7 +42,8 @@ GtkWidget	*gtkut_button( const char *inText, int *inValue, GtkWidget *inPage, Gt
 	
 	@returns the new widget
 */
-GtkWidget	*gtkut_create_icon_widget( const char **inXPM, GtkWidget *inParent );
+	GtkWidget *gtkut_create_icon_widget(const char **inXPM,
+		GtkWidget *inParent);
 
 /** Create a button with an xpm and optional label.
 
@@ -51,7 +53,8 @@ GtkWidget	*gtkut_create_icon_widget( const char **inXPM, GtkWidget *inParent );
 	
 	@returns the new button
 */
-GtkWidget	*gtkut_create_icon_button( const char *inLabel, const char **inXPM, GtkWidget *inParent );
+	GtkWidget *gtkut_create_icon_button(const char *inLabel,
+		const char **inXPM, GtkWidget *inParent);
 
 /** Create a button with a stock icon and custom label.
 
@@ -61,11 +64,14 @@ GtkWidget	*gtkut_create_icon_button( const char *inLabel, const char **inXPM, Gt
 	
 	@returns the new button
 */
-GtkWidget *gtkut_stock_button_new_with_label(const char *label, const char *stock);
+	GtkWidget *gtkut_stock_button_new_with_label(const char *label,
+		const char *stock);
 
-void gtkut_set_pixbuf_from_xpm( const char **inXPM, GdkPixbuf **outPixbuf );
+	void gtkut_set_pixbuf_from_xpm(const char **inXPM,
+		GdkPixbuf **outPixbuf);
 
-void gtkut_set_pixbuf( eb_local_account *ela, const char **inXPM, GdkPixbuf **outPixbuf );
+	void gtkut_set_pixbuf(eb_local_account *ela, const char **inXPM,
+		GdkPixbuf **outPixbuf);
 
 /** Get a widget's position.
 
@@ -73,7 +79,8 @@ void gtkut_set_pixbuf( eb_local_account *ela, const char **inXPM, GdkPixbuf **ou
 	@param	outXpos		if not NULL returns the x position
 	@param	outYpos		if not NULL returns the y position
 */
-void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos );
+	void gtkut_widget_get_uposition(GtkWidget *inWidget, int *outXpos,
+		int *outYpos);
 
 /** Create a button with a label in it.
 
@@ -83,7 +90,8 @@ void	gtkut_widget_get_uposition( GtkWidget *inWidget, int *outXpos, int *outYpos
 	
 	@returns	the new button
 */
-GtkWidget	*gtkut_create_label_button( const char *inButtonText, GCallback inSignalFunc, void *inCallbackData );
+	GtkWidget *gtkut_create_label_button(const char *inButtonText,
+		GCallback inSignalFunc, void *inCallbackData);
 
 /** Create a radio button and add it to a group.
 
@@ -96,9 +104,9 @@ GtkWidget	*gtkut_create_label_button( const char *inButtonText, GCallback inSign
 	
 	@returns	the list 'ioGroup' with the new radio button added to it
 */
-GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox,
-			const char *inButtonText, int inIsSelected,
-			GCallback inSignalFunc, void *inCallbackData );
+	GSList *gtkut_add_radio_button_to_group(GSList *ioGroup,
+		GtkWidget *inParentBox, const char *inButtonText,
+		int inIsSelected, GCallback inSignalFunc, void *inCallbackData);
 
 /** Create a check button.
 
@@ -110,8 +118,9 @@ GSList	*gtkut_add_radio_button_to_group( GSList *ioGroup, GtkWidget *inParentBox
 	
 	@returns	the new button
 */
-GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText, int inIsSelected,
-	GCallback inSignalFunc, void *inCallbackData );
+	GtkWidget *gtkut_check_button(GtkWidget *inParentBox,
+		const char *inButtonText, int inIsSelected,
+		GCallback inSignalFunc, void *inCallbackData);
 
 /** Create a menu button and append it to a menu.
 
@@ -122,8 +131,9 @@ GtkWidget	*gtkut_check_button( GtkWidget *inParentBox, const char *inButtonText,
 	
 	@returns	the new button
 */
-GtkWidget	*gtkut_create_menu_button( GtkMenu *inMenu, const char *inLabel,
-	GCallback inSignalFunc, void *inCallbackData );
+	GtkWidget *gtkut_create_menu_button(GtkMenu *inMenu,
+		const char *inLabel, GCallback inSignalFunc,
+		void *inCallbackData);
 
 /** Create a menu button, append it to a menu, and attach a submenu to it.
 
@@ -134,18 +144,17 @@ GtkWidget	*gtkut_create_menu_button( GtkMenu *inMenu, const char *inLabel,
 	
 	@returns	the new button
 */
-GtkWidget	*gtkut_attach_submenu( GtkMenu *inMenu, const char *inLabel,
-			     GtkWidget *inSubmenu, int inActive );
+	GtkWidget *gtkut_attach_submenu(GtkMenu *inMenu, const char *inLabel,
+		GtkWidget *inSubmenu, int inActive);
 
 /** Set a window's icon.
 
 	@param	inWindow		the window whose icon we are setting
 	@param	inXPM			the xpm we are setting it to [if NULL then use standard ayttm icon]
 */
-void	gtkut_set_window_icon( GtkWindow *inWindow, const gchar **inXPM );
+	void gtkut_set_window_icon(GtkWindow *inWindow, const gchar **inXPM);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif

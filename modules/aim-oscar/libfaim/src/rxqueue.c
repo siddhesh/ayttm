@@ -7,7 +7,7 @@
  */
 
 #define FAIM_INTERNAL
-#include <aim.h> 
+#include <aim.h>
 
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -18,12 +18,12 @@
  */
 faim_internal int aim_recv(int fd, void *buf, size_t count)
 {
-	int left, cur; 
+	int left, cur;
 
-	for (cur = 0, left = count; left; ) {
+	for (cur = 0, left = count; left;) {
 		int ret;
-		
-		ret = recv(fd, ((unsigned char *)buf)+cur, left, 0);
+
+		ret = recv(fd, ((unsigned char *)buf) + cur, left, 0);
 
 		/* Of course EOF is an error, only morons disagree with that. */
 		if (ret <= 0)
@@ -46,9 +46,9 @@ faim_internal int aim_bstream_recv(aim_bstream_t *bs, int fd, size_t count)
 
 	if (!bs || (fd < 0) || (count < 0))
 		return -1;
-	
+
 	if (count > (bs->len - bs->offset))
-		count = bs->len - bs->offset; /* truncate to remaining space */
+		count = bs->len - bs->offset;	/* truncate to remaining space */
 
 	if (count) {
 
@@ -73,7 +73,7 @@ faim_internal int aim_bstream_recv(aim_bstream_t *bs, int fd, size_t count)
 faim_internal void aim_frame_destroy(aim_frame_t *frame)
 {
 
-	free(frame->data.data); /* XXX aim_bstream_free */
+	free(frame->data.data);	/* XXX aim_bstream_free */
 	free(frame);
 
 	return;
@@ -82,12 +82,13 @@ faim_internal void aim_frame_destroy(aim_frame_t *frame)
 /*
  * Read a FLAP header from conn into fr, and return the number of bytes in the payload.
  */
-static int aim_get_command_flap(aim_session_t *sess, aim_conn_t *conn, aim_frame_t *fr)
+static int aim_get_command_flap(aim_session_t *sess, aim_conn_t *conn,
+	aim_frame_t *fr)
 {
 	fu8_t flaphdr_raw[6];
 	aim_bstream_t flaphdr;
 	fu16_t payloadlen;
-	
+
 	aim_bstream_init(&flaphdr, flaphdr_raw, sizeof(flaphdr_raw));
 
 	/*
@@ -116,14 +117,14 @@ static int aim_get_command_flap(aim_session_t *sess, aim_conn_t *conn, aim_frame
 		faimdprintf(sess, 0, "FLAP framing disrupted (0x%02x)", start);
 		aim_conn_close(conn);
 		return -1;
-	}	
+	}
 
 	/* we're doing FLAP if we're here */
 	fr->hdrtype = AIM_FRAMETYPE_FLAP;
 
 	fr->hdr.flap.type = aimbs_get8(&flaphdr);
 	fr->hdr.flap.seqnum = aimbs_get16(&flaphdr);
-	payloadlen = aimbs_get16(&flaphdr); /* length of payload */
+	payloadlen = aimbs_get16(&flaphdr);	/* length of payload */
 
 	return payloadlen;
 }
@@ -131,7 +132,8 @@ static int aim_get_command_flap(aim_session_t *sess, aim_conn_t *conn, aim_frame
 /*
  * Read a rendezvous header from conn into fr, and return the number of bytes in the payload.
  */
-static int aim_get_command_rendezvous(aim_session_t *sess, aim_conn_t *conn, aim_frame_t *fr)
+static int aim_get_command_rendezvous(aim_session_t *sess, aim_conn_t *conn,
+	aim_frame_t *fr)
 {
 	fu8_t rendhdr_raw[8];
 	aim_bstream_t rendhdr;
@@ -145,7 +147,7 @@ static int aim_get_command_rendezvous(aim_session_t *sess, aim_conn_t *conn, aim
 
 	aim_bstream_rewind(&rendhdr);
 
-	fr->hdrtype = AIM_FRAMETYPE_OFT; /* a misnomer--rendezvous */
+	fr->hdrtype = AIM_FRAMETYPE_OFT;	/* a misnomer--rendezvous */
 
 	aimbs_getrawbuf(&rendhdr, fr->hdr.rend.magic, 4);
 	fr->hdr.rend.hdrlen = aimbs_get16(&rendhdr) - 8;
@@ -167,9 +169,9 @@ faim_export int aim_get_command(aim_session_t *sess, aim_conn_t *conn)
 		return -EINVAL;
 
 	if (conn->fd == -1)
-		return -1; /* it's an aim_conn_close()'d connection */
+		return -1;	/* it's an aim_conn_close()'d connection */
 
-	if (conn->fd < 3) /* can happen when people abuse the interface */
+	if (conn->fd < 3)	/* can happen when people abuse the interface */
 		return -1;
 
 	if (conn->status & AIM_CONN_STATUS_INPROGRESS)
@@ -192,18 +194,19 @@ faim_export int aim_get_command(aim_session_t *sess, aim_conn_t *conn)
 
 		payloadlen = ret;
 	} else if (conn->type == AIM_CONN_TYPE_LISTENER) {
-		faimdprintf(sess, 0, "AIM_CONN_TYPE_LISTENER on fd %d\n", conn->fd);
+		faimdprintf(sess, 0, "AIM_CONN_TYPE_LISTENER on fd %d\n",
+			conn->fd);
 		free(newrx);
 		return -1;
 	} else
 		payloadlen = aim_get_command_flap(sess, conn, newrx);
 
-	newrx->nofree = 0; /* free by default */
+	newrx->nofree = 0;	/* free by default */
 
 	if (payloadlen) {
 		fu8_t *payload = NULL;
 
-		if (!(payload = (fu8_t *) malloc(payloadlen))) {
+		if (!(payload = (fu8_t *)malloc(payloadlen))) {
 			aim_frame_destroy(newrx);
 			return -1;
 		}
@@ -211,34 +214,33 @@ faim_export int aim_get_command(aim_session_t *sess, aim_conn_t *conn)
 		aim_bstream_init(&newrx->data, payload, payloadlen);
 
 		/* read the payload */
-		if (aim_bstream_recv(&newrx->data, conn->fd, payloadlen) < payloadlen) {
-			aim_frame_destroy(newrx); /* free's payload */
+		if (aim_bstream_recv(&newrx->data, conn->fd,
+				payloadlen) < payloadlen) {
+			aim_frame_destroy(newrx);	/* free's payload */
 			aim_conn_close(conn);
 			return -1;
 		}
 	} else
 		aim_bstream_init(&newrx->data, NULL, 0);
 
-
 	aim_bstream_rewind(&newrx->data);
 
 	newrx->conn = conn;
 
-	newrx->next = NULL;  /* this will always be at the bottom */
+	newrx->next = NULL;	/* this will always be at the bottom */
 
 	if (!sess->queue_incoming)
 		sess->queue_incoming = newrx;
 	else {
 		aim_frame_t *cur;
 
-		for (cur = sess->queue_incoming; cur->next; cur = cur->next)
-			;
+		for (cur = sess->queue_incoming; cur->next; cur = cur->next) ;
 		cur->next = newrx;
 	}
 
 	newrx->conn->lastactivity = time(NULL);
 
-	return 0;  
+	return 0;
 }
 
 /*
@@ -256,11 +258,11 @@ faim_export void aim_purge_rxqueue(aim_session_t *sess)
 {
 	aim_frame_t *cur, **prev;
 
-	for (prev = &sess->queue_incoming; (cur = *prev); ) {
+	for (prev = &sess->queue_incoming; (cur = *prev);) {
 		if (cur->handled) {
 
 			*prev = cur->next;
-			
+
 			if (!cur->nofree)
 				aim_frame_destroy(cur);
 
@@ -278,13 +280,14 @@ faim_export void aim_purge_rxqueue(aim_session_t *sess)
  * XXX: this is something that was handled better in the old connection
  * handling method, but eh.
  */
-faim_internal void aim_rxqueue_cleanbyconn(aim_session_t *sess, aim_conn_t *conn)
+faim_internal void aim_rxqueue_cleanbyconn(aim_session_t *sess,
+	aim_conn_t *conn)
 {
 	aim_frame_t *currx;
 
 	for (currx = sess->queue_incoming; currx; currx = currx->next) {
 		if ((!currx->handled) && (currx->conn == conn))
 			currx->handled = 1;
-	}	
+	}
 	return;
 }

@@ -31,66 +31,62 @@
 
 #include "account.h"
 
-enum list_type
-{
+enum list_type {
 	LIST_ONLINE,
 	LIST_EDIT
 };
 
-struct callback_item
-{
+struct callback_item {
 	char name[255];
-	void (*callback_function)();
+	void (*callback_function) ();
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void add_contact_and_accounts(struct contact * c);
-void add_contact_line(struct contact * ec);
-void add_account_line(eb_account * ea);
-void add_group_line(grouplist * eg);
-void update_group_line(grouplist * eg);
-	void update_contact_line(struct contact * ec);
-void remove_account_line(eb_account * ea);
-void remove_contact_line(struct contact * ec);
-void remove_group_line(grouplist * eg);
-void buddy_update_status_and_log(eb_account * ea);
-void buddy_update_status(eb_account * ea);
-void contact_update_status(struct contact * ec);
-void buddy_login(eb_account * ea);
-void buddy_logoff(eb_account * ea);
-void eb_sign_on_all(void);
-void eb_sign_on_startup(void);
-void eb_sign_off_all(void);
+	void add_contact_and_accounts(struct contact *c);
+	void add_contact_line(struct contact *ec);
+	void add_account_line(eb_account *ea);
+	void add_group_line(grouplist *eg);
+	void update_group_line(grouplist *eg);
+	void update_contact_line(struct contact *ec);
+	void remove_account_line(eb_account *ea);
+	void remove_contact_line(struct contact *ec);
+	void remove_group_line(grouplist *eg);
+	void buddy_update_status_and_log(eb_account *ea);
+	void buddy_update_status(eb_account *ea);
+	void contact_update_status(struct contact *ec);
+	void buddy_login(eb_account *ea);
+	void buddy_logoff(eb_account *ea);
+	void eb_sign_on_all(void);
+	void eb_sign_on_startup(void);
+	void eb_sign_off_all(void);
 
-void eb_smiley_window(void *smiley_submenuitem);
-void eb_import_window(void *import_submenuitem);
-void eb_profile_window(void *profile_submenuitem);
-void eb_set_status_window(void *set_status_submenuitem);
-void eb_status_window();
-void ay_set_submenus(void);
+	void eb_smiley_window(void *smiley_submenuitem);
+	void eb_import_window(void *import_submenuitem);
+	void eb_profile_window(void *profile_submenuitem);
+	void eb_set_status_window(void *set_status_submenuitem);
+	void eb_status_window();
+	void ay_set_submenus(void);
 /*GtkWidget* MakeStatusButton(eb_local_account * ela);*/
-void update_contact_list ();
-void update_user(eb_account * ea );
-void update_contact_window_length ();
-void focus_statuswindow (void);
-int add_menu_items(void *menu, int cur_service, int should_sep,
-			struct contact *conn, eb_account *acc, eb_local_account *ela);
-void set_menu_sensitivity(void);
-void reset_list (void);
+	void update_contact_list();
+	void update_user(eb_account *ea);
+	void update_contact_window_length();
+	void focus_statuswindow(void);
+	int add_menu_items(void *menu, int cur_service, int should_sep,
+		struct contact *conn, eb_account *acc, eb_local_account *ela);
+	void set_menu_sensitivity(void);
+	void reset_list(void);
 
-void set_tooltips_active(int);
+	void set_tooltips_active(int);
 
-void do_events(void);
+	void do_events(void);
 
-void show_status_window();
-void hide_status_window();
+	void show_status_window();
+	void hide_status_window();
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif
-

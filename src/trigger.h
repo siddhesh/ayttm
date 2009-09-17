@@ -29,16 +29,15 @@
 #ifndef __TRIGGER_H__
 #define __TRIGGER_H__
 
-typedef enum {NO_TYPE, USER_ONLINE, USER_OFFLINE, USER_ON_OFF_LINE} trigger_type;
-typedef enum {NO_ACTION, PLAY_SOUND, EXECUTE, DIALOG, POUNCE} trigger_action;
+typedef enum { NO_TYPE, USER_ONLINE, USER_OFFLINE,
+		USER_ON_OFF_LINE } trigger_type;
+typedef enum { NO_ACTION, PLAY_SOUND, EXECUTE, DIALOG, POUNCE } trigger_action;
 
-typedef struct _trigger
-{
+typedef struct _trigger {
 	trigger_type type;
 	trigger_action action;
 	char param[1024];
 } trigger_struct;
-
 
 /* forward declaration */
 struct contact;
@@ -48,8 +47,8 @@ void destroy_window();
 trigger_type get_trigger_type_num(const char *text);
 trigger_action get_trigger_action_num(const char *text);
 
-char * get_trigger_type_text(trigger_type type);
-char * get_trigger_action_text(trigger_action action);
+char *get_trigger_type_text(trigger_type type);
+char *get_trigger_action_text(trigger_action action);
 
 void show_trigger_window();
 void do_trigger_online(struct contact *con);

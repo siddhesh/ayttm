@@ -28,32 +28,31 @@ GPL. If you do not delete the provisions above, a recipient may use
 your version of this file under either the MPL or the GPL.
 */
 
-
 #include <stddef.h>
 
 #ifdef XML_UNICODE
 
 #ifdef XML_UNICODE_WCHAR_T
 typedef const wchar_t *KEY;
-#else /* not XML_UNICODE_WCHAR_T */
+#else				/* not XML_UNICODE_WCHAR_T */
 typedef const unsigned short *KEY;
-#endif /* not XML_UNICODE_WCHAR_T */
+#endif				/* not XML_UNICODE_WCHAR_T */
 
-#else /* not XML_UNICODE */
+#else				/* not XML_UNICODE */
 
 typedef const char *KEY;
 
-#endif /* not XML_UNICODE */
+#endif				/* not XML_UNICODE */
 
 typedef struct {
-  KEY name;
+	KEY name;
 } NAMED;
 
 typedef struct {
-  NAMED **v;
-  size_t size;
-  size_t used;
-  size_t usedLim;
+	NAMED **v;
+	size_t size;
+	size_t used;
+	size_t usedLim;
 } HASH_TABLE;
 
 NAMED *lookup(HASH_TABLE *table, KEY name, size_t createSize);
@@ -61,8 +60,8 @@ void hashTableInit(HASH_TABLE *);
 void hashTableDestroy(HASH_TABLE *);
 
 typedef struct {
-  NAMED **p;
-  NAMED **end;
+	NAMED **p;
+	NAMED **end;
 } HASH_TABLE_ITER;
 
 void hashTableIterInit(HASH_TABLE_ITER *, const HASH_TABLE *);

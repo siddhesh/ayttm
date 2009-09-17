@@ -29,9 +29,9 @@
 
 #ifndef __EB_AIM_H__
 #define __EB_AIM_H__
- 
+
 #include "service.h"
 
-struct service_callbacks * aim_query_callbacks();
+struct service_callbacks *aim_query_callbacks();
 
 #endif /*__AIM_H__*/

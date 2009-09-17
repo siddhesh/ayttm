@@ -40,61 +40,59 @@ struct contact;
 extern "C" {
 #endif
 
-typedef struct _grouplist
-{
-	char name[255];
-	LList * members;
-	void * list_item; /* GtkWidget */
-	void * tree; /* GtkWidget */
-	void * label; /* GtkWidget */
-	int contacts_online;
-	int contacts_shown;
-} grouplist;
+	typedef struct _grouplist {
+		char name[255];
+		LList *members;
+		void *list_item;	/* GtkWidget */
+		void *tree;	/* GtkWidget */
+		void *label;	/* GtkWidget */
+		int contacts_online;
+		int contacts_shown;
+	} grouplist;
 
-typedef struct local_account {
-        int service_id;
-        char handle[MAX_PREF_LEN];
-	char alias[MAX_PREF_LEN];
-        int connected;
-        int connecting;
-	void * status_button; /* GtkWidget */
-	LList * status_menu;
-	LList * status_pix; /* GtkWidget */
-        void *protocol_local_account_data;
-	int mgmt_flush_tag;
-	int connect_at_startup;
-	input_list *prefs;
-} eb_local_account;
+	typedef struct local_account {
+		int service_id;
+		char handle[MAX_PREF_LEN];
+		char alias[MAX_PREF_LEN];
+		int connected;
+		int connecting;
+		void *status_button;	/* GtkWidget */
+		LList *status_menu;
+		LList *status_pix;	/* GtkWidget */
+		void *protocol_local_account_data;
+		int mgmt_flush_tag;
+		int connect_at_startup;
+		input_list *prefs;
+	} eb_local_account;
 
-typedef struct account {
-	int service_id;
-	eb_local_account *ela;
-	char handle[255];
-	struct contact *account_contact;
-	void *protocol_account_data;
-	void *list_item; /* GtkWidget */
-	void *status; /* GtkWidget */
-	char *tiptext;
-	void *pix; /* GtkWidget */
-	int icon_handler;
-	int online;
-	int status_handler;
-	struct _info_window *infowindow;
- 	int priority;
-} eb_account;
+	typedef struct account {
+		int service_id;
+		eb_local_account *ela;
+		char handle[255];
+		struct contact *account_contact;
+		void *protocol_account_data;
+		void *list_item;	/* GtkWidget */
+		void *status;	/* GtkWidget */
+		char *tiptext;
+		void *pix;	/* GtkWidget */
+		int icon_handler;
+		int online;
+		int status_handler;
+		struct _info_window *infowindow;
+		int priority;
+	} eb_account;
 
-const char *decode_password(const char *pass_in, int enc_type);
-int load_accounts();
-int load_accounts_from_file(const char *file);
-int load_contacts();
-int load_contacts_from_file(const char *file);
-void write_contact_list();
-void write_account_list();
-eb_account *dummy_account(char *handle, char *group, eb_local_account *ela);
+	const char *decode_password(const char *pass_in, int enc_type);
+	int load_accounts();
+	int load_accounts_from_file(const char *file);
+	int load_contacts();
+	int load_contacts_from_file(const char *file);
+	void write_contact_list();
+	void write_account_list();
+	eb_account *dummy_account(char *handle, char *group,
+		eb_local_account *ela);
 
 #ifdef __cplusplus
 }
 #endif
-
-
-#endif /* __ACCOUNT_H__*/
+#endif				/* __ACCOUNT_H__ */

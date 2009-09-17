@@ -29,9 +29,9 @@
 
 #ifndef __EB_icq_H__
 #define __EB_icq_H__
- 
+
 #include "service.h"
 
-struct service_callbacks * icq_query_callbacks();
+struct service_callbacks *icq_query_callbacks();
 
 #endif /*__icq_H__*/

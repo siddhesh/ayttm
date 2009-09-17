@@ -42,11 +42,10 @@
 #include "common.h"
 #include "net_constants.h"
 
-
 struct addrinfo *lookup_address(const char *host, int port_num, int family)
 {
 	struct addrinfo hints;
-	struct addrinfo *result=NULL;
+	struct addrinfo *result = NULL;
 	char port[10];
 
 	memset(&hints, 0, sizeof(struct addrinfo));
@@ -57,22 +56,21 @@ struct addrinfo *lookup_address(const char *host, int port_num, int family)
 
 	snprintf(port, sizeof(port), "%d", port_num);
 
-	if ( getaddrinfo(host, port, &hints, &result) < 0 ) {
-		fprintf(stderr, "Lookup: unable to create socket for %s:%s\n", host, port);
-	}
-	else {
+	if (getaddrinfo(host, port, &hints, &result) < 0) {
+		fprintf(stderr, "Lookup: unable to create socket for %s:%s\n",
+			host, port);
+	} else {
 		return result;
 	}
 
 	return NULL;
 }
 
-
-int connect_address( const char *host, int port_num )
+int connect_address(const char *host, int port_num)
 {
 	int fd;
 	struct addrinfo hints;
-	struct addrinfo *result=NULL, *rp=NULL;
+	struct addrinfo *result = NULL, *rp = NULL;
 	char port[10];
 	int ret = -1;
 
@@ -83,13 +81,15 @@ int connect_address( const char *host, int port_num )
 
 	snprintf(port, sizeof(port), "%d", port_num);
 
-	if ( (ret = getaddrinfo(host, port, &hints, &result)) < 0 ) {
-		fprintf(stderr, "Connect: unable to create socket for %s:%s(%s)\n", host, port, gai_strerror(ret));
+	if ((ret = getaddrinfo(host, port, &hints, &result)) < 0) {
+		fprintf(stderr,
+			"Connect: unable to create socket for %s:%s(%s)\n",
+			host, port, gai_strerror(ret));
 		ret = AY_HOSTNAME_LOOKUP_FAIL;
-	}
-	else {
-		for( rp = result; rp; rp = rp->ai_next ) {
-			fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	} else {
+		for (rp = result; rp; rp = rp->ai_next) {
+			fd = socket(rp->ai_family, rp->ai_socktype,
+				rp->ai_protocol);
 
 			if (fd == -1)
 				continue;
@@ -97,56 +97,51 @@ int connect_address( const char *host, int port_num )
 			if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1) {
 				freeaddrinfo(result);
 				return fd;
-			}
-			else {
-				perror("connect:" );
+			} else {
+				perror("connect:");
 				ret = AY_CONNECT_FAILED;
 			}
 		}
 	}
 
-	if(result)
+	if (result)
 		freeaddrinfo(result);
 
 	return ret;
 }
 
-
 /* this code is borrowed from cvs 1.10 */
-int ay_recv_line( int sock, char **resultp )
+int ay_recv_line(int sock, char **resultp)
 {
 	int c;
 	char *result;
 	size_t input_index = 0;
 	size_t result_size = 80;
 
-	result = (char *) malloc (result_size);
+	result = (char *)malloc(result_size);
 
-	while (1)
-	{
+	while (1) {
 		char ch;
-		if (recv (sock, &ch, 1, 0) < 0) {
-			fprintf (stderr, "recv() error from  server\n");
+		if (recv(sock, &ch, 1, 0) < 0) {
+			fprintf(stderr, "recv() error from  server\n");
 			return -1;
 		}
 		c = ch;
 
-		if (c == EOF)
-		{
-			free (result);
-        
+		if (c == EOF) {
+			free(result);
+
 			/* It's end of file.  */
 			fprintf(stderr, "end of file from  server\n");
 		}
-        
+
 		if (c == '\012')
 			break;
-        
+
 		result[input_index++] = c;
-		while (input_index + 1 >= result_size)
-		{
+		while (input_index + 1 >= result_size) {
 			result_size *= 2;
-			result = (char *) realloc (result, result_size);
+			result = (char *)realloc(result, result_size);
 		}
 	}
 
@@ -157,9 +152,7 @@ int ay_recv_line( int sock, char **resultp )
 	result[input_index] = '\0';
 
 	if (resultp == NULL)
-		free (result);
+		free(result);
 
 	return input_index;
 }
-
-

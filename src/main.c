@@ -79,12 +79,12 @@ static int crash;
 static gchar *crash_param = NULL;
 #endif
 
-static void eb_cli_ver ()
+static void eb_cli_ver()
 {
 	printf(PACKAGE_STRING "-" RELEASE "\n");
 	printf("Copyright (C) 2003 The Ayttm team\n");
 	printf("Ayttm comes with NO WARRANTY, to the extent permitted"
-	       " by law.\n");
+		" by law.\n");
 	printf("You may redistribute copies of Ayttm under the terms of the\n");
 	printf("GNU General Public License.  For more information about these\n");
 	printf("matters, see the file named COPYING.\n");
@@ -96,30 +96,26 @@ static void eb_cli_ver ()
 	return;
 }
 
-struct option_help
-{
-	const char   s_opt;
-	const char * l_opt;
-	const char * help;
+struct option_help {
+	const char s_opt;
+	const char *l_opt;
+	const char *help;
 };
 
-static const struct option_help options [] =
-{
-	{'h', "help",       "Display this help and exit"},
-	{'v', "version",    "Output version information and exit"},
-	{'g', "geometry",   "Set position of main window"},
+static const struct option_help options[] = {
+	{'h', "help", "Display this help and exit"},
+	{'v', "version", "Output version information and exit"},
+	{'g', "geometry", "Set position of main window"},
 	{'d', "config-dir", "Specify configuration directory"},
-	{'D', "disable-server",    "Disable console message server"},
-	{'c', "contact",    "Specify contact to send a message to via console server"},
-	{'m', "message",    "Specify the message to send via console server"},
-	{' ', NULL,        "-c and -m must be used toegether"},
-	{'u', "url",        "pass an url to a module"},
-	{'\0', NULL,         NULL}
+	{'D', "disable-server", "Disable console message server"},
+	{'c', "contact", "Specify contact to send a message to via console server"},
+	{'m', "message", "Specify the message to send via console server"},
+	{' ', NULL, "-c and -m must be used toegether"},
+	{'u', "url", "pass an url to a module"},
+	{'\0', NULL, NULL}
 };
 
-
-
-static void eb_cli_help (const char * cmd)
+static void eb_cli_help(const char *cmd)
 {
 	unsigned int i = 0;
 
@@ -129,50 +125,47 @@ static void eb_cli_help (const char * cmd)
 
 #if defined (HAVE_GETOPT) || defined (HAVE_GETOPT_LONG)
 
-	for (i = 0; options [i].help != NULL; i++) {
+	for (i = 0; options[i].help != NULL; i++) {
 #ifdef HAVE_GETOPT_LONG
 
-		printf ("  %c%c  %2s%15s  %s\n",
-		  (options [i].s_opt == ' ' ? ' ' : '-'),
-		  options [i].s_opt,
-		  (options [i].l_opt == NULL ? "  " : "--"),
-		  options [i].l_opt,
-		  options [i].help);
+		printf("  %c%c  %2s%15s  %s\n",
+			(options[i].s_opt == ' ' ? ' ' : '-'),
+			options[i].s_opt,
+			(options[i].l_opt == NULL ? "  " : "--"),
+			options[i].l_opt, options[i].help);
 
-#else /* HAVE_GETOPT_LONG */
+#else				/* HAVE_GETOPT_LONG */
 
-  /* Leaves HAVE_GETOPT */
-		printf ("  %c%c  %s\n",
-		  (options [i].s_opt == ' ' ? ' ' : '-'),
-		  options [i].s_opt,
-		  options [i].help);
+		/* Leaves HAVE_GETOPT */
+		printf("  %c%c  %s\n",
+			(options[i].s_opt == ' ' ? ' ' : '-'),
+			options[i].s_opt, options[i].help);
 
-#endif /* HAVE_GETOPT_LONG */
+#endif				/* HAVE_GETOPT_LONG */
 	}
 
-#endif /* defined (HAVE_GETOPT) || defined (HAVE_GETOPT_LONG) */
+#endif				/* defined (HAVE_GETOPT) || defined (HAVE_GETOPT_LONG) */
 }
-
 
 /* Global variable, referenced in globals.h */
 char config_dir[1024] = "";
 
-
 static void start_login(gboolean new)
 {
 	/* Setting the default icon for un-iconed windows */
-	GdkPixbuf *default_icon = gdk_pixbuf_new_from_xpm_data((const char **)ayttm_xpm);
+	GdkPixbuf *default_icon =
+		gdk_pixbuf_new_from_xpm_data((const char **)ayttm_xpm);
 	gtk_window_set_default_icon(default_icon);
 
 	ay_load_tray_icon(default_icon);
-//	eb_status_window();
+//      eb_status_window();
 
-   	if (new)
+	if (new)
 		ay_edit_local_accounts();
 	else
-		eb_sign_on_startup() ;
+		eb_sign_on_startup();
 }
- 
+
 int main(int argc, char *argv[])
 {
 
@@ -194,12 +187,12 @@ int main(int argc, char *argv[])
 	gboolean accounts_success = FALSE;
 
 	pid_t pid;
-	const char * cmd = argv [0];
+	const char *cmd = argv[0];
 
 	srand(time(NULL));
 	setlocale(LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
-	textdomain (PACKAGE);
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 
 	geometry[0] = 0;
 
@@ -212,17 +205,17 @@ int main(int argc, char *argv[])
 		dwType = REG_SZ;
 		dwSize = 1024;
 		RegOpenKey(HKEY_CURRENT_USER,
-	"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
-		&appKey);
-		RegQueryValueEx(appKey, "AppData", NULL, &dwType, 
+			"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
+			&appKey);
+		RegQueryValueEx(appKey, "AppData", NULL, &dwType,
 			&appDir[0], &dwSize);
 		RegCloseKey(appKey);
 		g_snprintf(config_dir, 1024, "%s\\Ayttm\\", appDir);
 	}
 #else
-	gtk_set_locale ();
-	g_snprintf(
-			config_dir, 1024, "%s%c.ayttm%c", getenv("HOME"), G_DIR_SEPARATOR, G_DIR_SEPARATOR);
+	gtk_set_locale();
+	g_snprintf(config_dir, 1024, "%s%c.ayttm%c", getenv("HOME"),
+		G_DIR_SEPARATOR, G_DIR_SEPARATOR);
 #endif
 
 	g_thread_init(NULL);
@@ -230,29 +223,29 @@ int main(int argc, char *argv[])
 #if defined ( HAVE_GETOPT ) || defined ( HAVE_GETOPT_LONG )
 	while (1) {
 #ifdef HAVE_GETOPT_LONG
-		static struct option long_options[] = 
-		{
-	    	{"version", no_argument, NULL, 'v'},
-	    	{"help", no_argument, NULL, 'h'},
-	    	{"geometry", required_argument, NULL, 'g'},
-	    	{"activate-goad-server", required_argument, NULL, 'a'},
-	    	{"disable-server", no_argument, NULL, 'D'},
-	    	{"contact", required_argument, NULL, 'c'},
-	    	{"message", required_argument, NULL, 'm'},
-	    	{"config-dir", required_argument, NULL, 'd'},
-	    	{"url", required_argument, NULL, 'u'},
+		static struct option long_options[] = {
+			{"version", no_argument, NULL, 'v'},
+			{"help", no_argument, NULL, 'h'},
+			{"geometry", required_argument, NULL, 'g'},
+			{"activate-goad-server", required_argument, NULL, 'a'},
+			{"disable-server", no_argument, NULL, 'D'},
+			{"contact", required_argument, NULL, 'c'},
+			{"message", required_argument, NULL, 'm'},
+			{"config-dir", required_argument, NULL, 'd'},
+			{"url", required_argument, NULL, 'u'},
 #ifdef CRASH_DIALOG
-	    	{"crash", required_argument, NULL, 'C'},
+			{"crash", required_argument, NULL, 'C'},
 #endif
-	    	{0, 0, 0, 0}
+			{0, 0, 0, 0}
 		};
-    
+
 		int option_index = 0;
 
-		c = getopt_long(argc, argv, "vhg:a:d:Dc:m:u:C:", long_options, &option_index);
-#else /* HAVE_GETOPT_LONG */
+		c = getopt_long(argc, argv, "vhg:a:d:Dc:m:u:C:", long_options,
+			&option_index);
+#else				/* HAVE_GETOPT_LONG */
 /* Either had getopt_long or getopt or both so getopt should be here */
-		c = getopt (argc, argv, "vhg:a:d:Dc:m:u:C:");
+		c = getopt(argc, argv, "vhg:a:d:Dc:m:u:C:");
 #endif
 		/* Detect the end of the options. */
 
@@ -260,76 +253,76 @@ int main(int argc, char *argv[])
 			break;
 
 		switch (c) {
-		    case 'v':           /* version information */
-		        eb_cli_ver ();
-		        exit(0);
+		case 'v':	/* version information */
+			eb_cli_ver();
+			exit(0);
 			break;
 
-		    case 'h':           /* help information */
-		    case '?':
-  		        eb_cli_help (cmd);
-			exit (0);
-		        break;
+		case 'h':	/* help information */
+		case '?':
+			eb_cli_help(cmd);
+			exit(0);
+			break;
 
-		    case 'g':
+		case 'g':
 			strncpy(geometry, optarg, sizeof(geometry));
 			break;
 
-		    case ':':
+		case ':':
 			printf("Try 'ayttm --help' for more information.\n");
 			exit(0);
 
-		    case 'a':
+		case 'a':
 			printf("hi\n");
 			break;
 
-		    case 'D':
+		case 'D':
 			printf("Disabling console message server.\n");
 			disable_console_server = TRUE;
 			break;
 
-		    case 'c':
+		case 'c':
 			strncpy(contact, optarg, sizeof(contact));
 			break;
 
-		    case 'm':
+		case 'm':
 			strncpy(message, optarg, sizeof(message));
 			break;
 
-		    case 'u':
+		case 'u':
 			strncpy(url, optarg, sizeof(url));
 			break;
 
 #ifdef CRASH_DIALOG
-		    case 'C':
-			crash = 1;    
+		case 'C':
+			crash = 1;
 			crash_param = strdup(optarg);
 			break;
-#endif			
-		    case 'd':
+#endif
+		case 'd':
 			strncpy(config_dir, optarg, sizeof(config_dir));
 			/*Make sure we have directory delimiter */
 #if defined( _WIN32 )
-			if (config_dir[strlen(config_dir)-1] != '\\')
+			if (config_dir[strlen(config_dir) - 1] != '\\')
 				strcat(config_dir, "\\");
 #else
-			if (config_dir[strlen(config_dir)-1] != G_DIR_SEPARATOR)
+			if (config_dir[strlen(config_dir) - 1] !=
+				G_DIR_SEPARATOR)
 				strcat(config_dir, (char *)G_DIR_SEPARATOR);
 #endif
-			if (stat(config_dir, &stat_buf)==-1)
-			{
+			if (stat(config_dir, &stat_buf) == -1) {
 				perror(config_dir);
 				exit(errno);
 			}
-			if (!S_ISDIR(stat_buf.st_mode))
-			{
-				printf("config-dir %s is not a directory!\n", config_dir);
+			if (!S_ISDIR(stat_buf.st_mode)) {
+				printf("config-dir %s is not a directory!\n",
+					config_dir);
 				exit(1);
 			}
 			break;
 		}
-	} 
-    
+	}
+
 #ifdef CRASH_DIALOG
 	startup_dir = g_get_current_dir();
 	argv0 = g_strdup(argv[0]);
@@ -345,7 +338,7 @@ int main(int argc, char *argv[])
 
 #endif
 
-	if ( (strlen(message) > 0 && strlen(contact) > 0)
+	if ((strlen(message) > 0 && strlen(contact) > 0)
 		|| strlen(url) > 0) {
 #ifndef __MINGW32__
 		struct sockaddr_un remote;
@@ -359,28 +352,28 @@ int main(int argc, char *argv[])
 		sock = socket(AF_UNIX, SOCK_STREAM, 0);
 		strncpy(remote.sun_path, config_dir, sizeof(remote.sun_path));
 		strncat(remote.sun_path, "eb_socket",
-			sizeof(remote.sun_path)-strlen(remote.sun_path));
+			sizeof(remote.sun_path) - strlen(remote.sun_path));
 		remote.sun_family = AF_UNIX;
-		len = strlen(remote.sun_path) + sizeof(remote.sun_family) +1;
+		len = strlen(remote.sun_path) + sizeof(remote.sun_family) + 1;
 #else
 		sock = socket(AF_INET, SOCK_STREAM, 0);
 #endif
-		if (connect(sock, (struct sockaddr*)&remote, len) == -1 ) {
+		if (connect(sock, (struct sockaddr *)&remote, len) == -1) {
 			perror("connect");
 			exit(1);
 		}
 		if (strlen(url) > 0) {
-			length = strlen("URL-ayttm")+1;
+			length = strlen("URL-ayttm") + 1;
 			write(sock, &length, sizeof(short));
 			write(sock, "URL-ayttm", length);
-			length = strlen(url)+1;
+			length = strlen(url) + 1;
 			write(sock, &length, sizeof(short));
 			write(sock, url, length);
 		} else {
-			length = strlen(contact)+1;
+			length = strlen(contact) + 1;
 			write(sock, &length, sizeof(short));
 			write(sock, contact, length);
-			length = strlen(message)+1;
+			length = strlen(message) + 1;
 			write(sock, &length, sizeof(short));
 			write(sock, message, length);
 		}
@@ -393,7 +386,7 @@ int main(int argc, char *argv[])
 
 	gtk_set_locale();
 	gtk_init(&argc, &argv);
-	
+
 /*	g_snprintf(buff, 1024, "%s",config_dir);*/
 
 	/* Mizhi 04-04-2001 */
@@ -410,20 +403,23 @@ int main(int argc, char *argv[])
 		sock = socket(AF_UNIX, SOCK_STREAM, 0);
 		strncpy(remote.sun_path, config_dir, sizeof(remote.sun_path));
 		strncat(remote.sun_path, "eb_socket",
-			sizeof(remote.sun_path)-strlen(remote.sun_path));
+			sizeof(remote.sun_path) - strlen(remote.sun_path));
 		remote.sun_family = AF_UNIX;
-		len = strlen(remote.sun_path) + sizeof(remote.sun_family) +1;
+		len = strlen(remote.sun_path) + sizeof(remote.sun_family) + 1;
 #else
 		sock = socket(AF_INET, SOCK_STREAM, 0);
 #endif
-		if (connect(sock, (struct sockaddr*)&remote, len) == -1 ) {
+		if (connect(sock, (struct sockaddr *)&remote, len) == -1) {
 			perror("connect");
-			g_snprintf(buff, 1024, _("Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot be connected."), pid);
+			g_snprintf(buff, 1024,
+				_
+				("Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot be connected."),
+				pid);
 			/* TODO make sure this one is modal */
-			ay_do_error( _("Already Logged On"), buff );
+			ay_do_error(_("Already Logged On"), buff);
 			exit(1);
 		}
-		length = strlen("focus-ayttm")+1;
+		length = strlen("focus-ayttm") + 1;
 		write(sock, &length, sizeof(short));
 		write(sock, "focus-ayttm", length);
 		read(sock, &ret, sizeof(int));
@@ -431,11 +427,11 @@ int main(int argc, char *argv[])
 		exit(ret);
 	}
 
-	gtk_set_locale ();
-	g_snprintf(buff, 1024, "%s",config_dir);
+	gtk_set_locale();
+	g_snprintf(buff, 1024, "%s", config_dir);
 
 	mkdir(buff, 0700);
-	g_snprintf(buff, 1024, "%slogs",config_dir);
+	g_snprintf(buff, 1024, "%slogs", config_dir);
 	mkdir(buff, 0700);
 
 	if (!disable_console_server) {
@@ -443,10 +439,10 @@ int main(int argc, char *argv[])
 		sock = socket(AF_UNIX, SOCK_STREAM, 0);
 		strncpy(local.sun_path, config_dir, sizeof(local.sun_path));
 		strncat(local.sun_path, "eb_socket",
-			sizeof(local.sun_path)-strlen(local.sun_path));
+			sizeof(local.sun_path) - strlen(local.sun_path));
 		unlink(local.sun_path);
 		local.sun_family = AF_UNIX;
-		len = strlen(local.sun_path) + sizeof(local.sun_family) +1;
+		len = strlen(local.sun_path) + sizeof(local.sun_family) + 1;
 #else
 		sock = socket(AF_INET, SOCK_STREAM, 0);
 #endif
@@ -463,9 +459,10 @@ int main(int argc, char *argv[])
 
 	/* Initalize the menus that are available through the plugin_api */
 	init_menus();
-	
+
 	/* initialise outgoing_message_filters with the pre/post filter marker */
-	outgoing_message_filters = l_list_append(outgoing_message_filters, NULL);
+	outgoing_message_filters =
+		l_list_append(outgoing_message_filters, NULL);
 
 	ayttm_prefs_init();
 
@@ -474,10 +471,10 @@ int main(int argc, char *argv[])
 
 	/* Load all the modules in the module_path preference, details can be found in the preferences module tab */
 	init_smileys();
-	
+
 	load_modules();
 
-	ay_register_icons ();
+	ay_register_icons();
 
 	accounts_success = load_accounts();
 	//if (accounts_success)
@@ -493,11 +490,11 @@ int main(int argc, char *argv[])
 	clean_up_dummies();
 
 	write_contact_list();
-	
+
 	/*
 	 * Moved unload_modules() call to window delete event in status.c
 	 */
-	unload_modules();  // Need to unload what we load
+	unload_modules();	// Need to unload what we load
 
 	eb_debug(DBG_CORE, "Shutting sound down\n");
 	sound_shutdown();
@@ -506,7 +503,7 @@ int main(int argc, char *argv[])
 #ifndef __MINGW32__
 	if (!disable_console_server)
 		unlink(local.sun_path);
-        delete_lock_file(buff);
+	delete_lock_file(buff);
 	eb_debug(DBG_CORE, "Removed lock file\n");
 #endif
 

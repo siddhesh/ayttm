@@ -37,7 +37,7 @@ static void ay_usercount(GtkWidget *widget, gpointer data)
 {
 	int val = GPOINTER_TO_INT(data);
 
-	if(val) {
+	if (val) {
 		g_print("Yes\n");
 		iSetLocalPref("usercount_window_seen", 1);
 	} else {
@@ -67,7 +67,7 @@ void show_wnd_usercount(void)
 	GtkWidget *btn_yes;
 	GtkAccelGroup *accel_group;
 
-	if(wnd_usercount) {
+	if (wnd_usercount) {
 		gtk_widget_show(wnd_usercount);
 		return;
 	}
@@ -75,7 +75,8 @@ void show_wnd_usercount(void)
 	accel_group = gtk_accel_group_new();
 
 	wnd_usercount = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(wnd_usercount), _("Stand up and be counted"));
+	gtk_window_set_title(GTK_WINDOW(wnd_usercount),
+		_("Stand up and be counted"));
 
 	hbox1 = gtk_hbox_new(FALSE, 0);
 	gtk_widget_show(hbox1);
@@ -85,7 +86,8 @@ void show_wnd_usercount(void)
 	gtk_widget_show(vbox1);
 	gtk_box_pack_start(GTK_BOX(hbox1), vbox1, TRUE, TRUE, 4);
 
-	label1 = gtk_label_new(_("The Ayttm team would like to know how many people use ayttm.  "
+	label1 = gtk_label_new(_
+		("The Ayttm team would like to know how many people use ayttm.  "
 			"Clicking Yes below will include you in this count.  "
 			"Click on No to never be asked this question again.  "
 			"No personal information will be collected during this process."));
@@ -110,12 +112,15 @@ void show_wnd_usercount(void)
 	gtk_box_pack_start(GTK_BOX(vbox2), chk_country, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_country), TRUE);
 
-	chk_services = gtk_check_button_new_with_label(_("The services you use (Eg: MSN, Yahoo, etc., but no usernames)"));
+	chk_services =
+		gtk_check_button_new_with_label(_
+		("The services you use (Eg: MSN, Yahoo, etc., but no usernames)"));
 	gtk_widget_show(chk_services);
 	gtk_box_pack_start(GTK_BOX(vbox2), chk_services, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_services), TRUE);
 
-	label2 = gtk_label_new(_("Deselect any of the above checkboxes if you would prefer that that information not be included in the survey."));
+	label2 = gtk_label_new(_
+		("Deselect any of the above checkboxes if you would prefer that that information not be included in the survey."));
 	gtk_widget_show(label2);
 	gtk_box_pack_start(GTK_BOX(vbox1), label2, TRUE, TRUE, 5);
 	gtk_widget_set_size_request(label2, 410, 0);
@@ -134,34 +139,45 @@ void show_wnd_usercount(void)
 	gtk_widget_show(hbuttonbox1);
 	gtk_box_pack_start(GTK_BOX(hbox2), hbuttonbox1, FALSE, TRUE, 0);
 	gtk_box_set_spacing(GTK_BOX(hbuttonbox1), 5);
-	
+
 	btn_no = gtk_button_new_with_mnemonic(_("_No"));
-	btn_no_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(GTK_BIN(btn_no)->child));
-	gtk_widget_add_accelerator(btn_no, "clicked", accel_group, btn_no_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+	btn_no_key =
+		gtk_label_get_mnemonic_keyval(GTK_LABEL(GTK_BIN(btn_no)->
+			child));
+	gtk_widget_add_accelerator(btn_no, "clicked", accel_group, btn_no_key,
+		GDK_MOD1_MASK, (GtkAccelFlags) 0);
 	gtk_widget_set_size_request(btn_no, 70, 0);
 	gtk_widget_show(btn_no);
 	gtk_container_add(GTK_CONTAINER(hbuttonbox1), btn_no);
 	GTK_WIDGET_SET_FLAGS(btn_no, GTK_CAN_DEFAULT);
 
 	btn_yes = gtk_button_new_with_mnemonic(_("_Yes"));
-	btn_yes_key = gtk_label_get_mnemonic_keyval(GTK_LABEL(GTK_BIN(btn_yes)->child));
-	gtk_widget_add_accelerator(btn_yes, "clicked", accel_group, btn_yes_key, GDK_MOD1_MASK, (GtkAccelFlags) 0);
+	btn_yes_key =
+		gtk_label_get_mnemonic_keyval(GTK_LABEL(GTK_BIN(btn_yes)->
+			child));
+	gtk_widget_add_accelerator(btn_yes, "clicked", accel_group, btn_yes_key,
+		GDK_MOD1_MASK, (GtkAccelFlags) 0);
 	gtk_widget_set_size_request(btn_yes, 70, 0);
 	gtk_widget_show(btn_yes);
 	gtk_container_add(GTK_CONTAINER(hbuttonbox1), btn_yes);
 	GTK_WIDGET_SET_FLAGS(btn_yes, GTK_CAN_DEFAULT);
 
 	g_signal_connect_data(btn_no, "clicked", G_CALLBACK(gtk_widget_destroy),
-			wnd_usercount, NULL, G_CONNECT_AFTER|G_CONNECT_SWAPPED);
+		wnd_usercount, NULL, G_CONNECT_AFTER | G_CONNECT_SWAPPED);
 
-	g_signal_connect(btn_no, "clicked", G_CALLBACK(ay_usercount), GINT_TO_POINTER(0));
-	g_signal_connect_data(btn_yes, "clicked", G_CALLBACK(gtk_widget_destroy),
-			wnd_usercount, NULL, G_CONNECT_AFTER|G_CONNECT_SWAPPED);
-	g_signal_connect(btn_yes, "clicked", G_CALLBACK(ay_usercount), GINT_TO_POINTER(1));
+	g_signal_connect(btn_no, "clicked", G_CALLBACK(ay_usercount),
+		GINT_TO_POINTER(0));
+	g_signal_connect_data(btn_yes, "clicked",
+		G_CALLBACK(gtk_widget_destroy), wnd_usercount, NULL,
+		G_CONNECT_AFTER | G_CONNECT_SWAPPED);
+	g_signal_connect(btn_yes, "clicked", G_CALLBACK(ay_usercount),
+		GINT_TO_POINTER(1));
 
 	gtk_window_add_accel_group(GTK_WINDOW(wnd_usercount), accel_group);
 
-	g_signal_connect(wnd_usercount, "destroy", G_CALLBACK(gtk_widget_destroyed), &wnd_usercount);
+	g_signal_connect(wnd_usercount, "destroy",
+		G_CALLBACK(gtk_widget_destroyed), &wnd_usercount);
 	gtk_widget_show(wnd_usercount);
-	gtk_window_set_transient_for(GTK_WINDOW(wnd_usercount), GTK_WINDOW(statuswindow));
+	gtk_window_set_transient_for(GTK_WINDOW(wnd_usercount),
+		GTK_WINDOW(statuswindow));
 }

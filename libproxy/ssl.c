@@ -46,12 +46,10 @@ static void locking_function(int mode, int n, const char *file, int line)
 		g_mutex_unlock(ssl_mutex[n]);
 }
 
-
 static unsigned long id_function(void)
 {
 	return (unsigned long)g_thread_self();
 }
-
 
 /* Global system initialization */
 void ssl_init(void)
@@ -61,7 +59,7 @@ void ssl_init(void)
 
 	g_static_mutex_lock(&ssl_init_lock);
 
-	if(ssl_inited)
+	if (ssl_inited)
 		return;
 
 	SSL_library_init();
@@ -71,7 +69,7 @@ void ssl_init(void)
 
 	ssl_mutex = g_new0(GMutex *, num_locks);
 
-	for(i=0; i<num_locks; i++)
+	for (i = 0; i < num_locks; i++)
 		ssl_mutex[i] = g_mutex_new();
 
 	CRYPTO_set_locking_callback(locking_function);
@@ -82,37 +80,36 @@ void ssl_init(void)
 	g_static_mutex_unlock(&ssl_init_lock);
 }
 
-
-SSL *ssl_get_socket(int sock, const char *host, int port, void *data )
+SSL *ssl_get_socket(int sock, const char *host, int port, void *data)
 {
 	SSL_CTX *ssl_ctx = NULL;
 	SSL_METHOD *meth;
 
-	if(!ssl_inited)
+	if (!ssl_inited)
 		ssl_init();
 
-	/* Create our context*/
+	/* Create our context */
 	meth = SSLv23_client_method();
 	ssl_ctx = SSL_CTX_new(meth);
 
 	/* Set default certificate paths */
 	SSL_CTX_set_default_verify_paths(ssl_ctx);
-	
+
 #if (OPENSSL_VERSION_NUMBER < 0x0090600fL)
-	SSL_CTX_set_verify_depth(ssl_ctx,1);
+	SSL_CTX_set_verify_depth(ssl_ctx, 1);
 #endif
 
-	return ssl_init_socket_with_method(sock, host, port, ssl_ctx, SSL_METHOD_SSLv23, data );
+	return ssl_init_socket_with_method(sock, host, port, ssl_ctx,
+		SSL_METHOD_SSLv23, data);
 }
 
-
-SSL *ssl_init_socket_with_method(int sock, const char *host, int port, 
-				SSL_CTX *ssl_ctx, SSLMethod method, void *data )
+SSL *ssl_init_socket_with_method(int sock, const char *host, int port,
+	SSL_CTX *ssl_ctx, SSLMethod method, void *data)
 {
 	X509 *server_cert;
 	SSL *ssl;
 	int res = 0;
-	
+
 	ssl = SSL_new(ssl_ctx);
 
 	if (ssl == NULL) {
@@ -134,21 +131,26 @@ SSL *ssl_init_socket_with_method(int sock, const char *host, int port,
 	}
 
 	SSL_set_fd(ssl, sock);
-	if ((res=SSL_connect(ssl)) == -1) {
+	if ((res = SSL_connect(ssl)) == -1) {
 		eb_debug(DBG_CORE, ("SSL connect failed (%s)\n"),
-			    ERR_error_string(SSL_get_error(ssl, res), NULL));
+			ERR_error_string(SSL_get_error(ssl, res), NULL));
 		res = SSL_get_error(ssl, res);
 		switch (res) {
-			case SSL_ERROR_NONE:
-				printf("SSL_ERROR_NONE\n");break;
-			case SSL_ERROR_WANT_READ:
-				printf("SSL_ERROR_WANT_READ\n");break;
-			case SSL_ERROR_WANT_WRITE:
-				printf("SSL_ERROR_WANT_WRITE\n");break;
-			case SSL_ERROR_ZERO_RETURN:
-				printf("SSL_ERROR_ZERO_RETURN\n");break;
-			default:
-				printf("DEFAULT\n");break;
+		case SSL_ERROR_NONE:
+			printf("SSL_ERROR_NONE\n");
+			break;
+		case SSL_ERROR_WANT_READ:
+			printf("SSL_ERROR_WANT_READ\n");
+			break;
+		case SSL_ERROR_WANT_WRITE:
+			printf("SSL_ERROR_WANT_WRITE\n");
+			break;
+		case SSL_ERROR_ZERO_RETURN:
+			printf("SSL_ERROR_ZERO_RETURN\n");
+			break;
+		default:
+			printf("DEFAULT\n");
+			break;
 		}
 		SSL_free(ssl);
 		return NULL;
@@ -156,12 +158,12 @@ SSL *ssl_init_socket_with_method(int sock, const char *host, int port,
 
 	/* Get the cipher */
 
-	eb_debug(DBG_CORE, "SSL connection using %s\n",
-		    SSL_get_cipher(ssl));
+	eb_debug(DBG_CORE, "SSL connection using %s\n", SSL_get_cipher(ssl));
 
 	/* Get server's certificate (note: beware of dynamic allocation) */
 	if ((server_cert = SSL_get_peer_certificate(ssl)) == NULL) {
-		eb_debug(DBG_CORE, "server_cert is NULL ! this _should_not_ happen !\n");
+		eb_debug(DBG_CORE,
+			"server_cert is NULL ! this _should_not_ happen !\n");
 		SSL_free(ssl);
 		return NULL;
 	}

@@ -27,19 +27,16 @@
 
 #include <stdio.h>
 
-
 struct contact;
 
-typedef void	*t_log_window_id;
+typedef void *t_log_window_id;
 
-typedef struct _log_file
-{
-  const char	*filename;
-  int			log_started;
-  FILE			*fp;
-  long			filepos;
+typedef struct _log_file {
+	const char *filename;
+	int log_started;
+	FILE *fp;
+	long filepos;
 } log_file;
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +48,8 @@ extern "C" {
 	
 	@returns	the log window id
 */
-t_log_window_id ay_log_window_contact_create( struct contact *inRemoteContact );
+	t_log_window_id ay_log_window_contact_create(struct contact
+		*inRemoteContact);
 
 /** Create a log window and display a file.
 
@@ -59,8 +57,7 @@ t_log_window_id ay_log_window_contact_create( struct contact *inRemoteContact );
 	
 	@returns	the log window id
 */
-t_log_window_id ay_log_window_file_create( const char *inFileName );
-
+	t_log_window_id ay_log_window_file_create(const char *inFileName);
 
 /** Create a struct used to operate on log files.
 
@@ -68,7 +65,7 @@ t_log_window_id ay_log_window_file_create( const char *inFileName );
 	
 	@returns	the new log file
 */
-log_file	*ay_log_file_create( const char *inFileName );
+	log_file *ay_log_file_create(const char *inFileName);
 
 /** Open a log file.
 
@@ -80,7 +77,7 @@ log_file	*ay_log_file_create( const char *inFileName );
 	
 	@returns	errno or 0 if no error
 */
-int			ay_log_file_open( log_file *ioLogFile, const char *inMode );
+	int ay_log_file_open(log_file *ioLogFile, const char *inMode);
 
 /** Write a message to the log file.
 	
@@ -88,13 +85,14 @@ int			ay_log_file_open( log_file *ioLogFile, const char *inMode );
 	@param	inName			the text of the 'name' portion of the message
 	@param	inMessage		the text of the message itself
 */
-void		ay_log_file_message( log_file *ioLogFile, const char *inName, const char *inMessage );
+	void ay_log_file_message(log_file *ioLogFile, const char *inName,
+		const char *inMessage);
 
 /** Close a log file.
 	
 	@param	ioLogFile		the log file which we are closing
 */
-void		ay_log_file_close( log_file *ioLogFile );
+	void ay_log_file_close(log_file *ioLogFile);
 
 /** Free all memory allocated for a log file and set it to NULL.
 	
@@ -102,7 +100,7 @@ void		ay_log_file_close( log_file *ioLogFile );
 	
 	@param	ioLogFile		the log file which we are destroying
 */
-void		ay_log_file_destroy( log_file **ioLogFile );
+	void ay_log_file_destroy(log_file **ioLogFile);
 
 /** Free all memory allocated for a log file and set it to NULL.
 	
@@ -110,10 +108,9 @@ void		ay_log_file_destroy( log_file **ioLogFile );
 	
 	@param	ioLogFile		the log file which we are destroying
 */
-void		ay_log_file_destroy_no_close( log_file **ioLogFile );
+	void ay_log_file_destroy_no_close(log_file **ioLogFile);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif

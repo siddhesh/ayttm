@@ -14,17 +14,16 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-Contact_Member* contact(guint32 uin);
-Contact_Member* contact_from_socket(gint sock);
-guint32 Chars_2_DW(guchar* buf);
-guint16 Chars_2_Word(guchar* buf);
-void DW_2_Chars(guchar* buf, guint32 num);
-void Word_2_Chars(guchar* buf, guint16 num);
-size_t SOCKWRITE(gint sok, void* ptr, size_t len);
-size_t SOCKREAD(gint sok, void* ptr, size_t len);
+Contact_Member *contact(guint32 uin);
+Contact_Member *contact_from_socket(gint sock);
+guint32 Chars_2_DW(guchar *buf);
+guint16 Chars_2_Word(guchar *buf);
+void DW_2_Chars(guchar *buf, guint32 num);
+void Word_2_Chars(guchar *buf, guint16 num);
+size_t SOCKWRITE(gint sok, void *ptr, size_t len);
+size_t SOCKREAD(gint sok, void *ptr, size_t len);
 
-#endif /* __UTIL_H__ */
+#endif				/* __UTIL_H__ */

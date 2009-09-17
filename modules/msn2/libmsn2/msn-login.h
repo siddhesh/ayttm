@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifndef _MSN_LOGIN_H_
 #define _MSN_LOGIN_H_
 
@@ -45,4 +44,3 @@ extern char msn_host[512];
 extern char msn_port[8];
 
 #endif
-

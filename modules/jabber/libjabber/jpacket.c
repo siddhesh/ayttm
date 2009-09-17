@@ -43,116 +43,110 @@
 
 jpacket jpacket_new(xmlnode x)
 {
-    jpacket p;
+	jpacket p;
 
-    if(x == NULL)
-        return NULL;
+	if (x == NULL)
+		return NULL;
 
-    p = pmalloc(xmlnode_pool(x),sizeof(_jpacket));
-    p->x = x;
+	p = pmalloc(xmlnode_pool(x), sizeof(_jpacket));
+	p->x = x;
 
-    return jpacket_reset(p);
+	return jpacket_reset(p);
 }
 
 jpacket jpacket_reset(jpacket p)
 {
-    char *val;
-    xmlnode x;
+	char *val;
+	xmlnode x;
 
-    x = p->x;
-    memset(p,0,sizeof(_jpacket));
-    p->x = x;
-    p->p = xmlnode_pool(x);
+	x = p->x;
+	memset(p, 0, sizeof(_jpacket));
+	p->x = x;
+	p->p = xmlnode_pool(x);
 
-    if(strncmp(xmlnode_get_name(x),"message",7) == 0)
-    {
-        p->type = JPACKET_MESSAGE;
-    }else if(strncmp(xmlnode_get_name(x),"presence",8) == 0)
-    {
-        p->type = JPACKET_PRESENCE;
-        val = xmlnode_get_attrib(x, "type");
-        if(val == NULL)
-            p->subtype = JPACKET__AVAILABLE;
-        else if(strcmp(val,"unavailable") == 0)
-            p->subtype = JPACKET__UNAVAILABLE;
-        else if(strcmp(val,"probe") == 0)
-            p->subtype = JPACKET__PROBE;
-        else if(strcmp(val,"error") == 0)
-            p->subtype = JPACKET__ERROR;
-        else if(strcmp(val,"invisible") == 0)
-            p->subtype = JPACKET__INVISIBLE;
-        else if(*val == 's' || *val == 'u')
-            p->type = JPACKET_S10N;
-        else if(strcmp(val,"available") == 0)
-        { /* someone is using type='available' which is frowned upon */
-            xmlnode_hide_attrib(x,"type");
-            p->subtype = JPACKET__AVAILABLE;
-        }else
-            p->type = JPACKET_UNKNOWN;
-    }else if(strncmp(xmlnode_get_name(x),"iq",2) == 0)
-    {
-        p->type = JPACKET_IQ;
-        p->iq = xmlnode_get_tag(x,"?xmlns");
-        p->iqns = xmlnode_get_attrib(p->iq,"xmlns");
-    }
+	if (strncmp(xmlnode_get_name(x), "message", 7) == 0) {
+		p->type = JPACKET_MESSAGE;
+	} else if (strncmp(xmlnode_get_name(x), "presence", 8) == 0) {
+		p->type = JPACKET_PRESENCE;
+		val = xmlnode_get_attrib(x, "type");
+		if (val == NULL)
+			p->subtype = JPACKET__AVAILABLE;
+		else if (strcmp(val, "unavailable") == 0)
+			p->subtype = JPACKET__UNAVAILABLE;
+		else if (strcmp(val, "probe") == 0)
+			p->subtype = JPACKET__PROBE;
+		else if (strcmp(val, "error") == 0)
+			p->subtype = JPACKET__ERROR;
+		else if (strcmp(val, "invisible") == 0)
+			p->subtype = JPACKET__INVISIBLE;
+		else if (*val == 's' || *val == 'u')
+			p->type = JPACKET_S10N;
+		else if (strcmp(val, "available") == 0) {	/* someone is using type='available' which is frowned upon */
+			xmlnode_hide_attrib(x, "type");
+			p->subtype = JPACKET__AVAILABLE;
+		} else
+			p->type = JPACKET_UNKNOWN;
+	} else if (strncmp(xmlnode_get_name(x), "iq", 2) == 0) {
+		p->type = JPACKET_IQ;
+		p->iq = xmlnode_get_tag(x, "?xmlns");
+		p->iqns = xmlnode_get_attrib(p->iq, "xmlns");
+	}
 
-    /* set up the jids if any, flag packet as unknown if they are unparseable */
-    val = xmlnode_get_attrib(x,"to");
-    if(val != NULL)
-        if((p->to = jid_new(p->p, val)) == NULL)
-            p->type = JPACKET_UNKNOWN;
-    val = xmlnode_get_attrib(x,"from");
-    if(val != NULL)
-        if((p->from = jid_new(p->p, val)) == NULL)
-            p->type = JPACKET_UNKNOWN;
+	/* set up the jids if any, flag packet as unknown if they are unparseable */
+	val = xmlnode_get_attrib(x, "to");
+	if (val != NULL)
+		if ((p->to = jid_new(p->p, val)) == NULL)
+			p->type = JPACKET_UNKNOWN;
+	val = xmlnode_get_attrib(x, "from");
+	if (val != NULL)
+		if ((p->from = jid_new(p->p, val)) == NULL)
+			p->type = JPACKET_UNKNOWN;
 
-    return p;
+	return p;
 }
-
 
 int jpacket_subtype(jpacket p)
 {
-    char *type;
-    int ret = p->subtype;
+	char *type;
+	int ret = p->subtype;
 
-    if(ret != JPACKET__UNKNOWN)
-        return ret;
+	if (ret != JPACKET__UNKNOWN)
+		return ret;
 
-    ret = JPACKET__NONE; /* default, when no type attrib is specified */
-    type = xmlnode_get_attrib(p->x, "type");
-    if(j_strcmp(type,"error") == 0)
-        ret = JPACKET__ERROR;
-    else
-        switch(p->type)
-        {
-        case JPACKET_MESSAGE:
-            if(j_strcmp(type,"chat") == 0)
-                ret = JPACKET__CHAT;
-            else if(j_strcmp(type,"groupchat") == 0)
-                ret = JPACKET__GROUPCHAT;
-            else if(j_strcmp(type,"headline") == 0)
-                ret = JPACKET__HEADLINE;
-            break;
-        case JPACKET_S10N:
-            if(j_strcmp(type,"subscribe") == 0)
-                ret = JPACKET__SUBSCRIBE;
-            else if(j_strcmp(type,"subscribed") == 0)
-                ret = JPACKET__SUBSCRIBED;
-            else if(j_strcmp(type,"unsubscribe") == 0)
-                ret = JPACKET__UNSUBSCRIBE;
-            else if(j_strcmp(type,"unsubscribed") == 0)
-                ret = JPACKET__UNSUBSCRIBED;
-            break;
-        case JPACKET_IQ:
-            if(j_strcmp(type,"get") == 0)
-                ret = JPACKET__GET;
-            else if(j_strcmp(type,"set") == 0)
-                ret = JPACKET__SET;
-            else if(j_strcmp(type,"result") == 0)
-                ret = JPACKET__RESULT;
-            break;
-        }
+	ret = JPACKET__NONE;	/* default, when no type attrib is specified */
+	type = xmlnode_get_attrib(p->x, "type");
+	if (j_strcmp(type, "error") == 0)
+		ret = JPACKET__ERROR;
+	else
+		switch (p->type) {
+		case JPACKET_MESSAGE:
+			if (j_strcmp(type, "chat") == 0)
+				ret = JPACKET__CHAT;
+			else if (j_strcmp(type, "groupchat") == 0)
+				ret = JPACKET__GROUPCHAT;
+			else if (j_strcmp(type, "headline") == 0)
+				ret = JPACKET__HEADLINE;
+			break;
+		case JPACKET_S10N:
+			if (j_strcmp(type, "subscribe") == 0)
+				ret = JPACKET__SUBSCRIBE;
+			else if (j_strcmp(type, "subscribed") == 0)
+				ret = JPACKET__SUBSCRIBED;
+			else if (j_strcmp(type, "unsubscribe") == 0)
+				ret = JPACKET__UNSUBSCRIBE;
+			else if (j_strcmp(type, "unsubscribed") == 0)
+				ret = JPACKET__UNSUBSCRIBED;
+			break;
+		case JPACKET_IQ:
+			if (j_strcmp(type, "get") == 0)
+				ret = JPACKET__GET;
+			else if (j_strcmp(type, "set") == 0)
+				ret = JPACKET__SET;
+			else if (j_strcmp(type, "result") == 0)
+				ret = JPACKET__RESULT;
+			break;
+		}
 
-    p->subtype = ret;
-    return ret;
+	p->subtype = ret;
+	return ret;
 }

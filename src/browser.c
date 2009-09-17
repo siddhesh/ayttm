@@ -30,7 +30,6 @@
  *
  */
 
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -51,60 +50,59 @@
 #include "prefs.h"
 #include "globals.h"
 
-
 #include "logs.h"
 
 #ifndef _WIN32
-	
-	
-void open_url(void *w, char *url) {
+
+void open_url(void *w, char *url)
+{
 	char *browser = NULL;
 	char command[1281];
 	char *url_pos = NULL;
 	char esc_url[1024];
-	int i=0,j=1;
+	int i = 0, j = 1;
 
-	int free_browser = 0 ;
-	
-	if (!strncmp("log://", url, 6))
-	{
-		/*internal handling*/
-		ay_log_window_file_create( url+6 );
+	int free_browser = 0;
+
+	if (!strncmp("log://", url, 6)) {
+		/*internal handling */
+		ay_log_window_file_create(url + 6);
 		return;
 	}
 
-	esc_url[0]='"'; j=1;
-	if (url[0]=='\'' || url[0]=='"')
+	esc_url[0] = '"';
+	j = 1;
+	if (url[0] == '\'' || url[0] == '"')
 		i++;
-	for (; i< strlen(url) && j < 1023; i++,j++) {
-		switch(url[i]) {
-			case '$':
-			case '\'':
-			case '"':
-			case ' ':
-			case '\\':
-				if (i==strlen(url)-1)
-					break;
-				esc_url[j]='\\';
-				j++;
-				esc_url[j]=url[i];
+	for (; i < strlen(url) && j < 1023; i++, j++) {
+		switch (url[i]) {
+		case '$':
+		case '\'':
+		case '"':
+		case ' ':
+		case '\\':
+			if (i == strlen(url) - 1)
 				break;
-			default:
-				esc_url[j]=url[i];
+			esc_url[j] = '\\';
+			j++;
+			esc_url[j] = url[i];
+			break;
+		default:
+			esc_url[j] = url[i];
 		}
 	}
-	esc_url[j++]='"';
-	esc_url[j++]=0;
-	
+	esc_url[j++] = '"';
+	esc_url[j++] = 0;
+
 	if (iGetLocalPref("use_alternate_browser"))
 		browser = cGetLocalPref("alternate_browser");
-	
+
 	if (!browser || (strlen(browser) == 0)) {
-		browser = (char *) malloc(strlen(DEFAULT_WWW_BROWSER)+4);
+		browser = (char *)malloc(strlen(DEFAULT_WWW_BROWSER) + 4);
 		strcpy(browser, DEFAULT_WWW_BROWSER);
 		strncat(browser, " %s", 3);
 
-		free_browser = 1 ;
+		free_browser = 1;
 	}
 	url_pos = strstr(browser, "%s");
 	/*
@@ -112,40 +110,41 @@ void open_url(void *w, char *url) {
 	 * the url in place of the %s, else, put the url
 	 * at the end.
 	 */
-	if(url_pos) {
-		int pre_len = url_pos-browser;
+	if (url_pos) {
+		int pre_len = url_pos - browser;
 		strncpy(command, browser, pre_len);
 		command[pre_len] = 0;
 		strncat(command, esc_url, 1280 - pre_len);
-		strncat(command, url_pos+2, 1280 - strlen(command));
+		strncat(command, url_pos + 2, 1280 - strlen(command));
 		strncat(command, " &", 1280 - strlen(command));
 	} else {
 		strncpy(command, browser, 1280);
-		strncat(command," ",1280-strlen(command));
-		strncat(command,esc_url,1280-strlen(command));
+		strncat(command, " ", 1280 - strlen(command));
+		strncat(command, esc_url, 1280 - strlen(command));
 		strncat(command, " &", 1280 - strlen(command));
 	}
 	eb_debug(DBG_CORE, "launching %s\n", command);
 	system(command);
 
-	if(free_browser && browser)
+	if (free_browser && browser)
 		free(browser);
 }
 
 #else
 
-void open_url(GdkWindow *w, char *url) {
+void open_url(GdkWindow *w, char *url)
+{
 
 	if (!w)
 		return;
 
 	if (!strncmp("log://", url, 6)) {
-		/*internal handling*/
-		ay_log_window_file_create( url+6 );
+		/*internal handling */
+		ay_log_window_file_create(url + 6);
 		return;
 	}
 
-	ShellExecute(GDK_DRAWABLE_XID(w),"open",url,NULL,"C:\\",0);
+	ShellExecute(GDK_DRAWABLE_XID(w), "open", url, NULL, "C:\\", 0);
 }
 
 #endif

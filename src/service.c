@@ -47,7 +47,6 @@
 #include <X11/extensions/scrnsaver.h>
 #endif
 
-
 static guint idle_timer;
 static time_t lastsent = 0;
 static int is_idle = 0;
@@ -56,8 +55,7 @@ static int is_idle = 0;
 static int scrnsaver_ext = 0;
 #endif
 
-int NUM_SERVICES=0;		/* Used in prefs.c */
-
+int NUM_SERVICES = 0;		/* Used in prefs.c */
 
 /* Following chunk will be moved to a 'real' code file */
 /* FIXME: Should be a dynamic array */
@@ -67,36 +65,52 @@ struct service eb_services[255];
 static void refresh_service_contacts(int type)
 {
 	LList *l1, *l2, *l3;
-	LList * config=NULL;
-	struct contact *con=NULL;
+	LList *config = NULL;
+	struct contact *con = NULL;
 
 	eb_debug(DBG_CORE, ">Refreshing contacts for %i\n", type);
-	for(l1 = groups; l1; l1=l1->next ) {
-		for(l2 = ((grouplist*)l1->data)->members; l2; l2=l2->next ) {
-			con=l2->data;
-			if(con->chatwindow && con->chatwindow->preferred && con->chatwindow->preferred->service_id==type) {
-				eb_debug(DBG_MOD, "Setting the preferred service to NULL for %s\n", con->nick);
-				con->chatwindow->preferred=NULL;
+	for (l1 = groups; l1; l1 = l1->next) {
+		for (l2 = ((grouplist *)l1->data)->members; l2; l2 = l2->next) {
+			con = l2->data;
+			if (con->chatwindow && con->chatwindow->preferred
+				&& con->chatwindow->preferred->service_id ==
+				type) {
+				eb_debug(DBG_MOD,
+					"Setting the preferred service to NULL for %s\n",
+					con->nick);
+				con->chatwindow->preferred = NULL;
 			}
-			for(l3 = con->accounts; l3; l3=l3->next) {
-				eb_account * account = l3->data;
-				if(account->service_id == type) {
-					eb_debug(DBG_CORE, "Refreshing %s - %i\n", account->handle, type);
-					config = value_pair_add(NULL, "NAME", account->handle);
+			for (l3 = con->accounts; l3; l3 = l3->next) {
+				eb_account *account = l3->data;
+				if (account->service_id == type) {
+					eb_debug(DBG_CORE,
+						"Refreshing %s - %i\n",
+						account->handle, type);
+					config = value_pair_add(NULL, "NAME",
+						account->handle);
 					if (account->ela)
-						config = value_pair_add(config, "LOCAL_ACCOUNT", account->ela->handle);
+						config = value_pair_add(config,
+							"LOCAL_ACCOUNT",
+							account->ela->handle);
 					else
-						config = value_pair_add(config, "LOCAL_ACCOUNT", "");
-					if(RUN_SERVICE(account)->free_account_data)
-						RUN_SERVICE(account)->free_account_data(account);
+						config = value_pair_add(config,
+							"LOCAL_ACCOUNT", "");
+					if (RUN_SERVICE(account)->
+						free_account_data)
+						RUN_SERVICE(account)->
+							free_account_data
+							(account);
 					account->protocol_account_data = NULL;
-					account = eb_services[type].sc->read_account_config(account, config);
+					account =
+						eb_services[type].sc->
+						read_account_config(account,
+						config);
 					/* Is this a nomodule account?  Make it the right service number */
-					if(account->service_id==-1)
-					       account->service_id=type;
+					if (account->service_id == -1)
+						account->service_id = type;
 					value_pair_free(config);
-					config=NULL;
-					l3->data=account;
+					config = NULL;
+					l3->data = account;
 				}
 			}
 		}
@@ -107,35 +121,39 @@ static void refresh_service_contacts(int type)
 
 static void reload_service_accounts(int service_id)
 {
-	LList			*node = accounts;
-	LList			*account_pairs = NULL;
-	eb_local_account	*oela = NULL;
-	eb_local_account	*nela = NULL;
-	const int		buffer_size = 256;
-	char			buff[buffer_size];
-	char			buff2[buffer_size];
-	LList			*saved_info = NULL;
-	
+	LList *node = accounts;
+	LList *account_pairs = NULL;
+	eb_local_account *oela = NULL;
+	eb_local_account *nela = NULL;
+	const int buffer_size = 256;
+	char buff[buffer_size];
+	char buff2[buffer_size];
+	LList *saved_info = NULL;
+
 	saved_info = ay_save_account_information(service_id);
-	while(node)
-	{
-		oela=node->data;
-		if(oela->service_id != service_id || oela->connected) {
+	while (node) {
+		oela = node->data;
+		if (oela->service_id != service_id || oela->connected) {
 			node = node->next;
 			continue;
 		}
-		eb_debug(DBG_CORE, "Account: handle:%s service: %s\n", oela->handle, get_service_name(oela->service_id));
-		snprintf(buff, buffer_size, "%s:%s", get_service_name(oela->service_id), oela->handle);
+		eb_debug(DBG_CORE, "Account: handle:%s service: %s\n",
+			oela->handle, get_service_name(oela->service_id));
+		snprintf(buff, buffer_size, "%s:%s",
+			get_service_name(oela->service_id), oela->handle);
 		account_pairs = GetPref(buff);
-		nela = eb_services[oela->service_id].sc->read_local_account_config(account_pairs);
-		if(!nela) {
-			snprintf(buff2, buffer_size, _("Unable to create account for %s.\nCheck your config file."), buff);
-			ay_do_error( _("Invalid Account"), buff2 );
-			oela->service_id=get_service_id("NO SERVICE");
-		}
-		else {
+		nela = eb_services[oela->service_id].sc->
+			read_local_account_config(account_pairs);
+		if (!nela) {
+			snprintf(buff2, buffer_size,
+				_
+				("Unable to create account for %s.\nCheck your config file."),
+				buff);
+			ay_do_error(_("Invalid Account"), buff2);
+			oela->service_id = get_service_id("NO SERVICE");
+		} else {
 			nela->service_id = oela->service_id;
-			node->data=nela;
+			node->data = nela;
 			//FIXME: This should probably be left to the service to clean up, though at this point, it may not exist
 			free(oela->protocol_local_account_data);
 			free(oela);
@@ -146,72 +164,75 @@ static void reload_service_accounts(int service_id)
 	l_list_free(saved_info);
 }
 
-
 /* Add a new service, or replace an existing one */
 int add_service(struct service *Service_Info)
 {
 	int i;
-	LList *session_prefs=NULL;
+	LList *session_prefs = NULL;
 
 	assert(Service_Info);
 
 	eb_debug(DBG_CORE, ">Entering\n");
 	if (Service_Info->sc->read_prefs_config) {
-		session_prefs=GetPref(Service_Info->name);
+		session_prefs = GetPref(Service_Info->name);
 		Service_Info->sc->read_prefs_config(session_prefs);
 	}
 
-	for (i=0; i < NUM_SERVICES; i++ ) {
+	for (i = 0; i < NUM_SERVICES; i++) {
 		/* Check to see if another service exists for the same protocol, if so, replace it */
-		if (!strcasecmp(eb_services[i].name,Service_Info->name))
-		{
-				eb_debug(DBG_CORE, "Replacing %s service ", Service_Info->name);
-				free(eb_services[i].sc);
-				Service_Info->protocol_id=i;
-				eb_debug(DBG_CORE, "(service_id %d)\n",Service_Info->protocol_id);
-				memcpy(&eb_services[i], Service_Info, sizeof(struct service));
-				reload_service_accounts(i);
-				refresh_service_contacts(i);
-				ay_set_submenus();
-				eb_debug(DBG_CORE, "<Replaced existing service\n");
-				return(i);
+		if (!strcasecmp(eb_services[i].name, Service_Info->name)) {
+			eb_debug(DBG_CORE, "Replacing %s service ",
+				Service_Info->name);
+			free(eb_services[i].sc);
+			Service_Info->protocol_id = i;
+			eb_debug(DBG_CORE, "(service_id %d)\n",
+				Service_Info->protocol_id);
+			memcpy(&eb_services[i], Service_Info,
+				sizeof(struct service));
+			reload_service_accounts(i);
+			refresh_service_contacts(i);
+			ay_set_submenus();
+			eb_debug(DBG_CORE, "<Replaced existing service\n");
+			return (i);
 		}
-		
+
 	}
-	Service_Info->protocol_id=NUM_SERVICES++;
-	eb_debug(DBG_CORE, "(%s: service_id %d)\n",Service_Info->name, Service_Info->protocol_id);
-	memcpy(&eb_services[Service_Info->protocol_id], Service_Info, sizeof(struct service));
+	Service_Info->protocol_id = NUM_SERVICES++;
+	eb_debug(DBG_CORE, "(%s: service_id %d)\n", Service_Info->name,
+		Service_Info->protocol_id);
+	memcpy(&eb_services[Service_Info->protocol_id], Service_Info,
+		sizeof(struct service));
 	reload_service_accounts(Service_Info->protocol_id);
 	refresh_service_contacts(Service_Info->protocol_id);
 	ay_set_submenus();
 	eb_debug(DBG_CORE, "<Added new service \n");
-	return(Service_Info->protocol_id);
+	return (Service_Info->protocol_id);
 }
 
 /* This now creates a service if the name is not recognized */
-int get_service_id( const char * servicename )
+int get_service_id(const char *servicename)
 {
 	int i;
 	char buf[1024];
 
-	for (i=0; i < NUM_SERVICES; i++ ) {
-		if (strcasecmp(eb_services[i].name,servicename)==0)
-		{
-			return i;	
+	for (i = 0; i < NUM_SERVICES; i++) {
+		if (strcasecmp(eb_services[i].name, servicename) == 0) {
+			return i;
 		}
 	}
 	eb_debug(DBG_CORE, "Creating empty service for %s\n", servicename);
-	memcpy(&eb_services[NUM_SERVICES], &nomodule_SERVICE_INFO, sizeof(struct service));
-	eb_services[NUM_SERVICES].sc=eb_nomodule_query_callbacks();
+	memcpy(&eb_services[NUM_SERVICES], &nomodule_SERVICE_INFO,
+		sizeof(struct service));
+	eb_services[NUM_SERVICES].sc = eb_nomodule_query_callbacks();
 	eb_services[NUM_SERVICES].name = strdup(servicename);
-	eb_services[NUM_SERVICES].protocol_id=NUM_SERVICES;
+	eb_services[NUM_SERVICES].protocol_id = NUM_SERVICES;
 	NUM_SERVICES++;
 	snprintf(buf, sizeof(buf), "%s::path", servicename);
 	cSetLocalPref(buf, "Empty Module");
-	return(NUM_SERVICES-1);
+	return (NUM_SERVICES - 1);
 }
 
-char *get_service_name( int service_id )
+char *get_service_name(int service_id)
 {
 	if ((service_id >= 0) && (service_id < NUM_SERVICES))
 		return (eb_services[service_id].name);
@@ -220,18 +241,19 @@ char *get_service_name( int service_id )
 	return "unknown";
 }
 
-static int strcasecmp_list(const void* a, const void* b)
+static int strcasecmp_list(const void *a, const void *b)
 {
 	return strcasecmp((const char *)a, (const char *)b);
 }
 
-
-LList * get_service_list()
+LList *get_service_list()
 {
-	LList * newlist = NULL;
+	LList *newlist = NULL;
 	int i;
-	for ( i = 0; i < NUM_SERVICES; i++ )
-		newlist = l_list_insert_sorted( newlist, eb_services[i].name, strcasecmp_list);
+	for (i = 0; i < NUM_SERVICES; i++)
+		newlist =
+			l_list_insert_sorted(newlist, eb_services[i].name,
+			strcasecmp_list);
 
 	return newlist;
 }
@@ -240,33 +262,37 @@ void serv_touch_idle()
 {
 	/* Are we idle?  If so, not anymore */
 	if (is_idle > 0) {
-		LList * node;
+		LList *node;
 		is_idle = 0;
-		for (node = accounts; node; node = node->next ) {
+		for (node = accounts; node; node = node->next) {
 			if (((eb_local_account *)(node->data))->connected
-			&& RUN_SERVICE(((eb_local_account*)(node->data)))->set_idle) {
-				RUN_SERVICE(((eb_local_account*)node->data))->set_idle(
-					    (eb_local_account*)node->data, 0);
+				&& RUN_SERVICE(((eb_local_account *)(node->
+							data)))->set_idle) {
+				RUN_SERVICE(((eb_local_account *)node->data))->
+					set_idle((eb_local_account *)node->data,
+					0);
 			}
 		}
-    	}
+	}
 	time(&lastsent);
 }
 
 static guint idle_time = 0;
 
-static int report_idle(void * data)
+static int report_idle(void *data)
 {
-	LList * node;
+	LList *node;
 
 	if (!is_idle)
 		return FALSE;
 
-	for (node = accounts; node; node = node->next ) {
+	for (node = accounts; node; node = node->next) {
 		if (((eb_local_account *)node->data)->connected
-		&& RUN_SERVICE(((eb_local_account*)node->data))->set_idle) {
-			RUN_SERVICE(((eb_local_account*)node->data))->set_idle(
-				    (eb_local_account*)node->data, idle_time);
+			&& RUN_SERVICE(((eb_local_account *)node->data))->
+			set_idle) {
+			RUN_SERVICE(((eb_local_account *)node->data))->
+				set_idle((eb_local_account *)node->data,
+				idle_time);
 		}
 	}
 	return TRUE;
@@ -274,36 +300,42 @@ static int report_idle(void * data)
 
 static int check_idle()
 {
-	int		idle_reporter = -1;
-	const int	sendIdleTime = iGetLocalPref("do_send_idle_time");
+	int idle_reporter = -1;
+	const int sendIdleTime = iGetLocalPref("do_send_idle_time");
 
 #ifdef HAVE_XSS
 	if (scrnsaver_ext) {
-		static XScreenSaverInfo * mit_info = NULL;
+		static XScreenSaverInfo *mit_info = NULL;
 		mit_info = XScreenSaverAllocInfo();
-		XScreenSaverQueryInfo(GDK_DISPLAY(), DefaultRootWindow(GDK_DISPLAY()), mit_info);
-		idle_time = mit_info->idle/1000;
+		XScreenSaverQueryInfo(GDK_DISPLAY(),
+			DefaultRootWindow(GDK_DISPLAY()), mit_info);
+		idle_time = mit_info->idle / 1000;
 		free(mit_info);
 	} else
 #endif
 	{
-    		time_t t;
+		time_t t;
 
-    		if (is_idle)
-        		return TRUE;
-    		time(&t);
+		if (is_idle)
+			return TRUE;
+		time(&t);
 		idle_time = t - lastsent;
 	}
 
 	if ((idle_time >= 600) && sendIdleTime) {
 		if (is_idle == 0) {
-			LList * node;
-			idle_reporter = eb_timeout_add(60000, report_idle, NULL);
-			for (node = accounts; node; node = node->next ) {
+			LList *node;
+			idle_reporter =
+				eb_timeout_add(60000, report_idle, NULL);
+			for (node = accounts; node; node = node->next) {
 				if (((eb_local_account *)node->data)->connected
-				&& RUN_SERVICE(((eb_local_account*)node->data))->set_idle) {
-					RUN_SERVICE(((eb_local_account*)node->data))->set_idle(
-						    (eb_local_account*)node->data, idle_time);
+					&& RUN_SERVICE(((eb_local_account *)
+							node->data))->
+					set_idle) {
+					RUN_SERVICE(((eb_local_account *)node->
+							data))->
+						set_idle((eb_local_account *)
+						node->data, idle_time);
 				}
 			}
 		}
@@ -318,14 +350,15 @@ static int check_idle()
 
 void add_idle_check()
 {
-	idle_timer = eb_timeout_add(5000, (GtkFunction)check_idle, NULL);
+	idle_timer = eb_timeout_add(5000, (GtkFunction) check_idle, NULL);
 	serv_touch_idle();
 #ifdef HAVE_XSS
 	{
-		int	eventnum;
-		int	errornum;
-		
-		if (XScreenSaverQueryExtension(GDK_DISPLAY(), &eventnum, &errornum))
+		int eventnum;
+		int errornum;
+
+		if (XScreenSaverQueryExtension(GDK_DISPLAY(), &eventnum,
+				&errornum))
 			scrnsaver_ext = 1;
 	}
 #endif

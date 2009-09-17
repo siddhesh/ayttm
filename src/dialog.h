@@ -32,34 +32,30 @@ extern "C" {
 
 /*dialog.c*/
 
-void eb_do_dialog( const char *message, const char *title, 
-		void (*action)(void *data, int result), 
-		void *data );
+	void eb_do_dialog(const char *message, const char *title,
+		void (*action) (void *data, int result), void *data);
 
-void do_list_dialog( const char *message, const char *title, const char **list, 
-		void (*action)(const char *text, void *data), 
-		void *data );
+	void do_list_dialog(const char *message, const char *title,
+		const char **list, void (*action) (const char *text,
+			void *data), void *data);
 
-void do_llist_dialog( const char *message, const char *title, const LList *list, 
-		void (*action)(const char *text, void *data), 
-		void *data );
+	void do_llist_dialog(const char *message, const char *title,
+		const LList *list, void (*action) (const char *text,
+			void *data), void *data);
 
-void do_text_input_window( const char *title, const char *value, 
-		void (*action)(const char *text, void *data), 
-		void *data );
+	void do_text_input_window(const char *title, const char *value,
+		void (*action) (const char *text, void *data), void *data);
 
-void do_password_input_window( const char *title, const char *value, 
-		void (*action)(const char *text, void *data), 
-		void *data );
+	void do_password_input_window(const char *title, const char *value,
+		void (*action) (const char *text, void *data), void *data);
 
-void do_text_input_window_multiline( const char *title, const char *value, 
-		void (*action)(const char *text, void *data), 
-		void *data );
+	void do_text_input_window_multiline(const char *title,
+		const char *value, void (*action) (const char *text,
+			void *data), void *data);
 
-int eb_do_confirm_dialog(const char *message, const char *title);
+	int eb_do_confirm_dialog(const char *message, const char *title);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif

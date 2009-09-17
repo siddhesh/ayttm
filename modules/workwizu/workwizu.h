@@ -21,24 +21,23 @@
 
 #ifndef __EB_WORKWIZU_H__
 #define __EB_WORKWIZU_H__
- 
+
 #include "service.h"
 
-struct service_callbacks * workwizu_query_callbacks();
+struct service_callbacks *workwizu_query_callbacks();
 
 typedef struct {
 	int fd;
 	int tag_r;
-        int tag_w;
-}tag_info;
+	int tag_w;
+} tag_info;
 
 typedef struct _wwz_account_data wwz_account_data;
 
-struct _wwz_account_data
-{
+struct _wwz_account_data {
 	char *password;
 	int sock;
-	eb_chat_room *chat_room; /* only one */	
+	eb_chat_room *chat_room;	/* only one */
 	int activity_tag;
 	int connect_tag;
 };
@@ -59,21 +58,18 @@ struct _wwz_user {
 	int typing_handler;
 };
 
-typedef enum 
-{
+typedef enum {
 	CONN_CLOSED,
 	CONN_WAITING_CHALLENGE,
 	CONN_WAITING_USERINFO,
 	CONN_ESTABLISHED
 } ConnState;
-	
-static void clean_up (int sock);
-eb_account * eb_workwizu_new_account (const char *account);
-void eb_workwizu_add_user (eb_account *account);
-void eb_workwizu_del_user (eb_account *account);
-void eb_workwizu_logout (eb_local_account *account);
 
-
+static void clean_up(int sock);
+eb_account *eb_workwizu_new_account(const char *account);
+void eb_workwizu_add_user(eb_account *account);
+void eb_workwizu_del_user(eb_account *account);
+void eb_workwizu_logout(eb_local_account *account);
 
 /* destinations */
 #define CHANNEL 0

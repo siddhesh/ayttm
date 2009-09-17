@@ -28,7 +28,6 @@
 
 #include "llist.h"
 
-
 LList *groups;
 LList *temp_groups;
 LList *accounts;

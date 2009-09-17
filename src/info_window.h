@@ -35,31 +35,29 @@
 
 #include "account.h"
 
-
-typedef struct _info_window
-{
-	GtkWidget * window;
-	GtkWidget * info;
-        GtkWidget * scrollwindow;
-        void (*cleanup)(struct _info_window *);
-        void *info_data;
-        int info_type;
-	struct account * remote_account;
-	eb_local_account * local_user;
+typedef struct _info_window {
+	GtkWidget *window;
+	GtkWidget *info;
+	GtkWidget *scrollwindow;
+	void (*cleanup) (struct _info_window *);
+	void *info_data;
+	int info_type;
+	struct account *remote_account;
+	eb_local_account *local_user;
 
 } info_window;
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-info_window * eb_info_window_new( eb_local_account * local, struct account *);
-void eb_info_window_clear(info_window *iw); 
-void eb_info_window_add_info( eb_account * remote_account, gchar* text, gint ignore_bg, gint ignore_fg, gint ignore_font );
+	info_window *eb_info_window_new(eb_local_account *local,
+		struct account *);
+	void eb_info_window_clear(info_window *iw);
+	void eb_info_window_add_info(eb_account *remote_account, gchar *text,
+		gint ignore_bg, gint ignore_fg, gint ignore_font);
 
 #ifdef __cplusplus
-} /*extern "C" */
+}				/*extern "C" */
 #endif
-
 #endif

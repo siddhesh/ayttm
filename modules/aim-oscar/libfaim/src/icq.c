@@ -18,7 +18,8 @@ faim_export int aim_icq_reqofflinemsgs(aim_session_t *sess)
 
 	bslen = 2 + 4 + 2 + 2;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -30,8 +31,8 @@ faim_export int aim_icq_reqofflinemsgs(aim_session_t *sess)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x003c); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
+	aimbs_putle16(&fr->data, 0x003c);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
 
 	aim_tx_enqueue(sess, fr);
 
@@ -50,7 +51,8 @@ faim_export int aim_icq_ackofflinemsgs(aim_session_t *sess)
 
 	bslen = 2 + 4 + 2 + 2;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -62,8 +64,8 @@ faim_export int aim_icq_ackofflinemsgs(aim_session_t *sess)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x003e); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
+	aimbs_putle16(&fr->data, 0x003e);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
 
 	aim_tx_enqueue(sess, fr);
 
@@ -80,9 +82,10 @@ faim_export int aim_icq_hideip(aim_session_t *sess)
 	if (!sess || !(conn = aim_conn_findbygroup(sess, 0x0015)))
 		return -EINVAL;
 
-	bslen = 2+4+2+2+2+4;
+	bslen = 2 + 4 + 2 + 2 + 2 + 4;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -94,9 +97,9 @@ faim_export int aim_icq_hideip(aim_session_t *sess)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x07d0); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
-	aimbs_putle16(&fr->data, 0x0424); /* shrug. */
+	aimbs_putle16(&fr->data, 0x07d0);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
+	aimbs_putle16(&fr->data, 0x0424);	/* shrug. */
 	aimbs_putle16(&fr->data, 0x0001);
 	aimbs_putle16(&fr->data, 0x0001);
 
@@ -129,9 +132,10 @@ faim_export int aim_icq_changepasswd(aim_session_t *sess, const char *passwd)
 	passwdlen = strlen(passwd);
 	if (passwdlen > MAXICQPASSLEN)
 		passwdlen = MAXICQPASSLEN;
-	bslen = 2+4+2+2+2+2+passwdlen+1;
+	bslen = 2 + 4 + 2 + 2 + 2 + 2 + passwdlen + 1;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -143,10 +147,10 @@ faim_export int aim_icq_changepasswd(aim_session_t *sess, const char *passwd)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x07d0); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
-	aimbs_putle16(&fr->data, 0x042e); /* shrug. */
-	aimbs_putle16(&fr->data, passwdlen+1);
+	aimbs_putle16(&fr->data, 0x07d0);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
+	aimbs_putle16(&fr->data, 0x042e);	/* shrug. */
+	aimbs_putle16(&fr->data, passwdlen + 1);
 	aimbs_putraw(&fr->data, passwd, passwdlen);
 	aimbs_putle8(&fr->data, '\0');
 
@@ -171,7 +175,8 @@ faim_export int aim_icq_getallinfo(aim_session_t *sess, const char *uin)
 
 	bslen = 2 + 4 + 2 + 2 + 2 + 4;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -183,9 +188,9 @@ faim_export int aim_icq_getallinfo(aim_session_t *sess, const char *uin)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x07d0); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
-	aimbs_putle16(&fr->data, 0x04b2); /* shrug. */
+	aimbs_putle16(&fr->data, 0x07d0);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
+	aimbs_putle16(&fr->data, 0x04b2);	/* shrug. */
 	aimbs_putle32(&fr->data, atoi(uin));
 
 	aim_tx_enqueue(sess, fr);
@@ -216,7 +221,8 @@ faim_export int aim_icq_getalias(aim_session_t *sess, const char *uin)
 
 	bslen = 2 + 4 + 2 + 2 + 2 + 4;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -228,9 +234,9 @@ faim_export int aim_icq_getalias(aim_session_t *sess, const char *uin)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x07d0); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
-	aimbs_putle16(&fr->data, 0x04ba); /* shrug. */
+	aimbs_putle16(&fr->data, 0x07d0);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
+	aimbs_putle16(&fr->data, 0x04ba);	/* shrug. */
 	aimbs_putle32(&fr->data, atoi(uin));
 
 	aim_tx_enqueue(sess, fr);
@@ -260,7 +266,8 @@ faim_export int aim_icq_getsimpleinfo(aim_session_t *sess, const char *uin)
 
 	bslen = 2 + 4 + 2 + 2 + 2 + 4;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -272,9 +279,9 @@ faim_export int aim_icq_getsimpleinfo(aim_session_t *sess, const char *uin)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x07d0); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
-	aimbs_putle16(&fr->data, 0x051f); /* shrug. */
+	aimbs_putle16(&fr->data, 0x07d0);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
+	aimbs_putle16(&fr->data, 0x051f);	/* shrug. */
 	aimbs_putle32(&fr->data, atoi(uin));
 
 	aim_tx_enqueue(sess, fr);
@@ -297,7 +304,8 @@ faim_export int aim_icq_sendxmlreq(aim_session_t *sess, const char *xml)
 
 	bslen = 2 + 10 + 2 + strlen(xml) + 1;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10 + 4 + bslen)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + bslen)))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0015, 0x0002, 0x0000, NULL, 0);
@@ -309,9 +317,9 @@ faim_export int aim_icq_sendxmlreq(aim_session_t *sess, const char *xml)
 
 	aimbs_putle16(&fr->data, bslen - 2);
 	aimbs_putle32(&fr->data, atoi(sess->sn));
-	aimbs_putle16(&fr->data, 0x07d0); /* I command thee. */
-	aimbs_putle16(&fr->data, snacid); /* eh. */
-	aimbs_putle16(&fr->data, 0x0998); /* shrug. */
+	aimbs_putle16(&fr->data, 0x07d0);	/* I command thee. */
+	aimbs_putle16(&fr->data, snacid);	/* eh. */
+	aimbs_putle16(&fr->data, 0x0998);	/* shrug. */
 	aimbs_putle16(&fr->data, strlen(xml) + 1);
 	aimbs_putraw(&fr->data, xml, strlen(xml) + 1);
 
@@ -320,7 +328,8 @@ faim_export int aim_icq_sendxmlreq(aim_session_t *sess, const char *xml)
 	return 0;
 }
 
-static void aim_icq_freeinfo(struct aim_icq_info *info) {
+static void aim_icq_freeinfo(struct aim_icq_info *info)
+{
 	int i;
 
 	if (!info)
@@ -358,7 +367,8 @@ static void aim_icq_freeinfo(struct aim_icq_info *info) {
 /**
  * Subtype 0x0003 - Response to 0x0015/0x002, contains an ICQesque packet.
  */
-static int icqresponse(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int icqresponse(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_tlvlist_t *tl;
@@ -367,7 +377,8 @@ static int icqresponse(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, 
 	fu32_t ouruin;
 	fu16_t cmdlen, cmd, reqid;
 
-	if (!(tl = aim_readtlvchain(bs)) || !(datatlv = aim_gettlv(tl, 0x0001, 1))) {
+	if (!(tl = aim_readtlvchain(bs))
+		|| !(datatlv = aim_gettlv(tl, 0x0001, 1))) {
 		aim_freetlvchain(&tl);
 		faimdprintf(sess, 0, "corrupt ICQ response\n");
 		return 0;
@@ -380,9 +391,10 @@ static int icqresponse(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, 
 	cmd = aimbs_getle16(&qbs);
 	reqid = aimbs_getle16(&qbs);
 
-	faimdprintf(sess, 1, "icq response: %d bytes, %ld, 0x%04x, 0x%04x\n", cmdlen, ouruin, cmd, reqid);
+	faimdprintf(sess, 1, "icq response: %d bytes, %ld, 0x%04x, 0x%04x\n",
+		cmdlen, ouruin, cmd, reqid);
 
-	if (cmd == 0x0041) { /* offline message */
+	if (cmd == 0x0041) {	/* offline message */
 		struct aim_icq_offlinemsg msg;
 		aim_rxcallback_t userfunc;
 
@@ -399,7 +411,8 @@ static int icqresponse(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, 
 		msg.msglen = aimbs_getle16(&qbs);
 		msg.msg = aimbs_getstr(&qbs, msg.msglen);
 
-		if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_ICQ, AIM_CB_ICQ_OFFLINEMSG)))
+		if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_ICQ,
+					AIM_CB_ICQ_OFFLINEMSG)))
 			ret = userfunc(sess, rx, &msg);
 
 		free(msg.msg);
@@ -407,140 +420,196 @@ static int icqresponse(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, 
 	} else if (cmd == 0x0042) {
 		aim_rxcallback_t userfunc;
 
-		if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_ICQ, AIM_CB_ICQ_OFFLINEMSGCOMPLETE)))
+		if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_ICQ,
+					AIM_CB_ICQ_OFFLINEMSGCOMPLETE)))
 			ret = userfunc(sess, rx);
 
-	} else if (cmd == 0x07da) { /* information */
+	} else if (cmd == 0x07da) {	/* information */
 		fu16_t subtype;
 		struct aim_icq_info *info;
 		aim_rxcallback_t userfunc;
 
 		subtype = aimbs_getle16(&qbs);
-		aim_bstream_advance(&qbs, 1); /* 0x0a */
+		aim_bstream_advance(&qbs, 1);	/* 0x0a */
 
 		/* find other data from the same request */
-		for (info = sess->icq_info; info && (info->reqid != reqid); info = info->next);
+		for (info = sess->icq_info; info && (info->reqid != reqid);
+			info = info->next) ;
 		if (!info) {
-			info = (struct aim_icq_info *)calloc(1, sizeof(struct aim_icq_info));
+			info = (struct aim_icq_info *)calloc(1,
+				sizeof(struct aim_icq_info));
 			info->reqid = reqid;
 			info->next = sess->icq_info;
 			sess->icq_info = info;
 		}
 
 		switch (subtype) {
-		case 0x00a0: { /* hide ip status */
-			/* nothing */
-		} break;
-
-		case 0x00aa: { /* password change status */
-			/* nothing */
-		} break;
-
-		case 0x00c8: { /* general and "home" information */
-			info->nick = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->first = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->last = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->email = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->homecity = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->homestate = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->homephone = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->homefax = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->homeaddr = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->mobile = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->homezip = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->homecountry = aimbs_getle16(&qbs);
-			/* 0x0a 00 02 00 */
-			/* 1 byte timezone? */
-			/* 1 byte hide email flag? */
-		} break;
-
-		case 0x00dc: { /* personal information */
-			info->age = aimbs_getle8(&qbs);
-			info->unknown = aimbs_getle8(&qbs);
-			info->gender = aimbs_getle8(&qbs);
-			info->personalwebpage = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->birthyear = aimbs_getle16(&qbs);
-			info->birthmonth = aimbs_getle8(&qbs);
-			info->birthday = aimbs_getle8(&qbs);
-			info->language1 = aimbs_getle8(&qbs);
-			info->language2 = aimbs_getle8(&qbs);
-			info->language3 = aimbs_getle8(&qbs);
-			/* 0x00 00 01 00 00 01 00 00 00 00 00 */
-		} break;
-
-		case 0x00d2: { /* work information */
-			info->workcity = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workstate = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workphone = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workfax = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workaddr = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workzip = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workcountry = aimbs_getle16(&qbs);
-			info->workcompany = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workdivision = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->workposition = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			aim_bstream_advance(&qbs, 2); /* 0x01 00 */
-			info->workwebpage = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-		} break;
-
-		case 0x00e6: { /* additional personal information */
-			info->info = aimbs_getstr(&qbs, aimbs_getle16(&qbs)-1);
-		} break;
-
-		case 0x00eb: { /* email address(es) */
-			int i;
-			info->numaddresses = aimbs_getle16(&qbs);
-			info->email2 = (char **)calloc(info->numaddresses, sizeof(char *));
-			for (i = 0; i < info->numaddresses; i++) {
-				info->email2[i] = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-				if (i+1 != info->numaddresses)
-					aim_bstream_advance(&qbs, 1); /* 0x00 */
+		case 0x00a0:{	/* hide ip status */
+				/* nothing */
 			}
-		} break;
+			break;
 
-		case 0x00f0: { /* personal interests */
-		} break;
+		case 0x00aa:{	/* password change status */
+				/* nothing */
+			}
+			break;
 
-		case 0x00fa: { /* past background and current organizations */
-		} break;
+		case 0x00c8:{	/* general and "home" information */
+				info->nick =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->first =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->last =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->email =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->homecity =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->homestate =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->homephone =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->homefax =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->homeaddr =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->mobile =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->homezip =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->homecountry = aimbs_getle16(&qbs);
+				/* 0x0a 00 02 00 */
+				/* 1 byte timezone? */
+				/* 1 byte hide email flag? */
+			}
+			break;
 
-		case 0x0104: { /* alias info */
-			info->nick = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->first = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->last = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			aim_bstream_advance(&qbs, aimbs_getle16(&qbs)); /* email address? */
-			/* Then 0x00 02 00 */
-		} break;
+		case 0x00dc:{	/* personal information */
+				info->age = aimbs_getle8(&qbs);
+				info->unknown = aimbs_getle8(&qbs);
+				info->gender = aimbs_getle8(&qbs);
+				info->personalwebpage =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->birthyear = aimbs_getle16(&qbs);
+				info->birthmonth = aimbs_getle8(&qbs);
+				info->birthday = aimbs_getle8(&qbs);
+				info->language1 = aimbs_getle8(&qbs);
+				info->language2 = aimbs_getle8(&qbs);
+				info->language3 = aimbs_getle8(&qbs);
+				/* 0x00 00 01 00 00 01 00 00 00 00 00 */
+			}
+			break;
 
-		case 0x010e: { /* unknown */
-			/* 0x00 00 */
-		} break;
+		case 0x00d2:{	/* work information */
+				info->workcity =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workstate =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workphone =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workfax =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workaddr =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workzip =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workcountry = aimbs_getle16(&qbs);
+				info->workcompany =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workdivision =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->workposition =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				aim_bstream_advance(&qbs, 2);	/* 0x01 00 */
+				info->workwebpage =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+			}
+			break;
 
-		case 0x019a: { /* simple info */
-			aim_bstream_advance(&qbs, 2);
-			info->uin = aimbs_getle32(&qbs);
-			info->nick = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->first = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->last = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			info->email = aimbs_getstr(&qbs, aimbs_getle16(&qbs));
-			/* Then 0x00 02 00 00 00 00 00 */
-		} break;
-		} /* End switch statement */
+		case 0x00e6:{	/* additional personal information */
+				info->info =
+					aimbs_getstr(&qbs,
+					aimbs_getle16(&qbs) - 1);
+			}
+			break;
+
+		case 0x00eb:{	/* email address(es) */
+				int i;
+				info->numaddresses = aimbs_getle16(&qbs);
+				info->email2 =
+					(char **)calloc(info->numaddresses,
+					sizeof(char *));
+				for (i = 0; i < info->numaddresses; i++) {
+					info->email2[i] =
+						aimbs_getstr(&qbs,
+						aimbs_getle16(&qbs));
+					if (i + 1 != info->numaddresses)
+						aim_bstream_advance(&qbs, 1);	/* 0x00 */
+				}
+			}
+			break;
+
+		case 0x00f0:{	/* personal interests */
+			}
+			break;
+
+		case 0x00fa:{	/* past background and current organizations */
+			}
+			break;
+
+		case 0x0104:{	/* alias info */
+				info->nick =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->first =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->last =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				aim_bstream_advance(&qbs, aimbs_getle16(&qbs));	/* email address? */
+				/* Then 0x00 02 00 */
+			}
+			break;
+
+		case 0x010e:{	/* unknown */
+				/* 0x00 00 */
+			}
+			break;
+
+		case 0x019a:{	/* simple info */
+				aim_bstream_advance(&qbs, 2);
+				info->uin = aimbs_getle32(&qbs);
+				info->nick =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->first =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->last =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				info->email =
+					aimbs_getstr(&qbs, aimbs_getle16(&qbs));
+				/* Then 0x00 02 00 00 00 00 00 */
+			}
+			break;
+		}		/* End switch statement */
 
 		if (!(snac->flags & 0x0001)) {
 			if (subtype != 0x0104)
-				if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_ICQ, AIM_CB_ICQ_INFO)))
+				if ((userfunc = aim_callhandler(sess, rx->conn,
+							AIM_CB_FAM_ICQ,
+							AIM_CB_ICQ_INFO)))
 					ret = userfunc(sess, rx, info);
 
 			if (info->uin && info->nick)
-				if ((userfunc = aim_callhandler(sess, rx->conn, AIM_CB_FAM_ICQ, AIM_CB_ICQ_ALIAS)))
+				if ((userfunc = aim_callhandler(sess, rx->conn,
+							AIM_CB_FAM_ICQ,
+							AIM_CB_ICQ_ALIAS)))
 					ret = userfunc(sess, rx, info);
 
 			if (sess->icq_info == info) {
 				sess->icq_info = info->next;
 			} else {
 				struct aim_icq_info *cur;
-				for (cur=sess->icq_info; (cur->next && (cur->next!=info)); cur=cur->next);
+				for (cur = sess->icq_info;
+					(cur->next && (cur->next != info));
+					cur = cur->next) ;
 				if (cur->next)
 					cur->next = cur->next->next;
 			}
@@ -553,7 +622,8 @@ static int icqresponse(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, 
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0003)

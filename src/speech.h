@@ -22,7 +22,7 @@
 /*
  *  Message Speak
  *
- */ 
+ */
 
 #ifndef __SPEAK_MESSAGE__
 #define __SPEAK_MESSAGE__
@@ -33,13 +33,10 @@
 extern "C" {
 #endif
 
-void speak_message( eb_account * remote,
-		    gchar * voice,
-		    gchar * message );
+	void speak_message(eb_account *remote, gchar *voice, gchar *message);
 
-void say_strings(gchar *s1, gchar *s2, gchar *s3);
+	void say_strings(gchar *s1, gchar *s2, gchar *s3);
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif

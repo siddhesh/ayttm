@@ -14,14 +14,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 #ifndef __FILE_IO_H__
 #define __FILE_IO_H__
 
 int Get_Config_Info();
-int Read_ICQ_RC(char* filename);
-void Write_ICQ_RC(char* filename);
-int Read_Contacts_RC(char* filename);
-void Write_Contacts_RC(char* filename);
+int Read_ICQ_RC(char *filename);
+void Write_ICQ_RC(char *filename);
+int Read_Contacts_RC(char *filename);
+void Write_Contacts_RC(char *filename);
 
-#endif /* __FILE_IO_H__ */
+#endif				/* __FILE_IO_H__ */

@@ -24,21 +24,20 @@
 
 void jdebug(char *zone, const char *msgfmt, ...)
 {
-    va_list ap;
-    static char loghdr[LOGSIZE_HDR];
-    static char logmsg[LOGSIZE_TAIL];
-    static int size;
+	va_list ap;
+	static char loghdr[LOGSIZE_HDR];
+	static char logmsg[LOGSIZE_TAIL];
+	static int size;
 
-    /* XXX: We may want to check the sizes eventually */
-    size = snprintf(loghdr, LOGSIZE_HDR, "debug/%s %s\n", zone, msgfmt);
+	/* XXX: We may want to check the sizes eventually */
+	size = snprintf(loghdr, LOGSIZE_HDR, "debug/%s %s\n", zone, msgfmt);
 
-    va_start(ap, msgfmt);
-    size = vsnprintf(logmsg, LOGSIZE_TAIL, loghdr, ap);
+	va_start(ap, msgfmt);
+	size = vsnprintf(logmsg, LOGSIZE_TAIL, loghdr, ap);
 
-    fprintf(stderr,"%s",logmsg);
+	fprintf(stderr, "%s", logmsg);
 
-    return;
+	return;
 }
 
-
-#endif  /* DEBUG */
+#endif				/* DEBUG */

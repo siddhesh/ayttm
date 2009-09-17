@@ -23,7 +23,6 @@
  *
  */
 
-
 #ifndef __NET_CONSTANTS_H__
 #define __NET_CONSTANTS_H__
 
@@ -31,8 +30,7 @@
  * Various status codes returned by the connection routines to
  * indicate the reason for failure. AY_NONE is success.
  */
-typedef enum
-{
+typedef enum {
 	AY_NONE = 0,
 	AY_CONNECTION_REFUSED = -1,
 	AY_HOSTNAME_LOOKUP_FAIL = -2,
@@ -51,13 +49,10 @@ typedef enum
 	AY_NUM_ERRORS = -15
 } AyConnectionStatus;
 
-
-typedef enum
-{
+typedef enum {
 	AY_CONNECTION_TYPE_PLAIN = 1,
 	AY_CONNECTION_TYPE_SSL = 2,
 	AY_CONNECTION_TYPE_SERVER = 3
-} AyConnectionType ;
-
+} AyConnectionType;
 
 #endif

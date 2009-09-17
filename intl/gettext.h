@@ -64,39 +64,35 @@ typedef unsigned long nls_uint32;
 #  else
   /* The following line is intended to throw an error.  Using #error is
      not portable enough.  */
-  "Cannot determine unsigned 32-bit data type."
+"Cannot determine unsigned 32-bit data type."
 #  endif
 # endif
 #endif
-
-
 /* Header for binary .mo file format.  */
-struct mo_file_header
-{
-  /* The magic number.  */
-  nls_uint32 magic;
-  /* The revision number of the file format.  */
-  nls_uint32 revision;
-  /* The number of strings pairs.  */
-  nls_uint32 nstrings;
-  /* Offset of table with start offsets of original strings.  */
-  nls_uint32 orig_tab_offset;
-  /* Offset of table with start offsets of translation strings.  */
-  nls_uint32 trans_tab_offset;
-  /* Size of hashing table.  */
-  nls_uint32 hash_tab_size;
-  /* Offset of first hashing entry.  */
-  nls_uint32 hash_tab_offset;
+	struct mo_file_header {
+	/* The magic number.  */
+	nls_uint32 magic;
+	/* The revision number of the file format.  */
+	nls_uint32 revision;
+	/* The number of strings pairs.  */
+	nls_uint32 nstrings;
+	/* Offset of table with start offsets of original strings.  */
+	nls_uint32 orig_tab_offset;
+	/* Offset of table with start offsets of translation strings.  */
+	nls_uint32 trans_tab_offset;
+	/* Size of hashing table.  */
+	nls_uint32 hash_tab_size;
+	/* Offset of first hashing entry.  */
+	nls_uint32 hash_tab_offset;
 };
 
-struct string_desc
-{
-  /* Length of addressed string.  */
-  nls_uint32 length;
-  /* Offset of string in file.  */
-  nls_uint32 offset;
+struct string_desc {
+	/* Length of addressed string.  */
+	nls_uint32 length;
+	/* Offset of string in file.  */
+	nls_uint32 offset;
 };
 
 /* @@ begin of epilog @@ */
 
-#endif	/* gettext.h  */
+#endif				/* gettext.h  */

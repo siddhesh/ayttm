@@ -35,36 +35,40 @@
  ******************************************************************************/
 /*  Module defines */
 #ifndef USE_POSIX_DLOPEN
-	#define plugin_info video_capture_LTX_plugin_info
-	#define module_version video_capture_LTX_module_version
+#define plugin_info video_capture_LTX_plugin_info
+#define module_version video_capture_LTX_module_version
 #endif
-
 
 static int plugin_init();
 static int plugin_finish();
 
-static char frame_grabber[MAX_PREF_LEN]= AYTTM_BIN_DIR "/ayttm_streamer_wrapper.sh -d %d";
+static char frame_grabber[MAX_PREF_LEN] =
+	AYTTM_BIN_DIR "/ayttm_streamer_wrapper.sh -d %d";
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_UTILITY,
 	"Video Capture",
 	"Capture video images from some source",
-	"$Revision: 1.4 $",
-	"$Date: 2009/07/27 16:42:03 $",
+	"$Revision: 1.5 $",
+	"$Date: 2009/09/17 12:04:58 $",
 	0,
 	plugin_init,
 	plugin_finish,
 	0,
 	0
 };
+
 /* End Module Exports */
 
-unsigned int module_version() {return CORE_VERSION;}
+unsigned int module_version()
+{
+	return CORE_VERSION;
+}
 
 static long int grab_frame(unsigned char **image);
 
-static long int (*old_grab_frame)(unsigned char **);
+static long int (*old_grab_frame) (unsigned char **);
 
 static int plugin_init()
 {
@@ -73,7 +77,7 @@ static int plugin_init()
 	plugin_info.prefs = il;
 	il->widget.entry.value = frame_grabber;
 	il->name = "frame_grabber";
-	il->label= _("Frame grabber command:");
+	il->label = _("Frame grabber command:");
 	il->type = EB_INPUT_ENTRY;
 
 	old_grab_frame = video_grab_frame;
@@ -97,32 +101,32 @@ static long int grab_frame(unsigned char **image)
 {
 	FILE *grabber_fp;
 	unsigned char buff[1024];
-	unsigned char *outbuf=0;
-	long int nsize=0, n;
+	unsigned char *outbuf = 0;
+	long int nsize = 0, n;
 
 	char *cmd = strdup(frame_grabber);
-	while(strstr(cmd, "%d")) {
+	while (strstr(cmd, "%d")) {
 		char *tmp = strstr(cmd, "%d");
-		char *rest=0;
-		if(*(tmp+2))
-			rest = strdup(tmp+2);
+		char *rest = 0;
+		if (*(tmp + 2))
+			rest = strdup(tmp + 2);
 		*tmp = 0;
 		cmd = ay_string_append(cmd, eb_config_dir());
-		if(rest)
+		if (rest)
 			cmd = ay_string_append(cmd, rest);
 	}
 
 	grabber_fp = popen(cmd, "r");
 	ay_free(cmd);
 
-	if(!grabber_fp)
+	if (!grabber_fp)
 		return -1;
 
-	while(! (feof(grabber_fp) || ferror(grabber_fp)) ) {
+	while (!(feof(grabber_fp) || ferror(grabber_fp))) {
 		n = fread(buff, 1, sizeof(buff), grabber_fp);
-		outbuf = ay_renew(unsigned char, outbuf, n+nsize);
-		memcpy(outbuf+nsize, buff, n);
-		nsize+=n;
+		outbuf = ay_renew(unsigned char, outbuf, n + nsize);
+		memcpy(outbuf + nsize, buff, n);
+		nsize += n;
 	}
 
 	pclose(grabber_fp);
@@ -130,4 +134,3 @@ static long int grab_frame(unsigned char **image)
 	*image = outbuf;
 	return nsize;
 }
-

@@ -31,42 +31,46 @@
 #include "message_parse.h"
 #include "file_select.h"
 
-
-static void send_file_callback( const char *selected_filename, void *data )
+static void send_file_callback(const char *selected_filename, void *data)
 {
-	eb_account	*ea = (eb_account *)data;
-	eb_account	*x_fer_account = NULL;
-    
-	if ( (selected_filename == NULL) || (ea == NULL) )
-		return;
-	
-	x_fer_account = find_suitable_file_transfer_account(ea, ea->account_contact);
+	eb_account *ea = (eb_account *)data;
+	eb_account *x_fer_account = NULL;
 
-	if ( x_fer_account != NULL ) {
-		eb_local_account *ela = find_suitable_local_account_for_remote( x_fer_account, NULL );
-		
-		RUN_SERVICE(ela)->send_file( ela, x_fer_account, (char *)selected_filename );
+	if ((selected_filename == NULL) || (ea == NULL))
+		return;
+
+	x_fer_account =
+		find_suitable_file_transfer_account(ea, ea->account_contact);
+
+	if (x_fer_account != NULL) {
+		eb_local_account *ela =
+			find_suitable_local_account_for_remote(x_fer_account,
+			NULL);
+
+		RUN_SERVICE(ela)->send_file(ela, x_fer_account,
+			(char *)selected_filename);
 	} else {
-		eb_local_account *ela = find_suitable_local_account_for_remote( ea, NULL );
-		
-		strncpy( filename, selected_filename, sizeof(filename) );
-		RUN_SERVICE(ela)->send_im( ela, ea, "EB_COMMAND SEND_FILE" );
+		eb_local_account *ela =
+			find_suitable_local_account_for_remote(ea, NULL);
+
+		strncpy(filename, selected_filename, sizeof(filename));
+		RUN_SERVICE(ela)->send_im(ela, ea, "EB_COMMAND SEND_FILE");
 	}
 }
 
-void eb_do_send_file( eb_account *ea )
+void eb_do_send_file(eb_account *ea)
 {
-	ay_do_file_selection( NULL, _("Select file to send"), send_file_callback, ea );
+	ay_do_file_selection(NULL, _("Select file to send"), send_file_callback,
+		ea);
 }
 
-void eb_view_log( struct contact *contact )
+void eb_view_log(struct contact *contact)
 {
-	if ( !contact ) {
+	if (!contact) {
 		eb_debug(DBG_CORE, "Contact is null!\n");
 		return;
 	}
 
-	if ( contact->logwindow == NULL )
-		contact->logwindow = ay_log_window_contact_create( contact );
+	if (contact->logwindow == NULL)
+		contact->logwindow = ay_log_window_contact_create(contact);
 }
-

@@ -42,7 +42,6 @@
 /* #include "pixmaps/nomodule_online.xpm" */
 #include "pixmaps/nomodule_away.xpm"
 
-
 #define SERVICE_INFO nomodule_SERVICE_INFO
 /* This will end up being an array, one for each protocol we know about */
 struct service SERVICE_INFO = { NULL, -1, SERVICE_CAN_NOTHING, NULL };
@@ -60,65 +59,64 @@ struct eb_nomodule_local_account_data {
 	int status;
 };
 
-enum
-{
-	NOMODULE_OFFLINE=0
+enum {
+	NOMODULE_OFFLINE = 0
 };
-
-
 
 /*   callbacks used by Ayttm    */
 
-static int eb_nomodule_query_connected(eb_account * account)
-{		
+static int eb_nomodule_query_connected(eb_account *account)
+{
 	return FALSE;
 }
 
-static void eb_nomodule_login( eb_local_account * account )
-{
-	return;							  
-}
-
-static void eb_nomodule_logout( eb_local_account * account )
+static void eb_nomodule_login(eb_local_account *account)
 {
 	return;
 }
 
-static void eb_nomodule_send_im( eb_local_account * account_from,
-				  eb_account * account_to,
-				  char * message )
+static void eb_nomodule_logout(eb_local_account *account)
 {
 	return;
 }
 
-static eb_local_account * eb_nomodule_read_local_config(LList * pairs)
+static void eb_nomodule_send_im(eb_local_account *account_from,
+	eb_account *account_to, char *message)
 {
-	eb_local_account * ela = calloc( 1, sizeof( eb_local_account ) );
-	struct eb_nomodule_local_account_data * ala = calloc( 1, sizeof( struct eb_nomodule_local_account_data ) );
-	char *ptr=NULL;
-	
-	eb_debug(DBG_CORE, "eb_nomodule_read_local_config: entering\n");	
-	/*you know, eventually error handling should be put in here*/
+	return;
+}
+
+static eb_local_account *eb_nomodule_read_local_config(LList *pairs)
+{
+	eb_local_account *ela = calloc(1, sizeof(eb_local_account));
+	struct eb_nomodule_local_account_data *ala =
+		calloc(1, sizeof(struct eb_nomodule_local_account_data));
+	char *ptr = NULL;
+
+	eb_debug(DBG_CORE, "eb_nomodule_read_local_config: entering\n");
+	/*you know, eventually error handling should be put in here */
 	ptr = value_pair_get_value(pairs, "SCREEN_NAME");
 
-	if(ptr) {
+	if (ptr) {
 		strncpy(ela->handle, ptr, sizeof(ela->handle));
 		free(ptr);
 	}
 
-	if(!ela->handle[0]) {
-		fprintf(stderr, "Error!  Invalid account config no SCREEN_NAME defined!\n");
+	if (!ela->handle[0]) {
+		fprintf(stderr,
+			"Error!  Invalid account config no SCREEN_NAME defined!\n");
 		return 0;
 	}
 
 	strncpy(ela->alias, ela->handle, MAX_PREF_LEN);
 	ptr = value_pair_get_value(pairs, "PASSWORD");
-	if(!ptr) {
-		fprintf(stderr, "Warning!  No password specified for handle %s\n", ela->handle);
-	}
-	else {
+	if (!ptr) {
+		fprintf(stderr,
+			"Warning!  No password specified for handle %s\n",
+			ela->handle);
+	} else {
 		strncpy(ala->password, ptr, 255);
-		free( ptr );
+		free(ptr);
 	}
 	ela->service_id = SERVICE_INFO.protocol_id;
 	ela->protocol_local_account_data = ala;
@@ -128,29 +126,31 @@ static eb_local_account * eb_nomodule_read_local_config(LList * pairs)
 	return ela;
 }
 
-static LList * eb_nomodule_write_local_config( eb_local_account * account )
+static LList *eb_nomodule_write_local_config(eb_local_account *account)
 {
-	LList * list = NULL;
-	struct eb_nomodule_local_account_data * alad = account->protocol_local_account_data;
+	LList *list = NULL;
+	struct eb_nomodule_local_account_data *alad =
+		account->protocol_local_account_data;
 
-	list = value_pair_add( list, "SCREEN_NAME", account->handle );
-	list = value_pair_add( list, "PASSWORD", alad->password );
+	list = value_pair_add(list, "SCREEN_NAME", account->handle);
+	list = value_pair_add(list, "PASSWORD", alad->password);
 
 	return list;
 }
-			
-static eb_account * eb_nomodule_read_config( eb_account *ea, LList * config )
+
+static eb_account *eb_nomodule_read_config(eb_account *ea, LList *config)
 {
-	struct eb_nomodule_account_data * aad =  calloc( 1, sizeof( struct eb_nomodule_account_data ) );
-	
+	struct eb_nomodule_account_data *aad =
+		calloc(1, sizeof(struct eb_nomodule_account_data));
+
 	aad->status = 0;
 
 	ea->protocol_account_data = aad;
-	
+
 	return ea;
 }
 
-static LList * eb_nomodule_get_states()
+static LList *eb_nomodule_get_states()
 {
 	return NULL;
 }
@@ -158,98 +158,100 @@ static LList * eb_nomodule_get_states()
 /* return an error string in case this login is syntaxically 
  * bad, NULL if everything is OK.
  */
-static char * eb_nomodule_check_login(const char * login, const char * pass)
+static char *eb_nomodule_check_login(const char *login, const char *pass)
 {
 	return NULL;
 }
 
-static int eb_nomodule_get_current_state(eb_local_account * account )
+static int eb_nomodule_get_current_state(eb_local_account *account)
 {
 	return 0;
 }
 
-static void eb_nomodule_set_current_state( eb_local_account * account, int state )
+static void eb_nomodule_set_current_state(eb_local_account *account, int state)
 {
 	return;
 }
 
-static void eb_nomodule_add_user( eb_account * account )
+static void eb_nomodule_add_user(eb_account *account)
 {
 	return;
 }
 
-static void eb_nomodule_del_user( eb_account * account )
+static void eb_nomodule_del_user(eb_account *account)
 {
 	return;
 }
 
-static eb_account * eb_nomodule_new_account(eb_local_account *ela, const char * account )
+static eb_account *eb_nomodule_new_account(eb_local_account *ela,
+	const char *account)
 {
 	return NULL;
 }
 
-static const char * eb_nomodule_get_status_string( eb_account * account )
+static const char *eb_nomodule_get_status_string(eb_account *account)
 {
 	static char string[255];
 
-	snprintf(string, 255, _("Offline"));		
+	snprintf(string, 255, _("Offline"));
 
 	return string;
 }
 
 static GdkPixbuf *nomodule_icon_away = NULL;
-static void *eb_nomodule_get_status_pixbuf( eb_account * account)
+static void *eb_nomodule_get_status_pixbuf(eb_account *account)
 {
-	if(!nomodule_icon_away)
-		nomodule_icon_away = gdk_pixbuf_new_from_xpm_data(nomodule_away_xpm);
+	if (!nomodule_icon_away)
+		nomodule_icon_away =
+			gdk_pixbuf_new_from_xpm_data(nomodule_away_xpm);
 
 	return nomodule_icon_away;
 }
 
-static void eb_nomodule_set_idle( eb_local_account * ela, int idle )
+static void eb_nomodule_set_idle(eb_local_account *ela, int idle)
 {
 	return;
 }
 
-static void eb_nomodule_set_away(eb_local_account * account, char * message, int away)
+static void eb_nomodule_set_away(eb_local_account *account, char *message,
+	int away)
 {
 	return;
 }
 
-
-static void eb_nomodule_get_info( eb_local_account * from, eb_account * account_to )
+static void eb_nomodule_get_info(eb_local_account *from, eb_account *account_to)
 {
 	return;
 }
 
-static input_list * eb_nomodule_get_prefs()
+static input_list *eb_nomodule_get_prefs()
 {
 	return NULL;
 }
 
-static void eb_nomodule_read_prefs_config(LList * values)
+static void eb_nomodule_read_prefs_config(LList *values)
 {
 	return;
 }
 
-static LList * eb_nomodule_write_prefs_config()
+static LList *eb_nomodule_write_prefs_config()
 {
 	return NULL;
 }
 
-static void	eb_nomodule_free_account_data( eb_account *account )
+static void eb_nomodule_free_account_data(eb_account *account)
 {
-	if ( account == NULL )
+	if (account == NULL)
 		return;
-		
-	free( account->protocol_account_data );
+
+	free(account->protocol_account_data);
 }
 
-struct service_callbacks * eb_nomodule_query_callbacks()
+struct service_callbacks *eb_nomodule_query_callbacks()
 {
-	struct service_callbacks * sc;
-	
-	sc = calloc( 1, sizeof( struct service_callbacks ) );
+	struct service_callbacks *sc;
+
+	sc = calloc(1, sizeof(struct service_callbacks));
 	sc->query_connected = eb_nomodule_query_connected;
 	sc->login = eb_nomodule_login;
 	sc->logout = eb_nomodule_logout;
@@ -282,6 +284,6 @@ struct service_callbacks * eb_nomodule_query_callbacks()
 	sc->write_prefs_config = eb_nomodule_write_prefs_config;
 
 	sc->free_account_data = eb_nomodule_free_account_data;
-	
+
 	return sc;
 }

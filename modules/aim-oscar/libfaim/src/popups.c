@@ -14,7 +14,8 @@
  * The message is probably HTML.
  * 
  */
-static int parsepopup(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int parsepopup(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_rxcallback_t userfunc;
 	aim_tlvlist_t *tl;
@@ -30,7 +31,8 @@ static int parsepopup(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 	height = aim_gettlv16(tl, 0x0004, 1);
 	delay = aim_gettlv16(tl, 0x0005, 1);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, msg, url, width, height, delay);
 
 	aim_freetlvchain(&tl);
@@ -40,7 +42,8 @@ static int parsepopup(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0002)

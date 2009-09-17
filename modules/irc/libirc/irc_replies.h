@@ -34,7 +34,7 @@
 #define RPL_MYINFO		  4
 #define RPL_BOUNCE		  5
 
-#define RPL_NONE		300		/* Dummy Reply. Not used */
+#define RPL_NONE		300	/* Dummy Reply. Not used */
 #define RPL_AWAY		301
 #define RPL_USERHOST		302
 #define RPL_ISON		303
@@ -191,6 +191,5 @@
 #define IRC_CMD_KILL		1010
 #define IRC_CMD_PING		1011
 #define IRC_CMD_ERROR		1012
-
 
 #endif

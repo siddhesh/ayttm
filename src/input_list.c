@@ -30,140 +30,138 @@
 #include "input_list.h"
 #include "value_pair.h"
 
-
-static void	s_convert_space_to_underscore( char *inStr )
+static void s_convert_space_to_underscore(char *inStr)
 {
-	char	*ptr = inStr;
-	
-	if ( ptr == NULL )
+	char *ptr = inStr;
+
+	if (ptr == NULL)
 		return;
-		
-	for ( ptr = strchr( inStr, ' ' ); ptr && *ptr; ptr = strchr( ptr, ' ' ) )
+
+	for (ptr = strchr(inStr, ' '); ptr && *ptr; ptr = strchr(ptr, ' '))
 		*ptr = '_';
 }
 
-LList	*eb_input_to_value_pair( input_list *il )
+LList *eb_input_to_value_pair(input_list *il)
 {
-	LList	*vp = NULL;
-	char	key[MAX_PREF_NAME_LEN];
-	char	value[MAX_PREF_LEN];
+	LList *vp = NULL;
+	char key[MAX_PREF_NAME_LEN];
+	char value[MAX_PREF_LEN];
 
-	
-	while ( il != NULL )
-	{
-		switch ( il->type )
-		{
-			case EB_INPUT_CHECKBOX:
-				{
-					snprintf( key, sizeof(key), "%s", il->name );
-					s_convert_space_to_underscore( key );
-						
-					snprintf( value, sizeof(value), "%i", *il->widget.checkbox.value );
-					
-					vp = value_pair_add( vp, key, value );
-				}
-				break;
+	while (il != NULL) {
+		switch (il->type) {
+		case EB_INPUT_CHECKBOX:
+			{
+				snprintf(key, sizeof(key), "%s", il->name);
+				s_convert_space_to_underscore(key);
 
-			case EB_INPUT_PASSWORD:
-			case EB_INPUT_ENTRY:
-				{
-					snprintf( key, sizeof(key), "%s", il->name );
-					s_convert_space_to_underscore( key );
-						
-					vp = value_pair_add( vp, key, il->widget.entry.value );
-				}
-				break;
+				snprintf(value, sizeof(value), "%i",
+					*il->widget.checkbox.value);
 
-			case EB_INPUT_LIST:
-				{
-					snprintf( key, sizeof(key), "%s", il->name );
-					s_convert_space_to_underscore( key );
-						
-					snprintf( value, sizeof(value), "%i", *il->widget.listbox.value );
-					vp = value_pair_add( vp, key, value );
-				}
-				break;
+				vp = value_pair_add(vp, key, value);
+			}
+			break;
+
+		case EB_INPUT_PASSWORD:
+		case EB_INPUT_ENTRY:
+			{
+				snprintf(key, sizeof(key), "%s", il->name);
+				s_convert_space_to_underscore(key);
+
+				vp = value_pair_add(vp, key,
+					il->widget.entry.value);
+			}
+			break;
+
+		case EB_INPUT_LIST:
+			{
+				snprintf(key, sizeof(key), "%s", il->name);
+				s_convert_space_to_underscore(key);
+
+				snprintf(value, sizeof(value), "%i",
+					*il->widget.listbox.value);
+				vp = value_pair_add(vp, key, value);
+			}
+			break;
 		}
 
 		il = il->next;
 	}
-	
-	return( vp );
+
+	return (vp);
 }
 
-void	eb_update_from_value_pair( input_list *il, LList *vp )
+void eb_update_from_value_pair(input_list *il, LList *vp)
 {
-	char	key[MAX_PREF_NAME_LEN];
+	char key[MAX_PREF_NAME_LEN];
 
-	
-	if ( vp == NULL )
+	if (vp == NULL)
 		return;
-		
-	while ( il != NULL )
-	{
+
+	while (il != NULL) {
 		char *value = NULL;
-		switch ( il->type )
-		{
-			case EB_INPUT_CHECKBOX:
-				{
-					if ( il->widget.checkbox.value == NULL )
-					{
-						eb_debug(DBG_CORE, "checkbox.value is NULL\n");
-						break;
-					}
-					
-					snprintf( key, sizeof(key), "%s", il->name );
-					s_convert_space_to_underscore( key );
-						
-					value = value_pair_get_value( vp, key );
-
-					if ( value != NULL )
-						*il->widget.checkbox.value = atoi(value);
+		switch (il->type) {
+		case EB_INPUT_CHECKBOX:
+			{
+				if (il->widget.checkbox.value == NULL) {
+					eb_debug(DBG_CORE,
+						"checkbox.value is NULL\n");
+					break;
 				}
-				break;
-				
-			case EB_INPUT_PASSWORD:
-			case EB_INPUT_ENTRY:
-				{
-					char tmp[MAX_PREF_LEN]="";
-					if ( il->widget.entry.value == NULL )
-					{
-						eb_debug(DBG_CORE, "entry.value is NULL\n");
-						break;
-					}
-					
-					snprintf( key, sizeof(key), "%s", il->name );
-					s_convert_space_to_underscore( key );
-					
-					value = value_pair_get_value( vp, key );
 
-					if ( value != NULL )
-						strncpy( tmp, value, MAX_PREF_LEN);
-					strcpy( il->widget.entry.value, tmp );
+				snprintf(key, sizeof(key), "%s", il->name);
+				s_convert_space_to_underscore(key);
+
+				value = value_pair_get_value(vp, key);
+
+				if (value != NULL)
+					*il->widget.checkbox.value =
+						atoi(value);
+			}
+			break;
+
+		case EB_INPUT_PASSWORD:
+		case EB_INPUT_ENTRY:
+			{
+				char tmp[MAX_PREF_LEN] = "";
+				if (il->widget.entry.value == NULL) {
+					eb_debug(DBG_CORE,
+						"entry.value is NULL\n");
+					break;
 				}
-				break;
 
-			case EB_INPUT_LIST:
-				{
-					if ( il->widget.listbox.value == NULL )
-					{
-						eb_debug(DBG_CORE, "listbox.value is NULL\n");
-						break;
-					}
-					
-					snprintf( key, sizeof(key), "%s", il->name );
-					s_convert_space_to_underscore( key );
-					
-					value = value_pair_get_value( vp, key );
+				snprintf(key, sizeof(key), "%s", il->name);
+				s_convert_space_to_underscore(key);
 
-					if ( value != NULL )
-						*il->widget.checkbox.value = atoi(value);
+				value = value_pair_get_value(vp, key);
+
+				if (value != NULL)
+					strncpy(tmp, value, MAX_PREF_LEN);
+				strcpy(il->widget.entry.value, tmp);
+			}
+			break;
+
+		case EB_INPUT_LIST:
+			{
+				if (il->widget.listbox.value == NULL) {
+					eb_debug(DBG_CORE,
+						"listbox.value is NULL\n");
+					break;
 				}
-				break;
+
+				snprintf(key, sizeof(key), "%s", il->name);
+				s_convert_space_to_underscore(key);
+
+				value = value_pair_get_value(vp, key);
+
+				if (value != NULL)
+					*il->widget.checkbox.value =
+						atoi(value);
+			}
+			break;
 		}
-		
+
 		il = il->next;
-		if(value)
+		if (value)
 			free(value);
 	}
 }

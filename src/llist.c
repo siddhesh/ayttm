@@ -26,7 +26,7 @@
 
 #include "llist.h"
 
-LList *l_list_append(LList * list, void *data)
+LList *l_list_append(LList *list, void *data)
 {
 	LList *n;
 	LList *new_list = malloc(sizeof(LList));
@@ -49,7 +49,7 @@ LList *l_list_append(LList * list, void *data)
 	}
 }
 
-LList *l_list_prepend(LList * list, void *data)
+LList *l_list_prepend(LList *list, void *data)
 {
 	LList *n = malloc(sizeof(LList));
 
@@ -62,18 +62,17 @@ LList *l_list_prepend(LList * list, void *data)
 	return n;
 }
 
-LList *l_list_concat(LList * list, LList * add)
+LList *l_list_concat(LList *list, LList *add)
 {
 	LList *l;
 
-	if(!list)
+	if (!list)
 		return add;
 
-	if(!add)
+	if (!add)
 		return list;
 
-	for (l = list; l->next; l = l->next)
-		;
+	for (l = list; l->next; l = l->next) ;
 
 	l->next = add;
 	add->prev = l;
@@ -81,13 +80,13 @@ LList *l_list_concat(LList * list, LList * add)
 	return list;
 }
 
-LList *l_list_remove(LList * list, void *data)
+LList *l_list_remove(LList *list, void *data)
 {
 	LList *n;
 
 	for (n = list; n != NULL; n = n->next) {
 		if (n->data == data) {
-			LList *new=l_list_remove_link(list, n);
+			LList *new = l_list_remove_link(list, n);
 			free(n);
 			return new;
 		}
@@ -98,7 +97,7 @@ LList *l_list_remove(LList * list, void *data)
 
 /* Warning */
 /* link MUST be part of list */
-LList *l_list_remove_link(LList * list, const LList * link)
+LList *l_list_remove_link(LList *list, const LList *link)
 {
 	if (!link)
 		return list;
@@ -110,11 +109,11 @@ LList *l_list_remove_link(LList * list, const LList * link)
 
 	if (link == list)
 		list = link->next;
-	
+
 	return list;
 }
 
-int l_list_length(const LList * list)
+int l_list_length(const LList *list)
 {
 	int retval = 0;
 	const LList *n = list;
@@ -129,22 +128,22 @@ int l_list_length(const LList * list)
 /* well, you could just check for list == NULL, but that would be
  * implementation dependent
  */
-int l_list_empty(const LList * list)
+int l_list_empty(const LList *list)
 {
-	if(!list)
+	if (!list)
 		return 1;
 	else
 		return 0;
 }
 
-int l_list_singleton(const LList * list)
+int l_list_singleton(const LList *list)
 {
-	if(!list || list->next)
+	if (!list || list->next)
 		return 0;
 	return 1;
 }
 
-LList *l_list_copy(LList * list)
+LList *l_list_copy(LList *list)
 {
 	LList *n;
 	LList *copy = NULL;
@@ -156,12 +155,12 @@ LList *l_list_copy(LList * list)
 	return copy;
 }
 
-void l_list_free_1(LList * list)
+void l_list_free_1(LList *list)
 {
 	free(list);
 }
 
-void l_list_free(LList * list)
+void l_list_free(LList *list)
 {
 	LList *n = list;
 
@@ -172,22 +171,21 @@ void l_list_free(LList * list)
 	}
 }
 
-LList *l_list_find(LList * list, const void *data)
+LList *l_list_find(LList *list, const void *data)
 {
 	LList *l;
-	for (l = list; l && l->data != data; l = l->next)
-		;
+	for (l = list; l && l->data != data; l = l->next) ;
 
 	return l;
 }
 
-void l_list_foreach(LList * list, LListFunc fn, void * user_data)
+void l_list_foreach(LList *list, LListFunc fn, void *user_data)
 {
 	for (; list; list = list->next)
 		fn(list->data, user_data);
 }
 
-LList *l_list_find_custom(LList * list, const void *data, LListCompFunc comp)
+LList *l_list_find_custom(LList *list, const void *data, LListCompFunc comp)
 {
 	LList *l;
 	for (l = list; l; l = l->next)
@@ -197,22 +195,21 @@ LList *l_list_find_custom(LList * list, const void *data, LListCompFunc comp)
 	return NULL;
 }
 
-LList *l_list_nth(LList * list, int n)
+LList *l_list_nth(LList *list, int n)
 {
-	int i=n;
-	for ( ; list && i; list = list->next, i--)
-		;
+	int i = n;
+	for (; list && i; list = list->next, i--) ;
 
 	return list;
 }
 
-LList *l_list_insert_sorted(LList * list, void *data, LListCompFunc comp)
+LList *l_list_insert_sorted(LList *list, void *data, LListCompFunc comp)
 {
 	LList *l, *n, *prev = NULL;
 	if (!list)
 		return l_list_append(list, data);
 
-       	n = malloc(sizeof(LList));
+	n = malloc(sizeof(LList));
 	n->data = data;
 	for (l = list; l && comp(l->data, n->data) <= 0; l = l->next)
 		prev = l;
@@ -225,11 +222,11 @@ LList *l_list_insert_sorted(LList * list, void *data, LListCompFunc comp)
 
 	n->next = l;
 
-	if(n->prev) {
+	if (n->prev) {
 		n->prev->next = n;
 		return list;
 	} else {
 		return n;
 	}
-		
+
 }

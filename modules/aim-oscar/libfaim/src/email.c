@@ -26,7 +26,8 @@ faim_export int aim_email_sendcookies(aim_session_t *sess, aim_conn_t *conn)
 	if (!sess || !conn)
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+2+16+16)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 2 + 16 + 16)))
 		return -ENOMEM;
 	snacid = aim_cachesnac(sess, 0x0018, 0x0006, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0018, 0x0006, 0x0000, snacid);
@@ -59,7 +60,6 @@ faim_export int aim_email_sendcookies(aim_session_t *sess, aim_conn_t *conn)
 	return 0;
 }
 
-
 /**
  * Subtype 0x0007 - Receive information about your email account
  *
@@ -72,20 +72,23 @@ faim_export int aim_email_sendcookies(aim_session_t *sess, aim_conn_t *conn)
  * this is just a periodic status update, this will also contain 
  * the number of unread emails that you have.
  */
-static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
 	struct aim_emailinfo *new;
 	aim_tlvlist_t *tlvlist;
 	fu8_t *cookie8, *cookie16;
-	int tmp, havenewmail = 0; /* Used to tell the client we have _new_ mail */
+	int tmp, havenewmail = 0;	/* Used to tell the client we have _new_ mail */
 
-	cookie8 = aimbs_getraw(bs, 8); /* Possibly the code used to log you in to mail? */
-	cookie16 = aimbs_getraw(bs, 16); /* Mail cookie sent above */
+	cookie8 = aimbs_getraw(bs, 8);	/* Possibly the code used to log you in to mail? */
+	cookie16 = aimbs_getraw(bs, 16);	/* Mail cookie sent above */
 
 	/* See if we already have some info associated with this cookie */
-	for (new=sess->emailinfo; (new && strncmp(cookie16, new->cookie16, 16)); new=new->next);
+	for (new = sess->emailinfo;
+		(new && strncmp(cookie16, new->cookie16, 16));
+		new = new->next) ;
 	if (new) {
 		/* Free some of the old info, if existant */
 		free(new->cookie8);
@@ -115,7 +118,7 @@ static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, ai
 		/* If they don't send a 0x0080 TLV, it means we definately have new mail */
 		/* (ie. this is not just another status update) */
 		havenewmail = 1;
-		new->nummsgs++; /* We know we have at least 1 new email */
+		new->nummsgs++;	/* We know we have at least 1 new email */
 	}
 	new->url = aim_gettlv_str(tlvlist, 0x0007, 1);
 	if (!(new->unread = aim_gettlv8(tlvlist, 0x0081, 1))) {
@@ -125,7 +128,8 @@ static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, ai
 	new->domain = aim_gettlv_str(tlvlist, 0x0082, 1);
 	new->flag = aim_gettlv16(tlvlist, 0x0084, 1);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, new, havenewmail);
 
 	aim_freetlvchain(&tlvlist);
@@ -148,7 +152,8 @@ faim_export int aim_email_activate(aim_session_t *sess, aim_conn_t *conn)
 	if (!sess || !conn)
 		return -EINVAL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+1+16)))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 1 + 16)))
 		return -ENOMEM;
 	snacid = aim_cachesnac(sess, 0x0018, 0x0016, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0018, 0x0016, 0x0000, snacid);
@@ -166,7 +171,8 @@ faim_export int aim_email_activate(aim_session_t *sess, aim_conn_t *conn)
 	return 0;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0007)

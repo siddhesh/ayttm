@@ -13,12 +13,12 @@
 extern "C" {
 #endif
 
-void html_text_buffer_append ( GtkTextView *text_view, char *text, int ignore );
+	void html_text_buffer_append(GtkTextView *text_view, char *text,
+		int ignore);
 
-void html_text_view_init ( GtkTextView *text_view, int ignore_font );
+	void html_text_view_init(GtkTextView *text_view, int ignore_font);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

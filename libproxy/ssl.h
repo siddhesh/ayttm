@@ -39,22 +39,20 @@
 #include "networking.h"
 
 #ifdef __cplusplus
-extern "C" 
-{
+extern "C" {
 #endif
 
+	typedef enum {
+		SSL_METHOD_SSLv23,
+		SSL_METHOD_TLSv1
+	} SSLMethod;
 
-typedef enum {
-        SSL_METHOD_SSLv23,
-        SSL_METHOD_TLSv1
-} SSLMethod;
-
-
-int ssl_read(SSL *ssl, char *buf, int len);
-int ssl_write(SSL *ssl, const char *buf, int len);
-SSL *ssl_get_socket(int sock, const char *host, int port, void *data);
-SSL *ssl_init_socket_with_method( int sock, const char *host, int port, SSL_CTX *ctx, SSLMethod method, void *data );
-void ssl_done_socket(SSL *ssl);
+	int ssl_read(SSL *ssl, char *buf, int len);
+	int ssl_write(SSL *ssl, const char *buf, int len);
+	SSL *ssl_get_socket(int sock, const char *host, int port, void *data);
+	SSL *ssl_init_socket_with_method(int sock, const char *host, int port,
+		SSL_CTX *ctx, SSLMethod method, void *data);
+	void ssl_done_socket(SSL *ssl);
 
 #ifdef __cplusplus
 }

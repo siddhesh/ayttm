@@ -41,179 +41,173 @@
 
 #include "lib.h"
 
-void expat_startElement(void* userdata, const char* name, const char** atts)
+void expat_startElement(void *userdata, const char *name, const char **atts)
 {
-    /* get the xmlnode pointed to by the userdata */
-    xmlnode *x = userdata;
-    xmlnode current = *x;
+	/* get the xmlnode pointed to by the userdata */
+	xmlnode *x = userdata;
+	xmlnode current = *x;
 
-    if (current == NULL)
-    {
-        /* allocate a base node */
-        current = xmlnode_new_tag(name);
-        xmlnode_put_expat_attribs(current, atts);
-        *x = current;
-    }
-    else
-    {
-        *x = xmlnode_insert_tag(current, name);
-        xmlnode_put_expat_attribs(*x, atts);
-    }
+	if (current == NULL) {
+		/* allocate a base node */
+		current = xmlnode_new_tag(name);
+		xmlnode_put_expat_attribs(current, atts);
+		*x = current;
+	} else {
+		*x = xmlnode_insert_tag(current, name);
+		xmlnode_put_expat_attribs(*x, atts);
+	}
 }
 
-void expat_endElement(void* userdata, const char* name)
+void expat_endElement(void *userdata, const char *name)
 {
-    xmlnode *x = userdata;
-    xmlnode current = *x;
+	xmlnode *x = userdata;
+	xmlnode current = *x;
 
-    current->complete = 1;
-    current = xmlnode_get_parent(current);
+	current->complete = 1;
+	current = xmlnode_get_parent(current);
 
-    /* if it's NULL we've hit the top folks, otherwise back up a level */
-    if(current != NULL)
-        *x = current;
+	/* if it's NULL we've hit the top folks, otherwise back up a level */
+	if (current != NULL)
+		*x = current;
 }
 
-void expat_charData(void* userdata, const char* s, int len)
+void expat_charData(void *userdata, const char *s, int len)
 {
-    xmlnode *x = userdata;
-    xmlnode current = *x;
+	xmlnode *x = userdata;
+	xmlnode current = *x;
 
-    xmlnode_insert_cdata(current, s, len);
+	xmlnode_insert_cdata(current, s, len);
 }
-
 
 xmlnode xmlnode_str(char *str, int len)
 {
-    XML_Parser p;
-    xmlnode *x, node; /* pointer to an xmlnode */
+	XML_Parser p;
+	xmlnode *x, node;	/* pointer to an xmlnode */
 
-    if(NULL == str)
-        return NULL;
+	if (NULL == str)
+		return NULL;
 
-    x = malloc(sizeof(void *));
+	x = malloc(sizeof(void *));
 
-    *x = NULL; /* pointer to NULL */
-    p = XML_ParserCreate(NULL);
-    XML_SetUserData(p, x);
-    XML_SetElementHandler(p, expat_startElement, expat_endElement);
-    XML_SetCharacterDataHandler(p, expat_charData);
-    if(!XML_Parse(p, str, len, 1))
-    {
-        /*        jdebug(ZONE,"xmlnode_str_error: %s",(char *)XML_ErrorString(XML_GetErrorCode(p)));*/
-        xmlnode_free(*x);
-        *x = NULL;
-    }
-    node = *x;
-    free(x);
-    XML_ParserFree(p);
-    return node; /* return the xmlnode x points to */
+	*x = NULL;		/* pointer to NULL */
+	p = XML_ParserCreate(NULL);
+	XML_SetUserData(p, x);
+	XML_SetElementHandler(p, expat_startElement, expat_endElement);
+	XML_SetCharacterDataHandler(p, expat_charData);
+	if (!XML_Parse(p, str, len, 1)) {
+		/*        jdebug(ZONE,"xmlnode_str_error: %s",(char *)XML_ErrorString(XML_GetErrorCode(p))); */
+		xmlnode_free(*x);
+		*x = NULL;
+	}
+	node = *x;
+	free(x);
+	XML_ParserFree(p);
+	return node;		/* return the xmlnode x points to */
 }
 
 xmlnode xmlnode_file(char *file)
 {
-    XML_Parser p;
-    xmlnode *x, node; /* pointer to an xmlnode */
-    char buf[BUFSIZ];
-    int done, fd, len;
+	XML_Parser p;
+	xmlnode *x, node;	/* pointer to an xmlnode */
+	char buf[BUFSIZ];
+	int done, fd, len;
 
-    if(NULL == file)
-        return NULL;
+	if (NULL == file)
+		return NULL;
 
-    fd = open(file,O_RDONLY);
-    if(fd < 0)
-        return NULL;
+	fd = open(file, O_RDONLY);
+	if (fd < 0)
+		return NULL;
 
-    x = malloc(sizeof(void *));
+	x = malloc(sizeof(void *));
 
-    *x = NULL; /* pointer to NULL */
-    p = XML_ParserCreate(NULL);
-    XML_SetUserData(p, x);
-    XML_SetElementHandler(p, expat_startElement, expat_endElement);
-    XML_SetCharacterDataHandler(p, expat_charData);
-    do{
-        len = read(fd, buf, BUFSIZ);
-        done = len < BUFSIZ;
-        if(!XML_Parse(p, buf, len, done))
-        {
-            /*            jdebug(ZONE,"xmlnode_file_parseerror: %s",(char *)XML_ErrorString(XML_GetErrorCode(p)));*/
-            xmlnode_free(*x);
-            *x = NULL;
-            done = 1;
-        }
-    }while(!done);
+	*x = NULL;		/* pointer to NULL */
+	p = XML_ParserCreate(NULL);
+	XML_SetUserData(p, x);
+	XML_SetElementHandler(p, expat_startElement, expat_endElement);
+	XML_SetCharacterDataHandler(p, expat_charData);
+	do {
+		len = read(fd, buf, BUFSIZ);
+		done = len < BUFSIZ;
+		if (!XML_Parse(p, buf, len, done)) {
+			/*            jdebug(ZONE,"xmlnode_file_parseerror: %s",(char *)XML_ErrorString(XML_GetErrorCode(p))); */
+			xmlnode_free(*x);
+			*x = NULL;
+			done = 1;
+		}
+	} while (!done);
 
-    node = *x;
-    XML_ParserFree(p);
-    free(x);
-    close(fd);
-    return node; /* return the xmlnode x points to */
+	node = *x;
+	XML_ParserFree(p);
+	free(x);
+	close(fd);
+	return node;		/* return the xmlnode x points to */
 }
 
-char* xmlnode_file_borked(char *file)
+char *xmlnode_file_borked(char *file)
 {
-    XML_Parser p;
-    char buf[BUFSIZ];
-    static char err[1024];
-    int fd, len, done;
+	XML_Parser p;
+	char buf[BUFSIZ];
+	static char err[1024];
+	int fd, len, done;
 
-    if(NULL == file)
-        return "no file specified";
+	if (NULL == file)
+		return "no file specified";
 
-    fd = open(file,O_RDONLY);
-    if(fd < 0)
-        return "unable to open file";
+	fd = open(file, O_RDONLY);
+	if (fd < 0)
+		return "unable to open file";
 
-    p = XML_ParserCreate(NULL);
-    while(1)
-    {
-        len = read(fd, buf, BUFSIZ);
-        done = len < BUFSIZ;
-        if(!XML_Parse(p, buf, len, done))
-        {
-            snprintf(err,1023,"%s at line %d and column %d",XML_ErrorString(XML_GetErrorCode(p)),XML_GetErrorLineNumber(p),XML_GetErrorColumnNumber(p));
-            XML_ParserFree(p);
-            close(fd);
-            return err;
-        }
-    }
+	p = XML_ParserCreate(NULL);
+	while (1) {
+		len = read(fd, buf, BUFSIZ);
+		done = len < BUFSIZ;
+		if (!XML_Parse(p, buf, len, done)) {
+			snprintf(err, 1023, "%s at line %d and column %d",
+				XML_ErrorString(XML_GetErrorCode(p)),
+				XML_GetErrorLineNumber(p),
+				XML_GetErrorColumnNumber(p));
+			XML_ParserFree(p);
+			close(fd);
+			return err;
+		}
+	}
 }
 
 int xmlnode2file(char *file, xmlnode node)
 {
-    char *doc, *ftmp;
-    int fd, i;
+	char *doc, *ftmp;
+	int fd, i;
 
-    if(file == NULL || node == NULL)
-        return -1;
+	if (file == NULL || node == NULL)
+		return -1;
 
-    ftmp = spools(xmlnode_pool(node),file,".t.m.p",xmlnode_pool(node));
-    fd = open(ftmp, O_CREAT | O_WRONLY | O_TRUNC, 0600);
-    if(fd < 0)
-        return -1;
+	ftmp = spools(xmlnode_pool(node), file, ".t.m.p", xmlnode_pool(node));
+	fd = open(ftmp, O_CREAT | O_WRONLY | O_TRUNC, 0600);
+	if (fd < 0)
+		return -1;
 
-    doc = xmlnode2str(node);
-    i = write(fd,doc,strlen(doc));
-    if(i < 0)
-        return -1;
+	doc = xmlnode2str(node);
+	i = write(fd, doc, strlen(doc));
+	if (i < 0)
+		return -1;
 
-    close(fd);
+	close(fd);
 
-    if(rename(ftmp,file) < 0)
-    {
-        unlink(ftmp);
-        return -1;
-    }
-    return 1;
+	if (rename(ftmp, file) < 0) {
+		unlink(ftmp);
+		return -1;
+	}
+	return 1;
 }
 
-void xmlnode_put_expat_attribs(xmlnode owner, const char** atts)
+void xmlnode_put_expat_attribs(xmlnode owner, const char **atts)
 {
-    int i = 0;
-    if (atts == NULL) return;
-    while (atts[i] != '\0')
-    {
-        xmlnode_put_attrib(owner, atts[i], atts[i+1]);
-        i += 2;
-    }
+	int i = 0;
+	if (atts == NULL)
+		return;
+	while (atts[i] != '\0') {
+		xmlnode_put_attrib(owner, atts[i], atts[i + 1]);
+		i += 2;
+	}
 }

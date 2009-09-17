@@ -5,10 +5,9 @@
 extern "C" {
 #endif
 
-extern long int (*video_grab_frame)(unsigned char **);
+	extern long int (*video_grab_frame) (unsigned char **);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

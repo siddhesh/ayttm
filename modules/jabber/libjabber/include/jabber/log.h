@@ -23,14 +23,10 @@
 #define LOGSIZE_HDR 1024
 #define LOGSIZE_TAIL 2048
 
-
 #ifdef DEBUG
-	void jdebug(char *zone, const char *msgfmt, ...);
+void jdebug(char *zone, const char *msgfmt, ...);
 #else
-	#define jdebug if(0) warn
+#define jdebug if(0) warn
 #endif
 
-
-
-#endif	/* INCL_LOG_H */
-
+#endif				/* INCL_LOG_H */

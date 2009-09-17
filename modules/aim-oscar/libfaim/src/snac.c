@@ -28,7 +28,9 @@ faim_internal void aim_initsnachash(aim_session_t *sess)
 	return;
 }
 
-faim_internal aim_snacid_t aim_cachesnac(aim_session_t *sess, const fu16_t family, const fu16_t type, const fu16_t flags, const void *data, const int datalen)
+faim_internal aim_snacid_t aim_cachesnac(aim_session_t *sess,
+	const fu16_t family, const fu16_t type, const fu16_t flags,
+	const void *data, const int datalen)
 {
 	aim_snac_t snac;
 
@@ -39,7 +41,7 @@ faim_internal aim_snacid_t aim_cachesnac(aim_session_t *sess, const fu16_t famil
 
 	if (datalen) {
 		if (!(snac.data = malloc(datalen)))
-			return 0; /* er... */
+			return 0;	/* er... */
 		memcpy(snac.data, data, datalen);
 	} else
 		snac.data = NULL;
@@ -79,14 +81,14 @@ faim_internal aim_snacid_t aim_newsnac(aim_session_t *sess, aim_snac_t *newsnac)
  * The returned structure must be freed by the caller.
  *
  */
-faim_internal aim_snac_t *aim_remsnac(aim_session_t *sess, aim_snacid_t id) 
+faim_internal aim_snac_t *aim_remsnac(aim_session_t *sess, aim_snacid_t id)
 {
 	aim_snac_t *cur, **prev;
 	int index;
 
 	index = id % FAIM_SNAC_HASH_SIZE;
 
-	for (prev = (aim_snac_t **)&sess->snac_hash[index]; (cur = *prev); ) {
+	for (prev = (aim_snac_t **)&sess->snac_hash[index]; (cur = *prev);) {
 		if (cur->id == id) {
 			*prev = cur->next;
 			if (cur->flags & AIM_SNACFLAGS_DESTRUCTOR) {
@@ -119,9 +121,9 @@ faim_export void aim_cleansnacs(aim_session_t *sess, int maxage)
 		if (!sess->snac_hash[i])
 			continue;
 
-		curtime = time(NULL); /* done here in case we waited for the lock */
+		curtime = time(NULL);	/* done here in case we waited for the lock */
 
-		for (prev = (aim_snac_t **)&sess->snac_hash[i]; (cur = *prev); ) {
+		for (prev = (aim_snac_t **)&sess->snac_hash[i]; (cur = *prev);) {
 			if ((curtime - cur->issuetime) > maxage) {
 
 				*prev = cur->next;
@@ -136,7 +138,8 @@ faim_export void aim_cleansnacs(aim_session_t *sess, int maxage)
 	return;
 }
 
-faim_internal int aim_putsnac(aim_bstream_t *bs, fu16_t family, fu16_t subtype, fu16_t flags, aim_snacid_t snacid)
+faim_internal int aim_putsnac(aim_bstream_t *bs, fu16_t family, fu16_t subtype,
+	fu16_t flags, aim_snacid_t snacid)
 {
 
 	aimbs_put16(bs, family);

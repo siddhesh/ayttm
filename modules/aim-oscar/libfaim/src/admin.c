@@ -17,8 +17,9 @@
  * 0x0011 - Email address
  * 0x0013 - Unknown
  *
- */ 
-faim_export int aim_admin_getinfo(aim_session_t *sess, aim_conn_t *conn, fu16_t info)
+ */
+faim_export int aim_admin_getinfo(aim_session_t *sess, aim_conn_t *conn,
+	fu16_t info)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
@@ -44,11 +45,12 @@ faim_export int aim_admin_getinfo(aim_session_t *sess, aim_conn_t *conn, fu16_t 
  * an information change (subtype 0x0004).
  *
  */
-static int infochange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int infochange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_rxcallback_t userfunc;
-	char *url=NULL, *sn=NULL, *email=NULL;
-	fu16_t perms, tlvcount, err=0;
+	char *url = NULL, *sn = NULL, *email = NULL;
+	fu16_t perms, tlvcount, err = 0;
 
 	perms = aimbs_get16(bs);
 	tlvcount = aimbs_get16(bs);
@@ -60,36 +62,46 @@ static int infochange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
 		length = aimbs_get16(bs);
 
 		switch (type) {
-			case 0x0001: {
+		case 0x0001:{
 				sn = aimbs_getstr(bs, length);
-			} break;
+			}
+			break;
 
-			case 0x0004: {
+		case 0x0004:{
 				url = aimbs_getstr(bs, length);
-			} break;
+			}
+			break;
 
-			case 0x0008: {
+		case 0x0008:{
 				err = aimbs_get16(bs);
-			} break;
+			}
+			break;
 
-			case 0x0011: {
+		case 0x0011:{
 				if (length == 0) {
-					email = (char*)malloc(13*sizeof(char));
+					email = (char *)malloc(13 *
+						sizeof(char));
 					strcpy(email, "*suppressed*");
 				} else
 					email = aimbs_getstr(bs, length);
-			} break;
+			}
+			break;
 		}
 
 		tlvcount--;
 	}
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
-		userfunc(sess, rx, (snac->subtype == 0x0005) ? 1 : 0, perms, err, url, sn, email);
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
+		userfunc(sess, rx, (snac->subtype == 0x0005) ? 1 : 0, perms,
+			err, url, sn, email);
 
-	if (sn) free(sn);
-	if (url) free(url);
-	if (email) free(email);
+	if (sn)
+		free(sn);
+	if (url)
+		free(url);
+	if (email)
+		free(email);
 
 	return 1;
 }
@@ -98,25 +110,27 @@ static int infochange(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, a
  * Subtype 0x0004 - Set screenname formatting.
  *
  */
-faim_export int aim_admin_setnick(aim_session_t *sess, aim_conn_t *conn, const char *newnick)
+faim_export int aim_admin_setnick(aim_session_t *sess, aim_conn_t *conn,
+	const char *newnick)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 	aim_tlvlist_t *tl = NULL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+2+2+strlen(newnick))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 2 + 2 + strlen(newnick))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0007, 0x0004, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0007, 0x0004, 0x0000, snacid);
 
-	aim_addtlvtochain_raw(&tl, 0x0001, strlen(newnick), (unsigned char *)newnick);
-	
+	aim_addtlvtochain_raw(&tl, 0x0001, strlen(newnick),
+		(unsigned char *)newnick);
+
 	aim_writetlvchain(&fr->data, &tl);
 	aim_freetlvchain(&tl);
-	
-	aim_tx_enqueue(sess, fr);
 
+	aim_tx_enqueue(sess, fr);
 
 	return 0;
 }
@@ -125,23 +139,27 @@ faim_export int aim_admin_setnick(aim_session_t *sess, aim_conn_t *conn, const c
  * Subtype 0x0004 - Change password.
  *
  */
-faim_export int aim_admin_changepasswd(aim_session_t *sess, aim_conn_t *conn, const char *newpw, const char *curpw)
+faim_export int aim_admin_changepasswd(aim_session_t *sess, aim_conn_t *conn,
+	const char *newpw, const char *curpw)
 {
 	aim_frame_t *fr;
 	aim_tlvlist_t *tl = NULL;
 	aim_snacid_t snacid;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+4+strlen(curpw)+4+strlen(newpw))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 4 + strlen(curpw) + 4 + strlen(newpw))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0007, 0x0004, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0007, 0x0004, 0x0000, snacid);
 
 	/* new password TLV t(0002) */
-	aim_addtlvtochain_raw(&tl, 0x0002, strlen(newpw), (unsigned char *)newpw);
+	aim_addtlvtochain_raw(&tl, 0x0002, strlen(newpw),
+		(unsigned char *)newpw);
 
 	/* current password TLV t(0012) */
-	aim_addtlvtochain_raw(&tl, 0x0012, strlen(curpw), (unsigned char *)curpw);
+	aim_addtlvtochain_raw(&tl, 0x0012, strlen(curpw),
+		(unsigned char *)curpw);
 
 	aim_writetlvchain(&fr->data, &tl);
 	aim_freetlvchain(&tl);
@@ -155,23 +173,26 @@ faim_export int aim_admin_changepasswd(aim_session_t *sess, aim_conn_t *conn, co
  * Subtype 0x0004 - Change email address.
  *
  */
-faim_export int aim_admin_setemail(aim_session_t *sess, aim_conn_t *conn, const char *newemail)
+faim_export int aim_admin_setemail(aim_session_t *sess, aim_conn_t *conn,
+	const char *newemail)
 {
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 	aim_tlvlist_t *tl = NULL;
 
-	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02, 10+2+2+strlen(newemail))))
+	if (!(fr = aim_tx_new(sess, conn, AIM_FRAMETYPE_FLAP, 0x02,
+				10 + 2 + 2 + strlen(newemail))))
 		return -ENOMEM;
 
 	snacid = aim_cachesnac(sess, 0x0007, 0x0004, 0x0000, NULL, 0);
 	aim_putsnac(&fr->data, 0x0007, 0x0004, 0x0000, snacid);
 
-	aim_addtlvtochain_raw(&tl, 0x0011, strlen(newemail), (unsigned char *)newemail);
-	
+	aim_addtlvtochain_raw(&tl, 0x0011, strlen(newemail),
+		(unsigned char *)newemail);
+
 	aim_writetlvchain(&fr->data, &tl);
 	aim_freetlvchain(&tl);
-	
+
 	aim_tx_enqueue(sess, fr);
 
 	return 0;
@@ -194,7 +215,8 @@ faim_export int aim_admin_reqconfirm(aim_session_t *sess, aim_conn_t *conn)
  * Subtype 0x0007 - Account confirmation request acknowledgement.
  *
  */
-static int accountconfirm(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int accountconfirm(aim_session_t *sess, aim_module_t *mod,
+	aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	int ret = 0;
 	aim_rxcallback_t userfunc;
@@ -206,13 +228,15 @@ static int accountconfirm(aim_session_t *sess, aim_module_t *mod, aim_frame_t *r
 
 	tl = aim_readtlvchain(bs);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
 		ret = userfunc(sess, rx, status);
 
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if ((snac->subtype == 0x0003) || (snac->subtype == 0x0005))

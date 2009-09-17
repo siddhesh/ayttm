@@ -5,11 +5,11 @@
  */
 
 #define FAIM_INTERNAL
-#include <aim.h> 
+#include <aim.h>
 
 faim_internal int aim_bstream_init(aim_bstream_t *bs, fu8_t *data, int len)
 {
-	
+
 	if (!bs)
 		return -1;
 
@@ -53,7 +53,7 @@ faim_internal int aim_bstream_advance(aim_bstream_t *bs, int n)
 {
 
 	if (aim_bstream_empty(bs) < n)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	bs->offset += n;
 
@@ -62,67 +62,67 @@ faim_internal int aim_bstream_advance(aim_bstream_t *bs, int n)
 
 faim_internal fu8_t aimbs_get8(aim_bstream_t *bs)
 {
-	
+
 	if (aim_bstream_empty(bs) < 1)
-		return 0; /* XXX throw an exception */
-	
+		return 0;	/* XXX throw an exception */
+
 	bs->offset++;
-	
+
 	return aimutil_get8(bs->data + bs->offset - 1);
 }
 
 faim_internal fu16_t aimbs_get16(aim_bstream_t *bs)
 {
-	
+
 	if (aim_bstream_empty(bs) < 2)
-		return 0; /* XXX throw an exception */
-	
+		return 0;	/* XXX throw an exception */
+
 	bs->offset += 2;
-	
+
 	return aimutil_get16(bs->data + bs->offset - 2);
 }
 
 faim_internal fu32_t aimbs_get32(aim_bstream_t *bs)
 {
-	
+
 	if (aim_bstream_empty(bs) < 4)
-		return 0; /* XXX throw an exception */
-	
+		return 0;	/* XXX throw an exception */
+
 	bs->offset += 4;
-	
+
 	return aimutil_get32(bs->data + bs->offset - 4);
 }
 
 faim_internal fu8_t aimbs_getle8(aim_bstream_t *bs)
 {
-	
+
 	if (aim_bstream_empty(bs) < 1)
-		return 0; /* XXX throw an exception */
-	
+		return 0;	/* XXX throw an exception */
+
 	bs->offset++;
-	
+
 	return aimutil_getle8(bs->data + bs->offset - 1);
 }
 
 faim_internal fu16_t aimbs_getle16(aim_bstream_t *bs)
 {
-	
+
 	if (aim_bstream_empty(bs) < 2)
-		return 0; /* XXX throw an exception */
-	
+		return 0;	/* XXX throw an exception */
+
 	bs->offset += 2;
-	
+
 	return aimutil_getle16(bs->data + bs->offset - 2);
 }
 
 faim_internal fu32_t aimbs_getle32(aim_bstream_t *bs)
 {
-	
+
 	if (aim_bstream_empty(bs) < 4)
-		return 0; /* XXX throw an exception */
-	
+		return 0;	/* XXX throw an exception */
+
 	bs->offset += 4;
-	
+
 	return aimutil_getle32(bs->data + bs->offset - 4);
 }
 
@@ -130,7 +130,7 @@ faim_internal int aimbs_put8(aim_bstream_t *bs, fu8_t v)
 {
 
 	if (aim_bstream_empty(bs) < 1)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	bs->offset += aimutil_put8(bs->data + bs->offset, v);
 
@@ -141,7 +141,7 @@ faim_internal int aimbs_put16(aim_bstream_t *bs, fu16_t v)
 {
 
 	if (aim_bstream_empty(bs) < 2)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	bs->offset += aimutil_put16(bs->data + bs->offset, v);
 
@@ -152,7 +152,7 @@ faim_internal int aimbs_put32(aim_bstream_t *bs, fu32_t v)
 {
 
 	if (aim_bstream_empty(bs) < 4)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	bs->offset += aimutil_put32(bs->data + bs->offset, v);
 
@@ -163,7 +163,7 @@ faim_internal int aimbs_putle8(aim_bstream_t *bs, fu8_t v)
 {
 
 	if (aim_bstream_empty(bs) < 1)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	bs->offset += aimutil_putle8(bs->data + bs->offset, v);
 
@@ -174,7 +174,7 @@ faim_internal int aimbs_putle16(aim_bstream_t *bs, fu16_t v)
 {
 
 	if (aim_bstream_empty(bs) < 2)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	bs->offset += aimutil_putle16(bs->data + bs->offset, v);
 
@@ -185,7 +185,7 @@ faim_internal int aimbs_putle32(aim_bstream_t *bs, fu32_t v)
 {
 
 	if (aim_bstream_empty(bs) < 4)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	bs->offset += aimutil_putle32(bs->data + bs->offset, v);
 
@@ -223,7 +223,7 @@ faim_internal char *aimbs_getstr(aim_bstream_t *bs, int len)
 {
 	unsigned char *ob;
 
-	if (!(ob = malloc(len+1)))
+	if (!(ob = malloc(len + 1)))
 		return NULL;
 
 	if (aimbs_getrawbuf(bs, ob, len) < len) {
@@ -240,7 +240,7 @@ faim_internal int aimbs_putraw(aim_bstream_t *bs, const fu8_t *v, int len)
 {
 
 	if (aim_bstream_empty(bs) < len)
-		return 0; /* XXX throw an exception */
+		return 0;	/* XXX throw an exception */
 
 	memcpy(bs->data + bs->offset, v, len);
 	bs->offset += len;
@@ -252,10 +252,10 @@ faim_internal int aimbs_putbs(aim_bstream_t *bs, aim_bstream_t *srcbs, int len)
 {
 
 	if (aim_bstream_empty(srcbs) < len)
-		return 0; /* XXX throw exception (underrun) */
+		return 0;	/* XXX throw exception (underrun) */
 
 	if (aim_bstream_empty(bs) < len)
-		return 0; /* XXX throw exception (overflow) */
+		return 0;	/* XXX throw exception (overflow) */
 
 	memcpy(bs->data + bs->offset, srcbs->data + srcbs->offset, len);
 	bs->offset += len;

@@ -36,10 +36,11 @@ void msn_sb_got_join(MsnConnection *mc)
 
 	payload->num_members++;
 
-	if(payload->callback)
+	if (payload->callback)
 		payload->callback(mc, 0, payload->data);
 
-	ext_buddy_joined_chat(mc, mc->current_message->argv[1], msn_urldecode(mc->current_message->argv[2]));
+	ext_buddy_joined_chat(mc, mc->current_message->argv[1],
+		msn_urldecode(mc->current_message->argv[2]));
 }
 
 static void msn_sb_got_usr_response(MsnConnection *mc, void *data)
@@ -48,16 +49,18 @@ static void msn_sb_got_usr_response(MsnConnection *mc, void *data)
 	MsnAccount *ma = mc->account;
 	int error = 0;
 
-	if(!strcmp(mc->current_message->argv[2], "OK"))
+	if (!strcmp(mc->current_message->argv[2], "OK"))
 		error = 0;
 	else {
 		LList *l;
 
 		error = 1;
 
-		for(l = mc->account->connections; l; l = l_list_next(l)) {
-			if(mc == l->data) {
-				mc->account->connections = l_list_remove(mc->account->connections, l);
+		for (l = mc->account->connections; l; l = l_list_next(l)) {
+			if (mc == l->data) {
+				mc->account->connections =
+					l_list_remove(mc->account->connections,
+					l);
 				break;
 			}
 		}
@@ -66,57 +69,55 @@ static void msn_sb_got_usr_response(MsnConnection *mc, void *data)
 		mc->account = NULL;
 	}
 
-	if(error)
+	if (error)
 		payload->callback(ma->ns_connection, error, payload->data);
 	else
 		msn_message_send(mc, NULL, MSN_COMMAND_CAL, payload->room);
 }
 
-
 static void msn_sb_got_ans_response(MsnConnection *mc, void *data)
 {
 	SBPayload *payload = mc->sbpayload;
 
-	if(mc->current_message->command == MSN_COMMAND_IRO) {
+	if (mc->current_message->command == MSN_COMMAND_IRO) {
 		payload->num_members = atoi(mc->current_message->argv[3]);
 
-		ext_buddy_joined_chat(mc, mc->current_message->argv[4], msn_urldecode(mc->current_message->argv[5]));
+		ext_buddy_joined_chat(mc, mc->current_message->argv[4],
+			msn_urldecode(mc->current_message->argv[5]));
 
 		msn_connection_push_callback(mc, msn_sb_got_ans_response, NULL);
-	}
-	else if (mc->current_message->command == MSN_COMMAND_ANS) {
+	} else if (mc->current_message->command == MSN_COMMAND_ANS) {
 		ext_got_ans(mc);
-	}
-	else {
+	} else {
 		printf("failure in response\n");
 	}
 }
-
 
 static void msn_sb_connected(MsnConnection *mc)
 {
 	SBPayload *payload = mc->sbpayload;
 
-	if(payload->incoming) {
-		msn_message_send(mc, NULL, MSN_COMMAND_ANS, mc->account->passport, payload->challenge, payload->session_id);
+	if (payload->incoming) {
+		msn_message_send(mc, NULL, MSN_COMMAND_ANS,
+			mc->account->passport, payload->challenge,
+			payload->session_id);
 		msn_connection_push_callback(mc, msn_sb_got_ans_response, NULL);
 		ext_new_sb(mc);
-	}
-	else {
-		msn_message_send(mc, NULL, MSN_COMMAND_USR, 2, mc->account->passport, payload->challenge);
+	} else {
+		msn_message_send(mc, NULL, MSN_COMMAND_USR, 2,
+			mc->account->passport, payload->challenge);
 		msn_connection_push_callback(mc, msn_sb_got_usr_response, NULL);
 	}
 
 	free(payload->challenge);
 }
 
-
 void msn_connect_sb(MsnAccount *ma, const char *host, int port)
 {
 	MsnConnection *sbmc = msn_connection_new();
 
 	sbmc->host = strdup(host);
-	
+
 	sbmc->port = port;
 	sbmc->type = MSN_CONNECTION_SB;
 	sbmc->account = ma;
@@ -128,7 +129,6 @@ void msn_connect_sb(MsnAccount *ma, const char *host, int port)
 
 	msn_connection_connect(sbmc, msn_sb_connected);
 }
-
 
 void msn_connect_sb_with_info(MsnConnection *mc, char *room_name, void *data)
 {
@@ -145,7 +145,7 @@ void msn_connect_sb_with_info(MsnConnection *mc, char *room_name, void *data)
 	int port = 0;
 
 	char *host = mc->current_message->argv[2];
-	
+
 	offset = strchr(host, ':');
 	*offset = '\0';
 	port = atoi(++offset);
@@ -156,7 +156,6 @@ void msn_connect_sb_with_info(MsnConnection *mc, char *room_name, void *data)
 	msn_connect_sb(mc->account, host, port);
 }
 
-
 static void msn_got_sb_info(MsnConnection *mc, void *data)
 {
 	char *offset = NULL;
@@ -164,7 +163,7 @@ static void msn_got_sb_info(MsnConnection *mc, void *data)
 	int port = 0;
 
 	char *host = mc->current_message->argv[3];
-	
+
 	offset = strchr(host, ':');
 	*offset = '\0';
 	port = atoi(++offset);
@@ -174,8 +173,8 @@ static void msn_got_sb_info(MsnConnection *mc, void *data)
 	msn_connect_sb(mc->account, host, port);
 }
 
-
-void msn_get_sb(MsnAccount *ma, char *room_name, void *data, SBCallback callback)
+void msn_get_sb(MsnAccount *ma, char *room_name, void *data,
+	SBCallback callback)
 {
 	SBPayload *payload = m_new0(SBPayload, 1);
 
@@ -188,15 +187,14 @@ void msn_get_sb(MsnAccount *ma, char *room_name, void *data, SBCallback callback
 	msn_connection_push_callback(ma->ns_connection, msn_got_sb_info, NULL);
 }
 
-
 void msn_sb_disconnected(MsnConnection *sb)
 {
 	LList *buddies = sb->account->buddies;
 
-	while(buddies) {
+	while (buddies) {
 		MsnBuddy *bud = buddies->data;
 
-		if(bud->sb == sb) {
+		if (bud->sb == sb) {
 			bud->sb = NULL;
 			break;
 		}
@@ -209,12 +207,9 @@ void msn_sb_disconnected(MsnConnection *sb)
 	msn_connection_free(sb);
 }
 
-
 void msn_sb_disconnect(MsnConnection *sb)
 {
 	msn_message_send(sb, NULL, MSN_COMMAND_OUT);
 
 	msn_sb_disconnected(sb);
 }
-
-

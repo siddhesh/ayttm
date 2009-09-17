@@ -22,7 +22,6 @@
 #ifndef __PLATFORM_DEFS_H__
 #define __PLATFORM_DEFS_H__
 
-
 #ifdef __MINGW32__
 #define snprintf		_snprintf
 #define vsnprintf		_vsnprintf
@@ -41,7 +40,6 @@
 #define ECONNREFUSED	WSAECONNREFUSED
 #define EINPROGRESS		WSAEINPROGRESS
 #endif
-
 
 #ifdef _WIN32
 #define mkdir( x, y )	_mkdir( x )

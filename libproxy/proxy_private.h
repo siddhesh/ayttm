@@ -36,12 +36,14 @@ AyProxyData *default_proxy;
 extern "C" {
 #endif
 
-int socks4_connect	( int sock, const char *host, int port, AyProxyData *proxy );
-int socks5_connect	( int sock, const char *host, int port, AyProxyData *proxy );
-int http_connect	( int sock, const char *host, int port, AyProxyData *proxy );
+	int socks4_connect(int sock, const char *host, int port,
+		AyProxyData *proxy);
+	int socks5_connect(int sock, const char *host, int port,
+		AyProxyData *proxy);
+	int http_connect(int sock, const char *host, int port,
+		AyProxyData *proxy);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

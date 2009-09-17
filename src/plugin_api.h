@@ -36,30 +36,29 @@ extern "C" {
 
 /* Plugin */
 
-typedef enum {
-	PLUGIN_SERVICE = 1,
-	PLUGIN_FILTER,
-	PLUGIN_IMPORTER,
-	PLUGIN_SMILEY,
-	PLUGIN_UTILITY,
-	PLUGIN_UNKNOWN
-} PLUGIN_TYPE;
+	typedef enum {
+		PLUGIN_SERVICE = 1,
+		PLUGIN_FILTER,
+		PLUGIN_IMPORTER,
+		PLUGIN_SMILEY,
+		PLUGIN_UTILITY,
+		PLUGIN_UNKNOWN
+	} PLUGIN_TYPE;
 
-typedef int (*eb_plugin_func)();
+	typedef int (*eb_plugin_func) ();
 
-typedef struct {
-	PLUGIN_TYPE type;
-	char *module_name;
-	char *description;
-	char *version;
-	char *date;
-	int *ref_count;
-	eb_plugin_func init;
-	eb_plugin_func finish;
-	eb_plugin_func reload_prefs;
-	input_list *prefs;
-} PLUGIN_INFO;
-
+	typedef struct {
+		PLUGIN_TYPE type;
+		char *module_name;
+		char *description;
+		char *version;
+		char *date;
+		int *ref_count;
+		eb_plugin_func init;
+		eb_plugin_func finish;
+		eb_plugin_func reload_prefs;
+		input_list *prefs;
+	} PLUGIN_INFO;
 
 #define IS_ebmCallbackData(x) (x->CDType>=ebmCALLBACKDATA)
 /* Names of menus and the data structure passed to callbacks for them */
@@ -73,50 +72,49 @@ typedef struct {
 #define EB_CONTACT_MENU "CONTACT MENU"
 #define IS_ebmContactData(x) (x->CDType==ebmCONTACTDATA)
 
-typedef enum {
-	ebmCALLBACKDATA=10,
-	ebmIMPORTDATA,
-	ebmCONTACTDATA,
-	ebmPROFILEDATA,
-	ebmSMILEYDATA
-} ebmType;
+	typedef enum {
+		ebmCALLBACKDATA = 10,
+		ebmIMPORTDATA,
+		ebmCONTACTDATA,
+		ebmPROFILEDATA,
+		ebmSMILEYDATA
+	} ebmType;
 
-typedef struct {
-	ebmType CDType;
-	void *user_data;
-} ebmCallbackData;
+	typedef struct {
+		ebmType CDType;
+		void *user_data;
+	} ebmCallbackData;
 
+	typedef void ebmSmileyData;
 
-typedef void ebmSmileyData;
+	typedef struct {
+		ebmCallbackData cd;
+		char *MenuName;
+	} ebmImportData;
 
-typedef struct {
-	ebmCallbackData cd;
-	char *MenuName;
-} ebmImportData;
+	typedef struct {
+		ebmCallbackData cd;
+		char *group;	/* Can have two contacts with same name in diff groups */
+		char *contact;	/* Name of the contact we're chatting with */
+		char *remote_account;	/* The actual account name the contact is using */
+		char *local_account;	/* The actual account we're using */
+	} ebmContactData;
 
-typedef struct {
-	ebmCallbackData cd;
-	char *group;		/* Can have two contacts with same name in diff groups */
-	char *contact;		/* Name of the contact we're chatting with */
-	char *remote_account;	/* The actual account name the contact is using */
-	char *local_account;    /* The actual account we're using */
-} ebmContactData;
-
-typedef void (*eb_menu_callback) (ebmCallbackData *data);
+	typedef void (*eb_menu_callback) (ebmCallbackData *data);
 
 /* File */
-typedef enum {
-	EB_INPUT_READ = G_IO_IN | G_IO_HUP | G_IO_PRI | G_IO_ERR | G_IO_NVAL,
-	EB_INPUT_WRITE =  G_IO_OUT | G_IO_ERR | G_IO_NVAL,
-	EB_INPUT_EXCEPTION = G_IO_ERR | G_IO_NVAL
-} eb_input_condition;
+	typedef enum {
+		EB_INPUT_READ =
+			G_IO_IN | G_IO_HUP | G_IO_PRI | G_IO_ERR | G_IO_NVAL,
+		EB_INPUT_WRITE = G_IO_OUT | G_IO_ERR | G_IO_NVAL,
+		EB_INPUT_EXCEPTION = G_IO_ERR | G_IO_NVAL
+	} eb_input_condition;
 
-
-ebmCallbackData *ebmProfileData_new(eb_local_account * ela);
-ebmImportData *ebmImportData_new();
-ebmSmileyData *ebmSmileyData_new();
-ebmContactData *ebmContactData_new();
-void eb_set_active_menu_status(LList *status_menu, int status);
+	ebmCallbackData *ebmProfileData_new(eb_local_account *ela);
+	ebmImportData *ebmImportData_new();
+	ebmSmileyData *ebmSmileyData_new();
+	ebmContactData *ebmContactData_new();
+	void eb_set_active_menu_status(LList *status_menu, int status);
 
 /* eb_add_menu_item returns a tag, which can be used by eb_remove_menu_item 
  * label:	The name of the menu item to add to the menu
@@ -125,36 +123,38 @@ void eb_set_active_menu_status(LList *status_menu, int status);
  * type:	The expected type of data passed to the callback for this menu
  * data:	Any user data to be passed along with the menu data
  */
-void *eb_add_menu_item(char *label, char *menu_name, eb_menu_callback callback, ebmType type, void *data);
+	void *eb_add_menu_item(char *label, char *menu_name,
+		eb_menu_callback callback, ebmType type, void *data);
 /* FIXME: Want an eb_add_menu_item_condition function */
 /* tag comes from a call to eb_add_menu_item, returns 0 on success */
-int eb_activate_menu_item(char *menu_name, void *tag);
-int eb_remove_menu_item(char *menu_name, void *tag);
-void eb_menu_item_set_protocol(void *item, char * protocol);
+	int eb_activate_menu_item(char *menu_name, void *tag);
+	int eb_remove_menu_item(char *menu_name, void *tag);
+	void eb_menu_item_set_protocol(void *item, char *protocol);
 
-typedef void (*eb_input_function) (void *data, int source, eb_input_condition condition);
-typedef int (*eb_timeout_function) (void *data);
+	typedef void (*eb_input_function) (void *data, int source,
+		eb_input_condition condition);
+	typedef int (*eb_timeout_function) (void *data);
 
 /* Returns a tag to be used by eb_input_remove */
-int eb_input_add(int fd, eb_input_condition condition, eb_input_function function,
-		 void *callback_data);
-void eb_input_remove(int tag);
+	int eb_input_add(int fd, eb_input_condition condition,
+		eb_input_function function, void *callback_data);
+	void eb_input_remove(int tag);
 
 /* Returns a tag to be used by eb_timeout_remove */
-int eb_timeout_add(int ms, eb_timeout_function function, void *callback_data);
-void eb_timeout_remove(int tag);
+	int eb_timeout_add(int ms, eb_timeout_function function,
+		void *callback_data);
+	void eb_timeout_remove(int tag);
 
-const char *eb_config_dir();
+	const char *eb_config_dir();
 
-extern void ay_set_submenus(void);
-extern void set_menu_sensitivity(void);
+	extern void ay_set_submenus(void);
+	extern void set_menu_sensitivity(void);
 
-typedef struct {
-	eb_input_function function;
-	GIOCondition condition;
-	gpointer data;
-} AyIOClosure;
-
+	typedef struct {
+		eb_input_function function;
+		GIOCondition condition;
+		gpointer data;
+	} AyIOClosure;
 
 /* Service */
 
@@ -162,14 +162,13 @@ typedef struct {
 #include "debug.h"
 
 #if defined(__MINGW32__) && defined(__IN_PLUGIN__)
-__declspec(dllimport) int do_plugin_debug;
+	 __declspec(dllimport) int do_plugin_debug;
 #else
-extern int do_plugin_debug;
+	extern int do_plugin_debug;
 #endif
 #define DBG_MOD iGetLocalPref( "do_plugin_debug" )
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
-#endif /* _PLUGIN_API_H */
+#endif				/* _PLUGIN_API_H */

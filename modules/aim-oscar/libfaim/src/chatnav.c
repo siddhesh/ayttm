@@ -24,11 +24,12 @@ faim_export int aim_chatnav_reqrights(aim_session_t *sess, aim_conn_t *conn)
 /*
  * Subtype 0x0008
  */
-faim_export int aim_chatnav_createroom(aim_session_t *sess, aim_conn_t *conn, const char *name, fu16_t exchange)
+faim_export int aim_chatnav_createroom(aim_session_t *sess, aim_conn_t *conn,
+	const char *name, fu16_t exchange)
 {
-	static const char ck[] = {"create"};
-	static const char lang[] = {"en"};
-	static const char charset[] = {"us-ascii"};
+	static const char ck[] = { "create" };
+	static const char lang[] = { "en" };
+	static const char charset[] = { "us-ascii" };
 	aim_frame_t *fr;
 	aim_snacid_t snacid;
 	aim_tlvlist_t *tl = NULL;
@@ -82,7 +83,9 @@ faim_export int aim_chatnav_createroom(aim_session_t *sess, aim_conn_t *conn, co
 	return 0;
 }
 
-static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs, aim_snac_t *snac2)
+static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod,
+	aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs,
+	aim_snac_t *snac2)
 {
 	aim_rxcallback_t userfunc;
 	int ret = 0;
@@ -96,7 +99,7 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 
 	/* 
 	 * Type 0x0002: Maximum concurrent rooms.
-	 */ 
+	 */
 	if (aim_gettlv(tlvlist, 0x0002, 1))
 		maxrooms = aim_gettlv8(tlvlist, 0x0002, 1);
 
@@ -107,17 +110,21 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 	 * representing another exchange.  
 	 * 
 	 */
-	for (curexchange = 0; ((exchangetlv = aim_gettlv(tlvlist, 0x0003, curexchange+1))); ) {
+	for (curexchange = 0;
+		((exchangetlv = aim_gettlv(tlvlist, 0x0003,
+					curexchange + 1)));) {
 		aim_bstream_t tbs;
 
 		aim_bstream_init(&tbs, exchangetlv->value, exchangetlv->length);
 
 		curexchange++;
 
-		exchanges = realloc(exchanges, curexchange * sizeof(struct aim_chat_exchangeinfo));
+		exchanges =
+			realloc(exchanges,
+			curexchange * sizeof(struct aim_chat_exchangeinfo));
 
 		/* exchange number */
-		exchanges[curexchange-1].number = aimbs_get16(&tbs);
+		exchanges[curexchange - 1].number = aimbs_get16(&tbs);
 		innerlist = aim_readtlvchain(&tbs);
 
 		/* 
@@ -126,20 +133,17 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 		 * Usually three bytes: 0x0114 (exchange 1) or 0x010f (others).
 		 *
 		 */
-		if (aim_gettlv(innerlist, 0x000a, 1))
-			;
+		if (aim_gettlv(innerlist, 0x000a, 1)) ;
 
 		/* 
 		 * Type 0x000d: Unknown.
 		 */
-		if (aim_gettlv(innerlist, 0x000d, 1))
-			;
+		if (aim_gettlv(innerlist, 0x000d, 1)) ;
 
 		/* 
 		 * Type 0x0004: Unknown
 		 */
-		if (aim_gettlv(innerlist, 0x0004, 1))
-			;
+		if (aim_gettlv(innerlist, 0x0004, 1)) ;
 
 		/* 
 		 * Type 0x0002: Unknown
@@ -148,8 +152,9 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 			fu16_t classperms;
 
 			classperms = aim_gettlv16(innerlist, 0x0002, 1);
-			
-			faimdprintf(sess, 1, "faim: class permissions %x\n", classperms);
+
+			faimdprintf(sess, 1, "faim: class permissions %x\n",
+				classperms);
 		}
 
 		/*
@@ -160,47 +165,44 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 		 * 4 Instancing Allowed
 		 * 8 Occupant Peek Allowed
 		 *
-		 */ 
+		 */
 		if (aim_gettlv(innerlist, 0x00c9, 1))
-			exchanges[curexchange-1].flags = aim_gettlv16(innerlist, 0x00c9, 1);
-		      
+			exchanges[curexchange - 1].flags =
+				aim_gettlv16(innerlist, 0x00c9, 1);
+
 		/*
 		 * Type 0x00ca: Creation Date 
 		 */
-		if (aim_gettlv(innerlist, 0x00ca, 1))
-			;
-		      
+		if (aim_gettlv(innerlist, 0x00ca, 1)) ;
+
 		/*
 		 * Type 0x00d0: Mandatory Channels?
 		 */
-		if (aim_gettlv(innerlist, 0x00d0, 1))
-			;
+		if (aim_gettlv(innerlist, 0x00d0, 1)) ;
 
 		/*
 		 * Type 0x00d1: Maximum Message length
 		 */
-		if (aim_gettlv(innerlist, 0x00d1, 1))
-			;
+		if (aim_gettlv(innerlist, 0x00d1, 1)) ;
 
 		/*
 		 * Type 0x00d2: Maximum Occupancy?
 		 */
-		if (aim_gettlv(innerlist, 0x00d2, 1))	
-			;
+		if (aim_gettlv(innerlist, 0x00d2, 1)) ;
 
 		/*
 		 * Type 0x00d3: Exchange Description
 		 */
-		if (aim_gettlv(innerlist, 0x00d3, 1))	
-			exchanges[curexchange-1].name = aim_gettlv_str(innerlist, 0x00d3, 1);
+		if (aim_gettlv(innerlist, 0x00d3, 1))
+			exchanges[curexchange - 1].name =
+				aim_gettlv_str(innerlist, 0x00d3, 1);
 		else
-			exchanges[curexchange-1].name = NULL;
+			exchanges[curexchange - 1].name = NULL;
 
 		/*
 		 * Type 0x00d4: Exchange Description URL
 		 */
-		if (aim_gettlv(innerlist, 0x00d4, 1))	
-			;
+		if (aim_gettlv(innerlist, 0x00d4, 1)) ;
 
 		/*
 		 * Type 0x00d5: Creation Permissions
@@ -218,41 +220,44 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 
 		/*
 		 * Type 0x00d6: Character Set (First Time)
-		 */	      
-		if (aim_gettlv(innerlist, 0x00d6, 1))	
-			exchanges[curexchange-1].charset1 = aim_gettlv_str(innerlist, 0x00d6, 1);
+		 */
+		if (aim_gettlv(innerlist, 0x00d6, 1))
+			exchanges[curexchange - 1].charset1 =
+				aim_gettlv_str(innerlist, 0x00d6, 1);
 		else
-			exchanges[curexchange-1].charset1 = NULL;
-		      
+			exchanges[curexchange - 1].charset1 = NULL;
+
 		/*
 		 * Type 0x00d7: Language (First Time)
-		 */	      
-		if (aim_gettlv(innerlist, 0x00d7, 1))	
-			exchanges[curexchange-1].lang1 = aim_gettlv_str(innerlist, 0x00d7, 1);
+		 */
+		if (aim_gettlv(innerlist, 0x00d7, 1))
+			exchanges[curexchange - 1].lang1 =
+				aim_gettlv_str(innerlist, 0x00d7, 1);
 		else
-			exchanges[curexchange-1].lang1 = NULL;
+			exchanges[curexchange - 1].lang1 = NULL;
 
 		/*
 		 * Type 0x00d8: Character Set (Second Time)
-		 */	      
-		if (aim_gettlv(innerlist, 0x00d8, 1))	
-			exchanges[curexchange-1].charset2 = aim_gettlv_str(innerlist, 0x00d8, 1);
+		 */
+		if (aim_gettlv(innerlist, 0x00d8, 1))
+			exchanges[curexchange - 1].charset2 =
+				aim_gettlv_str(innerlist, 0x00d8, 1);
 		else
-			exchanges[curexchange-1].charset2 = NULL;
+			exchanges[curexchange - 1].charset2 = NULL;
 
 		/*
 		 * Type 0x00d9: Language (Second Time)
-		 */	      
-		if (aim_gettlv(innerlist, 0x00d9, 1))	
-			exchanges[curexchange-1].lang2 = aim_gettlv_str(innerlist, 0x00d9, 1);
+		 */
+		if (aim_gettlv(innerlist, 0x00d9, 1))
+			exchanges[curexchange - 1].lang2 =
+				aim_gettlv_str(innerlist, 0x00d9, 1);
 		else
-			exchanges[curexchange-1].lang2 = NULL;
-		      
+			exchanges[curexchange - 1].lang2 = NULL;
+
 		/*
 		 * Type 0x00da: Unknown
 		 */
-		if (aim_gettlv(innerlist, 0x00da, 1))	
-			;
+		if (aim_gettlv(innerlist, 0x00da, 1)) ;
 
 		aim_freetlvchain(&innerlist);
 	}
@@ -260,8 +265,10 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 	/*
 	 * Call client.
 	 */
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype)))
-		ret = userfunc(sess, rx, snac2->type, maxrooms, curexchange, exchanges);
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype)))
+		ret = userfunc(sess, rx, snac2->type, maxrooms, curexchange,
+			exchanges);
 
 	for (curexchange--; curexchange >= 0; curexchange--) {
 		free(exchanges[curexchange].name);
@@ -276,12 +283,15 @@ static int parseinfo_perms(aim_session_t *sess, aim_module_t *mod, aim_frame_t *
 	return ret;
 }
 
-static int parseinfo_create(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs, aim_snac_t *snac2)
+static int parseinfo_create(aim_session_t *sess, aim_module_t *mod,
+	aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs,
+	aim_snac_t *snac2)
 {
 	aim_rxcallback_t userfunc;
 	aim_tlvlist_t *tlvlist, *innerlist;
 	char *ck = NULL, *fqcn = NULL, *name = NULL;
-	fu16_t exchange = 0, instance = 0, unknown = 0, flags = 0, maxmsglen = 0, maxoccupancy = 0;
+	fu16_t exchange = 0, instance = 0, unknown = 0, flags = 0, maxmsglen =
+		0, maxoccupancy = 0;
 	fu32_t createtime = 0;
 	fu8_t createperms = 0, detaillevel;
 	int cklen;
@@ -292,7 +302,8 @@ static int parseinfo_create(aim_session_t *sess, aim_module_t *mod, aim_frame_t 
 	tlvlist = aim_readtlvchain(bs);
 
 	if (!(bigblock = aim_gettlv(tlvlist, 0x0004, 1))) {
-		faimdprintf(sess, 0, "no bigblock in top tlv in create room response\n");
+		faimdprintf(sess, 0,
+			"no bigblock in top tlv in create room response\n");
 		aim_freetlvchain(&tlvlist);
 		return 0;
 	}
@@ -306,7 +317,9 @@ static int parseinfo_create(aim_session_t *sess, aim_module_t *mod, aim_frame_t 
 	detaillevel = aimbs_get8(&bbbs);
 
 	if (detaillevel != 0x02) {
-		faimdprintf(sess, 0, "unknown detaillevel in create room response (0x%02x)\n", detaillevel);
+		faimdprintf(sess, 0,
+			"unknown detaillevel in create room response (0x%02x)\n",
+			detaillevel);
 		aim_freetlvchain(&tlvlist);
 		free(ck);
 		return 0;
@@ -337,8 +350,11 @@ static int parseinfo_create(aim_session_t *sess, aim_module_t *mod, aim_frame_t 
 	if (aim_gettlv(innerlist, 0x00d5, 1))
 		createperms = aim_gettlv8(innerlist, 0x00d5, 1);
 
-	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family, snac->subtype))) {
-		ret = userfunc(sess, rx, snac2->type, fqcn, instance, exchange, flags, createtime, maxmsglen, maxoccupancy, createperms, unknown, name, ck);
+	if ((userfunc = aim_callhandler(sess, rx->conn, snac->family,
+				snac->subtype))) {
+		ret = userfunc(sess, rx, snac2->type, fqcn, instance, exchange,
+			flags, createtime, maxmsglen, maxoccupancy, createperms,
+			unknown, name, ck);
 	}
 
 	free(ck);
@@ -368,40 +384,51 @@ static int parseinfo_create(aim_session_t *sess, aim_module_t *mod, aim_frame_t 
  * the room yields no different a response than requesting the room's info.
  *
  */
-static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 	aim_snac_t *snac2;
 	int ret = 0;
 
 	if (!(snac2 = aim_remsnac(sess, snac->id))) {
-		faimdprintf(sess, 0, "faim: chatnav_parse_info: received response to unknown request! (%08lx)\n", snac->id);
+		faimdprintf(sess, 0,
+			"faim: chatnav_parse_info: received response to unknown request! (%08lx)\n",
+			snac->id);
 		return 0;
 	}
 
 	if (snac2->family != 0x000d) {
-		faimdprintf(sess, 0, "faim: chatnav_parse_info: received response that maps to corrupt request! (fam=%04x)\n", snac2->family);
+		faimdprintf(sess, 0,
+			"faim: chatnav_parse_info: received response that maps to corrupt request! (fam=%04x)\n",
+			snac2->family);
 		return 0;
 	}
 
 	/*
 	 * We now know what the original SNAC subtype was.
 	 */
-	if (snac2->type == 0x0002) /* request chat rights */
+	if (snac2->type == 0x0002)	/* request chat rights */
 		ret = parseinfo_perms(sess, mod, rx, snac, bs, snac2);
-	else if (snac2->type == 0x0003) /* request exchange info */
-		faimdprintf(sess, 0, "chatnav_parse_info: resposne to exchange info\n");
-	else if (snac2->type == 0x0004) /* request room info */
-		faimdprintf(sess, 0, "chatnav_parse_info: response to room info\n");
-	else if (snac2->type == 0x0005) /* request more room info */
-		faimdprintf(sess, 0, "chatnav_parse_info: response to more room info\n");
-	else if (snac2->type == 0x0006) /* request occupant list */
-		faimdprintf(sess, 0, "chatnav_parse_info: response to occupant info\n");
-	else if (snac2->type == 0x0007) /* search for a room */
+	else if (snac2->type == 0x0003)	/* request exchange info */
+		faimdprintf(sess, 0,
+			"chatnav_parse_info: resposne to exchange info\n");
+	else if (snac2->type == 0x0004)	/* request room info */
+		faimdprintf(sess, 0,
+			"chatnav_parse_info: response to room info\n");
+	else if (snac2->type == 0x0005)	/* request more room info */
+		faimdprintf(sess, 0,
+			"chatnav_parse_info: response to more room info\n");
+	else if (snac2->type == 0x0006)	/* request occupant list */
+		faimdprintf(sess, 0,
+			"chatnav_parse_info: response to occupant info\n");
+	else if (snac2->type == 0x0007)	/* search for a room */
 		faimdprintf(sess, 0, "chatnav_parse_info: search results\n");
-	else if (snac2->type == 0x0008) /* create room */
+	else if (snac2->type == 0x0008)	/* create room */
 		ret = parseinfo_create(sess, mod, rx, snac, bs, snac2);
 	else
-		faimdprintf(sess, 0, "chatnav_parse_info: unknown request subtype (%04x)\n", snac2->type);
+		faimdprintf(sess, 0,
+			"chatnav_parse_info: unknown request subtype (%04x)\n",
+			snac2->type);
 
 	if (snac2)
 		free(snac2->data);
@@ -410,7 +437,8 @@ static int parseinfo(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, ai
 	return ret;
 }
 
-static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx, aim_modsnac_t *snac, aim_bstream_t *bs)
+static int snachandler(aim_session_t *sess, aim_module_t *mod, aim_frame_t *rx,
+	aim_modsnac_t *snac, aim_bstream_t *bs)
 {
 
 	if (snac->subtype == 0x0009)

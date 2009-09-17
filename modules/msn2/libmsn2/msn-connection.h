@@ -19,7 +19,6 @@
  *
  */
 
-
 /*
  * The general design is as follows:
  *
@@ -53,32 +52,33 @@ typedef enum {
 	MSN_CONNECTION_SB = 2,
 	MSN_CONNECTION_FT = 3,
 	MSN_CONNECTION_HTTP = 4,
-} MsnConnectionType ;
+} MsnConnectionType;
 
 struct _MsnConnection {
-	char *host;			/* The host */
-	int port;			/* The port */
-	int use_ssl;			/* Do we use SSL? Dial 1 for yes */
-	int incoming;			/* Whether this is an incoming connection. 0 or false by default */
-	MsnConnectionType type;		/* Type of Connection */
+	char *host;		/* The host */
+	int port;		/* The port */
+	int use_ssl;		/* Do we use SSL? Dial 1 for yes */
+	int incoming;		/* Whether this is an incoming connection. 0 or false by default */
+	MsnConnectionType type;	/* Type of Connection */
 	MsnMessage *current_message;	/* The current Message (or data in case of FT) */
-	void *ext_data;			/* Any external data you want to attach? */
-	MsnAccount *account;		/* The account to which this connection belongs */
-	int trid;			/* Transaction ID for this connection */
-	LList *callbacks;		/* Callbacks to process responses to previously sent requests */
+	void *ext_data;		/* Any external data you want to attach? */
+	MsnAccount *account;	/* The account to which this connection belongs */
+	int trid;		/* Transaction ID for this connection */
+	LList *callbacks;	/* Callbacks to process responses to previously sent requests */
 
-	SBPayload *sbpayload;		/* This is stuff we may need to send on connecting */
+	SBPayload *sbpayload;	/* This is stuff we may need to send on connecting */
 
-	int tag_r;			/* Identifier for read resource */
-	int tag_w;			/* Identifier for write resource */
-	int tag_c;			/* Connection tag */
-} ;
+	int tag_r;		/* Identifier for read resource */
+	int tag_w;		/* Identifier for write resource */
+	int tag_c;		/* Connection tag */
+};
 
-typedef void (*MsnConnectionCallback)(MsnConnection *mc);
+typedef void (*MsnConnectionCallback) (MsnConnection *mc);
 
-typedef void (*MsnCallbackHandler)(MsnConnection *mc, void *data);
+typedef void (*MsnCallbackHandler) (MsnConnection *mc, void *data);
 
-void msn_connection_push_callback(MsnConnection *mc, MsnCallbackHandler handle, void *data);
+void msn_connection_push_callback(MsnConnection *mc, MsnCallbackHandler handle,
+	void *data);
 int msn_connection_pop_callback(MsnConnection *mc);
 
 MsnConnection *msn_connection_new();
@@ -94,13 +94,10 @@ MsnConnection *msn_connection_new();
 	ext_msn_connect(mc, callback); \
 }
 
-
-void msn_connection_send_data (MsnConnection *mc,char *data,int len);
+void msn_connection_send_data(MsnConnection *mc, char *data, int len);
 
 void msn_connection_free(MsnConnection *mc);
 
 int msn_got_response(MsnConnection *mc, char *response, int len);
 
-
 #endif
-

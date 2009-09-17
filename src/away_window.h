@@ -20,12 +20,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- */  
+ */
 
 #ifndef __AWAY_WINDOW_H__
 #define __AWAY_WINDOW_H__
 
-char * get_away_message();
+char *get_away_message();
 void show_away_choicewindow(void *widget, void *data);
 void away_window_set_back(void);
 #endif

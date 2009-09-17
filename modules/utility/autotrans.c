@@ -41,29 +41,26 @@
 #include "llist.h"
 #include "platform_defs.h"
 
-
 /* already declared in dialog.h - but that uses gtk */
-void do_list_dialog(char * message, char * title, char **list,
-		    void (*action) (char *text, gpointer data),
-		    gpointer data);
-			
+void do_list_dialog(char *message, char *title, char **list,
+	void (*action) (char *text, gpointer data), gpointer data);
+
 /*******************************************************************************
  *                             Begin Module Code
  ******************************************************************************/
 /*  Module defines */
 #ifndef USE_POSIX_DLOPEN
-	#define plugin_info autotrans_LTX_plugin_info
-	#define module_version autotrans_LTX_module_version
+#define plugin_info autotrans_LTX_plugin_info
+#define module_version autotrans_LTX_module_version
 #endif
 
-
 /* Function Prototypes */
-static char *translate_out(const eb_local_account * local, const eb_account * remote,
-			    const struct contact *contact, const char * s);
+static char *translate_out(const eb_local_account *local,
+	const eb_account *remote, const struct contact *contact, const char *s);
 
 static int trans_init();
 static int trans_finish();
-static void language_select(ebmCallbackData * data);
+static void language_select(ebmCallbackData *data);
 
 static int doTrans = 0;
 static int myLanguage = 0;
@@ -74,22 +71,25 @@ static void *tag2;
 
 static int ref_count = 0;
 
-
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_FILTER,
 	"Auto-translation",
 	"Automatic translation of messages using Babelfish",
-	"$Revision: 1.16 $",
-	"$Date: 2009/08/19 04:07:04 $",
+	"$Revision: 1.17 $",
+	"$Date: 2009/09/17 12:04:59 $",
 	&ref_count,
 	trans_init,
 	trans_finish,
 	NULL
 };
+
 /* End Module Exports */
 
-unsigned int module_version() {return CORE_VERSION;}
+unsigned int module_version()
+{
+	return CORE_VERSION;
+}
 
 static int trans_init()
 {
@@ -119,9 +119,9 @@ static int trans_init()
 	il->name = "myLanguage";
 	il->label = _("My language code:");
 	{
-		LList *l=NULL;
+		LList *l = NULL;
 		int i;
-		for(i=0; languages[i]; i++)
+		for (i = 0; languages[i]; i++)
 			l = l_list_append(l, languages[i]);
 
 		il->widget.listbox.list = l;
@@ -130,21 +130,27 @@ static int trans_init()
 
 	eb_debug(DBG_MOD, "Auto-trans initialised\n");
 
-	outgoing_message_filters = l_list_prepend(outgoing_message_filters, &translate_out);
-	incoming_message_filters = l_list_append(incoming_message_filters, &translate_out);
+	outgoing_message_filters =
+		l_list_prepend(outgoing_message_filters, &translate_out);
+	incoming_message_filters =
+		l_list_append(incoming_message_filters, &translate_out);
 
 	/* the following is adapted from notes.c */
 
 	if ((tag1 = eb_add_menu_item(_("Set Language"), EB_CHAT_WINDOW_MENU,
-			      language_select, ebmCONTACTDATA, NULL)) == NULL) {
-		eb_debug(DBG_MOD, "Error!  Unable to add Language menu to chat window menu\n");
+				language_select, ebmCONTACTDATA,
+				NULL)) == NULL) {
+		eb_debug(DBG_MOD,
+			"Error!  Unable to add Language menu to chat window menu\n");
 		return (-1);
 	}
 
 	if ((tag2 = eb_add_menu_item(_("Set Language"), EB_CONTACT_MENU,
-			      language_select, ebmCONTACTDATA, NULL)) == NULL) {
+				language_select, ebmCONTACTDATA,
+				NULL)) == NULL) {
 		eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag1);
-		eb_debug(DBG_MOD, "Error!  Unable to add Language menu to contact menu\n");
+		eb_debug(DBG_MOD,
+			"Error!  Unable to add Language menu to contact menu\n");
 		return (-1);
 	}
 
@@ -156,12 +162,14 @@ static int trans_finish()
 	int result = 0;
 
 	eb_debug(DBG_MOD, "Auto-trans shutting down\n");
-	outgoing_message_filters = l_list_remove(outgoing_message_filters, &translate_out);
-	incoming_message_filters = l_list_remove(incoming_message_filters, &translate_out);
-	
-	while(plugin_info.prefs) {
+	outgoing_message_filters =
+		l_list_remove(outgoing_message_filters, &translate_out);
+	incoming_message_filters =
+		l_list_remove(incoming_message_filters, &translate_out);
+
+	while (plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
-		if(il && il->type==EB_INPUT_LIST)
+		if (il && il->type == EB_INPUT_LIST)
 			l_list_free(il->widget.listbox.list);
 		free(plugin_info.prefs);
 		plugin_info.prefs = il;
@@ -171,12 +179,14 @@ static int trans_finish()
 
 	result = eb_remove_menu_item(EB_CHAT_WINDOW_MENU, tag1);
 	if (result) {
-		g_warning("Unable to remove Language menu item from chat window menu!");
+		g_warning
+			("Unable to remove Language menu item from chat window menu!");
 		return (-1);
 	}
 	result = eb_remove_menu_item(EB_CONTACT_MENU, tag2);
 	if (result) {
-		g_warning("Unable to remove Language menu item from chat window menu!");
+		g_warning
+			("Unable to remove Language menu item from chat window menu!");
 		return (-1);
 	}
 
@@ -188,7 +198,7 @@ static int trans_finish()
  ******************************************************************************/
 static void language_selected(char *text, gpointer data)
 {
-	struct contact *cont = (struct contact *) data;
+	struct contact *cont = (struct contact *)data;
 
 	cont->language[0] = text[0];
 	cont->language[1] = text[1];
@@ -197,19 +207,20 @@ static void language_selected(char *text, gpointer data)
 	write_contact_list();
 
 	if (!doTrans) {
-		ay_do_warning( _("Auto-Translation Warning"), _("You have just selected a language "
-					"with which to talk to a buddy. This will "
-					"only affect you if you have the auto-translator"
-					"plugin turned on. If you do, beware that it will"
-					"hang each time you send or receive a message, for"
-					"the time it takes to contact BabelFish. This can"
-					"take several seconds.") );
+		ay_do_warning(_("Auto-Translation Warning"),
+			_("You have just selected a language "
+				"with which to talk to a buddy. This will "
+				"only affect you if you have the auto-translator"
+				"plugin turned on. If you do, beware that it will"
+				"hang each time you send or receive a message, for"
+				"the time it takes to contact BabelFish. This can"
+				"take several seconds."));
 	}
 }
 
-static void language_select(ebmCallbackData * data)
+static void language_select(ebmCallbackData *data)
 {
-	ebmContactData *ecd = (ebmContactData *) data;
+	ebmContactData *ecd = (ebmContactData *)data;
 	struct contact *cont;
 	char buf[1024];
 
@@ -219,11 +230,12 @@ static void language_select(ebmCallbackData * data)
 		return;
 	}
 
-	g_snprintf(buf, 1024, _("Select the code for the language to use when talking to %s"),
-		   cont->nick);
+	g_snprintf(buf, 1024,
+		_("Select the code for the language to use when talking to %s"),
+		cont->nick);
 
 	do_list_dialog(buf, _("Select Language"), languages,
-		       &language_selected, (gpointer) cont);
+		&language_selected, (gpointer) cont);
 }
 
 /*
@@ -237,14 +249,14 @@ static char *Utf8ToStr(const char *in)
 	int i = 0;
 	unsigned int n;
 	char *result = NULL;
-	result = (char *) malloc(strlen(in) + 1);
+	result = (char *)malloc(strlen(in) + 1);
 
 	/* convert a string from UTF-8 Format */
 	for (n = 0; n < strlen(in); n++) {
 		unsigned char c = in[n];
 
 		if (c < 128) {
-			result[i++] = (char) c;
+			result[i++] = (char)c;
 		} else {
 			result[i++] = (c << 6) | (in[++n] & 63);
 		}
@@ -260,35 +272,36 @@ static int isurlchar(unsigned char c)
 
 static char *trans_urlencode(const char *instr)
 {
-	int ipos=0, bpos=0;
+	int ipos = 0, bpos = 0;
 	char *str = NULL;
 	int len = strlen(instr);
 
-	if(!(str = malloc(sizeof(char) * (3*len + 1)) ))
+	if (!(str = malloc(sizeof(char) * (3 * len + 1))))
 		return strdup("");
 
-	while(instr[ipos]) {
-		while(isurlchar(instr[ipos]))
+	while (instr[ipos]) {
+		while (isurlchar(instr[ipos]))
 			str[bpos++] = instr[ipos++];
-		if(!instr[ipos])
+		if (!instr[ipos])
 			break;
-		
-		snprintf(&str[bpos], 4, "%%%.2x", 
-				(instr[ipos]=='\r' || instr[ipos]=='\n'?
-				 ' ':instr[ipos]));
-		bpos+=3;
+
+		snprintf(&str[bpos], 4, "%%%.2x",
+			(instr[ipos] == '\r' || instr[ipos] == '\n' ?
+				' ' : instr[ipos]));
+		bpos += 3;
 		ipos++;
 	}
-	str[bpos]='\0';
+	str[bpos] = '\0';
 
 	/* free extra alloc'ed mem. */
 	len = strlen(str);
-	str = realloc(str, sizeof(char) * (len+1));
+	str = realloc(str, sizeof(char) * (len + 1));
 
 	return str;
 }
 
-static int do_http_post(const char *host, const char *path, const char *enc_data)
+static int do_http_post(const char *host, const char *path,
+	const char *enc_data)
 {
 	char buff[1024];
 	int fd;
@@ -297,13 +310,12 @@ static int do_http_post(const char *host, const char *path, const char *enc_data
 
 	if (fd > 0) {
 		snprintf(buff, sizeof(buff),
-			 "POST %s HTTP/1.1\r\n"
-			 "Host: %s\r\n"
-			 "User-Agent: Mozilla/4.5 [en] (%s/%s)\r\n"
-			 "Content-type: application/x-www-form-urlencoded\r\n"
-			 "Content-length: %d\r\n"
-			 "\r\n",
-			 path, host, PACKAGE, VERSION, strlen(enc_data));
+			"POST %s HTTP/1.1\r\n"
+			"Host: %s\r\n"
+			"User-Agent: Mozilla/4.5 [en] (%s/%s)\r\n"
+			"Content-type: application/x-www-form-urlencoded\r\n"
+			"Content-length: %d\r\n"
+			"\r\n", path, host, PACKAGE, VERSION, strlen(enc_data));
 
 		write(fd, buff, strlen(buff));
 		write(fd, enc_data, strlen(enc_data));
@@ -314,40 +326,39 @@ static int do_http_post(const char *host, const char *path, const char *enc_data
 
 #define START_POS "<input type=hidden name=\"q\" value=\""
 #define END_POS   "\">"
-static char *doTranslate(const char * ostring, const char * from, const char * to)
+static char *doTranslate(const char *ostring, const char *from, const char *to)
 {
 	char buf[2048];
 	int fd;
-	int offset=0;
+	int offset = 0;
 	char *string;
 	char *result;
 
 	string = trans_urlencode(ostring);
-	snprintf(buf, 2048, "tt=urltext&lp=%s_%s&urltext=%s",
-		 from, to, string);
+	snprintf(buf, 2048, "tt=urltext&lp=%s_%s&urltext=%s", from, to, string);
 	free(string);
 
 	fd = do_http_post("babelfish.altavista.com", "/babelfish/tr", buf);
 
-	while((ay_tcp_readline(buf+offset, sizeof(buf)-offset, fd)) > 0) {
+	while ((ay_tcp_readline(buf + offset, sizeof(buf) - offset, fd)) > 0) {
 		char *end, *start = strstr(buf, START_POS);
-		offset=0;
-		if(!start)
+		offset = 0;
+		if (!start)
 			continue;
-		
+
 		start += strlen(START_POS);
 		end = strstr(start, END_POS);
-		if(end) {
-			*end='\0';
+		if (end) {
+			*end = '\0';
 			string = start;
 			break;
 		} else {
 			/* append next line */
 			offset = strlen(buf);
 		}
-			
+
 	}
-	
+
 	eb_debug(DBG_MOD, "Translated %s to %s\n", ostring, string);
 
 	result = Utf8ToStr(string);
@@ -355,8 +366,8 @@ static char *doTranslate(const char * ostring, const char * from, const char * t
 	return result;
 }
 
-static char *translate_out(const eb_local_account * local, const eb_account * remote,
-			    const struct contact *contact, const char * s)
+static char *translate_out(const eb_local_account *local,
+	const eb_account *remote, const struct contact *contact, const char *s)
 {
 	char *p;
 	char l[3];
@@ -369,7 +380,7 @@ static char *translate_out(const eb_local_account * local, const eb_account * re
 	}			// no translation
 
 	strncpy(l, languages[myLanguage], 2);
-	l[2]=0;
+	l[2] = 0;
 	if (!strcmp(contact->language, l)) {
 		return strdup(s);
 	}			// speak same language

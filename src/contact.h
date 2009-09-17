@@ -47,17 +47,16 @@ struct contact {
 	int send_offline;
 	int default_chatb;
 	int default_filetransb;
-	struct _grouplist * group;
-	struct _chat_window * chatwindow;
+	struct _grouplist *group;
+	struct _chat_window *chatwindow;
 	t_log_window_id logwindow;
 
-	void * list_item; /* GtkWidget */
-	void * tree; /* GtkWidget */
-	void * pix; /* GtkWidget */
-	void * status; /* GtkWidget */
-	void * label; /* GtkWidget */
+	void *list_item;	/* GtkWidget */
+	void *tree;		/* GtkWidget */
+	void *pix;		/* GtkWidget */
+	void *status;		/* GtkWidget */
+	void *label;		/* GtkWidget */
 	int icon_handler;
 };
-
 
 #endif

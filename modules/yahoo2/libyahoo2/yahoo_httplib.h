@@ -28,21 +28,20 @@ extern "C" {
 
 #include "yahoo2_types.h"
 
-char *yahoo_urlencode(const char *instr);
-char *yahoo_urldecode(const char *instr);
-char *yahoo_xmldecode(const char *instr);
+	char *yahoo_urlencode(const char *instr);
+	char *yahoo_urldecode(const char *instr);
+	char *yahoo_xmldecode(const char *instr);
 
-int yahoo_tcp_readline(char *ptr, int maxlen, void *fd);
-void yahoo_http_post(int id, const char *url, const char *cookies, long size,
+	int yahoo_tcp_readline(char *ptr, int maxlen, void *fd);
+	void yahoo_http_post(int id, const char *url, const char *cookies,
+		long size, yahoo_get_fd_callback callback, void *data);
+	void yahoo_http_get(int id, const char *url, const char *cookies,
 		yahoo_get_fd_callback callback, void *data);
-void yahoo_http_get(int id, const char *url, const char *cookies,
-		yahoo_get_fd_callback callback, void *data);
-void yahoo_get_url_fd(int id, const char *url, const struct yahoo_data *yd,
+	void yahoo_get_url_fd(int id, const char *url,
+		const struct yahoo_data *yd,
 		yahoo_get_url_handle_callback callback, void *data);
-
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

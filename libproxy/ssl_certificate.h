@@ -33,23 +33,25 @@
 
 typedef struct _SSLCertificate SSLCertificate;
 
-struct _SSLCertificate
-{
+struct _SSLCertificate {
 	X509 *x509_cert;
 	char *host;
 	int port;
 };
 
-SSLCertificate *ssl_certificate_find (const char *host, int port);
-SSLCertificate *ssl_certificate_find_lookup (const char *host, int port, int lookup);
-int ssl_certificate_check (X509 *x509_cert, const char *host, int port, void *data );
-char* ssl_certificate_to_string(SSLCertificate *cert);
+SSLCertificate *ssl_certificate_find(const char *host, int port);
+SSLCertificate *ssl_certificate_find_lookup(const char *host, int port,
+	int lookup);
+int ssl_certificate_check(X509 *x509_cert, const char *host, int port,
+	void *data);
+char *ssl_certificate_to_string(SSLCertificate *cert);
 void ssl_certificate_destroy(SSLCertificate *cert);
 void ssl_certificate_delete_from_disk(SSLCertificate *cert);
-char * readable_fingerprint(unsigned char *src, int len);
-char *ssl_certificate_check_signer (X509 *cert);
+char *readable_fingerprint(unsigned char *src, int len);
+char *ssl_certificate_check_signer(X509 *cert);
 
-gboolean ay_connection_verify(const char *message, const char *title, void *data);
+gboolean ay_connection_verify(const char *message, const char *title,
+	void *data);
 
-#endif /* USE_OPENSSL */
-#endif /* SSL_CERTIFICATE_H */
+#endif				/* USE_OPENSSL */
+#endif				/* SSL_CERTIFICATE_H */

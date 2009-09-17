@@ -26,13 +26,13 @@
 #include "value_pair.h"
 #include "util.h"
 
-char * value_pair_get_value( LList * pairs, const char * key )
+char *value_pair_get_value(LList *pairs, const char *key)
 {
-	LList * node;
-	for( node = pairs; node; node=node->next) {
-		value_pair * vp = node->data;
-		if(!strcasecmp(key, vp->key)) {
-			if(!vp->value)
+	LList *node;
+	for (node = pairs; node; node = node->next) {
+		value_pair *vp = node->data;
+		if (!strcasecmp(key, vp->key)) {
+			if (!vp->value)
 				return strdup("");
 			else
 				return strdup(vp->value);
@@ -41,25 +41,25 @@ char * value_pair_get_value( LList * pairs, const char * key )
 	return NULL;
 }
 
-void value_pair_free( LList * pairs )
+void value_pair_free(LList *pairs)
 {
-	LList * node;
-	for( node = pairs; node; node = node->next )
+	LList *node;
+	for (node = pairs; node; node = node->next)
 		free(node->data);
 	l_list_free(pairs);
 }
 
-void value_pair_print_values( LList * pairs, FILE * file, int indent )
+void value_pair_print_values(LList *pairs, FILE *file, int indent)
 {
-	LList * node;
+	LList *node;
 	int i;
 	char *tmp;
-	
-	for( node = pairs; node; node = node->next ) {
-		value_pair * vp = node->data;
 
-		for( i = 0; i < indent; i++ )
-			fprintf( file, "\t" );
+	for (node = pairs; node; node = node->next) {
+		value_pair *vp = node->data;
+
+		for (i = 0; i < indent; i++)
+			fprintf(file, "\t");
 
 		tmp = escape_string(vp->value);
 		fprintf(file, "%s=\"%s\"\n", vp->key, tmp);
@@ -67,34 +67,32 @@ void value_pair_print_values( LList * pairs, FILE * file, int indent )
 	}
 }
 
-LList * value_pair_add(LList * list, const char * key, const char * value)
+LList *value_pair_add(LList *list, const char *key, const char *value)
 {
-	value_pair	*vp = NULL;
-	char		*old_value = NULL;
-	
-	
-	old_value = value_pair_get_value( list, key );
-	
-	if ( old_value != NULL )
-	{
+	value_pair *vp = NULL;
+	char *old_value = NULL;
+
+	old_value = value_pair_get_value(list, key);
+
+	if (old_value != NULL) {
 		list = value_pair_remove(list, key);
-		free( old_value );
+		free(old_value);
 	}
 
 	vp = calloc(1, sizeof(value_pair));
 	strncpy(vp->key, key, MAX_PREF_NAME_LEN);
 	strncpy(vp->value, value, MAX_PREF_LEN);
-	
+
 	return l_list_append(list, vp);
 }
 
-LList * value_pair_remove( LList *pairs, const char *key )
+LList *value_pair_remove(LList *pairs, const char *key)
 {
-	LList * node;
-	for( node = pairs; node; node=node->next) {
-		value_pair * vp = node->data;
-		if(vp && !strcasecmp(key, vp->key)) {
-			pairs=l_list_remove_link(pairs, node);
+	LList *node;
+	for (node = pairs; node; node = node->next) {
+		value_pair *vp = node->data;
+		if (vp && !strcasecmp(key, vp->key)) {
+			pairs = l_list_remove_link(pairs, node);
 			free(node->data);
 			free(node);
 			break;
@@ -103,15 +101,14 @@ LList * value_pair_remove( LList *pairs, const char *key )
 	return pairs;
 }
 
-LList * value_pair_update(LList * pairs, LList * new_list)
+LList *value_pair_update(LList *pairs, LList *new_list)
 {
 
-	LList * node;
-	for( node = new_list; node; node=node->next) {
-		value_pair * vp = node->data;
+	LList *node;
+	for (node = new_list; node; node = node->next) {
+		value_pair *vp = node->data;
 		pairs = value_pair_remove(pairs, vp->key);
 		pairs = value_pair_add(pairs, vp->key, vp->value);
 	}
 	return pairs;
 }
-

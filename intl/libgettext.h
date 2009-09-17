@@ -46,4 +46,4 @@
    translation is needed.  Instead the string itself is the result.  */
 #define gettext_noop(Str) (Str)
 
-#endif /* _LIBGETTEXT_H */
+#endif				/* _LIBGETTEXT_H */

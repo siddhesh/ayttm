@@ -21,21 +21,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
- 
+
 #ifndef __ACTION_H__
 #define __ACTION_H__
 
 #include "logs.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void conversation_action( log_file *logfile, int to_end );
+	void conversation_action(log_file *logfile, int to_end);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}				/* extern "C" */
 #endif
-
 #endif
