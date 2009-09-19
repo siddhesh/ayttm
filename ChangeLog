@@ -1,3 +1,7 @@
+* Sat Sep 19 2009 14:10 UTC [siddheshp]   0.6.0-2
+- ChangeLog:
+ * Moved to git. See ayttm.git.sf.net
+
 * Tue Sep 15 2009 16:30 UTC [siddheshp]   0.6.0-2
 - ChangeLog, configure.ac, src/Makefile.am:
  * CORE: Updated configure script to disable yahoo as well as msn if openssl
