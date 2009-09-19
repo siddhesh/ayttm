@@ -571,7 +571,6 @@ AC_CONFIG_FILES([Makefile ayttm.spec
                  sounds/Makefile
                  src/Makefile
 		 src/gtk/Makefile])
-#		 mingw32/Makefile])
 
 
 AC_OUTPUT
