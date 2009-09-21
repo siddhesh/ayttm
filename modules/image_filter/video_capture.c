@@ -43,7 +43,7 @@ static int plugin_init();
 static int plugin_finish();
 
 static char frame_grabber[MAX_PREF_LEN] =
-	AYTTM_BIN_DIR "/ayttm_streamer_wrapper.sh -d %d";
+	AYTTM_BIN_DIR "/ayttm_streamer_wrapper -d %d";
 
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {

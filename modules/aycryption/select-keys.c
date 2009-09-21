@@ -565,7 +565,7 @@ static void other_btn_cb(GtkWidget *widget, gpointer data)
 	struct select_keys_s *sk = data;
 
 	g_return_if_fail(sk);
-	do_text_input_window(_("Enter another user or key ID:"), _(""),
+	do_text_input_window(_("Enter another user or key ID:"), "",
 		other_selected_cb, sk);
 }
 

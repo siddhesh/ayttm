@@ -85,7 +85,7 @@ rm -rf $RPM_BUILD_ROOT
 # the config file
 %config(noreplace) /etc/ayttmrc
 # Lastly, the binary itself
-%{_bindir}/ayttm_streamer_wrapper.sh
+%{_bindir}/ayttm_streamer_wrapper
 %{_bindir}/@PACKAGE@
 %exclude %{_libdir}/@PACKAGE@/*.a
 

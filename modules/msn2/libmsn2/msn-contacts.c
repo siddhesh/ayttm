@@ -87,7 +87,6 @@ void msn_buddies_send_adl(MsnAccount *ma, LList *in, int initial, int add)
 	int offset = 0;
 	char *cur_domain = NULL;
 	int cur_type = 0;
-	int push_callback = 0;
 
 	/* Sort the list */
 	while (in) {

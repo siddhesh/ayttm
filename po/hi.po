@@ -2,12 +2,12 @@
 # Copyright (C) 2003 Philip S Tellis.
 # Philip S Tellis <philip.tellis@gmx.net>, 2003.
 #
-#: modules/aycryption/select-keys.c:592
+#: modules/aycryption/select-keys.c:568
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-11 08:42+0530\n"
+"POT-Creation-Date: 2009-09-21 15:05+0530\n"
 "PO-Revision-Date: 2007-02-24 09:42+0530\n"
 "Last-Translator: Ashish Jain <ashish_jain_mca@yahoo.co.nz>\n"
 "Language-Team: आशीष जैन ( ASHISH JAIN ) <tensai_ashish@yahoo.com>\n"
@@ -19,26 +19,26 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "Plural-Forms: nplurals=2; plural=n != 1\n"
 
-#: modules/aim-toc/aim-toc.c:120 modules/icq/icq.c:122
-#: modules/icq-toc/icq-toc.c:122 modules/msn2/msn.c:184
-#: modules/workwizu/workwizu.c:143 src/gtk/prefs_window.C:2241
+#: modules/aim-toc/aim-toc.c:132 modules/icq/icq.c:128
+#: modules/icq-toc/icq-toc.c:132 modules/msn2/msn.c:198
+#: modules/workwizu/workwizu.c:146 src/gtk/prefs_window.C:2241
 msgid "Server:"
 msgstr "सर्वर "
 
-#: modules/aim-toc/aim-toc.c:127 modules/icq/icq.c:129
-#: modules/icq-toc/icq-toc.c:129 modules/msn2/msn.c:191
-#: modules/workwizu/workwizu.c:150 src/gtk/prefs_window.C:2257
+#: modules/aim-toc/aim-toc.c:139 modules/icq/icq.c:135
+#: modules/icq-toc/icq-toc.c:139 modules/msn2/msn.c:205
+#: modules/workwizu/workwizu.c:153 src/gtk/prefs_window.C:2257
 msgid "Port:"
 msgstr "पोर्ट "
 
-#: modules/aim-toc/aim-toc.c:134 modules/aycryption/aycryption.c:133
-#: modules/icq/icq.c:136 modules/icq-toc/icq-toc.c:136 modules/irc/irc.c:118
-#: modules/jabber/jabber.c:117 modules/msn2/msn.c:212 modules/smtp/smtp.c:101
-#: modules/workwizu/workwizu.c:164 modules/yahoo2/yahoo.c:242
+#: modules/aim-toc/aim-toc.c:146 modules/aycryption/aycryption.c:135
+#: modules/icq/icq.c:142 modules/icq-toc/icq-toc.c:146 modules/irc/irc.c:122
+#: modules/jabber/jabber.c:129 modules/msn2/msn.c:228 modules/smtp/smtp.c:104
+#: modules/workwizu/workwizu.c:167 modules/yahoo2/yahoo.c:249
 msgid "Enable debugging"
 msgstr "दोषमार्जन समर्थ करिए"
 
-#: modules/aim-toc/aim-toc.c:476
+#: modules/aim-toc/aim-toc.c:479
 #, c-format
 msgid ""
 "AIM user %s would like to\n"
@@ -51,224 +51,224 @@ msgstr ""
 "फाईल भेजना\n"
 "क्या आप स्वीकार करना चाहते हैं ?"
 
-#: modules/aim-toc/aim-toc.c:478
+#: modules/aim-toc/aim-toc.c:482
 msgid "Incoming AIM File Request"
 msgstr "AIM फाईल की प्रार्थना आ रही है ।"
 
-#: modules/aim-toc/aim-toc.c:494 modules/aim-toc/aim-toc.c:936
-#: modules/aim-toc/aim-toc.c:1023 modules/aim-toc/aim-toc.c:1383
+#: modules/aim-toc/aim-toc.c:497 modules/aim-toc/aim-toc.c:945
+#: modules/aim-toc/aim-toc.c:1038 modules/aim-toc/aim-toc.c:1412
 msgid "AIM Error"
 msgstr "AIM दोष"
 
-#: modules/aim-toc/aim-toc.c:877
+#: modules/aim-toc/aim-toc.c:881
 #, c-format
 msgid "Logging in to AIM account: %s"
 msgstr "AIM खाते :  %s में प्रवेश हो रहा है ।"
 
-#: modules/aim-toc/aim-toc.c:904
+#: modules/aim-toc/aim-toc.c:911
 #, c-format
 msgid "AIM password for: %s"
 msgstr "AIM पासवर्ड : %s के ल‍िए ।"
 
-#: modules/aim-toc/aim-toc.c:936
+#: modules/aim-toc/aim-toc.c:947
 msgid "Cannot connect to AIM due to network problem."
 msgstr "नेटवर्क समस्या के कारण AIM से असंयुक्तता । "
 
-#: modules/aim-toc/aim-toc.c:1023 modules/icq-toc/icq-toc.c:957
+#: modules/aim-toc/aim-toc.c:1038 modules/icq-toc/icq-toc.c:973
 msgid "Message Truncated"
 msgstr "सन्देश छटनी"
 
-#: modules/aim-toc/aim-toc.c:1042
+#: modules/aim-toc/aim-toc.c:1059
 msgid "_Screen Name:"
 msgstr "(_S)स्क्रीन नाम:"
 
-#: modules/aim-toc/aim-toc.c:1049 modules/icq-toc/icq-toc.c:983
-#: modules/irc/irc.c:603 modules/jabber/jabber.c:440 modules/msn2/msn.c:459
-#: modules/smtp/smtp.c:189 modules/yahoo2/yahoo.c:2528
-#: src/edit_local_accounts.c:665
+#: modules/aim-toc/aim-toc.c:1066 modules/icq-toc/icq-toc.c:1001
+#: modules/irc/irc.c:617 modules/jabber/jabber.c:468 modules/msn2/msn.c:476
+#: modules/smtp/smtp.c:192 modules/yahoo2/yahoo.c:2643
+#: src/edit_local_accounts.c:672
 msgid "_Password:"
 msgstr "(_P)पासवर्ड:"
 
-#: modules/aim-toc/aim-toc.c:1056 modules/icq-toc/icq-toc.c:990
-#: modules/jabber/jabber.c:454 modules/msn2/msn.c:466
-#: modules/yahoo2/yahoo.c:2535
+#: modules/aim-toc/aim-toc.c:1073 modules/icq-toc/icq-toc.c:1008
+#: modules/jabber/jabber.c:482 modules/msn2/msn.c:483
+#: modules/yahoo2/yahoo.c:2650
 msgid "_Ask for password at Login time"
 msgstr "(_A)पासवर्ड के ल‍िए प्रवेश के समय पूछें"
 
-#: modules/aim-toc/aim-toc.c:1063 modules/icq-toc/icq-toc.c:997
-#: modules/irc/irc.c:610 modules/jabber/jabber.c:461 modules/msn2/msn.c:473
-#: modules/yahoo2/yahoo.c:2542 src/edit_local_accounts.c:702
+#: modules/aim-toc/aim-toc.c:1080 modules/icq-toc/icq-toc.c:1015
+#: modules/irc/irc.c:624 modules/jabber/jabber.c:489 modules/msn2/msn.c:490
+#: modules/yahoo2/yahoo.c:2657 src/edit_local_accounts.c:710
 msgid "_Connect at startup"
 msgstr "(_C)शुरु होते समय ह‍ी जोडे ।"
 
-#: modules/aim-toc/aim-toc.c:1070 modules/icq-toc/icq-toc.c:1004
+#: modules/aim-toc/aim-toc.c:1087 modules/icq-toc/icq-toc.c:1022
 msgid "P_rofile:"
 msgstr "(_R)व्यक्तिगत विवरण:"
 
-#: modules/aim-toc/aim-toc.c:1167 modules/icq-toc/icq-toc.c:1098
+#: modules/aim-toc/aim-toc.c:1187 modules/icq-toc/icq-toc.c:1121
 msgid "User is currently away"
 msgstr "अभी प्रयोगकर्त्ता अनुपस्थित है"
 
-#: modules/aim-toc/aim-toc.c:1348 modules/msn2/msn.c:786
-#: modules/msn2/msn.c:798 src/chat_window.c:887 src/chat_window.c:1385
-#: src/chat_window.c:1389 src/chat_window.c:1392 src/chat_window.c:2066
-#: src/chat_window.c:2197 src/contact_util.C:417 src/crash.c:468
-#: src/crash.c:487 src/edit_account_window.c:287 src/edit_account_window.c:323
-#: src/status.c:1249 src/status.c:1690 src/status.c:1728 src/util.c:1067
-#: src/util.c:1095 src/util.c:1204
+#: modules/aim-toc/aim-toc.c:1376 modules/msn2/msn.c:806
+#: modules/msn2/msn.c:819 src/chat_window.c:932 src/chat_window.c:1476
+#: src/chat_window.c:1481 src/chat_window.c:1484 src/chat_window.c:2282
+#: src/chat_window.c:2422 src/contact_util.C:417 src/crash.c:468
+#: src/crash.c:485 src/edit_account_window.c:309 src/edit_account_window.c:346
+#: src/status.c:1268 src/status.c:1700 src/status.c:1737 src/util.c:1110
+#: src/util.c:1142 src/util.c:1252
 msgid "Unknown"
 msgstr "अज्ञात"
 
-#: modules/aim-toc/aim-toc.c:1374 src/add_contact_window.c:410
+#: modules/aim-toc/aim-toc.c:1403 src/add_contact_window.c:447
 msgid "Buddies"
 msgstr "मित्र"
 
-#: modules/aim-toc/aim-toc.c:1383
+#: modules/aim-toc/aim-toc.c:1413
 msgid "This URL isn't supported by AIM module."
 msgstr "यह URL , AIM module द्वारा समर्थ‍ित नहीं है ।"
 
-#: modules/aycryption/aycryption.c:119
+#: modules/aycryption/aycryption.c:121
 msgid "Store passphrase in memory"
 msgstr "passphrase को memory में स्टोर करें"
 
-#: modules/aycryption/aycryption.c:126
+#: modules/aycryption/aycryption.c:128
 msgid "Private key for signing:"
 msgstr "प्रवेश के ल‍िए निजी कुंजी:"
 
-#: modules/aycryption/aycryption.c:143
+#: modules/aycryption/aycryption.c:148
 msgid "Aycryption - status"
 msgstr "Aycryption - अवस्था"
 
-#: modules/aycryption/aycryption.c:161 modules/aycryption/aycryption.c:166
+#: modules/aycryption/aycryption.c:167 modules/aycryption/aycryption.c:174
 msgid "GPG settings..."
 msgstr "GPG settings..."
 
-#: modules/aycryption/aycryption.c:172 modules/aycryption/aycryption.c:179
+#: modules/aycryption/aycryption.c:182 modules/aycryption/aycryption.c:191
 msgid "GPG status..."
 msgstr "GPG अवस्था..."
 
-#: modules/aycryption/aycryption.c:312
+#: modules/aycryption/aycryption.c:327
 #, c-format
 msgid "<font color=%s><b>%s</b>: %s</font><br>"
 msgstr "<font color=%s><b>%s</b>: %s</font><br>"
 
-#: modules/aycryption/aycryption.c:548
+#: modules/aycryption/aycryption.c:567
 msgid "Got an "
 msgstr "मिला एक"
 
-#: modules/aycryption/aycryption.c:549
+#: modules/aycryption/aycryption.c:569
 msgid "encrypted"
 msgstr "कूट रूपान्तरित "
 
-#: modules/aycryption/aycryption.c:549
+#: modules/aycryption/aycryption.c:569
 #, fuzzy
 msgid "unencrypted"
 msgstr "कूट रूपान्तरित "
 
-#: modules/aycryption/aycryption.c:553
+#: modules/aycryption/aycryption.c:573
 msgid ", unsigned message."
 msgstr ", अहस्ताक्ष‍‍रित संदेशा ।"
 
-#: modules/aycryption/aycryption.c:556
+#: modules/aycryption/aycryption.c:576
 msgid ", correctly signed (by "
 msgstr ", सही हस्ताक्ष‍‍रित (के द्वारा "
 
-#: modules/aycryption/aycryption.c:561
+#: modules/aycryption/aycryption.c:581
 msgid ", badly signed (by "
 msgstr ", गलत हस्ताक्ष‍‍रित (के द्वारा "
 
-#: modules/aycryption/aycryption.c:566
+#: modules/aycryption/aycryption.c:586
 msgid " message with no key."
 msgstr "बिना कुंजी के संदेशा"
 
-#: modules/aycryption/aycryption.c:569
+#: modules/aycryption/aycryption.c:591
 msgid " message ; signature is valid but  the signing key has been revoked"
 msgstr ""
 
-#: modules/aycryption/aycryption.c:572 modules/aycryption/aycryption.c:577
+#: modules/aycryption/aycryption.c:594 modules/aycryption/aycryption.c:600
 msgid " correctly signed (by "
 msgstr " सही हस्ताक्ष‍‍रित (के द्वारा "
 
-#: modules/aycryption/aycryption.c:574
+#: modules/aycryption/aycryption.c:597
 msgid ") message, but signature has expired."
 msgstr ") संदेशा , परन्तु हस्ताक्ष‍‍र समय सीमा समाप्त ।"
 
-#: modules/aycryption/aycryption.c:579
+#: modules/aycryption/aycryption.c:602
 msgid ") message, but key has expired."
 msgstr ") संदेशा , परन्तु कुंजी समय सीमा समाप्त ।"
 
-#: modules/aycryption/aycryption.c:582
+#: modules/aycryption/aycryption.c:607
 msgid ") message, but there was an error verifying the signature"
 msgstr ""
 
-#: modules/aycryption/aycryption.c:585
+#: modules/aycryption/aycryption.c:612
 msgid " message - Unknown signature status (file a bugreport)!"
 msgstr " संदेशा - अज्ञात हस्ताक्ष‍‍र स्थिति (file a bugreport)!"
 
-#: modules/aycryption/select-keys.c:75
+#: modules/aycryption/select-keys.c:74
 #, c-format
 msgid "Please select key for `%s'"
 msgstr " `%s' के लिए कुंजी चुनिए "
 
-#: modules/aycryption/select-keys.c:78
+#: modules/aycryption/select-keys.c:76
 #, c-format
 msgid "Collecting info for `%s' ... %c"
 msgstr " `%s' ... %c  के लिए सूचना एकत्रित करते हुए "
 
-#: modules/aycryption/select-keys.c:362
+#: modules/aycryption/select-keys.c:349
 msgid "Select Keys"
 msgstr "कुंज‍ियाँ चुनिए "
 
-#: modules/aycryption/select-keys.c:384
+#: modules/aycryption/select-keys.c:372
 msgid "Size"
 msgstr "आकार"
 
-#: modules/aycryption/select-keys.c:385
+#: modules/aycryption/select-keys.c:373
 msgid "Key ID"
 msgstr "कुंजी पहचान"
 
-#: modules/aycryption/select-keys.c:386
+#: modules/aycryption/select-keys.c:374
 msgid "Name"
 msgstr "नाम"
 
-#: modules/aycryption/select-keys.c:387
+#: modules/aycryption/select-keys.c:375
 msgid "Address"
 msgstr "पता"
 
-#: modules/aycryption/select-keys.c:388
+#: modules/aycryption/select-keys.c:376
 msgid "Val"
 msgstr "Val"
 
-#: modules/aycryption/select-keys.c:450
+#: modules/aycryption/select-keys.c:432
 msgid "Select"
 msgstr "चुनिए"
 
-#: modules/aycryption/select-keys.c:451 modules/aycryption/select-keys.c:708
-#: src/activity_bar.C:136 src/edit_local_accounts.c:787
+#: modules/aycryption/select-keys.c:435 modules/aycryption/select-keys.c:680
+#: src/activity_bar.C:136 src/edit_local_accounts.c:801
 msgid "Cancel"
 msgstr "रद्द करें"
 
-#: modules/aycryption/select-keys.c:452
+#: modules/aycryption/select-keys.c:438
 msgid "Other..."
 msgstr "कोई ओर..."
 
-#: modules/aycryption/select-keys.c:454
+#: modules/aycryption/select-keys.c:442
 msgid "Enable encryption"
 msgstr "कूट रूपान्तरन समर्थ करिए "
 
-#: modules/aycryption/select-keys.c:456
+#: modules/aycryption/select-keys.c:445
 msgid "Enable signing"
 msgstr "हस्ताक्ष‍‍रण समर्थ करें"
 
-#: modules/aycryption/select-keys.c:592
+#: modules/aycryption/select-keys.c:568
 msgid "Enter another user or key ID:"
 msgstr "दूसरा प्रयोगकर्त्ता या कुंजी पहचान डालें: "
 
-#: modules/aycryption/select-keys.c:638
+#: modules/aycryption/select-keys.c:610
 msgid "[no user id]"
 msgstr "[no user id]"
 
-#: modules/aycryption/select-keys.c:640
+#: modules/aycryption/select-keys.c:612
 #, fuzzy, c-format
 msgid ""
 "%sPlease enter the passphrase for:\n"
@@ -280,7 +280,7 @@ msgstr ""
 "  %.*s  \n"
 "(%.*s)\n"
 
-#: modules/aycryption/select-keys.c:642
+#: modules/aycryption/select-keys.c:614
 msgid ""
 "Bad passphrase! Try again...\n"
 "\n"
@@ -288,24 +288,24 @@ msgstr ""
 "गलत passphrase! फिर से कोशिश करें ...\n"
 "\n"
 
-#: modules/aycryption/select-keys.c:665
+#: modules/aycryption/select-keys.c:636
 msgid "Passphrase"
 msgstr "Passphrase"
 
-#: modules/aycryption/select-keys.c:705
+#: modules/aycryption/select-keys.c:677
 msgid "OK"
 msgstr "ठीक है"
 
-#: modules/icq/icq.c:662
+#: modules/icq/icq.c:619
 #, c-format
 msgid "User is away: %s"
 msgstr "प्रयोगकर्त्ता अनुपस्थित है: %s"
 
-#: modules/icq/icq.c:668
+#: modules/icq/icq.c:625
 msgid "I have just added you to my contact list."
 msgstr "मैने अभी आपको अपनी सम्पर्क सूची में सम्मिलित किया है । "
 
-#: modules/icq/icq.c:685
+#: modules/icq/icq.c:638
 #, c-format
 msgid ""
 "ICQ user %d would like to\n"
@@ -318,7 +318,7 @@ msgstr ""
 "फाईल भेजना\n"
 "क्या आप स्वीकार करना चाहते हैं?"
 
-#: modules/icq/icq.c:702
+#: modules/icq/icq.c:656
 #, c-format
 msgid ""
 "ICQ user %s would like to add you to their contact list.\n"
@@ -329,79 +329,79 @@ msgstr ""
 "कारण: %s\n"
 "क्या आप अनुमति देना चाहते हैं ? "
 
-#: modules/icq/icq.c:705
+#: modules/icq/icq.c:659
 msgid "Authorize ICQ User"
 msgstr "ICQ प्रयोगकर्त्ता प्रमाणित करें"
 
-#: modules/icq/icq.c:712
+#: modules/icq/icq.c:665
 #, c-format
 msgid "Unknown packet type %x contents %s"
 msgstr "अज्ञात packet type %x ‍िववरण  %s"
 
-#: modules/icq/icq.c:1456
+#: modules/icq/icq.c:1400
 msgid "ICQ Info:<BR>"
 msgstr "ICQ सूचना:<BR>"
 
-#: modules/icq/icq.c:1463 modules/icq/icq.c:1480
+#: modules/icq/icq.c:1407 modules/icq/icq.c:1425
 #, c-format
 msgid "UIN: %d<br>"
 msgstr "UIN: %d<br>"
 
-#: modules/icq/icq.c:1465
+#: modules/icq/icq.c:1409
 #, c-format
 msgid "Nickname: %s<br>"
 msgstr "उपनाम:  %s<br>"
 
-#: modules/icq/icq.c:1467
+#: modules/icq/icq.c:1411
 #, c-format
 msgid "First Name: %s<br>"
 msgstr "उप नाम : %s<br>"
 
-#: modules/icq/icq.c:1469
+#: modules/icq/icq.c:1413
 #, c-format
 msgid "Last Name: %s<br>"
 msgstr "अप नाम : %s<br>"
 
-#: modules/icq/icq.c:1471
+#: modules/icq/icq.c:1415
 #, c-format
 msgid "Email: %s<br>"
 msgstr "ईमेल: %s<br>"
 
-#: modules/icq/icq.c:1474
+#: modules/icq/icq.c:1419
 msgid "Authorization Required<BR>"
 msgstr "प्रमाणितता चाहिए<BR>"
 
-#: modules/icq/icq.c:1483
+#: modules/icq/icq.c:1428
 #, c-format
 msgid "City: %s<br>"
 msgstr "शहर: %s<br>"
 
-#: modules/icq/icq.c:1485
+#: modules/icq/icq.c:1430
 #, c-format
 msgid "State: %s<br>"
 msgstr "राज्य: %s<br>"
 
-#: modules/icq/icq.c:1487
+#: modules/icq/icq.c:1432
 #, c-format
 msgid "Age: %s<br>"
 msgstr "उम्र: %s<br>"
 
-#: modules/icq/icq.c:1489
+#: modules/icq/icq.c:1434
 #, c-format
 msgid "Sex: %s<br>"
 msgstr "लिंग: %s<br>"
 
-#: modules/icq/icq.c:1491
+#: modules/icq/icq.c:1436
 #, c-format
 msgid "Phone: %s<br>"
 msgstr "टेलीफोन नम्बर: %s<br>"
 
-#: modules/icq/icq.c:1493
+#: modules/icq/icq.c:1438
 #, c-format
 msgid "Url: %s<br>"
 msgstr "Url: %s<br>"
 
-#: modules/icq/icq.c:1495
+#: modules/icq/icq.c:1440
 #, c-format
 msgid "About: %s<br>"
 msgstr "बारें में: %s<br>"
@@ -419,45 +419,45 @@ msgstr ""
 "फाईल भेजना\n"
 "क्या आप स्वीकार करना चाहते हैं ?"
 
-#: modules/icq-toc/icq-toc.c:405
+#: modules/icq-toc/icq-toc.c:406
 msgid "Incoming icq File Request"
 msgstr "ICQ फाईल की प्रार्थना आ रही है ।"
 
-#: modules/icq-toc/icq-toc.c:430 modules/icq-toc/icq-toc.c:842
+#: modules/icq-toc/icq-toc.c:430 modules/icq-toc/icq-toc.c:848
 msgid "ICQ Error"
 msgstr "ICQ दोष"
 
-#: modules/icq-toc/icq-toc.c:786
+#: modules/icq-toc/icq-toc.c:787
 #, c-format
 msgid "Logging in to ICQ account: %s"
 msgstr "ICQ खाते :  %s में प्रवेश हो रहा है ।"
 
-#: modules/icq-toc/icq-toc.c:811
+#: modules/icq-toc/icq-toc.c:815
 #, c-format
 msgid "ICQ password for: %s"
 msgstr "ICQ पासवर्ड : %s के ल‍िए ।"
 
-#: modules/icq-toc/icq-toc.c:842
+#: modules/icq-toc/icq-toc.c:850
 msgid "Cannot connect to ICQ due to network problem."
 msgstr "नेटवर्क समस्या के कारण ICQ से असंयुक्तता । "
 
-#: modules/icq-toc/icq-toc.c:957
+#: modules/icq-toc/icq-toc.c:973
 msgid "ICQ Warning"
 msgstr "ICQ चेतावनी"
 
-#: modules/icq-toc/icq-toc.c:976
+#: modules/icq-toc/icq-toc.c:994
 msgid "ICQ _UIN:"
 msgstr "ICQ _UIN:"
 
-#: modules/importers/import_everybuddy.c:123
-#: modules/importers/import_everybuddy.c:133
-#: modules/importers/import_everybuddy.c:169
-#: modules/importers/import_everybuddy.c:184
+#: modules/importers/import_everybuddy.c:127
+#: modules/importers/import_everybuddy.c:138
+#: modules/importers/import_everybuddy.c:180
 #: modules/importers/import_everybuddy.c:196
+#: modules/importers/import_everybuddy.c:208
 msgid "Import error"
 msgstr "आयात दोष"
 
-#: modules/importers/import_everybuddy.c:123
+#: modules/importers/import_everybuddy.c:128
 msgid ""
 "Cannot import accounts.\n"
 "Check that ~/.everybuddy/accounts exists and is readable."
@@ -465,7 +465,7 @@ msgstr ""
 "ख़ाता आयात असफल.\n"
 "ज़ाँच लें ~/.everybuddy/accounts विद्यमान है और readable है ।"
 
-#: modules/importers/import_everybuddy.c:133
+#: modules/importers/import_everybuddy.c:139
 msgid ""
 "Cannot import contacts.\n"
 "Check that ~/.everybuddy/contacts exists and is readable."
@@ -473,7 +473,7 @@ msgstr ""
 "सम्पर्क सूची आयात असफल.\n"
 "ज़ाँच लें ~/.everybuddy/contacts विद्यमान है और readable है ।"
 
-#: modules/importers/import_everybuddy.c:170
+#: modules/importers/import_everybuddy.c:181
 msgid ""
 "Cannot import preferences.\n"
 "Check that ~/.everybuddy/preferences exists and is readable."
@@ -481,7 +481,7 @@ msgstr ""
 "प्राथमिकताएं आयात असफल.\n"
 "ज़ाँच लें ~/.everybuddy/preferences विद्यमान है और readable है ।"
 
-#: modules/importers/import_everybuddy.c:185
+#: modules/importers/import_everybuddy.c:197
 msgid ""
 "Cannot save away messages.\n"
 "Check that ~/.ayttm/away_messages is writable."
@@ -489,7 +489,7 @@ msgstr ""
 "अवर्तमान संदेश लिख़ना असफल.\n"
 "ज़ाँच लें ~/.ayttm/away_messages विद्यमान है और writable है ।"
 
-#: modules/importers/import_everybuddy.c:197
+#: modules/importers/import_everybuddy.c:209
 msgid ""
 "Cannot import away messages.\n"
 "Check that ~/.everybuddy/away_messages exists and is readable."
@@ -497,255 +497,255 @@ msgstr ""
 "अवर्तमान संदेश आयात असफल.\n"
 "ज़ाँच लें ~/.everybuddy/away_messages विद्यमान है और readable है ।"
 
-#: modules/importers/import_everybuddy.c:217
+#: modules/importers/import_everybuddy.c:227
 msgid "Import success"
 msgstr "आयात सफल"
 
-#: modules/importers/import_everybuddy.c:239
+#: modules/importers/import_everybuddy.c:251
 msgid "Import parameters"
 msgstr "आयात विकल्प"
 
-#: modules/importers/import_everybuddy.c:245
+#: modules/importers/import_everybuddy.c:257
 msgid "Select which parts of your everybuddy configuration to import.\n"
 msgstr "अपने everybuddy configuration के वह हिस्से चुनिए जो आयात करने है ।\n"
 
-#: modules/importers/import_everybuddy.c:249
+#: modules/importers/import_everybuddy.c:262
 msgid "Import local accounts"
 msgstr "आयात लोकल ख़ाते"
 
-#: modules/importers/import_everybuddy.c:251
+#: modules/importers/import_everybuddy.c:264
 msgid "Import contacts"
 msgstr "आयात सम्पर्क सूची"
 
-#: modules/importers/import_everybuddy.c:253
+#: modules/importers/import_everybuddy.c:267
 msgid "Import preferences"
 msgstr "आयात प्राथमिकताएं"
 
-#: modules/importers/import_everybuddy.c:255
+#: modules/importers/import_everybuddy.c:270
 msgid "Import away messages"
 msgstr "आयात अवर्तमान संदेश"
 
-#: modules/irc/irc.c:225 modules/irc/irc.c:285 modules/irc/irc.c:386
+#: modules/irc/irc.c:223 modules/irc/irc.c:287 modules/irc/irc.c:393
 msgid "IRC Error"
 msgstr "IRC दोष"
 
-#: modules/irc/irc.c:232
+#: modules/irc/irc.c:229
 #, fuzzy
 msgid "IRC Warning"
 msgstr "ICQ चेतावनी"
 
-#: modules/irc/irc.c:272
+#: modules/irc/irc.c:269
 #, c-format
 msgid "Logging in to IRC account: %s"
 msgstr "IRC खाते :  %s में प्रवेश हो रहा है ।"
 
-#: modules/irc/irc.c:284 modules/irc/irc.c:385 modules/msn2/msn.c:740
+#: modules/irc/irc.c:285 modules/irc/irc.c:391 modules/msn2/msn.c:760
 #, c-format
 msgid "Cannot connect to %s."
 msgstr " %s से सम्पर्क नही ।"
 
-#: modules/irc/irc.c:311
+#: modules/irc/irc.c:313
 #, c-format
 msgid "Connection closed by %s."
 msgstr " %s के द्वारा सम्पर्क बन्द ।"
 
-#: modules/irc/irc.c:343
+#: modules/irc/irc.c:347
 #, fuzzy, c-format
 msgid "Not Connected to server"
 msgstr "सर्वर जोडे(_n): "
 
-#: modules/irc/irc.c:368
+#: modules/irc/irc.c:373
 #, c-format
 msgid "Error occurred while sending data to %s: %s"
 msgstr ""
 
-#: modules/irc/irc.c:437
+#: modules/irc/irc.c:447
 #, fuzzy, c-format
 msgid "<font color=\"#AA77AA\">%s</font>"
 msgstr "<font color=%s><b>%s</b>: %s</font><br>"
 
-#: modules/irc/irc.c:596
+#: modules/irc/irc.c:610
 msgid "_Nick:"
 msgstr "_Nick:"
 
-#: modules/irc/irc.c:617
+#: modules/irc/irc.c:631
 msgid "IRC _Host:"
 msgstr "IRC _Host:"
 
-#: modules/irc/irc.c:624
+#: modules/irc/irc.c:638
 msgid "IRC P_ort:"
 msgstr "IRC पोर्ट(_o):"
 
-#: modules/irc/irc.c:719
+#: modules/irc/irc.c:735
 msgid "No hostname found in your login (which should be in user@host form)."
 msgstr ""
 "आपक login में कोई hostname नहीं मिला (जो कि ऐसा user@host होना चाहिए था ) ।"
 
-#: modules/irc/irc.c:969
+#: modules/irc/irc.c:995
 #, c-format
 msgid "<b>User info for</b> %s<br>"
 msgstr "%s <b> के ल‍िए प्रयोगकर्त्ता सूचना </b><br>"
 
-#: modules/irc/irc.c:970
+#: modules/irc/irc.c:996
 #, c-format
 msgid "<b>Server:</b> %s<br>"
 msgstr "<b>सर्वर:</b> %s<br>"
 
-#: modules/irc/irc.c:973
+#: modules/irc/irc.c:1001
 #, c-format
 msgid "<b>Idle time and online status:</b> %s<br>"
 msgstr "<b> गंवाया समय और online अवस्था :</b> %s<br>"
 
-#: modules/irc/irc.c:976
+#: modules/irc/irc.c:1004
 #, fuzzy
 msgid "<b>Whois info:</b><br><br>"
 msgstr "<b>Whois सूचना:</b> %s<br>"
 
-#: modules/irc/irc.c:1067
+#: modules/irc/irc.c:1101
 #, fuzzy, c-format
 msgid "<i><b>User Name: </b></i> %s<br><i><b>Real Name: </b></i> %s<br>"
 msgstr "<b>सर्वर:</b> %s<br>"
 
-#: modules/irc/irc.c:1227
+#: modules/irc/irc.c:1261
 #, fuzzy, c-format
 msgid "<i><b>Server Info: </b></i> %s<br>"
 msgstr "<b>सर्वर:</b> %s<br>"
 
-#: modules/irc/irc.c:1437
+#: modules/irc/irc.c:1497
 #, c-format
 msgid ". Quit reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1464
+#: modules/irc/irc.c:1525
 #, c-format
 msgid ". Part reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1778
+#: modules/irc/irc.c:1876
 #, fuzzy, c-format
 msgid "<font color=\"#775500\">Topic set by: %s</font>"
 msgstr "<font color=%s><b>%s</b>: %s</font><br>"
 
-#: modules/irc/irc.c:1819
+#: modules/irc/irc.c:1920
 #, c-format
 msgid "<font color=\"#00BBBB\">%s is running %s"
 msgstr ""
 
-#: modules/irc/irc.c:1826
+#: modules/irc/irc.c:1935
 msgid " on "
 msgstr ""
 
-#: modules/irc/irc.c:1851
+#: modules/irc/irc.c:1967
 #, c-format
 msgid "<font color=\"#AABB44\">%s has sent Time as <B>%s</B></font>"
 msgstr ""
 
-#: modules/irc/irc.c:1877
+#: modules/irc/irc.c:1995
 #, c-format
 msgid "<I><B><font color=\"#AA0000\">%s:</font></B> %s</I>"
 msgstr ""
 
-#: modules/irc/irc.c:1973
+#: modules/irc/irc.c:2100
 #, c-format
 msgid ">>> Inviting %s [%s] <<<"
 msgstr ">>>  %s [%s] निम‍न्त्रित<<<"
 
-#: modules/irc/irc.c:1975
+#: modules/irc/irc.c:2103
 #, c-format
 msgid ">>> Inviting %s <<<"
 msgstr ">>>  %s निम‍न्त्रित <<<"
 
-#: modules/irc/irc.c:2133 modules/irc/irc.c:2181
+#: modules/irc/irc.c:2266 modules/irc/irc.c:2311
 #, fuzzy
 msgid "Nickname in Use"
 msgstr "उपनाम:  %s<br>"
 
-#: modules/irc/irc.c:2146
+#: modules/irc/irc.c:2278
 #, fuzzy
 msgid "No such Server"
 msgstr "सर्वर जोडे(_n): "
 
-#: modules/irc/irc.c:2159
+#: modules/irc/irc.c:2290
 msgid "No such Channel"
 msgstr ""
 
-#: modules/irc/irc.c:2172
+#: modules/irc/irc.c:2302
 msgid "No such Nickname"
 msgstr ""
 
-#: modules/jabber/jabber.c:110
+#: modules/jabber/jabber.c:122
 msgid "Default Server:"
 msgstr "प्राथमिक सर्वर:"
 
-#: modules/jabber/jabber.c:281
+#: modules/jabber/jabber.c:302
 #, c-format
 msgid "Logging in to Jabber account: %s"
 msgstr "Jabber खाते :  %s में प्रवेश हो रहा है ।"
 
-#: modules/jabber/jabber.c:311
+#: modules/jabber/jabber.c:335
 #, c-format
 msgid "Jabber password for: %s"
 msgstr "Jabber पासवर्ड : %s के ल‍िए ।"
 
-#: modules/jabber/jabber.c:433
+#: modules/jabber/jabber.c:461
 msgid "_Username:"
 msgstr "प्रयोगकर्त्ता(_U):"
 
-#: modules/jabber/jabber.c:447
+#: modules/jabber/jabber.c:475
 msgid "Co_nnect Server:"
 msgstr "सर्वर जोडे(_n): "
 
-#: modules/jabber/jabber.c:469
+#: modules/jabber/jabber.c:497
 msgid "Use _SSL"
 msgstr "SSL प्रयोग करें (_S)"
 
-#: modules/jabber/jabber.c:476 modules/smtp/smtp.c:203
+#: modules/jabber/jabber.c:504 modules/smtp/smtp.c:206
 msgid "P_ort:"
 msgstr "पोर्ट(_o):"
 
-#: modules/jabber/jabber.c:484
+#: modules/jabber/jabber.c:512
 msgid "SSL Po_rt:"
 msgstr "SSL पोर्ट(_r):"
 
-#: modules/jabber/jabber.c:492
+#: modules/jabber/jabber.c:520
 msgid "Request mail information (GMail only)"
 msgstr ""
 
-#: modules/jabber/jabber.c:1266 modules/msn2/msn.c:1988
-#: modules/workwizu/workwizu.c:328 modules/yahoo2/yahoo.c:2197
-#: src/chat_room.c:1929 src/chat_room.c:1947
+#: modules/jabber/jabber.c:1312 modules/msn2/msn.c:2008
+#: modules/workwizu/workwizu.c:339 modules/yahoo2/yahoo.c:2293
+#: src/chat_room.c:2089 src/chat_room.c:2112
 msgid "typing..."
 msgstr "लिख रहा है..."
 
-#: modules/jabber/libEBjabber.c:289
+#: modules/jabber/libEBjabber.c:286
 msgid "No jabber server specified."
 msgstr "कोई jabber सर्वर वर्णित नही ।"
 
-#: modules/jabber/libEBjabber.c:289
+#: modules/jabber/libEBjabber.c:287
 msgid "Cannot login"
 msgstr "प्रवेश निषेध"
 
-#: modules/jabber/libEBjabber.c:313 modules/jabber/libEBjabber.c:321
-#: modules/jabber/libEBjabber.c:872 modules/jabber/libEBjabber.c:1098
+#: modules/jabber/libEBjabber.c:310 modules/jabber/libEBjabber.c:318
+#: modules/jabber/libEBjabber.c:886 modules/jabber/libEBjabber.c:1130
 msgid "Jabber Error"
 msgstr "Jabber दोष"
 
-#: modules/jabber/libEBjabber.c:659
+#: modules/jabber/libEBjabber.c:670
 #, fuzzy
 msgid "You have new email: \n"
 msgstr "एक नई मेल है %s की तरफ़ से %s के बारे में \n"
 
-#: modules/jabber/libEBjabber.c:1072
+#: modules/jabber/libEBjabber.c:1101
 msgid "Register? You're not authorized"
 msgstr "रजिस्टर ? आपको अनुमति नहीं है"
 
-#: modules/jabber/libEBjabber.c:1073
+#: modules/jabber/libEBjabber.c:1104
 #, c-format
 msgid ""
 "Do you want to try to create the account \"%s\" on the jabber server %s?"
 msgstr "क्या आप jabber सर्वर %s पर ख़ाता \"%s\" ख़ोलने की कोशिश करना चाहते हैं ? "
 
-#: modules/jabber/libEBjabber.c:1154
+#: modules/jabber/libEBjabber.c:1191
 #, c-format
 msgid ""
 "%s wants to add you to his friends' list.\n"
@@ -756,75 +756,75 @@ msgstr ""
 "\n"
 "क्या आप स्वीकार करते हैं?"
 
-#: modules/jabber/libEBjabber.c:1208
+#: modules/jabber/libEBjabber.c:1247
 #, c-format
 msgid "The Jabber server %s has disconnected you."
 msgstr "jabber सर्वर %s  ने आपको अलग़ किया ।"
 
-#: modules/jabber/libEBjabber.c:1210 src/gtk/prefs_window.C:2948
+#: modules/jabber/libEBjabber.c:1249 src/gtk/prefs_window.C:2948
 msgid "Disconnect"
 msgstr "सम्पर्क तोडें"
 
-#: modules/jabber/libEBjabber.c:1217
+#: modules/jabber/libEBjabber.c:1257
 #, c-format
 msgid "Connection to the jabber server %s failed!"
 msgstr "jabber सर्वर %s से सम्पर्क विच्छेद ।"
 
-#: modules/jabber/libEBjabber.c:1218
+#: modules/jabber/libEBjabber.c:1259
 msgid "Jabber server not responding"
 msgstr "jabber सर्वर उत्तर नहीं दे रहा"
 
-#: modules/msn2/msn.c:198 modules/yahoo2/yahoo.c:228
+#: modules/msn2/msn.c:212 modules/yahoo2/yahoo.c:235
 msgid "Guess status from Away messages"
 msgstr "अवर्तमान संदेशों से अवस्था अनुमान करें"
 
-#: modules/msn2/msn.c:205
+#: modules/msn2/msn.c:221
 msgid "Rename my MSN-only contacts whenever they change their alias"
 msgstr "जब भी मेरे MSN-only सम्पर्क अपना उपनाम बदले उन्हें नया नाम दे "
 
-#: modules/msn2/msn.c:407 modules/msn2/msn.c:412
+#: modules/msn2/msn.c:421 modules/msn2/msn.c:427
 msgid "Invite to Gnomemeeting"
 msgstr "Gnomemeeting में निम‍न्त्रण दे"
 
-#: modules/msn2/msn.c:452
+#: modules/msn2/msn.c:469
 msgid "_MSN Login:"
 msgstr "MSN प्रवेश(_M):"
 
-#: modules/msn2/msn.c:480
+#: modules/msn2/msn.c:497
 msgid "_Login invisible"
 msgstr "अदृश्य प्रवेश(_L)"
 
-#: modules/msn2/msn.c:487
+#: modules/msn2/msn.c:504
 msgid "Friendly Name:"
 msgstr "मै‍त्रिक नाम: "
 
-#: modules/msn2/msn.c:494
+#: modules/msn2/msn.c:511
 msgid "Tell me about new Hotmail/MSN mail"
 msgstr "मुझे नये Hotmail/MSN मेल के बारे में बताए"
 
-#: modules/msn2/msn.c:588
+#: modules/msn2/msn.c:606
 #, c-format
 msgid "Logging in to MSN account: %s"
 msgstr "MSN खाते :  %s में प्रवेश हो रहा है ।"
 
-#: modules/msn2/msn.c:621
+#: modules/msn2/msn.c:641
 #, c-format
 msgid "MSN password for: %s"
 msgstr "MSN पासवर्ड : %s के ल‍िए ।"
 
-#: modules/msn2/msn.c:698 modules/msn2/msn.c:741 modules/msn2/msn.c:1744
+#: modules/msn2/msn.c:715 modules/msn2/msn.c:762 modules/msn2/msn.c:1755
 msgid "MSN Error"
 msgstr "MSN  दोष"
 
-#: modules/msn2/msn.c:710
+#: modules/msn2/msn.c:727
 msgid "Connected, sending login information"
 msgstr ""
 
-#: modules/msn2/msn.c:878
+#: modules/msn2/msn.c:904
 msgid "Logged in. Downloading contact information."
 msgstr ""
 
-#: modules/msn2/msn.c:888
+#: modules/msn2/msn.c:914
 #, fuzzy, c-format
 msgid ""
 "MSN Login Failed:\n"
@@ -832,48 +832,48 @@ msgid ""
 "%s"
 msgstr "MSN प्रवेश(_M):"
 
-#: modules/msn2/msn.c:890
+#: modules/msn2/msn.c:917
 #, fuzzy
 msgid "Login Failed"
 msgstr "अदृश्य प्रवेश(_L)"
 
-#: modules/msn2/msn.c:1170
+#: modules/msn2/msn.c:1192
 msgid ""
 "MSN passport ID must have @domain.tld part. For example foo@live.com or "
 "bar@hotmail.com"
 msgstr ""
 
-#: modules/msn2/msn.c:1340
+#: modules/msn2/msn.c:1356
 #, c-format
 msgid "Could not unblock <i>%s</i>. Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1342 modules/msn2/msn.c:1354 modules/msn2/msn.c:1366
-#: modules/msn2/msn.c:1377 modules/msn2/msn.c:1388 modules/msn2/msn.c:1398
-#: modules/msn2/msn.c:1497
+#: modules/msn2/msn.c:1359 modules/msn2/msn.c:1373 modules/msn2/msn.c:1387
+#: modules/msn2/msn.c:1399 modules/msn2/msn.c:1411 modules/msn2/msn.c:1424
+#: modules/msn2/msn.c:1523
 msgid "MSN"
 msgstr ""
 
-#: modules/msn2/msn.c:1352
+#: modules/msn2/msn.c:1370
 #, c-format
 msgid "Could not block <i>%s</i>. Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1363
+#: modules/msn2/msn.c:1384
 #, c-format
 msgid ""
 "Could not remove <i>%s</i> from group <i>%s</i>.\n"
 "Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1374
+#: modules/msn2/msn.c:1396
 #, c-format
 msgid ""
 "Could not add <i>%s</i> to group <i>%s</i>.\n"
 "Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1385
+#: modules/msn2/msn.c:1408
 #, c-format
 msgid ""
 "Unable to add group <b>%s</b>. Server returned error:\n"
@@ -881,17 +881,17 @@ msgid ""
 "<i>%s</i>"
 msgstr ""
 
-#: modules/msn2/msn.c:1386
+#: modules/msn2/msn.c:1409
 #, fuzzy
 msgid "Unknown error"
 msgstr "अज्ञात"
 
-#: modules/msn2/msn.c:1396
+#: modules/msn2/msn.c:1421
 #, c-format
 msgid "Could not add buddy %s(<i>%s</i>). Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1422
+#: modules/msn2/msn.c:1447
 #, fuzzy, c-format
 msgid ""
 "The MSN user:\n"
@@ -905,22 +905,22 @@ msgstr ""
 "\n"
 "क्या आप स्वयम् को उन्हें online देखने की अनुमति देना चाहते हैं ?"
 
-#: modules/msn2/msn.c:1425
+#: modules/msn2/msn.c:1451
 #, fuzzy
 msgid "MSN New Contact"
 msgstr "Yahoo नया सम्पर्क"
 
-#: modules/msn2/msn.c:1475
+#: modules/msn2/msn.c:1501
 #, fuzzy
 msgid "MSN Invitation"
 msgstr "निम‍न्त्रण स्वीकारे"
 
-#: modules/msn2/msn.c:1475
+#: modules/msn2/msn.c:1501
 #, fuzzy
 msgid "Invite failed!"
 msgstr "प्रयोगकर्त्ता आमन्त्रित करें"
 
-#: modules/msn2/msn.c:1489
+#: modules/msn2/msn.c:1515
 #, fuzzy, c-format
 msgid ""
 "%s has invited you to chat.\n"
@@ -930,57 +930,57 @@ msgstr ""
 "\n"
 "क्या आप स्वीकार करते हैं?"
 
-#: modules/msn2/msn.c:1491
+#: modules/msn2/msn.c:1518
 #, fuzzy
 msgid "MSN Chat Invitation"
 msgstr "गपशप मे आमन्त्रित करें"
 
-#: modules/msn2/msn.c:1497
+#: modules/msn2/msn.c:1523
 msgid "Not Implemented"
 msgstr ""
 
-#: modules/msn2/msn.c:1646
+#: modules/msn2/msn.c:1669
 #, fuzzy, c-format
 msgid "Connection error: %s"
 msgstr "सम्पर्क प्रकार:"
 
-#: modules/msn2/msn.c:1746
+#: modules/msn2/msn.c:1757
 msgid "MSN :: Operation failed"
 msgstr ""
 
-#: modules/msn2/msn.c:1962 modules/msn2/msn.c:1976
+#: modules/msn2/msn.c:1981 modules/msn2/msn.c:1997
 msgid "MSN Mail"
 msgstr "MSN मेल"
 
-#: modules/smtp/smtp.c:108
+#: modules/smtp/smtp.c:111
 msgid "Contacts online by default"
 msgstr "प्राथमिक ओनलाइन सम्पर्क"
 
-#: modules/smtp/smtp.c:182
+#: modules/smtp/smtp.c:185
 msgid "_Email Address:"
 msgstr "ईमल पता (_E):"
 
-#: modules/smtp/smtp.c:196
+#: modules/smtp/smtp.c:199
 msgid "SMTP _Server:"
 msgstr "SMTP सर्वर(_S):"
 
-#: modules/smtp/smtp.c:450
+#: modules/smtp/smtp.c:456
 msgid "SMTP Warning"
 msgstr "SMTP चेतावनी"
 
-#: modules/smtp/smtp.c:450
+#: modules/smtp/smtp.c:457
 msgid "You cannot send files through SMTP... yet"
 msgstr "SMTP के द्वारा फाईल नही भेज सकते... फिर भी "
 
-#: modules/smtp/smtp.c:496
+#: modules/smtp/smtp.c:505
 msgid "Message sent via SMTP."
 msgstr "SMTP के द्वारा संदेशा भेजा गया  ।"
 
-#: modules/smtp/smtp.c:498
+#: modules/smtp/smtp.c:507
 msgid "Error sending message via SMTP."
 msgstr "SMTP के द्वारा संदेशा भेजते हुए दोष उत्पन्न ।"
 
-#: modules/smtp/smtp.c:610
+#: modules/smtp/smtp.c:625
 msgid "SMTP logins must have @domain.tld part."
 msgstr "SMTP प्रवेशार्थी के पास @domain.tld हिस्सा होना आवश्यक है । "
 
@@ -992,15 +992,15 @@ msgstr "स्वतः भाषांतर समर्थ करें"
 msgid "My language code:"
 msgstr "मेरा भाषा कोड:"
 
-#: modules/utility/autotrans.c:138 modules/utility/autotrans.c:144
+#: modules/utility/autotrans.c:140 modules/utility/autotrans.c:148
 msgid "Set Language"
 msgstr "भाषा चुनिए"
 
-#: modules/utility/autotrans.c:200
+#: modules/utility/autotrans.c:210
 msgid "Auto-Translation Warning"
 msgstr "स्वतः भाषांतर चेतावनी"
 
-#: modules/utility/autotrans.c:200
+#: modules/utility/autotrans.c:211
 msgid ""
 "You have just selected a language with which to talk to a buddy. This will "
 "only affect you if you have the auto-translatorplugin turned on. If you do, "
@@ -1008,90 +1008,90 @@ msgid ""
 "it takes to contact BabelFish. This cantake several seconds."
 msgstr ""
 
-#: modules/utility/autotrans.c:222
+#: modules/utility/autotrans.c:234
 #, c-format
 msgid "Select the code for the language to use when talking to %s"
 msgstr "%s से बात करने की भाषा का कोड चुनिए"
 
-#: modules/utility/autotrans.c:225
+#: modules/utility/autotrans.c:237
 msgid "Select Language"
 msgstr "भाषा चुनिए"
 
-#: modules/utility/middle.c:87
+#: modules/utility/middle.c:89
 msgid "Enable L33t-speak conversion"
 msgstr "L33t-speak परिवर्तन समर्थ करें "
 
-#: modules/utility/middle.c:94
+#: modules/utility/middle.c:96
 msgid "Enable 3x7r3m3 L33t-speak [implies previous]"
 msgstr "3x7r3m3 L33t-speak [implies previous]  समर्थ करें "
 
-#: modules/utility/notes.c:130
+#: modules/utility/notes.c:138
 msgid "Notes Editor:"
 msgstr "लेख सम्पादक:"
 
-#: modules/utility/rainbow.c:100
+#: modules/utility/rainbow.c:103
 msgid "Enable rainbow conversion"
 msgstr "rainbow परिवर्तन समर्थ करें "
 
-#: modules/utility/rainbow.c:107
+#: modules/utility/rainbow.c:110
 msgid "Starting R value:"
 msgstr " R गुण शुरु हो रहा है: "
 
-#: modules/utility/rainbow.c:113
+#: modules/utility/rainbow.c:116
 msgid "Starting G value:"
 msgstr "G गुण शुरु हो रहा है: "
 
-#: modules/utility/rainbow.c:119
+#: modules/utility/rainbow.c:122
 msgid "Starting B value:"
 msgstr "B गुण शुरु हो रहा है: "
 
-#: modules/utility/rainbow.c:126
+#: modules/utility/rainbow.c:129
 msgid "Ending R value:"
 msgstr "G गुण ख़त्म हो रहा है: "
 
-#: modules/utility/rainbow.c:132
+#: modules/utility/rainbow.c:135
 msgid "Ending G value:"
 msgstr "G गुण ख़त्म हो रहा है: "
 
-#: modules/utility/rainbow.c:138
+#: modules/utility/rainbow.c:141
 msgid "Ending B value:"
 msgstr "B गुण ख़त्म हो रहा है: "
 
-#: modules/workwizu/workwizu.c:157
+#: modules/workwizu/workwizu.c:160
 msgid "Distbase:"
 msgstr "Distbase:"
 
-#: modules/workwizu/workwizu.c:206 modules/workwizu/workwizu.c:454
-#: modules/workwizu/workwizu.c:466 modules/workwizu/workwizu.c:492
-#: modules/workwizu/workwizu.c:636 modules/workwizu/workwizu.c:689
-#: modules/workwizu/workwizu.c:777 modules/workwizu/workwizu.c:982
+#: modules/workwizu/workwizu.c:214 modules/workwizu/workwizu.c:471
+#: modules/workwizu/workwizu.c:484 modules/workwizu/workwizu.c:513
+#: modules/workwizu/workwizu.c:660 modules/workwizu/workwizu.c:716
+#: modules/workwizu/workwizu.c:806 modules/workwizu/workwizu.c:1025
 msgid "Workwizu Error"
 msgstr "वर्कविज़ु दोष"
 
-#: modules/workwizu/workwizu.c:206
+#: modules/workwizu/workwizu.c:215
 msgid "Connection closed (can't write)"
 msgstr "सम्पर्क बन्द(लिख़ नही सकता) "
 
-#: modules/workwizu/workwizu.c:454 modules/workwizu/workwizu.c:636
-#: modules/workwizu/workwizu.c:689
+#: modules/workwizu/workwizu.c:472 modules/workwizu/workwizu.c:661
+#: modules/workwizu/workwizu.c:716
 msgid "Server doesn't answer."
 msgstr "सर्वर अनुत्तर ।"
 
-#: modules/workwizu/workwizu.c:466
+#: modules/workwizu/workwizu.c:485
 msgid "Bad authentication."
 msgstr "गलत प्रमाणितता ।"
 
-#: modules/workwizu/workwizu.c:491
+#: modules/workwizu/workwizu.c:511
 #, c-format
 msgid "Connection to %s lost."
 msgstr " %s  से सम्पर्क ख़त्म ।"
 
-#: modules/workwizu/workwizu.c:674
+#: modules/workwizu/workwizu.c:699
 #, c-format
 msgid "Logging in to Workwizu account: %s"
 msgstr "Workwizu खाते :  %s में प्रवेश हो रहा है ।"
 
-#: modules/workwizu/workwizu.c:777 modules/workwizu/workwizu.c:982
+#: modules/workwizu/workwizu.c:808 modules/workwizu/workwizu.c:1027
 msgid ""
 "You aren't allowed to speak.\n"
 "This message has probably not arrived."
@@ -1099,92 +1099,92 @@ msgstr ""
 "आपको बोलने की अनुमति नहीं है ।\n"
 "शायद यह संदेश पहँचा नहीं है ।"
 
-#: modules/workwizu/workwizu.c:903
+#: modules/workwizu/workwizu.c:939
 msgid "The login is empty."
 msgstr " login ख़ाली है ।"
 
-#: modules/workwizu/workwizu.c:957 src/nomodule.c:195
+#: modules/workwizu/workwizu.c:999 src/nomodule.c:196
 #, c-format
 msgid "Offline"
 msgstr "ओफलाईन(अनुपस्थित)"
 
-#: modules/workwizu/workwizu.c:959
+#: modules/workwizu/workwizu.c:1001
 msgid "No speak"
 msgstr "बातचीत नही "
 
-#: modules/yahoo2/yahoo.c:165
+#: modules/yahoo2/yahoo.c:172
 msgid "Pager Server:"
 msgstr "पेज़र सर्वर:"
 
-#: modules/yahoo2/yahoo.c:172
+#: modules/yahoo2/yahoo.c:179
 msgid "Pager Port:"
 msgstr "पेज़र पोर्ट:"
 
-#: modules/yahoo2/yahoo.c:179
+#: modules/yahoo2/yahoo.c:186
 msgid "File Transfer Host:"
 msgstr "फ़ाईल स्थानान्नतरण Host:"
 
-#: modules/yahoo2/yahoo.c:186
+#: modules/yahoo2/yahoo.c:193
 msgid "File Transfer Port:"
 msgstr "फ़ाईल स्थानान्नतरण Port:"
 
-#: modules/yahoo2/yahoo.c:193
+#: modules/yahoo2/yahoo.c:200
 msgid "Webcam Host:"
 msgstr "वेबकेम Host:"
 
-#: modules/yahoo2/yahoo.c:200
+#: modules/yahoo2/yahoo.c:207
 msgid "Webcam Port:"
 msgstr "वेबकेम Port:"
 
-#: modules/yahoo2/yahoo.c:207
+#: modules/yahoo2/yahoo.c:214
 msgid "Connection type:"
 msgstr "सम्पर्क प्रकार:"
 
-#: modules/yahoo2/yahoo.c:210
+#: modules/yahoo2/yahoo.c:217
 msgid "Dialup"
 msgstr "Dialup"
 
-#: modules/yahoo2/yahoo.c:211
+#: modules/yahoo2/yahoo.c:218
 msgid "DSL/Cable"
 msgstr "DSL/Cable"
 
-#: modules/yahoo2/yahoo.c:212
+#: modules/yahoo2/yahoo.c:219
 msgid "T1/Lan"
 msgstr "T1/Lan"
 
-#: modules/yahoo2/yahoo.c:221
+#: modules/yahoo2/yahoo.c:228
 msgid "Prompt for transferred filename"
 msgstr "स्थानान्नतरित फ़ाईलनाम के लिए टोंके"
 
-#: modules/yahoo2/yahoo.c:235
+#: modules/yahoo2/yahoo.c:242
 msgid "Show how long contact has been away"
 msgstr "सम्पर्क कितने समय से अवर्तमान है दिख़ाईए "
 
-#: modules/yahoo2/yahoo.c:930
+#: modules/yahoo2/yahoo.c:944
 #, c-format
 msgid "<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"
 msgstr "<FONT COLOR=\"#0000FF\">[%s पर ओफलाईन संदेश]</FONT><BR>%s"
 
-#: modules/yahoo2/yahoo.c:1072
+#: modules/yahoo2/yahoo.c:1092
 msgid "Save file as"
 msgstr "फा़ईल ऐसे सहेज़े"
 
-#: modules/yahoo2/yahoo.c:1096
+#: modules/yahoo2/yahoo.c:1118
 #, c-format
 msgid ""
 "%s, the yahoo user %s has sent you a file%s%s, Do you want to accept it?"
 msgstr ""
 "%s, yahoo प्रयोगकर्त्ता %s एक फाईल %s%s  भेजना चाहता है,क्या आप स्वीकार करना चाहते हैं?"
 
-#: modules/yahoo2/yahoo.c:1098
+#: modules/yahoo2/yahoo.c:1120
 msgid " with the message "
 msgstr "संदेश के साथ"
 
-#: modules/yahoo2/yahoo.c:1108
+#: modules/yahoo2/yahoo.c:1130
 msgid "Yahoo File Transfer"
 msgstr "Yahoo फ़ाईल स्थानान्नतरण"
 
-#: modules/yahoo2/yahoo.c:1292
+#: modules/yahoo2/yahoo.c:1323
 #, c-format
 msgid ""
 "The yahoo user %s declined your invitation to join conference %s, with the "
@@ -1193,18 +1193,18 @@ msgstr ""
 "yahoo प्रयोगकर्त्ता %s ने आपका सभा %s  से जुडने का आमन्त्रण , इस सन्देश  : %s : के साथ "
 "ठुकरा दिया है ।"
 
-#: modules/yahoo2/yahoo.c:1306 modules/yahoo2/yahoo.c:1774
-#: modules/yahoo2/yahoo.c:2061 modules/yahoo2/yahoo.c:2109
-#: modules/yahoo2/yahoo.c:2262 modules/yahoo2/yahoo.c:2408
-#: modules/yahoo2/yahoo.c:3324
+#: modules/yahoo2/yahoo.c:1337 modules/yahoo2/yahoo.c:1822
+#: modules/yahoo2/yahoo.c:2150 modules/yahoo2/yahoo.c:2203
+#: modules/yahoo2/yahoo.c:2357 modules/yahoo2/yahoo.c:2521
+#: modules/yahoo2/yahoo.c:3481
 msgid "Yahoo Error"
 msgstr "Yahoo दोष"
 
-#: modules/yahoo2/yahoo.c:1335 modules/yahoo2/yahoo.c:1412
+#: modules/yahoo2/yahoo.c:1367 modules/yahoo2/yahoo.c:1449
 msgid "Thanks, but no thanks"
 msgstr "धन्यवाद , परन्तु मुझे कोई दिलचस्पी नही"
 
-#: modules/yahoo2/yahoo.c:1349
+#: modules/yahoo2/yahoo.c:1383
 #, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to a conference - %s, the topic is %"
@@ -1213,29 +1213,29 @@ msgstr ""
 "%s, yahoo प्रयोगकर्त्ता %s ने आपको सभा -  %s  से जुडने का आमन्त्रण , इस विषय : %s : के "
 "साथ दिया है ।\n"
 
-#: modules/yahoo2/yahoo.c:1350
+#: modules/yahoo2/yahoo.c:1384
 #, c-format
 msgid "Do you want to join?"
 msgstr "क्या आप जुडना चाहते है?"
 
-#: modules/yahoo2/yahoo.c:1356
+#: modules/yahoo2/yahoo.c:1390
 msgid "Yahoo Join Conference"
 msgstr "Yahoo सभा से जुडें"
 
-#: modules/yahoo2/yahoo.c:1568
+#: modules/yahoo2/yahoo.c:1607
 msgid "Join my conference"
 msgstr "मेरी सभा से जुडें"
 
-#: modules/yahoo2/yahoo.c:1699
+#: modules/yahoo2/yahoo.c:1741
 #, c-format
 msgid "%s's webcam"
 msgstr "%s का वेबकेम"
 
-#: modules/yahoo2/yahoo.c:1774 modules/yahoo2/yahoo.c:2061
+#: modules/yahoo2/yahoo.c:1824 modules/yahoo2/yahoo.c:2152
 msgid "Cannot find a valid local account to view user's webcam."
 msgstr "प्रयोगकर्त्ता का वेबकेम देखने के लिए कोई लोकल ख़ाता नहीं मिला ।"
 
-#: modules/yahoo2/yahoo.c:1789
+#: modules/yahoo2/yahoo.c:1841
 #, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to view their webcam.Do you want to "
@@ -1244,36 +1244,36 @@ msgstr ""
 "%s, yahoo प्रयोगकर्त्ता %s अपना वेबकेम आपको दिख़ाने के लिए आमन्त्रण दे रहा है । क्या आप "
 "स्वीकार करते हैं?"
 
-#: modules/yahoo2/yahoo.c:1794
+#: modules/yahoo2/yahoo.c:1846
 msgid "Yahoo Webcam Invitation"
 msgstr "Yahoo  वेबकेम आमन्त्रण"
 
-#: modules/yahoo2/yahoo.c:1822
+#: modules/yahoo2/yahoo.c:1875
 #, c-format
 msgid "%s, webcam connection closed. %s "
 msgstr "%s, वेबकेम सम्पर्क बन्द । %s "
 
-#: modules/yahoo2/yahoo.c:1824
+#: modules/yahoo2/yahoo.c:1879
 msgid "stopped broadcasting."
 msgstr "प्रसार बन्द ।"
 
-#: modules/yahoo2/yahoo.c:1826
+#: modules/yahoo2/yahoo.c:1883
 msgid "cancelled viewing permission."
 msgstr "देखने की आज्ञा निषेध ।"
 
-#: modules/yahoo2/yahoo.c:1828
+#: modules/yahoo2/yahoo.c:1887
 msgid "declined you permission."
 msgstr "आपकी अनुमति रद्द की ।"
 
-#: modules/yahoo2/yahoo.c:1830
+#: modules/yahoo2/yahoo.c:1891
 msgid "does not have their webcam online."
 msgstr "उनका वेबकेम उपस्थित नही है ।"
 
-#: modules/yahoo2/yahoo.c:1832
+#: modules/yahoo2/yahoo.c:1895
 msgid "did something we don't know about."
 msgstr "ने कुछ किया जो हमे नहीं पता ।"
 
-#: modules/yahoo2/yahoo.c:1838
+#: modules/yahoo2/yahoo.c:1902
 msgid ""
 "\n"
 "Close image window?"
@@ -1281,26 +1281,26 @@ msgstr ""
 "\n"
 "चित्र पट बन्द करें?"
 
-#: modules/yahoo2/yahoo.c:1839 modules/yahoo2/yahoo.c:1841
+#: modules/yahoo2/yahoo.c:1904 modules/yahoo2/yahoo.c:1907
 msgid "Webcam connection closed"
 msgstr "वेबकेम सम्पर्क बन्द"
 
-#: modules/yahoo2/yahoo.c:1889 modules/yahoo2/yahoo.c:1958
+#: modules/yahoo2/yahoo.c:1955 modules/yahoo2/yahoo.c:2036
 #, c-format
 msgid "My webcam (%d viewer%s)"
 msgstr "मेरा वेबकेम (%d दर्शक %s)"
 
-#: modules/yahoo2/yahoo.c:1934
+#: modules/yahoo2/yahoo.c:2005
 #, c-format
 msgid "%s, the yahoo user %s has stopped viewing your webcam."
 msgstr "%s, yahoo प्रयोगकर्त्ता %s आपका वेबकेम देखना बन्द किया ।"
 
-#: modules/yahoo2/yahoo.c:1939
+#: modules/yahoo2/yahoo.c:2011
 #, c-format
 msgid "%s, the yahoo user %s is viewing your webcam."
 msgstr "%s, yahoo प्रयोगकर्त्ता %s आपका वेबकेम देख रह़ा है ।"
 
-#: modules/yahoo2/yahoo.c:1944
+#: modules/yahoo2/yahoo.c:2018
 #, c-format
 msgid ""
 "%s, the yahoo user %s wants to view your webcam.\n"
@@ -1309,7 +1309,7 @@ msgstr ""
 "%s, yahoo प्रयोगकर्त्ता %s आपका वेबकेम देखना चाहता है ।\n"
 "क्या आप अनुमति देते हैं ?"
 
-#: modules/yahoo2/yahoo.c:1948
+#: modules/yahoo2/yahoo.c:2024
 #, c-format
 msgid ""
 "%s, the yahoo user %s wants to %d your webcam.  Tell the ayttm devels about "
@@ -1318,38 +1318,38 @@ msgstr ""
 "%s, yahoo प्रयोगकर्त्ता %s आपका वेबकेम %d चाहता है । ayttm डेवलपर्स को इसके बारे मे "
 "बताएँ ।"
 
-#: modules/yahoo2/yahoo.c:1956 modules/yahoo2/yahoo.c:1982
+#: modules/yahoo2/yahoo.c:2033 modules/yahoo2/yahoo.c:2062
 msgid "Yahoo Webcam"
 msgstr "Yahoo वेबकेम"
 
-#: modules/yahoo2/yahoo.c:1966
+#: modules/yahoo2/yahoo.c:2045
 msgid "Yahoo Webcam Request"
 msgstr "Yahoo वेबकेम प्रार्थना"
 
-#: modules/yahoo2/yahoo.c:1982
+#: modules/yahoo2/yahoo.c:2064
 msgid "Could not read images from your webcam, could not find a video grabber."
 msgstr "वेबकेम से तसवीर नहीं देख सकते,वि‍‍डीयो ग्रेबर नही मिला ।"
 
-#: modules/yahoo2/yahoo.c:2037
+#: modules/yahoo2/yahoo.c:2122
 #, c-format
 msgid "%s, the yahoo user %s has declined your invitation to view your webcam."
 msgstr ""
 "%s, yahoo प्रयोगकर्त्ता %s ने आपका अपना वेबकेम दिखाने का आमन्त्रण ठुकरा दिया है । "
 
-#: modules/yahoo2/yahoo.c:2038
+#: modules/yahoo2/yahoo.c:2124
 msgid "Webcam invite declined"
 msgstr "वेबकेम निमन्त्रण रद्द"
 
-#: modules/yahoo2/yahoo.c:2107
+#: modules/yahoo2/yahoo.c:2201
 #, c-format
 msgid "%s has rejected your request to be added as a buddy%s%s"
 msgstr "%s ने आपकी मित्र बनने की प्रार्थना रद्द की %s%s"
 
-#: modules/yahoo2/yahoo.c:2108
+#: modules/yahoo2/yahoo.c:2202
 msgid " with the message:\n"
 msgstr "सन्देश के साथ:\n"
 
-#: modules/yahoo2/yahoo.c:2120
+#: modules/yahoo2/yahoo.c:2216
 #, fuzzy, c-format
 msgid ""
 "%s, the yahoo user \n"
@@ -1359,7 +1359,7 @@ msgid ""
 "has added you to their contact list"
 msgstr "%s, yahoo प्रयोगकर्त्ता %s  आपकी सम्पर्क सूची में सम्मिलित"
 
-#: modules/yahoo2/yahoo.c:2123
+#: modules/yahoo2/yahoo.c:2219
 #, fuzzy
 msgid ""
 " with the following message:\n"
@@ -1367,52 +1367,52 @@ msgid ""
 "<i>"
 msgstr "निम्नलिखित सन्देश के साथ:\n"
 
-#: modules/yahoo2/yahoo.c:2129
+#: modules/yahoo2/yahoo.c:2225
 msgid "Do you want to allow this?"
 msgstr "क्या आप इसे अनुमति देना चाहते है?"
 
-#: modules/yahoo2/yahoo.c:2133
+#: modules/yahoo2/yahoo.c:2229
 msgid "Yahoo New Contact"
 msgstr "Yahoo नया सम्पर्क"
 
-#: modules/yahoo2/yahoo.c:2228
+#: modules/yahoo2/yahoo.c:2324
 #, c-format
 msgid "You have new mail from %s about %s\n"
 msgstr "एक नई मेल है %s की तरफ़ से %s के बारे में \n"
 
-#: modules/yahoo2/yahoo.c:2234
+#: modules/yahoo2/yahoo.c:2329
 #, c-format
 msgid "You have %d message%s\n"
 msgstr "आपके लिए %d संदेश%s हैं ।\n"
 
-#: modules/yahoo2/yahoo.c:2235
+#: modules/yahoo2/yahoo.c:2330
 msgid "s"
 msgstr "स"
 
-#: modules/yahoo2/yahoo.c:2240
+#: modules/yahoo2/yahoo.c:2335
 msgid "Yahoo Mail"
 msgstr "Yahoo मेल"
 
-#: modules/yahoo2/yahoo.c:2252
+#: modules/yahoo2/yahoo.c:2348
 #, fuzzy, c-format
 msgid "%s: Yahoo System Message"
 msgstr "Yahoo सिस्टम संदेश"
 
-#: modules/yahoo2/yahoo.c:2322
+#: modules/yahoo2/yahoo.c:2416
 #, c-format
 msgid "Logging in to Yahoo account: %s"
 msgstr "Yahoo! खाते :  %s में प्रवेश हो रहा है ।"
 
-#: modules/yahoo2/yahoo.c:2351
+#: modules/yahoo2/yahoo.c:2447
 #, c-format
 msgid "Yahoo! password for: %s"
 msgstr "Yahoo! पासवर्ड : %s के ल‍िए ।"
 
-#: modules/yahoo2/yahoo.c:2374
+#: modules/yahoo2/yahoo.c:2472
 msgid "Fetching buddies..."
 msgstr ""
 
-#: modules/yahoo2/yahoo.c:2387
+#: modules/yahoo2/yahoo.c:2488
 #, c-format
 msgid ""
 "Could not log into Yahoo service - username not recognised.  Please verify "
@@ -1421,7 +1421,7 @@ msgstr ""
 "Yahoo सर्विस में प्रवेश निषेध - प्रयोगकर्त्ता नाम पहचान असफल. कृप्या प्रयोगकर्त्ता नाम जाँच "
 "लें कि वह सही लिखा है ।"
 
-#: modules/yahoo2/yahoo.c:2390
+#: modules/yahoo2/yahoo.c:2493
 #, c-format
 msgid ""
 "Could not log into Yahoo service - incorrect password.  Please verify that "
@@ -1429,7 +1429,7 @@ msgid ""
 msgstr ""
 "Yahoo सर्विस में प्रवेश निषेध - गलत पासवर्ड . कृप्या पासवर्ड जाँच लें कि वह सही लिखा है ।"
 
-#: modules/yahoo2/yahoo.c:2394
+#: modules/yahoo2/yahoo.c:2499
 #, c-format
 msgid ""
 "Could not log into Yahoo service.  Your account has been locked.\n"
@@ -1438,14 +1438,14 @@ msgstr ""
 "Yahoo सर्विस में प्रवेश निषेध ।आपका ख़ाता बन्द कर दिया गया है ।\n"
 "उसे फिर से चालू करने के लिए %s पर जाएँ ।"
 
-#: modules/yahoo2/yahoo.c:2397
+#: modules/yahoo2/yahoo.c:2505
 #, c-format
 msgid ""
 "You have been logged out of the yahoo service, possibly due to a duplicate "
 "login."
 msgstr "शायद दूसरी जगह प्रवेश के कारण आप yahoo सर्विस से बाहर कर दिए गए हैं।"
 
-#: modules/yahoo2/yahoo.c:2399
+#: modules/yahoo2/yahoo.c:2509
 #, c-format
 msgid ""
 "Could not connect to Yahoo server.  Please verify that you are connected to "
@@ -1454,70 +1454,70 @@ msgstr ""
 "Yahoo सर्वर से सम्पर्क बन्द।कृप्या जाँच लें कि आप नेट से जुडे हुए है तथा host और port सही डले "
 "हुए है ।"
 
-#: modules/yahoo2/yahoo.c:2401
+#: modules/yahoo2/yahoo.c:2513
 #, c-format
 msgid "Could not log into Yahoo service due to unknown state: %d\n"
 msgstr "अपरीचित अवस्था : %d : के कारण Yahoo सर्विस में प्रवेश निषेध।\n"
 
-#: modules/yahoo2/yahoo.c:2521
+#: modules/yahoo2/yahoo.c:2636
 msgid "_Yahoo Id:"
 msgstr "_Yahoo Id:"
 
-#: modules/yahoo2/yahoo.c:2549
+#: modules/yahoo2/yahoo.c:2664
 msgid "Yahoo _Mail Notification"
 msgstr "Yahoo मेल सूचना(_M)"
 
-#: modules/yahoo2/yahoo.c:2556
+#: modules/yahoo2/yahoo.c:2671
 msgid "Login _invisible"
 msgstr "अदृश्य प्रवेश(_i)"
 
-#: modules/yahoo2/yahoo.c:2563
+#: modules/yahoo2/yahoo.c:2678
 msgid "Ignore _System Messages"
 msgstr "सिस्टम संदेश पर ध्यान न दें"
 
-#: modules/yahoo2/yahoo.c:2822 modules/yahoo2/yahoo.c:2865
-#: src/chat_window.c:697 src/chat_window.c:1393 src/contact_util.C:600
-#: src/contact_util.C:604 src/offline_queue_mgmt.c:161
-#: src/offline_queue_mgmt.c:163 src/status.c:1250 src/status.c:1624
-#: src/status.c:1659 src/util.c:1102 src/util.c:1234 src/util.c:1238
+#: modules/yahoo2/yahoo.c:2946 modules/yahoo2/yahoo.c:2991
+#: src/chat_window.c:728 src/chat_window.c:1485 src/contact_util.C:600
+#: src/contact_util.C:604 src/offline_queue_mgmt.c:163
+#: src/offline_queue_mgmt.c:166 src/status.c:1269 src/status.c:1640
+#: src/status.c:1673 src/util.c:1150 src/util.c:1283 src/util.c:1287
 msgid "Ignore"
 msgstr "ध्यान न दे"
 
-#: modules/yahoo2/yahoo.c:3031
+#: modules/yahoo2/yahoo.c:3167
 #, c-format
 msgid "%s for %d:%02d:%02d"
 msgstr "%s for %d:%02d:%02d"
 
-#: modules/yahoo2/yahoo.c:3296
+#: modules/yahoo2/yahoo.c:3452
 #, c-format
 msgid "Yahoo read error (%d): %s"
 msgstr "Yahoo पढ़ने में दोष (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3300
+#: modules/yahoo2/yahoo.c:3456
 #, c-format
 msgid "Yahoo read error: Server closed socket"
 msgstr "Yahoo पढ़ने में दोष:सर्वर ने साकेट बन्द किया"
 
-#: modules/yahoo2/yahoo.c:3311
+#: modules/yahoo2/yahoo.c:3467
 #, c-format
 msgid "Yahoo write error (%d): %s"
 msgstr "Yahoo लिख़ने में दोष (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3315
+#: modules/yahoo2/yahoo.c:3471
 #, c-format
 msgid "Yahoo write error: Server closed socket"
 msgstr "Yahoo लिख़ने में दोष:सर्वर ने साकेट बन्द किया"
 
-#: modules/yahoo2/yahoo.c:3736 modules/yahoo2/yahoo.c:3741
+#: modules/yahoo2/yahoo.c:3897 modules/yahoo2/yahoo.c:3900
 msgid "Invite to view Webcam"
 msgstr "वेबकेम देखने के लिए निमन्त्रण दे "
 
-#: modules/yahoo2/yahoo.c:3750 modules/yahoo2/yahoo.c:3755
+#: modules/yahoo2/yahoo.c:3907 modules/yahoo2/yahoo.c:3910
 msgid "View Webcam"
 msgstr "वेबकेम देखें"
 
-#: src/action.c:80 src/action.c:93 src/action.c:126 src/action.c:139
-#: src/action.c:171 src/action.c:244 src/action.c:260
+#: src/action.c:79 src/action.c:93 src/action.c:124 src/action.c:136
+#: src/action.c:169 src/action.c:245 src/action.c:261
 msgid "Action Error"
 msgstr "क्रिया दोष"
 
@@ -1526,15 +1526,15 @@ msgstr "क्रिया दोष"
 msgid "Command line is invalid (missing %s and %p)."
 msgstr "समादेश अमान्य( %s तथा %p नही पाए गए) "
 
-#: src/action.c:93
+#: src/action.c:94
 msgid "Cannot run command : fork() failed."
 msgstr "समादेश निष्पा‍दित नही हो सकता : fork() असफल ।"
 
-#: src/action.c:126
+#: src/action.c:125
 msgid "Cannot use log: no logfile available."
 msgstr "log इस्तेमाल नही हो सकता : logfile नही है।"
 
-#: src/action.c:139
+#: src/action.c:137
 msgid "Cannot use log: logfile too short (!?)."
 msgstr "log इस्तेमाल नही हो सकता : logfile बहुत छोटी है(!?)।"
 
@@ -1542,27 +1542,27 @@ msgstr "log इस्तेमाल नही हो सकता : logfile ब
 msgid "Cannot use log: Impossible to create temporary file."
 msgstr "log इस्तेमाल नही हो सकता : अस्थाई फाइल बनाना असम्भव।"
 
-#: src/action.c:185 src/gtk/log_window.C:439
+#: src/action.c:186 src/gtk/log_window.C:439
 msgid "Conversation ended on "
 msgstr "पर वार्तालाप ख़त्म"
 
-#: src/action.c:187 src/gtk/log_window.C:394 src/gtk/log_window.C:400
+#: src/action.c:188 src/gtk/log_window.C:394 src/gtk/log_window.C:400
 msgid "Conversation started on "
 msgstr "पर वार्तालाप शुरु "
 
-#: src/action.c:260
+#: src/action.c:261
 msgid "No data available to use."
 msgstr "इस्तेमाल के लिए डेटा नही।"
 
-#: src/action.c:266
+#: src/action.c:267
 msgid "Action"
 msgstr "क्रियाएँ"
 
-#: src/action.c:266
+#: src/action.c:267
 msgid "Execute"
 msgstr "निष्पादन करें"
 
-#: src/action.c:267
+#: src/action.c:268
 #, c-format
 msgid ""
 "Enter the command to run here:\n"
@@ -1573,30 +1573,30 @@ msgstr ""
 " %s = वार्तालाप की फ़ाइल ( HTML में)दिखाई\n"
 " %p = वार्तालाप की फ़ाइल (text में)दिखाई"
 
-#: src/add_contact_window.c:216 src/add_contact_window.c:220
-#: src/add_contact_window.c:232 src/edit_account_window.c:68
-#: src/edit_account_window.c:79
+#: src/add_contact_window.c:224 src/add_contact_window.c:229
+#: src/add_contact_window.c:242 src/edit_account_window.c:70
+#: src/edit_account_window.c:82
 msgid "Account error"
 msgstr "खाता दोष"
 
-#: src/add_contact_window.c:216
+#: src/add_contact_window.c:225
 #, fuzzy
 msgid "No Account Name specified."
 msgstr "कोई लोकल ख़ाता वर्णित नही ।"
 
-#: src/add_contact_window.c:220 src/chat_room.c:738
+#: src/add_contact_window.c:230 src/chat_room.c:785
 msgid "No local account specified."
 msgstr "कोई लोकल ख़ाता वर्णित नही ।"
 
-#: src/add_contact_window.c:232
+#: src/add_contact_window.c:243
 msgid "Local account doesn't exist."
 msgstr "कोई लोकल ख़ाता मौजूद नही ।"
 
-#: src/add_contact_window.c:240 src/crash.c:532
+#: src/add_contact_window.c:251 src/crash.c:530
 msgid "Error"
 msgstr " दोष"
 
-#: src/add_contact_window.c:240
+#: src/add_contact_window.c:253
 msgid ""
 "Creation of this contact is impossible.\n"
 "The service chosen is unavailable."
@@ -1604,8 +1604,8 @@ msgstr ""
 "इस सम्पर्क की रचना असम्भव।\n"
 "चुनी हुई सर्विस अनुपस्थित।"
 
-#: src/add_contact_window.c:252 src/edit_local_accounts.c:338
-#: src/edit_local_accounts.c:391
+#: src/add_contact_window.c:268 src/edit_local_accounts.c:346
+#: src/edit_local_accounts.c:404
 #, c-format
 msgid ""
 "This account is not a valid %s account: \n"
@@ -1616,44 +1616,44 @@ msgstr ""
 "\n"
 " %s"
 
-#: src/add_contact_window.c:255 src/edit_local_accounts.c:341
-#: src/edit_local_accounts.c:355 src/edit_local_accounts.c:394
-#: src/edit_local_accounts.c:406 src/edit_local_accounts.c:522
-#: src/service.c:133
+#: src/add_contact_window.c:271 src/edit_local_accounts.c:350
+#: src/edit_local_accounts.c:366 src/edit_local_accounts.c:407
+#: src/edit_local_accounts.c:421 src/edit_local_accounts.c:531
+#: src/service.c:152
 msgid "Invalid Account"
 msgstr "अवैध ख़ाता"
 
-#: src/add_contact_window.c:301
+#: src/add_contact_window.c:319
 #, fuzzy
 msgid "No Local Accounts"
 msgstr "लोकल ख़ाता बदलें"
 
-#: src/add_contact_window.c:301
+#: src/add_contact_window.c:321
 msgid "Cannot add contacts. You have not added any chat accounts yet"
 msgstr ""
 
-#: src/add_contact_window.c:314
+#: src/add_contact_window.c:334
 msgid "_Account: "
 msgstr "ख़ाता(_A):"
 
-#: src/add_contact_window.c:332
+#: src/add_contact_window.c:355
 msgid "_Local account: "
 msgstr "लोकल ख़ाता(_L):"
 
-#: src/add_contact_window.c:361
+#: src/add_contact_window.c:387
 #, fuzzy
 msgid "Contact: "
 msgstr "सम्पर्क(_C): "
 
-#: src/add_contact_window.c:390 src/edit_contact_window.c:103
+#: src/add_contact_window.c:422 src/edit_contact_window.c:106
 msgid "_Group: "
 msgstr "समुदाय(_G):"
 
-#: src/add_contact_window.c:421 src/chat_window.c:889 src/chat_window.c:2200
+#: src/add_contact_window.c:459 src/chat_window.c:936 src/chat_window.c:2426
 msgid "Add Contact"
 msgstr "सम्पर्क जोडे"
 
-#: src/add_contact_window.c:426
+#: src/add_contact_window.c:464
 msgid "Ayttm - Add Contact"
 msgstr "Ayttm - सम्पर्क जोडें"
 
@@ -1669,7 +1669,7 @@ msgstr "अवर्तमान करें"
 msgid "You are currently away, click \"I'm back\" to return"
 msgstr "आप अभी अवर्तमान है ,वापिस आने के लिए \"मैं वापिस आ गया हूँ \" पर क्लिक करें ।"
 
-#: src/away_window.c:109
+#: src/away_window.c:110
 msgid ""
 "This is the away message that will \n"
 "be sent to people messaging you.\n"
@@ -1679,185 +1679,185 @@ msgstr ""
 "आपको संदेश देने वालो को भेजा जाएगा \n"
 "आप इच्छानुसार इसे सम्पादित भी कर सकते है।"
 
-#: src/away_window.c:125
+#: src/away_window.c:129
 msgid "I'm Back"
 msgstr "मैं वापिस आ गया हूँ"
 
-#: src/away_window.c:141 src/chat_window.c:1076
+#: src/away_window.c:145 src/chat_window.c:1147
 msgid "Away"
 msgstr "अवर्तमान"
 
-#: src/chat_room.c:553
+#: src/chat_room.c:589
 msgid "Chatroom error"
 msgstr "चेटरुम दोष"
 
-#: src/chat_room.c:553
+#: src/chat_room.c:591
 msgid "Cannot invite a third party until a protocol has been chosen."
 msgstr "जब तक प्रोटोकोल नहीं चुनते आप किसी तीसरी party को आमन्त्रित नही करे सकते ।"
 
-#: src/chat_room.c:561 src/chat_room.c:600
+#: src/chat_room.c:602 src/chat_room.c:645
 msgid "Invite a contact"
 msgstr "सम्पर्क आमन्त्रित करें"
 
-#: src/chat_room.c:573
+#: src/chat_room.c:614
 msgid "Handle: "
 msgstr ""
 
-#: src/chat_room.c:587
+#: src/chat_room.c:630
 msgid "Message: "
 msgstr "संदेश:"
 
-#: src/chat_room.c:610 src/chat_room.c:1537 src/chat_window.c:949
+#: src/chat_room.c:655 src/chat_room.c:1677 src/chat_window.c:1007
 msgid "Invite"
 msgstr "आमन्त्रण दें"
 
-#: src/chat_room.c:649
+#: src/chat_room.c:695
 #, c-format
 msgid "Chatroom %d"
 msgstr "चेटरुम %d"
 
-#: src/chat_room.c:738 src/chat_room.c:755
+#: src/chat_room.c:785 src/chat_room.c:803
 msgid "Cannot join"
 msgstr "जोड नही सकते"
 
-#: src/chat_room.c:755 src/chat_room.c:845 src/edit_account_window.c:68
-#: src/edit_account_window.c:79
+#: src/chat_room.c:804 src/chat_room.c:907 src/edit_account_window.c:71
+#: src/edit_account_window.c:83
 msgid "The local account doesn't exist."
 msgstr "यह लोकल ख़ाता मौजूद नही ।"
 
-#: src/chat_room.c:809 src/chat_room.c:845
+#: src/chat_room.c:865 src/chat_room.c:906
 msgid "Cannot list chatrooms"
 msgstr "चेटरुम सूची नही बन सकती"
 
-#: src/chat_room.c:809
+#: src/chat_room.c:866
 msgid "No list available."
 msgstr "कोई सूची मौजूद नही ।"
 
-#: src/chat_room.c:813
+#: src/chat_room.c:870
 msgid "Select a chatroom."
 msgstr "चेटरुम चुनिए "
 
-#: src/chat_room.c:813
+#: src/chat_room.c:870
 msgid "Public chatrooms list"
 msgstr "सार्वजनिक चेटरुम सूची"
 
-#: src/chat_room.c:815 src/chat_room.c:914
+#: src/chat_room.c:873 src/chat_room.c:983
 msgid "List public chatrooms..."
 msgstr "सार्वजनिक चेटरुम सूचित करें..."
 
-#: src/chat_room.c:849
+#: src/chat_room.c:912
 msgid "Loading List. This may take a while..."
 msgstr ""
 
-#: src/chat_room.c:884
+#: src/chat_room.c:949
 msgid "Chat Room Name: "
 msgstr "चेटरुम नाम:"
 
-#: src/chat_room.c:895 src/edit_account_window.c:220
+#: src/chat_room.c:960 src/edit_account_window.c:233
 msgid "Local account: "
 msgstr "लोकल ख़ाता:"
 
-#: src/chat_room.c:905 src/chat_room.c:1755 src/chat_room.c:1756
+#: src/chat_room.c:971 src/chat_room.c:1911 src/chat_room.c:1912
 msgid "Reconnect at login"
 msgstr "प्रवेश होने पर पुन:सम्पर्क स्थापित करें"
 
-#: src/chat_room.c:909
+#: src/chat_room.c:977
 msgid "Chatroom is public"
 msgstr "चेटरुम सार्वजनिक है"
 
-#: src/chat_room.c:921
+#: src/chat_room.c:991
 msgid "Join a Chat Room"
 msgstr "किसी चेटरुम से जुडें"
 
-#: src/chat_room.c:953
+#: src/chat_room.c:1024
 msgid "Join"
 msgstr "जुडें"
 
-#: src/chat_room.c:1099 src/chat_room.c:1120
+#: src/chat_room.c:1176 src/chat_room.c:1199
 #, fuzzy, c-format
 msgid "Online: %i"
 msgstr "ओनलाइन"
 
-#: src/chat_room.c:1184
+#: src/chat_room.c:1273
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s has joined the chat.</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) गपशप में सम्मिलित हो गया है </b></body>"
 
-#: src/chat_room.c:1187
+#: src/chat_room.c:1276
 #, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) has joined the chat.</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) गपशप में सम्मिलित हो गया है </b></body>"
 
-#: src/chat_room.c:1219
+#: src/chat_room.c:1312
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s is now known as %s</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s ने प्रवेश किया %s @ %s.\n"
 "</b></body>"
 
-#: src/chat_room.c:1264 src/chat_room.c:1270
+#: src/chat_room.c:1365 src/chat_room.c:1375
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s has left the chat%s</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s  ने गपशप छोड दी है ।</b></body>"
 
-#: src/chat_room.c:1267
+#: src/chat_room.c:1370
 #, fuzzy, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat%s</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s (%s) ने गपशप छोड दी है ।</b></body>"
 
-#: src/chat_room.c:1518 src/chat_window.c:909
+#: src/chat_room.c:1653 src/chat_window.c:960
 msgid "Disable Sounds"
 msgstr "ध्वनि असमर्थ करें"
 
-#: src/chat_room.c:1526 src/chat_window.c:917
+#: src/chat_room.c:1664 src/chat_window.c:971
 #, c-format
 msgid "Set Character Encoding (%s)"
 msgstr ""
 
-#: src/chat_room.c:1528 src/chat_window.c:919
+#: src/chat_room.c:1667 src/chat_window.c:974
 #, c-format
 msgid "Set Character Encoding"
 msgstr ""
 
-#: src/chat_room.c:1543 src/chat_room.c:1792 src/chat_window.c:961
+#: src/chat_room.c:1684 src/chat_room.c:1942 src/chat_window.c:1021
 msgid "Send Message"
 msgstr "संदेशा भेजें"
 
-#: src/chat_room.c:1549 src/chat_room.c:1796 src/chat_window.c:979
-#: src/crash.c:268 src/gtk/about_window.c:193 src/image_window.c:149
+#: src/chat_room.c:1691 src/chat_room.c:1947 src/chat_window.c:1044
+#: src/crash.c:264 src/gtk/about_window.c:197 src/image_window.c:158
 msgid "Close"
 msgstr "बन्द करें"
 
-#: src/chat_room.c:1593 src/status.c:2561
+#: src/chat_room.c:1737 src/status.c:2608
 msgid "Online"
 msgstr "ओनलाइन"
 
-#: src/chat_room.c:1665
+#: src/chat_room.c:1816
 msgid "Invite User"
 msgstr "प्रयोगकर्त्ता आमन्त्रित करें"
 
-#: src/chat_room.c:1745 src/chat_window.c:2239
+#: src/chat_room.c:1901 src/chat_window.c:2472
 msgid "Insert Smiley"
 msgstr "Smiley डालें"
 
-#: src/chat_room.c:1767 src/chat_window.c:2252 src/gtk/prefs_window.C:495
+#: src/chat_room.c:1920 src/chat_window.c:2488 src/gtk/prefs_window.C:495
 msgid "Sound"
 msgstr "ध्वनि"
 
-#: src/chat_room.c:1768
+#: src/chat_room.c:1921
 msgid "Enable Sounds"
 msgstr "ध्वनियाँ समर्थ करें"
 
-#: src/chat_room.c:1789 src/chat_window.c:934 src/chat_window.c:2285
+#: src/chat_room.c:1938 src/chat_window.c:991 src/chat_window.c:2523
 #: src/gtk/log_window.C:264
 msgid "Actions..."
 msgstr "क्रियाएँ..."
 
-#: src/chat_window.c:492 src/chat_window.c:498 src/chat_window.c:723
+#: src/chat_window.c:517 src/chat_window.c:523 src/chat_window.c:758
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> Cannot send message - user is offline.</"
 "b></body>\n"
@@ -1865,7 +1865,7 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> संदेशा नही भेज सकते - प्रयोगकर्त्ता ओफलाइन है</b></"
 "body>\n"
 
-#: src/chat_window.c:514
+#: src/chat_window.c:542
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> Cannot send message - no local account "
 "found.</b></body>\n"
@@ -1873,43 +1873,43 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b>संदेशा नही भेज सकते - लोकल ख़ाता मौजूद नही</b></"
 "body>\n"
 
-#: src/chat_window.c:709
+#: src/chat_window.c:740
 #, c-format
 msgid "Do you really want to ignore %s?"
 msgstr "क्या आप वाकई %s पर ध्यान नहीं देना चाहते है ?"
 
-#: src/chat_window.c:711 src/chat_window.c:955
+#: src/chat_window.c:743 src/chat_window.c:1014
 msgid "Ignore Contact"
 msgstr "सम्पर्क पर ध्यान नहीं दे"
 
-#: src/chat_window.c:833
+#: src/chat_window.c:875
 msgid "Change Local Account"
 msgstr "लोकल ख़ाता बदलें"
 
-#: src/chat_window.c:898
+#: src/chat_window.c:947
 msgid "Offline Messaging"
 msgstr "ओफलाइन संदेशन"
 
-#: src/chat_window.c:928 src/status.c:652
+#: src/chat_window.c:984 src/status.c:669
 msgid "View Log"
 msgstr "Log देखें"
 
-#: src/chat_window.c:943 src/status.c:643
+#: src/chat_window.c:1001 src/status.c:660
 msgid "Send File"
 msgstr "फाइल भेजें "
 
-#: src/chat_window.c:1075
+#: src/chat_window.c:1146
 msgid ""
 "You are currently away. \n"
 "\n"
 "Do you want to be back Online?"
 msgstr ""
 
-#: src/chat_window.c:1310
+#: src/chat_window.c:1397
 msgid "<b>Error: </b>"
 msgstr "<b>दोष: </b>"
 
-#: src/chat_window.c:1330
+#: src/chat_window.c:1419
 #, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s is logged %s @ %s.\n"
@@ -1918,135 +1918,137 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s ने प्रवेश किया %s @ %s.\n"
 "</b></body>"
 
-#: src/chat_window.c:1331
+#: src/chat_window.c:1420
 msgid "in"
 msgstr "अन्दर "
 
-#: src/chat_window.c:1331
+#: src/chat_window.c:1420
 msgid "out"
 msgstr "बाहर"
 
-#: src/chat_window.c:1693
+#: src/chat_window.c:1831
 #, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s changed status to %s @ %s.</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s ने अपनी स्थिति में %s @ %s बदली।</b></body>"
 
-#: src/chat_window.c:1694
+#: src/chat_window.c:1833
 msgid "(Online)"
 msgstr "(ओनलाइन)"
 
-#: src/chat_window.c:1719 src/chat_window.c:1800
+#: src/chat_window.c:1858 src/chat_window.c:1859 src/chat_window.c:1972
+#: src/chat_window.c:1973
 msgid "Conversation started"
 msgstr "बातचीत प्रारम्भ "
 
-#: src/chat_window.c:1720 src/chat_window.c:1721
+#: src/chat_window.c:1862 src/chat_window.c:1863
 #, c-format
 msgid "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>बातचीत प्रारम्भ "
 
-#: src/chat_window.c:1722 src/chat_window.c:1723
+#: src/chat_window.c:1865 src/chat_window.c:1866
 msgid "<HR WIDTH=\"100%\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%\"><B>बातचीत प्रारम्भ "
 
-#: src/chat_window.c:1755 src/chat_window.c:1761 src/chat_window.c:1766
-#: src/chat_window.c:1792 src/chat_window.c:1801 src/chat_window.c:1805
+#: src/chat_window.c:1902 src/chat_window.c:1913 src/chat_window.c:1923
+#: src/chat_window.c:1961 src/chat_window.c:1976 src/chat_window.c:1985
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s</b></body>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s</b></body>"
 
-#: src/chat_window.c:1770 src/chat_window.c:1771
+#: src/chat_window.c:1927 src/chat_window.c:1929
 msgid "<B>Conversation "
 msgstr "<B>बातचीत"
 
-#: src/chat_window.c:1771 src/chat_window.c:1778
+#: src/chat_window.c:1930 src/chat_window.c:1942
 msgid "ended on"
 msgstr ""
 
-#: src/chat_window.c:1772 src/chat_window.c:1779
+#: src/chat_window.c:1933 src/chat_window.c:1945
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s</b></body>\n"
 
-#: src/chat_window.c:1777 src/chat_window.c:1778
+#: src/chat_window.c:1940 src/chat_window.c:1942
 msgid "<P ALIGN=\"CENTER\"><B>Conversation "
 msgstr "<P ALIGN=\"CENTER\"><B>बातचीत"
 
-#: src/chat_window.c:1785 src/chat_window.c:1786 src/chat_window.c:1790
+#: src/chat_window.c:1951 src/chat_window.c:1952 src/chat_window.c:1953
+#: src/chat_window.c:1957
 msgid "<P><hr><b>"
 msgstr "<P><hr><b>"
 
-#: src/chat_window.c:1787
+#: src/chat_window.c:1954
 msgid "changed status to"
 msgstr ""
 
-#: src/chat_window.c:1804
+#: src/chat_window.c:1981 src/chat_window.c:1982
 msgid "Conversation ended"
 msgstr "गपशप समाप्त"
 
-#: src/chat_window.c:1869
+#: src/chat_window.c:2076
 #, c-format
 msgid "<body bgcolor=#F9E589 width=*>%sConversation ended%s</body>\n"
 msgstr "<body bgcolor=#F9E589 width=*>%s बातचीत समाप्त %s</body>\n"
 
-#: src/chat_window.c:2210
+#: src/chat_window.c:2439
 msgid "Allow"
 msgstr "स्वीकार करें"
 
-#: src/chat_window.c:2215
+#: src/chat_window.c:2446
 #, fuzzy
 msgid "Allow Offline Messaging Ctrl+O"
 msgstr "ओफलाइन संदेशन"
 
-#: src/chat_window.c:2257
+#: src/chat_window.c:2494
 #, fuzzy
 msgid "Enable Sounds Ctrl+S"
 msgstr "ध्वनियाँ समर्थ करें CTRL+S"
 
-#: src/chat_window.c:2277
+#: src/chat_window.c:2514
 msgid "View Log CTRL+L"
 msgstr "Log देखें CTRL+L"
 
-#: src/chat_window.c:2294
+#: src/chat_window.c:2533
 msgid "Send File CTRL+T"
 msgstr "फाइल भेजें CTRL+T"
 
-#: src/chat_window.c:2302
+#: src/chat_window.c:2542
 msgid "Invite CTRL+I"
 msgstr "आमन्त्रित करें CTRL+I"
 
-#: src/chat_window.c:2310
+#: src/chat_window.c:2551
 msgid "Ignore CTRL+G"
 msgstr "ध्यान नहीं दे CTRL+G"
 
-#: src/chat_window.c:2318
+#: src/chat_window.c:2560
 msgid "Send Message CTRL+R"
 msgstr "संदेश भेजें CTRL+R"
 
-#: src/chat_window.c:2326 src/chat_window.c:2328
+#: src/chat_window.c:2569 src/chat_window.c:2572
 msgid "Close CTRL+Q"
 msgstr "बन्द करें CTRL+Q"
 
-#: src/chat_window.c:2442
+#: src/chat_window.c:2692
 #, c-format
 msgid "Character Encoding for %s"
 msgstr ""
 
-#: src/contact_actions.c:59
+#: src/contact_actions.c:63
 msgid "Select file to send"
 msgstr "भेजने के लिए फाईल चुनिए"
 
-#: src/crash.c:158
+#: src/crash.c:156
 #, c-format
 msgid "Ayttm process (%ld) received signal %ld"
 msgstr ""
 
-#: src/crash.c:197
+#: src/crash.c:196
 msgid "Ayttm has crashed"
 msgstr ""
 
-#: src/crash.c:215
+#: src/crash.c:214
 #, c-format
 msgid ""
 "%s.\n"
@@ -2061,91 +2063,91 @@ msgid ""
 "Please file a bug report and include the information below."
 msgstr ""
 
-#: src/crash.c:224
+#: src/crash.c:225
 msgid "Debug log"
 msgstr "log दोष मुक्त करें"
 
-#: src/crash.c:273
+#: src/crash.c:269
 msgid "Save to current directory"
 msgstr ""
 
-#: src/crash.c:282
+#: src/crash.c:280
 msgid "Create bug report"
 msgstr "दोष प्रतिवेदन करें"
 
-#: src/crash.c:530
+#: src/crash.c:528
 #, c-format
 msgid ""
 "Caught strange signal (%d). This is probably\n"
 "due to a broken compilation; Exiting."
 msgstr ""
 
-#: src/dialog.c:232 src/dialog.c:306
+#: src/dialog.c:223 src/dialog.c:293
 #, fuzzy
 msgid "Ayttm"
 msgstr "बन्द करें"
 
-#: src/edit_account_window.c:60 src/edit_account_window.c:74
-#: src/edit_account_window.c:240 src/edit_account_window.c:241
-#: src/edit_account_window.c:298
+#: src/edit_account_window.c:62 src/edit_account_window.c:77
+#: src/edit_account_window.c:260 src/edit_account_window.c:261
+#: src/edit_account_window.c:319
 msgid "[None]"
 msgstr ""
 
-#: src/edit_account_window.c:184
+#: src/edit_account_window.c:191
 msgid "Contact Name: "
 msgstr "सम्पर्क नाम:"
 
-#: src/edit_account_window.c:199
+#: src/edit_account_window.c:208
 msgid "Group Name: "
 msgstr "समूह नाम:"
 
-#: src/edit_account_window.c:303
+#: src/edit_account_window.c:324
 #, c-format
 msgid "%s - Account edition"
 msgstr "%s - ख़ाता सम्पादन"
 
-#: src/edit_account_window.c:318
+#: src/edit_account_window.c:340
 #, c-format
 msgid "Add %s to Contact List"
 msgstr "%s को सम्पर्क सूची में सम्मिलित करें"
 
-#: src/edit_account_window.c:318
+#: src/edit_account_window.c:341
 msgid "Add Unknown Contact"
 msgstr "अनजान सम्पर्क जोडें"
 
-#: src/edit_account_window.c:326
+#: src/edit_account_window.c:349
 #, c-format
 msgid "Edit %s"
 msgstr "%s को सम्पादित करें"
 
-#: src/edit_account_window.c:326
+#: src/edit_account_window.c:349
 msgid "Edit Account"
 msgstr "ख़ाता सम्पादित करें"
 
-#: src/edit_contact_window.c:85
+#: src/edit_contact_window.c:88
 #, fuzzy
 msgid "_Contact:"
 msgstr "सम्पर्क(_C): "
 
-#: src/edit_contact_window.c:131
+#: src/edit_contact_window.c:135
 msgid "Default _Protocol: "
 msgstr "प्राथमिक प्रोटोकोल(_P): "
 
-#: src/edit_contact_window.c:161 src/edit_group_window.c:108
+#: src/edit_contact_window.c:168 src/edit_group_window.c:108
 #, c-format
 msgid "Edit Properties for %s"
 msgstr " %s के लिए गुण सम्पादन करें ।"
 
-#: src/edit_contact_window.c:191
+#: src/edit_contact_window.c:198
 #, c-format
 msgid "%s - Edit Contact"
 msgstr "%s - सम्पर्क सम्पादन"
 
-#: src/edit_group_window.c:67
+#: src/edit_group_window.c:66
 msgid "Group Name:"
 msgstr "समूह नाम:"
 
-#: src/edit_group_window.c:76
+#: src/edit_group_window.c:75
 #, c-format
 msgid "%s group%s%s"
 msgstr "%s समूह%s%s"
@@ -2162,29 +2164,29 @@ msgstr "जोडे"
 msgid "Add group"
 msgstr "समूह जोडें"
 
-#: src/edit_list_window.c:247
+#: src/edit_list_window.c:249
 msgid "Delete"
 msgstr "नष्ट करें"
 
-#: src/edit_list_window.c:293
+#: src/edit_list_window.c:296
 msgid "Title"
 msgstr "शीर्षक"
 
-#: src/edit_list_window.c:429 src/edit_list_window.c:434
-#: src/edit_list_window.c:593
+#: src/edit_list_window.c:432 src/edit_list_window.c:437
+#: src/edit_list_window.c:596
 msgid "Save"
 msgstr "सहेजें"
 
-#: src/edit_list_window.c:431 src/edit_list_window.c:432
+#: src/edit_list_window.c:434 src/edit_list_window.c:435
 msgid "Replace saved"
 msgstr "बदलाव सहेजा"
 
-#: src/edit_list_window.c:467
+#: src/edit_list_window.c:470
 #, c-format
 msgid "You have to fill in \"%s\"."
 msgstr ""
 
-#: src/edit_list_window.c:468
+#: src/edit_list_window.c:472
 msgid "Input missing"
 msgstr ""
 
@@ -2192,39 +2194,39 @@ msgstr ""
 msgid "Title: "
 msgstr "शीर्षक:"
 
-#: src/edit_list_window.c:566
+#: src/edit_list_window.c:567
 msgid "Value:"
 msgstr "गुण:"
 
-#: src/edit_list_window.c:598
+#: src/edit_list_window.c:601
 #, c-format
 msgid "New %s"
 msgstr "नया %s"
 
-#: src/edit_list_window.c:620
+#: src/edit_list_window.c:622
 #, c-format
 msgid "Existing %ss"
 msgstr ""
 
-#: src/edit_list_window.c:675
+#: src/edit_list_window.c:679
 #, c-format
 msgid "Edit %ss"
 msgstr "%ss को सम्पादित करें"
 
-#: src/edit_local_accounts.c:151 src/edit_local_accounts.c:576
+#: src/edit_local_accounts.c:150 src/edit_local_accounts.c:587
 msgid "C"
 msgstr ""
 
-#: src/edit_local_accounts.c:232
+#: src/edit_local_accounts.c:237
 msgid "Please enter an account name."
 msgstr ""
 
-#: src/edit_local_accounts.c:235
+#: src/edit_local_accounts.c:240
 #, fuzzy
 msgid "Please select an account type."
 msgstr " `%s' के लिए कुंजी चुनिए "
 
-#: src/edit_local_accounts.c:250
+#: src/edit_local_accounts.c:257
 msgid ""
 "<b><big>How to create and register accounts:</big></b>\n"
 "\n"
@@ -2246,11 +2248,11 @@ msgid ""
 "to use from the <i>Preferences</i> menu. Passwords are not supported yet."
 msgstr ""
 
-#: src/edit_local_accounts.c:267 src/edit_local_accounts.c:756
+#: src/edit_local_accounts.c:274 src/edit_local_accounts.c:766
 msgid "Help"
 msgstr "मदद"
 
-#: src/edit_local_accounts.c:352 src/edit_local_accounts.c:403
+#: src/edit_local_accounts.c:363 src/edit_local_accounts.c:418
 #, c-format
 msgid ""
 "You already have an account for %s service.\n"
@@ -2258,63 +2260,63 @@ msgid ""
 "Multiple accounts on this service aren't supported yet."
 msgstr ""
 
-#: src/edit_local_accounts.c:497
+#: src/edit_local_accounts.c:506
 msgid "Invalid Service"
 msgstr "अवैध सर्विस"
 
-#: src/edit_local_accounts.c:497
+#: src/edit_local_accounts.c:507
 msgid "Can't add account : unknown service"
 msgstr ""
 
-#: src/edit_local_accounts.c:522
+#: src/edit_local_accounts.c:532
 msgid "You didn't define an account."
 msgstr ""
 
-#: src/edit_local_accounts.c:577
+#: src/edit_local_accounts.c:588
 msgid "Screen Name"
 msgstr "स्क्रीन नाम"
 
-#: src/edit_local_accounts.c:578
+#: src/edit_local_accounts.c:589
 msgid "Password"
 msgstr "पासवर्ड"
 
-#: src/edit_local_accounts.c:579
+#: src/edit_local_accounts.c:590
 msgid "Service"
 msgstr "सर्विस"
 
-#: src/edit_local_accounts.c:652
+#: src/edit_local_accounts.c:659
 msgid "Screen _Name:"
 msgstr "स्क्रीन नाम(_N):"
 
-#: src/edit_local_accounts.c:679
+#: src/edit_local_accounts.c:686
 msgid "Service _Type:"
 msgstr ""
 
-#: src/edit_local_accounts.c:760
+#: src/edit_local_accounts.c:771
 msgid "Add Account"
 msgstr ""
 
-#: src/edit_local_accounts.c:766 src/status.c:317
+#: src/edit_local_accounts.c:778 src/status.c:317
 msgid "Delete Account"
 msgstr ""
 
-#: src/edit_local_accounts.c:773
+#: src/edit_local_accounts.c:786
 msgid "Modify Account"
 msgstr ""
 
-#: src/edit_local_accounts.c:781
+#: src/edit_local_accounts.c:795
 msgid "Ok"
 msgstr ""
 
-#: src/edit_local_accounts.c:806
+#: src/edit_local_accounts.c:821
 msgid "Ayttm Account Editor"
 msgstr ""
 
-#: src/gtk/about_window.c:108
+#: src/gtk/about_window.c:106
 msgid "About Ayttm"
 msgstr ""
 
-#: src/gtk/about_window.c:141
+#: src/gtk/about_window.c:140
 msgid "Ayttm is brought to you by:"
 msgstr ""
 
@@ -2322,20 +2324,20 @@ msgstr ""
 msgid "\"With a little help from\":"
 msgstr ""
 
-#: src/gtk/about_window.c:178
+#: src/gtk/about_window.c:180
 msgid "Ayttm is based on Everybuddy 0.4.3 which was brought to you by:"
 msgstr ""
 
-#: src/gtk/gtkspell.c:259
+#: src/gtk/gtkspell.c:263
 #, c-format
 msgid "Not in dictionary: %s"
 msgstr ""
 
-#: src/gtk/gtkspell.c:273
+#: src/gtk/gtkspell.c:279
 msgid "(no suggestions)"
 msgstr ""
 
-#: src/gtk/gtkspell.c:283
+#: src/gtk/gtkspell.c:290
 msgid "Other Possibilities..."
 msgstr ""
 
@@ -2404,7 +2406,7 @@ msgstr ""
 msgid "Advanced:Proxy"
 msgstr ""
 
-#: src/gtk/prefs_window.C:503 src/gtk/prefs_window.C:1076 src/status.c:2575
+#: src/gtk/prefs_window.C:503 src/gtk/prefs_window.C:1076 src/status.c:2624
 msgid "Accounts"
 msgstr ""
 
@@ -2637,7 +2639,7 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
-#: src/gtk/prefs_window.C:1835 src/gtk/prefs_window.C:2075 src/trigger.c:362
+#: src/gtk/prefs_window.C:1835 src/gtk/prefs_window.C:2075 src/trigger.c:365
 msgid "Browse"
 msgstr ""
 
@@ -2719,7 +2721,7 @@ msgstr ""
 msgid "Remote encoding:"
 msgstr ""
 
-#: src/gtk/prefs_window.C:2525 src/status.c:657
+#: src/gtk/prefs_window.C:2525 src/status.c:673
 msgid "Info"
 msgstr ""
 
@@ -2775,61 +2777,61 @@ msgstr ""
 msgid "Connect"
 msgstr ""
 
-#: src/image_window.c:134
+#: src/image_window.c:143
 msgid "Viewing Image"
 msgstr ""
 
-#: src/info_window.c:143
+#: src/info_window.c:144
 msgid "<font color=red> (Invalid UTF-8 characters in response)</font>"
 msgstr ""
 
-#: src/logs.c:111
+#: src/logs.c:108
 #, c-format
 msgid "%sConversation started on %s %s\n"
 msgstr ""
 
-#: src/logs.c:141
+#: src/logs.c:139
 #, c-format
 msgid "%sConversation ended on %s %s\n"
 msgstr ""
 
-#: src/main.c:421
+#: src/main.c:416
 #, c-format
 msgid ""
 "Ayttm is already running (pid=%d), and the remote-control UNIX socket cannot "
 "be connected."
 msgstr ""
 
-#: src/main.c:423
+#: src/main.c:419
 msgid "Already Logged On"
 msgstr ""
 
-#: src/message_parse.c:193 src/message_parse.c:200 src/message_parse.c:207
-#: src/message_parse.c:289 src/message_parse.c:306
+#: src/message_parse.c:177 src/message_parse.c:183 src/message_parse.c:188
+#: src/message_parse.c:269 src/message_parse.c:284
 msgid "Ayttm File Transfer"
 msgstr "Ayttm फाइल स्थानान्तरण "
 
-#: src/message_parse.c:193
+#: src/message_parse.c:178
 msgid "Remote Side Disconnected"
 msgstr ""
 
-#: src/message_parse.c:200
+#: src/message_parse.c:183
 msgid "Unable to open file"
 msgstr "फाइल खोलने मे असमर्थ "
 
-#: src/message_parse.c:207
+#: src/message_parse.c:189
 msgid "File Sent Successfully"
 msgstr "फाइल सफलतापूर्वक भेजी गई"
 
-#: src/message_parse.c:289
+#: src/message_parse.c:270
 msgid "Remote Side has aborted the file transfer"
 msgstr "सुदूर पक्ष ने फाइल स्थानान्तरण विफल किया"
 
-#: src/message_parse.c:306
+#: src/message_parse.c:285
 msgid "File Receive Complete"
 msgstr "फाइल प्राप्तिकरण पूरा"
 
-#: src/message_parse.c:395
+#: src/message_parse.c:367
 #, c-format
 msgid ""
 "Would you like to accept\n"
@@ -2840,11 +2842,11 @@ msgstr ""
 "फाइल %sस्वीकार करते है ?\n"
 "माप=%lu"
 
-#: src/message_parse.c:396
+#: src/message_parse.c:369
 msgid "Download File"
 msgstr "फाइल डाउनलोड करें"
 
-#: src/plugin.c:164
+#: src/plugin.c:168
 #, c-format
 msgid ""
 "Plugin %s has not been loaded because of an error:\n"
@@ -2852,48 +2854,48 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/plugin.c:166 src/plugin.c:563
+#: src/plugin.c:170 src/plugin.c:587
 msgid "Plugin error"
 msgstr ""
 
-#: src/plugin.c:239
+#: src/plugin.c:242
 msgid "Cannot resolve symbol \"plugin_info\"."
 msgstr ""
 
-#: src/plugin.c:317
+#: src/plugin.c:319
 #, c-format
 msgid "Cannot open module directory \"%s\"."
 msgstr ""
 
-#: src/plugin.c:318 src/plugin.c:497
+#: src/plugin.c:321 src/plugin.c:519
 msgid "Plugin Warning"
 msgstr "प्लग-ईन चेतावनी"
 
-#: src/plugin.c:327
+#: src/plugin.c:329
 #, c-format
 msgid "Looking for modules in %s"
 msgstr ""
 
-#: src/plugin.c:381
+#: src/plugin.c:385
 msgid "Unable to resolve symbol SERVICE_INFO"
 msgstr ""
 
-#: src/plugin.c:392
+#: src/plugin.c:399
 #, c-format
 msgid "Not loading module %s, a module for that service is already loaded!\n"
 msgstr ""
 
-#: src/plugin.c:393
+#: src/plugin.c:403
 msgid "Same service is provided by an already loaded plugin."
 msgstr ""
 
-#: src/plugin.c:415
+#: src/plugin.c:424
 msgid ""
 "This plugin is not binary compatible.\n"
 "Try a clean install (or read README)."
 msgstr ""
 
-#: src/plugin.c:420
+#: src/plugin.c:430
 #, c-format
 msgid ""
 "Plugin version (%d) differs from core version (%d), which means it is "
@@ -2901,149 +2903,149 @@ msgid ""
 "Try a clean install (or read README)."
 msgstr ""
 
-#: src/plugin.c:488
+#: src/plugin.c:507
 msgid "No init function defined"
 msgstr ""
 
-#: src/plugin.c:496
+#: src/plugin.c:517
 #, c-format
 msgid "Utility module %s doesn't define an init function; skipping it."
 msgstr ""
 
-#: src/plugin.c:562
+#: src/plugin.c:585
 #, c-format
 msgid "Unable to unload plugin %s; maybe it is still in use?"
 msgstr ""
 
-#: src/service.c:132
+#: src/service.c:150
 #, c-format
 msgid ""
 "Unable to create account for %s.\n"
 "Check your config file."
 msgstr ""
 
-#: src/status.c:270
+#: src/status.c:264
 #, c-format
 msgid "Do you really want to delete group \"%s\"?"
 msgstr ""
 
-#: src/status.c:271 src/status.c:537
+#: src/status.c:266 src/status.c:543
 msgid "Delete Group"
 msgstr ""
 
-#: src/status.c:294
+#: src/status.c:290
 #, c-format
 msgid "Do you really want to delete contact \"%s\"?"
 msgstr ""
 
-#: src/status.c:295 src/status.c:637
+#: src/status.c:292 src/status.c:653
 msgid "Delete Contact"
 msgstr ""
 
-#: src/status.c:316
+#: src/status.c:315
 #, c-format
 msgid "Do you really want to delete account \"%s\"?"
 msgstr ""
 
-#: src/status.c:372
+#: src/status.c:374
 msgid "Ayttm - history"
 msgstr ""
 
-#: src/status.c:528
+#: src/status.c:534
 #, fuzzy
 msgid "Add contact to group"
 msgstr "सम्पर्क जोडे"
 
-#: src/status.c:534
+#: src/status.c:540
 #, fuzzy
 msgid "Edit Group"
 msgstr "ख़ाता सम्पादित करें"
 
-#: src/status.c:540
+#: src/status.c:546
 msgid "Sort"
 msgstr ""
 
-#: src/status.c:593
+#: src/status.c:602
 #, c-format
 msgid "%s options"
 msgstr ""
 
-#: src/status.c:631
+#: src/status.c:646
 #, fuzzy
 msgid "Add Account to Contact"
 msgstr "अनजान सम्पर्क जोडें"
 
-#: src/status.c:634
+#: src/status.c:650
 #, fuzzy
 msgid "Edit Contact"
 msgstr "%s - सम्पर्क सम्पादन"
 
-#: src/status.c:646 src/trigger.c:374
+#: src/status.c:663 src/trigger.c:378
 msgid "Edit Trigger"
 msgstr ""
 
-#: src/status.c:688
+#: src/status.c:707
 msgid "Edit Account..."
 msgstr ""
 
-#: src/status.c:691
+#: src/status.c:710
 msgid "Delete Account..."
 msgstr ""
 
-#: src/status.c:697
+#: src/status.c:718
 msgid "Send File..."
 msgstr ""
 
-#: src/status.c:700
+#: src/status.c:721
 msgid "Info..."
 msgstr ""
 
-#: src/status.c:838
+#: src/status.c:858
 #, c-format
 msgid ""
 "A new release of ayttm is available.\n"
 "Latest version is %s, while you have %s.\n"
 msgstr ""
 
-#: src/status.c:842
+#: src/status.c:862
 #, fuzzy
 msgid "New release available!"
 msgstr "कोई सूची मौजूद नही ।"
 
-#: src/status.c:848
+#: src/status.c:867
 msgid "No new release"
 msgstr ""
 
-#: src/status.c:848
+#: src/status.c:868
 msgid "You have the latest release of ayttm installed."
 msgstr ""
 
-#: src/status.c:902
+#: src/status.c:929
 #, c-format
 msgid "Setting %s (on %s) to %s"
 msgstr ""
 
-#: src/status.c:942
+#: src/status.c:969
 #, c-format
 msgid "Setting %s (on %s) to Online"
 msgstr ""
 
-#: src/status.c:974
+#: src/status.c:1000
 #, c-format
 msgid "Setting %s (on %s) to Offline"
 msgstr ""
 
-#: src/status.c:1080
+#: src/status.c:1105
 #, c-format
 msgid "Account vanished after add_account_line.\n"
 msgstr ""
 
-#: src/status.c:1094
+#: src/status.c:1124
 #, c-format
 msgid "Account missing while online?\n"
 msgstr ""
 
-#: src/status.c:1531
+#: src/status.c:1548
 #, c-format
 msgid ""
 "%s\n"
@@ -3051,149 +3053,149 @@ msgid ""
 "<span size='small'>Since %s</span>"
 msgstr ""
 
-#: src/status.c:1594 src/status.c:2622
+#: src/status.c:1609 src/status.c:2676
 msgid "-"
 msgstr ""
 
-#: src/status.c:2056
+#: src/status.c:2071
 #, c-format
 msgid "eb_smiley_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2065
+#: src/status.c:2080
 #, c-format
 msgid "eb_import_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2076
+#: src/status.c:2091
 #, c-format
 msgid "eb_profile_function: calling callback\n"
 msgstr ""
 
-#: src/status.c:2228
+#: src/status.c:2259
 msgid "Sign o_n all"
 msgstr ""
 
-#: src/status.c:2230
+#: src/status.c:2261
 #, fuzzy
 msgid "Sign onto all accounts"
 msgstr "आयात लोकल ख़ाते"
 
-#: src/status.c:2234
+#: src/status.c:2265
 msgid "Sign o_ff all"
 msgstr ""
 
-#: src/status.c:2236
+#: src/status.c:2267
 #, fuzzy
 msgid "Sign off all accounts"
 msgstr "आयात लोकल ख़ाते"
 
-#: src/status.c:2240
+#: src/status.c:2271
 msgid "New group chat"
 msgstr ""
 
-#: src/status.c:2242
+#: src/status.c:2273
 msgid "Start a chat room for a group chat"
 msgstr ""
 
-#: src/status.c:2246
+#: src/status.c:2277
 #, fuzzy
 msgid "Set as _away"
 msgstr "अवर्तमान करें"
 
-#: src/status.c:2248
+#: src/status.c:2279
 msgid "Set a Custom \"Away\" status"
 msgstr ""
 
-#: src/status.c:2252
+#: src/status.c:2283
 msgid "_Quit"
 msgstr ""
 
-#: src/status.c:2254
+#: src/status.c:2285
 #, fuzzy
 msgid "Close Ayttm"
 msgstr "बन्द करें"
 
-#: src/status.c:2258
+#: src/status.c:2289
 #, fuzzy
 msgid "_Preferences"
 msgstr "आयात प्राथमिकताएं"
 
-#: src/status.c:2260
+#: src/status.c:2291
 msgid "Customize your Ayttm"
 msgstr ""
 
-#: src/status.c:2264
+#: src/status.c:2295
 msgid "Add or _delete accounts"
 msgstr ""
 
-#: src/status.c:2266
+#: src/status.c:2297
 #, fuzzy
 msgid "Add or Delete chat accounts"
 msgstr "आयात लोकल ख़ाते"
 
-#: src/status.c:2270
+#: src/status.c:2301
 #, fuzzy
 msgid "Edit _accounts"
 msgstr "ख़ाता सम्पादित करें"
 
-#: src/status.c:2272
+#: src/status.c:2303
 msgid "Edit your account details"
 msgstr ""
 
-#: src/status.c:2276
+#: src/status.c:2307
 #, fuzzy
 msgid "Add a _contact account"
 msgstr "सम्पर्क जोडे"
 
-#: src/status.c:2278
+#: src/status.c:2309
 msgid "Add an account for a contact"
 msgstr ""
 
-#: src/status.c:2282
+#: src/status.c:2313
 #, fuzzy
 msgid "Add a _group"
 msgstr "समूह जोडें"
 
-#: src/status.c:2284
+#: src/status.c:2315
 #, fuzzy
 msgid "Add a contact group"
 msgstr "सम्पर्क जोडे"
 
-#: src/status.c:2289
+#: src/status.c:2320
 msgid "_Web site"
 msgstr ""
 
-#: src/status.c:2295
+#: src/status.c:2326
 msgid "_Manual"
 msgstr ""
 
-#: src/status.c:2302
+#: src/status.c:2333
 msgid "_About Ayttm"
 msgstr ""
 
-#: src/status.c:2308
+#: src/status.c:2339
 msgid "Check for new _release"
 msgstr ""
 
-#: src/status.c:2316
+#: src/status.c:2347
 msgid "Dump structures"
 msgstr ""
 
-#: src/status.c:2568
+#: src/status.c:2616
 msgid "Contacts"
 msgstr ""
 
-#: src/status.c:2600
+#: src/status.c:2650
 msgid "Welcome To Ayttm"
 msgstr ""
 
-#: src/status.c:2602
+#: src/status.c:2652
 #, fuzzy
 msgid "Welcome to Ayttm"
 msgstr "बन्द करें"
 
-#: src/trigger.c:54
+#: src/trigger.c:55
 #, c-format
 msgid ""
 "%s just came %s.\n"
@@ -3201,79 +3203,79 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/trigger.c:54 src/trigger.c:97
+#: src/trigger.c:56 src/trigger.c:98
 msgid "online"
 msgstr ""
 
-#: src/trigger.c:54 src/trigger.c:97
+#: src/trigger.c:56 src/trigger.c:99
 msgid "offline"
 msgstr ""
 
-#: src/trigger.c:55
+#: src/trigger.c:57
 msgid "Online trigger"
 msgstr ""
 
-#: src/trigger.c:174
+#: src/trigger.c:178
 msgid "Select parameter"
 msgstr " parameter चुनिए"
 
-#: src/trigger.c:251 src/trigger.c:259
+#: src/trigger.c:244 src/trigger.c:252
 msgid "None"
 msgstr ""
 
-#: src/trigger.c:252
+#: src/trigger.c:245
 msgid "User goes online"
 msgstr "प्रयोगकर्त्ता ओनलाइन हुआ"
 
-#: src/trigger.c:253
+#: src/trigger.c:246
 msgid "User goes offline"
 msgstr "प्रयोगकर्त्ता ओफलाइन हुआ"
 
-#: src/trigger.c:254
+#: src/trigger.c:247
 msgid "User goes on or offline"
 msgstr "प्रयोगकर्त्ता चला गया अथवा ओफलाइन हुआ"
 
-#: src/trigger.c:260
+#: src/trigger.c:253
 msgid "Play sound"
 msgstr ""
 
-#: src/trigger.c:261
+#: src/trigger.c:254
 msgid "Execute command"
 msgstr "समादेश निष्पादन करें"
 
-#: src/trigger.c:262
+#: src/trigger.c:255
 msgid "Show alert dialog"
 msgstr ""
 
-#: src/trigger.c:263
+#: src/trigger.c:256
 msgid "Send message"
 msgstr "संदेश भेजें"
 
-#: src/trigger.c:297
+#: src/trigger.c:291
 msgid "User: "
 msgstr "प्रयोगकर्त्ता:"
 
-#: src/trigger.c:311
+#: src/trigger.c:307
 msgid "Trigger: "
 msgstr ""
 
-#: src/trigger.c:330
+#: src/trigger.c:329
 msgid "Action: "
 msgstr "क्रिया:"
 
-#: src/trigger.c:348
+#: src/trigger.c:350
 msgid "Parameter: "
 msgstr ""
 
-#: src/trigger.c:390
+#: src/trigger.c:394
 msgid "Update"
 msgstr "नवीनीकरण"
 
-#: src/trigger.c:422
+#: src/trigger.c:428
 msgid "Ayttm - Edit Trigger"
 msgstr ""
 
-#: src/util.c:1074
+#: src/util.c:1118
 #, c-format
 msgid ""
 "The account \"%s\" already exists on your\n"
@@ -3284,11 +3286,11 @@ msgid ""
 "Should I move it?"
 msgstr ""
 
-#: src/util.c:1088
+#: src/util.c:1133
 msgid "Error: account exists"
 msgstr ""
 
-#: src/util.c:1421
+#: src/util.c:1480
 #, c-format
 msgid ""
 "User %s wants to invite you to\n"
@@ -3299,32 +3301,32 @@ msgstr ""
 "%s के लिए आमन्त्रित करना चाहता है\n"
 "क्या आप स्वीकार करते है ?"
 
-#: src/util.c:1427
+#: src/util.c:1486
 msgid "Chat Invite"
 msgstr "गपशप मे आमन्त्रित करें"
 
-#: src/util.c:1489 src/util.c:1505
+#: src/util.c:1549 src/util.c:1569
 #, c-format
 msgid "deleting stale lock file\n"
 msgstr ""
 
-#: src/util.c:1536
+#: src/util.c:1601
 msgid "Unexpected datatype passed to eb_generic_menu_function, ignoring call!"
 msgstr ""
 
-#: src/util.c:1540
+#: src/util.c:1606
 msgid "No callback defined in call to eb_generic_menu_function, ignoring call!"
 msgstr ""
 
-#: src/util.c:1950
+#: src/util.c:2028
 msgid "Can't connect"
 msgstr ""
 
-#: src/util.c:1950
+#: src/util.c:2029
 msgid "Connection to the server failed."
 msgstr ""
 
-#: src/util.c:2114
+#: src/util.c:2198
 msgid ""
 "<font color=\"#f00\">(truncated message since it was in an unknown encoding)"
 "</font>"

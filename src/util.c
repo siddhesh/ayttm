@@ -2259,7 +2259,7 @@ unsigned char *ay_base64_decode(const char *in, int *len)
 	*len = (inlen * 3 / 4) - less;
 
 	/* Leave space for null termination in case this is just a string */
-	char *out = (char *)calloc(*len + 1, sizeof(char));
+	unsigned char *out = (unsigned char *)calloc(*len + 1, sizeof(unsigned char));
 
 	for (i = 0, j = 0; i < inlen; i += 4, j += 3) {
 		char tmpin[4] = { 0, 0, 0, 0 };

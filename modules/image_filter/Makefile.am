@@ -11,7 +11,7 @@ else
 JASPER_BUILD =
 endif
 
-bin_SCRIPTS = ayttm_streamer_wrapper.sh
+bin_SCRIPTS = ayttm_streamer_wrapper
 pkglib_LTLIBRARIES = video_capture.la $(JASPER_BUILD)
 
 img2jpc_la_SOURCES = img2jpc.c 

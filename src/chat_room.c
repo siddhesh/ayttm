@@ -52,10 +52,6 @@
 #endif
 
 #include "pixmaps/tb_volume.xpm"
-#include "pixmaps/smiley_button.xpm"
-#include "pixmaps/action.xpm"
-#include "pixmaps/invite_btn.xpm"
-#include "pixmaps/reconnect.xpm"
 
 #include "auto_complete.h"
 
