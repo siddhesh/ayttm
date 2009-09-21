@@ -1,3 +1,14 @@
+* Mon Sep 21 2009 10:10 UTC [siddheshp]   0.6.0-3
+- ChangeLog, configure.ac,  ayttm.spec.in, modules/aycryption/select-keys.c, 
+modules/image_filter/Makefile.am, ayttm_streamer_wrapper,
+modules/image_filter/video_capture.c, modules/msn2/libmsn2/msn-contacts.c,
+po/de.po, po/en_GB.po, po/es.po, po/fr.po, po/hi.po, po/nl.po, po/pt_BR.po,
+po/sv.po, src/chat_room.c, src/util.c:
+ * Fixed some build warnings
+ * Updated *po
+ * Rename ayttm_stream_wrapper.sh to ayttm_stream_wrapper. Patch by Minto
+ Joseph <mintojoseph@users.sourceforge.net>. Closes #2859843 Patch on SF
+
 * Sat Sep 19 2009 14:10 UTC [siddheshp]   0.6.0-2
 - ChangeLog:
  * Moved to git. See ayttm.git.sf.net
