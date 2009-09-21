@@ -1,3 +1,9 @@
+* Mon Sep 21 2009 13:25 UTC [siddheshp]   0.6.0-4
+- ChangeLog, configure.ac, modules/yahoo2/libyahoo2.c,
+modules/yahoo2/yahoo2_types.h:
+ * YMSG: Send ACK for messages to server when it is sent with key 429
+ * YMSG: Fix status messages. Would crash if status message is changed
+
 * Mon Sep 21 2009 10:10 UTC [siddheshp]   0.6.0-3
 - ChangeLog, configure.ac,  ayttm.spec.in, modules/aycryption/select-keys.c, 
 modules/image_filter/Makefile.am, ayttm_streamer_wrapper,

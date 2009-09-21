@@ -1238,6 +1238,7 @@ static void yahoo_process_message(struct yahoo_input_data *yid,
 		long tm;
 		char *msg;
 		int utf8;
+		char *gunk;
 	} *message = y_new0(struct m, 1);
 
 	for (l = pkt->hash; l; l = l->next) {
@@ -1251,6 +1252,9 @@ static void yahoo_process_message(struct yahoo_input_data *yid,
 			message->tm = strtol(pair->value, NULL, 10);
 		else if (pair->key == 97)
 			message->utf8 = atoi(pair->value);
+		/* This comes when the official client sends us a message */
+		else if (pair->key == 429)
+			message->gunk = pair->value;
 		/* user message *//* sys message */
 		else if (pair->key == 14 || pair->key == 16)
 			message->msg = pair->value;
@@ -1274,6 +1278,23 @@ static void yahoo_process_message(struct yahoo_input_data *yid,
 			YAHOO_CALLBACK(ext_yahoo_system_message) (yd->client_id,
 				message->to, message->from, message->msg);
 		} else if (pkt->status <= 2 || pkt->status == 5) {
+			/* Confirm message receipt if we got the gunk */
+			if(message->gunk) {
+				struct yahoo_packet *outpkt;
+                        
+				outpkt = yahoo_packet_new(YAHOO_SERVICE_MESSAGE_CONFIRM,
+					YPACKET_STATUS_DEFAULT, 0);
+				yahoo_packet_hash(outpkt, 1, yd->user);
+				yahoo_packet_hash(outpkt, 5, message->from);
+				yahoo_packet_hash(outpkt, 302, "430");
+				yahoo_packet_hash(outpkt, 430, message->gunk);
+				yahoo_packet_hash(outpkt, 303, "430");
+				yahoo_packet_hash(outpkt, 450, "0");
+				yahoo_send_packet(yid, outpkt, 0);
+                        
+				yahoo_packet_free(outpkt);
+			}
+
 			YAHOO_CALLBACK(ext_yahoo_got_im) (yd->client_id,
 				message->to, message->from, message->msg,
 				message->tm, pkt->status, message->utf8);
@@ -1352,13 +1373,15 @@ static void yahoo_process_status(struct yahoo_input_data *yid,
 
 		switch (pair->key) {
 		case 300:	/* Begin buddy */
-			if (!u)
+			if (!strcmp(pair->value, "315") && !u) {
 				u = y_new0(struct user, 1);
+			}
 			break;
 		case 301:	/* End buddy */
-			if (u)
+			if (!strcmp(pair->value, "315") && u) {
 				users = y_list_prepend(users, u);
-			u = NULL;
+				u = NULL;
+			}
 			break;
 		case 0:	/* we won't actually do anything with this */
 			NOTICE(("key %d:%s", pair->key, pair->value));
