@@ -40,7 +40,7 @@ static const MsnError errors[] = {
 	{MSN_ERROR_GROUP_EXISTS, "Group with same name already exists", 0, 0},
 	{MSN_ERROR_GROUP_NAME_TOO_LONG, "Group name too long", 0, 0},
 	{MSN_ERROR_GROUP_REMOVE_FAIL, "Cannot remove this group", 0, 0},
-	{MSN_ERROR_INVALID_GROUP, "Invalid group", 0, 0},
+	{MSN_ERROR_INVALID_GROUP2, "Invalid group", 0, 0},
 	{MSN_ERROR_ADDRESS_SYNC_FAIL, "Error in address list synchronization", 1, 1},
 	{MSN_ERROR_SWITCHBOADR_ERROR, "Switchboard error", 1, 0},
 	{MSN_ERROR_P2P_ERROR, "P2P error", 1, 0},
