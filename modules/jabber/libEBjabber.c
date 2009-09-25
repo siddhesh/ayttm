@@ -1018,6 +1018,10 @@ void j_on_packet_handler(jconn conn, jpacket packet)
 			} else if (!strcmp(ns, NS_DISCOINFO)) {
 				for (y = xmlnode_get_tag(x, "feature"); y;
 					y = xmlnode_get_nextsibling(y)) {
+
+					if(strcmp(y->name, "feature"))
+						continue;
+
 					name = xmlnode_get_attrib(y, "var");
 					eb_debug(DBG_JBR, "Feature: %s\n",
 						name);
