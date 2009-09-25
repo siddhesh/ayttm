@@ -1082,7 +1082,7 @@ static void ay_msn_add_user(eb_account *account)
 	while (buds) {
 		MsnBuddy *bud = buds->data;
 		if (!strcasecmp(bud->passport, account->handle)
-			&& bud->type & MSN_BUDDY_ALLOW) {
+			&& bud->list & MSN_BUDDY_ALLOW) {
 			eb_debug(DBG_MSN, "Buddy %s Already Exists",
 				bud->passport);
 			return;
@@ -1573,6 +1573,15 @@ static void ay_msn_del_group(eb_local_account *ela, const char *group)
 static void ay_msn_add_group(eb_local_account *ela, const char *group)
 {
 	ay_msn_local_account *mlad = ela->protocol_local_account_data;
+	LList *groups = mlad->ma->groups;
+
+	while(groups) {
+		MsnGroup *grp = groups->data;
+		if(!strcmp(grp->name, group))
+			return;
+
+		groups = l_list_next(groups);
+	}
 
 	msn_group_add(mlad->ma, group);
 }

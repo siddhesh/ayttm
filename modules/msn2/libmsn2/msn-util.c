@@ -55,9 +55,10 @@ char *msn_urlencode(const char *in)
 
 char *msn_urldecode(const char *in)
 {
-	int ipos = 0, bpos = 0;
+	int ipos = 0, bpos = 0, reduce = 0;
 	char *str = NULL;
-	int len = strlen(in);
+
+	int len = strlen(in)+1;
 
 	if (!(str = m_new0(char, len)))
 		 return "";
@@ -71,6 +72,9 @@ char *msn_urldecode(const char *in)
 
 		if (!in[ipos])
 			break;
+
+		/* Found a non-url character */
+		reduce += 2;
 
 		for (i = 0; i < 2; i++) {
 			int tmp = 0;
@@ -93,8 +97,8 @@ char *msn_urldecode(const char *in)
 	str[bpos] = '\0';
 
 	/* free extra alloc'ed mem. */
-	len = strlen(str);
-	str = m_renew(char, str, len + 1);
+	if(reduce)
+		str = m_renew(char, str, len - reduce);
 
 	return (str);
 }
