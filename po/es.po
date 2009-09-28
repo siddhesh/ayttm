@@ -2,12 +2,11 @@
 # Copyright (C) 2003 Free Software Foundation, Inc.
 # Ricardo Mones <ricardo@mones.org>, 2003.
 #
-#: modules/aycryption/select-keys.c:568
 msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-21 15:05+0530\n"
+"POT-Creation-Date: 2009-09-28 15:28+0530\n"
 "PO-Revision-Date: 2007-08-05 01:22+0100\n"
 "Last-Translator: Ricardo Mones <ricardo@mones.org>\n"
 "Language-Team: Ricardo Mones <ricardo@mones.org>\n"
@@ -707,9 +706,9 @@ msgstr "Pue_rto SSL:"
 msgid "Request mail information (GMail only)"
 msgstr ""
 
-#: modules/jabber/jabber.c:1312 modules/msn2/msn.c:2008
+#: modules/jabber/jabber.c:1312 modules/msn2/msn.c:2017
 #: modules/workwizu/workwizu.c:339 modules/yahoo2/yahoo.c:2293
-#: src/chat_room.c:2089 src/chat_room.c:2112
+#: src/chat_room.c:2085 src/chat_room.c:2108
 msgid "typing..."
 msgstr "tecleando..."
 
@@ -722,7 +721,7 @@ msgid "Cannot login"
 msgstr "No se puede conectar"
 
 #: modules/jabber/libEBjabber.c:310 modules/jabber/libEBjabber.c:318
-#: modules/jabber/libEBjabber.c:886 modules/jabber/libEBjabber.c:1130
+#: modules/jabber/libEBjabber.c:886 modules/jabber/libEBjabber.c:1134
 msgid "Jabber Error"
 msgstr "Error Jabber"
 
@@ -731,17 +730,17 @@ msgstr "Error Jabber"
 msgid "You have new email: \n"
 msgstr "Tiene un correo nuevo de %s sobre %s\n"
 
-#: modules/jabber/libEBjabber.c:1101
+#: modules/jabber/libEBjabber.c:1105
 msgid "Register? You're not authorized"
 msgstr "¿Registrarse? No está autorizado"
 
-#: modules/jabber/libEBjabber.c:1104
+#: modules/jabber/libEBjabber.c:1108
 #, c-format
 msgid ""
 "Do you want to try to create the account \"%s\" on the jabber server %s?"
 msgstr "¿Quiere intentar crear la cuenta «%s» en el servidor jabber %s?"
 
-#: modules/jabber/libEBjabber.c:1191
+#: modules/jabber/libEBjabber.c:1195
 #, c-format
 msgid ""
 "%s wants to add you to his friends' list.\n"
@@ -752,21 +751,21 @@ msgstr ""
 "\n"
 "¿Desea aceptar?"
 
-#: modules/jabber/libEBjabber.c:1247
+#: modules/jabber/libEBjabber.c:1251
 #, c-format
 msgid "The Jabber server %s has disconnected you."
 msgstr "El servidor Jabber %s le ha desconectado."
 
-#: modules/jabber/libEBjabber.c:1249 src/gtk/prefs_window.C:2948
+#: modules/jabber/libEBjabber.c:1253 src/gtk/prefs_window.C:2948
 msgid "Disconnect"
 msgstr "Desconectar"
 
-#: modules/jabber/libEBjabber.c:1257
+#: modules/jabber/libEBjabber.c:1261
 #, c-format
 msgid "Connection to the jabber server %s failed!"
 msgstr "¡La conexión con el servidor jabber %s falló!"
 
-#: modules/jabber/libEBjabber.c:1259
+#: modules/jabber/libEBjabber.c:1263
 msgid "Jabber server not responding"
 msgstr "El servidor jabber no esta respondiendo"
 
@@ -808,7 +807,7 @@ msgstr "Entrando en la cuenta MSN: %s"
 msgid "MSN password for: %s"
 msgstr "Contraseña MSN para: %s"
 
-#: modules/msn2/msn.c:715 modules/msn2/msn.c:762 modules/msn2/msn.c:1755
+#: modules/msn2/msn.c:715 modules/msn2/msn.c:762 modules/msn2/msn.c:1764
 msgid "MSN Error"
 msgstr "Error MSN"
 
@@ -935,16 +934,16 @@ msgstr "Invitación a charla"
 msgid "Not Implemented"
 msgstr ""
 
-#: modules/msn2/msn.c:1669
+#: modules/msn2/msn.c:1678
 #, fuzzy, c-format
 msgid "Connection error: %s"
 msgstr "Tipo de conexión:"
 
-#: modules/msn2/msn.c:1757
+#: modules/msn2/msn.c:1766
 msgid "MSN :: Operation failed"
 msgstr ""
 
-#: modules/msn2/msn.c:1981 modules/msn2/msn.c:1997
+#: modules/msn2/msn.c:1990 modules/msn2/msn.c:2006
 msgid "MSN Mail"
 msgstr "Correo MSN"
 
@@ -1591,7 +1590,7 @@ msgstr "Error en la cuenta"
 msgid "No Account Name specified."
 msgstr "No se especificó el nombre de la cuenta."
 
-#: src/add_contact_window.c:230 src/chat_room.c:785
+#: src/add_contact_window.c:230 src/chat_room.c:781
 msgid "No local account specified."
 msgstr "No se especificó la cuenta local."
 
@@ -1692,104 +1691,104 @@ msgstr "He vuelto"
 msgid "Away"
 msgstr "Ausente"
 
-#: src/chat_room.c:589
+#: src/chat_room.c:585
 msgid "Chatroom error"
 msgstr "Error en la sala de charla"
 
-#: src/chat_room.c:591
+#: src/chat_room.c:587
 msgid "Cannot invite a third party until a protocol has been chosen."
 msgstr "No puede invitar a terceros hasta que haya elejido un protocolo."
 
-#: src/chat_room.c:602 src/chat_room.c:645
+#: src/chat_room.c:598 src/chat_room.c:641
 msgid "Invite a contact"
 msgstr "Invitar a un contacto"
 
-#: src/chat_room.c:614
+#: src/chat_room.c:610
 msgid "Handle: "
 msgstr "Apodo: "
 
-#: src/chat_room.c:630
+#: src/chat_room.c:626
 msgid "Message: "
 msgstr "Mensaje: "
 
-#: src/chat_room.c:655 src/chat_room.c:1677 src/chat_window.c:1007
+#: src/chat_room.c:651 src/chat_room.c:1673 src/chat_window.c:1007
 msgid "Invite"
 msgstr "Invitar"
 
-#: src/chat_room.c:695
+#: src/chat_room.c:691
 #, c-format
 msgid "Chatroom %d"
 msgstr "Charla %d"
 
-#: src/chat_room.c:785 src/chat_room.c:803
+#: src/chat_room.c:781 src/chat_room.c:799
 msgid "Cannot join"
 msgstr "No se puede unir"
 
-#: src/chat_room.c:804 src/chat_room.c:907 src/edit_account_window.c:71
+#: src/chat_room.c:800 src/chat_room.c:903 src/edit_account_window.c:71
 #: src/edit_account_window.c:83
 msgid "The local account doesn't exist."
 msgstr "La cuenta local no existe."
 
-#: src/chat_room.c:865 src/chat_room.c:906
+#: src/chat_room.c:861 src/chat_room.c:902
 msgid "Cannot list chatrooms"
 msgstr "No puedo listar las charlas"
 
-#: src/chat_room.c:866
+#: src/chat_room.c:862
 msgid "No list available."
 msgstr "No hay lista disponible."
 
-#: src/chat_room.c:870
+#: src/chat_room.c:866
 msgid "Select a chatroom."
 msgstr "Seleccione una charla."
 
-#: src/chat_room.c:870
+#: src/chat_room.c:866
 msgid "Public chatrooms list"
 msgstr "Lista pública de charlas"
 
-#: src/chat_room.c:873 src/chat_room.c:983
+#: src/chat_room.c:869 src/chat_room.c:979
 msgid "List public chatrooms..."
 msgstr "Listar charlas públicas..."
 
-#: src/chat_room.c:912
+#: src/chat_room.c:908
 msgid "Loading List. This may take a while..."
 msgstr ""
 
-#: src/chat_room.c:949
+#: src/chat_room.c:945
 msgid "Chat Room Name: "
 msgstr "Nombre de la charla: "
 
-#: src/chat_room.c:960 src/edit_account_window.c:233
+#: src/chat_room.c:956 src/edit_account_window.c:233
 msgid "Local account: "
 msgstr "Cuenta local: "
 
-#: src/chat_room.c:971 src/chat_room.c:1911 src/chat_room.c:1912
+#: src/chat_room.c:967 src/chat_room.c:1907 src/chat_room.c:1908
 msgid "Reconnect at login"
 msgstr "Reconectar al entrar"
 
-#: src/chat_room.c:977
+#: src/chat_room.c:973
 msgid "Chatroom is public"
 msgstr "La charla es pública"
 
-#: src/chat_room.c:991
+#: src/chat_room.c:987
 msgid "Join a Chat Room"
 msgstr "Unirse a una charla"
 
-#: src/chat_room.c:1024
+#: src/chat_room.c:1020
 msgid "Join"
 msgstr "Unirse"
 
-#: src/chat_room.c:1176 src/chat_room.c:1199
+#: src/chat_room.c:1172 src/chat_room.c:1195
 #, fuzzy, c-format
 msgid "Online: %i"
 msgstr "Conectado"
 
-#: src/chat_room.c:1273
+#: src/chat_room.c:1269
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s has joined the chat.</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) se ha unido a la charla.</b></body>"
 
-#: src/chat_room.c:1276
+#: src/chat_room.c:1272
 #, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) has joined the chat.</b></body>"
@@ -1797,70 +1796,70 @@ msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) se ha unido a la charla.</b></body>"
 
 # $mones$ FIXME
-#: src/chat_room.c:1312
+#: src/chat_room.c:1308
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s is now known as %s</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s está conectado %s @ %s.\n"
 "</b></body>"
 
-#: src/chat_room.c:1365 src/chat_room.c:1375
+#: src/chat_room.c:1361 src/chat_room.c:1371
 #, fuzzy, c-format
 msgid "<body bgcolor=#F9E589 width=*><b> %s has left the chat%s</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s ha abandonado la charla.</b></body>"
 
-#: src/chat_room.c:1370
+#: src/chat_room.c:1366
 #, fuzzy, c-format
 msgid ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat%s</b></body>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) ha abandonado la charla.</b></body>"
 
-#: src/chat_room.c:1653 src/chat_window.c:960
+#: src/chat_room.c:1649 src/chat_window.c:960
 msgid "Disable Sounds"
 msgstr "Deshabilitar sonidos"
 
-#: src/chat_room.c:1664 src/chat_window.c:971
+#: src/chat_room.c:1660 src/chat_window.c:971
 #, c-format
 msgid "Set Character Encoding (%s)"
 msgstr ""
 
-#: src/chat_room.c:1667 src/chat_window.c:974
+#: src/chat_room.c:1663 src/chat_window.c:974
 #, c-format
 msgid "Set Character Encoding"
 msgstr ""
 
-#: src/chat_room.c:1684 src/chat_room.c:1942 src/chat_window.c:1021
+#: src/chat_room.c:1680 src/chat_room.c:1938 src/chat_window.c:1021
 msgid "Send Message"
 msgstr "Enviar mensaje"
 
-#: src/chat_room.c:1691 src/chat_room.c:1947 src/chat_window.c:1044
+#: src/chat_room.c:1687 src/chat_room.c:1943 src/chat_window.c:1044
 #: src/crash.c:264 src/gtk/about_window.c:197 src/image_window.c:158
 msgid "Close"
 msgstr "Cerrar"
 
-#: src/chat_room.c:1737 src/status.c:2608
+#: src/chat_room.c:1733 src/status.c:2608
 msgid "Online"
 msgstr "Conectado"
 
-#: src/chat_room.c:1816
+#: src/chat_room.c:1812
 msgid "Invite User"
 msgstr "Invitar usuario"
 
-#: src/chat_room.c:1901 src/chat_window.c:2472
+#: src/chat_room.c:1897 src/chat_window.c:2472
 msgid "Insert Smiley"
 msgstr "Insertar sonrisa"
 
-#: src/chat_room.c:1920 src/chat_window.c:2488 src/gtk/prefs_window.C:495
+#: src/chat_room.c:1916 src/chat_window.c:2488 src/gtk/prefs_window.C:495
 msgid "Sound"
 msgstr "Sonido"
 
-#: src/chat_room.c:1921
+#: src/chat_room.c:1917
 msgid "Enable Sounds"
 msgstr "Habilitar sonidos"
 
-#: src/chat_room.c:1938 src/chat_window.c:991 src/chat_window.c:2523
+#: src/chat_room.c:1934 src/chat_window.c:991 src/chat_window.c:2523
 #: src/gtk/log_window.C:264
 msgid "Actions..."
 msgstr "Acciones..."

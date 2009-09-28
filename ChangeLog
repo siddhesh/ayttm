@@ -1,3 +1,21 @@
+* Mon 28 Sep 2009 11:25 UTC [siddheshp]   0.6.0-6
+- modules/msn2/libmsn2/msn-http.c:
+ * MSN: Fix MSN crash when try to login with an incorrect password
+
+* Fri 25 Sep 2009 20:12 UTC [siddheshp]   0.6.0-5
+- modules/msn2/libmsn2/msn-util.c, modules/msn2/msn.c:
+ Multiple fixes in MSN:
+ * Do not send a group add request if it already exists. This happens
+ often on very first sign-on of a user
+ * Fixed typo on very first contact list sync. MSN_BUDDY_ALLOW is
+ incorrectly checked on buddy type instead of it's membership list.
+ This caused a flurry of requests to the server, leading to an abort
+ * Fixed buffer overflow in msn_urldecode
+
+* Fri 25 Sep 2009 19:42 UTC [siddheshp]   0.6.0-5
+- modules/jabber/libEBjabber.c:
+ * JABBER: Avoid stumbling into interspersed identity tags
+
 * Mon Sep 21 2009 13:25 UTC [siddheshp]   0.6.0-4
 - ChangeLog, configure.ac, modules/yahoo2/libyahoo2.c,
 modules/yahoo2/yahoo2_types.h:
