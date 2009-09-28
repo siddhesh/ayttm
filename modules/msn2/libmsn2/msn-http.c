@@ -56,6 +56,7 @@ static int http_mc_compare(const void *data, const void *comparison)
 int msn_http_got_response(MsnConnection *mc, int len)
 {
 	char *offset;
+	MsnAccount *ma;
 
 	LList *l =
 		l_list_find_custom(http_connection_list, mc, http_mc_compare);
@@ -97,11 +98,11 @@ int msn_http_got_response(MsnConnection *mc, int len)
 		return 0;
 	}
 
-	data->callback(mc->account, mc->current_message->payload,
+	ma = mc->account;
+
+	data->callback(ma, mc->current_message->payload,
 		mc->current_message->size ? mc->current_message->
 		size : strlen(mc->current_message->payload), data->cb_data);
-
-	mc->account->connections = l_list_remove(mc->account->connections, mc);
 
 	http_connection_list = l_list_remove(http_connection_list, data);
 
@@ -112,7 +113,15 @@ int msn_http_got_response(MsnConnection *mc, int len)
 
 	free(data);
 
-	msn_connection_free(mc);
+	/* 
+	 * Try to free only if the connection attempt is active.
+	 * A NULL NS connection indicates that this connection has also been
+	 * cancelled.
+	 */
+	if(ma->ns_connection) {
+		ma->connections = l_list_remove(ma->connections, mc);
+		msn_connection_free(mc);
+	}
 
 	return 1;
 }
