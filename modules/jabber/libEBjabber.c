@@ -1000,11 +1000,11 @@ void j_on_packet_handler(jconn conn, jpacket packet)
 					eb_debug(DBG_JBR,
 						"Buddy: %s(%s) %s %s\n", alias,
 						group, sub, name);
-					if (alias && sub && name) {
+					if (alias && sub) {
 						JB.jid = strtok(alias, "/");
 						JB.jid = strdup(JB.jid ? JB.
 							jid : alias);
-						JB.name = strdup(name);
+						JB.name = name ? strdup(name) : strdup(alias);
 						JB.sub = strdup(sub);
 						/* State does not matter */
 						JB.status = JABBER_OFFLINE;
