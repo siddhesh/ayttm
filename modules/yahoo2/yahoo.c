@@ -3359,12 +3359,22 @@ static void ay_yahoo_connect_status(const char *msg, void *data)
 
 static int ext_yahoo_write(void *fd, char *buf, int len)
 {
-	return ay_connection_write(AY_CONNECTION(fd), buf, len);
+	int ret;
+
+	ret = ay_connection_write(AY_CONNECTION(fd), buf, len);
+	LOG(("Received %d bytes from %p :: %s\n", ret, fd, buf));
+
+	return ret;
 }
 
 static int ext_yahoo_read(void *fd, char *buf, int len)
 {
-	return ay_connection_read(AY_CONNECTION(fd), buf, len);
+	int ret;
+
+	ret = ay_connection_read(AY_CONNECTION(fd), buf, len);
+	LOG(("Received %d bytes from %p :: %s\n", ret, fd, buf));
+
+	return ret;
 }
 
 static void ext_yahoo_close(void *fd)
