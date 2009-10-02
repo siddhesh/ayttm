@@ -1492,13 +1492,14 @@ void buddy_update_status_and_log(eb_account *ea)
 	buddy_update_status(ea);
 }
 
-/* update the status info(pixmap and state) of an account */
+/* update the status info (pixmap and state) of an account */
 void buddy_update_status(eb_account *ea)
 {
 	const gchar *status, *state;
 	gchar *tmp, *c, buff[128], msgbuff[1024];
 	struct tm *mytime;
 	time_t last_status_change;
+	GDate *date;
 
 	if (!ea || !ea->list_item)
 		return;
@@ -1539,20 +1540,29 @@ void buddy_update_status(eb_account *ea)
 
 	time(&last_status_change);
 	mytime = localtime(&last_status_change);
-	strftime(buff, 128, "%H:%M (%b %d)", mytime);
+	date = g_date_new();
+	g_date_set_time_t(date, last_status_change);
+	strftime(buff, 128, "%H:%M ", mytime);
+	/* g_date_strftime() only accepts date-related formats;
+	 * time-related formats give undefined results */
+	g_date_strftime(buff, 120, "(%b %d)", date);
+	g_date_free(date);
+
 	g_free(c);
 	c = g_markup_escape_text(status, -1);
 	g_free(ea->tiptext);
 	ea->tiptext =
-		g_strdup_printf(_
-		("%s\n%s\n<span size=\'small\'>Since %s</span>"), (state
-			&& state[0]) ? state : "", (c && c[0]) ? c : "", buff);
+		g_strdup_printf(
+			_("%s\n%s\n<span size=\'small\'>Since %s</span>"),
+			(state && state[0]) ? state : "",
+			(c && c[0]) ? c : "",
+			buff);
 
 	eb_update_status(ea, state);
 
 	g_free(c);
 
-	/* if there is only one account(this one) logged in under the
+	/* if there is only one account (this one) logged in under the
 	   parent contact, we must login the contact also */
 	buddy_update_icon(ea);
 
@@ -1821,9 +1831,7 @@ static void drag_begin_callback(GtkWidget *widget, GdkDragContext *c,
 static void drag_motion_callback(GtkWidget *widget, GdkDragContext *c, guint x,
 	guint y, guint time, gpointer data)
 {
-	/* TODO
-	 * 1) Update the pixbuf as the drag is moved around the tree
-	 */
+	/* TODO Update the pixbuf as the drag is moved around the tree */
 
 	GtkTreePath *path;
 	GdkRectangle rectangle;
@@ -1840,9 +1848,7 @@ static void drag_motion_callback(GtkWidget *widget, GdkDragContext *c, guint x,
 	valid = gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
 		&path, NULL, NULL, NULL);
 
-	/*
-	 * This is probably a bit crude. Any better approach to this?
-	 */
+	/* This is probably a bit crude. Any better approach to this? */
 	if (wy < rectangle.y + 10)
 		gtk_tree_view_scroll_to_point(GTK_TREE_VIEW(widget), wx - 10,
 			wy - 10);
