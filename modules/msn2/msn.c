@@ -207,22 +207,6 @@ static int plugin_init()
 
 	il->next = g_new0(input_list, 1);
 	il = il->next;
-	il->widget.checkbox.value = &do_guess_away;
-	il->name = "do_guess_away";
-	il->label = _("Guess status from Away messages");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
-	il->widget.checkbox.value = &do_rename_contacts;
-	il->name = "do_rename_contacts";
-	il->label =
-		_
-		("Rename my MSN-only contacts whenever they change their alias");
-	il->type = EB_INPUT_CHECKBOX;
-
-	il->next = g_new0(input_list, 1);
-	il = il->next;
 	il->widget.checkbox.value = &do_msn_debug;
 	il->name = "do_msn_debug";
 	il->label = _("Enable debugging");
