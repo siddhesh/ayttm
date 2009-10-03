@@ -3362,7 +3362,8 @@ static int ext_yahoo_write(void *fd, char *buf, int len)
 	int ret;
 
 	ret = ay_connection_write(AY_CONNECTION(fd), buf, len);
-	LOG(("Received %d bytes from %p :: %s\n", ret, fd, buf));
+	if (ret)
+		LOG(("Sent %d bytes to %p :: %s\n", ret, fd, buf));
 
 	return ret;
 }
@@ -3372,7 +3373,10 @@ static int ext_yahoo_read(void *fd, char *buf, int len)
 	int ret;
 
 	ret = ay_connection_read(AY_CONNECTION(fd), buf, len);
-	LOG(("Received %d bytes from %p :: %s\n", ret, fd, buf));
+	if(ret) {
+		buf[ret] = '\0';
+		LOG(("Received %d bytes from %p :: %s\n", ret, fd, buf));
+	}
 
 	return ret;
 }
@@ -3453,7 +3457,6 @@ static void eb_yahoo_callback(AyConnection *fd, eb_input_condition condition,
 	char buff[1024] = { 0 };
 
 	if (condition & EB_INPUT_READ) {
-		LOG(("Read: %p", fd));
 		// Do the read with ay_connection_read and call yahoo_got_data with the data
 		ret = yahoo_read_ready(d->id, fd, d->data);
 
@@ -3467,8 +3470,6 @@ static void eb_yahoo_callback(AyConnection *fd, eb_input_condition condition,
 	}
 
 	if (ret > 0 && condition & EB_INPUT_WRITE) {
-		LOG(("Write: %p", fd));
-
 		// Do write with ay_connection_write and then call yahoo_sent_data
 		ret = yahoo_write_ready(d->id, fd, d->data);
 

@@ -271,6 +271,7 @@ extern "C" {
 		char *cookie_b;
 		char *login_cookie;
 		char *crumb;
+		char *seed;
 
 		YList *buddies;
 		YList *ignore;

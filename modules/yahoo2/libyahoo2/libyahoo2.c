@@ -1752,12 +1752,41 @@ static void yahoo_process_picture_upload(struct yahoo_input_data *yid,
 
 void yahoo_login(int id, int initial)
 {
+	struct yahoo_data *yd = find_conn_by_id(id);
+	struct connect_callback_data *ccd;
+	struct yahoo_server_settings *yss;
+	int tag;
+
+	struct yahoo_input_data *yid = y_new0(struct yahoo_input_data, 1);
+	yid->yd = yd;
+	yid->type = YAHOO_CONNECTION_PAGER;
+	inputs = y_list_prepend(inputs, yid);
+
+	yd->initial_status = initial;
+	yss = yd->server_settings;
+
+	ccd = y_new0(struct connect_callback_data, 1);
+	ccd->yd = yd;
+
+	tag = YAHOO_CALLBACK(ext_yahoo_connect_async) (yd->client_id,
+		yss->pager_host, yss->pager_port, yahoo_connected, ccd, 0);
+
+	/*
+	 * if tag <= 0, then callback has already been called
+	 * so ccd will have been freed
+	 */
+	if (tag > 0)
+		ccd->tag = tag;
+	else if (tag < 0)
+		YAHOO_CALLBACK(ext_yahoo_login_response) (yd->client_id,
+			YAHOO_LOGIN_SOCK, NULL);
+}
+
+static void yahoo_auth_https(struct yahoo_data *yd)
+{
 	char url[256];
 
 	struct yahoo_input_data *yid = y_new0(struct yahoo_input_data, 1);
-	struct yahoo_data *yd = find_conn_by_id(id);
-
-	yd->initial_status = initial;
 
 	yid->yd = yd;
 	yid->type = YAHOO_CONNECTION_AUTH;
@@ -1766,7 +1795,8 @@ void yahoo_login(int id, int initial)
 
 	snprintf(url, sizeof(url),
 		"https://login.yahoo.com/config/pwtoken_get?src=ymsgr&ts="
-		"&login=%s" "&passwd=%s", yid->yd->user, yid->yd->password);
+		"&login=%s&passwd=%s&chal=%s", yid->yd->user, yid->yd->password,
+		yid->yd->seed);
 
 	yahoo_http_get(yid->yd->client_id, url, NULL,
 		_yahoo_http_connected, yid);
@@ -1779,14 +1809,7 @@ static void yahoo_process_auth(struct yahoo_input_data *yid,
 	char *sn = NULL;
 	YList *l = pkt->hash;
 	int m = 0;
-
 	struct yahoo_data *yd = yid->yd;
-	struct yahoo_packet *packet;
-
-	unsigned char crypt_hash[25];
-
-	md5_byte_t result[16];
-	md5_state_t ctx;
 
 	while (l) {
 		struct yahoo_pair *pair = l->data;
@@ -1808,38 +1831,57 @@ static void yahoo_process_auth(struct yahoo_input_data *yid,
 	if (!seed)
 		return;
 
-	if (m == 2) {
-		/* HTTPS */
-		md5_init(&ctx);
-		md5_append(&ctx, (md5_byte_t *)yd->crumb, strlen(yd->crumb));
-		md5_append(&ctx, (md5_byte_t *)seed, strlen(seed));
-		md5_finish(&ctx, result);
+	yd->seed = strdup(seed);
 
-		to_y64(crypt_hash, result, 16);
-
-		packet = yahoo_packet_new(YAHOO_SERVICE_AUTHRESP,
-			yd->initial_status, yd->session_id);
-		yahoo_packet_hash(packet, 1, yd->user);
-		yahoo_packet_hash(packet, 0, yd->user);
-		yahoo_packet_hash(packet, 277, yd->cookie_y);
-		yahoo_packet_hash(packet, 278, yd->cookie_t);
-		yahoo_packet_hash(packet, 307, (char *)crypt_hash);
-		yahoo_packet_hash(packet, 244, "4194239");	/* Rekkanoryo says this is the build number */
-		yahoo_packet_hash(packet, 2, yd->user);
-		yahoo_packet_hash(packet, 2, "1");
-		yahoo_packet_hash(packet, 59, yd->cookie_b);
-		yahoo_packet_hash(packet, 98, "us");	/* TODO Put country code */
-		yahoo_packet_hash(packet, 135, "9.0.0.2152");
-
-		yahoo_send_packet(yid, packet, 0);
-
-		yahoo_packet_free(packet);
-	} else {
+	if (m==2)
+		yahoo_auth_https(yd);
+	else {
 		/* call error */
 		WARNING(("unknown auth type %d", m));
 		YAHOO_CALLBACK(ext_yahoo_login_response) (yd->client_id,
 			YAHOO_LOGIN_UNKNOWN, NULL);
 	}
+}
+
+static void yahoo_send_auth(struct yahoo_data *yd)
+{
+
+	struct yahoo_packet *packet;
+
+	unsigned char crypt_hash[25];
+
+	md5_byte_t result[16];
+	md5_state_t ctx;
+
+	struct yahoo_input_data *yid =
+		find_input_by_id_and_type(yd->client_id,
+			YAHOO_CONNECTION_PAGER);
+
+	/* HTTPS */
+	md5_init(&ctx);
+	md5_append(&ctx, (md5_byte_t *)yd->crumb, strlen(yd->crumb));
+	md5_append(&ctx, (md5_byte_t *)yd->seed, strlen(yd->seed));
+	md5_finish(&ctx, result);
+
+	to_y64(crypt_hash, result, 16);
+
+	packet = yahoo_packet_new(YAHOO_SERVICE_AUTHRESP,
+		yd->initial_status, yd->session_id);
+	yahoo_packet_hash(packet, 1, yd->user);
+	yahoo_packet_hash(packet, 0, yd->user);
+	yahoo_packet_hash(packet, 277, yd->cookie_y);
+	yahoo_packet_hash(packet, 278, yd->cookie_t);
+	yahoo_packet_hash(packet, 307, (char *)crypt_hash);
+	yahoo_packet_hash(packet, 244, "4194239");	/* Rekkanoryo says this is the build number */
+	yahoo_packet_hash(packet, 2, yd->user);
+	yahoo_packet_hash(packet, 2, "1");
+	yahoo_packet_hash(packet, 59, yd->cookie_b);
+	yahoo_packet_hash(packet, 98, "us");	/* TODO Put country code */
+	yahoo_packet_hash(packet, 135, "9.0.0.2152");
+
+	yahoo_send_packet(yid, packet, 0);
+
+	yahoo_packet_free(packet);
 }
 
 static void yahoo_process_auth_resp(struct yahoo_input_data *yid,
@@ -3269,12 +3311,6 @@ static void yahoo_process_auth_connection(struct yahoo_input_data *yid,
 	int error_code = 0;
 	int is_ymsgr = 0;
 
-	struct yahoo_data *yd = NULL;
-
-	struct connect_callback_data *ccd;
-	struct yahoo_server_settings *yss;
-	int tag;
-
 	/* Wait till we get everything */
 	if (!over)
 		return;
@@ -3464,33 +3500,7 @@ static void yahoo_process_auth_connection(struct yahoo_input_data *yid,
 
 	yid->yd->crumb = strdup(token);
 
-	yd = yid->yd;
-
-	/* Create a new connection for the pager in advance */
-	yid = y_new0(struct yahoo_input_data, 1);
-	yid->yd = yd;
-	yid->type = YAHOO_CONNECTION_PAGER;
-	inputs = y_list_prepend(inputs, yid);
-
-	if (!yd)
-		return;
-
-	yss = yd->server_settings;
-
-	ccd = y_new0(struct connect_callback_data, 1);
-	ccd->yd = yd;
-	tag = YAHOO_CALLBACK(ext_yahoo_connect_async) (yd->client_id,
-		yss->pager_host, yss->pager_port, yahoo_connected, ccd, 0);
-
-	/*
-	 * if tag <= 0, then callback has already been called
-	 * so ccd will have been freed
-	 */
-	if (tag > 0)
-		ccd->tag = tag;
-	else if (tag < 0)
-		YAHOO_CALLBACK(ext_yahoo_login_response) (yd->client_id,
-			YAHOO_LOGIN_SOCK, NULL);
+	yahoo_send_auth(yid->yd);
 }
 
 static void (*yahoo_process_connection[]) (struct yahoo_input_data *,
