@@ -60,6 +60,7 @@
 #include "offline_queue_mgmt.h"
 #include "add_contact_window.h"
 #include "messages.h"
+#include "activity_bar.h"
 
 #ifndef NAME_MAX
 #define NAME_MAX 4096
@@ -1959,123 +1960,6 @@ void ay_dump_elas()
 }
 
 /* taken from Yahoo's httplib */
-static int ay_http_readline(char *ptr, int maxlen, int fd)
-{
-	int n, rc;
-	char c;
-
-	for (n = 1; n < maxlen; n++) {
-
-		do {
-			rc = read(fd, &c, 1);
-		} while (rc == -1 && errno == EINTR);
-
-		if (rc == 1) {
-			if (c == '\r')	/* get rid of \r */
-				continue;
-			*ptr = c;
-			if (c == '\n')
-				break;
-			ptr++;
-		} else if (rc == 0) {
-			if (n == 1)
-				return (0);	/* EOF, no data */
-			else
-				break;	/* EOF, w/ data */
-		} else {
-			return -1;
-		}
-	}
-
-	*ptr = 0;
-	return (n);
-}
-
-char *ay_http_get(const char *uri)
-{
-	char *result = NULL;
-	char *server = NULL, *oserver = NULL;
-	char *url = NULL;
-	int sock = 0;
-	char buf[4096];
-	AyConnection *con = NULL;
-
-	server = strdup(uri);
-
-	oserver = server;
-
-	if (!strstr(server, "://")) {
-		eb_debug(DBG_CORE, "bad url (no host)!\n");
-		return NULL;
-	}
-	server = strstr(server, "://") + 3 * sizeof(char);
-
-	if (!strstr(server, "/")) {
-		eb_debug(DBG_CORE, "bad url (no url)!\n");
-		return NULL;
-	}
-	url = strstr(server, "/") + sizeof(char);
-
-	*(url - sizeof(char)) = '\0';
-
-	eb_debug(DBG_CORE, "Getting %s from %s\n", url, server);
-
-	con = ay_connection_new(server, 80, AY_CONNECTION_TYPE_PLAIN);
-
-	sock = ay_connection_connect(con, NULL, NULL, NULL, NULL);
-
-	if (sock <= 0) {
-		ay_do_error(_("Can't connect"),
-			_("Connection to the server failed."));
-
-		ay_connection_free(con);
-		return NULL;
-	}
-
-	strcpy(buf, "GET /");
-	strcat(buf, url);
-	strcat(buf, " HTTP/1.1\r\nHost: ");
-	strcat(buf, server);
-	strcat(buf, "\r\n\r\n");
-
-	eb_debug(DBG_CORE, "<%s", buf);
-
-	if (ay_connection_write(con, buf, strlen(buf)) < strlen(buf)) {
-		eb_debug(DBG_CORE, "Couldn't write to sock !\n");
-		return NULL;
-	}
-
-	if (ay_http_readline(buf, sizeof(buf), sock) < 0) {
-		eb_debug(DBG_CORE, "readline error\n");
-		return NULL;
-	}
-
-	while (strcmp(buf, "")) {
-		/* getting headers */
-		if (ay_http_readline(buf, sizeof(buf), sock) < 0) {
-			eb_debug(DBG_CORE, "readline error\n");
-			ay_connection_free(con);
-			return NULL;
-		}
-	}
-
-	while (ay_http_readline(buf, sizeof(buf), sock) > 0) {
-		char *ores = NULL;
-		if (result) {
-			ores = g_strdup(result);
-			g_free(result);
-		} else
-			ores = g_strdup("");
-
-		result = g_strdup_printf("%s%s", ores, buf);
-		g_free(ores);
-
-	}
-
-	ay_connection_free(con);
-	return result;
-}
-
 int version_cmp(const char *v1, const char *v2)
 {
 	int x[2][4] = { {0, 0, 0, 0}, {0, 0, 0, 0} };
@@ -2113,30 +1997,105 @@ int version_cmp(const char *v1, const char *v2)
 	return 0;
 }
 
+struct version_data {
+	char *version;
+	int tag;
+	int input_tag;
+	int done;
+};
+
+static void ay_got_version_data(AyConnection *fd, eb_input_condition condition, void *data)
+{
+	char *version = NULL;
+	char buf[1480];
+	int read_len = 0, len = 0;
+
+	struct version_data *outversion = data;
+
+	/* 
+	 * Prefer to block here since our file is very small.
+	 * This should ideally run only once unless something really
+	 * nasty is happening.
+	 */
+	do {
+		read_len = ay_connection_read(fd, buf+len, sizeof(buf)-1);
+		if(read_len > 0) {
+			char *offset = NULL;
+
+			len += read_len;
+			buf[len] = '\0';
+			if((offset = strstr(buf, "-->"))) {
+				*offset = '\0';
+				version = strstr(buf, "<!--");
+				version += 4;
+
+				break;
+			}
+		}
+		else if(read_len == 0)
+			break;
+	} while(read_len > 0 || errno == EAGAIN);
+
+	if(version)
+		outversion->version = strdup(version);
+
+	ay_connection_input_remove(outversion->input_tag);
+	ay_connection_free(fd);
+	outversion->done = 1;
+}
+
+static void ay_got_version_connection(AyConnection *fd, int error, void *data)
+{
+	struct version_data *d = data;
+
+	if (error || !fd) {
+		if (error != AY_CANCEL_CONNECT)
+			ay_do_error(_("Error!"),
+				_("Unable to connection to SourceForge"));
+
+		d->done = 1;
+		return;
+	}
+
+	d->input_tag = ay_connection_input_add(fd, EB_INPUT_READ, ay_got_version_data, data);
+	ay_connection_write(fd, "GET /release.php HTTP/1.0\r\n"
+		"Host: ayttm.sourceforge.net\r\n"
+		"User Agent: Ayttm\r\n"
+		"\r\n", 77);
+}
+
+void ay_version_cancel_connect(void *data)
+{
+	struct version_data *d = data;
+	ay_connection_cancel_connect(d->tag);
+}
+
 char *ay_get_last_version(void)
 {
-	char *rss = NULL;
+	AyConnection *con = NULL;
+	int connect_tag = 0;
 	char *version = NULL;
-	rss = ay_http_get
-		("http://sourceforge.net/export/rss2_projfiles.php?group_id=77614");
-	if (rss != NULL) {
-		if (strstr(rss, "\t\t\t<title>ayttm ")) {
-			/* beginning matches */
-			char *released = NULL;
-			char *end = NULL;
-			released = strstr(rss, "\t\t\t<title>ayttm ");
-			if (released) {
-				released += strlen("\t\t\t<title>ayttm ");
-				end = strstr(released, " released (");
-			}
-			if (end)
-				*end = '\0';
+	struct version_data *data = g_new0(struct version_data, 1);
 
-			if (released && end)
-				version = strdup(released);
-		}
-	}
-	free(rss);
+	con = ay_connection_new("ayttm.sourceforge.net", 80,
+		AY_CONNECTION_TYPE_PLAIN);
+
+	data->tag = ay_connection_connect(con, ay_got_version_connection, NULL,
+		NULL, data);
+
+	connect_tag = ay_activity_bar_add(
+		_("Getting latest version information"),
+		ay_version_cancel_connect, data);
+
+	while(!data->done)
+		gtk_main_iteration();
+
+	ay_activity_bar_remove(connect_tag);
+
+	version = data->version;
+
+	g_free(data);
+
 	return version;
 }
 
