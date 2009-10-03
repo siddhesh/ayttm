@@ -1473,58 +1473,25 @@ void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user,
 #ifdef __MINGW32__
 	char *recoded;
 #endif
+	const gchar *color, *disp;
 
 	if (!message || !strlen(message))
 		return;
 
 	if (!strcmp(chat_room->local_user->handle, user)) {
-		time_t t;
-		struct tm *cur_time;
-		char *color;
-
 		color = "#0000ff";
-
-		time(&t);
-		cur_time = localtime(&t);
-		if (iGetLocalPref("do_convo_timestamp")) {
-			char *disp = chat_room->local_user->alias;
-			if (!strcmp(disp, ""))
-				disp = chat_room->local_user->handle;
-			g_snprintf(buff, 2048,
-				"<B><FONT COLOR=\"%s\">%d:%.2d:%.2d</FONT> <FONT COLOR=\"%s\">%s: </FONT></B>",
-				color, cur_time->tm_hour, cur_time->tm_min,
-				cur_time->tm_sec, color, disp);
-		} else {
-			char *disp = chat_room->local_user->alias;
-			if (!strcmp(disp, ""))
-				disp = chat_room->local_user->handle;
-			g_snprintf(buff, 2048,
-				"<FONT COLOR=\"%s\"><B>%s: </B></FONT>", color,
-				disp);
-		}
+		disp = chat_room->local_user->alias;
+		if (!strcmp(disp, ""))
+			disp = chat_room->local_user->handle;
 	} else {
 		LList *walk;
 		eb_account *acc = NULL;
-		gchar *color = NULL;
-		time_t t;
-		struct tm *cur_time;
 
 		if (RUN_SERVICE(chat_room->local_user)->get_color)
 			color = RUN_SERVICE(chat_room->local_user)->get_color();
 		else
 			color = "#ff0000";
-
-		time(&t);
-		cur_time = localtime(&t);
-		if (iGetLocalPref("do_convo_timestamp")) {
-			g_snprintf(buff, 2048,
-				"<B><FONT COLOR=\"%s\">%d:%.2d:%.2d</FONT> <FONT COLOR=\"%s\">%s: </FONT></B>",
-				color, cur_time->tm_hour, cur_time->tm_min,
-				cur_time->tm_sec, color, user);
-		} else
-			g_snprintf(buff, 2048,
-				"<FONT COLOR=\"%s\"><B>%s: </B></FONT>", color,
-				user);
+		disp = user;
 
 		for (walk = chat_room->typing_fellows; walk && walk->data;
 			walk = walk->next) {
@@ -1555,6 +1522,22 @@ void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user,
 		}
 
 	}
+
+	if (iGetLocalPref("do_convo_timestamp")) {
+		time_t t;
+		struct tm *cur_time;
+
+		time(&t);
+		cur_time = localtime(&t);
+
+		g_snprintf(buff, 2048,
+			"<B><FONT COLOR=\"%s\">%d:%.2d:%.2d %s: </FONT></B>",
+			color, cur_time->tm_hour, cur_time->tm_min,
+			cur_time->tm_sec, disp);
+	} else
+		g_snprintf(buff, 2048,
+			"<FONT COLOR=\"%s\"><B>%s: </B></FONT>", color, disp);
+
 	if (iGetLocalPref("do_smiley")
 		&& RUN_SERVICE(chat_room->local_user)->get_smileys)
 		temp_message =
