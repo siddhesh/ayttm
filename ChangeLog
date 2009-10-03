@@ -1,3 +1,15 @@
+* Sat 03 Oct 2009 08:05 UTC [siddheshp]   0.6.0-7
+- modules/msn2/libmsn2/msn-account.h, modules/msn2/libmsn2/msn-commands.c,
+modules/msn2/libmsn2/msn-login.c, modules/msn2/libmsn2/msn-message.h,
+modules/msn2/libmsn2/msn.c, modules/msn2/msn.c, ChangeLog, configure.ac:
+ * MSN: Personal Status Message support
+ Added support for personal status messages. Also renamed MsnAccount.status
+ to state for clarity
+
+* Sat 03 Oct 2009 08:05 UTC [siddheshp]   0.6.0-6
+- src/status.c:
+ Don't g_markup_escape a NULL string
+
 * Mon 28 Sep 2009 11:25 UTC [siddheshp]   0.6.0-6
 - modules/msn2/libmsn2/msn-http.c:
  * MSN: Fix MSN crash when try to login with an incorrect password

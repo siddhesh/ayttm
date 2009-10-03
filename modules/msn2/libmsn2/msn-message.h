@@ -71,6 +71,7 @@ typedef enum {
 	MSN_COMMAND_PRP = 33,
 	MSN_COMMAND_ACK = 34,
 	MSN_COMMAND_NAK = 35,
+	MSN_COMMAND_UUX = 36,
 	MSN_COMMAND_COUNT
 } MsnCommand;
 

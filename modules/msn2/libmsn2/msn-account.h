@@ -61,6 +61,7 @@ struct _MsnBuddy {
 	char *friendlyname;
 	char *contact_id;
 	int status;
+	char *psm;
 
 	MsnGroup *group;
 
@@ -113,7 +114,8 @@ struct _MsnAccount {
 	char *cache_key;
 
 	int blp;
-	int status;		/* Messenger Status */
+	int state;		/* Messenger State. Online, BRB, etc */
+	char *psm;		/* Messenger status. "Hell Oh World!" */
 };
 
 #define msn_account_new() (m_new0(MsnAccount, 1))
@@ -128,5 +130,6 @@ MsnConnection *msn_account_get_sb_with_session_id(MsnAccount *ma,
 
 void msn_set_initial_presence(MsnAccount *ma, int state);
 void msn_set_state(MsnAccount *ma, int state);
+void msn_set_psm(MsnAccount *ma, char *message);
 
 #endif

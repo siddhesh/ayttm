@@ -458,7 +458,7 @@ void msn_logout(MsnAccount *ma)
 	msn_connection_free(ma->ns_connection);
 	ma->ns_connection = NULL;
 
-	ma->status = MSN_STATE_OFFLINE;
+	ma->state = MSN_STATE_OFFLINE;
 
 	free(ma->ticket);
 	free(ma->nonce);

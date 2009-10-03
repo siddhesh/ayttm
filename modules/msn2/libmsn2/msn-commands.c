@@ -61,6 +61,7 @@ static void msn_command_got_REA(MsnConnection *mc);
 static void msn_command_got_RML(MsnConnection *mc);
 static void msn_command_got_RMG(MsnConnection *mc);
 static void msn_command_got_UBX(MsnConnection *mc);
+static void msn_command_got_UUX(MsnConnection *mc);
 static void msn_command_got_SDC(MsnConnection *mc);
 static void msn_command_got_IMS(MsnConnection *mc);
 
@@ -149,7 +150,8 @@ MsnCommandInfo msn_commands[] = {
 	{"BYE", MSN_COMMAND_BYE, 0, 0, msn_command_got_BYE, NULL},
 	{"PRP", MSN_COMMAND_PRP, 3, 0, msn_command_got_PRP, NULL},
 	{"ACK", MSN_COMMAND_ACK, 0, 0, msn_command_got_ACK, NULL},
-	{"NAK", MSN_COMMAND_NAK, 0, 0, msn_command_got_NAK, NULL}
+	{"NAK", MSN_COMMAND_NAK, 0, 0, msn_command_got_NAK, NULL},
+	{"UUX", MSN_COMMAND_UUX, 2, 0, msn_command_got_UUX, NULL}
 };
 
 MsnCommand msn_command_get_from_string(char *cmd)
@@ -300,7 +302,17 @@ static void msn_command_parse_payload_GCF(MsnMessage *msg)
 
 static void msn_command_parse_payload_UBX(MsnMessage *msg)
 {
+	char *end = NULL;
+	char *status = strstr(msg->payload, "<PSM>");
 
+	if(!status)
+		return;
+
+	status += 5;
+	end = strstr(status, "</PSM>");
+	*end = '\0';
+
+	msg->payload_info = status;
 }
 
 static void msn_command_parse_payload_QRY(MsnMessage *msg)
@@ -666,7 +678,7 @@ static void msn_command_got_ADG(MsnConnection *mc)
 
 static void msn_command_got_CHG(MsnConnection *mc)
 {
-	mc->account->status = msn_get_status_num(mc->current_message->argv[2]);
+	mc->account->state = msn_get_status_num(mc->current_message->argv[2]);
 
 	ext_got_status_change(mc->account);
 }
@@ -744,9 +756,29 @@ static void msn_command_got_RMG(MsnConnection *mc)
 
 }
 
-static void msn_command_got_UBX(MsnConnection *mc)
+static void msn_command_got_UUX(MsnConnection *mc)
 {
 
+}
+
+static void msn_command_got_UBX(MsnConnection *mc)
+{
+	LList *l = mc->account->buddies;
+
+	if(!mc->current_message->payload_info)
+		return;
+
+	while(l) {
+		MsnBuddy *bud = l->data;
+
+		if(!strcmp(bud->passport, mc->current_message->argv[1])) {
+			bud->psm = strdup((char *)mc->current_message->payload_info);
+			ext_got_buddy_status(mc, bud);
+			return;
+		}
+
+		l = l_list_next(l);
+	}
 }
 
 static void msn_command_got_SDC(MsnConnection *mc)

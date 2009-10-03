@@ -192,6 +192,27 @@ void msn_set_state(MsnAccount *ma, int state)
 		msn_state_strings[state]);
 }
 
+void msn_set_psm(MsnAccount *ma, char *message)
+{
+	char psm_payload[1024] = "";
+	char psm_payload_size[5];
+	int size = 0;
+
+	free(ma->psm);
+
+	size = snprintf(psm_payload, sizeof(psm_payload),
+		"<Data><PSM>%s</PSM><CurrentMedia></CurrentMedia>"
+		"<MachineGuid>{F26D1F07-95E2-403C-BC18-D4BFED493428}</MachineGuid>"
+		"</Data>", message?message:"");
+	
+	sprintf(psm_payload_size, "%d", size);
+
+	msn_message_send(ma->ns_connection, psm_payload[0]?psm_payload:NULL,
+		MSN_COMMAND_UUX, psm_payload_size);
+
+	ma->psm = message?strdup(message):NULL;
+}
+
 void msn_buddy_free(MsnBuddy *bud)
 {
 	if (!bud)
@@ -202,6 +223,8 @@ void msn_buddy_free(MsnBuddy *bud)
 	free(bud->passport);
 	free(bud->friendlyname);
 	free(bud->contact_id);
+	free(bud->psm);
+	free(bud);
 }
 
 void msn_buddy_reset(MsnBuddy *bud)

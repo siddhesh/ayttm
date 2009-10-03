@@ -540,7 +540,7 @@ static void msn_init_account_prefs(eb_local_account *ela)
  ******************************************************************************/
 
 /* Aligned to MsnState */
-static const char *ay_msn_status_strings[] =
+static const char *ay_msn_state_strings[] =
 	{ "", "Hidden", "Busy", "Idle", "BRB", "Away", "Phone", "Lunch",
 		"Offline" };
 
@@ -663,6 +663,8 @@ static void ay_msn_logout(eb_local_account *account)
 		eb_account *ea = (eb_account *)mad->ext_data;
 
 		mad->status = MSN_STATE_OFFLINE;
+		free(mad->psm);
+		mad->psm = NULL;
 		buddy_logoff(ea);
 		buddy_update_status(ea);
 	}
@@ -1124,7 +1126,7 @@ static eb_local_account *ay_msn_read_local_account_config(LList *values)
 
 	mlad->ma = msn_account_new();
 	mlad->ma->ext_data = ela;
-	mlad->ma->status = MSN_STATE_OFFLINE;
+	mlad->ma->state = MSN_STATE_OFFLINE;
 	mlad->ma->passport = strdup(ela->handle);
 
 	return ela;
@@ -1149,8 +1151,8 @@ static LList *ay_msn_get_states(void)
 
 	for (i = 0; i < MSN_STATES_COUNT; i++)
 		list = l_list_append(list,
-			(void *)(ay_msn_status_strings[i][0] ?
-				ay_msn_status_strings[i] : "Online"));
+			(void *)(ay_msn_state_strings[i][0] ?
+				ay_msn_state_strings[i] : "Online"));
 
 	return list;
 }
@@ -1159,7 +1161,7 @@ static gint ay_msn_get_current_state(eb_local_account *account)
 {
 	ay_msn_local_account *mlad =
 		(ay_msn_local_account *)account->protocol_local_account_data;
-	return mlad->ma->status;
+	return mlad->ma->state;
 }
 
 static void ay_msn_set_current_state(eb_local_account *account, gint state)
@@ -1283,14 +1285,24 @@ static void *ay_msn_get_status_pixbuf(eb_account *account)
 		return msn_icon_away;
 }
 
+static const char *ay_msn_get_state_string(eb_account *account)
+{
+	MsnBuddy *mad = (MsnBuddy *)account->protocol_account_data;
+
+	if (mad)
+		return ay_msn_state_strings[mad->status];
+	else
+		return ay_msn_state_strings[MSN_STATE_OFFLINE];
+}
+
 static const char *ay_msn_get_status_string(eb_account *account)
 {
 	MsnBuddy *mad = (MsnBuddy *)account->protocol_account_data;
 
 	if (mad)
-		return ay_msn_status_strings[mad->status];
+		return mad->psm;
 	else
-		return ay_msn_status_strings[MSN_STATE_OFFLINE];
+		return NULL;
 }
 
 static void ay_msn_set_idle(eb_local_account *account, gint idle)
@@ -1300,7 +1312,9 @@ static void ay_msn_set_idle(eb_local_account *account, gint idle)
 
 static void ay_msn_set_away(eb_local_account *account, char *message, int away)
 {
-	/* Not implemented */
+	ay_msn_local_account *mlad = account->protocol_local_account_data;
+
+	msn_set_psm(mlad->ma, message);
 }
 
 static void ay_msn_send_chat_room_message(eb_chat_room *room, gchar *mess)
@@ -1792,7 +1806,7 @@ void ext_got_status_change(MsnAccount *ma)
 	eb_local_account *ela = (eb_local_account *)ma->ext_data;
 
 	is_setting_state = 1;
-	eb_set_active_menu_status(ela->status_menu, ma->status);
+	eb_set_active_menu_status(ela->status_menu, ma->state);
 	is_setting_state = 0;
 }
 
@@ -2158,6 +2172,7 @@ struct service_callbacks *query_callbacks()
 	sc->ignore_user = ay_msn_ignore_user;
 	sc->unignore_user = ay_msn_unignore_user;
 	sc->get_status_string = ay_msn_get_status_string;
+	sc->get_state_string = ay_msn_get_state_string;
 	sc->get_status_pixbuf = ay_msn_get_status_pixbuf;
 	sc->set_idle = ay_msn_set_idle;
 	sc->set_away = ay_msn_set_away;
