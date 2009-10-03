@@ -486,6 +486,7 @@ static void msn_init_account_prefs(eb_local_account *ela)
 	il->label = _("Friendly Name:");
 	il->type = EB_INPUT_ENTRY;
 
+/* Unnecessary in the UI
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->do_mail_notify;
@@ -493,7 +494,6 @@ static void msn_init_account_prefs(eb_local_account *ela)
 	il->label = _("Tell me about new Hotmail/MSN mail");
 	il->type = EB_INPUT_CHECKBOX;
 
-/* Unnecessary in the UI
 	il->next = g_new0(input_list, 1);
 	il = il->next;
 	il->widget.checkbox.value = &mlad->do_mail_notify_folders;
