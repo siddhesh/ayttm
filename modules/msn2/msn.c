@@ -148,8 +148,6 @@ static int is_setting_state = 0;
 int do_msn_debug = 0;
 #define DBG_MSN do_msn_debug
 
-static int do_guess_away = 0;
-static int do_rename_contacts = 0;
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
@@ -869,7 +867,10 @@ void ext_msn_contacts_synced(MsnAccount *ma)
 	eb_set_active_menu_status(ela->status_menu, mlad->initial_state);
 	is_setting_state = 0;
 
-	msn_set_initial_presence(ma, mlad->initial_state);
+	if(mlad->login_invisible)
+		msn_set_initial_presence(ma, MSN_STATE_HIDDEN);
+	else
+		msn_set_initial_presence(ma, mlad->initial_state);
 }
 
 void ext_msn_login_response(MsnAccount *ma, int error)
