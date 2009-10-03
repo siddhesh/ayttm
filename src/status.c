@@ -1541,7 +1541,10 @@ void buddy_update_status(eb_account *ea)
 	mytime = localtime(&last_status_change);
 	strftime(buff, 128, "%H:%M (%b %d)", mytime);
 	g_free(c);
-	c = g_markup_escape_text(status, -1);
+
+	if (status)
+		c = g_markup_escape_text(status, -1);
+
 	g_free(ea->tiptext);
 	ea->tiptext =
 		g_strdup_printf(_
