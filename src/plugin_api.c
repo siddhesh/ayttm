@@ -222,7 +222,7 @@ int eb_input_add(int fd, eb_input_condition condition,
 	closure->condition = condition;
 	closure->data = callback_data;
 
-	eb_debug(DBG_CORE, "Adding input %d with function %p for data %p", fd,
+	eb_debug(DBG_CORE, "Adding input %d with function %p for data %p\n", fd,
 		function, callback_data);
 
 	channel = g_io_channel_unix_new(fd);

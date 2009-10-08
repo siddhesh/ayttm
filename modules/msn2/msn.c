@@ -1070,7 +1070,7 @@ static void ay_msn_add_user(eb_account *account)
 		MsnBuddy *bud = buds->data;
 		if (!strcasecmp(bud->passport, account->handle)
 			&& bud->list & MSN_BUDDY_ALLOW) {
-			eb_debug(DBG_MSN, "Buddy %s Already Exists",
+			eb_debug(DBG_MSN, "Buddy %s Already Exists\n",
 				bud->passport);
 
 			bud->ext_data = account;
@@ -1106,7 +1106,7 @@ static eb_local_account *ay_msn_read_local_account_config(LList *values)
 
 	eb_update_from_value_pair(ela->prefs, values);
 
-	/*the alias will be the persons login minus the @hotmail.com */
+	/* the alias will be the persons login minus the @hotmail.com */
 	c = strchr(ela->handle, '@');
 	*c = '\0';
 	strncpy(ela->alias, ela->handle, sizeof(ela->alias));
