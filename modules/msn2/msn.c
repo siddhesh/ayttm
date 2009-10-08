@@ -1072,6 +1072,9 @@ static void ay_msn_add_user(eb_account *account)
 			&& bud->list & MSN_BUDDY_ALLOW) {
 			eb_debug(DBG_MSN, "Buddy %s Already Exists",
 				bud->passport);
+
+			bud->ext_data = account;
+			account->protocol_account_data = bud;
 			return;
 		}
 
@@ -1339,6 +1342,7 @@ void ext_buddy_added(MsnAccount *ma, MsnBuddy *bud)
 		eb_account *ea = find_account_with_ela(bud->passport, ela);
 		if (!ea) {
 			eb_debug(DBG_MSN, "Could not find account!\n");
+			return;
 		}
 		bud->ext_data = ea;
 		ea->protocol_account_data = bud;
