@@ -1500,6 +1500,7 @@ void buddy_update_status(eb_account *ea)
 	struct tm *mytime;
 	time_t last_status_change;
 	GDate *date;
+	int offset;
 
 	if (!ea || !ea->list_item)
 		return;
@@ -1542,10 +1543,10 @@ void buddy_update_status(eb_account *ea)
 	mytime = localtime(&last_status_change);
 	date = g_date_new();
 	g_date_set_time_t(date, last_status_change);
-	strftime(buff, 128, "%H:%M ", mytime);
+	offset = strftime(buff, 128, "%H:%M ", mytime);
 	/* g_date_strftime() only accepts date-related formats;
 	 * time-related formats give undefined results */
-	g_date_strftime(buff, 120, "(%b %d)", date);
+	g_date_strftime(buff + offset, 128 - offset, "(%b %d)", date);
 	g_date_free(date);
 
 	g_free(c);
