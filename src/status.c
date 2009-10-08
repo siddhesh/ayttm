@@ -1550,6 +1550,7 @@ void buddy_update_status(eb_account *ea)
 	g_date_free(date);
 
 	g_free(c);
+	c = NULL;
 
 	if (status)
 		c = g_markup_escape_text(status, -1);
@@ -1558,7 +1559,7 @@ void buddy_update_status(eb_account *ea)
 	ea->tiptext =
 		g_strdup_printf(
 			_("%s\n%s\n<span size=\'small\'>Since %s</span>"),
-			(state && state[0]) ? state : "",
+			(state && state[0]) ? state : "Online",
 			(c && c[0]) ? c : "",
 			buff);
 
