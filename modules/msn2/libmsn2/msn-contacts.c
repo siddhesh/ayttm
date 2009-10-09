@@ -220,6 +220,7 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 
 	char *chunk;
 	char *blp_offset;
+	char *contact_enc;
 
 	/* Pick groups */
 	_get_next_tag_chunk(&chunk, &offset, "groups");
@@ -367,8 +368,12 @@ static void msn_ab_response(MsnAccount *ma, char *data, int len, void *cbdata)
 	msn_buddies_send_adl(ma, ma->buddies, 1, 0);
 
 	/* Send your friendly name */
+	contact_enc = msn_urlencode(ma->friendlyname);
+
 	msn_message_send(ma->ns_connection, NULL, MSN_COMMAND_PRP, "MFN",
-		ma->friendlyname);
+		contact_enc);
+
+	free(contact_enc);
 }
 
 void msn_download_address_book(MsnAccount *ma)

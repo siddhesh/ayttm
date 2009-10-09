@@ -464,15 +464,16 @@ static void msn_command_got_ILN(MsnConnection *mc)
 	MsnMessage *msg = mc->current_message;
 	LList *buds = mc->account->buddies;
 	MsnBuddy *bud = NULL;
+	char *fname = msn_urldecode(msg->argv[5]);
 
 	while (buds) {
 		bud = buds->data;
 
 		if (!strcmp(bud->passport, msg->argv[3])) {
 			if (!bud->friendlyname
-				|| strcmp(bud->friendlyname, msg->argv[5])) {
+				|| strcmp(bud->friendlyname, fname)) {
 				free(bud->friendlyname);
-				bud->friendlyname = msn_urldecode(msg->argv[5]);
+				bud->friendlyname = strdup(fname);
 			}
 
 			bud->status = msn_get_status_num(msg->argv[2]);
@@ -487,6 +488,8 @@ static void msn_command_got_ILN(MsnConnection *mc)
 	else
 		fprintf(stderr, "Got ILN for some unknown person %s(%s)\n",
 			msg->argv[5], msg->argv[3]);
+
+	free(fname);
 }
 
 static void msn_command_got_BLP(MsnConnection *mc)
@@ -825,14 +828,15 @@ static void msn_command_got_NLN(MsnConnection *mc)
 	MsnMessage *msg = mc->current_message;
 	LList *buds = mc->account->buddies;
 	MsnBuddy *bud = NULL;
+	char *fname = msn_urldecode(msg->argv[4]);
 
 	while (buds) {
 		bud = buds->data;
 
 		if (!strcmp(bud->passport, msg->argv[2])) {
-			if (strcmp(bud->friendlyname, msg->argv[4])) {
+			if (strcmp(bud->friendlyname, fname)) {
 				free(bud->friendlyname);
-				bud->friendlyname = msn_urldecode(msg->argv[4]);
+				bud->friendlyname = strdup(fname);
 			}
 
 			bud->status = msn_get_status_num(msg->argv[1]);
@@ -847,6 +851,8 @@ static void msn_command_got_NLN(MsnConnection *mc)
 	else
 		fprintf(stderr, "Got NLN for some unknown person %s(%s)\n",
 			msg->argv[4], msg->argv[2]);
+
+	free(fname);
 }
 
 static void msn_command_got_RNG(MsnConnection *mc)
@@ -905,7 +911,7 @@ static void msn_command_got_JOI(MsnConnection *mc)
 static void msn_command_got_PRP(MsnConnection *mc)
 {
 	free(mc->account->friendlyname);
-	mc->account->friendlyname = strdup(mc->current_message->argv[3]);
+	mc->account->friendlyname = msn_urldecode(mc->current_message->argv[3]);
 
 	ext_update_friendlyname(mc);
 }
