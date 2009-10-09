@@ -1785,6 +1785,7 @@ void yahoo_login(int id, int initial)
 static void yahoo_auth_https(struct yahoo_data *yd)
 {
 	char url[256];
+	char *user_encoded, *pass_encoded, *seed_encoded;
 
 	struct yahoo_input_data *yid = y_new0(struct yahoo_input_data, 1);
 
@@ -1793,13 +1794,21 @@ static void yahoo_auth_https(struct yahoo_data *yd)
 
 	inputs = y_list_prepend(inputs, yid);
 
+	user_encoded = yahoo_urlencode(yid->yd->user);
+	pass_encoded = yahoo_urlencode(yid->yd->password);
+	seed_encoded = yahoo_urlencode(yid->yd->seed);
+
 	snprintf(url, sizeof(url),
 		"https://login.yahoo.com/config/pwtoken_get?src=ymsgr&ts="
-		"&login=%s&passwd=%s&chal=%s", yid->yd->user, yid->yd->password,
-		yid->yd->seed);
+		"&login=%s&passwd=%s&chal=%s", user_encoded, pass_encoded,
+		seed_encoded);
 
 	yahoo_http_get(yid->yd->client_id, url, NULL,
 		_yahoo_http_connected, yid);
+
+	free(user_encoded);
+	free(pass_encoded);
+	free(seed_encoded);
 }
 
 static void yahoo_process_auth(struct yahoo_input_data *yid,
