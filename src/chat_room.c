@@ -1445,23 +1445,8 @@ eb_chat_room *eb_start_chat_room(eb_local_account *ela, gchar *name,
 
 void eb_chat_room_show_3rdperson(eb_chat_room *chat_room, gchar *message)
 {
-	char *link_message = NULL;
-	char *encoded = NULL;
-
-	link_message = linkify(message);
-
-	encoded =
-		ay_chat_convert_message((chat_window *)chat_room, link_message);
-
-	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), encoded,
-		HTML_IGNORE_NONE);
-	html_text_buffer_append(GTK_TEXT_VIEW(chat_room->chat), "\n",
-		HTML_IGNORE_NONE);
-	ay_log_file_message(chat_room->logfile, "", link_message);
-
-	g_free(encoded);
-
-	g_free(link_message);
+	eb_chat_window_display_notification(chat_room, message,
+		CHAT_NOTIFICATION_HIGHLIGHT);
 }
 
 void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user,

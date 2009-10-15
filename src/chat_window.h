@@ -114,6 +114,13 @@ typedef struct _chat_window_account {
 	gpointer data;
 } chat_window_account;
 
+/* Add more here or you can make your own */
+typedef enum {
+	CHAT_NOTIFICATION_NOTE = 0x0000ff,	/* Blue */
+	CHAT_NOTIFICATION_ERROR = 0xff0000,	/* Red */
+	CHAT_NOTIFICATION_HIGHLIGHT = 0x00ff00,	/* Green */
+} ChatNotificationType;
+
 chat_window *eb_chat_window_new(eb_local_account *local,
 	struct contact *remote);
 
@@ -124,7 +131,8 @@ int should_window_raise(const char *message);
 void eb_chat_window_display_status(eb_account *remote, gchar *message);
 void eb_chat_window_display_contact(struct contact *remote_contact);
 void eb_chat_window_display_account(eb_account *remote_account);
-void eb_chat_window_display_error(eb_account *remote, gchar *message);
+void eb_chat_window_display_notification(chat_window *cw, gchar *message,
+	ChatNotificationType type);
 void eb_log_status_changed(eb_account *ea, const gchar *status);
 void eb_chat_window_do_timestamp(struct contact *c, gboolean online);
 void eb_restore_last_conv(gchar *file_name, chat_window *cw);

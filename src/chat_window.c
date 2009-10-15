@@ -1388,22 +1388,31 @@ static void _show_smileys_cb(GtkWidget *widget, smiley_callback_data *data)
 	show_smileys_cb(data);
 }
 
-void eb_chat_window_display_error(eb_account *remote, gchar *message)
+void eb_chat_window_display_notification(chat_window *cw, gchar *message,
+	ChatNotificationType type)
 {
-	struct contact *remote_contact = remote->account_contact;
+	char *messagebuf, *linkmessage, *encoded;
 
-	if (remote_contact->chatwindow) {
-		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->
-				chatwindow->chat), _("<b>Error: </b>"),
-			HTML_IGNORE_NONE);
-		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->
-				chatwindow->chat), message, HTML_IGNORE_NONE);
-		html_text_buffer_append(GTK_TEXT_VIEW(remote_contact->
-				chatwindow->chat), "<br>", HTML_IGNORE_NONE);
+	linkmessage = linkify(message);
+	encoded = ay_chat_convert_message(cw, linkmessage);
+
+	messagebuf = g_strdup_printf("<font color=\"#%06x\">%s</font>", type,
+		encoded);
+
+	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), messagebuf,
+		HTML_IGNORE_NONE);
+	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), "\n",
+		HTML_IGNORE_NONE);
 #ifdef __MINGW32__
-		redraw_chat_window(remote_contact->chatwindow->chat);
+	redraw_chat_window(cw->chat);
 #endif
-	}
+
+	if (iGetLocalPref("do_logging"))
+		ay_log_file_message(cw->logfile, "", encoded);
+
+	g_free(messagebuf);
+	g_free(linkmessage);
+	g_free(encoded);
 }
 
 void eb_chat_window_do_timestamp(struct contact *c, gboolean online)
