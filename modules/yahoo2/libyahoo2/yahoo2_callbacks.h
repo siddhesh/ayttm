@@ -352,15 +352,42 @@ extern "C" {
  * 	id   - the id that identifies the server connection
  * 	me   - the identity the file was sent to
  * 	who  - the user who sent the file
- * 	url  - the file url
- * 	expires  - the expiry date of the file on the server (timestamp)
  * 	msg  - the message
  * 	fname- the file name if direct transfer
  * 	fsize- the file size if direct transfer
+ * 	trid - transfer id. Unique for this transfer
+ *
+ * NOTE: Subsequent callbacks for file transfer do not send all of this
+ * information again since it is wasteful. Implementations are expected to
+ * save this information and supply it as callback data when the file or
+ * confirmation is sent
  */
 	void YAHOO_CALLBACK_TYPE(ext_yahoo_got_file) (int id, const char *me,
-		const char *who, const char *url, long expires, const char *msg,
-		const char *fname, unsigned long fesize);
+		const char *who, const char *msg, const char *fname,
+		unsigned long fesize, char *trid);
+
+/*
+ * Name: ext_yahoo_got_ft_data
+ * 	Called multiple times when parts of the file are received
+ * Params:
+ * 	id   - the id that identifies the server connection
+ * 	in   - The data
+ * 	len  - Length of the data
+ * 	data - callback data
+ */
+	void YAHOO_CALLBACK_TYPE(ext_yahoo_got_ft_data) (int id,
+		const unsigned char *in, int len, void *data);
+
+/*
+ * Name: ext_yahoo_file_transfer_done
+ * 	File transfer is done
+ * Params:
+ * 	id     - the id that identifies the server connection
+ * 	result - To notify if it finished successfully or with a failure
+ * 	data   - callback data
+ */
+	void YAHOO_CALLBACK_TYPE(ext_yahoo_file_transfer_done) (int id,
+		int result, void *data);
 
 /*
  * Name: ext_yahoo_contact_added
@@ -662,6 +689,16 @@ extern "C" {
 	int YAHOO_CALLBACK_TYPE(ext_yahoo_connect_async) (int id,
 		const char *host, int port, yahoo_connect_callback callback,
 		void *callback_data, int use_ssl);
+
+/*
+ * Name: ext_yahoo_get_ip_addr
+ * 	get IP Address for a domain name
+ * Params:
+ * 	domain - Domain name
+ * Returns:
+ * 	Newly allocated string containing the IP Address in IPv4 notation
+ */
+	char *YAHOO_CALLBACK_TYPE(ext_yahoo_get_ip_addr) (const char *domain);
 
 /*
  * Name: ext_yahoo_write

@@ -153,7 +153,7 @@ static int url_to_host_port_path(const char *url,
 
 static int isurlchar(unsigned char c)
 {
-	return (isalnum(c) || '-' == c || '_' == c);
+	return (isalnum(c)); // || '_' == c || '-' == c || '.' == c);
 }
 
 char *yahoo_urlencode(const char *instr)
@@ -171,7 +171,7 @@ char *yahoo_urlencode(const char *instr)
 		if (!instr[ipos])
 			break;
 
-		snprintf(&str[bpos], 4, "%%%.2x", instr[ipos]);
+		snprintf(&str[bpos], 4, "%%%02x", instr[ipos] & 0xff);
 		bpos += 3;
 		ipos++;
 	}
@@ -296,7 +296,7 @@ static void connect_complete(void *fd, int error, void *data)
 	if (error == 0)
 		YAHOO_CALLBACK(ext_yahoo_write) (fd, ccd->request,
 			strlen(ccd->request));
-	FREE(ccd->request);
+	free(ccd->request);
 	ccd->callback(ccd->id, fd, error, ccd->user_data);
 	FREE(ccd);
 }
@@ -330,17 +330,17 @@ void yahoo_http_post(int id, const char *url, const char *cookies,
 	snprintf(buff, sizeof(buff),
 		"POST %s HTTP/1.1\r\n"
 		"Cookie: %s\r\n"
-		"User-Agent: Mozilla/4.0 [en] (" PACKAGE "/" VERSION ")\r\n"
-		"Host: %s:%d\r\n"
-		"Content-length: %ld\r\n"
+		"User-Agent: Mozilla/5.0\r\n"
+		"Host: %s\r\n"
+		"Content-Length: %ld\r\n"
 		"Cache-Control: no-cache\r\n"
-		"\r\n", url, cookies, host, port, content_length);
+		"\r\n", path, cookies, host, content_length);
 
 	yahoo_send_http_request(id, host, port, buff, callback, data, ssl);
 }
 
-void yahoo_http_get(int id, const char *url, const char *cookies,
-	yahoo_get_fd_callback callback, void *data)
+void yahoo_http_get(int id, const char *url, const char *cookies, int http11,
+	int keepalive, yahoo_get_fd_callback callback, void *data)
 {
 	char host[255];
 	int port = 80;
@@ -360,88 +360,47 @@ void yahoo_http_get(int id, const char *url, const char *cookies,
 		cookiebuff[0] = '\0';
 
 	snprintf(buff, sizeof(buff),
-		"GET %s HTTP/1.0\r\n"
-		"Host: %s:%d\r\n"
+		"GET %s HTTP/1.%s\r\n"
+		"%sHost: %s\r\n"
 		"User-Agent: Mozilla/4.5 [en] (" PACKAGE "/" VERSION ")\r\n"
-		"%s" "\r\n", path, host, port, cookiebuff);
+		"Accept: */*\r\n"
+		"%s" "\r\n", path, http11?"1":"0", cookiebuff, host,
+		keepalive? "Connection: Keep-Alive\r\n":"Connection: close\r\n");
 
 	yahoo_send_http_request(id, host, port, buff, callback, data, ssl);
 }
 
-struct url_data {
-	yahoo_get_url_handle_callback callback;
-	void *user_data;
-};
-
-static void yahoo_got_url_fd(int id, void *fd, int error, void *data)
+void yahoo_http_head(int id, const char *url, const char *cookies, int len,
+	char *payload, yahoo_get_fd_callback callback, void *data)
 {
-	char *tmp = NULL;
-	char buff[1024];
-	unsigned long filesize = 0;
-	char *filename = NULL;
-	int n;
+	char host[255];
+	int port = 80;
+	char path[255];
+	char buff[2048];
+	char cookiebuff[1024];
+	int ssl = 0;
 
-	struct url_data *ud = data;
-
-	if (error || fd == NULL) {
-		ud->callback(id, fd, error, filename, filesize, ud->user_data);
-		FREE(ud);
+	if (!url_to_host_port_path(url, host, &port, path, &ssl))
 		return;
-	}
 
-	while ((n = yahoo_tcp_readline(buff, sizeof(buff), fd)) > 0) {
-		LOG(("Read:%s:\n", buff));
-		if (!strcmp(buff, ""))
-			break;
+	/* Allow cases when we don't need to send a cookie */
+	if (cookies)
+		snprintf(cookiebuff, sizeof(cookiebuff), "Cookie: %s\r\n",
+			cookies);
+	else
+		cookiebuff[0] = '\0';
 
-		if (!strncasecmp(buff, "Content-length:",
-				strlen("Content-length:"))) {
-			tmp = strrchr(buff, ' ');
-			if (tmp)
-				filesize = atol(tmp);
-		}
+	snprintf(buff, sizeof(buff),
+		"HEAD %s HTTP/1.0\r\n"
+		"Accept: */*\r\n"
+		"Host: %s:%d\r\n"
+		"User-Agent: Mozilla/4.5 [en] (" PACKAGE "/" VERSION ")\r\n"
+		"%s"
+		"Content-Length: %d\r\n"
+		"Cache-Control: no-cache\r\n"
+		"\r\n%s", path, host, port, cookiebuff, len,
+		payload?payload:"");
 
-		if (!strncasecmp(buff, "Content-disposition:",
-				strlen("Content-disposition:"))) {
-			tmp = strstr(buff, "name=");
-			if (tmp) {
-				tmp += strlen("name=");
-				if (tmp[0] == '"') {
-					char *tmp2;
-					tmp++;
-					tmp2 = strchr(tmp, '"');
-					if (tmp2)
-						*tmp2 = '\0';
-				} else {
-					char *tmp2;
-					tmp2 = strchr(tmp, ';');
-					if (!tmp2)
-						tmp2 = strchr(tmp, '\r');
-					if (!tmp2)
-						tmp2 = strchr(tmp, '\n');
-					if (tmp2)
-						*tmp2 = '\0';
-				}
-
-				filename = strdup(tmp);
-			}
-		}
-	}
-
-	LOG(("n == %d\n", n));
-	LOG(("Calling callback, filename:%s, size: %ld\n", filename, filesize));
-	ud->callback(id, fd, error, filename, filesize, ud->user_data);
-	FREE(ud);
-	FREE(filename);
+	yahoo_send_http_request(id, host, port, buff, callback, data, ssl);
 }
 
-void yahoo_get_url_fd(int id, const char *url, const struct yahoo_data *yd,
-	yahoo_get_url_handle_callback callback, void *data)
-{
-	char buff[1024];
-	struct url_data *ud = y_new0(struct url_data, 1);
-	snprintf(buff, sizeof(buff), "Y=%s; T=%s", yd->cookie_y, yd->cookie_t);
-	ud->callback = callback;
-	ud->user_data = data;
-	yahoo_http_get(id, url, buff, yahoo_got_url_fd, ud);
-}

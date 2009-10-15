@@ -411,8 +411,8 @@ typedef struct {
 typedef struct {
 	int id;
 	char *from;
-	char *url;
 	char *fname;
+	char *trid;
 	unsigned long fsize;
 	unsigned long transferred;
 	long expires;
@@ -965,27 +965,20 @@ static void ext_yahoo_got_ping(int id, const char *errormsg)
 /*************************************
  * File transfer code starts here
  */
-static void eb_yahoo_save_file_callback(AyConnection *fd,
-	eb_input_condition cond, gpointer data)
+static void ext_yahoo_got_ft_data(int id, const unsigned char *in, int count,
+	gpointer data)
 {
 	eb_yahoo_file_transfer_data *yftd = data;
-	int file = yftd->file;
-	unsigned long count, c;
-	char buffer[1024];
-
-	count = ay_connection_read(fd, buffer, sizeof(buffer));
+	unsigned long c;
 
 	if (count == 0) {
-		eb_input_remove(yftd->input);
-		close(file);
-		ay_connection_free(fd);
+		close(yftd->file);
 
 		ay_activity_bar_remove(yftd->progress);
 
-		FREE(yftd->from);
-		FREE(yftd->url);
-		FREE(yftd->fname);
-		FREE(yftd);
+		g_free(yftd->from);
+		g_free(yftd->fname);
+		g_free(yftd);
 
 		return;
 	}
@@ -995,34 +988,34 @@ static void eb_yahoo_save_file_callback(AyConnection *fd,
 			yftd->transferred));
 	ay_progress_bar_update_progress(yftd->progress, yftd->transferred);
 
-	// do ay_connection_write instead
-	while (count > 0 && (c = write(file, buffer, count)) < count)
+	while (count > 0 && ((c = write(yftd->file, in, count)) < count)
+		&& c > 0) {
+		in += c;
 		count -= c;
+	}
+
+	if (c<0)
+		LOG(("File write error: %s(%d)\n", strerror(errno), errno));
 }
 
-static void eb_yahoo_got_url_handle(int id, void *fd, int error,
-	const char *filename, unsigned long size, void *data)
+static void eb_yahoo_save_file(const char *filename, gpointer data)
 {
-	eb_yahoo_file_transfer_data *yftd = data;
 	char label[1024] = "     ";	/* 5 spaces so that label[5]==NULL */
 
-	if (error || fd == NULL) {
-		WARNING(("yahoo_get_url_handle returned (%d) %s", error,
-				strerror(error)));
-		FREE(yftd->from);
-		FREE(yftd->url);
-		FREE(yftd->fname);
-		FREE(yftd);
+	eb_yahoo_file_transfer_data *yftd = data;
+
+	if (!filename) {
+		g_free(yftd->from);
+		g_free(yftd->fname);
+		g_free(yftd);
+
 		return;
 	}
 
-	LOG(("Passed in filename: %s user chosen filename: %s\n", filename,
-			yftd->fname));
+	g_free(yftd->fname);
+	yftd->fname = g_strdup(filename);
 
-	if (!filename)
-		filename = yftd->fname;
-	if (!yftd->fsize)
-		yftd->fsize = size;
+	LOG(("Got filename: %s\n", filename));
 
 	yftd->file = open(filename, O_WRONLY | O_CREAT | O_TRUNC,
 		S_IRUSR | S_IWUSR);
@@ -1030,41 +1023,17 @@ static void eb_yahoo_got_url_handle(int id, void *fd, int error,
 	if (yftd->file <= 0) {
 		WARNING(("Could not create file: %s, %s", filename,
 				strerror(errno)));
-		ay_connection_free(AY_CONNECTION(fd));
-		FREE(yftd->from);
-		FREE(yftd->url);
-		FREE(yftd->fname);
-		FREE(yftd);
+		g_free(yftd->from);
+		g_free(yftd->fname);
+		g_free(yftd);
 		return;
 	}
+
+	yahoo_send_file_transfer_response(yftd->id, YAHOO_FILE_TRANSFER_ACCEPT,
+		yftd->trid, yftd);
 
 	snprintf(label, 1024, "Receiving %s...", filename);
 	yftd->progress = ay_progress_bar_add(label, yftd->fsize, NULL, NULL);
-	yftd->input =
-		ay_connection_input_add(AY_CONNECTION(fd), EB_INPUT_READ,
-		eb_yahoo_save_file_callback, yftd);
-}
-
-static void eb_yahoo_save_file(const char *filename, gpointer data)
-{
-	eb_yahoo_file_transfer_data *yftd = data;
-
-	if (!filename) {
-		FREE(yftd->from);
-		FREE(yftd->url);
-		FREE(yftd->fname);
-		FREE(yftd);
-
-		return;
-	}
-
-	FREE(yftd->fname);
-	yftd->fname = g_strdup(filename);
-
-	LOG(("Got filename: %s\n", filename));
-
-	yahoo_get_url_handle(yftd->id, yftd->url, eb_yahoo_got_url_handle,
-		yftd);
 }
 
 static void eb_yahoo_accept_file(gpointer data, int result)
@@ -1073,10 +1042,7 @@ static void eb_yahoo_accept_file(gpointer data, int result)
 	if (result) {
 		char *filepath, *tmp;
 
-		if (yftd->fname)
-			filepath = strdup(yftd->fname);
-		else
-			filepath = yahoo_urldecode(strchr(yftd->url, '/') + 1);
+		filepath = strdup(yftd->fname);
 
 		if (strchr(filepath, '?'))
 			*(strchr(filepath, '?')) = '\0';
@@ -1094,39 +1060,37 @@ static void eb_yahoo_accept_file(gpointer data, int result)
 		else
 			eb_yahoo_save_file(filepath, yftd);
 
-		FREE(filepath);
+		free(filepath);
 	} else {
 
-		FREE(yftd->from);
-		FREE(yftd->url);
-		FREE(yftd->fname);
-		FREE(yftd);
+		yahoo_send_file_transfer_response(yftd->id, YAHOO_FILE_TRANSFER_REJECT,
+			yftd->trid, yftd);
+
+		g_free(yftd->from);
+		g_free(yftd->fname);
+		g_free(yftd);
 	}
 }
 
 static void ext_yahoo_got_file(int id, const char *me, const char *from,
-	const char *url, long expires,
-	const char *msg, const char *fname, unsigned long fsize)
+	const char *msg, const char *fname, unsigned long fsize, char *trid)
 {
 	char buff[1024];
 	eb_yahoo_file_transfer_data *yftd =
 		g_new0(eb_yahoo_file_transfer_data, 1);
-	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 
 	snprintf(buff, sizeof(buff),
-		_
-		("%s, the yahoo user %s has sent you a file%s%s, Do you want to accept it?"),
-		ela->handle, from, (msg
+		_("The Yahoo user <b>%s</b> has sent you a file%s%s.\n\n"
+		"Do you want to accept it?"),
+		from, (msg
 			&& *msg ? _(" with the message ") : ""), (msg
 			&& *msg ? msg : ""));
 
 	yftd->id = id;
+	yftd->trid = trid;
 	yftd->from = g_strdup(from);
-	yftd->url = g_strdup(url);
-	if (fname)
-		yftd->fname = g_strdup(fname);
+	yftd->fname = g_strdup(fname);
 	yftd->fsize = fsize;
-	yftd->expires = expires;
 	eb_do_dialog(buff, _("Yahoo File Transfer"), eb_yahoo_accept_file,
 		yftd);
 }
@@ -1137,10 +1101,10 @@ static void eb_yahoo_send_file_callback(AyConnection *fd,
 	eb_yahoo_file_transfer_data *yftd = data;
 	int file = yftd->file;
 	unsigned long count, c;
-	char buffer[1024];
+	char buf[1024];
+	char *buffer = buf;
 
-	LOG(("eb_yahoo_send_file_callback: %p", fd));
-	count = read(file, buffer, sizeof(buffer));
+	count = read(file, buf, sizeof(buffer));
 
 	if (count == 0) {
 		LOG(("end of file"));
@@ -1148,24 +1112,23 @@ static void eb_yahoo_send_file_callback(AyConnection *fd,
 	}
 
 	yftd->transferred += count;
+
+	LOG(("eb_yahoo_send_file_callback: %p. Read %d bytes (total %d)", fd,
+		count, yftd->transferred));
+
 	ay_progress_bar_update_progress(yftd->progress, yftd->transferred);
 	while (count > 0
-		&& (c = ay_connection_write(fd, buffer, count)) < count)
+		&& (c = ay_connection_write(fd, buffer, count)) < count && c > 0) {
 		count -= c;
+		buffer += c;
+	}
 
 	if (yftd->transferred >= yftd->fsize) {
 		LOG(("transferred >= size"));
  done_sending:
 		eb_input_remove(yftd->input);
 		close(file);
-		ay_connection_free(fd);
 
-		ay_activity_bar_remove(yftd->progress);
-
-		FREE(yftd->from);
-		FREE(yftd->url);
-		FREE(yftd->fname);
-		FREE(yftd);
 	}
 }
 
@@ -1221,12 +1184,62 @@ static void eb_yahoo_send_file(eb_local_account *from, eb_account *to,
 	yftd->file = in;
 
 	if ((tmp = strrchr(file, '/')))
-		yftd->fname = strdup(tmp + 1);
+		yftd->fname = g_strdup(tmp + 1);
 	else
-		yftd->fname = strdup(file);
+		yftd->fname = g_strdup(file);
 
 	yahoo_send_file(ylad->id, to->handle, "", yftd->fname, yftd->fsize,
 		eb_yahoo_got_fd, yftd);
+}
+
+struct ip_addr_info {
+	char *addr;
+	int done;
+};
+
+static void ay_ip_addr_connected(AyConnection *fd, int error, void *data)
+{
+	struct ip_addr_info *ip = data;
+
+	if(!error)
+		ip->addr = ay_connection_get_ip_addr(fd);
+
+	ip->done = 1;
+}
+
+static char *ext_yahoo_get_ip_addr(const char *domain)
+{
+	/* Not implemented */
+	struct ip_addr_info ip;
+	AyConnection *fd =
+		ay_connection_new(domain, 80, AY_CONNECTION_TYPE_PLAIN);
+
+	ip.done = 0;
+
+	ay_connection_connect(fd, ay_ip_addr_connected, NULL, NULL, &ip);
+
+	while(!ip.done)
+		gtk_main_iteration();
+
+	ay_connection_free(fd);
+
+	return ip.addr;
+}
+
+static void ext_yahoo_file_transfer_done(int id, int response, void *data)
+{
+	eb_yahoo_file_transfer_data *yftd = data;
+
+	ay_activity_bar_remove(yftd->progress);
+
+	g_free(yftd->from);
+	g_free(yftd->fname);
+	g_free(yftd);
+
+	if (response != YAHOO_FILE_TRANSFER_DONE) {
+		ay_do_error(_("Yahoo Error"), _("Failed to send file"));
+		LOG(("Error %d\n", response));
+	}
 }
 
 /*
@@ -3961,6 +3974,9 @@ static void register_callbacks()
 	yc.ext_yahoo_conf_userleave = ext_yahoo_conf_userleave;
 	yc.ext_yahoo_conf_message = ext_yahoo_conf_message;
 	yc.ext_yahoo_got_file = ext_yahoo_got_file;
+	yc.ext_yahoo_got_ft_data = ext_yahoo_got_ft_data;
+	yc.ext_yahoo_get_ip_addr = ext_yahoo_get_ip_addr;
+	yc.ext_yahoo_file_transfer_done = ext_yahoo_file_transfer_done;
 	yc.ext_yahoo_contact_added = ext_yahoo_contact_added;
 	yc.ext_yahoo_rejected = ext_yahoo_rejected;
 	yc.ext_yahoo_typing_notify = ext_yahoo_typing_notify;

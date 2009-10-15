@@ -214,6 +214,15 @@ struct yahoo_server_settings {
 	int conn_type;
 };
 
+static void yahoo_process_ft_connection(struct yahoo_input_data *yid, int over);
+
+static void yahoo_process_filetransfer(struct yahoo_input_data *yid,
+	struct yahoo_packet *pkt);
+static void yahoo_process_filetransferinfo(struct yahoo_input_data *yid,
+	struct yahoo_packet *pkt);
+static void yahoo_process_filetransferaccept(struct yahoo_input_data *yid,
+	struct yahoo_packet *pkt);
+
 static void *_yahoo_default_server_settings()
 {
 	struct yahoo_server_settings *yss =
@@ -907,67 +916,6 @@ static void yahoo_process_notify(struct yahoo_input_data *yid,
 		LOG(("Got unknown notification: %s", msg));
 }
 
-static void yahoo_process_filetransfer(struct yahoo_input_data *yid,
-	struct yahoo_packet *pkt)
-{
-	struct yahoo_data *yd = yid->yd;
-	char *from = NULL;
-	char *to = NULL;
-	char *msg = NULL;
-	char *url = NULL;
-	long expires = 0;
-
-	char *service = NULL;
-
-	char *filename = NULL;
-	unsigned long filesize = 0L;
-
-	YList *l;
-	for (l = pkt->hash; l; l = l->next) {
-		struct yahoo_pair *pair = l->data;
-		if (pair->key == 4)
-			from = pair->value;
-		if (pair->key == 5)
-			to = pair->value;
-		if (pair->key == 14)
-			msg = pair->value;
-		if (pair->key == 20)
-			url = pair->value;
-		if (pair->key == 38)
-			expires = atol(pair->value);
-
-		if (pair->key == 27)
-			filename = pair->value;
-		if (pair->key == 28)
-			filesize = atol(pair->value);
-
-		if (pair->key == 49)
-			service = pair->value;
-	}
-
-	if (pkt->service == YAHOO_SERVICE_P2PFILEXFER) {
-		if (strcmp("FILEXFER", service) != 0) {
-			WARNING(("unhandled service 0x%02x", pkt->service));
-			yahoo_dump_unhandled(pkt);
-			return;
-		}
-	}
-
-	if (msg) {
-		char *tmp;
-		tmp = strchr(msg, '\006');
-		if (tmp)
-			*tmp = '\0';
-	}
-	if (url && from)
-		YAHOO_CALLBACK(ext_yahoo_got_file) (yd->client_id, to, from,
-			url, expires, msg, filename, filesize);
-	else if (strcmp(from, "FILE_TRANSFER_SYSTEM") == 0 && msg != NULL)
-		YAHOO_CALLBACK(ext_yahoo_system_message) (yd->client_id, to,
-			from, msg);
-
-}
-
 static void yahoo_process_conference(struct yahoo_input_data *yid,
 	struct yahoo_packet *pkt)
 {
@@ -1302,7 +1250,7 @@ static void yahoo_process_message(struct yahoo_input_data *yid,
 			YAHOO_CALLBACK(ext_yahoo_error) (yd->client_id,
 				message->msg, 0, E_SYSTEM);
 		}
-		free(message);
+		FREE(message);
 	}
 
 	y_list_free(messages);
@@ -1803,12 +1751,12 @@ static void yahoo_auth_https(struct yahoo_data *yd)
 		"&login=%s&passwd=%s&chal=%s", user_encoded, pass_encoded,
 		seed_encoded);
 
-	yahoo_http_get(yid->yd->client_id, url, NULL,
+	yahoo_http_get(yid->yd->client_id, url, NULL, 1, 0,
 		_yahoo_http_connected, yid);
 
-	free(user_encoded);
-	free(pass_encoded);
-	free(seed_encoded);
+	FREE(user_encoded);
+	FREE(pass_encoded);
+	FREE(seed_encoded);
 }
 
 static void yahoo_process_auth(struct yahoo_input_data *yid,
@@ -2416,8 +2364,14 @@ static void yahoo_packet_process(struct yahoo_input_data *yid,
 		yahoo_process_chat(yid, pkt);
 		break;
 	case YAHOO_SERVICE_P2PFILEXFER:
-	case YAHOO_SERVICE_FILETRANSFER:
+	case YAHOO_SERVICE_Y7_FILETRANSFER:
 		yahoo_process_filetransfer(yid, pkt);
+		break;
+	case YAHOO_SERVICE_Y7_FILETRANSFERINFO:
+		yahoo_process_filetransferinfo(yid, pkt);
+		break;
+	case YAHOO_SERVICE_Y7_FILETRANSFERACCEPT:
+		yahoo_process_filetransferaccept(yid, pkt);
 		break;
 	case YAHOO_SERVICE_ADDBUDDY:
 		yahoo_process_buddyadd(yid, pkt);
@@ -2979,10 +2933,6 @@ static void yahoo_process_pager_connection(struct yahoo_input_data *yid,
 	}
 }
 
-static void yahoo_process_ft_connection(struct yahoo_input_data *yid, int over)
-{
-}
-
 static void yahoo_process_chatcat_connection(struct yahoo_input_data *yid,
 	int over)
 {
@@ -3325,6 +3275,7 @@ static void yahoo_process_auth_connection(struct yahoo_input_data *yid,
 		return;
 
 	if (!yid->rxqueue) {
+		LOG(("Whoops! Closed it just like that??\n"));
 		YAHOO_CALLBACK(ext_yahoo_login_response) (yid->yd->client_id,
 			YAHOO_LOGIN_UNKNOWN, NULL);
 		return;
@@ -3337,6 +3288,10 @@ static void yahoo_process_auth_connection(struct yahoo_input_data *yid,
 
 		token += 4;
 	}
+
+	/* Skip the first number */
+	token = strstr(token, "\r\n");
+	token += 2;
 
 	line_end = strstr(token, "\r\n");
 
@@ -3429,6 +3384,7 @@ static void yahoo_process_auth_connection(struct yahoo_input_data *yid,
 	/* Go for the crumb */
 	if (is_ymsgr) {
 		char url[256];
+		char *token_enc;
 		struct yahoo_input_data *crumb_yid =
 			y_new0(struct yahoo_input_data, 1);
 
@@ -3437,12 +3393,16 @@ static void yahoo_process_auth_connection(struct yahoo_input_data *yid,
 
 		inputs = y_list_prepend(inputs, crumb_yid);
 
+		token_enc = yahoo_urlencode(token);
+
 		snprintf(url, sizeof(url),
 			"https://login.yahoo.com/config/pwtoken_login?src=ymsgr&ts="
-			"&token=%s", token);
+			"&token=%s", token_enc);
 
-		yahoo_http_get(crumb_yid->yd->client_id, url, NULL,
+		yahoo_http_get(crumb_yid->yd->client_id, url, NULL, 1, 0,
 			_yahoo_http_connected, crumb_yid);
+
+		FREE(token_enc);
 
 		return;
 	}
@@ -3834,7 +3794,7 @@ void yahoo_get_list(int id)
 static void _yahoo_http_connected(int id, void *fd, int error, void *data)
 {
 	struct yahoo_input_data *yid = data;
-	if (fd <= 0) {
+	if (fd == NULL || error) {
 		inputs = y_list_remove(inputs, yid);
 		FREE(yid);
 		return;
@@ -3871,7 +3831,7 @@ void yahoo_get_yab(int id)
 
 	inputs = y_list_prepend(inputs, yid);
 
-	yahoo_http_get(yid->yd->client_id, url, buff,
+	yahoo_http_get(yid->yd->client_id, url, buff, 0, 0,
 		_yahoo_http_connected, yid);
 }
 
@@ -4395,8 +4355,8 @@ void yahoo_get_chatrooms(int id, int chatroomid)
 
 	inputs = y_list_prepend(inputs, yid);
 
-	yahoo_http_get(yid->yd->client_id, url, buff, _yahoo_http_connected,
-		yid);
+	yahoo_http_get(yid->yd->client_id, url, buff, 0, 0,
+		_yahoo_http_connected, yid);
 }
 
 void yahoo_chat_logon(int id, const char *from, const char *room,
@@ -4754,8 +4714,8 @@ static void yahoo_search_internal(int id, int t, const char *text, int g,
 	snprintf(buff, sizeof(buff), "Y=%s; T=%s", yd->cookie_y, yd->cookie_t);
 
 	inputs = y_list_prepend(inputs, yid);
-	yahoo_http_get(yid->yd->client_id, url, buff, _yahoo_http_connected,
-		yid);
+	yahoo_http_get(yid->yd->client_id, url, buff, 0, 0,
+		_yahoo_http_connected, yid);
 }
 
 void yahoo_search(int id, enum yahoo_search_type t, const char *text,
@@ -4805,194 +4765,638 @@ void yahoo_search_again(int id, int start)
 		start, yss->lsearch_ntotal);
 }
 
-struct send_file_data {
-	struct yahoo_packet *pkt;
-	yahoo_get_fd_callback callback;
-	void *user_data;
-};
-
-static void _yahoo_send_picture_connected(int id, void *fd, int error,
-	void *data)
-{
-	struct yahoo_input_data *yid =
-		find_input_by_id_and_type(id, YAHOO_CONNECTION_FT);
-	struct send_file_data *sfd = data;
-	struct yahoo_packet *pkt = sfd->pkt;
-	char buff[4];
-
-	if (fd <= 0) {
-		sfd->callback(id, fd, error, sfd->user_data);
-		FREE(sfd);
-		yahoo_packet_free(pkt);
-		inputs = y_list_remove(inputs, yid);
-		FREE(yid);
-		return;
-	}
-
-	yid->fd = fd;
-	yahoo_send_packet(yid, pkt, 4);
-	yahoo_packet_free(pkt);
-
-	buff[0] = 0x32;
-	buff[1] = 0x39;
-	buff[2] = 0xc0;
-	buff[3] = 0x80;
-
-	YAHOO_CALLBACK(ext_yahoo_write) (fd, buff, 4);
-
-	yid->fd = 0;
-
-	sfd->callback(id, fd, error, sfd->user_data);
-	FREE(sfd);
-	inputs = y_list_remove(inputs, yid);
-
-	yahoo_input_close(yid);
-}
-
 void yahoo_send_picture(int id, const char *name, unsigned long size,
 	yahoo_get_fd_callback callback, void *data)
 {
-	struct yahoo_data *yd = find_conn_by_id(id);
-	struct yahoo_input_data *yid;
-	struct yahoo_server_settings *yss;
-	struct yahoo_packet *pkt = NULL;
-	char size_str[10];
-	char expire_str[10];
-	long content_length = 0;
-	unsigned char buff[1024];
-	char url[255];
-	struct send_file_data *sfd;
-
-	if (!yd)
-		return;
-
-	yss = yd->server_settings;
-
-	yid = y_new0(struct yahoo_input_data, 1);
-	yid->yd = yd;
-	yid->type = YAHOO_CONNECTION_FT;
-
-	pkt = yahoo_packet_new(YAHOO_SERVICE_PICTURE_UPLOAD,
-		YPACKET_STATUS_DEFAULT, yd->session_id);
-
-	snprintf(size_str, sizeof(size_str), "%ld", size);
-	snprintf(expire_str, sizeof(expire_str), "%ld", (long)604800);
-
-	yahoo_packet_hash(pkt, 0, yd->user);
-	yahoo_packet_hash(pkt, 1, yd->user);
-	yahoo_packet_hash(pkt, 14, "");
-	yahoo_packet_hash(pkt, 27, name);
-	yahoo_packet_hash(pkt, 28, size_str);
-	yahoo_packet_hash(pkt, 38, expire_str);
-
-	content_length =
-		YAHOO_PACKET_HDRLEN + yahoo_packet_length(pkt) + size + 4;
-
-	snprintf(url, sizeof(url), "http://%s:%d/notifyft",
-		yss->filetransfer_host, yss->filetransfer_port);
-	snprintf((char *)buff, sizeof(buff), "Y=%s; T=%s",
-		yd->cookie_y, yd->cookie_t);
-	inputs = y_list_prepend(inputs, yid);
-
-	sfd = y_new0(struct send_file_data, 1);
-	sfd->pkt = pkt;
-	sfd->callback = callback;
-	sfd->user_data = data;
-	yahoo_http_post(yid->yd->client_id, url, (char *)buff, content_length,
-		_yahoo_send_picture_connected, sfd);
+	/* Not Implemented */
 }
 
-static void _yahoo_send_file_connected(int id, void *fd, int error, void *data)
+/* File Transfer */
+static YList *active_file_transfers = NULL;
+
+enum {
+	FT_STATE_HEAD = 1,
+	FT_STATE_RECV,
+	FT_STATE_RECV_START,
+	FT_STATE_SEND
+};
+
+struct send_file_data {
+	int client_id;
+	char *id;
+	char *who;
+	char *filename;
+	char *ip_addr;
+	char *token;
+	int size;
+
+	struct yahoo_input_data *yid;
+	int state;
+
+	yahoo_get_fd_callback callback;
+	void *data;
+};
+
+static char *yahoo_get_random(void)
 {
-	struct yahoo_input_data *yid =
-		find_input_by_id_and_type(id, YAHOO_CONNECTION_FT);
+	int i = 0;
+	int r;
+	int c = 0;
+	char out[25];
+
+	out[24] = '\0';
+	out[23] = '$';
+	out[22] = '$';
+	
+	for (i = 0; i < 22; i++) {
+		if(r == 0)
+			r = rand();
+
+		c = r%61;
+
+		if(c<26)
+			out[i] = c + 'a';
+		else if (c<52)
+			out[i] = c - 26 + 'A';
+		else
+			out[i] = c - 52 + '0';
+
+		r /= 61;
+	}
+
+	return strdup(out);
+}
+
+static int _are_same_id(const void *sfd1, const void *id)
+{
+	return strcmp(((struct send_file_data *)sfd1)->id, (char *)id);
+}
+
+static int _are_same_yid(const void *sfd1, const void *yid)
+{
+	if(((struct send_file_data *)sfd1)->yid == yid)
+		return 0;
+	else
+		return 1;
+}
+
+static struct send_file_data *yahoo_get_active_transfer(char *id)
+{
+	YList *l = y_list_find_custom(active_file_transfers, id,
+		_are_same_id);
+
+	if(l)
+		return (struct send_file_data *)l->data;
+	
+	return NULL;
+}
+
+static struct send_file_data *yahoo_get_active_transfer_with_yid(void *yid)
+{
+	YList *l = y_list_find_custom(active_file_transfers, yid,
+		_are_same_yid);
+
+	if(l)
+		return (struct send_file_data *)l->data;
+	
+	return NULL;
+}
+
+static void yahoo_add_active_transfer(struct send_file_data *sfd)
+{
+	active_file_transfers = y_list_prepend(active_file_transfers, sfd);
+}
+
+static void yahoo_remove_active_transfer(struct send_file_data *sfd)
+{
+	active_file_transfers = y_list_remove(active_file_transfers, sfd);
+	free(sfd->id);
+	free(sfd->who);
+	free(sfd->filename);
+	free(sfd->ip_addr);
+	FREE(sfd);
+}
+
+static void _yahoo_ft_upload_connected(int id, void *fd, int error, void *data)
+{
 	struct send_file_data *sfd = data;
-	struct yahoo_packet *pkt = sfd->pkt;
-	char buff[4];
+	struct yahoo_input_data *yid = sfd->yid;
 
 	if (fd <= 0) {
-		sfd->callback(id, fd, error, sfd->user_data);
-		FREE(sfd);
-		yahoo_packet_free(pkt);
 		inputs = y_list_remove(inputs, yid);
 		FREE(yid);
 		return;
 	}
 
+	sfd->callback(id, fd, error, sfd->data);
+
 	yid->fd = fd;
-	yahoo_send_packet(yid, pkt, 4);
+	yid->read_tag =
+		YAHOO_CALLBACK(ext_yahoo_add_handler) (yid->yd->client_id, fd,
+		YAHOO_INPUT_READ, yid);
+}
 
-	buff[0] = 0x32;
-	buff[1] = 0x39;
-	buff[2] = 0xc0;
-	buff[3] = 0x80;
+static void yahoo_file_transfer_upload(struct yahoo_data *yd,
+	struct send_file_data *sfd)
+{
+	char url[256];
+	char buff[4096];
+	char *sender_enc = NULL, *recv_enc = NULL, *token_enc = NULL;
 
-	YAHOO_CALLBACK(ext_yahoo_write) (fd, buff, 4);
+	struct yahoo_input_data *yid = y_new0(struct yahoo_input_data, 1);
 
-	yid->fd = 0;
+	yid->yd = yd;
+	yid->type = YAHOO_CONNECTION_FT;
 
-	sfd->callback(id, fd, error, sfd->user_data);
-	FREE(sfd);
-	inputs = y_list_remove(inputs, yid);
+	inputs = y_list_prepend(inputs, yid);
+	sfd->yid = yid;
+	sfd->state = FT_STATE_SEND;
+
+	token_enc = yahoo_urlencode(sfd->token);
+	sender_enc = yahoo_urlencode(yd->user);
+	recv_enc = yahoo_urlencode(sfd->who);
+
+	snprintf(url, sizeof(url), 
+		"http://%s/relay?token=%s&sender=%s&recver=%s", sfd->ip_addr,
+		token_enc, sender_enc, recv_enc);
+
+	snprintf(buff, sizeof(buff), "T=%s; Y=%s", yd->cookie_t, yd->cookie_y);
+
+	yahoo_http_post(yd->client_id, url, buff, sfd->size,
+		_yahoo_ft_upload_connected, sfd);
+
+	FREE(token_enc);
+	FREE(sender_enc);
+	FREE(recv_enc);
+}
+
+static void yahoo_init_ft_recv(struct yahoo_data *yd,
+	struct send_file_data *sfd)
+{
+	char url[256];
+	char buff[1024];
+	char *sender_enc = NULL, *recv_enc = NULL, *token_enc = NULL;
+
+	struct yahoo_input_data *yid = y_new0(struct yahoo_input_data, 1);
+
+	yid->yd = yd;
+	yid->type = YAHOO_CONNECTION_FT;
+
+	inputs = y_list_prepend(inputs, yid);
+	sfd->yid = yid;
+	sfd->state = FT_STATE_HEAD;
+
+	token_enc = yahoo_urlencode(sfd->token);
+	sender_enc = yahoo_urlencode(sfd->who);
+	recv_enc = yahoo_urlencode(yd->user);
+
+	snprintf(url, sizeof(url), 
+		"http://%s/relay?token=%s&sender=%s&recver=%s", sfd->ip_addr,
+		token_enc, sender_enc, recv_enc);
+
+	snprintf(buff, sizeof(buff), "Y=%s; T=%s", yd->cookie_y, yd->cookie_t);
+
+	yahoo_http_head(yid->yd->client_id, url, buff, 0, NULL,
+		_yahoo_http_connected, yid);
+
+	FREE(token_enc);
+	FREE(sender_enc);
+	FREE(recv_enc);
+}
+
+static void yahoo_file_transfer_accept(struct yahoo_input_data *yid,
+	struct send_file_data *sfd)
+{
+	struct yahoo_packet *pkt;
+
+	pkt = yahoo_packet_new(YAHOO_SERVICE_Y7_FILETRANSFERACCEPT,
+		YPACKET_STATUS_DEFAULT, yid->yd->session_id);
+
+	yahoo_packet_hash(pkt, 1, yid->yd->user);
+	yahoo_packet_hash(pkt, 5, sfd->who);
+	yahoo_packet_hash(pkt, 265, sfd->id);
+	yahoo_packet_hash(pkt, 27, sfd->filename);
+	yahoo_packet_hash(pkt, 249, "3");
+	yahoo_packet_hash(pkt, 251, sfd->token);
+
+	yahoo_send_packet(yid, pkt, 0);
 
 	yahoo_packet_free(pkt);
-	yahoo_input_close(yid);
+
+	yahoo_init_ft_recv(yid->yd, sfd);
+}
+
+static void yahoo_process_filetransferaccept(struct yahoo_input_data *yid,
+	struct yahoo_packet *pkt)
+{
+	YList *l;
+	struct send_file_data *sfd;
+	char *who = NULL;
+	char *filename = NULL;
+	char *id = NULL;
+	char *token = NULL;
+
+	for (l = pkt->hash; l; l = l->next) {
+		struct yahoo_pair *pair = l->data;
+		switch (pair->key) {
+		case 4:
+			who = pair->value;
+			break;
+		case 5:
+			/* Me... don't care */
+			break;
+		case 249:
+			break;
+		case 265:
+			id = pair->value;
+			break;
+		case 251:
+			token = pair->value;
+			break;
+		case 27:
+			filename = pair->value;
+			break;
+		}
+	}
+
+	sfd = yahoo_get_active_transfer(id);
+
+	if (sfd) {
+		sfd->token = strdup(token);
+
+		yahoo_file_transfer_upload(yid->yd, sfd);
+	}
+	else {
+		YAHOO_CALLBACK(ext_yahoo_file_transfer_done)
+			(yid->yd->client_id, YAHOO_FILE_TRANSFER_UNKNOWN,
+			sfd->data);
+
+		yahoo_remove_active_transfer(sfd);
+	}
+}
+
+static void yahoo_process_filetransferinfo(struct yahoo_input_data *yid,
+	struct yahoo_packet *pkt)
+{
+	YList *l;
+	char *who = NULL;
+	char *filename = NULL;
+	char *id = NULL;
+	char *token = NULL;
+	char *ip_addr = NULL;
+
+	struct send_file_data *sfd;
+
+	for (l = pkt->hash; l; l = l->next) {
+		struct yahoo_pair *pair = l->data;
+		switch (pair->key) {
+		case 1:
+		case 4:
+			who = pair->value;
+			break;
+		case 5:
+			/* Me... don't care */
+			break;
+		case 249:
+			break;
+		case 265:
+			id = pair->value;
+			break;
+		case 250:
+			ip_addr = pair->value;
+			break;
+		case 251:
+			token = pair->value;
+			break;
+		case 27:
+			filename = pair->value;
+			break;
+		}
+	}
+
+	sfd = yahoo_get_active_transfer(id);
+
+	if (sfd) {
+		sfd->token = strdup(token);
+		sfd->ip_addr = strdup(ip_addr);
+
+		yahoo_file_transfer_accept(yid, sfd);
+	}
+	else {
+		YAHOO_CALLBACK(ext_yahoo_file_transfer_done)
+			(yid->yd->client_id, YAHOO_FILE_TRANSFER_UNKNOWN,
+			sfd->data);
+
+		yahoo_remove_active_transfer(sfd);
+	}
+}
+
+static void yahoo_send_filetransferinfo(struct yahoo_data *yd,
+	struct send_file_data *sfd)
+{
+	struct yahoo_input_data *yid;
+	struct yahoo_packet *pkt;
+
+	yid = find_input_by_id_and_type(yd->client_id, YAHOO_CONNECTION_PAGER);
+	sfd->ip_addr = YAHOO_CALLBACK(ext_yahoo_get_ip_addr)("relay.yahoo.com");
+
+	if (!sfd->ip_addr) {
+		YAHOO_CALLBACK(ext_yahoo_file_transfer_done)
+			(yd->client_id, YAHOO_FILE_TRANSFER_RELAY, sfd->data);
+
+		yahoo_remove_active_transfer(sfd);
+
+		return;
+	}
+
+	pkt = yahoo_packet_new(YAHOO_SERVICE_Y7_FILETRANSFERINFO,
+		YPACKET_STATUS_DEFAULT, yd->session_id);
+
+	yahoo_packet_hash(pkt, 1, yd->user);
+	yahoo_packet_hash(pkt, 5, sfd->who);
+	yahoo_packet_hash(pkt, 265, sfd->id);
+	yahoo_packet_hash(pkt, 27, sfd->filename);
+	yahoo_packet_hash(pkt, 249, "3");
+	yahoo_packet_hash(pkt, 250, sfd->ip_addr);
+
+	yahoo_send_packet(yid, pkt, 0);
+
+	yahoo_packet_free(pkt);
+}
+
+static void yahoo_process_filetransfer(struct yahoo_input_data *yid,
+	struct yahoo_packet *pkt)
+{
+	YList *l;
+	char *who = NULL;
+	char *filename = NULL;
+	char *msg = NULL;
+	char *id = NULL;
+	int action = 0;
+	int size = 0;
+	struct yahoo_data *yd = yid->yd;
+
+	struct send_file_data *sfd;
+
+	for (l = pkt->hash; l; l = l->next) {
+		struct yahoo_pair *pair = l->data;
+		switch (pair->key) {
+		case 4:
+			who = pair->value;
+			break;
+		case 5:
+			/* Me... don't care */
+			break;
+		case 222:
+			action = atoi(pair->value);
+			break;
+		case 265:
+			id = pair->value;
+			break;
+		case 266: /* Don't know */
+			break;
+		case 302: /* Start Data? */
+			break;
+		case 300:
+			break;
+		case 27:
+			filename = pair->value;
+			break;
+		case 28:
+			size = atoi(pair->value);
+			break;
+		case 14:
+			msg = pair->value;
+		case 301: /* End Data? */
+			break;
+		case 303:
+			break;
+
+		}
+	}
+
+	if (action == YAHOO_FILE_TRANSFER_INIT) {
+		/* Received a FT request from buddy */
+		sfd = y_new0(struct send_file_data, 1);
+        
+		sfd->client_id = yd->client_id;
+		sfd->id = strdup(id);
+		sfd->who = strdup(who);
+		sfd->filename = strdup(filename);
+		sfd->size = size;
+        
+		yahoo_add_active_transfer(sfd);
+
+		YAHOO_CALLBACK(ext_yahoo_got_file) (yd->client_id, yd->user,
+			who, msg, filename, size, sfd->id);
+	}
+	else {
+		/* Response to our request */
+		sfd = yahoo_get_active_transfer(id);
+
+		if (sfd && action == YAHOO_FILE_TRANSFER_ACCEPT) {
+			yahoo_send_filetransferinfo(yd, sfd);
+		}
+		else if (!sfd || action == YAHOO_FILE_TRANSFER_REJECT) {
+			YAHOO_CALLBACK(ext_yahoo_file_transfer_done)
+				(yd->client_id, YAHOO_FILE_TRANSFER_REJECT,
+				sfd->data);
+
+			yahoo_remove_active_transfer(sfd);
+		}
+	}
 }
 
 void yahoo_send_file(int id, const char *who, const char *msg,
 	const char *name, unsigned long size,
 	yahoo_get_fd_callback callback, void *data)
 {
-	struct yahoo_data *yd = find_conn_by_id(id);
-	struct yahoo_input_data *yid;
-	struct yahoo_server_settings *yss;
 	struct yahoo_packet *pkt = NULL;
 	char size_str[10];
-	long content_length = 0;
-	unsigned char buff[1024];
-	char url[255];
+	struct yahoo_input_data *yid;
+	struct yahoo_data *yd;
 	struct send_file_data *sfd;
+	
+	yid = find_input_by_id_and_type(id, YAHOO_CONNECTION_PAGER);
+	yd = find_conn_by_id(id);
+	sfd = y_new0(struct send_file_data, 1);
+
+	sfd->client_id = id;
+	sfd->id = yahoo_get_random();
+	sfd->who = strdup(who);
+	sfd->filename = strdup(name);
+	sfd->size = size;
+	sfd->callback = callback;
+	sfd->data = data;
+
+	yahoo_add_active_transfer(sfd);
 
 	if (!yd)
 		return;
 
-	yss = yd->server_settings;
-
-	yid = y_new0(struct yahoo_input_data, 1);
-	yid->yd = yd;
-	yid->type = YAHOO_CONNECTION_FT;
-
-	pkt = yahoo_packet_new(YAHOO_SERVICE_FILETRANSFER,
+	pkt = yahoo_packet_new(YAHOO_SERVICE_Y7_FILETRANSFER,
 		YPACKET_STATUS_DEFAULT, yd->session_id);
 
 	snprintf(size_str, sizeof(size_str), "%ld", size);
 
-	yahoo_packet_hash(pkt, 0, yd->user);
+	yahoo_packet_hash(pkt, 1, yd->user);
 	yahoo_packet_hash(pkt, 5, who);
-	yahoo_packet_hash(pkt, 28, size_str);
+	yahoo_packet_hash(pkt, 265, sfd->id);
+	yahoo_packet_hash(pkt, 222, "1");
+	yahoo_packet_hash(pkt, 266, "1");
+	yahoo_packet_hash(pkt, 302, "268");
+	yahoo_packet_hash(pkt, 300, "268");
 	yahoo_packet_hash(pkt, 27, name);
-	yahoo_packet_hash(pkt, 14, msg);
+	yahoo_packet_hash(pkt, 28, size_str);
+	yahoo_packet_hash(pkt, 301, "268");
+	yahoo_packet_hash(pkt, 303, "268");
 
-	content_length =
-		YAHOO_PACKET_HDRLEN + yahoo_packet_length(pkt) + size + 4;
+	yahoo_send_packet(yid, pkt, 0);
 
-	snprintf(url, sizeof(url), "http://%s:%d/notifyft",
-		yss->filetransfer_host, yss->filetransfer_port);
-
-	/* thanks to kopete dumpcap */
-	snprintf((char *)buff, sizeof(buff),
-		"Y=%s; T=%s; C=%s ;B=fckeert1kk1nl&b=2", yd->cookie_y,
-		yd->cookie_t, yd->cookie_c);
-	inputs = y_list_prepend(inputs, yid);
-
-	sfd = y_new0(struct send_file_data, 1);
-	sfd->pkt = pkt;
-	sfd->callback = callback;
-	sfd->user_data = data;
-
-	yahoo_http_post(yid->yd->client_id, url, (char *)buff, content_length,
-		_yahoo_send_file_connected, sfd);
+	yahoo_packet_free(pkt);
 }
+
+void yahoo_send_file_transfer_response(int client_id, int response, char *id, void *data)
+{
+	struct yahoo_packet *pkt = NULL;
+	char resp[2];
+	struct yahoo_input_data *yid;
+	
+	struct send_file_data *sfd = yahoo_get_active_transfer(id);
+
+	sfd->data = data;
+
+	yid = find_input_by_id_and_type(client_id, YAHOO_CONNECTION_PAGER);
+
+	pkt = yahoo_packet_new(YAHOO_SERVICE_Y7_FILETRANSFER,
+		YPACKET_STATUS_DEFAULT, yid->yd->session_id);
+
+	snprintf(resp, sizeof(resp), "%d", response);
+
+	yahoo_packet_hash(pkt, 1, yid->yd->user);
+	yahoo_packet_hash(pkt, 5, sfd->who);
+	yahoo_packet_hash(pkt, 265, sfd->id);
+	yahoo_packet_hash(pkt, 222, resp);
+
+	yahoo_send_packet(yid, pkt, 0);
+
+	yahoo_packet_free(pkt);
+
+	if(response == YAHOO_FILE_TRANSFER_REJECT)
+		yahoo_remove_active_transfer(sfd);
+}
+
+static void yahoo_process_ft_connection(struct yahoo_input_data *yid, int over)
+{
+	struct send_file_data *sfd;
+	struct yahoo_data *yd = yid->yd;
+	
+	sfd = yahoo_get_active_transfer_with_yid(yid);
+
+	if (!sfd) {
+		LOG(("Something funny happened. yid %p has no sfd.\n", yid));
+		return;
+	}
+
+	/* 
+	 * We want to handle only the complete data with HEAD since we don't
+	 * want a situation where both the GET and HEAD are active.
+	 * With SEND, we really can't do much with partial response
+	 */
+	if ((sfd->state == FT_STATE_HEAD || sfd->state == FT_STATE_SEND) 
+			&& !over)
+		return;
+
+	if (sfd->state == FT_STATE_HEAD) {
+		/* Do a GET */
+		char url[256];
+		char buff[1024];
+		char *sender_enc = NULL, *recv_enc = NULL, *token_enc = NULL;
+
+		struct yahoo_input_data *yid_ft = 
+			y_new0(struct yahoo_input_data, 1);
+        
+		yid_ft->yd = yid->yd;
+		yid_ft->type = YAHOO_CONNECTION_FT;
+        
+		inputs = y_list_prepend(inputs, yid_ft);
+		sfd->yid = yid_ft;
+		sfd->state = FT_STATE_RECV;
+
+		token_enc = yahoo_urlencode(sfd->token);
+		sender_enc = yahoo_urlencode(sfd->who);
+		recv_enc = yahoo_urlencode(yd->user);
+        
+		snprintf(url, sizeof(url), 
+			"http://%s/relay?token=%s&sender=%s&recver=%s", sfd->ip_addr,
+			token_enc, sender_enc, recv_enc);
+
+		snprintf(buff, sizeof(buff), "Y=%s; T=%s", yd->cookie_y,
+			yd->cookie_t);
+
+
+		yahoo_http_get(yd->client_id, url, buff, 1, 1,
+			_yahoo_http_connected, yid_ft);
+
+		FREE(token_enc);
+		FREE(sender_enc);
+		FREE(recv_enc);
+	}
+	else if (sfd->state == FT_STATE_RECV || 
+		sfd->state == FT_STATE_RECV_START) {
+
+		unsigned char *data_begin = NULL;
+
+		if (yid->rxlen == 0)
+			yahoo_remove_active_transfer(sfd);
+
+		if (sfd->state != FT_STATE_RECV_START &&
+			(data_begin = 
+				(unsigned char *)strstr((char *)yid->rxqueue,
+				"\r\n\r\n"))) {
+
+			sfd->state = FT_STATE_RECV_START;
+
+			yid->rxlen -= 4+(data_begin-yid->rxqueue)/sizeof(char);
+			data_begin += 4;
+
+			if (yid->rxlen > 0)
+				YAHOO_CALLBACK(ext_yahoo_got_ft_data) 
+					(yd->client_id, data_begin,
+					yid->rxlen, sfd->data);
+		}
+		else if (sfd->state == FT_STATE_RECV_START)
+			YAHOO_CALLBACK(ext_yahoo_got_ft_data) (yd->client_id,
+				yid->rxqueue, yid->rxlen, sfd->data);
+
+		FREE(yid->rxqueue);
+		yid->rxqueue = NULL;
+		yid->rxlen = 0;
+	}
+	else if (sfd->state == FT_STATE_SEND) {
+		/* Sent file completed */
+		int len = 0;
+		char *off = strstr((char *)yid->rxqueue, "Content-Length: ");
+
+		if (off) {
+			off += 16;
+			len = atoi(off);
+		}
+
+		if (len < sfd->size)
+			YAHOO_CALLBACK(ext_yahoo_file_transfer_done)
+				(yd->client_id,
+				YAHOO_FILE_TRANSFER_FAILED, sfd->data);
+		else
+			YAHOO_CALLBACK(ext_yahoo_file_transfer_done)
+				(yd->client_id,
+				YAHOO_FILE_TRANSFER_DONE, sfd->data);
+
+		yahoo_remove_active_transfer(sfd);
+	}
+}
+
+/* End File Transfer */
 
 enum yahoo_status yahoo_current_status(int id)
 {
@@ -5042,16 +5446,6 @@ const char *yahoo_get_cookie(int id, const char *which)
 	if (!strncasecmp(which, "login", 5))
 		return yd->login_cookie;
 	return NULL;
-}
-
-void yahoo_get_url_handle(int id, const char *url,
-	yahoo_get_url_handle_callback callback, void *data)
-{
-	struct yahoo_data *yd = find_conn_by_id(id);
-	if (!yd)
-		return;
-
-	yahoo_get_url_fd(id, url, yd, callback, data);
 }
 
 const char *yahoo_get_profile_url(void)
