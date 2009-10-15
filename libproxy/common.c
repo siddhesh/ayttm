@@ -66,7 +66,7 @@ struct addrinfo *lookup_address(const char *host, int port_num, int family)
 	return NULL;
 }
 
-int connect_address(const char *host, int port_num)
+int connect_address(const char *host, int port_num, void *info)
 {
 	int fd;
 	struct addrinfo hints;
@@ -95,6 +95,11 @@ int connect_address(const char *host, int port_num)
 				continue;
 
 			if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1) {
+				/* Preserve the connection info if requested */
+				if(info)
+					memcpy(info, rp->ai_addr, 
+						rp->ai_addrlen);
+
 				freeaddrinfo(result);
 				return fd;
 			} else {

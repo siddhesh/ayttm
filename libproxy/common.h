@@ -35,7 +35,7 @@ extern "C" {
 		int family);
 
 /* Connect to an address on a port */
-	int connect_address(const char *host, int port_num);
+	int connect_address(const char *host, int port_num, void *info);
 
 /* Receive a line of data from socket */
 	int ay_recv_line(int sock, char **resultp);

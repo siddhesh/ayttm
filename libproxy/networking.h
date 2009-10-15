@@ -88,8 +88,7 @@ extern "C" {
 		AyInputCallback function, void *data);
 	void ay_connection_input_remove(int tag);
 
-	int ay_connect_host(const char *host, int port, void *callback,
-		void *scb, void *data);
+	char *ay_connection_get_ip_addr(AyConnection *con);
 
 	void ay_connection_free_no_close(AyConnection *con);
 	int ay_connection_get_fd(AyConnection *con);

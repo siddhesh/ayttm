@@ -93,6 +93,9 @@ struct _AyConnectionPrivate {
 	/* Port */
 	int port;
 
+	/* Connection info. Socket family, IP address, etc. */
+	struct sockaddr info;
+
 	/* Proxy. NULL if the connection is direct */
 	AyProxyData *proxy;
 
@@ -255,7 +258,7 @@ static gpointer _do_connect(gpointer data)
 	else if (!con->connect) {
 		con->connection->priv->fd.sockfd =
 			connect_address(con->connection->priv->host,
-			con->connection->priv->port);
+			con->connection->priv->port, &con->connection->priv->info);
 
 		if (!ay_check_continue_connecting(con, leash))
 			return NULL;
@@ -280,7 +283,7 @@ static gpointer _do_connect(gpointer data)
 		/* First get a connection to the proxy */
 		proxyfd =
 			connect_address(con->connection->priv->proxy->host,
-			con->connection->priv->proxy->port);
+			con->connection->priv->proxy->port, NULL);
 
 		if (proxyfd >= 0) {
 			if (!ay_check_continue_connecting(con, leash)) {
@@ -536,6 +539,14 @@ void ay_connection_disconnect(AyConnection *con)
 		close(con->priv->fd.listenfd);
 		con->priv->fd.listenfd = -1;
 	}
+}
+
+char *ay_connection_get_ip_addr(AyConnection *con)
+{
+	return g_strdup_printf("%u.%u.%u.%u", con->priv->info.sa_data[2] & 0xff,
+		con->priv->info.sa_data[3] & 0xff,
+		con->priv->info.sa_data[4] & 0xff,
+		con->priv->info.sa_data[5] & 0xff);
 }
 
 int ay_connection_read(AyConnection *con, void *buf, int len)
