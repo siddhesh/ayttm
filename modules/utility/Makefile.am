@@ -1,4 +1,4 @@
-AM_CFLAGS = $(GLIB_CFLAGS) -I$(top_srcdir)/src
+AM_CFLAGS = $(GTK_CFLAGS) $(GLIB_CFLAGS) -I$(top_srcdir)/src
 
 EXTRA_DIST = 
 

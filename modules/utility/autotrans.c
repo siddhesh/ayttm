@@ -32,6 +32,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include "externs.h"
 #include "plugin_api.h"
@@ -40,6 +41,9 @@
 #include "messages.h"
 #include "llist.h"
 #include "platform_defs.h"
+#include "libproxy/networking.h"
+#include "chat_window.h"
+#include "status.h"
 
 /* already declared in dialog.h - but that uses gtk */
 void do_list_dialog(char *message, char *title, char **list,
@@ -238,33 +242,6 @@ static void language_select(ebmCallbackData *data)
 		&language_selected, (gpointer) cont);
 }
 
-/*
-** Name:    Utf8ToStr
-** Purpose: revert UTF-8 string conversion
-** Input:   in     - the string to decode
-** Output:  a new decoded string
-*/
-static char *Utf8ToStr(const char *in)
-{
-	int i = 0;
-	unsigned int n;
-	char *result = NULL;
-	result = (char *)malloc(strlen(in) + 1);
-
-	/* convert a string from UTF-8 Format */
-	for (n = 0; n < strlen(in); n++) {
-		unsigned char c = in[n];
-
-		if (c < 128) {
-			result[i++] = (char)c;
-		} else {
-			result[i++] = (c << 6) | (in[++n] & 63);
-		}
-	}
-	result[i] = '\0';
-	return result;
-}
-
 static int isurlchar(unsigned char c)
 {
 	return (isalnum(c) || '-' == c || '_' == c);
@@ -300,69 +277,139 @@ static char *trans_urlencode(const char *instr)
 	return str;
 }
 
-static int do_http_post(const char *host, const char *path,
-	const char *enc_data)
+struct http_data {
+	int done;
+	int error;
+	char buf[1024];
+	int len;
+	int handle;
+};
+
+#define START_POS "<div id=result_box dir=\"ltr\">"
+#define END_POS   "</div>"
+
+static void trim_start(char *buf, int offset, int len)
+{
+	int i, j;
+
+	if (!offset)
+		return;
+
+	for (i=offset, j=0;i<len; i++, j++)
+		buf[j] = buf[i];
+	
+	buf[j] = '\0';
+}
+
+static void receive_translation(AyConnection *fd, eb_input_condition cond,
+	void *data)
+{
+	struct http_data *d = data;
+	int len = 0;
+
+	while ((len = ay_connection_read(fd, d->buf+d->len, sizeof(d->buf) - d->len)) > 0) {
+		char *end, *start;
+		
+		start = strstr(d->buf, START_POS);
+
+		if (!start)
+			continue;
+
+		d->len += len;
+
+		d->buf[len] = '\0';
+		trim_start(d->buf, start - d->buf, d->len);
+		d->len -= start - d->buf;
+
+		end = strstr(d->buf, END_POS);
+		if (end) {
+			*end = '\0';
+			d->done = 1;
+			trim_start(d->buf, strlen(START_POS), d->len);
+			ay_connection_input_remove(d->handle);
+			return;
+		}
+	}
+
+	if (len ==0 || (len < 0 && errno != EAGAIN)) {
+		d->error = 1;
+		d->done = 1;
+		ay_connection_input_remove(d->handle);
+	}
+}
+
+static void http_connected(AyConnection *fd, int error, void *data)
+{
+	struct http_data *d = data;
+
+	d->error = error;
+	d->done = 1;
+}
+
+static AyConnection *do_http_post(const char *host, const char *path,
+	struct http_data *d)
 {
 	char buff[1024];
-	int fd;
+	AyConnection *fd = ay_connection_new(host, 80,
+		AY_CONNECTION_TYPE_PLAIN);
 
-	fd = ay_socket_new(host, 80);
+	ay_connection_connect(fd, http_connected, NULL, NULL, d);
 
-	if (fd > 0) {
+	/* Busy wait. Yuck */
+	while(!d->done)
+		do_events();
+
+	if (!d->error) {
 		snprintf(buff, sizeof(buff),
-			"POST %s HTTP/1.1\r\n"
+			"GET %s HTTP/1.1\r\n"
 			"Host: %s\r\n"
-			"User-Agent: Mozilla/4.5 [en] (%s/%s)\r\n"
-			"Content-type: application/x-www-form-urlencoded\r\n"
-			"Content-length: %d\r\n"
-			"\r\n", path, host, PACKAGE, VERSION, strlen(enc_data));
+			"User-Agent: Mozilla/5.0 [en] (%s/%s)\r\n"
+			"\r\n", path, host, PACKAGE, VERSION);
 
-		write(fd, buff, strlen(buff));
-		write(fd, enc_data, strlen(enc_data));
+		ay_connection_write(fd, buff, strlen(buff));
+	}
+	else {
+		ay_connection_free(fd);
+		fd = NULL;
 	}
 
 	return fd;
 }
 
-#define START_POS "<input type=hidden name=\"q\" value=\""
-#define END_POS   "\">"
 static char *doTranslate(const char *ostring, const char *from, const char *to)
 {
 	char buf[2048];
-	int fd;
-	int offset = 0;
-	char *string;
 	char *result;
+	char *string;
+	AyConnection *fd;
+	struct http_data *d = g_new0(struct http_data, 1);
 
 	string = trans_urlencode(ostring);
-	snprintf(buf, 2048, "tt=urltext&lp=%s_%s&urltext=%s", from, to, string);
+	snprintf(buf, 2048, "/translate_t?hl=%s&js=n&text=%s&sl=%s&tl=%s",
+		from, string, from, to);
 	free(string);
 
-	fd = do_http_post("babelfish.altavista.com", "/babelfish/tr", buf);
+	fd = do_http_post("translate.google.com", buf, d);
 
-	while ((ay_tcp_readline(buf + offset, sizeof(buf) - offset, fd)) > 0) {
-		char *end, *start = strstr(buf, START_POS);
-		offset = 0;
-		if (!start)
-			continue;
+	if (!fd)
+		return NULL;
 
-		start += strlen(START_POS);
-		end = strstr(start, END_POS);
-		if (end) {
-			*end = '\0';
-			string = start;
-			break;
-		} else {
-			/* append next line */
-			offset = strlen(buf);
-		}
+	/* Busy wait again. Yuck yuck! */
+	d->done = 0;
+	d->handle = ay_connection_input_add(fd, EB_INPUT_READ,
+		receive_translation, d);
+	while (!d->done)
+		do_events();
 
-	}
+	ay_connection_free(fd);
 
-	eb_debug(DBG_MOD, "Translated %s to %s\n", ostring, string);
+	if (d->error)
+		return NULL;
 
-	result = Utf8ToStr(string);
-	eb_debug(DBG_MOD, "%s\n", result);
+	eb_debug(DBG_MOD, "Translated %s to %s\n", ostring, d->buf);
+
+	result = g_strdup(d->buf);
+	g_free(d);
 	return result;
 }
 
@@ -385,7 +432,17 @@ static char *translate_out(const eb_local_account *local,
 		return strdup(s);
 	}			// speak same language
 
+	eb_chat_window_display_notification(contact->chatwindow,
+		_("translating..."), CHAT_NOTIFICATION_WORKING);
+
 	p = doTranslate(s, l, contact->language);
+
+	if (!p) {
+		eb_chat_window_display_notification(contact->chatwindow,
+			_("Failed to get a translation"),
+			CHAT_NOTIFICATION_ERROR);
+	}
+
 	eb_debug(DBG_MOD, "%s translated to %s\n", s, p);
 	return p;
 }
