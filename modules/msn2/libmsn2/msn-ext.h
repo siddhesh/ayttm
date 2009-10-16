@@ -29,7 +29,6 @@ void ext_msn_free(MsnConnection *mc);
 void ext_msn_error(MsnConnection *mc, const MsnError *error);
 void ext_show_error(MsnConnection *mc, const char *msg);
 void ext_msn_send_data(MsnConnection *mc, char *buf, int len);
-void ext_msn_account_destroyed(MsnAccount *ma);
 void ext_msn_connection_destroyed(MsnConnection *mc);
 void ext_msn_connect(MsnConnection *mc, MsnConnectionCallback callback);
 void ext_msn_login_response(MsnAccount *ma, int response);

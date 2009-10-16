@@ -49,8 +49,6 @@ void msn_account_free(MsnAccount *ma)
 	free(ma->passport);
 	free(ma->friendlyname);
 
-	ext_msn_account_destroyed(ma);
-
 	free(ma->policy);
 	free(ma->nonce);
 	free(ma->ticket);
