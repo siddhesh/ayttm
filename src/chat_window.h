@@ -119,6 +119,7 @@ typedef enum {
 	CHAT_NOTIFICATION_NOTE = 0x0000ff,	/* Blue */
 	CHAT_NOTIFICATION_ERROR = 0xff0000,	/* Red */
 	CHAT_NOTIFICATION_HIGHLIGHT = 0x00ff00,	/* Green */
+	CHAT_NOTIFICATION_WORKING = 0xcccccc	/* Gray */
 } ChatNotificationType;
 
 chat_window *eb_chat_window_new(eb_local_account *local,

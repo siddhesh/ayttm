@@ -1393,6 +1393,9 @@ void eb_chat_window_display_notification(chat_window *cw, gchar *message,
 {
 	char *messagebuf, *linkmessage, *encoded;
 
+	if (!cw)
+		return;
+
 	linkmessage = linkify(message);
 	encoded = ay_chat_convert_message(cw, linkmessage);
 
@@ -1400,9 +1403,8 @@ void eb_chat_window_display_notification(chat_window *cw, gchar *message,
 		encoded);
 
 	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), messagebuf,
-		HTML_IGNORE_NONE);
-	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), "\n",
-		HTML_IGNORE_NONE);
+		(type==CHAT_NOTIFICATION_WORKING)?HTML_IGNORE_END:HTML_IGNORE_NONE);
+
 #ifdef __MINGW32__
 	redraw_chat_window(cw->chat);
 #endif

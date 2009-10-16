@@ -8,6 +8,7 @@
 #define	HTML_IGNORE_FOREGROUND	1
 #define	HTML_IGNORE_BACKGROUND	2
 #define	HTML_IGNORE_FONT	4
+#define	HTML_IGNORE_END		8
 
 #ifdef __cplusplus
 extern "C" {
