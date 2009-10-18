@@ -154,7 +154,7 @@ static gboolean selection_made_callback(GtkTreeSelection *selection,
 			&selected_row, CONNECT, &autoconnect, -1);
 
 		gtk_list_store_set(account_list_store, &selected_row,
-			CONNECT, !autoconnect);
+			CONNECT, !autoconnect, -1);
 	}
 
 	gtk_tree_model_get(GTK_TREE_MODEL(account_list_store), &sel,
