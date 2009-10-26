@@ -1673,7 +1673,18 @@ static void ay_msn_incoming(AyConnection *source, eb_input_condition condition,
 		memset(buf, 0, sizeof(buf));
 	}
 
-	if (len < 0 && errno != EAGAIN && errno != EINTR) {
+	if (len == 0 && mc->type == MSN_CONNECTION_SB) {
+		eb_debug(DBG_MSN,
+			"Disconnected switchboard %p due to inactivity\n",
+			source);
+		eb_chat_room *ecr = mc->sbpayload->data;
+
+		if (ecr)
+			ecr->protocol_local_chat_room_data = NULL;
+
+		msn_sb_disconnected(mc);
+	}
+	else if ((len == 0) || (len < 0 && errno != EAGAIN && errno != EINTR)) {
 		char errbuf[1024];
 		char buf[1024];
 
@@ -1682,6 +1693,7 @@ static void ay_msn_incoming(AyConnection *source, eb_input_condition condition,
 
 		ext_show_error(mc, buf);
 	}
+
 }
 
 void ext_msn_send_data(MsnConnection *mc, char *data, int len)

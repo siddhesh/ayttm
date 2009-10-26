@@ -120,12 +120,14 @@ int msn_got_response(MsnConnection *mc, char *response, int len)
 		|| mc->type == MSN_CONNECTION_SB) {
 		MsnAccount *ma = mc->account;
 
-		if (len == 0) {
+		if (len == 0 && mc->type == MSN_CONNECTION_NS) {
 			const MsnError *error =
 				msn_strerror(MSN_ERROR_CONNECTION_RESET);
 			ext_msn_error(mc, error);
 			return 1;
 		}
+		else if (len == 0)
+			return 1;
 
 		do {
 			if (!mc->current_message)
