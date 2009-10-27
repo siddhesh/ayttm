@@ -297,7 +297,7 @@ static void ay_lj_set_idle(eb_local_account *account, int idle)
 {
 }
 
-static void ay_lj_set_away(eb_local_account *account, char *message)
+static void ay_lj_set_away(eb_local_account *account, char *message, int away)
 {
 }
 
@@ -399,14 +399,14 @@ static char *status_strings[] = {
 	"Offline"
 };
 
-static char *ay_lj_get_status_string(eb_account *account)
+static const char *ay_lj_get_status_string(eb_account *account)
 {
 	lj_account_data *lad = account->protocol_account_data;
 
 	return status_strings[lad->status];
 }
 
-static char **ay_lj_get_status_pixmap(eb_account *account)
+static const char **ay_lj_get_status_pixmap(eb_account *account)
 {
 	lj_account_data *lad;
 
@@ -673,7 +673,7 @@ static void ay_lj_set_current_state(eb_local_account *account, int state)
 	lla->status = state;
 }
 
-static char *ay_lj_check_login(char *user, char *pass)
+static char *ay_lj_check_login(const char *user, const char *pass)
 {
 	return NULL;
 }

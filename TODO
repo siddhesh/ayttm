@@ -39,8 +39,6 @@ http://ayttm.git.sourceforge.net/git/gitweb.cgi?p=ayttm/ayttm;a=blob_plain;f=TOD
   * Standardize tab switching shortcut to Ctrl+Pageup/Ctrl+Pagedown. Remove
     it from preferences
   * Prettier/cleaner chat windows
-  * Fix SMTP module to work with the new networking code
-  * Fix LJ module to work with new networking code
 
 * eyecandy
   * Emoticons/pictures in contact names and status

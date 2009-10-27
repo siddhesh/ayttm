@@ -24,6 +24,7 @@
  * http://libyahoo2.sourceforge.net/
  */
 
+#include <intl.h>
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
@@ -33,6 +34,8 @@
 #include <ctype.h>
 
 #include "plugin_api.h"
+#include "libproxy/networking.h"
+#include "messages.h"
 
 #include "value_pair.h"
 #include "lj_httplib.h"
@@ -162,7 +165,37 @@ struct callback_data {
 	char *request;
 };
 
-static void read_http_response(void *data, int fd, eb_input_condition cond)
+static int lj_tcp_readline(char *buff, int maxlen, AyConnection *fd)
+{
+	int n, rc;
+	char c;
+
+	for (n = 1; n < maxlen; n++) {
+		do
+			rc = ay_connection_read(fd, &c, 1);
+		while(rc == -1 && errno == EINTR);
+
+		if (rc == 1) {
+			if(c == '\r')
+				continue;
+			*buff = c;
+			if (c == '\n')
+				break;
+			buff++;
+		} else if (rc == 0) {
+			if (n == 1)
+				return (0);
+			else
+				break;
+		} else
+			return -1;
+	}
+
+	*buff = 0;
+	return (n);
+}
+
+static void read_http_response(AyConnection *fd, eb_input_condition cond, void *data)
 {
 	struct callback_data *ccd = data;
 
@@ -175,7 +208,7 @@ static void read_http_response(void *data, int fd, eb_input_condition cond)
 	int success = LJ_HTTP_NETWORK;
 
 	while (success != LJ_HTTP_OK
-		&& (n = ay_tcp_readline(buff, sizeof(buff), fd)) > 0) {
+		&& (n = lj_tcp_readline(buff, sizeof(buff), fd)) > 0) {
 		/* read up to blank line */
 		if (!strcmp(buff, ""))
 			success = LJ_HTTP_OK;
@@ -187,7 +220,7 @@ static void read_http_response(void *data, int fd, eb_input_condition cond)
 	if (n == 0)
 		goto end_of_read;
 
-	while ((n = ay_tcp_readline(buff, sizeof(buff), fd)) > 0) {
+	while ((n = lj_tcp_readline(buff, sizeof(buff), fd)) > 0) {
 		if (!strcmp(key, "")) {
 			strncpy(key, buff, sizeof(key));
 		} else {
@@ -203,25 +236,36 @@ static void read_http_response(void *data, int fd, eb_input_condition cond)
 	value_pair_free(pairs);
 
 	eb_input_remove(ccd->tag);
-	close(fd);
+	ay_connection_free(fd);
 
 	free(ccd);
 }
 
-static void lj_got_connected(int fd, int error, void *data)
+static void lj_got_connected(AyConnection *fd, int error, void *data)
 {
 	struct callback_data *ccd = data;
-	if (error == 0 && fd > 0) {
-		write(fd, ccd->request, strlen(ccd->request));
-		fsync(fd);
+	if (error) {
+		if(error != AY_CANCEL_CONNECT) {
+			char buf[1024];
+			snprintf(buf, sizeof(buf), _("Connection Failed: %s"),
+				ay_connection_strerror(error));
+
+			ay_do_error(_("LiveJournal Error"), buf);
+
+		}
+
+		return;
 	}
+
+	ay_connection_write(fd, ccd->request, strlen(ccd->request));
 	free(ccd->request);
-	ccd->tag = eb_input_add(fd, EB_INPUT_READ, read_http_response, ccd);
+	ccd->tag = ay_connection_input_add(fd, EB_INPUT_READ, read_http_response, ccd);
 }
 
 void send_http_request(const char *request, lj_callback callback,
 	eb_local_account *ela)
 {
+	AyConnection *fd;
 	char buff[1024];
 	struct callback_data *ccd = calloc(1, sizeof(struct callback_data));
 	snprintf(buff, sizeof(buff),
@@ -230,13 +274,13 @@ void send_http_request(const char *request, lj_callback callback,
 		"Content-Type: application/x-www-form-urlencoded\r\n"
 		"Content-Length: %u\r\n"
 		"\r\n"
-		"%s", ext_lj_path(), ext_lj_host(), strlen(request), request);
+		"%s", ext_lj_path(), ext_lj_host(), (int)strlen(request), request);
 
 	ccd->callback = callback;
 	ccd->request = strdup(buff);
 	ccd->ela = ela;
 
-	ccd->tag =
-		ay_socket_new_async(ext_lj_host(), ext_lj_port(),
-		lj_got_connected, ccd, NULL);
+	fd = ay_connection_new(ext_lj_host(), ext_lj_port(), AY_CONNECTION_TYPE_PLAIN);
+
+	ccd->tag = ay_connection_connect(fd, lj_got_connected, NULL, NULL, ccd);
 }

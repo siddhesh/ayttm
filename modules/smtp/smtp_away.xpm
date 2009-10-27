@@ -1,5 +1,5 @@
 /* XPM */
-static char * smtp_away_xpm[] = {
+static const char * smtp_away_xpm[] = {
 "12 13 24 1",
 " 	c None",
 ".	c #73A0C6",

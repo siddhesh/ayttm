@@ -35,6 +35,7 @@
 #include "input_list.h"
 #include "value_pair.h"
 #include "util.h"
+#include "libproxy/networking.h"
 
 #include "message_parse.h"	/* eb_parse_incoming_message */
 #include "status.h"		/* buddy_login,  */
@@ -210,14 +211,49 @@ static void smtp_account_prefs_init(eb_local_account *ela)
 
 static LList *eb_smtp_buddies = NULL;
 
-static int smtp_tcp_writeline(char *buff, int fd)
+static int smtp_tcp_readline(char *buff, int maxlen, AyConnection *fd)
+{
+	int n, rc;
+	char c;
+
+	for (n = 1; n < maxlen; n++) {
+		do
+			rc = ay_connection_read(fd, &c, 1);
+		while(rc == -1 && errno == EINTR);
+
+		if (rc == 1) {
+			if(c == '\r')
+				continue;
+			*buff = c;
+			if (c == '\n')
+				break;
+			buff++;
+		} else if (rc == 0) {
+			if (n == 1)
+				return (0);
+			else
+				break;
+		} else
+			return -1;
+	}
+
+	*buff = 0;
+	return (n);
+}
+
+static int smtp_tcp_writeline(char *buff, AyConnection *fd)
 {
 	int len = strlen(buff);
 	int i;
+	int ret = 0;
 	for (i = 1; i <= 2; i++)
 		if (buff[len - i] == '\r' || buff[len - i] == '\n')
 			buff[len - i] = '\0';
-	return ay_tcp_writeline(buff, strlen(buff), fd);
+
+	ret = ay_connection_write(fd, buff, strlen(buff));
+	ret += ay_connection_write(fd, "\r\n", 2);
+
+	return ret;
 }
 
 static eb_local_account *eb_smtp_read_local_account_config(LList *pairs)
@@ -306,7 +342,7 @@ static void eb_smtp_logout(eb_local_account *account)
 	LList *l;
 
 	for (l = pending_connects; l; l = l->next)
-		ay_socket_cancel_async((int)l->data);
+		ay_connection_cancel_connect((int)l->data);
 
 	account->connected = 0;
 	ref_count--;
@@ -427,7 +463,7 @@ static char *status_strings[] = {
 	"Offline"
 };
 
-static char *eb_smtp_get_status_string(eb_account *account)
+static const char *eb_smtp_get_status_string(eb_account *account)
 {
 	eb_smtp_account_data *sad = account->protocol_account_data;
 
@@ -437,7 +473,7 @@ static char *eb_smtp_get_status_string(eb_account *account)
 #include "smtp_online.xpm"
 #include "smtp_away.xpm"
 
-static char **eb_smtp_get_status_pixmap(eb_account *account)
+static const char **eb_smtp_get_status_pixmap(eb_account *account)
 {
 	eb_smtp_account_data *sad;
 
@@ -447,7 +483,6 @@ static char **eb_smtp_get_status_pixmap(eb_account *account)
 		return smtp_online_xpm;
 	else
 		return smtp_away_xpm;
-
 }
 
 static void eb_smtp_send_file(eb_local_account *from, eb_account *to,
@@ -458,7 +493,7 @@ static void eb_smtp_send_file(eb_local_account *from, eb_account *to,
 }
 
 static int validate_or_die_gracefully(const char *buff, const char *valid,
-	int fd)
+	AyConnection *fd)
 {
 	if (strstr(buff, valid) == buff) {
 		return 1;
@@ -466,7 +501,7 @@ static int validate_or_die_gracefully(const char *buff, const char *valid,
 
 	LOG(("Server responded: %s", buff));
 	smtp_tcp_writeline("QUIT", fd);
-	close(fd);
+	ay_connection_free(fd);
 	return 0;
 }
 
@@ -510,14 +545,14 @@ static void smtp_message_sent(struct smtp_callback_data *d, int success)
 	eb_parse_incoming_message(d->from, d->to, reply);
 }
 
-static void send_message_async(void *data, int fd, eb_input_condition cond)
+static void send_message_async(AyConnection *fd, eb_input_condition cond, void *data)
 {
 	struct smtp_callback_data *d = data;
 	char buff[1024];
 
-	if (ay_tcp_readline(buff, sizeof(buff) - 1, fd) <= 0) {
+	if (smtp_tcp_readline(buff, sizeof(buff) - 1, fd) <= 0) {
 		WARNING(("smtp server closed connection"));
-		close(fd);
+		ay_connection_free(fd);
 		destroy_callback_data(d);
 	};
 
@@ -577,25 +612,27 @@ static void send_message_async(void *data, int fd, eb_input_condition cond)
 	smtp_tcp_writeline(buff, fd);
 }
 
-static void eb_smtp_got_connected(int fd, int error, void *data)
+static void eb_smtp_got_connected(AyConnection *fd, int error, void *data)
 {
 	struct smtp_callback_data *d = data;
 
 	if (error) {
-		WARNING(("Could not connect to smtp server: %d: %s",
-				error, strerror(error)));
+		if (error != AY_CANCEL_CONNECT)
+			WARNING(("Could not connect to smtp server: %d: %s",
+					error, strerror(error)));
 		destroy_callback_data(d);
 		return;
 	}
 
 	pending_connects = l_list_remove(pending_connects, (void *)d->tag);
 
-	d->tag = eb_input_add(fd, EB_INPUT_READ, send_message_async, d);
+	d->tag = ay_connection_input_add(fd, EB_INPUT_READ, send_message_async, d);
 }
 
 static void eb_smtp_send_im(eb_local_account *account_from,
 	eb_account *account_to, char *message)
 {
+	AyConnection *fd;
 	char localhost[255];
 	struct smtp_callback_data *d;
 	eb_smtp_local_account_data *sla =
@@ -608,13 +645,15 @@ static void eb_smtp_send_im(eb_local_account *account_from,
 		return;
 	}
 
+	fd = ay_connection_new(sla->smtp_host, atoi(sla->smtp_port),
+		AY_CONNECTION_TYPE_PLAIN);
+
 	d = calloc(1, sizeof(struct smtp_callback_data));
 	strcpy(d->localhost, localhost);
 	d->from = account_from;
 	d->to = account_to;
 	d->msg = strdup(message);
-	d->tag = ay_socket_new_async(sla->smtp_host, atoi(sla->smtp_port),
-		eb_smtp_got_connected, d, NULL);
+	d->tag = ay_connection_connect(fd, eb_smtp_got_connected, NULL, NULL, d);
 
 	pending_connects = l_list_append(pending_connects, (void *)d->tag);
 }
