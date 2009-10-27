@@ -1,20 +1,49 @@
-TODO 0.3.2
+This list will keep changing, so it would be best to look it up in the
+git repository:
+
+http://ayttm.git.sourceforge.net/git/gitweb.cgi?p=ayttm/ayttm;a=blob_plain;f=TODO;hb=HEAD
+
+* Yahoo!
   * Yahoo chat rooms
   * Active Webcam request
-  * Modules should be fixed for multiaccount (static things and so on)
-    - *TOC	Half-fixed (some unknown problems like segs)
-    - Jabber	Not checked
+  * Yahoo voice support ? 
 
-TODO later
-* Native file transfer for all protocols.
-* clean up the code
-* recoding and filtering in chatrooms
-* Non-blocking connection in IRC
-* Yahoo voice support ? 
-* Remember last selected smiley pack - Done gloablly, should be per chat
+* IRC
+  * CTCP color and formatting
+  * File Transfer
+  * Modes support
+  * Kick/ban
+  * Implement commands interpretation as a filter
+  * Replace password chars with * when doing a /identify
 
-eyecandy
-* emoticons in contact names and status
+* Jabber
+  * An abstraction to show xmpp based services better (e.g. gtalk, jabber)
+  * Extensions for jabber to support service specific extensions
+  * File transfer
 
-eternal TODO
-* Make ayttm fully stable in stable releases. 
+* MSN
+  * Offline messaging
+  * File transfer
+  * Message font formatting
+
+* AIM/ICQ
+  * Need a maintainer for this.
+
+* Misc
+  * clean up the code
+  * recoding and filtering in chatrooms
+  * Remember last selected smiley pack - Done globally, should be per chat
+  * Consolidate chat room and window code. There is currently a lot of
+    duplication of code
+  * buddy name completion in chat rooms on tab
+  * Standardize tab switching shortcut to Ctrl+Pageup/Ctrl+Pagedown. Remove
+    it from preferences
+  * Prettier/cleaner chat windows
+  * Fix SMTP module to work with the new networking code
+  * Fix LJ module to work with new networking code
+
+* eyecandy
+  * Emoticons/pictures in contact names and status
+  * PNG/MNG Smileys
+  * Icons and artwork for the interface
+
