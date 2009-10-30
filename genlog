@@ -1,0 +1,26 @@
+# Script to generate ChangeLog file from git log that rpmbuild will not complain about
+# Usage: ./genlog [since]
+#
+# Without the since, git log will spew out everything... *everything*!
+#!/bin/sh
+#
+# Add the following in your .git/config to get the right stuff in the git log.
+# This is what defines the core format of the git log. We then hack it further
+# to get something that rpmbuild can digest:
+#
+#[format]
+#	pretty = format:"<+> %cd %cN <%ce>%n- %H%n %s%n %b"
+#
+
+if [ "x$1" = "x" ]; then
+	TZ="UTC+0.0:0" git log --date=local|
+		sed -e "/[0-9][0-9]:[0-9][0-9]:[0-9][0-9]/ s/[0-9][0-9]:[0-9][0-9]:[0-9][0-9] //; s/,//"|
+		sed -e "s/^*/ */g"|
+		sed -e "s/^<+>/*/g" > ChangeLog-since-forever
+else
+	TZ="UTC+0.0:0" git log -r ${1}..HEAD --date=local|
+		sed -e "/[0-9][0-9]:[0-9][0-9]:[0-9][0-9]/ s/[0-9][0-9]:[0-9][0-9]:[0-9][0-9] //; s/,//"|
+		sed -e "s/^*/ */g"|
+		sed -e "s/^<+>/*/g" > ChangeLog-since-$1
+fi
+
