@@ -24,7 +24,7 @@ AC_ISC_POSIX
 
 AM_PROG_LEX
 # Got this from http://www.winehq.org/pipermail/wine-devel/2001-June/001254.html
-AC_CHECK_PROGS(XLEX, $LEX lex flex,none )
+AC_CHECK_PROGS(XLEX, $LEX flex lex, none)
 if test "$XLEX" = "none"; then
 	AC_MSG_ERROR([No suitable scanner found. Please install 'lex' or 'flex' package])
 fi
