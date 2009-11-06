@@ -146,7 +146,7 @@ static char *irc_states[] = {
 /* Added: stripping of CTCP/2 color/formatting attributes, which is
    everything between two '\006' = ctrl-F characters.
    See http://www.lag.net/~robey/ctcp/ctcp2.2.txt for details. */
-static unsigned char *strip_color(unsigned char *text)
+static char *strip_color(unsigned char *text)
 {
 	int nc = 0;
 	int i = 0;
@@ -198,7 +198,7 @@ static unsigned char *strip_color(unsigned char *text)
 
 	new_str[i] = 0;
 
-	return new_str;
+	return (char *)new_str;
 }
 
 static int ay_irc_query_connected(eb_account *account)
@@ -435,7 +435,6 @@ static void ay_irc_got_welcome(const char *nick, const char *message,
 	eb_chat_room *ecr = NULL;
 	char room_name[BUF_LEN];
 	eb_local_account *ela = (eb_local_account *)ia->data;
-	gchar *buf;
 
 	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", ia->nick,
 		ia->connect_address, ia->connect_address);
@@ -444,9 +443,7 @@ static void ay_irc_got_welcome(const char *nick, const char *message,
 		ecr = ay_irc_make_chat_room_window(room_name, ela, FALSE,
 			FALSE);
 
-	buf = g_strdup_printf(_("<font color=\"#AA77AA\">%s</font>"), message);
-	eb_chat_room_show_3rdperson(ecr, buf);
-	g_free(buf);
+	eb_chat_room_display_notification(ecr, message, IRC_WELCOME);
 
 	if (!strcmp(nick, ia->nick))
 		return;
@@ -979,7 +976,7 @@ static void irc_info_update(info_window *iw)
 	char message[BUF_LEN * 4];
 	char temp[BUF_LEN];
 	char *alpha = NULL;
-	unsigned char *freeme = NULL;
+	char *freeme = NULL;
 	irc_info *ii = (irc_info *)iw->info_data;
 
 	eb_account *ea = ii->me;
@@ -1757,22 +1754,22 @@ static void ay_irc_got_privmsg(const char *recipient, const char *message,
 
 			switch (element->type) {
 			case CTCP_ACTION:{
-					char colorized_message[BUF_LEN];
-					unsigned char *msg =
-						strip_color((unsigned char *)
+					char buf[BUF_LEN];
+					char *msg;
+					
+					msg = strip_color((unsigned char *)
 						element->data);
 
-					g_snprintf(colorized_message, BUF_LEN,
-						"<font color=\"#00AA00\">*%s %s</font>",
-						prefix->nick, msg);
+					g_snprintf(buf, BUF_LEN,
+						"*%s %s", prefix->nick, msg);
 
 					if (ecr)
-						eb_chat_room_show_3rdperson(ecr,
-							colorized_message);
+						eb_chat_room_display_notification(ecr,
+							buf, IRC_CTCP_ACTION);
 					else {
 						ay_irc_process_incoming_message
 							(recipient,
-							colorized_message,
+							buf,
 							prefix, ia);
 					}
 
@@ -1846,13 +1843,12 @@ static void ay_irc_got_topic(const char *channel, const char *topic,
 		ia->connect_address);
 
 	if ((ecr = find_chat_room_by_id(room_name))) {
-		char colorized_message[BUF_LEN];
-		unsigned char *msg = strip_color((unsigned char *)topic);
+		char buf[BUF_LEN];
+		char *msg = strip_color((unsigned char *)topic);
 
-		g_snprintf(colorized_message, BUF_LEN,
-			"<font color=\"#775500\">Topic: %s</font>", msg);
+		g_snprintf(buf, BUF_LEN, "Topic: %s", msg);
 
-		eb_chat_room_show_3rdperson(ecr, colorized_message);
+		eb_chat_room_display_notification(ecr, msg, IRC_TOPIC);
 
 		if (msg) {
 			free(msg);
@@ -1872,10 +1868,8 @@ static void ay_irc_got_topicsetby(const char *channel, const char *nickname,
 		ia->connect_address);
 
 	if ((ecr = find_chat_room_by_id(room_name))) {
-		buf = g_strdup_printf(_
-			("<font color=\"#775500\">Topic set by: %s</font>"),
-			nickname);
-		eb_chat_room_show_3rdperson(ecr, buf);
+		buf = g_strdup_printf(_("Topic set by: %s"), nickname);
+		eb_chat_room_display_notification(ecr, buf, IRC_TOPIC);
 		g_free(buf);
 	}
 }
@@ -1889,6 +1883,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 	ctcp_extended_data *element = NULL;
 	eb_local_account *ela = (eb_local_account *)ia->data;
 	eb_chat_room *cr = NULL;
+	int type = 0;
 
 	/* 
 	 * This is one of those AUTH NOTICEs...
@@ -1917,7 +1912,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 				if (version && version->name) {
 					snprintf(notice, sizeof(notice),
 						_
-						("<font color=\"#00BBBB\">%s is running %s"),
+						("<b>%s</b> is running %s"),
 						(prefix->nick ? prefix->
 							nick : prefix->
 							servername),
@@ -1939,15 +1934,14 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 							sizeof(notice) -
 							strlen(notice) - 1);
 					}
-					strncat(notice, "</font>",
-						sizeof(notice) -
-						strlen(notice) - 1);
 				}
 
 				if (element->data) {
 					free(element->data);
 					element->data = NULL;
 				}
+
+				type = IRC_CTCP_VERSION;
 
 				element->data = strdup(notice);
 
@@ -1964,7 +1958,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 
 				snprintf(notice, sizeof(notice),
 					_
-					("<font color=\"#AABB44\">%s has sent Time as <B>%s</B></font>"),
+					("<b>%s</b> has sent Time as <b>%s</b>"),
 					(prefix->nick ? prefix->nick : prefix->
 						servername), element->data);
 
@@ -1974,6 +1968,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 				}
 
 				element->data = strdup(notice);
+				type = IRC_CTCP_TIME;
 
 				break;
 			}
@@ -1992,7 +1987,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 
 				snprintf(notice, sizeof(notice),
 					_
-					("<I><B><font color=\"#AA0000\">%s:</font></B> %s</I>"),
+					("<I><B>%s:</B> %s</I>"),
 					(prefix->nick ? prefix->nick : prefix->
 						servername), element->data);
 
@@ -2001,6 +1996,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 					element->data = NULL;
 				}
 				element->data = strdup(notice);
+				type = CHAT_NOTIFICATION_NOTE;
 			}
 		}
 
@@ -2014,7 +2010,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 			}
 			/* We use chat room windows instead of normal chat windows since we want
 			   to be able to type commands in them. */
-			eb_chat_room_show_3rdperson(cr, element->data);
+			eb_chat_room_display_notification(cr, element->data, type);
 /*			ay_irc_process_incoming_message(recipient, element->data, prefix, ia); */
 		}
 		data_list = data_list->next;
@@ -2225,10 +2221,9 @@ static void ay_got_motd(const char *motd, irc_message_prefix *prefix,
 {
 	eb_chat_room *ecr = NULL;
 	char room_name[BUF_LEN];
-	char colorized_message[BUF_LEN];
 	eb_local_account *ela = (eb_local_account *)ia->data;
 
-	unsigned char *msg = strip_color((unsigned char *)motd);
+	char *msg = strip_color((unsigned char *)motd);
 
 	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", ia->nick,
 		ia->connect_address, ia->connect_address);
@@ -2237,10 +2232,7 @@ static void ay_got_motd(const char *motd, irc_message_prefix *prefix,
 		ecr = ay_irc_make_chat_room_window(room_name, ela, FALSE,
 			FALSE);
 
-	g_snprintf(colorized_message, BUF_LEN,
-		"<font color=\"#AA77AA\">%s</font>", msg);
-
-	eb_chat_room_show_3rdperson(ecr, colorized_message);
+	eb_chat_room_display_notification(ecr, msg, IRC_MOTD);
 
 	if (msg) {
 		free(msg);

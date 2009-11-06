@@ -291,7 +291,7 @@ static int is_link(char *token)
 	return TOKEN_NORMAL;
 }
 
-static GString *get_next_token(char *input)
+static GString *get_next_token(const char *input)
 {
 	int i = 0;
 	int len = strlen(input);
@@ -392,7 +392,7 @@ static void linkify_token(GString *token)
 	g_string_free(g2, TRUE);
 }
 
-char *linkify(char *input)
+char *linkify(const char *input)
 {
 	int i = 0;
 	int len = strlen(input);

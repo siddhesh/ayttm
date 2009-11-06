@@ -70,7 +70,7 @@ extern "C" {
 #endif
 
 	char *convert_eol(char *input);
-	char *linkify(char *input);
+	char *linkify(const char *input);
 
 	char *escape_string(const char *input);
 	char *unescape_string(const char *input);

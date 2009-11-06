@@ -1388,7 +1388,7 @@ static void _show_smileys_cb(GtkWidget *widget, smiley_callback_data *data)
 	show_smileys_cb(data);
 }
 
-void eb_chat_window_display_notification(chat_window *cw, gchar *message,
+void eb_chat_window_display_notification(chat_window *cw, const gchar *message,
 	ChatNotificationType type)
 {
 	char *messagebuf, *linkmessage, *encoded;

@@ -1266,13 +1266,13 @@ void eb_chat_room_buddy_arrive(eb_chat_room *room, const gchar *alias,
 			return;
 
 	if (!strcmp(alias, handle))
-		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> "
-				"%s has joined the chat.</b></body>"), handle);
+		buf = g_strdup_printf(_("<b>%s has joined the chat.</b>"),
+			handle);
 	else
-		buf = g_strdup_printf(_("<body bgcolor=#F9E589 width=*><b> "
-				"%s (%s) has joined the chat.</b></body>"),
+		buf = g_strdup_printf(_("<b>%s (%s) has joined the chat.</b>"),
 			handle, alias);
-	eb_chat_room_show_3rdperson(room, buf);
+
+	eb_chat_room_display_notification(room, buf, CHAT_ROOM_NOTIFICATION_JOIN);
 	eb_chat_room_private_log_reference(room, alias, handle);
 	g_free(buf);
 
@@ -1305,9 +1305,10 @@ void eb_chat_room_buddy_chnick(eb_chat_room *room, const gchar *buddy,
 	strncpy(ecrb->handle, newnick, sizeof(ecrb->handle));
 
 	buf = g_strdup_printf(_
-		("<body bgcolor=#F9E589 width=*><b> %s is now known as %s</b></body>"),
+		("<b>%s is now known as %s</b>"),
 		buddy, newnick);
-	eb_chat_room_show_3rdperson(room, buf);
+	eb_chat_room_display_notification(room, buf,
+		CHAT_ROOM_NOTIFICATION_NICK_CHANGE);
 	g_free(buf);
 
 	eb_chat_room_private_log_reference(room, newnick, newnick);
@@ -1357,20 +1358,16 @@ void eb_chat_room_buddy_leave_ex(eb_chat_room *room, const gchar *handle,
 	if (node) {
 		eb_chat_room_buddy *ecrb = node->data;
 		if (!strcmp(handle, ecrb->alias))
-			buf = g_strdup_printf(_
-				("<body bgcolor=#F9E589 width=*><b> "
-					"%s has left the chat%s</b></body>"),
+			buf = g_strdup_printf(_("<b>%s has left the chat%s</b>"),
 				handle, ex);
 		else
-			buf = g_strdup_printf(_
-				("<body bgcolor=#F9E589 width=*><b> "
-					"%s (%s) has left the chat%s</b></body>"),
+			buf = g_strdup_printf(_("<b>%s (%s) has left the chat%s</b>"), 
 				handle, ecrb->alias, ex);
 	} else
 		buf = g_strdup_printf(_
-			("<body bgcolor=#F9E589 width=*><b> %s has left the chat%s</b></body>"),
+			("<b>%s has left the chat%s</b>"),
 			handle, ex);
-	eb_chat_room_show_3rdperson(room, buf);
+	eb_chat_room_display_notification(room, buf, CHAT_ROOM_NOTIFICATION_LEAVE);
 	g_free(buf);
 
 	if (node && room->fellows) {
@@ -1441,12 +1438,6 @@ eb_chat_room *eb_start_chat_room(eb_local_account *ela, gchar *name,
 
 	eb_debug(DBG_CORE, "Started chatroom %s\n", name);
 	return ecb;
-}
-
-void eb_chat_room_show_3rdperson(eb_chat_room *chat_room, gchar *message)
-{
-	eb_chat_window_display_notification(chat_room, message,
-		CHAT_NOTIFICATION_HIGHLIGHT);
 }
 
 void eb_chat_room_show_message(eb_chat_room *chat_room, const gchar *user,

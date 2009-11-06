@@ -85,6 +85,15 @@ enum IRC_COMMAND_TYPE {
 	IRC_COMMAND_USER_DEF = 2
 };
 
+enum {
+	IRC_WELCOME = 0xaa77aa,
+	IRC_TOPIC = 0x775500,
+	IRC_MOTD = 0x885588,
+	IRC_CTCP_TIME = 0xaabb44,
+	IRC_CTCP_ACTION = 0x00aa00,
+	IRC_CTCP_VERSION = 0x00bbbb
+};
+
 typedef struct irc_command_action_type {
 	char command[MAX_IRC_COMMAND_LEN];
 	char action[MAX_IRC_ACTION_LEN];
@@ -92,7 +101,6 @@ typedef struct irc_command_action_type {
 } irc_command_action;
 
 /* Local prototypes */
-static unsigned char *strip_color(unsigned char *text);
 static int ay_irc_query_connected(eb_account *account);
 static void ay_irc_login(eb_local_account *account);
 static void ay_irc_logout(eb_local_account *ela);

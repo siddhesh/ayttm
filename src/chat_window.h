@@ -132,7 +132,7 @@ int should_window_raise(const char *message);
 void eb_chat_window_display_status(eb_account *remote, gchar *message);
 void eb_chat_window_display_contact(struct contact *remote_contact);
 void eb_chat_window_display_account(eb_account *remote_account);
-void eb_chat_window_display_notification(chat_window *cw, gchar *message,
+void eb_chat_window_display_notification(chat_window *cw, const gchar *message,
 	ChatNotificationType type);
 void eb_log_status_changed(eb_account *ea, const gchar *status);
 void eb_chat_window_do_timestamp(struct contact *c, gboolean online);

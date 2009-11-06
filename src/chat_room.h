@@ -41,16 +41,24 @@ typedef enum {
 	CHAT_ROOM_JOIN = 1
 } ChatRoomRefreshType;
 
+enum {
+	CHAT_ROOM_NOTIFICATION_JOIN = 0x777777,
+	CHAT_ROOM_NOTIFICATION_LEAVE = 0x777777,
+	CHAT_ROOM_NOTIFICATION_NICK_CHANGE = 0x777777
+};
+
 struct _chat_window;
 typedef struct _chat_window eb_chat_room;
+
+#define eb_chat_room_display_notification(ecr, msg,type) ({ \
+	eb_chat_window_display_notification((chat_window *)ecr, msg, type); \
+})
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	void eb_join_chat_room(eb_chat_room *chat_room, int send_join);
-	void eb_chat_room_show_3rdperson(eb_chat_room *chat_room,
-		char *message);
 	void eb_chat_room_show_message(eb_chat_room *chat_room,
 		const char *user, const char *message);
 	eb_chat_room *eb_start_chat_room(eb_local_account *ela, char *name,
