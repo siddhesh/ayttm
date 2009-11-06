@@ -1399,7 +1399,7 @@ void eb_chat_window_display_notification(chat_window *cw, gchar *message,
 	linkmessage = linkify(message);
 	encoded = ay_chat_convert_message(cw, linkmessage);
 
-	messagebuf = g_strdup_printf("<font color=\"#%06x\">%s</font>", type,
+	messagebuf = g_strdup_printf("<font color=\"#%06x\">%s</font><br>", type,
 		encoded);
 
 	html_text_buffer_append(GTK_TEXT_VIEW(cw->chat), messagebuf,
