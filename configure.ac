@@ -63,6 +63,9 @@ else
 	AC_DEFINE([USE_POSIX_DLOPEN], [1], [Define if we use POSIX dlopen])
 fi
 
+# global LDFLAGS
+LDFLAGS="$LDFLAGS -Wl,--no-add-needed"
+
 AC_CHECK_TOOL(RC, windres, no)
 
 # add some platform-specific flags
