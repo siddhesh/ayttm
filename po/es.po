@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ayttm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-29 20:26+0530\n"
+"POT-Creation-Date: 2009-11-06 13:55+0530\n"
 "PO-Revision-Date: 2007-08-05 01:22+0100\n"
 "Last-Translator: Ricardo Mones <ricardo@mones.org>\n"
 "Language-Team: Ricardo Mones <ricardo@mones.org>\n"
@@ -78,7 +78,7 @@ msgid "_Screen Name:"
 msgstr "_Nombre en pantalla:"
 
 #: modules/aim-toc/aim-toc.c:1066 modules/icq-toc/icq-toc.c:1001
-#: modules/irc/irc.c:617 modules/jabber/jabber.c:468 modules/msn2/msn.c:458
+#: modules/irc/irc.c:614 modules/jabber/jabber.c:468 modules/msn2/msn.c:458
 #: modules/smtp/smtp.c:193 modules/yahoo2/yahoo.c:2656
 #: src/edit_local_accounts.c:672
 msgid "_Password:"
@@ -91,7 +91,7 @@ msgid "_Ask for password at Login time"
 msgstr "Pedir contr_aseña al conectar"
 
 #: modules/aim-toc/aim-toc.c:1080 modules/icq-toc/icq-toc.c:1015
-#: modules/irc/irc.c:624 modules/jabber/jabber.c:489 modules/msn2/msn.c:472
+#: modules/irc/irc.c:621 modules/jabber/jabber.c:489 modules/msn2/msn.c:472
 #: modules/yahoo2/yahoo.c:2670 src/edit_local_accounts.c:710
 msgid "_Connect at startup"
 msgstr "_Conectar al inicio"
@@ -552,119 +552,114 @@ msgstr "Servidor de co_nexión:"
 msgid "Error occurred while sending data to %s: %s"
 msgstr ""
 
-#: modules/irc/irc.c:447
-#, fuzzy, c-format
-msgid "<font color=\"#AA77AA\">%s</font>"
-msgstr "<font color=%s><b>%s</b>: %s</font><br>"
-
-#: modules/irc/irc.c:610
+#: modules/irc/irc.c:607
 msgid "_Nick:"
 msgstr "_Apodo:"
 
-#: modules/irc/irc.c:631
+#: modules/irc/irc.c:628
 msgid "IRC _Host:"
 msgstr "_Host IRC:"
 
-#: modules/irc/irc.c:638
+#: modules/irc/irc.c:635
 msgid "IRC P_ort:"
 msgstr "Puert_o IRC:"
 
-#: modules/irc/irc.c:735
+#: modules/irc/irc.c:732
 msgid "No hostname found in your login (which should be in user@host form)."
 msgstr ""
 "No se encontro un nombre de máquina en su login (debe ser de la forma "
 "usuario@maquina)."
 
-#: modules/irc/irc.c:995
+#: modules/irc/irc.c:992
 #, c-format
 msgid "<b>User info for</b> %s<br>"
 msgstr "<b>Información de usuario para</b> %s<br>"
 
-#: modules/irc/irc.c:996
+#: modules/irc/irc.c:993
 #, c-format
 msgid "<b>Server:</b> %s<br>"
 msgstr "<b>Servidor:</b> %s<br>"
 
-#: modules/irc/irc.c:1001
+#: modules/irc/irc.c:998
 #, c-format
 msgid "<b>Idle time and online status:</b> %s<br>"
 msgstr "<b>Tiempo inactividad y estado en línea:</b> %s<br>"
 
-#: modules/irc/irc.c:1004
+#: modules/irc/irc.c:1001
 #, fuzzy
 msgid "<b>Whois info:</b><br><br>"
 msgstr "<b>Información whois:</b> %s<br>"
 
-#: modules/irc/irc.c:1101
+#: modules/irc/irc.c:1098
 #, fuzzy, c-format
 msgid "<i><b>User Name: </b></i> %s<br><i><b>Real Name: </b></i> %s<br>"
 msgstr "<b>Servidor:</b> %s<br>"
 
-#: modules/irc/irc.c:1261
+#: modules/irc/irc.c:1258
 #, fuzzy, c-format
 msgid "<i><b>Server Info: </b></i> %s<br>"
 msgstr "<b>Servidor:</b> %s<br>"
 
-#: modules/irc/irc.c:1497
+#: modules/irc/irc.c:1494
 #, c-format
 msgid ". Quit reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1525
+#: modules/irc/irc.c:1522
 #, c-format
 msgid ". Part reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1876
-#, fuzzy, c-format
-msgid "<font color=\"#775500\">Topic set by: %s</font>"
-msgstr "<font color=%s><b>%s</b>: %s</font><br>"
-
-#: modules/irc/irc.c:1920
+#: modules/irc/irc.c:1871
 #, c-format
-msgid "<font color=\"#00BBBB\">%s is running %s"
+msgid "Topic set by: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1935
+#: modules/irc/irc.c:1915
+#, c-format
+msgid "<b>%s</b> is running %s"
+msgstr ""
+
+#: modules/irc/irc.c:1930
 #, fuzzy
 msgid " on "
 msgstr "Tipografía: "
 
-#: modules/irc/irc.c:1967
+#: modules/irc/irc.c:1961
 #, c-format
-msgid "<font color=\"#AABB44\">%s has sent Time as <B>%s</B></font>"
+msgid "<b>%s</b> has sent Time as <b>%s</b>"
 msgstr ""
 
-#: modules/irc/irc.c:1995
+#: modules/irc/irc.c:1990
 #, c-format
-msgid "<I><B><font color=\"#AA0000\">%s:</font></B> %s</I>"
+msgid "<I><B>%s:</B> %s</I>"
 msgstr ""
 
-#: modules/irc/irc.c:2100
+#: modules/irc/irc.c:2096
 #, c-format
 msgid ">>> Inviting %s [%s] <<<"
 msgstr ">>> Invitando %s [%s] <<<"
 
-#: modules/irc/irc.c:2103
+#: modules/irc/irc.c:2099
 #, c-format
 msgid ">>> Inviting %s <<<"
 msgstr ">>> Invitando %s <<<"
 
-#: modules/irc/irc.c:2266 modules/irc/irc.c:2311
+#: modules/irc/irc.c:2258 modules/irc/irc.c:2303
 #, fuzzy
 msgid "Nickname in Use"
 msgstr "Apodo: %s<br>"
 
-#: modules/irc/irc.c:2278
+#: modules/irc/irc.c:2270
 #, fuzzy
 msgid "No such Server"
 msgstr "Servidor de co_nexión:"
 
-#: modules/irc/irc.c:2290
+#: modules/irc/irc.c:2282
 msgid "No such Channel"
 msgstr ""
 
-#: modules/irc/irc.c:2302
+#: modules/irc/irc.c:2294
 msgid "No such Nickname"
 msgstr ""
 
@@ -708,7 +703,7 @@ msgstr ""
 
 #: modules/jabber/jabber.c:1312 modules/msn2/msn.c:2032
 #: modules/workwizu/workwizu.c:339 modules/yahoo2/yahoo.c:2306
-#: src/chat_room.c:2053 src/chat_room.c:2076
+#: src/chat_room.c:2044 src/chat_room.c:2067
 msgid "typing..."
 msgstr "tecleando..."
 
@@ -1720,7 +1715,7 @@ msgstr "Apodo: "
 msgid "Message: "
 msgstr "Mensaje: "
 
-#: src/chat_room.c:651 src/chat_room.c:1641 src/chat_window.c:1007
+#: src/chat_room.c:651 src/chat_room.c:1632 src/chat_window.c:1007
 msgid "Invite"
 msgstr "Invitar"
 
@@ -1770,7 +1765,7 @@ msgstr "Nombre de la charla: "
 msgid "Local account: "
 msgstr "Cuenta local: "
 
-#: src/chat_room.c:967 src/chat_room.c:1875 src/chat_room.c:1876
+#: src/chat_room.c:967 src/chat_room.c:1866 src/chat_room.c:1867
 msgid "Reconnect at login"
 msgstr "Reconectar al entrar"
 
@@ -1793,82 +1788,77 @@ msgstr "Conectado"
 
 #: src/chat_room.c:1269
 #, fuzzy, c-format
-msgid "<body bgcolor=#F9E589 width=*><b> %s has joined the chat.</b></body>"
+msgid "<b>%s has joined the chat.</b>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) se ha unido a la charla.</b></body>"
 
 #: src/chat_room.c:1272
-#, c-format
-msgid ""
-"<body bgcolor=#F9E589 width=*><b> %s (%s) has joined the chat.</b></body>"
+#, fuzzy, c-format
+msgid "<b>%s (%s) has joined the chat.</b>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) se ha unido a la charla.</b></body>"
 
-# $mones$ FIXME
 #: src/chat_room.c:1308
 #, fuzzy, c-format
-msgid "<body bgcolor=#F9E589 width=*><b> %s is now known as %s</b></body>"
-msgstr ""
-"<body bgcolor=#F9E589 width=*><b> %s está conectado %s @ %s.\n"
-"</b></body>"
+msgid "<b>%s is now known as %s</b>"
+msgstr "%s es ahora %s"
 
-#: src/chat_room.c:1361 src/chat_room.c:1371
+#: src/chat_room.c:1361 src/chat_room.c:1368
 #, fuzzy, c-format
-msgid "<body bgcolor=#F9E589 width=*><b> %s has left the chat%s</b></body>"
+msgid "<b>%s has left the chat%s</b>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s ha abandonado la charla.</b></body>"
 
-#: src/chat_room.c:1366
+#: src/chat_room.c:1364
 #, fuzzy, c-format
-msgid ""
-"<body bgcolor=#F9E589 width=*><b> %s (%s) has left the chat%s</b></body>"
+msgid "<b>%s (%s) has left the chat%s</b>"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> %s (%s) ha abandonado la charla.</b></body>"
 
-#: src/chat_room.c:1617 src/chat_window.c:960
+#: src/chat_room.c:1608 src/chat_window.c:960
 msgid "Disable Sounds"
 msgstr "Deshabilitar sonidos"
 
-#: src/chat_room.c:1628 src/chat_window.c:971
+#: src/chat_room.c:1619 src/chat_window.c:971
 #, c-format
 msgid "Set Character Encoding (%s)"
 msgstr ""
 
-#: src/chat_room.c:1631 src/chat_window.c:974
+#: src/chat_room.c:1622 src/chat_window.c:974
 #, c-format
 msgid "Set Character Encoding"
 msgstr ""
 
-#: src/chat_room.c:1648 src/chat_room.c:1906 src/chat_window.c:1021
+#: src/chat_room.c:1639 src/chat_room.c:1897 src/chat_window.c:1021
 msgid "Send Message"
 msgstr "Enviar mensaje"
 
-#: src/chat_room.c:1655 src/chat_room.c:1911 src/chat_window.c:1044
+#: src/chat_room.c:1646 src/chat_room.c:1902 src/chat_window.c:1044
 #: src/crash.c:264 src/gtk/about_window.c:197 src/image_window.c:158
 msgid "Close"
 msgstr "Cerrar"
 
-#: src/chat_room.c:1701 src/status.c:2619
+#: src/chat_room.c:1692 src/status.c:2619
 msgid "Online"
 msgstr "Conectado"
 
-#: src/chat_room.c:1780
+#: src/chat_room.c:1771
 msgid "Invite User"
 msgstr "Invitar usuario"
 
-#: src/chat_room.c:1865 src/chat_window.c:2483
+#: src/chat_room.c:1856 src/chat_window.c:2483
 msgid "Insert Smiley"
 msgstr "Insertar sonrisa"
 
-#: src/chat_room.c:1884 src/chat_window.c:2499 src/gtk/prefs_window.C:495
+#: src/chat_room.c:1875 src/chat_window.c:2499 src/gtk/prefs_window.C:495
 msgid "Sound"
 msgstr "Sonido"
 
-#: src/chat_room.c:1885
+#: src/chat_room.c:1876
 msgid "Enable Sounds"
 msgstr "Habilitar sonidos"
 
-#: src/chat_room.c:1902 src/chat_window.c:991 src/chat_window.c:2534
+#: src/chat_room.c:1893 src/chat_window.c:991 src/chat_window.c:2534
 #: src/gtk/log_window.C:264
 msgid "Actions..."
 msgstr "Acciones..."
@@ -3401,6 +3391,21 @@ msgid ""
 "</font>"
 msgstr ""
 
+#, fuzzy
+#~ msgid "<font color=\"#AA77AA\">%s</font>"
+#~ msgstr "<font color=%s><b>%s</b>: %s</font><br>"
+
+#, fuzzy
+#~ msgid "<font color=\"#775500\">Topic set by: %s</font>"
+#~ msgstr "<font color=%s><b>%s</b>: %s</font><br>"
+
+# $mones$ FIXME
+#, fuzzy
+#~ msgid "<body bgcolor=#F9E589 width=*><b> %s is now known as %s</b></body>"
+#~ msgstr ""
+#~ "<body bgcolor=#F9E589 width=*><b> %s está conectado %s @ %s.\n"
+#~ "</b></body>"
+
 #~ msgid "<b>Error: </b>"
 #~ msgstr "<b>Error: </b>"
 
@@ -3448,9 +3453,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Enable Smileys"
 #~ msgstr "Insertar sonrisa"
-
-#~ msgid "%s is now %s"
-#~ msgstr "%s es ahora %s"
 
 #~ msgid "%s is now Online"
 #~ msgstr "%s está conectado"
