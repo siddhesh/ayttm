@@ -1079,12 +1079,15 @@ static void ext_yahoo_got_file(int id, const char *me, const char *from,
 	eb_yahoo_file_transfer_data *yftd =
 		g_new0(eb_yahoo_file_transfer_data, 1);
 
-	snprintf(buff, sizeof(buff),
-		_("The Yahoo user <b>%s</b> has sent you a file%s%s.\n\n"
-		"Do you want to accept it?"),
-		from, (msg
-			&& *msg ? _(" with the message ") : ""), (msg
-			&& *msg ? msg : ""));
+	if(msg && *msg)
+		snprintf(buff, sizeof(buff),
+			_("The Yahoo user <b>%s</b> has sent you a file.\n\n"
+			"Do you want to accept it?"), from); 
+	else
+		snprintf(buff, sizeof(buff),
+			_("The Yahoo user <b>%s</b> has sent you a file with "
+			"the message:\n\n<i>%s</i>.\n\ni"
+			"Do you want to accept it?"), from, msg);
 
 	yftd->id = id;
 	yftd->trid = trid;
@@ -1392,9 +1395,8 @@ static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who,
 		return;
 
 	snprintf(buff, sizeof(buff),
-		_
-		("%s, the yahoo user %s has invited you to a conference - %s, the topic is %s.\n")
-		_("Do you want to join?"), ela->handle, who, room, msg);
+		_("%s, the yahoo user %s has invited you to a conference - %s, "
+		"the topic is %s.\n\nDo you want to join?"), ela->handle, who, room, msg);
 
 	ycrd->id = id;
 	ycrd->host = strdup(who);

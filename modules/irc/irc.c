@@ -1910,30 +1910,26 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 					ctcp_got_version(element->data);
 
 				if (version && version->name) {
+					char app[255];
+
+					char *nick = prefix->nick ? 
+						prefix->nick :
+						prefix->servername;
+
+					if(version->version)
+						snprintf(app, sizeof(app), 
+							"%s-%s", version->name,
+							version->version);
+					else
+						snprintf(app, sizeof(app), 
+							"%s", version->name);
+					
 					snprintf(notice, sizeof(notice),
-						_
-						("<b>%s</b> is running %s"),
-						(prefix->nick ? prefix->
-							nick : prefix->
-							servername),
-						version->name);
-					if (version->version) {
-						strncat(notice, "-",
-							sizeof(notice) -
-							strlen(notice) - 1);
-						strncat(notice,
-							version->version,
-							sizeof(notice) -
-							strlen(notice) - 1);
-					}
-					if (version->env) {
-						strncat(notice, _(" on "),
-							sizeof(notice) -
-							strlen(notice) - 1);
-						strncat(notice, version->env,
-							sizeof(notice) -
-							strlen(notice) - 1);
-					}
+						_("<b>%s</b> is connected "
+						"using the program <i>%s</i> "
+						"on the <i>%s</i> operating "
+						"system"), nick, app,
+						version->env?version->env:"");
 				}
 
 				if (element->data) {
@@ -2093,7 +2089,7 @@ static void ay_irc_send_invite(eb_local_account *account, eb_chat_room *room,
 	free(simple_user);
 
 	if (*message)
-		g_snprintf(buff, BUF_LEN, _(">>> Inviting %s [%s] <<<"), user,
+		g_snprintf(buff, BUF_LEN, _(">>> Inviting %s [Message: %s] <<<"), user,
 			message);
 	else
 		g_snprintf(buff, BUF_LEN, _(">>> Inviting %s <<<"), user);
