@@ -209,17 +209,6 @@ static void language_selected(char *text, gpointer data)
 	cont->language[2] = '\0';
 
 	write_contact_list();
-
-	if (!doTrans) {
-		ay_do_warning(_("Auto-Translation Warning"),
-			_("You have just selected a language "
-				"with which to talk to a buddy. This will "
-				"only affect you if you have the auto-translator"
-				"plugin turned on. If you do, beware that it will"
-				"hang each time you send or receive a message, for"
-				"the time it takes to contact BabelFish. This can"
-				"take several seconds."));
-	}
 }
 
 static void language_select(ebmCallbackData *data)
