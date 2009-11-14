@@ -80,7 +80,7 @@ void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 	if (message[offset] == '/') {
 		char *param_offset = NULL;
 
-		// It is some kind of command
+		/* It is some kind of command */
 
 		message += offset + 1;
 
@@ -94,7 +94,7 @@ void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 		irc_get_command_string(buff, recipient, message, param_offset,
 			ia);
 
-		// reinstate the space so that we can put the message in our window intact
+		/* reinstate the space so that we can put the message in our window intact */
 		if (param_offset) {
 			*(param_offset - 1) = ' ';
 		}
@@ -400,9 +400,9 @@ int irc_recv(irc_account *ia, char *buf, int len)
 			return 0;
 
 		buf[len - 1] = '\0';
-
-//              fprintf(stderr, "irc> %s\n", buf);
-
+#ifdef IRC_PKTDUMP
+		fprintf(stderr, "irc> %s\n", buf);
+#endif
 		irc_message_parse(buf, ia);
 
 		return 1;

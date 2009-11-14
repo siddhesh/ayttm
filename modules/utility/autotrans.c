@@ -424,13 +424,13 @@ static char *translate_out(const eb_local_account *local,
 
 	if (contact->language[0] == '\0') {
 		return strdup(s);
-	}			// no translation
+	}			/* no translation */
 
 	strncpy(l, languages[myLanguage], 2);
 	l[2] = 0;
 	if (!strcmp(contact->language, l)) {
 		return strdup(s);
-	}			// speak same language
+	}			/* speak same language */
 
 	eb_chat_window_display_notification(contact->chatwindow,
 		_("translating..."), CHAT_NOTIFICATION_WORKING);

@@ -158,25 +158,15 @@ int socks4_connect(int sock, const char *host, int port, AyProxyData *proxy)
 		/* Check response - return as SOCKS4 if its valid */
 		if (read(sock, packet, 9) >= 4) {
 			if (packet[1] == 90) {
-//                              if(proxy_auth)
-//                                      g_free(proxy_auth);
 				return 0;
 			} else if (packet[1] == 91)
 				retval = AY_SOCKS4_UNKNOWN;
-//                                      ay_do_error( _("Proxy Error"), 
-//                                                      _("Socks 4 proxy rejected request for an unknown reason.") );
 			else if (packet[1] == 92)
 				retval = AY_SOCKS4_IDENTD_FAIL;
-//                                      ay_do_error( _("Proxy Error"), 
-//                                                      _("Socks 4 proxy rejected request because it could not connect to our identd.") );
 			else if (packet[1] == 93)
 				retval = AY_SOCKS4_IDENT_USER_DIFF;
-//                                      ay_do_error( _("Proxy Error"), 
-//                                                      _("Socks 4 proxy rejected request because identd returned a different userid.") );
 			else {
 				retval = AY_SOCKS4_INCOMPATIBLE_ERROR;
-//                                      ay_do_error( _("Proxy Error"), 
-//                                                      _("Socks 4 proxy rejected request with an RFC-uncompliant error cod.") );       
 				printf("=>>%d\n", packet[1]);
 			}
 		} else {
@@ -184,9 +174,6 @@ int socks4_connect(int sock, const char *host, int port, AyProxyData *proxy)
 		}
 	}
 	close(sock);
-
-//      if(proxy_auth)
-//              g_free(proxy_auth);
 
 	return retval;
 }
@@ -207,15 +194,15 @@ int socks5_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 	struct addrinfo *result = NULL;
 	int j;
 
-	buff[0] = 0x05;		//use socks v5
+	buff[0] = 0x05;		/* use socks v5 */
 	if (proxy->username && proxy->username[0]) {
-		buff[1] = 0x02;	//we support (no authentication & username/pass)
-		buff[2] = 0x00;	//we support the method type "no authentication"
-		buff[3] = 0x02;	//we support the method type "username/passw"
+		buff[1] = 0x02;	/* we support (no authentication & username/pass) */
+		buff[2] = 0x00;	/* we support the method type "no authentication" */
+		buff[3] = 0x02;	/* we support the method type "username/passw" */
 		need_auth = 1;
 	} else {
-		buff[1] = 0x01;	//we support (no authentication)
-		buff[2] = 0x00;	//we support the method type "no authentication"
+		buff[1] = 0x01;	/* we support (no authentication) */
+		buff[2] = 0x00;	/* we support the method type "no authentication" */
 	}
 
 	write(sockfd, buff, 3 + ((proxy->username
@@ -225,7 +212,6 @@ int socks5_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 		close(sockfd);
 		return AY_SOCKS5_CONNECT_FAIL;
 	}
-//      printf("buff[] %d %d proxy_user %s\n",buff[0],buff[1], proxy->username);
 	if (buff[1] == 0x00)
 		need_auth = 0;
 	else if (buff[1] == 0x02 && proxy->username && proxy->username[0])
@@ -234,7 +220,6 @@ int socks5_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 		fprintf(stderr, "No Acceptable Methods");
 		return AY_SOCKS5_CONNECT_FAIL;
 	}
-//      printf("need_auth=%d\n",((proxy->username && proxy->username[0])?1:0));
 	if (((proxy->username && proxy->username[0]) ? 1 : 0)) {
 		/* subneg start */
 		buff[0] = 0x01;	/* subneg version  */
@@ -263,16 +248,14 @@ int socks5_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 			return AY_SOCKS5_CONNECT_FAIL;
 		}
 
-		if (buff[1] != 0) {
-//                      ay_do_error( _("Proxy Error"), _("Socks5 proxy refused our authentication.") );
+		if (buff[1] != 0)
 			return AY_PROXY_PERMISSION_DENIED;
-		}
 	}
 
-	buff[0] = 0x05;		//use socks5
-	buff[1] = 0x01;		//connect only SOCK_STREAM for now
-	buff[2] = 0x00;		//reserved
-	buff[3] = 0x01;		//ipv4 address
+	buff[0] = 0x05;		/* use socks5 */
+	buff[1] = 0x01;		/* connect only SOCK_STREAM for now */
+	buff[2] = 0x00;		/* reserved */
+	buff[3] = 0x01;		/* ipv4 address */
 
 	if ((result = lookup_address(host, port, AF_UNSPEC)) == NULL)
 		return AY_HOSTNAME_LOOKUP_FAIL;
@@ -340,14 +323,12 @@ int http_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 			while (ay_recv_line(sockfd, &inputline) > 0) {
 				free(inputline);
 			}
-//                      ay_do_error( _("Proxy Error"), _("HTTP proxy error: Authentication required.") );
 			return AY_PROXY_AUTH_REQUIRED;
 		}
 		if (strstr(inputline, "403")) {
 			while (ay_recv_line(sockfd, &inputline) > 0) {
 				free(inputline);
 			}
-//                      ay_do_error( _("Proxy Error"), _("HTTP proxy error: permission denied.") );
 			return AY_PROXY_PERMISSION_DENIED;
 		}
 		free(inputline);

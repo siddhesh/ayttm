@@ -22,7 +22,6 @@
  *
  */
 
-//#include "ui_file_selection_dlg.h"
 #include <gtk/gtk.h>
 #include "file_select.h"
 

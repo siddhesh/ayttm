@@ -108,7 +108,7 @@ void irc_message_parse(char *incoming, irc_account *ia)
 		/* separate the command from the prefix */
 		command_offset = strchr(incoming, ' ');
 
-		// Malformed message. send a rejection
+		/* Malformed message. send a rejection */
 		if (!command_offset) {
 			CB_EXEC(ia->callbacks,
 				irc_warning) (_
@@ -857,7 +857,7 @@ void irc_get_command_string(char *out, const char *recipient, char *command,
 		snprintf(out, BUF_LEN, "PRIVMSG %s :%s\n", params,
 			(msg ? msg : ""));
 
-		// restore the space in params since client might need it
+		/* restore the space in params since client might need it */
 		if (msg) {
 			*(msg - 1) = ' ';
 		}

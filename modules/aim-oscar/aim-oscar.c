@@ -375,7 +375,7 @@ ay_aim_callback(void *data, int source, eb_input_condition condition)
 				source)) != NULL) ;
 
 	if (conn == NULL) {
-		// connection not found
+		/* connection not found */
 		WARNING(("connection not found"))
 
 	} else if (aim_get_command(&(alad->aimsess), conn) < 0) {
@@ -590,7 +590,6 @@ static int faim_cb_parse_authresp(aim_session_t *sess, aim_frame_t *fr, ...)
 
 	aim_sendcookie(sess, alad->conn, info->cookielen, info->cookie);
 	alad->status = AIM_ONLINE;
-	// serv_touch_idle();
 
 	return 1;
 }
@@ -628,7 +627,6 @@ static int faim_cb_connerr(aim_session_t *sess, aim_frame_t *fr, ...)
 				AIM_OFFLINE);
 		}
 		is_setting_state = 0;
-		// ay_aim_logout (ela);
 	}
 
 	return 1;
@@ -873,7 +871,7 @@ static int faim_cb_ssi_parseack(aim_session_t *sess, aim_frame_t *fr, ...)
 				break;
 		case 0x000e:
 			LOG(("[SSI] buddy requires authorization"))
-				// TODO
+				/* TODO */
 				break;
 		case 0xffff:
 			LOG(("[SSI] ack : 0xffff"))
@@ -2216,7 +2214,6 @@ static const gchar *ay_aim_get_status_string(eb_account *account)
 
 	if (aad->idle_time) {
 		int hours, minutes, days;
-		//minutes = (time(NULL) - (aad->idle_time*60))/60;
 		minutes = aad->idle_time;
 		hours = minutes / 60;
 		minutes = minutes % 60;

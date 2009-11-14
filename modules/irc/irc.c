@@ -333,8 +333,8 @@ void ay_irc_send_data(void *buf, int len, irc_account *ia)
 		(irc_local_account *)((eb_local_account *)ia->data)->
 		protocol_local_account_data;
 
-	int total = 0;		// how many bytes we've sent
-	int bytesleft = len;	// how many we have left to send
+	int total = 0;		/* how many bytes we've sent */
+	int bytesleft = len;	/* how many we have left to send */
 	int n = 0;
 	int errors = 0;
 
@@ -1077,7 +1077,7 @@ static void ay_irc_get_info(eb_local_account *account_from,
 	account_to->infowindow->cleanup = irc_info_data_cleanup;
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_got_whoisuser(const char *nick, const char *user,
 	const char *host, const char *real_name, irc_message_prefix *prefix,
 	irc_account *ia)
@@ -1297,7 +1297,7 @@ static void ay_got_away(const char *from, const char *message,
 		irc_info_update(ea->infowindow);
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_buddy_join(const char *channel, irc_message_prefix *prefix,
 	irc_account *ia)
 {
@@ -1400,7 +1400,7 @@ static void ay_got_namereply(irc_name_list *list, const char *channel,
 	}
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_got_channel_list(const char *me, const char *channel, int users,
 	const char *topic, irc_message_prefix *prefix, irc_account *ia)
 {
@@ -1531,7 +1531,7 @@ static void ay_buddy_part(const char *channel, const char *message,
 	}
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_buddy_nick_change(const char *newnick,
 	irc_message_prefix *prefix, irc_account *ia)
 {

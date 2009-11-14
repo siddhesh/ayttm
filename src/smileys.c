@@ -99,7 +99,7 @@ static t_smiley_set_list *s_smiley_sets = NULL;
 
 static int fast_sqrt(int n);
 
-/// compare two t_smiley_sets for sort order
+/* compare two t_smiley_sets for sort order */
 static int s_compare_smiley_set(const void *a, const void *b)
 {
 	const t_smiley_set *first = a;

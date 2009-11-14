@@ -364,7 +364,7 @@ void import_icq99_ok(GtkFileChooser *fs)
 	gint ICQ_ID = -1;
 
 	ICQ_ID = get_service_id("ICQ");
-	// Is there an ICQ service loaded?
+	/* Is there an ICQ service loaded? */
 	if (ICQ_ID < 0) {
 		return;
 	}
@@ -407,8 +407,6 @@ void import_icq99_ok(GtkFileChooser *fs)
 			add_account(contact.user_name, ea);
 		else
 			add_account(contact.nick_name, ea);
-
-//          RUN_SERVICE(ea)->add_user(ea);
 	}
 	update_contact_list();
 	write_contact_list();

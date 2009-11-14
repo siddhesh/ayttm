@@ -499,8 +499,6 @@ irc_name_list *irc_gen_name_list(char *message);
 
 int irc_recv(irc_account *ia, char *buf, int len);
 
-//void irc_send_data(void *buf, int len, irc_account *ia) ;
-
 void irc_get_command_string(char *out, const char *recipient, char *command,
 	char *params, irc_account *ia);
 
