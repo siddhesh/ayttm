@@ -77,9 +77,8 @@ PLUGIN_INFO plugin_info = {
 struct service SERVICE_INFO = {
 	"XMPP",
 	-1,
-	SERVICE_CAN_OFFLINEMSG |	/* all messages are offline */
-		SERVICE_CAN_FILETRANSFER,	/* true so i can prevent file 
-						   transfer altogether */
+	SERVICE_CAN_OFFLINEMSG |
+	SERVICE_CAN_FILETRANSFER,
 	NULL
 };
 
@@ -341,8 +340,6 @@ struct service_callbacks *query_callbacks()
 	sc->send_file = ay_xmpp_send_file;
 
 	sc->get_color = ay_xmpp_get_color;
-
-	xmpp_callbacks = sc;
 
 	return sc;
 }
