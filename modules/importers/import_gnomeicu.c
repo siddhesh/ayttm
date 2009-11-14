@@ -158,7 +158,6 @@ void import_gnomeicu_accounts(ebmCallbackData *data)
 				eb_services[ICQ_ID].sc->new_account(NULL, uin);
 			ea->service_id = ICQ_ID;
 			add_account(nick, ea);
-//                RUN_SERVICE(ea)->add_user(ea);
 		}
 		g_strfreev(tokens);
 	}

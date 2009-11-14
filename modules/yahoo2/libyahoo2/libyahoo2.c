@@ -2854,7 +2854,6 @@ int yahoo_write_ready(int id, void *fd, void *data)
 	int len;
 	struct data_queue *tx;
 
-	// Start comment
 	LOG(("write callback: id=%d fd=%p data=%p", id, fd, data));
 	if (!yid || !yid->txqueues)
 		return -2;
@@ -2865,7 +2864,6 @@ int yahoo_write_ready(int id, void *fd, void *data)
 
 	if (len == -1 && errno == EAGAIN)
 		return 1;
-	// End comment
 
 	if (len <= 0) {
 		int e = errno;
@@ -2987,7 +2985,7 @@ static void yahoo_process_yab_connection(struct yahoo_input_data *yid, int over)
 		}
 
 		if (!yab_used) {
-			//need to free the yab entry
+			/* need to free the yab entry */
 			FREE(yab->fname);
 			FREE(yab->lname);
 			FREE(yab->nname);

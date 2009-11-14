@@ -70,7 +70,6 @@
 #include "dialog.h"
 
 char filename[1024];
-// static unsigned long filename_len = 0; // unused
 static int xfer_in_progress = 0;
 static FILE *fp;
 static unsigned long amount_received;
@@ -207,9 +206,7 @@ static void send_file(char *filename, int s)
 	int i;
 	char buff[6];
 	unsigned long filelen;
-//      struct timeval tv;
 	char accept[10] = "";
-//      fd_set set;
 
 	if (xfer_in_progress)
 		return;

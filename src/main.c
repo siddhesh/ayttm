@@ -158,7 +158,6 @@ static void start_login(gboolean new)
 	gtk_window_set_default_icon(default_icon);
 
 	ay_load_tray_icon(default_icon);
-//      eb_status_window();
 
 	if (new)
 		ay_edit_local_accounts();
@@ -477,7 +476,6 @@ int main(int argc, char *argv[])
 	ay_register_icons();
 
 	accounts_success = load_accounts();
-	//if (accounts_success)
 	load_contacts();
 
 	start_login(!accounts_success);
@@ -494,7 +492,7 @@ int main(int argc, char *argv[])
 	/*
 	 * Moved unload_modules() call to window delete event in status.c
 	 */
-	unload_modules();	// Need to unload what we load
+	unload_modules();	/* Need to unload what we load */
 
 	eb_debug(DBG_CORE, "Shutting sound down\n");
 	sound_shutdown();

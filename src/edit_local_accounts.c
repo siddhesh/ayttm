@@ -488,9 +488,9 @@ static gboolean save_accounts(GtkTreeModel *model, GtkTreePath *path,
 		pairs = value_pair_add(pairs, "PASSWORD", pass);
 		save_account_info(service, pairs);
 		ela = eb_services[id].sc->read_local_account_config(pairs);
-		//prevent segfault
+
 		if (ela != NULL) {
-			// Is this an account for which a module is not loaded?
+			/* Is this an account for which a module is not loaded? */
 			if (ela->service_id == -1)
 				ela->service_id = id;
 			new_accounts = l_list_append(new_accounts, ela);

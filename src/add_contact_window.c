@@ -295,8 +295,10 @@ static void add_button_callback(void)
 * Create a Add contact window and put it on the screen
 */
 
-// FIXME Someone please tell me why the third argument exists.
-// I'll remove it otherwise as it's not being used in any case.
+/* 
+ * FIXME Someone please tell me why the third argument exists.
+ * I'll remove it otherwise as it's not being used in any case.
+ */
 static void show_add_defined_contact_window(struct contact *cont,
 	grouplist *grp, struct contact *con)
 {

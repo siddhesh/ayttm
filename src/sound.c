@@ -286,8 +286,10 @@ static int play_esd_file(gchar *soundfile)
 
 #endif				/* ESD_SOUND */
 
-// *** ARTS Support ***
-// Comments/Questions -> sebastian.held@gmx.de
+/*
+ * *** ARTS Support ***
+ * Comments/Questions -> sebastian.held@gmx.de
+ */
 #ifdef ARTS_SOUND
 
 static int test_arts()

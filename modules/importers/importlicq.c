@@ -234,7 +234,6 @@ void import_licq_accounts(ebmCallbackData *data)
 			eb_account *ea =
 				eb_services[ICQ_ID].sc->new_account(NULL, uin);
 			add_account(nick, ea);
-//            RUN_SERVICE(ea)->add_user(ea);
 		}
 	}
 	fclose(fp);
