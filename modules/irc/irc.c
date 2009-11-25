@@ -319,6 +319,7 @@ static void ay_irc_recv(AyConnection *con, eb_input_condition cond, void *data)
 		}
 
 		if (irc_recv(data, ia->buf, ia->len)) {
+			eb_debug(DBG_IRC, "(%p) Received: %s\n", con, ia->buf);
 			memset(ia->buf, 0, BUF_LEN);
 			ia->len = 0;
 		} else
@@ -349,6 +350,8 @@ void ay_irc_send_data(void *buf, int len, irc_account *ia)
 		ay_irc_error(buff, ia->data);
 		return;
 	}
+
+	eb_debug(DBG_IRC, "(%p) Sending: %s\n", ila->connection, buf);
 
 	while (total < len) {
 		n = ay_connection_write(ila->connection, buf + total,
@@ -2070,10 +2073,11 @@ static void ay_irc_send_chat_room_message(eb_chat_room *room, char *message)
 	type = irc_send_privmsg(room->room_name, message, ila->ia);
 
 	if (type == IRC_ECHO_ACTION) {
-		char *msg;
+		char *msg = message;
 		char buf[BUF_LEN];
 
-		msg = strcasestr(message, "/me");
+		while(*msg == ' ' || *msg == '\t')
+			msg++;
 
 		msg += 4;
 

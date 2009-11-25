@@ -70,10 +70,10 @@ int irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 	int offset = 0;
 	char buff[BUF_LEN];
 	memset(buff, 0, BUF_LEN);
-	int type = CTCP_NONE;
+	int type = IRC_NOECHO;
 
 	if (!message)
-		return;
+		return type;
 
 	while (message[offset] == ' ' || message[offset] == '\t')
 		offset++;
@@ -398,14 +398,17 @@ char *irc_param_list_get_at(irc_param_list *list, int position)
 int irc_recv(irc_account *ia, char *buf, int len)
 {
 	if (buf[len] == '\n') {
+		char *fbuf;
+
 		if (buf[len - 1] != '\r')
 			return 0;
 
-		buf[len - 1] = '\0';
-#ifdef IRC_PKTDUMP
-		fprintf(stderr, "irc> %s\n", buf);
-#endif
-		irc_message_parse(buf, ia);
+		fbuf = strdup(buf);
+
+		fbuf[len - 1] = '\0';
+		irc_message_parse(fbuf, ia);
+
+		free(fbuf);
 
 		return 1;
 	}
