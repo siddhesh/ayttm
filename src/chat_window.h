@@ -45,7 +45,6 @@ typedef struct _chat_window {
 	GtkWidget *smiley_window;
 	GtkWidget *sound_button;
 	GtkWidget *offline_button;
-	GtkWidget *status_label;
 	GtkWidget *reconnect_button;
 
 	int sound_enabled;
