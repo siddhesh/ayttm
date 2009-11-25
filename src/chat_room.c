@@ -1902,12 +1902,6 @@ void eb_join_chat_room(eb_chat_room *chat_room, int send_join)
 	TOOLBAR_APPEND(close_button, _("Close"), iconwid, destroy_chat_room,
 		chat_room);
 
-	chat_room->status_label = gtk_label_new(" ");
-	gtk_box_pack_start(GTK_BOX(hbox2), chat_room->status_label, FALSE,
-		FALSE, 0);
-	gtk_widget_show(chat_room->status_label);
-	chat_room->typing_fellows = NULL;
-
 	gtk_box_pack_end(GTK_BOX(hbox2), toolbar, FALSE, FALSE, 0);
 	gtk_widget_show(toolbar);
 
@@ -2068,8 +2062,9 @@ void eb_chat_room_display_status(eb_account *remote, char *message)
 		else
 			tmp = g_strdup_printf(" ");
 
-		if (ecr && ecr->status_label)
-			gtk_label_set_text(GTK_LABEL(ecr->status_label), tmp);
+		if (ecr)
+			eb_chat_room_display_notification(ecr, tmp,
+				CHAT_NOTIFICATION_WORKING);
 		g_free(tmp);
 	}
 }

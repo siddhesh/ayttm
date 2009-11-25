@@ -2123,8 +2123,9 @@ void eb_chat_window_display_status(eb_account *remote, gchar *message)
 	else
 		tmp = g_strdup_printf(" ");
 
-	gtk_label_set_text(GTK_LABEL(remote_contact->chatwindow->status_label),
-		tmp);
+	eb_chat_window_display_notification(remote_contact->chatwindow, tmp,
+		CHAT_NOTIFICATION_WORKING);
+
 	g_free(tmp);
 }
 
@@ -2592,10 +2593,6 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 #undef TOOLBAR_APPEND
 #undef TOOLBAR_APPEND_SPACE
 #undef ICON_CREATE
-
-	cw->status_label = gtk_label_new("          ");
-	gtk_box_pack_start(GTK_BOX(hbox), cw->status_label, FALSE, FALSE, 0);
-	gtk_widget_show(cw->status_label);
 
 	gtk_box_pack_end(GTK_BOX(hbox), toolbar, FALSE, FALSE, 0);
 	gtk_widget_show(toolbar);
