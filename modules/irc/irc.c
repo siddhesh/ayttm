@@ -2059,14 +2059,30 @@ static void ay_irc_leave_chat_room(eb_chat_room *room)
 
 static void ay_irc_send_chat_room_message(eb_chat_room *room, char *message)
 {
+	int type = 0;
+
 	irc_local_account *ila =
-		(irc_local_account *)room->local_user->
-		protocol_local_account_data;
+		(irc_local_account *)room->local_user->protocol_local_account_data;
 
-	if (message)
-		irc_send_privmsg(room->room_name, message, ila->ia);
+	if (!message)
+		return;
 
-	eb_chat_room_show_message(room, ila->ia->nick, message);
+	type = irc_send_privmsg(room->room_name, message, ila->ia);
+
+	if (type == IRC_ECHO_ACTION) {
+		char *msg;
+		char buf[BUF_LEN];
+
+		msg = strcasestr(message, "/me");
+
+		msg += 4;
+
+		g_snprintf(buf, BUF_LEN, "*%s %s", ila->ia->nick, msg);
+
+		eb_chat_room_display_notification(room, buf, IRC_CTCP_ACTION);
+	}
+	else if (type != IRC_NOECHO)
+		eb_chat_room_show_message(room, ila->ia->nick, message);
 }
 
 static void ay_irc_send_invite(eb_local_account *account, eb_chat_room *room,

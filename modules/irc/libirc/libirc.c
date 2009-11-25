@@ -64,12 +64,13 @@ void irc_logout(irc_account *ia)
 }
 
 /* Send a PRIVMSG */
-void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
+int irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 {
 	char *out_msg;
 	int offset = 0;
 	char buff[BUF_LEN];
 	memset(buff, 0, BUF_LEN);
+	int type = CTCP_NONE;
 
 	if (!message)
 		return;
@@ -91,7 +92,7 @@ void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 			param_offset++;
 		}
 
-		irc_get_command_string(buff, recipient, message, param_offset,
+		type = irc_get_command_string(buff, recipient, message, param_offset,
 			ia);
 
 		/* reinstate the space so that we can put the message in our window intact */
@@ -110,6 +111,7 @@ void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 	if (*buff)
 		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 
+	return type;
 }
 
 /* Send a NOTICE */
