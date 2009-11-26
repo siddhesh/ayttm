@@ -841,6 +841,11 @@ int irc_get_command_string(char *out, const char *recipient, char *command,
 		return IRC_NOECHO;
 	}
 
+	if (!strcasecmp(command, "KICK")) {
+		snprintf(out, BUF_LEN, "%s %s %s\n", command, recipient, params);
+		return IRC_ECHO_KICK;
+	}
+
 	if (!strcasecmp(command, "QUIT")) {
 		out[0] = '\0';
 
@@ -867,5 +872,5 @@ int irc_get_command_string(char *out, const char *recipient, char *command,
 		return IRC_NOECHO;
 	}
 
-	return IRC_NOECHO;
+	return 0;
 }

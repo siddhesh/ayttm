@@ -52,7 +52,8 @@
 
 enum {
 	IRC_NOECHO = 1,
-	IRC_ECHO_ACTION = 2
+	IRC_ECHO_ACTION,
+	IRC_ECHO_KICK
 };
 
 /* from util.c :

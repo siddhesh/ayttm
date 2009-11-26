@@ -70,10 +70,10 @@ int irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 	int offset = 0;
 	char buff[BUF_LEN];
 	memset(buff, 0, BUF_LEN);
-	int type = IRC_NOECHO;
+	int type = 0;
 
 	if (!message)
-		return type;
+		return IRC_NOECHO;
 
 	while (message[offset] == ' ' || message[offset] == '\t')
 		offset++;

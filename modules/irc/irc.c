@@ -2085,6 +2085,8 @@ static void ay_irc_send_chat_room_message(eb_chat_room *room, char *message)
 
 		eb_chat_room_display_notification(room, buf, IRC_CTCP_ACTION);
 	}
+	else if (type == IRC_ECHO_KICK)
+		eb_chat_room_display_notification(room, _("*Kick*"), IRC_CTCP_ACTION);
 	else if (type != IRC_NOECHO)
 		eb_chat_room_show_message(room, ila->ia->nick, message);
 }
@@ -2256,6 +2258,82 @@ static void ay_got_motd(const char *motd, irc_message_prefix *prefix,
 	}
 }
 
+static void ay_got_kick(const char *to, const char *channel,
+	const char *message, irc_message_prefix *prefix, irc_account *ia)
+{
+	char msg[BUF_LEN];
+	char room_name[BUF_LEN];
+	eb_chat_room *ecr;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", channel,
+		ia->connect_address);
+
+	if (!strcmp(to, ia->nick)) {
+		/* You got kicked :( */
+		eb_local_account *ela = (eb_local_account *)ia->data;
+
+		if (!(ecr = find_chat_room_by_id(room_name))) {
+			eb_debug(DBG_IRC, "Got KICK notification for a "
+				"channel I did not join\n");
+			return;
+		}
+
+		eb_destroy_chat_room(ecr);
+
+		snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", ia->nick,
+			ia->connect_address, ia->connect_address);
+        
+		if (!(ecr = find_chat_room_by_id(room_name)))
+			ecr = ay_irc_make_chat_room_window(room_name, ela, FALSE,
+				FALSE);
+
+		if (!message || !*message || !strcmp(prefix->nick, message))
+			snprintf(msg, sizeof(msg), _("<b>%s</b> has kicked "
+				"you out of channel <b>%s</b>"), prefix->nick,
+				channel);
+		else
+			snprintf(msg, sizeof(msg), _("<b>%s</b> has kicked "
+				"you out of channel <b>%s</b>. Reason: %s"),
+				prefix->nick, channel, message);
+	}
+	else if (!strcmp(ia->nick, prefix->nick)) {
+		/* You kicked someone */
+		if (!(ecr = find_chat_room_by_id(room_name))) {
+			eb_debug(DBG_IRC, "Got KICK notification for a "
+				"channel I did not join\n");
+			return;
+		}
+
+		if (!message || !*message || !strcmp(prefix->nick, message))
+			snprintf(msg, sizeof(msg), _("You just kicked <b>%s</b> "
+				"out of channel <b>%s</b>"), to,
+				channel);
+		else
+			snprintf(msg, sizeof(msg), _("You just kicked <b>%s</b> "
+				"out of channel <b>%s</b>. Reason: %s"),
+				to, channel, message);
+	}
+	else {
+		/* Someone kicked someone else */
+		if (!(ecr = find_chat_room_by_id(room_name))) {
+			eb_debug(DBG_IRC, "Got KICK notification for a "
+				"channel I did not join\n");
+			return;
+		}
+
+		if (!message || !*message || !strcmp(prefix->nick, message))
+			snprintf(msg, sizeof(msg), _("<b>%s</b> kicked <b>%s</b> "
+				"out of channel <b>%s</b>"), prefix->nick, to,
+				channel);
+		else
+			snprintf(msg, sizeof(msg), _("<b>%s</b> kicked <b>%s</b> "
+				"out of channel <b>%s</b>. Reason: %s"),
+				prefix->nick, to, channel, message);
+	}
+
+	eb_chat_room_display_notification(ecr, msg, IRC_KICK);
+}
+
 /* *************** *
  * Error Responses *
  * *************** */
@@ -2398,6 +2476,7 @@ static irc_callbacks *ay_irc_map_callbacks(void)
 	cb->irc_warning = ay_irc_warning;
 	cb->client_quit = ay_irc_client_quit;
 	cb->got_motd = ay_got_motd;
+	cb->got_kick = ay_got_kick;
 
 	/* Errors */
 	cb->irc_no_such_nick = ay_irc_no_such_nick;
