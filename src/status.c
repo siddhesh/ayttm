@@ -2581,7 +2581,6 @@ void eb_status_window()
 	GtkWidget *menu;
 	GtkWidget *hbox;
 	GtkWidget *radioonline, *radiocontact, *radioaccount;
-//      char *userrc = NULL;
 
 	statuswindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	/* The next line allows you to make the window smaller than the orig. size */
@@ -2598,10 +2597,6 @@ void eb_status_window()
 	gtk_handle_box_set_snap_edge(GTK_HANDLE_BOX(menubox), GTK_POS_LEFT);
 	gtk_handle_box_set_shadow_type(GTK_HANDLE_BOX(menubox),
 		GTK_SHADOW_NONE);
-
-//      userrc = g_strconcat(config_dir, G_DIR_SEPARATOR_S, "menurc", NULL);
-//      gtk_item_factory_parse_rc(userrc);
-//      g_free(userrc);
 
 	get_main_menu(statuswindow, &menu, menubox);
 

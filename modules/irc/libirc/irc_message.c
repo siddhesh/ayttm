@@ -108,7 +108,7 @@ void irc_message_parse(char *incoming, irc_account *ia)
 		/* separate the command from the prefix */
 		command_offset = strchr(incoming, ' ');
 
-		// Malformed message. send a rejection
+		/* Malformed message. send a rejection */
 		if (!command_offset) {
 			CB_EXEC(ia->callbacks,
 				irc_warning) (_
@@ -810,22 +810,24 @@ void irc_message_parse(char *incoming, irc_account *ia)
 	irc_param_list_free(params);
 }
 
-void irc_get_command_string(char *out, const char *recipient, char *command,
+int irc_get_command_string(char *out, const char *recipient, char *command,
 	char *params, irc_account *ia)
 {
 	if (!strcasecmp(command, "ME")) {
 		snprintf(out, BUF_LEN, "PRIVMSG %s :\001ACTION %s\001\n",
 			recipient, params);
-		return;
+		return IRC_ECHO_ACTION;
 	}
 
 	if (!strcasecmp(command, "LEAVE")) {
 		strcpy(command, "PART");
+
+		return IRC_NOECHO;
 	}
 
 	if (!strcasecmp(command, "J")) {
 		snprintf(out, BUF_LEN, "JOIN %s\n", params);
-		return;
+		return IRC_NOECHO;
 	}
 
 	if (!strcasecmp(command, "JOIN")
@@ -836,14 +838,19 @@ void irc_get_command_string(char *out, const char *recipient, char *command,
 		|| !strcasecmp(command, "NICK")
 		|| !strcasecmp(command, "JOIN")) {
 		snprintf(out, BUF_LEN, "%s %s\n", command, params);
-		return;
+		return IRC_NOECHO;
+	}
+
+	if (!strcasecmp(command, "KICK")) {
+		snprintf(out, BUF_LEN, "%s %s %s\n", command, recipient, params);
+		return IRC_ECHO_KICK;
 	}
 
 	if (!strcasecmp(command, "QUIT")) {
 		out[0] = '\0';
 
 		CB_EXEC(ia->callbacks, client_quit) (ia);
-		return;
+		return IRC_NOECHO;
 	}
 
 	if (!strcasecmp(command, "MSG")) {
@@ -857,11 +864,13 @@ void irc_get_command_string(char *out, const char *recipient, char *command,
 		snprintf(out, BUF_LEN, "PRIVMSG %s :%s\n", params,
 			(msg ? msg : ""));
 
-		// restore the space in params since client might need it
+		/* restore the space in params since client might need it */
 		if (msg) {
 			*(msg - 1) = ' ';
 		}
 
-		return;
+		return IRC_NOECHO;
 	}
+
+	return 0;
 }

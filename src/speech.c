@@ -44,7 +44,7 @@ void speak_message(eb_account *remote, gchar *voice, gchar *message)
 
 	strncpy(xbuff, message, sizeof(xbuff));
 	strip_html(xbuff);
-	// todo: convert "LOL" to "ha ha ha"?
+	/* todo: convert "LOL" to "ha ha ha"? */
 	snprintf(mbuff, sizeof(mbuff), "%s says: ", remote->handle);
 	say_strings(mbuff,
 		(voice == NULL ? DEFAULTMESSAGEBODYVOICE : voice), xbuff);

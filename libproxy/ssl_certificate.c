@@ -219,7 +219,7 @@ char *ssl_certificate_to_string(SSLCertificate *cert)
 	/* signature */
 	sig_status = ssl_certificate_check_signer(cert->x509_cert);
 
-	ret = g_strdup_printf(_("  <b>Owner:</b> %s (%s) in %s\n  "
+	ret = g_strdup_printf(_("  <b>Certificate Owner:</b> %s (%s) in %s\n  "
 			"<b>Signed by:</b> %s (%s) in %s\n  "
 			"<b>Fingerprint:</b> %s\n  "
 			"<b>Signature status:</b> %s"),

@@ -1079,12 +1079,15 @@ static void ext_yahoo_got_file(int id, const char *me, const char *from,
 	eb_yahoo_file_transfer_data *yftd =
 		g_new0(eb_yahoo_file_transfer_data, 1);
 
-	snprintf(buff, sizeof(buff),
-		_("The Yahoo user <b>%s</b> has sent you a file%s%s.\n\n"
-		"Do you want to accept it?"),
-		from, (msg
-			&& *msg ? _(" with the message ") : ""), (msg
-			&& *msg ? msg : ""));
+	if(msg && *msg)
+		snprintf(buff, sizeof(buff),
+			_("The Yahoo user <b>%s</b> has sent you a file.\n\n"
+			"Do you want to accept it?"), from); 
+	else
+		snprintf(buff, sizeof(buff),
+			_("The Yahoo user <b>%s</b> has sent you a file with "
+			"the message:\n\n<i>%s</i>.\n\ni"
+			"Do you want to accept it?"), from, msg);
 
 	yftd->id = id;
 	yftd->trid = trid;
@@ -1392,9 +1395,8 @@ static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who,
 		return;
 
 	snprintf(buff, sizeof(buff),
-		_
-		("%s, the yahoo user %s has invited you to a conference - %s, the topic is %s.\n")
-		_("Do you want to join?"), ela->handle, who, room, msg);
+		_("%s, the yahoo user %s has invited you to a conference - %s, "
+		"the topic is %s.\n\nDo you want to join?"), ela->handle, who, room, msg);
 
 	ycrd->id = id;
 	ycrd->host = strdup(who);
@@ -2762,14 +2764,6 @@ static LList *eb_yahoo_get_states()
 
 static char *eb_yahoo_check_login(const char *user, const char *pass)
 {
-	// Allow @ in yahoo usernames as well. See Feature Request #959812
-//      char *s = strchr(user, '@');
-//      if(s) {
-//              char ret[1024];
-//              snprintf(ret, sizeof(ret), _("Yahoo logins do NOT have the %s part."), s);
-//              return strdup(ret);
-//      }
-
 	return NULL;
 }
 
@@ -2863,7 +2857,6 @@ static void eb_yahoo_set_buddy_nick(eb_yahoo_local_account_data *ylad,
 	}
 
 	yab->id = bud->id;
-	/*	yab->nname = nick; *//* too many hassles with nicks */
 	yab->fname = strdup(nick);
 
 	/* get rid of leading spaces */
@@ -2961,7 +2954,7 @@ static void eb_yahoo_add_user(eb_account *ea)
 	else {
 		struct yahoo_buddy b = { NULL, ea->handle, NULL, NULL };
 
-		// TODO: add the custom invite message
+		/* TODO: add the custom invite message */
 		yahoo_add_buddy(ylad->id, ea->handle,
 			ea->account_contact->group->name, NULL);
 		eb_yahoo_set_buddy_nick(ylad, &b, ea->account_contact->nick);
@@ -3072,7 +3065,7 @@ static void eb_yahoo_unignore_user(eb_account *ea, const char *new_group)
 
 			/* add him only if he was moved to another group */
 			if (new_group)
-				// TODO: Add custom invite message
+				/* TODO: Add custom invite message */
 				yahoo_add_buddy(ylad->id, ea->handle, new_group,
 					NULL);
 
@@ -3169,7 +3162,6 @@ static const char *eb_yahoo_get_status_string(eb_account *ea)
 	int i;
 
 	if (yad->status == YAHOO_STATUS_CUSTOM && yad->status_message) {
-//              LOG(("eb_yahoo_get_status_string: %s is %s", ea->handle, yad->status_message));
 		return yad->status_message;
 	}
 	for (i = 0; eb_yahoo_status_codes[i].label; i++) {
@@ -3470,7 +3462,6 @@ static void eb_yahoo_callback(AyConnection *fd, eb_input_condition condition,
 	char buff[1024] = { 0 };
 
 	if (condition & EB_INPUT_READ) {
-		// Do the read with ay_connection_read and call yahoo_got_data with the data
 		ret = yahoo_read_ready(d->id, fd, d->data);
 
 		if (ret == -1)
@@ -3483,7 +3474,6 @@ static void eb_yahoo_callback(AyConnection *fd, eb_input_condition condition,
 	}
 
 	if (ret > 0 && condition & EB_INPUT_WRITE) {
-		// Do write with ay_connection_write and then call yahoo_sent_data
 		ret = yahoo_write_ready(d->id, fd, d->data);
 
 		if (ret == -1)

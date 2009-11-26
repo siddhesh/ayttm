@@ -319,6 +319,7 @@ static void ay_irc_recv(AyConnection *con, eb_input_condition cond, void *data)
 		}
 
 		if (irc_recv(data, ia->buf, ia->len)) {
+			eb_debug(DBG_IRC, "(%p) Received: %s\n", con, ia->buf);
 			memset(ia->buf, 0, BUF_LEN);
 			ia->len = 0;
 		} else
@@ -333,8 +334,8 @@ void ay_irc_send_data(void *buf, int len, irc_account *ia)
 		(irc_local_account *)((eb_local_account *)ia->data)->
 		protocol_local_account_data;
 
-	int total = 0;		// how many bytes we've sent
-	int bytesleft = len;	// how many we have left to send
+	int total = 0;		/* how many bytes we've sent */
+	int bytesleft = len;	/* how many we have left to send */
 	int n = 0;
 	int errors = 0;
 
@@ -349,6 +350,8 @@ void ay_irc_send_data(void *buf, int len, irc_account *ia)
 		ay_irc_error(buff, ia->data);
 		return;
 	}
+
+	eb_debug(DBG_IRC, "(%p) Sending: %s\n", ila->connection, buf);
 
 	while (total < len) {
 		n = ay_connection_write(ila->connection, buf + total,
@@ -1077,7 +1080,7 @@ static void ay_irc_get_info(eb_local_account *account_from,
 	account_to->infowindow->cleanup = irc_info_data_cleanup;
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_got_whoisuser(const char *nick, const char *user,
 	const char *host, const char *real_name, irc_message_prefix *prefix,
 	irc_account *ia)
@@ -1297,7 +1300,7 @@ static void ay_got_away(const char *from, const char *message,
 		irc_info_update(ea->infowindow);
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_buddy_join(const char *channel, irc_message_prefix *prefix,
 	irc_account *ia)
 {
@@ -1400,7 +1403,7 @@ static void ay_got_namereply(irc_name_list *list, const char *channel,
 	}
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_got_channel_list(const char *me, const char *channel, int users,
 	const char *topic, irc_message_prefix *prefix, irc_account *ia)
 {
@@ -1531,7 +1534,7 @@ static void ay_buddy_part(const char *channel, const char *message,
 	}
 }
 
-// IRC Handler
+/* IRC Handler */
 static void ay_buddy_nick_change(const char *newnick,
 	irc_message_prefix *prefix, irc_account *ia)
 {
@@ -1910,30 +1913,26 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 					ctcp_got_version(element->data);
 
 				if (version && version->name) {
+					char app[255];
+
+					char *nick = prefix->nick ? 
+						prefix->nick :
+						prefix->servername;
+
+					if(version->version)
+						snprintf(app, sizeof(app), 
+							"%s-%s", version->name,
+							version->version);
+					else
+						snprintf(app, sizeof(app), 
+							"%s", version->name);
+					
 					snprintf(notice, sizeof(notice),
-						_
-						("<b>%s</b> is running %s"),
-						(prefix->nick ? prefix->
-							nick : prefix->
-							servername),
-						version->name);
-					if (version->version) {
-						strncat(notice, "-",
-							sizeof(notice) -
-							strlen(notice) - 1);
-						strncat(notice,
-							version->version,
-							sizeof(notice) -
-							strlen(notice) - 1);
-					}
-					if (version->env) {
-						strncat(notice, _(" on "),
-							sizeof(notice) -
-							strlen(notice) - 1);
-						strncat(notice, version->env,
-							sizeof(notice) -
-							strlen(notice) - 1);
-					}
+						_("<b>%s</b> is connected "
+						"using the program <i>%s</i> "
+						"on the <i>%s</i> operating "
+						"system"), nick, app,
+						version->env?version->env:"");
 				}
 
 				if (element->data) {
@@ -2063,14 +2062,33 @@ static void ay_irc_leave_chat_room(eb_chat_room *room)
 
 static void ay_irc_send_chat_room_message(eb_chat_room *room, char *message)
 {
+	int type = 0;
+
 	irc_local_account *ila =
-		(irc_local_account *)room->local_user->
-		protocol_local_account_data;
+		(irc_local_account *)room->local_user->protocol_local_account_data;
 
-	if (message)
-		irc_send_privmsg(room->room_name, message, ila->ia);
+	if (!message)
+		return;
 
-	eb_chat_room_show_message(room, ila->ia->nick, message);
+	type = irc_send_privmsg(room->room_name, message, ila->ia);
+
+	if (type == IRC_ECHO_ACTION) {
+		char *msg = message;
+		char buf[BUF_LEN];
+
+		while(*msg == ' ' || *msg == '\t')
+			msg++;
+
+		msg += 4;
+
+		g_snprintf(buf, BUF_LEN, "*%s %s", ila->ia->nick, msg);
+
+		eb_chat_room_display_notification(room, buf, IRC_CTCP_ACTION);
+	}
+	else if (type == IRC_ECHO_KICK)
+		eb_chat_room_display_notification(room, _("*Kick*"), IRC_CTCP_ACTION);
+	else if (type != IRC_NOECHO)
+		eb_chat_room_show_message(room, ila->ia->nick, message);
 }
 
 static void ay_irc_send_invite(eb_local_account *account, eb_chat_room *room,
@@ -2093,7 +2111,7 @@ static void ay_irc_send_invite(eb_local_account *account, eb_chat_room *room,
 	free(simple_user);
 
 	if (*message)
-		g_snprintf(buff, BUF_LEN, _(">>> Inviting %s [%s] <<<"), user,
+		g_snprintf(buff, BUF_LEN, _(">>> Inviting %s [Message: %s] <<<"), user,
 			message);
 	else
 		g_snprintf(buff, BUF_LEN, _(">>> Inviting %s <<<"), user);
@@ -2240,6 +2258,82 @@ static void ay_got_motd(const char *motd, irc_message_prefix *prefix,
 	}
 }
 
+static void ay_got_kick(const char *to, const char *channel,
+	const char *message, irc_message_prefix *prefix, irc_account *ia)
+{
+	char msg[BUF_LEN];
+	char room_name[BUF_LEN];
+	eb_chat_room *ecr;
+
+	snprintf(room_name, sizeof(room_name), "%s@%s", channel,
+		ia->connect_address);
+
+	if (!strcmp(to, ia->nick)) {
+		/* You got kicked :( */
+		eb_local_account *ela = (eb_local_account *)ia->data;
+
+		if (!(ecr = find_chat_room_by_id(room_name))) {
+			eb_debug(DBG_IRC, "Got KICK notification for a "
+				"channel I did not join\n");
+			return;
+		}
+
+		eb_destroy_chat_room(ecr);
+
+		snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", ia->nick,
+			ia->connect_address, ia->connect_address);
+        
+		if (!(ecr = find_chat_room_by_id(room_name)))
+			ecr = ay_irc_make_chat_room_window(room_name, ela, FALSE,
+				FALSE);
+
+		if (!message || !*message || !strcmp(prefix->nick, message))
+			snprintf(msg, sizeof(msg), _("<b>%s</b> has kicked "
+				"you out of channel <b>%s</b>"), prefix->nick,
+				channel);
+		else
+			snprintf(msg, sizeof(msg), _("<b>%s</b> has kicked "
+				"you out of channel <b>%s</b>. Reason: %s"),
+				prefix->nick, channel, message);
+	}
+	else if (!strcmp(ia->nick, prefix->nick)) {
+		/* You kicked someone */
+		if (!(ecr = find_chat_room_by_id(room_name))) {
+			eb_debug(DBG_IRC, "Got KICK notification for a "
+				"channel I did not join\n");
+			return;
+		}
+
+		if (!message || !*message || !strcmp(prefix->nick, message))
+			snprintf(msg, sizeof(msg), _("You just kicked <b>%s</b> "
+				"out of channel <b>%s</b>"), to,
+				channel);
+		else
+			snprintf(msg, sizeof(msg), _("You just kicked <b>%s</b> "
+				"out of channel <b>%s</b>. Reason: %s"),
+				to, channel, message);
+	}
+	else {
+		/* Someone kicked someone else */
+		if (!(ecr = find_chat_room_by_id(room_name))) {
+			eb_debug(DBG_IRC, "Got KICK notification for a "
+				"channel I did not join\n");
+			return;
+		}
+
+		if (!message || !*message || !strcmp(prefix->nick, message))
+			snprintf(msg, sizeof(msg), _("<b>%s</b> kicked <b>%s</b> "
+				"out of channel <b>%s</b>"), prefix->nick, to,
+				channel);
+		else
+			snprintf(msg, sizeof(msg), _("<b>%s</b> kicked <b>%s</b> "
+				"out of channel <b>%s</b>. Reason: %s"),
+				prefix->nick, to, channel, message);
+	}
+
+	eb_chat_room_display_notification(ecr, msg, IRC_KICK);
+}
+
 /* *************** *
  * Error Responses *
  * *************** */
@@ -2382,6 +2476,7 @@ static irc_callbacks *ay_irc_map_callbacks(void)
 	cb->irc_warning = ay_irc_warning;
 	cb->client_quit = ay_irc_client_quit;
 	cb->got_motd = ay_got_motd;
+	cb->got_kick = ay_got_kick;
 
 	/* Errors */
 	cb->irc_no_such_nick = ay_irc_no_such_nick;

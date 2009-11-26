@@ -25,8 +25,8 @@
 #include "chat_window.h"
 
 struct protocol_smiley_struct {
-	char text[16];		// :-), :), ;-), etc
-	char name[64];		// this goes into the <smiley> tag for the gtkhtml stuff
+	char text[16];		/* :-), :), ;-), etc */
+	char name[64];		/* this goes into the <smiley> tag for the gtkhtml stuff */
 };
 
 typedef struct protocol_smiley_struct protocol_smiley;
@@ -34,7 +34,7 @@ typedef struct protocol_smiley_struct protocol_smiley;
 struct smiley_struct {
 	char *service;
 	char name[64];
-	const gchar **pixmap;	// from an xpm file, you know the drill...
+	const gchar **pixmap;	/* from an xpm file, you know the drill... */
 };
 
 typedef struct smiley_struct smiley;
@@ -51,11 +51,11 @@ extern "C" {
 #endif
 
 	typedef struct {
-		const char *set_name;	///< name of the set [key]
-		LList *set_smiley_list;	///< the list of (struct smiley_struct) which make up the set
+		const char *set_name;	/* name of the set [key] */
+		LList *set_smiley_list;	/* the list of (struct smiley_struct) which make up the set */
 	} t_smiley_set;
 
-	typedef LList t_smiley_set_list;	///< a list of t_smiley_set
+	typedef LList t_smiley_set_list;	/* a list of t_smiley_set */
 
 	void ay_add_smiley_set(const char *inName, LList *inSmileyList);
 	t_smiley_set_list *ay_get_smiley_sets(void);

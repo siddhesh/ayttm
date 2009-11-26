@@ -213,7 +213,7 @@ static char *dorainbow(const eb_local_account *local,
 
 			while (s[p2] == ' ' || s[p2] == '/') {
 				p2++;
-			}	// strip space before HTML tag
+			}	/* strip space before HTML tag */
 			for (a = 0; a < num_tags; a++) {
 				if (!strncasecmp
 					(s + p2, html_tags[a],
@@ -231,7 +231,7 @@ static char *dorainbow(const eb_local_account *local,
 						break;
 					}
 				}
-				*wptr = '\0';	// in case this is the last char
+				*wptr = '\0';	/* in case this is the last char */
 
 				continue;
 			}

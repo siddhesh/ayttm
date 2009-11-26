@@ -45,9 +45,6 @@ static GtkWidget *account_name;
 static GtkWidget *parameter;
 static GtkWidget *action_name;
 
-//static GList *triggers = NULL;
-//static GList *actions = NULL;
-
 static void quick_message(const char *contact, int online, const char *message)
 {
 

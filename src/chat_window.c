@@ -513,16 +513,15 @@ void send_message(GtkWidget *widget, gpointer d)
 			&& can_offline_message(data->contact)) {
 			data->preferred = can_offline_message(data->contact);
 		} else {
-			cw_put_message(data,
-				_("<body bgcolor=#F9E589 width=*><b> "
-					"Cannot send message - user is offline.</b></body>\n"),
-				0, 0, 0);
+			eb_chat_window_display_notification(data,
+				_("Cannot send message - user is offline\n"),
+				CHAT_NOTIFICATION_ERROR);
 			return;
 		}
 	} else if (!data->preferred->online && !data->contact->send_offline) {
-		cw_put_message(data, _("<body bgcolor=#F9E589 width=*><b> "
-				"Cannot send message - user is offline.</b></body>\n"),
-			0, 0, 0);
+		eb_chat_window_display_notification(data,
+			_("Cannot send message - user is offline\n"),
+			CHAT_NOTIFICATION_ERROR);
 		return;
 	}
 
@@ -539,9 +538,9 @@ void send_message(GtkWidget *widget, gpointer d)
 			data->preferred->ela);
 
 	if (!data->local_user) {
-		cw_put_message(data, _("<body bgcolor=#F9E589 width=*><b> "
-				"Cannot send message - no local account found.</b></body>\n"),
-			0, 0, 0);
+		eb_chat_window_display_notification(data,
+			_("Cannot send message - no local account found\n"),
+			CHAT_NOTIFICATION_ERROR);
 		return;
 	}
 
@@ -973,7 +972,7 @@ static gboolean handle_click(GtkWidget *widget, GdkEventButton *event,
 			snprintf(encoding_label, sizeof(encoding_label),
 				_("Set Character Encoding"));
 
-		button = gtk_menu_item_new_with_label(_(encoding_label));
+		button = gtk_menu_item_new_with_label(encoding_label);
 
 		g_signal_connect(button, "activate",
 			G_CALLBACK(ay_set_chat_encoding), cw);
@@ -1426,10 +1425,14 @@ void eb_chat_window_do_timestamp(struct contact *c, gboolean online)
 		return;
 
 	g_snprintf(buff, BUF_SIZE,
-		_
-		("<body bgcolor=#F9E589 width=*><b> %s is logged %s @ %s.\n</b></body>"),
-		c->nick, (online ? _("in") : _("out")),
-		g_strchomp(asctime(localtime(&my_time))));
+		online ?
+		_("<b> %s has logged in @ %s.\n</b>"):
+		_("<b> %s has logged out @ %s.\n</b>"),
+		c->nick, g_strchomp(asctime(localtime(&my_time))));
+
+	eb_chat_window_display_notification(c->chatwindow, buff,
+		CHAT_NOTIFICATION_NOTE);
+
 	html_text_buffer_append(GTK_TEXT_VIEW(c->chatwindow->chat), buff,
 		HTML_IGNORE_NONE);
 }
@@ -2120,8 +2123,9 @@ void eb_chat_window_display_status(eb_account *remote, gchar *message)
 	else
 		tmp = g_strdup_printf(" ");
 
-	gtk_label_set_text(GTK_LABEL(remote_contact->chatwindow->status_label),
-		tmp);
+	eb_chat_window_display_notification(remote_contact->chatwindow, tmp,
+		CHAT_NOTIFICATION_WORKING);
+
 	g_free(tmp);
 }
 
@@ -2589,10 +2593,6 @@ chat_window *eb_chat_window_new(eb_local_account *local, struct contact *remote)
 #undef TOOLBAR_APPEND
 #undef TOOLBAR_APPEND_SPACE
 #undef ICON_CREATE
-
-	cw->status_label = gtk_label_new("          ");
-	gtk_box_pack_start(GTK_BOX(hbox), cw->status_label, FALSE, FALSE, 0);
-	gtk_widget_show(cw->status_label);
 
 	gtk_box_pack_end(GTK_BOX(hbox), toolbar, FALSE, FALSE, 0);
 	gtk_widget_show(toolbar);
