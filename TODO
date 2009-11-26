@@ -12,7 +12,7 @@ http://ayttm.git.sourceforge.net/git/gitweb.cgi?p=ayttm/ayttm;a=blob_plain;f=TOD
   * CTCP color and formatting
   * File Transfer
   * Modes support
-  * Kick/ban
+  * Ban
   * Implement commands interpretation as a filter
   * Replace password chars with * when doing a /identify
 
