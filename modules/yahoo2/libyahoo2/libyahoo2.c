@@ -2,7 +2,7 @@
  * libyahoo2: libyahoo2.c
  *
  * Some code copyright (C) 2002-2004, Philip S Tellis <philip.tellis AT gmx.net>
- * YMSG16 authentication code copyright (C) 2009, 
+ * YMSG16 code copyright (C) 2009, 
  * 		Siddhesh Poyarekar <siddhesh dot poyarekar at gmail dot com>
  *
  * Yahoo Search copyright (C) 2003, Konstantin Klyagin <konst AT konst.org.ua>
@@ -51,7 +51,9 @@
 # include <config.h>
 #endif
 
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -706,7 +708,7 @@ static void yahoo_send_packet(struct yahoo_input_data *yid,
 	unsigned char *data;
 	int pos = 0;
 
-	if (yid->fd < 0)
+	if (!yid->fd)
 		return;
 
 	data = y_new0(unsigned char, len + 1);
@@ -1336,7 +1338,7 @@ static void yahoo_process_status(struct yahoo_input_data *yid,
 			break;
 		case 1:	/* we don't get the full buddy list here. */
 			if (!yd->logged_in) {
-				yd->logged_in = TRUE;
+				yd->logged_in = 1;
 				if (yd->current_status < 0)
 					yd->current_status = yd->initial_status;
 				YAHOO_CALLBACK(ext_yahoo_login_response) (yd->
@@ -1497,7 +1499,7 @@ static void yahoo_process_buddy_list(struct yahoo_input_data *yid,
 
 	/* Logged in */
 	if (!yd->logged_in) {
-		yd->logged_in = TRUE;
+		yd->logged_in = 1;
 		if (yd->current_status < 0)
 			yd->current_status = yd->initial_status;
 		YAHOO_CALLBACK(ext_yahoo_login_response) (yd->client_id,
@@ -1946,7 +1948,7 @@ static void yahoo_process_contact(struct yahoo_input_data *yid,
 	char *name = NULL;
 	long tm = 0L;
 	int state = YAHOO_STATUS_AVAILABLE;
-	int online = FALSE;
+	int online = 0;
 	int away = 0;
 	int idle = 0;
 	int mobile = 0;
@@ -2209,7 +2211,7 @@ static void _yahoo_webcam_get_server_connected(void *fd, int error, void *d)
 	unsigned int len = 0;
 	unsigned int pos = 0;
 
-	if (error || fd <= 0) {
+	if (error || !fd) {
 		FREE(who);
 		FREE(yid);
 		return;
@@ -2499,9 +2501,9 @@ static struct yab *yahoo_yab_read(unsigned char *d, int len)
 {
 	char *st, *en;
 	char *data = (char *)d;
-	data[len] = '\0';
-
 	struct yab *yab = NULL;
+
+	data[len] = '\0';
 
 	DEBUG_MSG(("Got yab: %s", data));
 	st = en = strstr(data, "e0=\"");
@@ -2950,7 +2952,7 @@ static void yahoo_process_yab_connection(struct yahoo_input_data *yid, int over)
 	YList *buds;
 	int changed = 0;
 	int id = yd->client_id;
-	int yab_used = FALSE;
+	int yab_used = 0;
 
 	LOG(("Got data for YAB"));
 
@@ -2963,11 +2965,11 @@ static void yahoo_process_yab_connection(struct yahoo_input_data *yid, int over)
 			continue;
 
 		changed = 1;
-		yab_used = FALSE;
+		yab_used = 0;
 		for (buds = yd->buddies; buds; buds = buds->next) {
 			struct yahoo_buddy *bud = buds->data;
 			if (!strcmp(bud->id, yab->id)) {
-				yab_used = TRUE;
+				yab_used = 1;
 				bud->yab_entry = yab;
 				if (yab->nname) {
 					bud->real_name = strdup(yab->nname);
@@ -2985,7 +2987,6 @@ static void yahoo_process_yab_connection(struct yahoo_input_data *yid, int over)
 		}
 
 		if (!yab_used) {
-			/* need to free the yab entry */
 			FREE(yab->fname);
 			FREE(yab->lname);
 			FREE(yab->nname);
@@ -3106,7 +3107,7 @@ static void _yahoo_webcam_connected(void *fd, int error, void *d)
 	unsigned int len = 0;
 	unsigned int pos = 0;
 
-	if (error || fd <= 0) {
+	if (error || !fd) {
 		FREE(yid);
 		return;
 	}
@@ -3588,8 +3589,8 @@ static void yahoo_connected(void *fd, int error, void *data)
 
 	FREE(ccd);
 
-	/* fd < 0 && error == 0 means connect was cancelled */
-	if (fd < 0)
+	/* fd == NULL && error == 0 means connect was cancelled */
+	if (!fd)
 		return;
 
 	pkt = yahoo_packet_new(YAHOO_SERVICE_AUTH, YPACKET_STATUS_DEFAULT,
@@ -3844,7 +3845,7 @@ static void _yahoo_http_post_connected(int id, void *fd, int error, void *data)
 	struct yahoo_input_data *yid = yad->yid;
 	char *buff = yad->data;
 
-	if (fd <= 0) {
+	if (!fd) {
 		inputs = y_list_remove(inputs, yid);
 		FREE(yid);
 		return;
@@ -4880,7 +4881,7 @@ static void _yahoo_ft_upload_connected(int id, void *fd, int error, void *data)
 	struct send_file_data *sfd = data;
 	struct yahoo_input_data *yid = sfd->yid;
 
-	if (fd <= 0) {
+	if (!fd) {
 		inputs = y_list_remove(inputs, yid);
 		FREE(yid);
 		return;
