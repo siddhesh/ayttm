@@ -1765,7 +1765,7 @@ const char *PREFIX(skipS) (const ENCODING *enc, const char *ptr) {
 static
 void PREFIX(updatePosition) (const ENCODING *enc,
 	const char *ptr, const char *end, POSITION *pos) {
-	while (ptr != end) {
+	while (ptr < end) {
 		switch (BYTE_TYPE(enc, ptr)) {
 #define LEAD_CASE(n) \
     case BT_LEAD ## n: \
