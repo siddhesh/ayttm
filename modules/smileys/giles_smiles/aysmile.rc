@@ -1,0 +1,26 @@
+#
+# Giles' Smiley theme for ayttm
+#
+
+%name	=	Giles Smileys
+%desc	=	An alternate smiley theme by Giles Hamlin
+%author	=	Giles Hamlin
+%date	=	$Date: 2003/05/09 19:11:52 $
+%revision=	$Revision: 1.2 $
+
+
+dead	=	dead.xpm
+blank	=	embarrased.xpm
+blush	=	embarrased.xpm
+grin	=	grin.xpm
+worried	=	indifferent.xpm
+lovey	=	kiss.xpm
+quiet	=	quiet.xpm
+sad	=	sad.xpm
+cooldude=	shades.xpm
+oh	=	shocked.xpm
+smile	=	smile.xpm
+sob	=	tears.xpm
+tongue	=	tongue.xpm
+wink	=	wink.xpm
+

@@ -1,0 +1,4 @@
+Makefile
+config.h
+.deps
+Makefile.in

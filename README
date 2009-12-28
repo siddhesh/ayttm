@@ -1,0 +1,81 @@
+* Important notes
+=================
+As of version 0.3.0 [CVS version 0.2.3-107], modules are installed in
+$prefix/lib/ayttm instead of $prefix/share/ayttm/modules. This means that
+the old modules in $prefix/share/ayttm/modules shouldn't be used anymore
+because they are not binary compatible anymore, and should be deleted.
+You also _must_ fix your prefs file to change modules paths.
+If you get a popup saying "Plugin version differs from core version, which 
+means it is probably not binary compatible." at startup, it means you 
+didn't read this file.
+
+* Project homepage (where to bugreport and so):
+===============================================
+	http://www.sf.net/projects/ayttm
+	
+* How to help & be helped
+=========================
+  - bugreports:
+    If you experience a fatal bug (crash), you can file a bugreport
+    on SF.net's bugtracker. The more precise it is, the easier we'll 
+    find out how to fix it. In particular, a backtrace is really 
+    useful. After a crash you should have a `core' file in your 
+    working directory ($HOME if run via a window manager). run gdb with 
+    it:
+    $ gdb `which ayttm` core
+    then at the gdb prompt, type 'bt full':
+    (gdb) bt full
+    and copy/paste the result to your bugreport.
+    You can also easily, automatically get stacktraces by running 
+    ./configure --enable-crash-dialog. It'll popup the stack trace every
+    time ayttm crashes.
+
+  - If you experience lots of crashes after an update (in particular 
+    for CVS updates), it is probably caused by a change in a structure
+    shared between core and modules. Try a "make clean && make && sudo
+    make install" instead of simply "make && sudo make install".
+  - If you are a developer and fix a bug or add a feature, we certainly
+    want to hear from you :) Please send a patch (ideally, against CVS)
+    to SF.net's patchtracker. use `cvs diff -u`.
+  - Translations: The existing translations are quite out of date after
+    the fork. I plan to update the French one, but that'll be when I'll
+    have more time, could be quite long. New translations or updates
+    to existing ones are very welcome.
+
+* General
+=========
+  Ayttm is an integrated messenger, which means you can be logged on 
+  more than one of the supported services at once. You can then chat
+  with people on the services where you have an account. 
+  Your "online friends" are grouped by contacts (a contact can have
+  more than one account), and by groups (Buddies, etc). You can order
+  your contacts by groups by either drag and dropping them, or by 
+  editing the contact. You can order your contacts' accounts only by
+  editing the account, yet.
+
+* Build Requirements:
+=========
+	autoconf.2.59
+	automake-1.6
+	bison.1.875
+	flex.2.5.4
+	freetype.2.1.8
+	gettext.0.13.1
+	glib 2.0.0
+	gtk2 2.6.0
+	libiconv.1.9.2
+	libtool.1.5.6
+	readline.4.3
+
+	For MSN2 Support:
+		openssl-0.9.7d
+
+	For Yahoo Webcam Support:
+		gdk-pixbuf.0.17.0
+		jasper-1.701.0
+		jpeg.6b
+		libpng.1.2.4
+		tiff.v3.5.3
+		zlib.1.2.1
+
+I should write more in this README, too...

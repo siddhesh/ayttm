@@ -1,0 +1,48 @@
+1) To build NETBSD you will need the following additional packages using pkg_add
+
+	autoconf-2.59.tgz
+	automake14-1.4.6.tgz
+	automake-1.8.3.tgz
+	bison-1.875nb1.tgz
+	flex-2.5.4a.tgz
+	gdk-pixbuf-0.22.0nb2.tgz
+	gettext-0.11.5nb3.tgz
+	gettext-lib-0.11.5nb2.tgz
+	gettext-m4-0.11.5.tgz
+	glib-1.2.10nb6.tgz
+	gmake-3.80nb3.tgz
+	gtk+-1.2.10nb7.tgz
+	jasper-1.701.0.tgz
+	jpeg-6bnb1.tgz
+	libiconv-1.9.1nb1.tgz
+	libtool-1.5.2nb5.tgz
+	libtool-base-1.5.2nb5.tgz
+	libtool-info-1.5.2nb5.tgz
+	m4-1.4nb1.tgz
+	perl-5.8.3.tgz
+	png-1.2.5nb2.tgz
+	pth-2.0.0.tgz
+	tiff-3.6.1nb1.tgz
+	unzip-5.50nb2.tgz
+	x11-links-0.23.tgz
+	xdg-dirs-1.1.tgz
+	xdg-x11-dirs-1.1.tgz
+
+2) Make sure /usr/pkg/bin is before /usr/bin in your path as there are overrides for
+gettext and other tools in /usr/pkg/bin.
+
+3) ./configure --disable-crash-dialog
+   make
+   make -i install
+
+CAVEATS:
+
+	Since there is no pthreads yet, file transfer may not work very well or
+	at all. We should redo this using GNU pth.
+
+	Smileys do not install properly.
+
+	To run:
+	mkdir $HOME/.ayttm
+	ayttm -D
+

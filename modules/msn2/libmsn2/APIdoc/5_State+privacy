@@ -1,0 +1,73 @@
+			CHANGING STATE AND PRIVACY SETTINGS
+				---------------
+
+
+(1)	Changing state
+
+	There are various states that any use can be in. They are:
+
+	FLN - Offline
+	HDN - Hidden (can still see buddy on/off-line notifications)
+	NLN - Online
+	BSY - Busy
+	IDL - Idle
+	BRB - Be Right Back
+	AWY - Away From Computer
+	PHN - On the Phone
+	LUN - Out to Lunch
+
+	When offline (FLN) or hidden (HDN), it is not possible to enter
+Switchboard sessions. However, any Switchboard sessions to which you are 
+connected when going offline (or even disconnecting from the Notification 
+Server itself) will remain open - it is up to the client to close them 
+using msn_clean_up() (see elsewhere for details of how).
+
+	To change your state, call msn_set_state(msnconn * conn, char * 
+state), where the msnconn object is the main NS connection, and the state 
+is one of the three-letter codes above.
+
+	No change is assumed to be complete and to have taken effect until 
+the function ext_changed_state(msnconn * conn, char * state) is called.
+
+
+(2)	Notification of other users' states
+
+	When first notified (by the server) of another user's state, or 
+when another user's state changes, the following functions are called:
+
+	(*) When a buddy is online
+		ext_buddy_set(msnconn * conn, char * buddy, char * 
+			friendlyname, char * state)
+
+	...where "buddy" is the buddy's username, "friendlyname" is their 
+	Friendly Name, and "state" is one of the above three-letter codes
+
+	(*) When a buddy is going offline
+		ext_buddy_offline(msnconn * conn, char * buddy)
+	
+
+(3)	Privacy settings
+
+	Privacy settings are communicated with the list synchronisation 
+object (see the Data Types section under Architecture). You can also 
+modify them while the program is running, using these functions:
+
+	void msn_set_BLP(msnconn * conn, char c)
+
+	void msn_set_GTC(msnconn * conn, char c)
+
+	The character is A or B for BLP, and A or N for GTC - see the 
+section "MSN Protocol Basics" for what they mean.
+
+	As communication with the MSN server is asynchronous, nothing is 
+assumed to have been accomplished until the server says that the setting 
+has been changed successfully. When that happens, the following functions 
+are called:
+
+	void ext_got_GTC(msnconn * conn, char c)
+
+	void ext_got_BLP(msnconn * conn, char c)
+
+
+	Note - these are also called during synchronisation with the 
+server, when the GTC and BLP values are received.

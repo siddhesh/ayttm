@@ -1,0 +1,32 @@
+/* XPM */
+static const char *free_icon_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"12 12 14 1",
+"  c opaque",
+". c gray20",
+"X c #336666",
+"o c #663333",
+"O c gray40",
+"+ c magenta",
+"@ c gray60",
+"# c #9999cc",
+"$ c #99cc99",
+"% c #cc99cc",
+"& c gray80",
+"* c #ffccff",
+"= c white",
+"- c None",
+/* pixels */
+"------------",
+"---#&@@#&---",
+"--&&&&&@O#--",
+"-#&&=&&@@O&-",
+"-&@&*&$@OOO-",
+"-@@&$%@@O.X-",
+"-@@@@@@OOo.-",
+"-@OO@OOO..O-",
+"-&.OOOX.. $-",
+"--@..... @--",
+"---@O..O@---",
+"------------"
+};

@@ -1,0 +1,160 @@
+		SENDING AND RECEIVING INSTANT MESSAGES
+			-------------------
+
+		(A)	SENDING MESSAGES
+
+
+	There are two ways of sending an Instant message via MSN - the 
+lazy way, and the fully-featured way.
+
+(1)	The lazy way
+
+	This way is simple but ugly. Call the function
+void msn_send_IM(msnconn * conn, char * rcpt, char * msg), with conn 
+pointing to the NS connection (the one you made earlier). The library will 
+look through all open Switchboard connections until it finds one that 
+contains only you and the user specified by "rcpt". It will then deliver 
+the message into that chat area. If no such area exists, it will start the 
+process of requesting a new Switchboard session, inviting your 
+correspondent, and sending that message (the actualy process will happen 
+asynchronously, as the server replies to the client's requests over 
+several subsequent polling-loop runs). For example:
+
+	msn_send_IM(mc, "blip109@hotmail.com", "hello, Meredydd!");
+
+
+(2) The proper way
+
+	This method gives you complete control over the session, but is 
+therefore more complicated. 
+
+	The first thing to do is request a switchboard session from the 
+server. This is the biggest problem with this method, as the session will 
+be delviered asynchronously. You make the call:
+
+	msn_new_SB(msnconn * ns_conn, void * tag);
+
+	The parameter "ns_conn" is the main connection to the 
+Notification Server. The tag is not touched by the library, so it can be 
+NULL if you want. It is simply handed to the callback later to help 
+identify why you wanted this particular switchboard session.
+
+	And a little while later you receive a call to
+ext_got_SB(msnconn new_sb_conn, void * tag), referring to the 
+the new switchboard connection and the tag you set earlier. Note that you 
+can know which account requested this switchboard from either the tag or 
+the authdata_SB object in the switchboard connection. You will also, as is 
+always the case with a new connection, receive a call to 
+msn_new_connection(msnconn * conn).
+
+	You can then call msn_send_IM(msnconn * conn, char * rcpt, char * 
+msg), with the switchboard connection as the first argument. Note that if 
+the msnconn object specified is a Switchboard connection, the "rcpt" 
+parameter is  ignored, so you can pass it as NULL. 
+
+	To send a "XXX is typing" notification to everyone in a 
+Switchboard session, call msn_send_typing(msnconn * conn), and pass it the 
+connection to which you want to send the notification.
+
+
+	Although the above methods of sending IMs work just fine, they 
+allow only basic messaging. For more advanced control, you may want to 
+set other parameters, such as font and content type. To do this, you pass 
+a "message" object (see section 2 for a listing of public members). The 
+relevant function uses C++'s function overloading capabilities, and so 
+has the same name:
+
+	void msn_send_IM(msnconn * conn, char * rcpt, message * msg);
+
+	In fact, the string-based function is merely a wrapper for the 
+above. It creates a set-to-defaults message object and sends that. Note 
+that both the easy and the thorough methods of sending work with message 
+objects too. Note also that it is the calling program's responsibility to 
+clean up the message function afterwards.
+
+	Not all the values in the message object need to be set. Indeed, 
+if the "header" member is set to anything other than NULL, all other 
+members except "body" will be ignored, and the message will be sent as-is. 
+This is NOT RECOMMENDED, as there should be no need to get that close to 
+the actual protocol. If there is another feature which you want to use, 
+either change the library (and preferably email me a patch), or email me 
+and request that I write it in!
+
+	If "content" is set to NULL, it defaults to "text/plain". If 
+"font" is NULL, then no font information is transmitted and the message 
+comes out in the default font.
+
+
+
+(3) Users within the session
+
+	When ext_new_connection() is called for the new Switchboard 
+connection, the "users" member of the connection object will contain a 
+list of all the users in the session (see the Data Types section for details).
+
+	The program is also notified whenever users join the session. 
+The function ext_user_joined(msnconn * conn, char * username, char * 
+friendlyname, int is_initial) is called. The first parameter is the 
+switchboard connection, the second and third describe the joining user, 
+and the fourth is true if this information is part of an initial roster 
+dump - that is, if this user is already in this session and you have just 
+joined it. If you are already in the session and the user joins, then this 
+parameter will be false (0).
+	If a user leaves the session, the program will also be notified. 
+The function ext_user_left(msnconn * conn, char * username) will be 
+called.
+
+
+(4) On error
+
+	If a switchboard session is open and a message is sent, but it 
+does not get properly sent to everyone else in that Switchboard session, 
+the function ext_IM_failed(msnconn * conn) will be called, and that 
+Switchboard connection will be passed to it.
+
+		(B)	SENDING INVITATIONS
+	Once you have a Switchboard session, you can invite people into 
+it. As many people as you like can share a Switchboard session - a 
+message sent into the session will be received by everyone else in the 
+session. To invite someone into a session, call
+msn_invite_user(msnconn * conn, char * username), with the switchboard 
+connection and the user you wish to invite. Their arrival will be 
+indicated by a call to ext_user_joined() as detailed above.
+
+		(C)	RECEIVING INVITATIONS
+	The library will automatically answer any invitation. 
+ext_new_connection(msnconn * conn) will be called with the Switchboard 
+connection that you have just entered. You will also receive notification 
+of which users are already in the session as detailed above. You can treat 
+the connection just like a Switchboard session you started yourself.
+
+
+		(D)	RECEIVING MESSAGES
+
+	Currently, there are two types of message recognised by this 
+library. One is a IM itself, the other is the "XXX is typing" 
+notification. Both involve receiving a callback.
+
+	On reception of an instant message, the function:
+
+void ext_got_IM(msnconn * conn, char * username, char * friendlyname, 
+	message * msg)
+
+will be called, with the following parameters:
+
+	conn		- The Switchboard connection on which this message 
+				was received
+	username	- The username of the user that sent this message 
+				(eg blip109@hotmail.com)
+	friendlyname	- The MSN "Friendly Name" attribute
+
+	msg		- The message object. See section 2 for details. 
+				If the "font" attribute is NULL, no font 
+				information arrived with this IM, and the 
+				other font attributes are nonsense
+
+
+	On reception of a typing notification, the function
+void ext_typing_user(msnconn * conn, char * username, char * friendlyname)
+will be called. The parameters are all the same as the above, except for 
+the lack of message content.

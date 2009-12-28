@@ -1,0 +1,51 @@
+AYTTM For Win32:
+	Initial Port to WIN32 Platform: Edward L. Haletky
+	Initial Port to MingW32       : Benoit Laniel
+	Win32 Platform Maintainer     : Edward L. Haletky
+
+Known Issues:
+
+	1) There is a problem when you click into the chat (non-entry)
+	window where occasionally the text will appear somewhere else besides
+	the end.
+
+	2) There is no spell checker support.
+
+	3) File transfer support is iffy at best
+
+	4) Smiley Themes are untested
+
+	5) chat_room is untested.
+
+To Install MinGW and necessary libraries.
+	Refer to http://blaniel.free.fr/mingw/
+	Please install the libraries as shown on the webpage
+	http://blaniel.free.fr/mingw/libs.html and in the listed order.
+	Please note that the glib 2.2.0 lists a dependency on pkg-config for
+	compilation but you will need this as well to compile AYTTM. For
+	compilation of AYTTM please install pkg-config.exe.
+
+	You will also need the XPM packages:
+	xpm-nox-4.0.3-20020617.zip  
+	xpm-nox-dev-4.0.3-20020112.zip
+
+To BUILD AYTTM:
+
+bison
+	cp /mingw/share/bison/bison.* /mingw/bin
+
+ayttm
+	sh mingw
+
+	or (its contents)
+
+	sh gen
+	./configure
+	make
+
+
+To INSTALL AYTTM:
+	cd mingw32
+	make install
+
+Voila, it now runs.

@@ -1,0 +1,131 @@
+TOC2.0 documentation and misc TOC notes
+Jeffrey Rosen - jeff@emuscene.com
+
+
+
+First of all, lets start with some old TOC1.0 stuff:
+
+toc_get_status <screenname>
+
+This useful command wasn't ever really documented.  It returns either an UPDATE_BUDDY message or an ERROR message depending on whether or not the guy appears to be online.
+
+
+
+Misc TOC notes:
+
+If you connect with an empty buddy list, other people can't see you online.  You can work around this by simply sending "toc_add_buddy a" if the user's buddy list is empty.  This has been corrected in TOC2.0.
+
+In TOC1.0 there is a toc_add_deny command, but no toc_remove_deny.  In order to remove people from your block list, you need to send a "toc_add_permit" command and then send your entire deny list without the screenname you want to unblock.  Reverse the deny and permit commands if you want to add someone to your permit list.  Again, TOC2.0 fixes this.
+
+
+
+Now for TOC2.0:
+
+CLIENT -> SERVER:
+
+
+
+The sign on process is essentially the same as in TOC1.0 except AOL added some questionable parameters to it:
+
+toc2_signon <address> <port> <screenname> <roasted pw> <language> <version*> <??**> <code***>
+
+* The version string MUST start with "TIC:" otherwise, no dice.  For example, "TIC:AIMM" is ok, but "AIMM2" would be rejected.
+
+** I have no idea what this is.  By default it's 160, but you can change it to other numbers and it still connects.
+
+*** This is a simple code created with the first letter of the screen name and password.  Here is some generic code based on some code Nuix provided:
+
+  sn = ascii value of the first letter of the screen name - 96
+  pw = ascii value of the first character of the password - 96
+
+  a = sn * 7696 + 738816
+  b = sn * 746512
+  c = pw * a
+  
+  return c - a + b + 71665152
+
+For example, if the screenname was "test" and the password was "x5435" the result would be 107128320.
+
+
+
+The permit/deny stuff has been seriously revamped.  There's not much else you could ask for:
+
+toc2_set_pdmode <value>
+
+ Value:
+ 1 - Allow all (default)
+ 2 - Block all
+ 3 - Allow "permit group" only
+ 4 - Block "deny group" only
+ 5 - Allow buddy list only
+
+Pretty self explanatory.  You can manage your permit/deny groups using the commands below:
+
+toc2_add_permit <screenname>
+toc2_remove_permit <screenname> 
+
+toc2_add_deny <screenname>
+toc2_remove_deny <screenname>
+
+<screenname> should be normalized and you can add multiple people at a time by separating the screennames with a space.  Unlike in TOC1.0, these don't cause funky behaviors.  That is, you can access these whenever you feel like and thanks to the new pdmode function, you no longer will have to resort to cheap hacks to get these to work correctly.  (Read: no more wildly flickering on other people's buddy lists!)
+
+Note: In TOC2.0 these are all automatically added to your config.  More on that later.
+
+
+
+Buddy list commands have also been seriously revamped:
+
+toc2_new_group <group>
+toc2_del_group <group>
+
+This is an entirely new command that allows you to add groups.  These should be quoted and you can't add more than one per command.  This can be worked around using the new_buddies command though.
+
+toc2_new_buddies <config format*>
+
+In TOC2.0, you must add buddies in "config format".  See example:
+
+{g:test<lf*>b:buddytest<lf>b:buddytest2<lf>b:buddytest3<lf>}
+
+If you sent that with the toc2_new_buddies command, you would add the three buddies (buddytest, buddytest2, and buddytest3) into the group "test".  Note that if the group doesn't already exist, it will be created.  
+
+* <lf> stands for linefeed (ASCII:10).  Don't literally send "<LF>" :)
+
+toc2_remove_buddy <screenname> <group>
+
+Pretty self explanatory.  You can remove multiple names in the same group using the syntax <screenname> <screenname> <group>.  
+
+
+
+toc2_send_im <user> <message> <auto>
+
+This seems to be the same as in TOC1.0.
+
+
+
+SERVER -> CLIENT:
+
+
+
+CONFIG2:<config>
+
+The only difference between CONFIG2 and CONFIG is that instead of "b buddy1", for example, it would be "b:buddy1".  Also, the last item is always "done:<lf>".
+
+A word about configs:  in TOC2.0, everything is automatically saved to your config and your config is automatically loaded when you sign on.  That is, you don't have to read the config and manually add all the buddies.  If they show up in the config, they've already been added.
+
+
+
+NEW_BUDDY_REPLY2:<buddy>:<action>
+
+This shows up after you add a buddy confirming that it was added correctly or something.  Maybe if you're at your buddy list maximum it returns an error?  If the buddy was added successfully, action is "added".
+
+
+
+IM_IN2:<user>:<auto>:<???>:<message>
+
+This command is the same as in TOC1.0 except there's a new parameter.  I haven't figured out what it's used for yet.
+
+
+
+UPDATE_BUDDY2:<screenname>:<online>:<warning>:<signon Time>:<idletime>:<userclass>:<???>
+
+Same as TOC1.0 except there's a mystery parameter.

@@ -1,0 +1,29 @@
+#
+# Console Smiley theme for ayttm
+#
+
+%name	=	Console Smileys
+%desc	=	Bare minimum smiley theme for those who prefer the console
+%author	=	Philip S Tellis
+%date	=	$Date: 2003/05/09 19:11:51 $
+%revision=	$Revision: 1.2 $
+
+
+smile	=	smile.xpm
+sad	=	sad.xpm
+wink	=	wink.xpm
+laugh	=	laugh.xpm
+cry	=	sob.xpm
+biglaugh=	laugh.xpm
+tongue	=	tongue.xpm
+cooldude=	cooldude.xpm
+worried	=	worried.xpm
+grin	=	grin.xpm
+blank	=	blank.xpm
+oh	=	oh.xpm
+confused=	confused.xpm
+lovey	=	kiss.xpm
+kiss	=	kiss.xpm
+heyy	=	heyy.xpm
+blush	=	blush.xpm
+

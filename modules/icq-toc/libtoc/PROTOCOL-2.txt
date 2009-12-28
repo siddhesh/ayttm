@@ -1,0 +1,22 @@
+String TOC2 must appear in toc_signon command to enable
+Permit mode 5 == permit if and only if on buddylist
+EMAIL:<email> sent after NICK
+
+New client->TOC commands:
+	toc_get_away <screenname>
+	toc_change_email <email>
+	toc_confirm_account
+
+New TOC->client commands:
+	AWAY:<screenname>:<message>
+	ADMIN_EMAIL_STATUS
+	ADMIN_CONFIRM_STATUS
+	INFO:<screenname>:<evil amount>:<signon time>:<idle time>:<user class>:<profile>
+
+Instead of GOTO_URL for toc_get_info, an INFO command is sent.
+toc_add_buddy and toc_remove_buddy require group as first parameter
+toc_add_permit and toc_add_deny have no side-effects
+new command toc_remove_permit and toc_remove_deny
+new command toc_set_permit_mode
+no toc_set_config
+New syntax for ERROR: ERROR:<error message>

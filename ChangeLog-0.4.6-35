@@ -1,0 +1,986 @@
+* Sat Dec 24 2006 16:43 GMT [philip]	0.4.6-35
+- modules/msn2/libmsn/msn_core.C
+Fix bad allocation issue that sometimes caused MSN login to freeze because
+of stray null bytes.
+
+* Fri Nov 25 2005 07:24 GMT [philip]	0.4.6-34
+- modules/yahoo2/yahoo.c
+Make it compile with gcc 4.
+Patch sent in by Baishampayan Ghose <b.ghose@gmail.com>
+
+* Sun Nov 20 2005 15:00 GMT [philip]	0.4.6-33
+- modules/irc/irc.c
+Add IRC commands patch sent in by Manish Malik <mm@bbspals.org>
+
+* Sat Oct 22 2005 20:05 GMT [philip]	0.4.6-32
+- modules/jabber/jabber.c, libEBjabber.[ch],
+- modules/jabber/libjabber/jconn.c,
+- modules/jabber/libjabber/include/jabber/jabber.h
+Allow overriding of connect server for gtalk support
+Patch from Burt Holzman
+
+* Sun Feb 13 2005 14:00 GMT [philip]	0.4.6-31
+- modules/{yahoo2,msn2,jabber,irc,aim-toc,icq}/
+- src/away_window.[hc]
+- src/nomodule.c
+Allow custom messages to be non-away messages
+- modules/irc/irc.c
+Send custom message to chat rooms (IRC)
+- modules/jabber
+Fix indentation in Jabber
+- src/edit_local_accounts.c
+- src/message_parse.c
+- src/status.c
+- src/gtk/extgtktext.c
+- src/chat_room.c
+- src/chat_room.h
+- src/edit_account_window.c
+- src/plugin.c
+Reduce dependency on gtk for headers
+- modules/utility/custom_message.c
+Add plugin to handle custom message status from a file
+
+* Wed Dec 29 2004 21:32 GMT [philip]	0.4.6-30
+- use rename(2) to rename log files
+
+* Wed Dec 29 2004 21:13 GMT [philip]	0.4.6-28
+- use 0 instead of NULL
+
+* Wed Dec 29 2004 21:09 GMT [philip]	0.4.6-29
+- ay_string_append takes in a const argument
+
+* Wed Dec 29 2004 21:03 GMT [philip]	0.4.6-27
+- Fixed /me handling for IRC
+- Added Swedish translation by Patrik Hermansson <patrik@paheco.nu>
+  po/sv.po
+
+* Tue Aug 10 2004 20:45 GMT [edward]	0.4.6-26
+- Update to notes utility. Fix added for 929347 had issues.
+  modules/utility/notes.c
+
+* Tue Jul 14 2004 17:50 GMT [edward]	0.4.6-25
+- Update for RH73 to README
+  README.LINUX
+
+* Tue Jul 13 2004 16:08 GMT [edward]	0.4.6-24
+- Update for Netbsd 1.6.2 (bug #753330)
+  README.NETBSD
+  configure.ac
+  src/message_parse.c
+
+* Mon Jul 12 2004 21:03 GMT [edward]	0.4.6-23
+- Update for Mandrake 10. Documentation change
+  README.LINUX
+
+* Mon Jul 12 2004 18:15 GMT [edward]	0.4.6-22
+- #980589 Right Arrow Key not avail
+  src/chat_window.c
+  src/chat_room.c
+
+* Mon Jul 12 2004 14:23 GMT [edward]	0.4.6-21
+- Upgraded automake support for 1.8, fixed error in nl.po that mandrake build did 
+  not work. Tested mandrake-9.2 build and small fixes and updates to README for bug
+  #985974.
+  acinclude.m4
+  README.LINUX
+  configure.ac
+  gen
+  m4/arts.m4
+  m4/esd.m4
+  src/Makefile.am
+  po/nl.po
+
+* Sat Jul 10 2004 22:38 GMT [colin]	0.4.6-20
+- Added NL translation by Sander Devrieze <s.devrieze@pandora.be>
+  po/nl.po
+  configure.ac
+
+* Fri Jul 09 2004 18:52 GMT [edward]	0.4.6-19
+- code for AIX port but #949977. Added READMEs for AIX and LINUX build issues.
+  This bug is closed, yet the final port is not complete as it requires libXShm
+  and I do not have a copy. The Solution was to use glib functions.
+  Also fixed bug #986853 and an unregistered one about a missing -I flag for 
+  webcam support.
+  README.LINUX
+  Makefile.am
+  README
+  README.AIX
+  configure.ac
+  src/message_parse.c
+  src/platform_defs.h
+  src/util.c
+
+* Mon Jun 28 2004 14:56 GMT [edward]	0.4.6-18
+- Fixed bug #929347
+  src/utils.c
+  src/externs.h
+  modules/utility/notes.c
+
+* Sun Jun 27 2004 16:20 GMT [tnhashmi]  0.4.6-17
+- fixed yahoo auth after protocol change
+
+* Wed Jun 16 2004 19:28 GMT [tnhashmi]  0.4.6-16
+- modules/yahoo2/yahoo.c
+added new yahoo smileys
+- configure.ac
+added new yahoo smileys
+
+* Tue May 18 2004 18:54 GMT [colin]	0.4.6-15
+- src/crash.c
+eat SIGPIPE
+- modules/msn2
+avoid a segfault
+
+
+* Tue Mar 23 2004 14:49 GMT [edward]	0.4.6-14
+- libproxy/proxy.c
+Added an if statement for PROXY_SOCKS5 in proxy_send/proxy_recv as the
+getsockopt causes MINGW32 to die horrible death. This is a system
+independent change as the only reason that call is needed is for SOCKS5
+support.
+
+* Wed Mar  3 2004 05:47 GMT [philip]	0.4.6-13
+- modules/yahoo2/yahoo.c
+Set active id to NULL when logging out.
+If we logged out of yahoo and then logged in again, without restarting
+ayttm/reloading the module, then the yahoo connection would close if we
+tried to send a message.  This happened because the active id contained
+junk after the logout, and the server thought we were trying to forge
+someone else's id, or something like that.
+
+* Tue Mar  2 2004 19:10 GMT [philip]	0.4.6-12
+- modules/image_filter/img2jpc.c
+add mode=real to jpc encoding options thanks to Lars Sundqvist for
+the suggestion
+Jpeg encoding wasn't working because I hadn't called jas_init before
+doing a jas_image_strtofmt.  This has now been fixed, and we can see
+webcam broadcasts again.
+
+* Tue Feb 17 2004 15:17 GMT [philip]	0.4.6-11
+- src/image_window.c
+define image_2_jpc and image_2_jpg *outside* the #ifdef
+so now we can load the yahoo module even without gdk-pixbuf-dev
+thanks to Pete Jewell for reporting this in bug 896846
+
+* Mon Feb 16 2004 08:16 GMT [philip]	0.4.6-10
+- modules/image_filter/img2jpc.c
+jp2 compression handled.  We now have small images
+
+* Tue Feb 10 2004 04:25 GMT [philip]	0.4.6-9
+- src/usercount.c src/Makefile.am src/prefs.[ch]
+add usercount window - not operational yet
+
+* Thu Jan 30 2004 08:16 GMT [chris]     0.4.6-8
+ - src/account.c
+ - src/chat_room.c
+ - src/chat_window.h
+ - src/ssl_certificate.c
+ - src/status.c
+ - src/util.c
+Fix several compiler warnings (missing fn declarations,
+discarding const qualifier)
+
+* Thu Jan 29 2004 05:19 GMT [philip]	0.4.6-7
+- modules/yahoo2/libyahoo2/yahoo_fn.[ch]
+ISO C does not allow unnamed unions
+
+* Thu Jan 29 2004 05:12 GMT [philip]	0.4.6-6
+- modules/yahoo2/
+ext_yahoo_remove handler accepts client_id as well - merge in from libyahoo2
+
+* Thu Jan 29 2004 05:10 GMT [philip]	0.4.6-5
+- modules/yahoo2/libyahoo2/yahoo_fn.c
+Braces around initialiser for anonymous union
+
+* Wed Jan 28 2004 21:12 GMT [breser]	0.4.6-4
+- modules/yahoo2/libyahoo2/yahoo_fn.[ch]
+Fix new yahoo authentication table code to work on 64-bit archs where sizeof(int) != sizeof(long).
+
+* Tue Jan 27 2004 05:21 GMT [philip]	0.4.6-3
+- modules/jabber/*/Makefile.am
+add EB_CFLAGS so that ssl includes will be found
+
+* Mon Jan 26 2004 18:31 GMT [philip]	0.4.6-2
+- modules/yahoo2/libyahoo2/yahoo_httplib.c
+fix possible segfault which could have been caused by a malformed url
+encoded string
+
+* Wed Jan 21 2004 06:41 GMT [philip]	0.4.6-1
+release
+
+* Tue Jan 20 2004 04:34 GMT [philip]	0.4.6-pre11
+- modules/image_filter/ayttm_streamer_wrapper.sh
+create .webcamrc file if it doesn't exist
+- modules/yahoo2/libyahoo2/libyahoo2.c
+set version number to 0x0a - the official client seems to send that
+
+* Thu Jan 15 2004 08:19 GMT [chris]	0.4.6-pre10
+- pixmaps/Makefile.am
+add ayttm_32x32.xpm to distribution
+
+* Wed Jan 14 2004 22:23 GMT [philip]	0.4.6-pre9
+- modules/yahoo2/libyahoo2/
+yahoo auth works again
+
+* Wed Jan 14 2004 04:48 GMT [philip]	0.4.6-pre8
+- modules/aycryption/aycryption.c
+use g_new0 instead of calloc for consistency
+
+* Fri Jan 09 2004 05:07 GMT [philip]	0.4.6-pre7
+- include ayttm_streamer_wrapper.sh in dist
+
+* Thu Jan 08 2004 15:51 GMT [philip]	0.4.6-pre6
+- configure.ac
+allow user to specify jasper path
+
+* Thu Jan 08 2004 09:49 GMT [chris]	0.4.6-pre5
+- src/crash.c
+include missing headers, needed for correct 64 bit
+compile (Debian bug#226665)
+
+* Wed Jan 07 2004 08:22 GMT [chris]	0.4.6-pre4
+- gen
+replace 'function check_gettext' with 
+POSIX sh compatible 'check_gettext()'
+- debian/rules, debian/changelog
+Debian packaging update for 0.4.6
+
+* Wed Jan 07 2004 08:08 GMT [philip]	0.4.6-pre3
+- src/status.c
+trim CR and LF from end of status message if any
+
+* Wed Jan 07 2004 05:10 GMT [philip]	0.4.6-pre2
+- src/spellcheck.C
+pspell_manager_check and pspell_manager_suggest do not take
+last argument of -1 - that is required for the equivalent aspell
+functions
+
+* Wed Jan 07 2004 04:59 GMT [philip]	0.4.6-pre1
+- ayttm.spec.in
+jasper filter on by default
+
+* Sat Jan 03 2004 14:21 GMT [colin]	0.4.5-27
+- modules/msn2/msn.C
+use friendlyname when adding contact
+
+* Sat Jan 03 2004 14:21 GMT [philip]	0.4.5-26
+- modules/aim-oscar/aim-oscar.c
+declare all variables at start of function - C style
+
+* Fri Dec 26 2003 08:14 GMT [philip]	0.4.5-25
+- modules/yahoo2/libyahoo2
+fix potential segfaults.
+
+* Tue Dec 22 2003 21:02 GMT [philip]	0.4.5-24
+- modules/yahoo2/libayhoo2/libayhoo2.c
+implement full async writes
+might cause problem with file sending.
+
+* Tue Dec 22 2003 08:51 GMT [philip]	0.4.5-23
+- modules/image_filter/img2jpc.c
+Make jpeg2000 encoding a pref, off by default
+
+* Mon Dec 22 2003 20:35 GMT [philip]	0.4.5-22
+- modules/image_filter/img2jpc.c
+don't store output format in a static, because it changes. this should
+take care of all those black screens on windows.
+
+* Mon Dec 22 2003 20:09 GMT [philip]	0.4.5-21
+- modules/image_filter/ayttm-streamer-wrapper.sh
+fix for Subash's webcamrc file
+- src/chat_window.c
+prevent segfault, better rtrim
+
+* Mon Dec 22 2003 09:41 GMT [philip]	0.4.5-20
+- modules/image_filter/img2jpc.c
+uncomment the jpc encoder ... duh
+add image_filter to the build path
+img2jpc will be built only if --enable-jasper-filter is passed to configure
+
+* Sun Dec 21 2003 17:33 GMT [philip]	0.4.5-19
+- modules/yahoo2/yahoo.c
+- src/status.c src/plugin_api.h
+add group to contact menu callback data so we can identify an account
+when the user right clicks on a contact
+
+* Sun Dec 21 2003 16:55 GMT [philip]	0.4.5-18
+- modules/yahoo2/
+loads of fixes, segfaults, mem leaks, some api changes in libyahoo2,
+asynchronous writes for webcam
+break webcam images into chunks of no more than 1024 bytes
+display number of people connected to your webcam
+check for EAGAIN on write
+run the webcam continuously for an hour - it works
+
+* Sun Dec 21 2003 07:33 GMT [philip]	0.4.5-17
+- modules/image_filter/ayttm_streamer_wrapper.sh
+don't race.  create a lock file
+- modules/yahoo2/yahoo.c
+tweaks, fix segfaults and don't allow duplicate My webcam windows.
+
+* Sat Dec 20 2003 15:14 GMT [philip]	0.4.5-16
+- modules/yahoo2/yahoo.c
+Ok, I think webcam broadcast works... I've seen myself, and I'm green!
+
+* Sat Dec 20 2003 08:17 GMT [philip]	0.4.5-15
+- modules/yahoo2/yahoo.c
+set ela->connecting to 0 only after complete connect is through
+- modules/yahoo2/libyahoo2/libyahoo2.c
+call ext_yahoo_login_response with _SOCK if connect returned error
+
+* Fri Dec 19 2003 19:15 GMT [philip]	0.4.5-14
+- modules/image_filter/video_capture.c
+- modules/image_filter/ayttm_streamer_wrapper.sh
+added video grabber based on streamer (xawtv)
+- src/video.[ch]
+api for video grabber
+- modules/yahoo2/yahoo.c
+use it
+
+* Thu Dec 18 2003 19:31 GMT [philip]	0.4.5-13
+- modules/yahoo2/yahoo.c
+Webcam sending probably works, but I'm behind a firewall, so can't test
+
+* Wed Dec 17 2003 11:52 GMT [philip]	0.4.5-12
+- src/image_window.[ch]
+- modules/image_filter
+moved jpeg2000 codec to a module
+we should replace the code in there with something that doesn't use jasper
+
+* Mon Dec 15 2003 18:35 UTC [elh]	0.4.5-11
+- src/util.c
+fix to get log file renaming working - plasmoida (bug 859659)
+
+* Mon Dec 15 2003 10:08 GMT [philip]	0.4.5-10
+- src/status.c
+ok, it was still getting too wide.  this is pretty much trial and error
+
+* Sat Dec 13 2003 09:56 GMT [colin]	0.4.5-9
+- modules/jabber/libEBJabber.c
+Apply patch 856271 from Wes Hardaker (fixes presence)
+
+* Fri Dec 12 2003 19:56 GMT [philip]	0.4.5-8
+- modules/yahoo2/yahoo.c
+fix get_time to work on windows - plasmoida (bug 859107)
+
+* Fri Dec 12 2003 10:30 GMT [philip]	0.4.5-7
+- src/status.c
+finally fix that statusbar
+
+* Fri Dec 12 2003 07:07 GMT [philip]	0.4.5-6
+- modules/yahoo2/yahoo.c
+fix possible crash (which may have caused bug 821649
+
+* Fri Dec 12 2003 06:56 GMT [philip]	0.4.5-5
+- modules/yahoo2/libyahoo2/yahoo_httplib.c
+fix file receiving - sometimes the sender would not be
+ready to send, and our non blocking read was returning with
+EAGAIN.  We now check for this.
+The fix is a hack that just polls continuously until read is
+ready.  We need to change this at some point to actually use
+an asynchronous wait.
+
+* Thu Dec 11 2003 06:26 GMT [philip]	0.4.5-4
+- modules/icq-toc/icq-toc.c
+printf -> eb_debug
+
+* Wed Dec 10 2003 09:37 GMT [philip]	0.4.5-3
+- modules/yahoo2/
+major work for webcam broadcasts
+- src/input_list.h
+make name/label part of widget rather than each widget type
+add tooltip property
+- AUTHORS/
+philip works again
+
+* Fri Dec 05 2003 11:55 GMT [colin]	0.4.5-2
+- modules/msn2/msn.C
+Gnomemeeting changed --callto to --call...
+
+* Wed Dec 03 2003 14:39 GMT [colin]	0.4.5-1
+release
+
+* Tue Dec 02 2003 17:00 GMT [colin]     0.4.5-pre2
+- modules/msn2/msn.C
+Fix gnomemeeting detection
+
+* Tue Dec 02 2003 12:00 GMT [colin]     0.4.5-pre1
+- util.c
+Display PID
+- prerelease
+
+* Tue Nov 25 2003 22:00 GMT [chris]     0.4.4-24
+- m4/arts.m4 configure.ac src/sound.c
+Autodetect broken arts_free() for arts < 1.1.3.
+Only fork for arts if arts_free is broken.
+
+* Wed Nov 19 2003 21:05 GMT [colin]	0.4.4-23
+- configure.ac po/es.po
+New Spanish translation by Ricardo Mones
+
+* Mon Nov 17 2003 08:05 GMT [breser]	0.4.4-22
+- gen
+Switch to #!/bin/sh and use which instead of type -p,
+to be more portable.
+
+* Mon Nov 17 2003 00:11 GMT [breser]	0.4.4-21
+- gen
+Fix syntax error and make more friendly for people without
+a type builtin in their shell.
+
+* Mon Nov 17 2003 00:11 GMT [breser]	0.4.4-20
+- gen
+Fixed to find versioned automake and aclocal commands.
+Needed for Mandrake (and possibly other distros) where
+automake-1.4 is the primary version but newer versions
+can be installed at the same time.  There may be
+a better way to do this but this works for now.
+
+* Fri Nov 14 2003 12:17 GMT [chris]     0.4.4-19
+- debian/changelog debian/compat debian/control
+  debian/copyright debian/dirs debian/docs
+  debian/menu debian/postinst debian/README.Debian
+  debian/rules
+Add debian packaging
+- pixmaps/ayttm_32x32.xpm
+Added 32x32 icon, needed for Debian menu system
+- Makefile.am
+Add ayttmrc to clean target
+
+* Fri Nov 14 2003 11:30 GMT [philip]	0.4.4-18
+- modules/yahoo2/yahoo.c
+We can now request to see other peoples' webcams
+
+* Sun Nov 9 2003 06:30 GMT [philip]	0.4.4-17
+- modules/yahoo2/yahoo.c
+make "s" a translatable string
+- po/de.po
+translate "s"
+- add config.rpath - should have been added with gettext upgrade
+Needed in EXTRA_DIST
+
+* Sat Nov 8 2003 10:20 GMT [colin]	0.4.4-16
+- src/edit_local_account.c pixmaps/Makefile.am pixmaps/help.xpm
+Add help about adding accounts
+
+* Fri Nov 7 2003 18:09 GMT [philip]	0.4.4-15
+Added Chris Halls' changes
+Ran gettextize
+- Makefile.am
+Remove intl from SUBDIRS and DIST_SUBDIRS, add config.rpath to EXTRA_DIST
+- m4/Makefile.am
+added m4 files to EXTRA_DIFF
+- po/
+updated to gettext 0.11.1
+intl/ no longer exists
+
+- configure.ac
+Added AM_MAINTAINER_MODE
+Removed intl/Makefile
+
+* Fri Nov 7 2003 17:22 GMT [breser]	0.4.4-14
+- configure.ac
+fix aspell detection
+
+* Fri Nov 7 2003 11:30 GMT [colin]	0.4.4-13
+- modules/jabber
+More chatroom fixes
+
+* Fri Nov 7 2003 11:30 GMT [colin]	0.4.4-12
+- modules/jabber
+Chatroom fixes
+
+* Wed Nov 5 2003 11:30 GMT [colin]	0.4.4-11
+- src/status.c
+printf->debug
+
+* Wed Nov 5 2003 11:30 GMT [colin]	0.4.4-10
+- modules/msn2/msn.C
+Fix bsd build
+
+* Sun Nov 2 2003 18:30 GMT [colin]	0.4.4-9
+- src/chat_window.c
+Fix possible crash
+
+* Wed Oct 29 2003 11:20 GMT [colin]	0.4.4-8
+- src/chat_room.c
+MRU list for chatrooms
+
+* Wed Oct 29 2003 11:20 GMT [colin]	0.4.4-7
+- configure.ac src/tcp_util.c
+Check for hstrerror() existence (fix for Solaris)
+
+* Tue Oct 28 2003 13:17 GMT [elh]	0.4.4-6
+- Makefile.am
+  mingw32/Makefile.am
+  src/ssl_certificate.c
+Updates for MINGW32 compile.
+
+* Tue Oct 28 2003 11:20 GMT [colin]	0.4.4-5
+- src/status.c
+status_bar aware of do_noautoresize pref (ugly but i don't care)
+
+* Mon Oct 27 2003 17:20 GMT [colin]	0.4.4-4
+- src/status.c
+Don't log status changes containing numbers
+
+* Mon Oct 27 2003 11:20 GMT [colin]	0.4.4-3-too ;-)
+- po/pt_BR.po
+update Brazilian translation (thanks Fabricio!)
+
+* Sun Oct 26 2003 17:30 GMT [colin]	0.4.4-3
+- src/chat_window.c
+Implement login/logoff history
+- modules/aycryption/aycryption.c
+Missing realize()
+
+* Sun Oct 26 2003 14:53 GMT [nicolas]	0.4.4-2
+- modules/aim-oscar/aim-oscar.c
+Bugfixes, proxy connection support, group chat support.
+
+* Sat Oct 25 2003 17:30 GMT [colin]	0.4.4-1
+Release
+
+* Sat Oct 25 2003 09:25 GMT [colin]	0.4.3-15
+- src/chat_window.c
+  src/chat_room.c
+autocomplete: Fix issues with modifiers and punctuation.
+Refactor a bit
+
+* Fri Oct 24 2003 17:25 GMT [colin]	0.4.3-14
+- src/chat_window.c
+  src/chat_room.c
+  src/prefs.[ch] src/gtk/prefs_window.C
+ease and generalize auto completion (with a pref).
+Words you type get registered and used as database for 
+future typings.
+
+* Wed Oct 22 2003 18:25 GMT [colin]	0.4.3-13
+- src/chat_room.c
+autocomplete usernames with tab
+fix bug where local_user->alias is null
+
+* Wed Oct 22 2003 18:25 GMT [colin]	0.4.3-12
+- modules/msn2/msn.C
+Add auto rename pref
+
+* Wed Oct 22 2003 08:25 GMT [nicolas]	0.4.3-11
+- modules/aim-toc/aim-toc.c
+Remove old useless code that leaks in eb_aim_chat_invite().
+
+* Wed Oct 22 2003 08:23 GMT [philip]	0.4.3-10
+- modules/yahoo2/yahoo.c modules/yahoo2/libyahoo2/yahoo2_types.h
+Detect failed login because of incorrect username
+and don't allow @domain part in username
+
+* Wed Oct 22 2003 05:23 GMT [philip]	0.4.3-9
+- src/account.c
+Fix password encoding algorithm which was broken for two specific
+characters in a password.  Passwords for any account with password
+enc_type==2 will have to be reset in ayttm (through the account editor).
+
+* Tue Oct 21 2003 04:09 GMT [philip]	0.4.3-8
+- ChangeLog, configure
+we're still in 0.4.3 - which was the last release.  0.4.4 is
+a long way off
+
+* Mon Oct 20 2003 14:51 GMT [elh]	0.4.3-7
+- src/ssl_certificate.c
+  A few MinGW compile fixes. globals.h should be after unistd.h always.
+  netdb.h is a part of winsock2.h for Win32 so added ifdef 
+
+* Mon Oct 20 2003 13:19 GMT [elh]	0.4.3-6
+- ChangeLog
+  configure.ac
+  For some reason we never progressed to 0.4.4 from 0.4.3. This was corrected
+
+* Mon Oct 20 2003 10:00 GMT [colin]	0.4.3-5
+- src/ssl.c
+Missing init
+
+* Sun Oct 19 2003 16:00 GMT [colin]	0.4.3-4
+- modules/msn2
+fix possible crash
+
+* Sun Oct 19 2003 07:06 GMT [philip]	0.4.3-3
+- modules/aim-oscar/aim-oscar.c
+line 1578, LList *states was placed after LOG().  C declarations
+should be the first statement in a function.
+
+* Sat Oct 18 2003 23:00 GMT [colin]	0.4.3-2
+- src/ssl* src/dialog.[ch] modules/msn2 modules/jabber
+Check SSL certificates for validity or change
+
+* Sat Oct 18 2003 10:00 GMT [colin]	0.4.3-1
+Release
+
+* Sat Oct 18 2003 10:00 GMT [colin]	0.4.3-pre19
+- modules/jabber/libEBjabber.c
+Workaround for bug "[ 783598 ] Jabber chat doesn't update users list"
+by Wes Hardaker <hardaker@users.sf.net>
+
+* Thu Oct 16 2003 04:24 GMT [philip]	0.4.3-pre18
+- src/util.c src/crash.c src/status.c
+more correct version number comparison - still doesn't work
+correctly with -pre* releases
+
+* Wed Oct 15 2003 07:09 GMT [philip]	0.4.3-pre17
+- src/util.c src/contact_parser.y
+Don't allow duplicate contact accounts
+
+* Tue Oct 14 2003 00:36 GMT [elh]	0.4.3-pre16
+- src/smileys.c
+Fix a bug where smileys appear in http strings
+
+* Mon Oct 13 2003 22:49 GMT [nicolas]	0.4.3-pre15
+- modules/aim-oscar/aim-oscar.c
+Fix a bug preventing from login if a previous login failed,
+add the password prompting stuff, make the away state work.
+
+* Sun Oct 12 2003 10:30 GMT [colin]	0.4.3-pre14
+- modules/msn2/msn.C
+Split too long messages, as suggested by Adam 
+Butler (spacedoubtman@users.sf.net)
+
+* Sun Oct 12 2003 10:30 GMT [colin]	0.4.3-pre13
+- modules/*toc/*toc.c
+don't linkify outgoing messages
+patch by Adam Butler (spacedoubtman@users.sf.net)
+
+* Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre12
+- src/dialog.c
+enable ENTER to validate input
+
+* Sat Oct 11 2003 10:30 GMT [colin]	0.4.3-pre11
+- modules/*toc/*toc.c
+ask pass stuff
+- modules/*/*
+ask pass if empty too
+
+* Fri Oct 10 2003 19:30 GMT [philip]	0.4.3-pre10
+- modules/yahoo2/yahoo.c modules/msn2/msn.C
+no need to typecast callback anymore
+
+* Fri Oct 10 2003 18:51 GMT [colin]	0.4.3-pre9
+- modules/msn2/msn.C
+password asking stuff
+
+* Fri Oct 10 2003 09:48 GMT [philip]	0.4.3-pre8
+- src/dialog.[ch]
+cleaner interface for dialogs
+all files that used do_dialog will now use eb_do_dialog which
+does not expect a callback to accept a GtkWidget
+
+* Fri Oct 10 2003 07:13 GMT [philip]	0.4.3-pre7
+- modules/yahoo/yahoo.c
+fix duplicate sign on problem
+- modules/jabber/jabber.c
+password prompting
+
+* Fri Oct 10 2003 05:43 GMT [philip]	0.4.3-pre6
+- src/value_pair.c src/account_parser.y
+Fix overzealous escaping of values
+- src/contact_parser.y src/contact_scanner.l
+allow comments in contact file too
+- src/dialog.c
+Ok button has default
+
+* Fri Oct 10 2003 04:55 GMT [philip]	0.4.3-pre5
+- modules/yahoo2/yahoo.c
+Prompt for password if not given in prefs
+- modules/*
+minor bug fixes and remove warnings
+
+* Thu Oct  9 2003 20:17 GMT [nicolas]	0.4.3-pre4
+- modules/aim-oscar/aim-oscar.c
+Better connection error checking, add account prefs, parse
+permit/deny settings, deal with nicknames case changes.
+
+* Thu Oct  9 2003 19:13 GMT [elh]	0.4.3-pre3
+- src/plugin.c
+  mingw32/setup.bat
+  mingw32/Makefile.am
+Updates to support a different deliminator for module path on Win32 Platforms.
+
+* Thu Oct  9 2003 09:10 GMT [colin]	0.4.3-pre2
+- src/dialog.[ch]
+add do_password_input_window()
+
+* Thu Oct  9 2003 09:10 GMT [colin]	0.4.3-pre1
+- src/status.c src/gtk/prefs_window.C
+remove gtk warnings & prerelease
+
+* Thu Oct  9 2003 09:10 GMT [colin]	0.4.2-18
+- modules/msn2/msn.C
+Invisible login pref
+
+* Thu Oct  9 2003 09:10 GMT [philip]	0.4.2-17
+- src/account_parser.y src/account_scanner.l src/account.c
+Comments allowed in accounts file.  Comment about passwords added
+
+* Thu Oct  9 2003 07:53 GMT [philip]	0.4.2-16
+- src/account.c src/account_parser.y
+encode passwords on disk - to prevent over the shoulder password loss.
+this is NOT encryption
+also ended up fixing a memory leak
+
+* Wed Oct  8 2003 16:10 GMT [nicolas]	0.4.2-15
+- modules/aim-oscar/aim-oscar.c
+Add prefs for debug messages, better connection error report, use an
+activity bar instead of a progress bar.
+Use snprintf everywhere to avoid bo. (patch by colin)
+
+* Wed Oct  8 2003 11:07 GMT [colin]	0.4.2-14
+- src/add_contact_window.c
+Fix extraneous free()
+
+* Wed Oct  8 2003 06:07 GMT [philip]	0.4.2-13
+- modules/yahoo2/
+Fix double processing of format string leading to crash and possible
+remote exploit
+
+* Mon Oct  6 2003 22:12 GMT [colin]	0.4.2-12
+- src/chat_window.c
+possible crash?
+
+* Mon Oct  6 2003 20:11 GMT [nicolas]  	0.4.2-11
+- modules/aim-oscar/aim-oscar.c
+Implement server side buddy list
+
+* Mon Oct  6 2003 00:05 GMT [colin]   	0.4.2-10
+- src/chatroom.[ch] src/offline_queue_mgmt.c
+auto reconnect to chatrooms
+- pixmaps/reconnect.xpm pixmaps/Makefile.am
+new pixmap
+
+* Sat Oct  4 2003 11:05 GMT [colin]	0.4.2-8
+- modules/jabber
+Jabber typing notifications
+
+* Sat Oct  4 2003 11:05 GMT [colin]	0.4.2-7
+- modules/jabber
+SSL Jabber
+
+* Thu Oct  2 2003 12:15 GMT [nicolas]	0.4.2-6
+- modules/aim-oscar/libfaim/*
+  modules/aim-oscar/Makefile.am
+  modules/aim-oscar/aim-oscar.c
+  modules/aim-oscar/aim.h
+Update to latest libfaim (from Gaim), start updating aim-oscar module.
+
+* Tue Oct  1 2003 11:55 GMT [elh]	0.4.2-5
+- Makefile.am
+  README.WIN32
+  mingw32/Makefile.am
+  src/Makefile.am
+  src/exchndl2.cxx
+  src/gtk/prefs_window.C
+Fixes for MinGW installation, added a debug window (sort of a crash dialog), 
+fixed a missing translation. Crash and translation are thanks to Benoit.
+
+* Tue Sep 30 2003 18:56 GMT [philip]	0.4.2-4
+- modules/yahoo2/libyahoo2.c
+fix for big endian auth
+
+* Tue Sep 30 2003 16:13 GMT [colin]	0.4.2-3
+- modules/msn2/libmsn2/msn_core.C
+Fix crash when https servers are unreacheable
+
+* Sun Sep 28 2003 20:10 GMT [colin]	0.4.2-2
+- po/de_DE.po
+German translation by Christian Becke <christianbecke@web.de>
+
+* Sun Sep 28 2003 19:19 GMT [colin]	0.4.2-1
+Release
+
+* Sun Sep 28 2003 12:19 GMT [philip]	0.4.1-12
+- modules/yahoo2/libyahoo2
+Yahoo works again thanks to the gaim team
+
+* Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-11
+- modules/jabber
+Fixes (ela fixes, auto account selection, chatroom)
+
+* Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-10
+- modules/yahoo2/yahoo.c
+Test a possibly null pointer (may fix 812252)
+
+* Sat Sep 27 2003 09:00 GMT [colin]	0.4.1-9
+- src/chat_window.c
+Fix a crash when using the window close button with tabs
+
+* Sat Sep 27 2003 00:00 GMT [philip]	0.4.1-8bis
+- src/smileys.c
+Fix very old crash due to smiley window - Thanks to Nicolas Peninguy !
+
+* Thu Sep 26 2003 21:21 GMT [elh]	0.4.1-8
+- src/smileys.h 
+  mingw32/ay.iss
+Missing export and release script
+
+* Thu Sep 25 2003 07:53 GMT [philip]	0.4.1-7
+- configure.ac
+Applied Brian Ford's patch to make it more consistent
+- src/Makefile.am
+_LDFLAGS is reserved by automake.  use WIN32_LD instead of WIN32_LDFLAGS
+
+* Wed Sep 24 2003 15:17 GMT [philip]	0.4.1-6
+- modules/yahoo2
+change host name to scs.msg.yahoo.com
+
+* Mon Sep 22 2003 04:38 GMT [philip]	0.4.1-5
+- src/status.c
+fix tooltips pref
+
+* Sun Sep 21 2003 15:52 GMT [philip]	0.4.1-4
+- modules/yahoo2/libyahoo2/libyahoo2.c
+forgot the strdup
+
+* Sat Sep 20 2003 10:26 GMT [philip]	0.4.1-3
+- modules/yahoo2/libyahoo2
+support YMSG 0x000b
+
+* Sat Sep 20 2003 08:50 GMT [philip]	0.4.1-2
+- Makefile.am
+include ayttm.spec in DIST
+- modules/yahoo2/yahoo2.c modules/yahoo2/libyahoo2
+No more extern vars.  merge in from libyahoo2
+
+* Wed Sep 17 2003 16:30 GMT [colin]	0.4.1
+Release
+
+* Fri Sep 15 2003 14:16 GMT [elh]	0.4.1-pre4
+- Makefile.am
+  pixmaps/Makefile.am
+  po/Makefile.in.in
+  src/Makefile.am
+  src/main.c
+More Makefile changes from Benoit regarding incorrect name of program,
+and gmo files.
+
+* Fri Sep 15 2003 12:01 GMT [elh]	0.4.1-pre3
+- modules/msn2/libmsn2/msn_core.C
+  change to MINGW32 only code for bzero macro
+  Thanks to Benoit for the fix.
+
+* Fri Sep 14 2003 22:01 GMT [elh]	0.4.1-pre2
+- src/image_window.c
+  More changes for Jasper support on WIn32
+
+* Fri Sep 12 2003 15:30 GMT [philip]	0.4.1-pre1
+- feature freeze
+
+* Fri Sep 12 2003 15:10 GMT [elh]	0.4.0-25
+- README.WIN32
+  src/ssl.c
+  modules/msn2/libmsn2/msn_core.C
+Updates for Openssl and msn2 support in WIN32 platform
+
+* Thu Sep 11 2003 20:17 GMT [elh]	0.4.0-24
+- README.WIN32
+  mingw
+  mingw32/Makefile.am
+Updates for makefile. It now compiles and RUNS!
+
+* Thu Sep 11 2003 11:28 GMT [philip]	0.4.0-23
+- Up yahoo version number so we don't get blocked
+
+* Sun Sep  8 2003 12:23 GMT [colin]	0.4.0-22
+- modules/msn2/libmsn2/msn_core.C
+Fix file transfer with Mac (unsigned char problem found
+and patch by Nicolas Peninguy)
+
+* Thu Sep  5 2003 12:23 GMT [elh]       0.4.0-21
+README.WIN32
+Add new readme
+
+* Thu Sep  5 2003 12:06 GMT [elh]       0.4.0-20
+mingw32/Makefile.am
+Fixed installation aspect for MSYS
+
+* Thu Sep  4 2003 16:58 GMT [colin]     0.4.0-19
+modules/*toc/*toc.c
+Fix bug introduced in 0.4.0-1[12]
+
+* Thu Sep  4 2003 06:58 GMT [colin]	0.4.0-18
+- modules/aycryption/aycryption.c
+Fire compatibility patch by Gary E. Miller <garyemiller@users.sf.net>
+
+* Wed Sep  3 2003 15:55 GMT [colin]	0.4.0-17
+- src/gtk/pref_windows.C src/prefs.[ch] src/status.c
+"Edit accounts" now point to the correct page in prefs
+
+* Wed Sep  3 2003 11:55 GMT [elh]	0.4.0-16
+- src/gtk/pref_windows.C
+Remove include of plugin.h as its not needed and was interfering with 
+build of windows port
+
+* Sun Aug 31 2003 09:18 GMT [colin]	0.4.0-15
+- src/util.[ch] src/status.c 
+Move latest version retrieval to util.c
+- src/crash.c 
+Don't help bugreport creation with old versions
+- src/edit_account_window.c
+Fix bug where chatwindows were always reopened after account edition
+
+* Sun Aug 31 2003 09:18 GMT [colin]	0.4.0-14
+- src/util.c
+Unescape_string still wasn't fixed (thanks Philip for spotting this!)
+
+* Sat Aug 30 2003 11:41 GMT [colin]	0.4.0-13
+- src/util.c
+unescape_string wasn't NULL-proof
+
+* Sat Aug 30 2003 11:41 GMT [colin]	0.4.0-12
+- modules/icq-toc
+Always use ea->ela instead of SERVICE_INFO.protocol_id
+
+* Sat Aug 30 2003 11:41 GMT [colin]	0.4.0-11
+- modules/aim-toc
+Always use ea->ela instead of SERVICE_INFO.protocol_id
+
+* Sat Aug 30 2003 11:41 GMT [colin]	0.4.0-10
+- modules/irc/irc.c
+Get rid of accounts with no associated ela
+
+* Sat Aug 30 2003 01:38 GMT [elh]	0.4.0-9
+- src/prefs.c
+moved util.h include to fix MINGW32 compilation issue
+
+* Fri Aug 29 2003 12:41 GMT [colin]	0.4.0-8
+- modules/msn2/msn.C
+Ack! a null pointer bug was here since three minor versions!
+
+* Tue Aug 26 2003 12:09 GMT [colin]	0.4.0-7
+- src/chat_window.[ch] src/chat_room.c src/util.c src/edit_account_window.c
+Clean a bit tabbed chatwindows
+
+* Tue Aug 26 2003 12:09 GMT [colin]	0.4.0-6
+- modules/msn2/libmsn2/
+Don't hardcode file transfer's chunk size when receiving
+
+* Tue Aug 26 2003 12:09 GMT [elh]	0.4.0-5
+- configure.ac
+  src/Makefile.am
+  Makefile.am
+  src/prefs.c
+  most Makefile.am files
+Fixes for new MINGW32 compile
+
+* Tue Aug 26 2003 04:48 GMT [philip]	0.4.0-4
+- configure.ac
+Allow user to specify openssl prefix
+- ChangeLog
+fix date format so rpm doesn't complain
+
+* Mon Aug 25 2003 18:52 GMT [elh]	0.4.0-3
+- src/ssl.h
+OPENSSL_NO_KRB5 undefined to fix issue with includes
+
+* Sun Aug 24 2003 22:52 GMT [colin]	0.4.0-2
+- src/util.c
+Don't return 127.0.0.1 as local address
+
+* Sat Aug 23 2003 10:52 GMT [colin]	0.4.0-1
+Release
+

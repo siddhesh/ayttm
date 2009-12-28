@@ -1,0 +1,46 @@
+This list will keep changing, so it would be best to look it up in the
+git repository:
+
+http://ayttm.git.sourceforge.net/git/gitweb.cgi?p=ayttm/ayttm;a=blob_plain;f=TODO;hb=HEAD
+
+* Yahoo!
+  * Yahoo chat rooms
+  * Active Webcam request
+  * Yahoo voice support ? 
+
+* IRC
+  * CTCP color and formatting
+  * File Transfer
+  * Modes support
+  * Ban
+  * Implement commands interpretation as a filter
+  * Replace password chars with * when doing a /identify
+
+* Jabber
+  * An abstraction to show xmpp based services better (e.g. gtalk, jabber)
+  * Extensions for jabber to support service specific extensions
+  * File transfer
+
+* MSN
+  * Offline messaging
+  * File transfer
+  * Message font formatting
+
+* AIM/ICQ
+  * Need a maintainer for this.
+
+* Misc
+  * clean up the code
+  * recoding and filtering in chatrooms
+  * Remember last selected smiley pack - Done globally, should be per chat
+  * Consolidate chat room and window code. There is currently a lot of
+    duplication of code
+  * Standardize tab switching shortcut to Ctrl+Pageup/Ctrl+Pagedown. Remove
+    it from preferences
+  * Prettier/cleaner chat windows
+
+* eyecandy
+  * Emoticons/pictures in contact names and status
+  * PNG/MNG Smileys
+  * Icons and artwork for the interface
+

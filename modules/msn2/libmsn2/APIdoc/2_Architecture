@@ -1,0 +1,154 @@
+			ARCHITECTURE OF THE LIBRARY
+
+			---------------------------
+			     Table of contents
+
+		(1) Basic structure and code etiquette
+		(2) Data types
+		(3) Memory-management conventions
+
+
+(1)	Basic structure
+
+	This MSN library is a single-threaded, asynchronous MSN messenger 
+implementation. Originally written in C, it has undergone minor rewrites 
+to make use of the C++ constructor/destructor features, and precious 
+little else.
+
+	Communication is by means of "requests" and "callbacks". Within 
+this API specification, "request" means a function that is called, and 
+returns control almost immediately, leaving the polling loop to do most of 
+the work. These all start with the prefix "msn_", and are declared and 
+implemented in msn_core.h and msn_core.C respectively. A "callback" here 
+is a function implemented by the code using the library, that is called 
+to notify it of some occurrence, for example a message arriving. These are 
+defined in msn_interface.h, but can be implemented anywhere at the 
+author's discretion. In the sample implementation given here, they are 
+implemented in msn_interface.C. Their standard prefix is "ext_", and a 
+skeleton implementation is, as I have mentioned earlier, available in 
+msn_interface.C.
+
+
+	1a)	Code etiquette
+	
+	Every attempt has been made to segregate the library itself from 
+anything it uses. Hence, anything in msn_core.C and msn_core.h should not 
+be changed to fit the program being linked with the MSN library. If 
+changes *are* made to these areas (ie bugfixes / new features), please 
+send in a patch (contact details in the INDEX section).
+
+
+
+
+
+
+
+
+
+(2) Data types
+
+	There are a few data types (classes) that the rest of the client 
+must know about. These are all defined in msn_core.h:
+
+	* msnconn
+	* llist (and llist_data)
+	* message
+	* syncinfo (dealt with in the MESSAGING section)
+
+
+	2a) msnconn
+
+	The class msnconn represents a connection to an MSN server. A new 
+msnconn object is created for each user logged on (aka Notification Server 
+connection), and for each chat space (aka Switchboard session) currently 
+in use. Internal mechanics of the class are handled by the library, but a 
+pointer to the relevant msnconn object must be passed to each library 
+function.
+
+
+	2b) llist (and llist_data)
+
+	To avoid dependence on any library, I implemented my own linked 
+list structure. The linked list is refered to by a pointer to the first 
+llist object. Each llist object has the following public members:
+
+	llist *		next
+	llist *		prev
+	llist_data *	data
+
+	llist_data is an empty class. Everything that can be attached to 
+an llist object must inherit llist_data.
+
+	The constructor initialises all of the above members to NULL, and 
+the destructor checks if either the data or the "next" pointer are 
+non-NULL, and if they are, deletes them.
+
+****	WARNING - If you do not want your data deleted, set the data pointer 
+	to NULL before deleting an llist object. Likewise, if you do not 
+	want to delete everything after that object in the linked list, 
+	set the "next" pointer to NULL before deleting.
+
+	A list is terminated when the "next" pointer is NULL (the llist at 
+the beginning of the list has a NULL "prev" pointer). An empty list is 
+designated by the pointer to the list being set to NULL.
+
+
+	2c) message
+
+	The message class encapsulates All That You Need To Know (tm) 
+about a protocol-level MSN message. This includes raw header and body 
+data, as well as content-type and (for IMs only) font information. It is 
+used with message send and receive functions, and is explained in section 
+6. A message object has the following public members:
+
+	char *	header
+	char *	body
+
+	char *	font
+	char *	colour
+	int	bold
+	int 	italic
+	int	underline
+	int	fontsize
+
+	char *	content
+
+
+
+	"header" is the message's raw MIME header
+
+	"body" is the raw message body
+
+	"font" is the font name - note that this is only taken notice of 
+when writing instant messages - otherwise, it is completely ignored
+
+	"colour" (spelt the British way, so there!) is the colour of the 
+text. It is specified as in HTML but with no leading #. For example, 
+"ff0000" would be bright red.
+
+	"bold", "italic", and "underline" are also only for instant 
+messages. They are true (non-zero) if the message's font is bold, italic, 
+or underlined respectively.
+
+	"fontsize" is also only for instant messages. It is the font size 
+for that message.
+
+	"content" is the content type of the message.
+"text/plain; charset=UTF-8" is the content-type for instant messages (the 
+"; charset=UTF-8" is optional).
+
+
+
+
+3) Memory management conventions
+
+	Every piece of data passed to a callback is assumed to be 
+transient - that is to say, it will be deleted once the callback returns. 
+Making shallow copies is unlikely to work for most classes, as they use 
+pointers to linked lists that will also be deleted once the callback 
+returns. In future, some functions will have the opportunity to return a 
+value to state that they do not wish any data pssed to them to be deleted. 
+For the moment, though, treat all data as transient.
+	Likewise, all data passed *to* the MSN library is assumed by the 
+library to be transient, except where explicitly stated in this API 
+specification.

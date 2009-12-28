@@ -1,0 +1,25 @@
+-=[ EVERY BUDDY: http://www.everybuddy.com  ]=-
+
+Here's a quick overview of the nomenclature used in EveryBuddy.  
+
+
+ACCOUNT
+  An ACCOUNT has two parts.  There is a SERVICE and a HANDLE.  The common
+way for describing an ACCOUNT will be TOC/Zilding or ICQ/12345678.
+
+CONTACT
+  A CONTACT is the representation of a real person, comprised of an identifing
+nickname and a collection of ACCOUNTS that the person has. 
+
+HANDLE
+  A HANDLE is how a person can be referred to while logged into a SERVICE. 
+On AIM, an example of a HANDLE would be 'Zilding'.  On ICQ, an example of a
+HANDLE would be 12345678.
+
+SERVICE
+  A SERVICE is a protocol and a server.  For example, the AIM SERVICE uses
+the TOC protocol (or Oscar...) and the server toc.oscar.aol.com.  The reason
+the seperation is made between the protocol and the server is that it is
+possible, in the future, that (if there are any open protocols) there may be
+several seperate servers with the same protocol, and they will be considered
+seperate SERVICEs.

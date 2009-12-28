@@ -1,0 +1,8 @@
+.deps
+.libs
+Makefile
+Makefile.in
+icq.la
+icq.lo
+importicq.lo
+importlicq.lo

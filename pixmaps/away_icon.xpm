@@ -1,0 +1,19 @@
+/* XPM */
+static const char*away_icon[]={
+"12 12 4 1",
+". c None",
+"# c #a0a0a0",
+"a c #c3c3c3",
+"b c #ffff00",
+".....#aaaaaa",
+".....##aa#aa",
+"....bbb#a.##",
+"...bbbb##...",
+"..bbbbbbbb..",
+"..#abbbbbb..",
+"..#ab#abbb..",
+"aaaaaaabbb..",
+"##aaaaabb...",
+"..aa##aa....",
+"..##..##....",
+"............"};

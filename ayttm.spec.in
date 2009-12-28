@@ -1,0 +1,95 @@
+Summary: 	A Universal Instant Messaging Client 
+Name: 		@PACKAGE@
+Version: 	@VERSION@
+Release:	@RELEASE@
+Group: 		Applications/Internet
+License: 	GPL
+URL: 		http://ayttm.sourceforge.net
+Source: 	%{name}-%{version}.tar.bz2
+Buildroot: 	%{_tmppath}/%{name}-%{version}-%{release}-root
+
+Requires: gtk2 >= 2.12.0
+Requires: glib2 >= 2.0.0
+@REQUIRES@
+
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: flex
+BuildRequires: bison
+BuildRequires: libtool-ltdl
+BuildRequires: libtool-ltdl-devel
+BuildRequires: gtk2-devel >= 2.12.0
+BuildRequires: glib2-devel >= 2.0.0
+
+
+# If you want stripped RPM with no crash dialog use
+# --define "nodebug 1" in rpmbuild commandline
+%if "%{nodebug}" != "1"
+%define nodebug 0
+%endif
+
+%description
+Ayttm is designed to become a Universal Instant Messaging client, seamlessly
+integrating all existing Instant Messaging clients and providing a single
+consistant user interface. Currently, Ayttm supports sending and receiving
+messages through AOL, ICQ, Yahoo, MSN, IRC and Jabber.
+
+%if "%{nodebug}" == "0"
+
+%define optflags -g
+
+%ifnarch x86_64 # x86_64 does not have brp-compress
+%define __spec_install_post %{_libdir}/rpm/brp-compress
+%endif
+
+%endif
+
+%define debug_package %{nil}
+
+%prep
+%setup 
+
+%build
+%if "%{nodebug}" == "0"
+%configure --enable-smtp --enable-jasper-filter --sysconfdir=/etc
+%else
+%configure --disable-crash-dialog --enable-smtp --enable-jasper-filter --sysconfdir=/etc
+%endif
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make DESTDIR=$RPM_BUILD_ROOT install
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+# Install documentation.
+%doc COPYING AUTHORS README ChangeLog
+# Install man page.
+%{_mandir}/man*/*
+# Icons and sounds
+%{_datadir}/pixmaps/*.png
+%{_datadir}/@PACKAGE@/sounds/*
+%{_datadir}/@PACKAGE@/smileys/*
+# Red Hat menu (doesn't do any damage on other distros)
+%{_datadir}/gnome/apps/Internet/@PACKAGE@.desktop
+%{_datadir}/applnk/Internet/@PACKAGE@.desktop
+# Install the modules
+%{_libdir}/@PACKAGE@/*.la  
+%{_libdir}/@PACKAGE@/*.so 
+# Install translations
+%{_datadir}/locale/*/LC_MESSAGES/@PACKAGE@.mo
+# the config file
+%config(noreplace) /etc/ayttmrc
+# Lastly, the binary itself
+%{_bindir}/ayttm_streamer_wrapper
+%{_bindir}/@PACKAGE@
+%exclude %{_libdir}/@PACKAGE@/*.a
+
+
+%changelog
+@CHANGELOG@
+

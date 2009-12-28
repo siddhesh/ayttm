@@ -1,0 +1,13 @@
+ayttm
+Makefile
+.deps
+.libs
+Makefile.in
+account_parser.c
+account_parser.h
+account_scanner.c
+contact_parser.c
+contact_parser.h
+contact_scanner.c
+defaults.h
+defaults_win32.h

@@ -1,0 +1,95 @@
+/*
+ * Ayttm
+ *
+ * Copyright (C) 2009, the Ayttm team
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+#ifndef _MSN_ERRORS_H_
+#define _MSN_ERRORS_H_
+
+#include "msn.h"
+
+struct _MsnError {
+	int error_num;
+	const char *message;
+	int fatal;
+	int nsfatal;
+};
+
+enum {
+	MSN_ERROR_CONNECTION_RESET = 0x01,
+	MSN_ERROR_INVALID_SYNTAX = 200,
+	MSN_ERROR_INVALID_PARAM = 201,
+	MSN_ERROR_INVALID_USER = 205,
+	MSN_ERROR_DOMAIN_MISSING = 206,
+	MSN_ERROR_USER_LOGGED_IN = 207,
+	MSN_ERROR_INVALID_BUDDY_PASSPORT = 208,
+	MSN_ERROR_INVALID_NICK = 209,
+	MSN_ERROR_BUDDY_LIST_FULL = 210,
+	MSN_ERROR_INVALID_PROFILE = 213,
+	MSN_ERROR_BUDDY_IN_ROOM = 215,
+	MSN_ERROR_USER_NOT_ONLINE = 217,
+	MSN_ERROR_TOO_MANY_GROUPS = 223,
+	MSN_ERROR_INVALID_GROUP = 224,
+	MSN_ERROR_USER_NOT_IN_GROUP = 225,
+	MSN_ERROR_GROUP_NOT_EMPTY = 227,
+	MSN_ERROR_GROUP_EXISTS = 228,
+	MSN_ERROR_GROUP_NAME_TOO_LONG = 229,
+	MSN_ERROR_GROUP_REMOVE_FAIL = 230,
+	MSN_ERROR_INVALID_GROUP2 = 231,
+	MSN_ERROR_ADDRESS_SYNC_FAIL = 240,
+	MSN_ERROR_SWITCHBOADR_ERROR = 280,
+	MSN_ERROR_P2P_ERROR = 282,
+
+	MSN_ERROR_NOT_LOGGED_IN = 302,
+
+	MSN_ERROR_CONTACT_LIST_ERROR1 = 402,
+	MSN_ERROR_CONTACT_LIST_ERROR2 = 403,
+	MSN_ERROR_INVALID_ACCOUNT_PERMISSION = 420,
+
+	MSN_ERROR_SERVICE_UNAVAILABLE = 500,
+	MSN_ERROR_FEATURE_UNAVAILABLE = 502,
+	MSN_ERROR_ACCOUNT_BANNED = 511,
+	MSN_ERROR_CHL_FAIL_BUG = 540,
+
+	MSN_ERROR_SERVER_GOING_DOWN = 604,
+
+	MSN_ERROR_CHAT_REQUEST_REJECTED = 713,
+	MSN_ERROR_TOO_MANY_SESSIONS = 714,
+	MSN_ERROR_UNEXPECTED_REQUEST = 715,
+
+	MSN_ERROR_TOO_MANY_REQUESTS = 800,
+
+	MSN_ERROR_SERVER_TOO_BUSY = 910,
+	MSN_ERROR_AUTH_FAILED = 911,
+	MSN_ERROR_YOU_HIDDEN = 913,
+	MSN_ERROR_AUTH_FAILED2 = 917,
+	MSN_ERROR_BUDDY_ADD_CHAT_FAIL = 920,
+	MSN_ERROR_PASSPORT_UNVERIFIED = 924,
+
+	MSN_LOGIN_OK = 0x1000,
+	MSN_LOGIN_FAIL_PASSPORT,
+	MSN_LOGIN_FAIL_SSO,
+	MSN_LOGIN_FAIL_VER,
+	MSN_LOGIN_FAIL_OTHER,
+	MSN_MESSAGE_DELIVERY_FAILED = 0x2000
+};
+
+const MsnError *msn_strerror(int error);
+
+#endif

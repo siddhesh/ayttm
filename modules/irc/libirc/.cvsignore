@@ -1,0 +1,8 @@
+.deps
+.libs
+Makefile
+Makefile.in
+libirc.la
+libirc.lo
+ctcp.lo
+irc_message.lo

@@ -1,0 +1,325 @@
+ChangeLog-0.4.6
+* Bugfixes
+- various segfaults fixed
+- Trailing newline from status messages removed
+- don't allow duplicate My Webcam window
+- log file renaming on windows works
+- yahoo file receive fixed
+- work with newer gnomemeeting
+
+* New features
+- Yahoo webcam broadcasting
+- Yahoo auth works
+- jasper is optional
+- Yahoo webcam from right click menu
+
+=======================================================================
+
+ChangeLog-0.4.5
+* Bugfixes
+- More work an AIM-oscar
+- Updated French, Brazilian and Spanish translations
+- Solaris and BSD compilation fixes
+- Status changes log fixes
+- Jabber chatroom fixes
+- Arts fix
+- Gnomemeeting detection failure fix
+
+* New features
+- Most Recent Used List for chatrooms
+- Yahoo Webcam: request support
+
+=======================================================================
+
+ChangeLog-0.4.4
+* Bugfixes
+- Fix possible MSN crash
+- Fix password encoding bug
+
+* New features
+- Check ssl certificates for validity (avoid MITM attacks)
+- Yahoo usernames syntax check
+- MSN: auto rename of MSN-only contacts (with pref)
+- chat auto-completion (with pref)
+
+=======================================================================
+
+ChangeLog-0.4.3
+* Bugfixes
+- Jabber chatrooms: user list not updated - fixed
+- More correct version number comparison
+- Duplicate contacts accounts 
+- Smileys in URLs
+- TOC modules: don't send html messages
+- dialogs now discarded with Enter
+- No more GTK warnings in console
+- Memory leak fixed
+- Double free fixed (leading to segfaults)
+- Yahoo: fix format string (possible remote exploit)
+- Windows: lots of fixes
+- Yahoo: new auth works with big endian computers
+- MSN: fix crash when connection fails
+
+* New features
+- Passwords encoded on disk (not encrypted !)
+- Password saving no more mandatory
+- MSN: split too long messages into N messages
+  instead of erroring
+- Automatic reconnect to chatrooms at login time
+  (mostly useful for IRC and Jabber)
+- Jabber typing notifications
+- Jabber on SSL
+- new German translation
+
+=======================================================================
+
+ChangeLog-0.4.2
+* Bugfixes
+- Yahoo works with new protocol
+- Jabber fixes
+- Crash in yahoo fixed
+- Crash when closing tabbed chatwindows fixed
+- Crash due to smiley window fixed
+- More Win32 fixes
+- Tooltip pref fixed
+
+=======================================================================
+
+ChangeLog-0.4.1
+* Bugfixes
+- sometimes 127.0.0.1 was returned as our IP, breaking some filetransfers
+- fix SSL includes 
+- MSN filetransfer: fixes regarding bugs with Mac official client
+- MSN filetransfer: fix a cast (char to unsigned char) breaking FTs
+  (Thanks Nicolas Peninguy!)
+- fix win32
+
+=======================================================================
+
+ChangeLog-0.4.0
+* New features
+- MSN uses MSNP8 protocol
+
+=======================================================================
+
+ChangeLog-0.3.4
+* Enhancements
+- Keyboard accessibility for dialog boxes
+
+* Bugfixes
+- fix segfault when replying to new contact in AIM
+- fix irc bugs
+- fix segfaults in yahoo
+- TOC file transfer fixes
+
+* New features
+- new account editor with account specific prefs
+- new livejournal module
+
+=======================================================================
+
+ChangeLog-0.3.3
+* Bugfixes 
+- Check for pspell in pspell and aspell
+- Make some dialogs transients for their parents
+- Nicer Invite (to chatroom) window
+- Fix smiley_directory being ignored when nonstandard
+- Fix automatic protocol fallback failing
+- Fix MSN file send failing the second time (server socket not closed)
+- Fix crash viewing Yahoo webcam
+- Fix crash reading Yahoo addressbook
+
+* New Features
+- IRC is multiaccount compatible
+- IRC uses asynchronous (non blocking) connect
+- Tabbed chat rooms
+- Invite people to chatrooms from chat windows
+- Support for multi-protocol smiley themes
+
+=======================================================================
+
+ChangeLog-0.3.2
+* Important notes about this release
+- Links must now be double-clicked to be used
+
+* Bugfixes 
+- Temporary (dummy) contacts are now online by default
+- Aycryption/Kopete interoperability
+- Random smiley-selector bug may be fixed
+- Better error management in aycryption 
+- AIM: strip spaces in contact's handles
+- Fix username editing in My accounts
+- IRC fixes (contact's accounts must have an @server part)
+- Better calculation of smileys window's size
+
+* New Features
+- Prefs panel interface improved (resizeable, Enter/Esc)
+- Timestamping option is back
+- AOL smileys updated
+- MSN v6 new smileys added (missing pixmaps)
+- Public chatroom selection interface (for IRC)
+- New Brazilian portuguese translation
+- MSN allows offline messaging to continue messaging hidden people
+- IRC: highlight your nick when some message begins with it
+- Handle pageup/pagedown to scroll through messages in chat windows
+- AIM supports multiaccount
+
+=======================================================================
+
+ChangeLog-0.3.1
+
+* Bugfixes
+- Many code cleanups
+- make dependency tracking fixed 
+- Contact list always sorted at startup
+- Fix crash handler when getoptlong isn't available
+- Fix msn connection failing silently
+- configure didn't allow to --enable-smtp
+
+* New Features
+- Multi accounts per service are now supported in the core, MSN and Yahoo.
+- Use pspell instead of ispell
+- Add Everybuddy importer
+- real Font preference
+- Away warner - reminds you you're away when you try to message someone
+- Aycryption GPG module
+- Load and Unload module buttons are back
+- Extreme leet-speak
+- Yahoo! webcam viewing support
+- nicer ayttm messages ;-)
+- "Mail notify script" MSN preference implemented
+- Smiley themer which remembers last selected theme
+
+=======================================================================
+
+ChangeLog-0.3.0
+Ayttm 0.3.0 has been released.
+The minor version number bump is there because we feel there are
+enough new features since 0.2.0 to motivate it, and to help people
+read the release notes because things changed and we'll get bugreports 
+if no-one reads it.
+Modules path has changed, it is now $PREFIX/lib/ayttm instead of 
+$PREFIX/share/ayttm/modules. So if upgrading, you have to change your 
+~/.ayttm/prefs file by replacing "share/ayttm/modules" by "lib/ayttm".
+Provided on sourceforge is a perlscript that does the job.
+
+* Bugfixes
+- Segfaults fixed ;-)
+- MSN: Login in predefined state now works
+- Compilation warnings
+- Plug memory leaks
+- gdk_pixbuf optional
+- Jabber fixes 
+- Yahoo chatroom (bad name displaying) fix 
+- --url command-line option (lets modules handle URLs,
+  ie "aim:goim?screenname=colinleroy")
+- TOC modules now try ports 80 and 9898 (should stop
+  problems from places with transparent http proxies)
+- Fix useless Error popup at logout (with Jabber)
+- Handle TOC Chatrooms name errors
+- Proxy support fixed (every type of proxy should work 
+  with or without auth)
+- Modules path changed to comply with FHS (read README!)
+
+* New features
+- "Actions": lets you run arbitrary commands with your 
+  conversation logs (print, mail, view in browser,...)
+- New away messages system (allows deletion)
+- Login on startup now on a per-account basis
+- Asynchronous connection for jabber
+- Activity bars for Yahoo,MSN,AIM,ICQ,Jabber 
+  (allows cancellation of hung connections)
+- Yahoo: non-blocking connects for every connection
+- Shiny new preferences window
+
+=======================================================================
+
+ChangeLog-0.2.3
+* Bugfixes
+- Segfaults fixed
+- Warnings fixed
+- Fix a bug in the offline contact management file parsing
+- Fix a too long read in Yahoo!
+- Some memory management bugs in MSN, Yahoo! and core fixed
+- GUI fixes (reword labels, nicer windows and menus)
+- Ignome/unignore better supported in MSN
+- Fix Jabber registration
+- ICQ support via ICQ-TOC
+- Closing file transfer windows didn't cancel the transfers
+- Remember main window position 
+- Fix bug where group renaming didn't move logs (and they were lost)
+- Fix bug where password wasn't updated (but written) after Modifying
+  one of our accounts
+
+* New features
+- Log chat-room conversations
+- Tooltip to track people's status
+- MSN Netmeeting integration via Gnomemeeting
+- Asynchronous connections to AIM, ICQ, MSN, Yahoo! and Workwizu
+
+=======================================================================
+
+ChangeLog-0.2.2
+* Bugfixes
+- Code cleanups
+- More Utf8 encoding issues in MSN fixed
+- Smileys containing > (like yahoo's devil) weren't rendered
+- Less dependencies to gtk/glib
+- Yahoo chatroom fixes
+- Chatroom fixes (in core)
+- Logwindow and conversation restoring didn't respect font prefs
+- Fix contact renaming 
+- Some memleaks plugged
+- Fix babelfish autotrans
+- Menuitems sensitivity fixes 
+
+* New features
+- Offline contact and group management cacheing
+- Yahoo addressbook updating
+- Aim-toc module: group management
+- Away window now allows multiline messages
+- Chatroom: selecting people in the list opens a chat window (or 
+  lets user add them as friends if they aren't)
+
+=======================================================================
+
+ChangeLog-0.2.1
+* Important notes about this release
+- There has been a name change. People trying out Ayttm for
+  the first time do not care, but people upgrading from an
+  older version should do the following:
+  make uninstall (in the old version source)
+  mv ~/.yattm ~/.ayttm
+  cd ~/.ayttm
+  perl -pi -e 's/yattm/ayttm/g' prefs menurc
+  perl -pi -e 's/sounds\/ayttm/ayttm\/sounds/g' prefs
+
+* Bugfixes 
+- code cleanups
+- some memleaks plugged
+- some segfaults fixed
+- Decoding bugs (Utf8 messages in Yahoo!, Utf8 
+  friendlynames in MSN) fixed 
+- Default focuses should be in the first text field of 
+  each window
+- Conversation restoring improved
+- Default browser changed to mozilla (old code didn't work)
+- No more log file overwrite when you rename a contact
+- Font strangenesses (size reset to defaults, ...) fixed
+
+* New Features
+- Name change :)
+- Bring Ayttm in front in case of duplicate launch
+- Better lists handling in MSN
+- Group handling in MSN
+- Check account validity when adding a friend
+- MSN smileys are back, copyright free this time
+- Chatroom improvements: multiline edit, smiley selector,
+  timestamping, Typing... status support, * and protocol in 
+  window title, nicer default name
+- Ispell dictionnary specification
+- Crash handler (enabled by default) - pops the stacktrace up
+  if Ayttm segfaults
+
+=======================================================================
+

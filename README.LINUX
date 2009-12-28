@@ -1,0 +1,39 @@
+How to build on various platfoms:
+
+RedHat: 
+	EL3-WS (confirmed)
+	1) install and build jasper
+	2) ./configure
+	3) make
+	4) make install
+
+	7.3 (confirmed)
+	0) install autoconf atleast v2.57
+	   install automake atleast v1.6.3
+	1) install and build jasper
+	2) ./configure
+	3) make
+	4) make install
+
+Mandrake:
+	10 (confirmed)
+	# Base automake/autoconf tools can not properly install smileys. so use
+	# -i option to install everything. 
+	# Smileys will not be install.
+	0) Install autoconf 2.59
+	   Install automake 1.7
+	   Install libltdl3-devel
+	   Install libgtk+2.0-devel
+	1) install and build jasper
+	2) ./configure
+	3) make
+	4) make -i install
+
+	9.2 (confirmed) (automake-1.4, autconf-2.13, libtool-1.4)
+	# Base automake/autoconf tools can not properly install smileys. so use
+	# -i option to install everything. 
+	# Smileys will not be install.
+	1) install and build jasper
+	2) ./configure
+	3) make
+	4) make -i install

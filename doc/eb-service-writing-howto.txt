@@ -1,0 +1,1401 @@
+Everybuddy Service Module Writing Howto
+by Philip S Tellis, philip dot tellis at gmx dot net
+v1.0, a very hot 18th May 2002
+v1.1, a sultry, and slightly rainy 3rd August 2002
+
+$Revision: 1.2 $
+$Date: 2009/09/06 18:23:07 $
+
+I recently wrote the new Yahoo2 module for everybuddy, and well, to say the
+least, the early parts were just one stumbling block after another.  There's
+a lot I learnt after getting past that stage, so I'm going to put it down
+here that others don't have the same problems.
+
+
+0. About this document
+
+0.1.  Copyright
+
+Copyright C 2002 by Philip S Tellis.
+
+Permission is granted to make and distribute copies of this manual
+provided the copyright notice and this permission notice are preserved on
+all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the
+derived work is distributed under the terms of a permission notice
+identical to this one.  Translations fall under the catagory of "modified
+versions".
+
+This document is part of the everybuddy project (http://www.everybuddy.com/)
+
+0.2.  Disclaimer
+
+The information in this document is based on my own experience.  It worked
+for me, and in all probability should work for you too, however, I make no
+guarantees.  If your code segfaults after following these instructions, 
+*you* have to debug it.
+
+0.3.  Feedback
+
+If you have questions or comments about this document, I'm on the everybuddy
+user and dev mailing lists.
+
+0.4.  Where to get this Howto
+
+This howto should be distributed with the everybuddy project, in the docs
+directory.
+
+
+1. Introduction
+
+Thanks to Alex Wheeler, Everybuddy now uses modules for services and utilities.
+Anyone can write a module, provided they follow the API, and understand some
+of the variable naming conventions and restrictions.
+
+The interfaces for the service modules and utility modules are different, but
+I've only looked at the service modules, so this document will be only about
+writing service modules.
+
+A service, is simply a particular IM protocol, so ICQ, AIM, MSN, Yahoo and
+Jabber are all separate services.
+
+1.1.  What I'll assume
+
+I assume you know C, and know which standard functions are declared in which 
+libraries.  If you can't do this, stop now, and go learn C.  You don't know 
+what you're missing.
+
+You should also have some knowledge of how to use gdb.  If you're going to
+develop a module, you'll be using gdb a lot.
+
+You may need to know a bit about glib/gtk, but we'll try and keep that to a
+minimum, and I'll refer you to documentation when something comes up.  You
+should check out the glib library anyway, because they have quite a few
+good functions and types that will be used often.
+
+1.2.  What you'll need
+
+I'll assume that you have a CVS checkout of everybuddy, because we'll use 
+autoconf/automake to generate our makefile based on everybuddy's defaults.
+
+You'll also need libtool version 1.4 or later if you want useful error
+messages in the module loader.  You can develop with earlier versions, but
+if you do get errors, you'll be groping in the dark with the wrong message.
+
+1.3.  I18n
+
+Everybuddy uses gettext for internationalisation.  We'll deal with this in
+section 11.
+
+
+2. A skeleton module
+
+We'll start off by writing a skeleton module, that doesn't do anything, but
+can be compiled and loaded into everybuddy.
+
+2.1.  Module directory
+
+First, create a new directory under the modules directory of everybuddy's
+source.  I'll call this directory test, you call it anything you want to.
+We will write our module code and makefiles inside this directory.
+
+
+2.2.  The module code
+
+Start your C file by putting the following code into it.  I'll use a module
+called test.  You should replace all occurances of test with the name of your 
+service.
+
+Your source file can have any name, what's important is what you use in the
+four #define lines at the start of the module code section below.
+
+/*
+ * test.c
+ */
+
+#include "service.h"
+#include "plugin_api.h"
+#include "smileys.h"
+
+/*******************************************************************************
+ *                             Begin Module Code
+ ******************************************************************************/
+/*  Module defines */
+#define plugin_info test_LTX_plugin_info
+#define SERVICE_INFO test_LTX_SERVICE_INFO
+#define plugin_init test_LTX_plugin_init
+#define plugin_finish test_LTX_plugin_finish
+
+/* Function Prototypes */
+int plugin_init();
+int plugin_finish();
+struct service_callbacks * query_callbacks();
+
+static int ref_count = 0;
+
+/*  Module Exports */
+PLUGIN_INFO plugin_info =
+{
+	PLUGIN_SERVICE,
+	"Test Service",
+	"Test Service Module",
+	"$Revision: 1.2 $",
+	"$Date: 2009/09/06 18:23:07 $",
+	&ref_count,
+	plugin_init,
+	plugin_finish,
+	NULL
+};
+struct service SERVICE_INFO = {
+	"Test", 		// Name
+	-1,			// Protocol id - leave as -1
+	FALSE, 			// can do offline messaging
+	FALSE, 			// can do conferencing
+	FALSE, 			// can do native file transfer
+	FALSE, 			// can do iconv
+	NULL			// pointer to service callbacks - leave NULL
+};
+/* End Module Exports */
+
+int plugin_init()
+{
+	ref_count = 0;
+	plugin_info.prefs = NULL;
+
+	return (0);
+}
+
+int plugin_finish()
+{
+	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
+	return (ref_count);
+}
+
+/*******************************************************************************
+ *                             End Module Code
+ ******************************************************************************/
+
+
+
+And at the end of your code, add the service callbacks function.  The 
+service_callbacks structure is a list of function pointers.  You assign
+to each, the function in your module that performs the particular task.
+
+For now, we'll keep all of them NULL.
+
+
+struct service_callbacks *query_callbacks()
+{
+	struct service_callbacks *sc;
+
+	sc = g_new0(struct service_callbacks, 1);
+
+	sc->query_connected 		= NULL;
+	sc->login			= NULL;
+	sc->logout 			= NULL;
+	sc->check_login			= NULL;
+
+	sc->send_im 			= NULL;
+
+	sc->read_local_account_config 	= NULL;
+	sc->write_local_config 		= NULL;
+	sc->read_account_config 	= NULL;
+
+	sc->get_states 			= NULL;
+	sc->get_current_state 		= NULL;
+	sc->set_current_state 		= NULL;
+	
+	sc->new_account			= NULL;
+	sc->add_user 			= NULL;
+	sc->del_user 			= NULL;
+
+	sc->is_suitable			= NULL;
+
+	sc->get_status_string 		= NULL;
+	sc->get_status_pixbuf 		= NULL;
+
+	sc->set_idle 			= NULL;
+	sc->set_away 			= NULL;
+
+	sc->send_chat_room_message 	= NULL;
+
+	sc->join_chat_room 		= NULL;
+	sc->leave_chat_room 		= NULL;
+
+	sc->make_chat_room 		= NULL;
+
+	sc->send_invite 		= NULL;
+	sc->accept_invite 		= NULL;
+	sc->decline_invite 		= NULL;
+
+	sc->send_file			= NULL;
+
+	sc->terminate_chat		= NULL;
+
+	sc->get_info 			= NULL;
+	sc->get_prefs 			= NULL;
+	sc->read_prefs_config 		= NULL;
+	sc->write_prefs_config 		= NULL;
+
+	sc->add_importers 		= NULL;
+	
+	sc->get_color			= NULL;
+	sc->get_smileys			= NULL;
+
+	return sc;
+}
+
+
+Well, it wasn't really necessary to set all of them to null, since the
+call to g_new0 does that, but if we're going to have to assign actual
+function addresses to them at some point, it makes sense to keep all of
+them ready right now.
+
+Just make sure that this is always the last function in your file.  It
+needs to be aware of all the functions that it refers to.
+
+That should be sufficient to get your module compiled and loaded into
+everybuddy.  There's just one more thing to do.  Create the Makefile
+that will build and install the module correctly.
+
+2.3.  The Makefile
+
+Since everybuddy uses autoconf to build a source distribution, your job
+of making the makefile is easy.
+
+Create a file called Makefile.am in the test directory, with the following
+contents:
+
+
+SUBDIRS = 
+libdir = $(datadir)/everybuddy/modules
+
+CFLAGS = @CFLAGS@ -I$(top_srcdir)/src $(GTK_CFLAGS)
+
+EXTRA_DIST = 
+
+lib_LTLIBRARIES = test.la
+test_la_SOURCES = test.c
+
+test_la_LDFLAGS = -module 
+
+
+Just make sure that the value you give for lib_LTLIBRARIES matches the 
+next two variable names, and the name you gave to your service at the
+start of your source (those four #define lines).  eg, for my yahoo2 module, 
+the last two lines look like this:
+
+lib_LTLIBRARIES = yahoo2.la
+yahoo2_la_SOURCES = yahoo.c
+
+yahoo2_la_LDFLAGS = -module 
+
+To build the makefile, first cd to everybuddy's top level directory - the
+one that has configure in it.  Now type the following at the shell prompt:
+
+CONFIG_FILES=modules/test/Makefile CONFIG_HEADERS=  sh config.status
+
+That should create a makefile in your module directory.  Change back to
+your module directory.
+
+
+2.4.  Compiling, loading and testing
+
+You only need to run make and make install inside your module's directory
+so that only that module will be compiled and installed.
+
+If you already have everybuddy running, then go to the Preferences menu, 
+and select the Modules tab.  Click on Rescan.  If all went well, you should
+now see your module among the list of loaded modules.
+
+If there was an error, you'll get an error message telling you what went wrong.
+(Assuming of course that you have libtool-1.4 or later).
+
+2.5.  The callbacks
+
+At this point, you should probably go and look at service.h and have a look
+at the signatures for the functions that you need to implement.  Not all of
+them need to be implemented, the rest of this howto will list out what needs
+to be implemented.
+
+
+3. Run time configuration
+
+Now that we have a loadable module, we need to be able to configure it at
+run time.  There are many things that can be configured, we'll look at those
+that are generally included in all modules.
+
+3.1.  Creating the prefs list
+
+To create the prefs list, we need to first include the input_list and
+dialog apis. Add 
+
+#include "dialog.h"
+#include "input_list.h"
+
+to the includes section (sometimes called the preamble) of your C file.
+Although I think that MAX_PREF_LEN should probably be defined in a file
+called prefs.h
+
+Then, we create our input list in plugin_init. 
+
+int plugin_init()
+{
+	input_list *il = g_new0(input_list, 1);
+
+	ref_count = 0;
+
+	plugin_info.prefs = il;
+	il->widget.entry.value = service_host;
+	il->widget.entry.name = service_host;
+	il->widget.entry.label = "Server:";
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = service_port;
+	il->widget.entry.name = service_port;
+	il->widget.entry.label = "Port:";
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &do_test_debug;
+	il->widget.checkbox.name = do_test_debug;
+	il->widget.checkbox.label = "Enable debugging";
+	il->type = EB_INPUT_CHECKBOX;
+
+	return 0;
+}
+
+
+3.2.  Variables to store our prefs
+
+We also need to declare and define the variables that will hold our prefs.
+These are the variables used above - service_host, service_port and
+do_test_debug.
+
+The first two are character arrays, and the third is an int or gboolean.
+
+Declare them before you define plugin_init().  It's a good convention to
+put them at the same place as the declaration of ref_count.  We can also
+set default values for these prefs at this point.
+
+static char service_host[MAX_PREF_LEN] = "testserver.com";
+static char service_port[MAX_PREF_LEN] = "8080";
+static int do_test_debug = 0;
+
+We make them static so that they cannot be used outside the module, but if
+your module runs into multiple source files that all need to access these
+variables, then drop the static class.
+
+Note that the size of all character arrays used as prefs MUST be at least
+MAX_PREF_LEN.  Anything less than this will most certainly cause a segfault
+when reading prefs from file.
+
+That's it.  We now have a user configurable module.  Recompile and install
+it by running make and make install.  If you already have everybuddy running,
+then just go to the modules list, right click on your module and choose
+reload.  Then see your prefs listed out there.
+
+
+3.3.  Making use of do_test_debug
+
+Since we let the user turn on debugging messages at run time, we should add 
+code that will show or hide debugging info depending on the value of this
+variable.
+
+Again, we have Alex to thank for making this a run time directive rather than
+compile time.
+
+Add the following code just after your module section.
+
+#ifdef __STDC__
+int TEST_DEBUGLOG(char *fmt,...)
+#else
+int TEST_DEBUGLOG(fmt, va_alist)
+char *fmt;
+va_dcl
+#endif
+{
+	va_list ap;
+
+#ifdef __STDC__
+	va_start(ap, fmt);
+#else
+	va_start(ap);
+#endif
+
+	vfprintf(stderr, fmt, ap);
+	fflush(stderr);
+	va_end(ap);
+	return 0;
+}
+
+
+#define LOG(x) if(do_test_debug) { TEST_DEBUGLOG("%s:%d: ", __FILE__, __LINE__); \
+	TEST_DEBUGLOG x; \
+	TEST_DEBUGLOG("\n"); }
+
+#define WARNING(x) if(do_test_debug) { TEST_DEBUGLOG("%s:%d: warning: ", __FILE__, __LINE__); \
+	TEST_DEBUGLOG x; \
+	TEST_DEBUGLOG("\n"); }
+
+
+
+Try it out by adding a few LOG and WARNING messages in your code.
+
+You must use a double pair of parentheses in your calls to LOG or WARNING.  
+eg: LOG(("Error with %s", ea->handle));
+
+If you understand how #define works, you'll know what happens here.
+
+
+4. Account Configuration
+
+Now that we have a service, everybuddy will allow users to add accounts with 
+that service.  We need to be able to read this account information.
+
+In fact, we must provide at least some definition, even if it does nothing, 
+or we'll get a segfault when everybuddy tries to call these functions.
+
+4.1.  Configuration stubs
+
+Add the following two function stubs, and add them to the query_callbacks
+function:
+
+eb_local_account *read_local_account_config(GList * pairs)
+{
+	eb_local_account *ela = g_new0(eb_local_account, 1);
+
+	ela->handle = strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
+	strncpy(ela->alias, ela->handle, sizeof(ela->alias));
+
+	ela->service_id = SERVICE_INFO.protocol_id;
+	ela->protocol_local_account_data = NULL;
+
+	return ela;
+}
+
+GList * write_local_config(eb_local_account *account)
+{
+	GList *list = NULL;
+	value_pair *vp;
+
+	vp = g_new0(value_pair, 1);
+	strcpy(vp->key, "SCREEN_NAME");
+	strcpy(vp->value, account->handle);
+
+	list = g_list_append(list, vp);
+
+	vp = g_new0(value_pair, 1);
+	strcpy(vp->key, "PASSWORD");
+	strcpy(vp->value, "");
+
+	list = g_list_append(list, vp);
+
+	return list;
+}
+
+It should be evident from the names where they need to go in the callbacks
+code.
+
+You'll also have to include value_pair.h to handle the value_pair type.
+
+So... anything missing?  If you've been paying attention, then you'll have
+noticed that we ignored the password in read config and just wrote back a
+blank password in write config.
+
+This is so because eb_local_account doesn't store passwords.  That would be
+protocol specific information, so would be handled by the protocol local
+account data.  You'll also have noticed that we set this to NULL.
+
+4.2.  protocol_local_account_data
+
+Every service would have certain unique fields.  The eb_local_account
+structure only holds information that is of importance to everybuddy, ie
+that which is required to display on screen, and identify the module that
+will be used to do the dirty work.  Anything else is stored in 
+protocol_local_account_data.  
+
+protocol_local_account_data is of type void*, so we can cast it to any type of
+our choice.  We could just make it a character array to store the password, 
+but we'll think of the future, and make it a struct instead that we can
+extend when we need to.
+
+Somewhere at the top of your file (after the module section), add your struct
+definition.  For convenience, we'll also typedef it.
+
+typedef struct eb_test_local_account_data {
+	char password[255];
+} eb_test_local_account_data;
+
+Now, in eb_read_local_account_config, add code to use the protocol local
+account data:
+
+	eb_test_local_account_data *tla = g_new0(eb_test_local_account_data, 1);
+	
+	...
+	strncpy(tla->password, value_pair_get_value(pairs, "PASSWORD"),
+			sizeof(tla->password));
+	...
+	
+	ela->protocol_local_account_data = tla;
+
+and also in eb_write_local_config:
+
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	...
+	strcpy(vp->value, tla->password);
+
+
+That should do it.  Compile, install, reload, and test it by creating an
+account.  Hmmm... segfault.  Use gdb to figure out where it occurs.  We'll
+have to implement those methods next.
+
+
+5. The status menu
+
+When an account exists, everybuddy queries the account's service module for
+a status menu.  This status menu can be used to change the state of the
+account.  We need to provide everybuddy with a GList of all possible states.
+
+Order is important here, because when everybuddy needs to set the state of an
+account, it will send back the index of the state in this list, and when it
+queries the module for the current state, we need to return an index.
+
+5.1.  Returning all our states
+
+Create a function returning a list of all states:
+
+GList * eb_test_get_states()
+{
+	GList * states = NULL;
+
+	states = g_list_append(states, "Online");
+	states = g_list_append(states, "Offline");
+	states = g_list_append(states, "Away");
+
+	return states;
+}
+
+Then register it as a callback.
+
+	sc->get_states = eb_test_get_states;
+
+You can now look at the glib documentation for GList.  You don't need to, but
+it's a good idea.  GList is an implementation of a doubly linked list.
+
+
+5.2.  The current state
+
+We now need to tell everybuddy what our current state is.  Of course, we first
+need to have some place to store our current state.  Go back to the
+eb_test_local_account_data struct that we created, and add a field for the
+current status:
+
+typedef struct eb_test_local_account_data {
+	char password[255];
+	int status;
+} eb_test_local_account_data;
+
+and initialise it in read_local_account_config to the offline value.
+
+Then, create eb_test_get_current_state:
+
+gint eb_test_get_current_state(eb_local_account *account)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	return tla->status;
+}
+
+Of course, this assumes that your service has status numbers that run
+sequentially from 0 up in steps of 1.  If it doesn't, then you'll have to add
+some conversion mechanism.  Just remember that everybuddy expects an integer
+from 0 up.
+
+Register this function as a callback.
+
+5.3.  Setting the state
+
+Finally, give everybuddy a mechanism to set the state.
+
+void eb_test_set_current_state(eb_local_account *account, gint state)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+	
+	tla->status = state;
+}
+
+Of course, you'll want it to do a lot more, like actually changing the state
+on the server, going online and offline, etc.
+
+5.4.  Readable states
+
+It's not very easy to read your code when it contains a whole load of numbers
+like this, so many of use use enums instead:
+
+enum test_states {
+	ONLINE = 0,
+	OFFLINE,
+	AWAY
+};
+
+and use those values instead.
+
+
+6. Buddies
+
+We now need to add code to add and remove buddies.  If these callbacks don't
+exist, everybuddy will segfault.  The first thing we need, is some way to keep
+track of the status of all our buddies.
+
+6.1.  Buddy status
+
+Define a new structure called eb_test_account_data:
+
+typedef struct eb_test_account_data {
+	gint status;
+} eb_test_account_data;
+
+
+6.2.  Adding a new contact
+
+Create a function that given an account handle, returns a new eb_account for
+your service.
+
+eb_account * eb_test_new_account(gchar * account)
+{
+	eb_account *ea = g_new0(eb_account, 1);
+	eb_test_account_data *tad = g_new0(eb_test_account_data, 1);
+
+	ea->protocol_account_data = tad;
+
+	strncpy(ea->handle, account, 255);
+	ea->service_id = SERVICE_INFO.protocol_id;
+	tad->status = TEST_STATE_OFFLINE;
+
+	return ea;
+}
+
+
+6.3.  Adding and removing buddies on the server
+
+You should also write functions to add and remove your buddies from the
+server.  These functions must exist for everybuddy to run.
+
+void eb_test_add_user(eb_account * account)
+{
+
+}
+
+void eb_test_del_user(eb_account * account)
+{
+
+}
+
+And add them as callbacks.
+
+This will allow you to add contacts for the service.
+
+6.4.  Reading contacts from your contact file
+
+Also add code to read your account from the contacts file:
+
+eb_account *eb_test_read_account_config(GList * config, struct contact * contact)
+{
+	eb_account *ea = g_new0(eb_account, 1);
+	eb_test_account_data *tad = g_new0(eb_test_account_data, 1);
+
+	tad->status = TEST_STATE_OFFLINE;
+
+	strncpy(ea->handle, value_pair_get_value(config, "NAME"),
+			sizeof(ea->handle));
+
+	ea->service_id = SERVICE_INFO.protocol_id;
+	ea->protocol_account_data = tad;
+	ea->account_contact = contact;
+	ea->icon_handler = -1;
+	ea->status_handler = -1;
+
+	eb_test_add_user(ea);
+
+	return ea;
+}
+
+
+7. Buddy status
+
+For a buddy to be displayed in the buddy list, everybuddy requires a pixmap to
+display against the buddy name, a status string, and must be able to query
+whether a buddy is online or not.
+
+7.1.  Querying a buddy's status
+
+gboolean eb_test_query_connected(eb_account * account)
+{
+	eb_test_account_data *tad = account->protocol_account_data;
+
+	if (ref_count <= 0) {
+		tad->status = TEST_STATE_OFFLINE;
+	}
+	return tad->status != TEST_STATE_OFFLINE;
+}
+
+7.2.  Returning a status string
+
+You need to implement a function that given an eb_account, returns the status
+string associated with that.  This could simply be something like Online,
+Offline, Away.
+
+gchar *eb_test_get_status_string(eb_account * account)
+{
+	return "";
+}
+
+
+7.3.  Returning a status pixmap
+
+Everybuddy uses standard pixmaps with different colours for each service.  You
+will have to modify some of the existing pixmaps to make your own.
+
+#include "pixmaps/test_online.xpm"
+#include "pixmaps/test_away.xpm"
+
+static gint pixmaps = 0;
+static GdkPixbuf *eb_test_pixbuf[2];
+
+void eb_test_init_pixbufs()
+{
+	eb_test_pixbuf[0] = gdk_pixbuf_new_from_xpm_data(test_online_xpm);
+
+	eb_test_pixbuf[1] = gdk_pixbuf_new_from_xpm_data(test_away_xpm);
+
+	pixmaps = 1;
+}
+
+void *eb_test_get_status_pixbuf(eb_account * account)
+{
+	eb_test_account_data *tad;
+
+	if (!pixmaps)
+		eb_test_init_pixbufs();
+
+	tad = account->protocol_account_data;
+
+	if(tad->status == TEST_STATE_ONLINE) {
+		return eb_test_pixbuf[0];
+	} else {
+		return eb_test_pixbuf[1];
+	}
+
+}
+
+You'll also have to include util.h to get access to the statuswindow.
+
+8. Logging in and out
+
+You must also implement the login and logout functions that are called when
+one selects Sign on all and Sign off all from the menu.
+
+8.1.  Login
+
+Your login code would perform the actual login process, this is just skeleton
+code.
+
+void eb_test_login(eb_local_account *account)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	tla->status = TEST_STATE_ONLINE;
+	eb_test_set_current_state(account, TEST_STATE_ONLINE);
+	ref_count++;
+	account->connected = 1;
+}
+
+8.2.  Logout
+
+Your logout code would perform the actual logout process.  You should also
+call buddy_logoff for all your buddies after you have completed logging
+off.
+
+void eb_test_logout(eb_local_account *account)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	tla->status = TEST_STATE_OFFLINE;
+	ref_count--;
+	account->connected = 0;
+	eb_test_set_current_state(account, TEST_STATE_OFFLINE);
+
+	// for(buddies) {
+	//	buddy_logoff(buddy);
+	//	buddy_update_status(buddy);
+	// }
+}
+
+8.3.  Updating the status menu on logon/logoff
+
+It would be nice if the status menu actually reflected your logged in/out
+status.  To do this, you need to call eb_set_active_menu_status:
+
+	if(account->status_menu)
+		eb_set_active_menu_status(account->status_menu, TEST_STATE_ONLINE);
+
+and similarly for the offline state.
+
+Be careful though, because eb_set_active_menu_status calls your
+set_current_state function.  If this function calls your login/logout
+functions to login/logout, then you could end up with a loop.
+
+To avoid this, we use a global variable is_setting_state.  This is a dirty
+hack, but it works for now, so until someone has a better idea, this is what
+we'll do.
+
+At the start of the file:
+
+static int is_setting_state = 0;
+
+In eb_test_set_current_state, right at the top of the function:
+
+	if(is_setting_state)
+		return;
+
+And for every call to eb_set_active_menu_status:
+
+	if(account->status_menu) {
+		is_setting_state = 1;
+		eb_set_active_menu_status(account->status_menu, TEST_STATE_ONLINE);
+		is_setting_state = 0;
+	}
+
+9. Smileys and Service Colour
+
+As of version 0.4.2, everybuddy supports pixmap smileys.  Each module is
+responsible for providing their own smiley list, but everybuddy provides
+a default list for those that don't want to.  Thanks to Meredyyd for this.
+
+9.1.  Setting your smileys
+
+For now we'll just use the default, and you can read through that code to
+figure out how to do your own.
+
+In query_callbacks, attach an entry for get_smileys:
+
+        sc->get_smileys                 = eb_default_smileys;
+	
+This will tell everybuddy to use the default smiley list when needed.
+
+
+9.2.  Service colour
+
+When in a chat window, it's hard to tell at a glance which service you're
+using to chat with someone.  This is especially a problem when the service
+you're using goes down and everybuddy falls back to an alternate service.
+
+Instead, everybuddy now uses a service colour to identify each service in
+the chat window.  Your buddy's handle will show up in the colour that you
+specify here.
+
+First, add your colour function:
+
+	#define TEST_MSG_COLOR   "#808080"
+	static char *eb_test_get_color(void) { return TEST_MSG_COLOR; }
+
+This colour would ideally be the same as the pixmap that you use for your
+buddies.  It can be a static string since everybuddy will not free it.
+
+Next, add the callback in query_callbacks.
+
+
+10. Finishing up
+
+Well, that's all you need to implement a service module that can be loaded
+into everybuddy.  You still have to implement sending of messages and setting 
+of idle and away states, but I think you can manage that from here.
+
+
+11. I18n
+
+Thanks to Colin Leroy, everybuddy has internationalisation support.  If you
+don't know what that means, you've got to do some reading on the web.
+
+
+11.1. intl.h
+
+To enable your module for i18n support, you've got to do a few things.  First,
+add the i18n API to your module:
+
+	#include "intl.h"
+
+Ideally, this should be the first of your includes.
+
+
+11.2. Replacing the strings
+
+Next, locate all the user displayed text strings in your code.  For the test 
+module, this would be our three prefs: Server, Port and Enable Debugging.
+
+All we as programmers need to do is enclose these strings in _() function
+calls:
+
+	...
+	il->widget.entry.label = _("Server:");
+	...
+	il->widget.entry.label = _("Port:");
+	...
+	il->widget.checkbox.label = _("Enable debugging");
+	...
+
+If your module has any other strings, do it for them too.  Don't do it for
+debugging messages - those that are written via LOG or WARNING.
+
+11.3. Making the translation template
+
+You'll also have to do a bit to get a translation template file that can be
+used by the translators.
+
+First, replace every _() with gettext().
+Then run xgettext test.c
+That will give you a messages.po file.  You should concatenate this to the
+existing .po files in everybuddy's po directory.
+Then, replace all the gettext() back to _().
+
+
+12. Acknowledgements
+
+* Thanks to Torrey Searle for creating everybuddy
+* Thanks to Alex Wheeler, without whom there would be no modules
+* All the members of the Everybuddy-dev team, who helped a lot when I was
+  writing the yahoo2 module
+* Thanks to Yahoo for forcing me to figure out how to write modules
+* Thanks to Meredydd for smiley support
+* Thanks to Colin for i18n support and lots more
+
+
+13. Further Reading
+
+Well, read the sources of the other modules, you'll learn a lot, and read the
+headers that are included in your file.
+
+* The Glib and GTK documentation
+
+
+Appendix A: test.c
+
+
+/*
+ * test.c
+ */
+
+#include <string.h>
+#include "service.h"
+#include "plugin_api.h"
+#include "dialog.h"
+#include "input_list.h"
+#include "value_pair.h"
+#include "util.h"
+
+/*******************************************************************************
+ *                             Begin Module Code
+ ******************************************************************************/
+/*  Module defines */
+#define plugin_info test_LTX_plugin_info
+#define SERVICE_INFO test_LTX_SERVICE_INFO
+#define plugin_init test_LTX_plugin_init
+#define plugin_finish test_LTX_plugin_finish
+
+/* Function Prototypes */
+int plugin_init();
+int plugin_finish();
+struct service_callbacks * query_callbacks();
+
+static int is_setting_state = 0;
+
+static int ref_count = 0;
+
+char service_host[MAX_PREF_LEN] = "testserver.com";
+char service_port[MAX_PREF_LEN] = "80";
+static int do_test_debug = 0;
+
+/*  Module Exports */
+PLUGIN_INFO plugin_info =
+{
+	PLUGIN_SERVICE,
+	"Test Service",
+	"Test Service Module",
+	"$Revision: 1.2 $",
+	"$Date: 2009/09/06 18:23:07 $",
+	&ref_count,
+	plugin_init,
+	plugin_finish,
+	NULL
+};
+struct service SERVICE_INFO = {
+	"Test", 		// Name
+	-1,			// Protocol id - leave as -1
+	FALSE, 			// can do offline messaging
+	FALSE, 			// can do conferencing
+	FALSE, 			// can do native file transfer
+	TRUE, 			// can do iconv
+	NULL			// pointer to service callbacks - leave NULL
+};
+/* End Module Exports */
+
+int plugin_init()
+{
+	input_list *il = g_new0(input_list, 1);
+	ref_count = 0;
+
+	plugin_info.prefs = il;
+	il->widget.entry.value = service_host;
+	il->widget.entry.name = service_host;
+	il->widget.entry.label = _("Server:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.entry.value = service_port;
+	il->widget.entry.name = service_port;
+	il->widget.entry.label = _("Port:");
+	il->type = EB_INPUT_ENTRY;
+
+	il->next = g_new0(input_list, 1);
+	il = il->next;
+	il->widget.checkbox.value = &do_test_debug;
+	il->widget.checkbox.name = do_test_debug;
+	il->widget.checkbox.label = _("Enable debugging");
+	il->type = EB_INPUT_CHECKBOX;
+
+
+	return (0);
+}
+
+int plugin_finish()
+{
+	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
+	return (ref_count);
+}
+
+/*******************************************************************************
+ *                             End Module Code
+ ******************************************************************************/
+
+
+#ifdef __STDC__
+int TEST_DEBUGLOG(char *fmt,...)
+#else
+int TEST_DEBUGLOG(fmt, va_alist)
+char *fmt;
+va_dcl
+#endif
+{
+	va_list ap;
+
+#ifdef __STDC__
+	va_start(ap, fmt);
+#else
+	va_start(ap);
+#endif
+
+	vfprintf(stderr, fmt, ap);
+	fflush(stderr);
+	va_end(ap);
+	return 0;
+}
+
+
+#define LOG(x) if(do_test_debug) { TEST_DEBUGLOG("%s:%d: ", __FILE__, __LINE__); \
+	TEST_DEBUGLOG x; \
+	TEST_DEBUGLOG("\n"); }
+
+#define WARNING(x) if(do_test_debug) { TEST_DEBUGLOG("%s:%d: warning: ", __FILE__, __LINE__); \
+	TEST_DEBUGLOG x; \
+	TEST_DEBUGLOG("\n"); }
+
+
+enum eb_test_states {
+	TEST_STATE_ONLINE=0,
+	TEST_STATE_OFFLINE,
+	TEST_STATE_AWAY
+};
+	
+typedef struct eb_test_account_data {
+	gint status;
+} eb_test_account_data;
+
+typedef struct eb_test_local_account_data {
+	char password[255];
+	int status;
+} eb_test_local_account_data;
+
+eb_local_account *read_local_account_config(GList * pairs)
+{
+	eb_local_account *ela = g_new0(eb_local_account, 1);
+	eb_test_local_account_data *tla = g_new0(eb_test_local_account_data, 1);
+
+	ela->handle = g_strdup(value_pair_get_value(pairs, "SCREEN_NAME"));
+	strncpy(ela->alias, ela->handle, 255);
+	strncpy(tla->password, value_pair_get_value(pairs, "PASSWORD"), 255);
+
+	tla->status = TEST_STATE_OFFLINE;
+
+	ela->service_id = SERVICE_INFO.protocol_id;
+	ela->protocol_local_account_data = tla;
+
+	return ela;
+}
+
+GList *write_local_config(eb_local_account * account)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+	GList *list = NULL;
+	value_pair *vp;
+
+	vp = g_new0(value_pair, 1);
+	strcpy(vp->key, "SCREEN_NAME");
+	strcpy(vp->value, account->handle);
+
+	list = g_list_append(list, vp);
+
+	vp = g_new0(value_pair, 1);
+	strcpy(vp->key, "PASSWORD");
+	strcpy(vp->value, tla->password);
+
+	list = g_list_append(list, vp);
+
+	return list;
+}
+
+GList *eb_test_get_states()
+{
+	GList *states = NULL;
+
+	states = g_list_append(states, "Online");
+	states = g_list_append(states, "Offline");
+	states = g_list_append(states, "Away");
+
+	return states;
+}
+
+gint eb_test_get_current_state(eb_local_account *account)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	return tla->status;
+}
+
+void eb_test_set_current_state(eb_local_account *account, gint state)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	if(is_setting_state)
+		return;
+
+	tla->status = state;
+}
+
+eb_account *eb_test_new_account(gchar * account)
+{
+	eb_account *ea = g_new0(eb_account, 1);
+	eb_test_account_data *tad = g_new0(eb_test_account_data, 1);
+
+	ea->protocol_account_data = tad;
+
+	strncpy(ea->handle, account, 255);
+	ea->service_id = SERVICE_INFO.protocol_id;
+	tad->status = TEST_STATE_OFFLINE;
+
+	return ea;
+}
+
+void eb_test_add_user(eb_account * account)
+{
+
+}
+
+void eb_test_del_user(eb_account * account)
+{
+}
+
+eb_account *eb_test_read_account_config(GList * config, struct contact * contact)
+{
+	eb_account *ea = g_new0(eb_account, 1);
+	eb_test_account_data *tad = g_new0(eb_test_account_data, 1);
+
+	tad->status = TEST_STATE_OFFLINE;
+
+	strncpy(ea->handle, value_pair_get_value(config, "NAME"), 255);
+
+	ea->service_id = SERVICE_INFO.protocol_id;
+	ea->protocol_account_data = tad;
+	ea->account_contact = contact;
+	ea->icon_handler = -1;
+	ea->status_handler = -1;
+
+	eb_test_add_user(ea);
+
+	return ea;
+}
+
+gboolean eb_test_query_connected(eb_account * account)
+{
+	eb_test_account_data *tad = account->protocol_account_data;
+
+	if (ref_count <= 0) {
+		tad->status = TEST_STATE_OFFLINE;
+	}
+	return tad->status != TEST_STATE_OFFLINE;
+}
+
+gchar *eb_test_get_status_string(eb_account * account)
+{
+	return "";
+}
+
+
+#include "pixmaps/nomodule_online.xpm"
+#include "pixmaps/nomodule_away.xpm"
+
+static gint pixmaps = 0;
+static GdkPixbuf *eb_test_pixbuf[2];
+
+void eb_test_init_pixbufs()
+{
+	eb_test_pixbuf[0] = gdk_pixbuf_new_from_xpm_data(test_online_xpm);
+
+	eb_test_pixbuf[1] = gdk_pixbuf_new_from_xpm_data(test_away_xpm);
+
+	pixmaps = 1;
+}
+
+void *eb_test_get_status_pixbuf(eb_account * account)
+{
+	eb_test_account_data *tad;
+
+	if (!pixmaps)
+		eb_test_init_pixbufs();
+
+	tad = account->protocol_account_data;
+
+	if(tad->status == TEST_STATE_ONLINE) {
+		return eb_test_pixbuf[0];
+	} else {
+		return eb_test_pixbuf[1];
+	}
+
+}
+
+void eb_test_login(eb_local_account *account)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	if(account->status_menu) {
+		tla->status = TEST_STATE_ONLINE;
+		is_setting_state = 1;
+		eb_set_active_menu_status(account->status_menu, TEST_STATE_ONLINE);
+		is_setting_state = 0;
+	} else
+		eb_test_set_current_state(account, TEST_STATE_ONLINE);
+	account->connected = 1;
+	ref_count++;
+}
+
+void eb_test_logout(eb_local_account *account)
+{
+	eb_test_local_account_data *tla = account->protocol_local_account_data;
+
+	account->connected = 0;
+	ref_count--;
+	if(account->status_menu) {
+		tla->status = TEST_STATE_OFFLINE;
+		is_setting_state = 1;
+		eb_set_active_menu_status(account->status_menu, TEST_STATE_OFFLINE);
+		is_setting_state = 0;
+	} else
+		eb_test_set_current_state(account, TEST_STATE_OFFLINE);
+}
+
+#define TEST_MSG_COLOR   "#808080"
+static char *eb_test_get_color(void) { return TEST_MSG_COLOR; }
+
+struct service_callbacks *query_callbacks()
+{
+	struct service_callbacks *sc;
+
+	sc = g_new0(struct service_callbacks, 1);
+
+	sc->query_connected 		= eb_test_query_connected;
+	sc->login			= eb_test_login;
+	sc->logout 			= eb_test_logout;
+	sc->check_login			= NULL;
+
+	sc->send_im 			= NULL;
+
+	sc->read_local_account_config 	= read_local_account_config;
+	sc->write_local_config 		= write_local_config;
+	sc->read_account_config 	= eb_test_read_account_config;
+
+	sc->get_states 			= eb_test_get_states;
+	sc->get_current_state 		= eb_test_get_current_state;
+	sc->set_current_state 		= eb_test_set_current_state;
+	
+	sc->new_account 		= eb_test_new_account;
+	sc->add_user 			= eb_test_add_user;
+	sc->del_user 			= eb_test_del_user;
+
+	sc->is_suitable			= NULL;
+
+	sc->get_status_string 		= eb_test_get_status_string;
+	sc->get_status_pixbuf 		= eb_test_get_status_pixbuf;
+
+	sc->set_idle 			= NULL;
+	sc->set_away 			= NULL;
+
+	sc->send_chat_room_message 	= NULL;
+
+	sc->join_chat_room 		= NULL;
+	sc->leave_chat_room 		= NULL;
+
+	sc->make_chat_room 		= NULL;
+
+	sc->send_invite 		= NULL;
+	sc->accept_invite 		= NULL;
+	sc->decline_invite 		= NULL;
+
+	sc->send_file			= NULL;
+
+	sc->terminate_chat		= NULL;
+
+	sc->get_info 			= NULL;
+	sc->get_prefs 			= NULL;
+	sc->read_prefs_config 		= NULL;
+	sc->write_prefs_config 		= NULL;
+
+	sc->add_importers 		= NULL;
+
+	sc->get_color 			= eb_test_get_color;
+	sc->get_smileys 		= eb_default_smileys;
+
+	return sc;
+}
+
+
+ChangeLog:
+
+2002-08-03 Philip Tellis
+	* Added Torrey to the Acks
+	* Various spelling, grammar changes (not necessarily fixes)
+	* Added entries for check_login, get_color and get_smileys 
+	  to service_callbacks
+	* Updates for new prefs format
+	* Use sizeof() instead of absolute values
+	* Add entry for smileys and service colour
+	* Added entry for I18n (section 11)
+
+2002-05-18 Philip Tellis
+	* First release
