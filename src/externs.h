@@ -15,7 +15,8 @@ LList *incoming_message_filters;
 __declspec(dllimport)
 LList *nick_modify_utility;
 #else
-extern LList *outgoing_message_filters;
+extern LList *outgoing_message_filters_local;
+extern LList *outgoing_message_filters_remote;
 extern LList *incoming_message_filters;
 extern LList *nick_modify_utility;
 #endif

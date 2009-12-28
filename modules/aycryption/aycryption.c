@@ -52,10 +52,8 @@
 #endif
 
 /* Function Prototypes */
-static char *aycryption_out(const eb_local_account *local,
-	const eb_account *remote, struct contact *contact, const char *s);
-static char *aycryption_in(const eb_local_account *local,
-	const eb_account *remote, const struct contact *contact, const char *s);
+static char *aycryption_out(Conversation *conv, const char *s);
+static char *aycryption_in(Conversation *conv, const char *s);
 static void set_gpg_key(ebmCallbackData *data);
 static void show_gpg_log(ebmCallbackData *data);
 void pgp_encrypt(gpgme_data_t plain, gpgme_data_t *cipher, gpgme_key_t *kset,
@@ -135,8 +133,8 @@ static int aycryption_init()
 	il->label = strdup(_("Enable debugging"));
 	il->type = EB_INPUT_CHECKBOX;
 
-	outgoing_message_filters =
-		l_list_append(outgoing_message_filters, &aycryption_out);
+	outgoing_message_filters_remote =
+		l_list_append(outgoing_message_filters_remote, &aycryption_out);
 	incoming_message_filters =
 		l_list_append(incoming_message_filters, &aycryption_in);
 
@@ -204,8 +202,8 @@ static int aycryption_init()
 
 static int aycryption_finish()
 {
-	outgoing_message_filters =
-		l_list_remove(outgoing_message_filters, &aycryption_out);
+	outgoing_message_filters_remote =
+		l_list_remove(outgoing_message_filters_remote, &aycryption_out);
 	incoming_message_filters =
 		l_list_remove(incoming_message_filters, &aycryption_in);
 
@@ -362,8 +360,7 @@ void gpg_get_kset(struct contact *ct, gpgme_key_t **kset)
 	gpgme_release(ctx);
 }
 
-static char *aycryption_out(const eb_local_account *local,
-	const eb_account *remote, struct contact *ct, const char *s)
+static char *aycryption_out(Conversation *conv, const char *s)
 {
 	char *p = NULL;
 	char buf[4096];
@@ -374,11 +371,16 @@ static char *aycryption_out(const eb_local_account *local,
 	gpgme_key_t *kset = NULL;
 	int err;
 
+	struct contact *ct = conv->contact;
+
+	if (!ct)
+		return g_strdup(s);
+
 	if ((!ct->gpg_do_encryption || !ct->gpg_key || ct->gpg_key == '\0')
 		&& !ct->gpg_do_signature) {
 		if (ct->gpg_do_encryption)
 			log_action(ct, LOG_ERR, "Could not encrypt message.");
-		return strdup(s);
+		return g_strdup(s);
 	}
 
 	if (ct->gpg_do_encryption && ct->gpg_key && ct->gpg_key[0])
@@ -389,7 +391,7 @@ static char *aycryption_out(const eb_local_account *local,
 			ct->gpg_do_encryption, ct->gpg_key, ct->gpg_key[0]);
 		log_action(ct, LOG_ERR,
 			"Could not encrypt message - you may have to set your contact's key.");
-		return strdup(s);
+		return g_strdup(s);
 	}
 
 	error = gpgme_data_new(&plain);
@@ -425,8 +427,8 @@ static char *aycryption_out(const eb_local_account *local,
 
 		snprintf(tmp, sizeof(tmp), "%s%s", (p != NULL) ? p : "", buf);
 		if (p)
-			free(p);
-		p = strdup(tmp);
+			g_free(p);
+		p = g_strdup(tmp);
 		memset(buf, 0, sizeof(buf));
 	}
 
@@ -436,8 +438,7 @@ static char *aycryption_out(const eb_local_account *local,
 	return p;
 }
 
-static char *aycryption_in(const eb_local_account *local,
-	const eb_account *remote, const struct contact *ct, const char *s)
+static char *aycryption_in(Conversation *conv, const char *s)
 {
 	char *p = NULL, *res = NULL, *s_nohtml = NULL;
 	gpgme_data_t plain = NULL, cipher = NULL;
@@ -454,10 +455,15 @@ static char *aycryption_in(const eb_local_account *local,
 
 	int sig_code = 0;
 
+	struct contact *ct = conv->contact;
+
+	if (!ct)
+		return g_strdup(s);
+
 	memset(buf, 0, 4096);
 	if (strncmp(s, "-----BEGIN PGP ", strlen("-----BEGIN PGP "))) {
 		eb_debug(DBG_CRYPT, "Incoming message isn't PGP formatted\n");
-		return strdup(s);
+		return g_strdup(s);
 	}
 
 	err = gpgme_new(&ctx);
@@ -466,7 +472,7 @@ static char *aycryption_in(const eb_local_account *local,
 		eb_debug(DBG_CRYPT, "gpgme_new failed: %s\n",
 			gpgme_strerror(err));
 		log_action(ct, LOG_ERR, "Memory error.");
-		return strdup(s);
+		return g_strdup(s);
 	}
 	gpgme_data_new(&plain);
 	gpgme_data_new(&cipher);
@@ -474,11 +480,11 @@ static char *aycryption_in(const eb_local_account *local,
 	/* Clean out kopete HTML crap
 	 * < vdanen> so like KDE to just bloat stuff for the hell of it
 	 */
-	s_nohtml = strdup(s);
+	s_nohtml = g_strdup(s);
 	if (!s_nohtml) {
 		eb_debug(DBG_CRYPT, "Couldn't copy message to strip html");
 		log_action(ct, LOG_ERR, "Memory error while stripping html.");
-		return strdup(s);
+		return g_strdup(s);
 	}
 	br_to_nl(s_nohtml);
 	eb_debug(DBG_CRYPT, "html stripped: %s\n", s_nohtml);
@@ -488,7 +494,7 @@ static char *aycryption_in(const eb_local_account *local,
 	if (err == -1)
 		perror("cipher write error");
 
-	free(s_nohtml);
+	g_free(s_nohtml);
 
 	mygpgme_data_rewind(cipher);
 	mygpgme_data_rewind(plain);
@@ -501,7 +507,7 @@ static char *aycryption_in(const eb_local_account *local,
 	if (err && gpg_err_code(err) != GPG_ERR_NO_DATA) {
 		log_action(ct, LOG_ERR,
 			"Cannot decrypt message - maybe your contact uses an incorrect key.");
-		return strdup(s);
+		return g_strdup(s);
 	} else if (gpg_err_code(err) == GPG_ERR_NO_DATA) {	/*plaintext signed */
 		was_crypted = 0;
 		mygpgme_data_rewind(cipher);
@@ -536,8 +542,8 @@ static char *aycryption_in(const eb_local_account *local,
 
 		snprintf(tmp, sizeof(tmp), "%s%s", (p != NULL) ? p : "", buf);
 		if (p)
-			free(p);
-		p = strdup(tmp);
+			g_free(p);
+		p = g_strdup(tmp);
 		memset(buf, 0, sizeof(buf));
 	}
 
@@ -614,8 +620,8 @@ static char *aycryption_in(const eb_local_account *local,
 		}
 
 		if (curloglevel == LOG_ERR) {
-			res = strdup(s);
-			free(p);
+			res = g_strdup(s);
+			g_free(p);
 			p = res;
 		}
 		log_action(ct, curloglevel, s_sigstat);

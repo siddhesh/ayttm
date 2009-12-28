@@ -1255,7 +1255,7 @@ static void ext_yahoo_file_transfer_done(int id, int response, void *data)
 static void ext_yahoo_conf_userjoin(int id, const char *me, const char *who,
 	const char *room)
 {
-	eb_chat_room *chat_room = NULL;
+	Conversation *chat_room = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	eb_yahoo_chat_room_data *ycrd;
@@ -1263,18 +1263,18 @@ static void ext_yahoo_conf_userjoin(int id, const char *me, const char *who,
 /*	char buff[1024];*/
 	YList *l;
 
-	chat_room = find_chat_room_by_id(room);
+	chat_room = ay_conversation_find_by_name(ela, room);
 
 	if (!chat_room)
 		return;
 
-	eb_chat_room_buddy_arrive(chat_room,
+	ay_conversation_buddy_arrive(chat_room,
 		(ea ? ea->account_contact->nick : who), who);
 
-	ycrd = chat_room->protocol_local_chat_room_data;
+	ycrd = chat_room->protocol_local_conversation_data;
 
 /*	snprintf(buff, sizeof(buff), _("%s has joined the conference."), who);
-	eb_chat_room_show_message(chat_room, _("Yahoo! Messenger"), buff);*/
+	ay_conversation_show_message(chat_room, _("Yahoo! Messenger"), buff);*/
 
 	/* I don't want myself in the members list */
 	if (!strcmp(who, ylad->act_id)) {
@@ -1293,7 +1293,8 @@ static void ext_yahoo_conf_userjoin(int id, const char *me, const char *who,
 static void ext_yahoo_conf_userleave(int id, const char *me, const char *who,
 	const char *room)
 {
-	eb_chat_room *chat_room = find_chat_room_by_id(room);
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	Conversation *chat_room = ay_conversation_find_by_name(ela, room);
 	eb_yahoo_chat_room_data *ycrd;
 /*	char buff[1024]; */
 	const YList *l;
@@ -1301,11 +1302,11 @@ static void ext_yahoo_conf_userleave(int id, const char *me, const char *who,
 	if (!chat_room)
 		return;
 
-	ycrd = chat_room->protocol_local_chat_room_data;
-	eb_chat_room_buddy_leave(chat_room, who);
+	ycrd = chat_room->protocol_local_conversation_data;
+	ay_conversation_buddy_leave(chat_room, who);
 
 /*	snprintf(buff, sizeof(buff), _("%s has left the conference."), who);
-	eb_chat_room_show_message(chat_room, _("Yahoo! Messenger"), buff);*/
+	ay_conversation_show_message(chat_room, _("Yahoo! Messenger"), buff);*/
 
 	for (l = ycrd->members; l; l = l->next) {
 		char *handle = l->data;
@@ -1327,9 +1328,9 @@ static void ext_yahoo_conf_userdecline(int id, const char *me, const char *who,
 	YList *l = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
-	eb_chat_room *chat_room = find_chat_room_by_id(room);
+	Conversation *chat_room = ay_conversation_find_by_name(ela, room);
 	eb_yahoo_chat_room_data *ycrd =
-		chat_room->protocol_local_chat_room_data;
+		chat_room->protocol_local_conversation_data;
 
 	if (!strcmp(ylad->act_id, who))
 		return;
@@ -1360,23 +1361,17 @@ static void eb_yahoo_accept_conference(gpointer data, int result)
 	eb_local_account *ela = yahoo_find_local_account_by_id(ycrd->id);
 
 	if (result) {
-		eb_chat_room *chat_room = g_new0(eb_chat_room, 1);
 		eb_account *ea = find_account_with_ela(ycrd->host, ela);
+		Conversation *chat_room = ay_conversation_new(ela, NULL,
+			ycrd->room, 1, 0);
 
-		strcpy(chat_room->id, ycrd->room);
-		strcpy(chat_room->room_name, ycrd->room);
+		chat_room->protocol_local_conversation_data = ycrd;
 
-		chat_room->protocol_local_chat_room_data = ycrd;
-		chat_room->fellows = NULL;
-		chat_room->connected = FALSE;
-
-		chat_room->local_user = ela;
-
-		eb_join_chat_room(chat_room, TRUE);
-		eb_chat_room_buddy_arrive(chat_room,
+		ay_join_conversation(chat_room, TRUE);
+		ay_conversation_buddy_arrive(chat_room,
 			(ea ? ea->account_contact->nick : ycrd->host),
 			ycrd->host);
-		eb_chat_room_buddy_arrive(chat_room, ela->alias, ela->handle);
+		ay_conversation_buddy_arrive(chat_room, ela->alias, ela->handle);
 
 	} else {
 		yahoo_conference_decline(ycrd->id, ylad->act_id, ycrd->members,
@@ -1419,41 +1414,36 @@ static void eb_yahoo_accept_invite(eb_local_account *ela, void *data)
 {
 	eb_yahoo_chat_room_data *ycrd = data;
 
-	eb_chat_room *chat_room = g_new0(eb_chat_room, 1);
+	Conversation *chat_room;
 	eb_account *ea;
 	YList *l;
 	eb_yahoo_local_account_data *ylad = ela->protocol_local_account_data;
 	int done_myself = 0;
 
-	strcpy(chat_room->id, ycrd->room);
-	strcpy(chat_room->room_name, ycrd->room);
+	chat_room = ay_conversation_new(ela, NULL, ycrd->room, 1, 0);
 
-	chat_room->protocol_local_chat_room_data = ycrd;
-	chat_room->fellows = NULL;
-	chat_room->connected = FALSE;
+	chat_room->protocol_local_conversation_data = ycrd;
 
-	chat_room->local_user = ela;
-
-	eb_join_chat_room(chat_room, TRUE);
-/*	eb_chat_room_buddy_arrive(chat_room, 
+	ay_join_conversation(chat_room, TRUE);
+/*	ay_conversation_buddy_arrive(chat_room, 
 			(ea?ea->account_contact->nick:ycrd->host), 
 			ycrd->host);
 */
 	for (l = ycrd->members; l; l = l->next) {
 		char *handle = l->data;
 		if (!strcmp(ylad->act_id, handle)) {
-			eb_chat_room_buddy_arrive(chat_room, ela->alias,
+			ay_conversation_buddy_arrive(chat_room, ela->alias,
 				ylad->act_id);
 			done_myself = 1;
 		} else {
 			ea = find_account_with_ela(handle, ela);
-			eb_chat_room_buddy_arrive(chat_room,
+			ay_conversation_buddy_arrive(chat_room,
 				(ea ? ea->account_contact->nick : handle),
 				handle);
 		}
 	}
 	if (!done_myself)
-		eb_chat_room_buddy_arrive(chat_room, ela->alias, ylad->act_id);
+		ay_conversation_buddy_arrive(chat_room, ela->alias, ylad->act_id);
 }
 
 static void eb_yahoo_decline_invite(eb_local_account *ela, void *data)
@@ -1467,13 +1457,13 @@ static void eb_yahoo_decline_invite(eb_local_account *ela, void *data)
 static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who,
 	const char *room, const char *msg, YList *members)
 {
-	eb_chat_room *chat_room = NULL;
+	Conversation *chat_room = NULL;
 	eb_yahoo_chat_room_data *ycrd = NULL;
 	eb_local_account *ela = yahoo_find_local_account_by_id(id);
 	if (!ela)
 		return;
 
-	chat_room = find_chat_room_by_id(room);
+	chat_room = ay_conversation_find_by_name(ela, room);
 	if (!chat_room) {
 		ycrd = g_new0(eb_yahoo_chat_room_data, 1);
 		ycrd->id = id;
@@ -1482,7 +1472,7 @@ static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who,
 		ycrd->members = members;
 	} else {
 		YList *l;
-		ycrd = chat_room->protocol_local_chat_room_data;
+		ycrd = chat_room->protocol_local_conversation_data;
 		for (l = ycrd->members; l->next; l = l->next) ;
 		l->next = members;
 		members->prev = l;
@@ -1497,7 +1487,8 @@ static void ext_yahoo_conf_message(int id, const char *me,
 {
 	int i = 0, j = 0;
 	unsigned char *umsg = (unsigned char *)msg;
-	eb_chat_room *chat_room = find_chat_room_by_id(room);
+	eb_local_account *ela = yahoo_find_local_account_by_id(id);
+	Conversation *chat_room = ay_conversation_find_by_name(ela, room);
 
 	if (!chat_room)
 		return;
@@ -1520,10 +1511,10 @@ static void ext_yahoo_conf_message(int id, const char *me,
 	}
 	umsg[j] = '\0';
 
-	eb_chat_room_show_message(chat_room, who, (char *)umsg);
+	ay_conversation_show_message(chat_room, who, (char *)umsg);
 }
 
-static void eb_yahoo_send_chat_room_message(eb_chat_room *room, char *message)
+static void eb_yahoo_send_chat_room_message(Conversation *room, char *message)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_yahoo_local_account_data *ylad;
@@ -1538,12 +1529,12 @@ static void eb_yahoo_send_chat_room_message(eb_chat_room *room, char *message)
 
 	ylad = room->local_user->protocol_local_account_data;
 
-	ycrd = room->protocol_local_chat_room_data;
+	ycrd = room->protocol_local_conversation_data;
 	yahoo_conference_message(ycrd->id, ylad->act_id, ycrd->members,
 		ycrd->room, message, 1);
 }
 
-static void eb_yahoo_join_chat_room(eb_chat_room *room)
+static void eb_yahoo_join_chat_room(Conversation *room)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_local_account *ela;
@@ -1555,7 +1546,7 @@ static void eb_yahoo_join_chat_room(eb_chat_room *room)
 		return;
 	}
 
-	ycrd = room->protocol_local_chat_room_data;
+	ycrd = room->protocol_local_conversation_data;
 	ela = room->local_user;
 	ylad = ela->protocol_local_account_data;
 	if (!ycrd || !ylad)
@@ -1573,7 +1564,7 @@ static void eb_yahoo_join_chat_room(eb_chat_room *room)
 	ycrd->members = y_list_append(ycrd->members, strdup(ylad->act_id));
 }
 
-static void eb_yahoo_leave_chat_room(eb_chat_room *room)
+static void eb_yahoo_leave_chat_room(Conversation *room)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_yahoo_local_account_data *ylad;
@@ -1584,7 +1575,7 @@ static void eb_yahoo_leave_chat_room(eb_chat_room *room)
 		return;
 	}
 
-	ycrd = room->protocol_local_chat_room_data;
+	ycrd = room->protocol_local_conversation_data;
 	ylad = room->local_user->protocol_local_account_data;
 	yahoo_conference_logoff(ycrd->id, ylad->act_id, ycrd->members,
 		ycrd->room);
@@ -1602,7 +1593,7 @@ static void eb_yahoo_leave_chat_room(eb_chat_room *room)
 	free(ycrd);
 }
 
-static void eb_yahoo_send_invite(eb_local_account *ela, eb_chat_room *ecr,
+static void eb_yahoo_send_invite(eb_local_account *ela, Conversation *ecr,
 	char *who, const char *message)
 {
 	eb_yahoo_chat_room_data *ycrd;
@@ -1615,7 +1606,7 @@ static void eb_yahoo_send_invite(eb_local_account *ela, eb_chat_room *ecr,
 		return;
 	}
 
-	ycrd = ecr->protocol_local_chat_room_data;
+	ycrd = ecr->protocol_local_conversation_data;
 	ylad = ela->protocol_local_account_data;
 
 	if (!message || !*message)
@@ -1630,12 +1621,13 @@ static void eb_yahoo_send_invite(eb_local_account *ela, eb_chat_room *ecr,
 	ycrd->members = y_list_append(ycrd->members, strdup(who));
 }
 
-static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account *ela,
+static Conversation *eb_yahoo_make_chat_room(char *name, eb_local_account *ela,
 	int is_public)
 {
-	eb_chat_room *ecr = g_new0(eb_chat_room, 1);
+	Conversation *ecr;
 	eb_yahoo_chat_room_data *ycrd = g_new0(eb_yahoo_chat_room_data, 1);
 	eb_yahoo_local_account_data *ylad;
+	char room_name[255];
 
 	if (!ela) {
 		WARNING(("ela is null"));
@@ -1645,26 +1637,24 @@ static eb_chat_room *eb_yahoo_make_chat_room(char *name, eb_local_account *ela,
 	ylad = ela->protocol_local_account_data;
 
 	if (name && *name)
-		strcpy(ecr->room_name, name);
+		strcpy(room_name, name);
 	else
-		sprintf(ecr->room_name, "%s-%d", ylad->act_id, ylad->id);
+		sprintf(room_name, "%s-%d", ylad->act_id, ylad->id);
+	
+	ecr = ay_conversation_new(ela, NULL, room_name, 1, is_public);
 
-	strcpy(ecr->id, ecr->room_name);
-	ecr->fellows = NULL;
-	ecr->connected = FALSE;
-	ecr->local_user = ela;
-	ecr->protocol_local_chat_room_data = ycrd;
+	ecr->protocol_local_conversation_data = ycrd;
 
 	ycrd->id = ylad->id;
 	ycrd->host = g_strdup(ylad->act_id);
-	ycrd->room = g_strdup(ecr->room_name);
+	ycrd->room = g_strdup(ecr->name);
 	ycrd->members = NULL;
 	ycrd->connected = FALSE;
 
 	yahoo_conference_logon(ycrd->id, ylad->act_id, ycrd->members,
 		ycrd->room);
 
-	eb_join_chat_room(ecr, TRUE);
+	ay_join_conversation(ecr, TRUE);
 	return ecr;
 }
 

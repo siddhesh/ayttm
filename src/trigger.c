@@ -58,10 +58,10 @@ static void pounce_contact(struct contact *con, char *str)
 {
 	gint pos = 0;
 
-	eb_chat_window_display_contact(con);
-	gtk_editable_insert_text(GTK_EDITABLE(con->chatwindow->entry), str,
+	ay_conversation_chat_with_contact(con);
+	gtk_editable_insert_text(GTK_EDITABLE(con->conversation->window->entry), str,
 		strlen(str), &pos);
-	send_message(NULL, con->chatwindow);
+	send_message(NULL, con->conversation);
 }
 
 void do_trigger_action(struct contact *con, int trigger_type)

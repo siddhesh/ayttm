@@ -48,7 +48,7 @@ struct contact {
 	int default_chatb;
 	int default_filetransb;
 	struct _grouplist *group;
-	struct _chat_window *chatwindow;
+	struct _conversation *conversation;
 	t_log_window_id logwindow;
 
 	void *list_item;	/* GtkWidget */

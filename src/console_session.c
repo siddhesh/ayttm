@@ -95,19 +95,19 @@ static void console_session_get_command(void *data, int source,
 			write(source, &ret, sizeof(int));
 			return;
 		}
-		eb_chat_window_display_contact(remote_contact);
-		remote_contact->chatwindow->preferred =
+		ay_conversation_chat_with_contact(remote_contact);
+		remote_contact->conversation->preferred =
 			find_suitable_remote_account(remote_contact->
-			chatwindow->preferred,
-			remote_contact->chatwindow->contact);
-		if (!remote_contact->chatwindow->preferred) {
+			conversation->preferred,
+			remote_contact->conversation->contact);
+		if (!remote_contact->conversation->preferred) {
 			ret = -2;
 			write(source, &ret, sizeof(int));
 			return;
 		}
 
 		gtk_editable_insert_text(GTK_EDITABLE(remote_contact->
-				chatwindow->entry), message, strlen(message),
+				conversation->window->entry), message, strlen(message),
 			&pos);
 	} else {
 		focus_statuswindow();

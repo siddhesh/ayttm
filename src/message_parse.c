@@ -437,8 +437,13 @@ void eb_parse_incoming_message(eb_local_account *account,
 				sizeof(struct sockaddr));
 			send_file(filename, sockfd);
 		}
-	} else
-		eb_chat_window_display_remote_message(account, remote, message);
+	} else {
+		/* Ensure that the conversation comes up */
+		ay_conversation_chat_with_account(remote);
+
+		ay_conversation_got_message(remote->account_contact->conversation,
+			remote->account_contact->nick, message);
+	}
 
 	free(buff);
 }
@@ -448,7 +453,7 @@ void eb_update_status(eb_account *remote, const char *message)
 	char *buff = convert_to_utf8(message);
 
 	eb_chat_window_display_status(remote, buff);
-	eb_chat_room_display_status(remote, buff);
+	ay_conversation_display_status(remote, buff);
 
 	g_free(buff);
 }
