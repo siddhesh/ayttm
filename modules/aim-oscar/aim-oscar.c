@@ -50,7 +50,6 @@ typedef unsigned long ulong;
 #include "service.h"
 #include "llist.h"
 #include "chat_window.h"
-#include "chat_room.h"
 #include "util.h"
 #include "status.h"
 #include "globals.h"
@@ -176,7 +175,7 @@ struct eb_aim_account_data {
 struct oscar_chat_room_data {
 	char *name;
 	gint exchange;
-	eb_chat_room *ecr;
+	Conversation *ecr;
 };
 
 struct oscar_chat_room {
@@ -269,9 +268,9 @@ static char *extract_name(const char *name);
 static void connect_error(struct eb_aim_local_account_data *alad, char *msg);	/* FIXME find a better name */
 static eb_account *oscar_find_account_with_ela(const char *handle,
 	eb_local_account *ela, gint should_update);
-static eb_chat_room *oscar_find_chat_room_by_conn(struct
+static Conversation *oscar_find_conversation_by_conn(struct
 	eb_aim_local_account_data *alad, aim_conn_t *conn);
-static eb_chat_room *oscar_find_chat_room_by_name(struct
+static Conversation *oscar_find_conversation_by_name(struct
 	eb_aim_local_account_data *alad, const char *name);
 static aim_conn_t *oscar_find_chat_conn_by_source(struct
 	eb_aim_local_account_data *alad, int fd);
@@ -1152,7 +1151,7 @@ static int faim_cb_parse_incoming_im(aim_session_t *sess, aim_frame_t *fr, ...)
 		{
 			char *encoding, *lang;
 			struct aim_chat_roominfo *roominfo;
-			eb_chat_room *ecr = g_new0(eb_chat_room, 1);
+			Conversation *ecr = g_new0(Conversation, 1);
 			
 			userinfo = va_arg(ap, struct aim_userinfo_s *);
 			roominfo = va_arg(ap, struct aim_chat_roominfo *);
@@ -1170,7 +1169,7 @@ static int faim_cb_parse_incoming_im(aim_session_t *sess, aim_frame_t *fr, ...)
 			ecr->connected = FALSE;
 			ecr->fellows = NULL;
 			
-			ecr->protocol_local_chat_room_data = (void *) ((int)roominfo->exchange);
+			ecr->protocol_local_conversation_data = (void *) ((int)roominfo->exchange);
 			
 			ecr->local_user = ela;
 			
@@ -1269,7 +1268,7 @@ static int faim_cb_handle_redirect(aim_session_t *sess, aim_frame_t *fr, ...)
 
 	case 0xe:{		/* Chat */
 			struct oscar_chat_room *ocr;
-			eb_chat_room *ecr;
+			Conversation *ecr;
 
 			LOG((" -> Chat"))
 
@@ -1297,8 +1296,8 @@ static int faim_cb_handle_redirect(aim_session_t *sess, aim_frame_t *fr, ...)
 			ocr->instance = redir->chat.instance;
 			ocr->show = extract_name(redir->chat.room);
 
-			ecr = oscar_find_chat_room_by_name(alad, ocr->show);
-			ecr->protocol_local_chat_room_data = ocr;
+			ecr = oscar_find_conversation_by_name(alad, ocr->show);
+			ecr->protocol_local_conversation_data = ocr;
 
 			ocr->conn->status |= AIM_CONN_STATUS_INPROGRESS;
 
@@ -1454,7 +1453,7 @@ static int faim_cb_chatnav_info(aim_session_t *sess, aim_frame_t *fr, ...)
 
 static int faim_cb_conninitdone_chat(aim_session_t *sess, aim_frame_t *fr, ...)
 {
-	eb_chat_room *ecr;
+	Conversation *ecr;
 	eb_local_account *ela = (eb_local_account *)sess->aux_data;
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)ela->
@@ -1473,8 +1472,8 @@ static int faim_cb_conninitdone_chat(aim_session_t *sess, aim_frame_t *fr, ...)
 
 	aim_clientready(&(alad->aimsess), fr->conn);
 
-	ecr = oscar_find_chat_room_by_conn(alad, fr->conn);
-	eb_join_chat_room(ecr, TRUE);
+	ecr = oscar_find_conversation_by_conn(alad, fr->conn);
+	ay_join_conversation(ecr, TRUE);
 
 	return 1;
 }
@@ -1489,7 +1488,7 @@ static int faim_cb_chat_join(aim_session_t *sess, aim_frame_t *fr, ...)
 	va_list ap;
 	int count, i;
 	aim_userinfo_t *info;
-	eb_chat_room *ecr;
+	Conversation *ecr;
 
 	LOG(("faim_cb_chat_join()"))
 
@@ -1498,7 +1497,7 @@ static int faim_cb_chat_join(aim_session_t *sess, aim_frame_t *fr, ...)
 	info = va_arg(ap, aim_userinfo_t *);
 	va_end(ap);
 
-	ecr = oscar_find_chat_room_by_conn(alad, fr->conn);
+	ecr = oscar_find_conversation_by_conn(alad, fr->conn);
 	if (!ecr) {
 		WARNING(("Can't find chatroom !"))
 			return 1;
@@ -1508,10 +1507,10 @@ static int faim_cb_chat_join(aim_session_t *sess, aim_frame_t *fr, ...)
 		eb_account *ea =
 			oscar_find_account_with_ela(info[i].sn, ela, TRUE);
 		if (ea) {
-			eb_chat_room_buddy_arrive(ecr,
+			ay_conversation_buddy_arrive(ecr,
 				ea->account_contact->nick, info[i].sn);
 		} else {
-			eb_chat_room_buddy_arrive(ecr, info[i].sn, info[i].sn);
+			ay_conversation_buddy_arrive(ecr, info[i].sn, info[i].sn);
 		}
 	}
 
@@ -1528,7 +1527,7 @@ static int faim_cb_chat_leave(aim_session_t *sess, aim_frame_t *fr, ...)
 	va_list ap;
 	int count, i;
 	aim_userinfo_t *info;
-	eb_chat_room *ecr;
+	Conversation *ecr;
 
 	LOG(("faim_cb_chat_leave()"))
 
@@ -1537,14 +1536,14 @@ static int faim_cb_chat_leave(aim_session_t *sess, aim_frame_t *fr, ...)
 	info = va_arg(ap, aim_userinfo_t *);
 	va_end(ap);
 
-	ecr = oscar_find_chat_room_by_conn(alad, fr->conn);
+	ecr = oscar_find_conversation_by_conn(alad, fr->conn);
 	if (!ecr) {
 		WARNING(("Can't find chatroom !"))
 			return 1;
 	}
 
 	for (i = 0; i < count; i++) {
-		eb_chat_room_buddy_leave(ecr, info[i].sn);
+		ay_conversation_buddy_leave(ecr, info[i].sn);
 	}
 
 	return 1;
@@ -1592,7 +1591,7 @@ static int faim_cb_chat_incoming_msg(aim_session_t *sess, aim_frame_t *fr, ...)
 	aim_userinfo_t *info;
 	char *msg;
 
-	eb_chat_room *ecr;
+	Conversation *ecr;
 	eb_account *ea;
 
 	va_start(ap, fr);
@@ -1602,7 +1601,7 @@ static int faim_cb_chat_incoming_msg(aim_session_t *sess, aim_frame_t *fr, ...)
 
 	LOG(("faim_cb_chat_incoming_msg(): %s => %s", info->sn, msg))
 
-		ecr = oscar_find_chat_room_by_conn(alad, fr->conn);
+		ecr = oscar_find_conversation_by_conn(alad, fr->conn);
 	if (!ecr) {
 		WARNING(("Can't find chatroom !"))
 			return 1;
@@ -1610,9 +1609,9 @@ static int faim_cb_chat_incoming_msg(aim_session_t *sess, aim_frame_t *fr, ...)
 
 	ea = oscar_find_account_with_ela(info->sn, ela, TRUE);
 	if (ea) {
-		eb_chat_room_show_message(ecr, ea->account_contact->nick, msg);
+		ay_conversation_got_message(ecr, ea->account_contact->nick, msg);
 	} else {
-		eb_chat_room_show_message(ecr, info->sn, msg);
+		ay_conversation_got_message(ecr, info->sn, msg);
 	}
 
 	return 1;
@@ -1726,9 +1725,9 @@ static void oscar_chatnav_connect_status(const char *msg, void *data)
 
 static void oscar_chat_connect(AyConnection *fd, int error, void *data)
 {
-	eb_chat_room *ecr = (eb_chat_room *)data;
+	Conversation *ecr = (Conversation *)data;
 	struct oscar_chat_room *ocr =
-		(struct oscar_chat_room *)ecr->protocol_local_chat_room_data;
+		(struct oscar_chat_room *)ecr->protocol_local_conversation_data;
 	eb_local_account *account = ecr->local_user;
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)account->
@@ -2273,14 +2272,11 @@ oscar_create_room(eb_local_account *account, struct oscar_chat_room_data *ocrd)
 static void ay_oscar_accept_invite(eb_local_account *account, void *data)
 {
 	struct oscar_chat_room_data *ocrd = (struct oscar_chat_room_data *)data;
-	eb_chat_room *ecr = g_new0(eb_chat_room, 1);
+	Conversation *ecr;
 
 	LOG(("ay_oscar_accept_invite()"))
 
-		strncpy(ecr->room_name, ocrd->name, sizeof(ecr->room_name));
-	ecr->fellows = NULL;
-	ecr->connected = FALSE;
-	ecr->local_user = account;
+	ecr = ay_conversation_new(account, NULL, ocrd->name, 1, 0);
 
 	ocrd->ecr = ecr;
 
@@ -2295,18 +2291,15 @@ static void ay_oscar_decline_invite(eb_local_account *account, void *data)
 	g_free(ocrd);
 }
 
-static eb_chat_room *ay_oscar_make_chat_room(char *name,
+static Conversation *ay_oscar_make_chat_room(char *name,
 	eb_local_account *account, int is_public)
 {
 	struct oscar_chat_room_data *ocrd;
-	eb_chat_room *ecr = g_new0(eb_chat_room, 1);
+	Conversation *ecr;
 
 	LOG(("ay_oscar_make_chat_room()"))
 
-		strncpy(ecr->room_name, name, sizeof(ecr->room_name));
-	ecr->fellows = NULL;
-	ecr->connected = FALSE;
-	ecr->local_user = account;
+	ecr = ay_conversation_new(account, NULL, name, 1, 0);
 
 	ocrd = g_new0(struct oscar_chat_room_data, 1);
 	ocrd->name = g_strdup(name);
@@ -2318,15 +2311,15 @@ static eb_chat_room *ay_oscar_make_chat_room(char *name,
 	return ecr;
 }
 
-static void ay_oscar_join_chat_room(eb_chat_room *room)
+static void ay_oscar_join_chat_room(Conversation *room)
 {
 	LOG(("ay_oscar_join_chat_room()"))
 }
 
-static void ay_oscar_leave_chat_room(eb_chat_room *room)
+static void ay_oscar_leave_chat_room(Conversation *room)
 {
 	struct oscar_chat_room *ocr =
-		(struct oscar_chat_room *)room->protocol_local_chat_room_data;
+		(struct oscar_chat_room *)room->protocol_local_conversation_data;
 	eb_local_account *account = room->local_user;
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)account->
@@ -2344,10 +2337,10 @@ static void ay_oscar_leave_chat_room(eb_chat_room *room)
 	g_free(ocr);
 }
 
-static void ay_oscar_send_chat_room_message(eb_chat_room *room, char *message)
+static void ay_oscar_send_chat_room_message(Conversation *room, char *message)
 {
 	struct oscar_chat_room *ocr =
-		(struct oscar_chat_room *)room->protocol_local_chat_room_data;
+		(struct oscar_chat_room *)room->protocol_local_conversation_data;
 	eb_local_account *account = room->local_user;
 	struct eb_aim_local_account_data *alad =
 		(struct eb_aim_local_account_data *)account->
@@ -2358,7 +2351,7 @@ static void ay_oscar_send_chat_room_message(eb_chat_room *room, char *message)
 }
 
 static void
-ay_oscar_send_invite(eb_local_account *account, eb_chat_room *room,
+ay_oscar_send_invite(eb_local_account *account, Conversation *room,
 	char *user, const char *message)
 {
 	struct eb_aim_local_account_data *alad;
@@ -2366,7 +2359,7 @@ ay_oscar_send_invite(eb_local_account *account, eb_chat_room *room,
 
 	alad = (struct eb_aim_local_account_data *)account->
 		protocol_local_account_data;
-	ocr = (struct oscar_chat_room *)room->protocol_local_chat_room_data;
+	ocr = (struct oscar_chat_room *)room->protocol_local_conversation_data;
 
 	aim_chat_invite(&(alad->aimsess), alad->conn, user, message,
 		ocr->exchange, ocr->name, 0x0);
@@ -2590,17 +2583,17 @@ static eb_account *oscar_find_account_with_ela(const char *handle,
 	return result;
 }
 
-static eb_chat_room *oscar_find_chat_room_by_name(struct
+static Conversation *oscar_find_conversation_by_name(struct
 	eb_aim_local_account_data *alad, const char *name)
 {
 	LList *node;
-	eb_chat_room *result = NULL;
-	eb_chat_room *ecr = NULL;
+	Conversation *result = NULL;
+	Conversation *ecr = NULL;
 
 	node = alad->rooms;
 	while (node) {
-		ecr = (eb_chat_room *)node->data;
-		if (strcmp(ecr->room_name, name) == 0) {
+		ecr = (Conversation *)node->data;
+		if (strcmp(ecr->name, name) == 0) {
 			result = ecr;
 			break;
 		}
@@ -2615,15 +2608,15 @@ static aim_conn_t *oscar_find_chat_conn_by_source(struct
 	eb_aim_local_account_data *alad, int fd)
 {
 	LList *node;
-	eb_chat_room *ecr = NULL;
+	Conversation *ecr = NULL;
 	struct oscar_chat_room *ocr = NULL;
 	aim_conn_t *result = NULL;
 
 	node = alad->rooms;
 	while (node) {
-		ecr = (eb_chat_room *)node->data;
+		ecr = (Conversation *)node->data;
 		ocr = (struct oscar_chat_room *)ecr->
-			protocol_local_chat_room_data;
+			protocol_local_conversation_data;
 		if (ocr->conn->fd == fd) {
 			result = ocr->conn;
 			break;
@@ -2635,19 +2628,19 @@ static aim_conn_t *oscar_find_chat_conn_by_source(struct
 	return result;
 }
 
-static eb_chat_room *oscar_find_chat_room_by_conn(struct
+static Conversation *oscar_find_conversation_by_conn(struct
 	eb_aim_local_account_data *alad, aim_conn_t *conn)
 {
 	LList *node;
-	eb_chat_room *result = NULL;
-	eb_chat_room *ecr = NULL;
+	Conversation *result = NULL;
+	Conversation *ecr = NULL;
 
 	node = alad->rooms;
 	while (node) {
-		ecr = (eb_chat_room *)node->data;
+		ecr = (Conversation *)node->data;
 
 		if (((struct oscar_chat_room *)ecr->
-				protocol_local_chat_room_data)->conn == conn) {
+			protocol_local_conversation_data)->conn == conn) {
 			result = ecr;
 			break;
 		}

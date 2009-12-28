@@ -30,7 +30,7 @@
 #ifndef __SERVICE_H__
 #define __SERVICE_H__
 
-#include "chat_room.h"
+#include "chat_window.h"
 #include "input_list.h"
 
 extern int NUM_SERVICES;
@@ -59,7 +59,7 @@ struct service_callbacks {
 	 */
 	int (*send_typing) (eb_local_account *account_from,
 		eb_account *account_to);
-	int (*send_cr_typing) (eb_chat_room *chatroom);
+	int (*send_cr_typing) (Conversation *chatroom);
 
 	/* reads local account information from a file */
 	eb_local_account *(*read_local_account_config) (LList *values);
@@ -140,21 +140,21 @@ struct service_callbacks {
 
 	/*send a message to a chat room */
 
-	void (*send_chat_room_message) (eb_chat_room *room, char *message);
+	void (*send_chat_room_message) (Conversation *room, char *message);
 
 	/*these are used to join and leave a chat room */
 
-	void (*join_chat_room) (eb_chat_room *room);
-	void (*leave_chat_room) (eb_chat_room *room);
+	void (*join_chat_room) (Conversation *room);
+	void (*leave_chat_room) (Conversation *room);
 
 	/*this it to create a new chat room */
 
-	eb_chat_room *(*make_chat_room) (char *name, eb_local_account *account,
+	Conversation *(*make_chat_room) (char *name, eb_local_account *account,
 		int is_public);
 
 	/*this is to invite somebody into the chat room */
 
-	void (*send_invite) (eb_local_account *account, eb_chat_room *room,
+	void (*send_invite) (eb_local_account *account, Conversation *room,
 		char *user, const char *message);
 
 	void (*accept_invite) (eb_local_account *account, void *invitation);

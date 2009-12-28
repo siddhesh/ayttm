@@ -32,7 +32,7 @@
 #include "service.h"
 #include "mem_util.h"
 #include "offline_queue_mgmt.h"	/* so the compiler tells us about type mismatches */
-#include "chat_room.h"
+#include "chat_window.h"
 
 /* FIXME: temporary UGLY !!! */
 eb_account *find_account_by_handle(const char *handle, int type);
@@ -208,7 +208,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 
 		ay_strfreev(tokens);
 	}
-	start_auto_chatrooms(ela);
+//	start_auto_chatrooms(ela);
 	fclose(temp);
 
 	if (queue)

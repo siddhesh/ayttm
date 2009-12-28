@@ -61,6 +61,7 @@ if test "$use_posix_dlopen" = "no"; then
 else
 	echo "Using POSIX dlopen for dynamic library loading"
 	AC_DEFINE([USE_POSIX_DLOPEN], [1], [Define if we use POSIX dlopen])
+	LDFLAGS="$LDFLAGS -ldl"
 fi
 
 # global LDFLAGS

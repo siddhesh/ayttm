@@ -72,13 +72,13 @@ static void refresh_service_contacts(int type)
 	for (l1 = groups; l1; l1 = l1->next) {
 		for (l2 = ((grouplist *)l1->data)->members; l2; l2 = l2->next) {
 			con = l2->data;
-			if (con->chatwindow && con->chatwindow->preferred
-				&& con->chatwindow->preferred->service_id ==
+			if (con->conversation && con->conversation->preferred
+				&& con->conversation->preferred->service_id ==
 				type) {
 				eb_debug(DBG_MOD,
 					"Setting the preferred service to NULL for %s\n",
 					con->nick);
-				con->chatwindow->preferred = NULL;
+				con->conversation->preferred = NULL;
 			}
 			for (l3 = con->accounts; l3; l3 = l3->next) {
 				eb_account *account = l3->data;

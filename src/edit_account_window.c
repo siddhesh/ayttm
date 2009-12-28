@@ -56,7 +56,7 @@ static void ok_callback(void)
 	int reshow_chatwindow = FALSE;
 
 	if (account && account->account_contact
-		&& account->account_contact->chatwindow)
+		&& account->account_contact->conversation)
 		reshow_chatwindow = TRUE;
 
 	if (strcmp(service, _("[None]")) && strstr(service, "]")) {
@@ -99,7 +99,7 @@ static void ok_callback(void)
 			account->service_id);
 	}
 
-	if (con && con->chatwindow) {
+	if (con && con->conversation) {
 		reshow_chatwindow = TRUE;
 	}
 	if (!account->account_contact)
@@ -114,7 +114,7 @@ static void ok_callback(void)
 	write_contact_list();
 	gtk_widget_destroy(edit_account_window);
 	if (reshow_chatwindow) {
-		eb_chat_window_display_contact(con);
+		ay_conversation_chat_with_contact(con);
 	}
 }
 
