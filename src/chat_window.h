@@ -67,8 +67,6 @@ typedef struct _chat_window {
 
 	char *name;
 
-	eb_local_account *local_user;
-
 	Conversation *conv;
 	LList *typing_fellows;
 } chat_window;

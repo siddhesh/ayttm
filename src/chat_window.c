@@ -583,7 +583,7 @@ static void change_local_account_on_click(GtkWidget *button, gpointer userdata)
 		return;
 	cw = cwa->cw;
 	ela = (eb_local_account *)cwa->data;
-	cw->local_user = ela;
+	cw->conv->local_user = ela;
 	/* don't free it */
 	account = gtk_label_get_text(label);
 	eb_debug(DBG_CORE, "change_local_account_on_click: %s\n", account);
@@ -779,8 +779,8 @@ static gboolean handle_click(GtkWidget *widget, GdkEventButton *event,
 			should_sep =
 				(add_menu_items(menu, -1, should_sep, NULL,
 					cw->conv->preferred, cw->conv->local_user) > 0);
-			if (cw->local_user)
-				add_menu_items(menu, cw->local_user->service_id,
+			if (cw->conv->local_user)
+				add_menu_items(menu, cw->conv->local_user->service_id,
 					should_sep, NULL, cw->conv->preferred,
 					cw->conv->local_user);
 			gtkut_create_menu_button(GTK_MENU(menu), NULL, NULL,
@@ -1217,7 +1217,7 @@ static void add_page_with_pane(chat_window *cw, GtkWidget *vbox, const char *nam
 	gtk_label_set_max_width_chars(GTK_LABEL(contact_label), 24);
 	gtk_label_set_ellipsize(GTK_LABEL(contact_label), PANGO_ELLIPSIZE_END);
 
-        gtk_rc_parse_string (
+	gtk_rc_parse_string (
 		"style \"tab-button-style\"\n"
 		"{\n"
 			"  GtkWidget::focus-padding = 0\n"
@@ -1237,9 +1237,16 @@ static void add_page_with_pane(chat_window *cw, GtkWidget *vbox, const char *nam
 	g_signal_connect(close_button, "clicked", G_CALLBACK(close_tab_callback),
 		cw);
 
+/* FIXME: This doesn't quite work.
+ * 	The idea is to install the handler for the window and then
+ * 	once the window receives the event, we find the in-focus
+ * 	tab and close it.
+ * 	If that is the last tab then close the window.
+ * 	If tabbed chat is disabled then close the window.
+
 	gtk_widget_add_accelerator(close_button, "clicked", accel_group,
 		GDK_w, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-
+*/
 	tab_label = gtk_hbox_new(FALSE, 3);
 
 	gtk_box_pack_start(GTK_BOX(tab_label), contact_label, TRUE, TRUE, 0);
@@ -1426,19 +1433,12 @@ void ay_chat_window_fellows_rename(chat_window *cw, ConversationFellow *fellow)
 			&upd_iter, 0, &name, -1);
 
 		if (!strcmp(name, fellow->alias)) {
-/*			cw->conv->num_fellows--;
-			buf = g_strdup_printf(_("Online: %i"),
-				cw->conv->num_fellows);
-			gtk_tree_view_column_set_title(cw->column,
-				buf);
-			g_free(buf);*/
 			gtk_list_store_set(cw->fellows_model, 
 				&upd_iter, 
 				0, fellow->alias, -1);
 			return;
 		}
-	}
-	while (gtk_tree_model_iter_next(GTK_TREE_MODEL(cw->
+	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(cw->
 				fellows_model), &upd_iter));
 }
 
@@ -1458,18 +1458,11 @@ void ay_chat_window_fellows_remove(chat_window *cw, ConversationFellow *fellow)
 			&del_iter, 0, &name, -1);
 
 		if (!strcmp(name, fellow->alias)) {
-/*			cw->conv->num_fellows--;
-			buf = g_strdup_printf(_("Online: %i"),
-				cw->conv->num_fellows);
-			gtk_tree_view_column_set_title(cw->column,
-				buf);
-			g_free(buf);*/
 			gtk_list_store_remove(cw->fellows_model,
 				&del_iter);
 			return;
 		}
-	}
-	while (gtk_tree_model_iter_next(GTK_TREE_MODEL(cw->
+	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(cw->
 				fellows_model), &del_iter));
 }
 
@@ -1746,14 +1739,15 @@ chat_window *ay_chat_window_new(Conversation *conv)
 		GTK_TOOL_ITEM(cw->sound_button), -1);
 
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(cw->sound_button),
-		_("Enable Sounds Ctrl+S"));
+		_("Enable Sound"/* Ctrl+S"*/));
 
 	g_signal_connect(cw->sound_button, "clicked",
 		G_CALLBACK(set_sound_callback), cw);
 	gtk_widget_show(cw->sound_button);
+/*
 	gtk_widget_add_accelerator(cw->sound_button, "clicked", accel_group,
 		GDK_s, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-
+*/
 	/* Toggle the sound button based on preferences */
 	cw->send_enabled = iGetLocalPref("do_play_send");
 	cw->receive_enabled = iGetLocalPref("do_play_receive");
@@ -1766,11 +1760,13 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	cw_set_sound_active(cw, enableSoundButton);
 
 	ICON_CREATE(iconwid, GTK_STOCK_FIND);
-	TOOLBAR_APPEND(view_log_button, _("View Log CTRL+L"), iconwid,
+	TOOLBAR_APPEND(view_log_button, _("View Log"/* CTRL+L"*/), iconwid,
 		view_log_callback, cw);
+	
+/* FIXME: Doesn't quite work
 	gtk_widget_add_accelerator(view_log_button, "clicked", accel_group,
 		GDK_l, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-
+*/
 	TOOLBAR_APPEND_SPACE(TRUE);
 
 #ifndef __MINGW32__
@@ -1786,7 +1782,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	/* This is the send file button... only for private chats */
 	if (cw->conv->contact) {
 		ICON_CREATE(iconwid, GTK_STOCK_OPEN);
-		TOOLBAR_APPEND(sendf_button, _("Send File CTRL+T"), iconwid, send_file,
+		TOOLBAR_APPEND(sendf_button, _("Send File"/* CTRL+T"*/), iconwid, send_file,
 			cw);
 		gtk_widget_add_accelerator(sendf_button, "clicked", accel_group, GDK_t,
 			GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -1806,7 +1802,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	if (!conv->is_room) {
 		/* This is the ignore button */
 		ICON_CREATE(iconwid, GTK_STOCK_REMOVE);
-		TOOLBAR_APPEND(ignore_button, _("Ignore CTRL+G"), iconwid,
+		TOOLBAR_APPEND(ignore_button, _("Ignore"/* CTRL+G"*/), iconwid,
 			ignore_callback, cw);
 		gtk_widget_add_accelerator(ignore_button, "clicked", accel_group, GDK_g,
 			GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -1816,7 +1812,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 
 	/* This is the send button */
 	ICON_CREATE(iconwid, GTK_STOCK_OK);
-	TOOLBAR_APPEND(send_button, _("Send Message CTRL+R"), iconwid,
+	TOOLBAR_APPEND(send_button, _("Send Message"/* CTRL+R"*/), iconwid,
 		send_message, cw);
 	gtk_widget_add_accelerator(send_button, "clicked", accel_group, GDK_r,
 		GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);

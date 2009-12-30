@@ -20,7 +20,7 @@ src/action.c
 src/activity_bar.C
 src/add_contact_window.c
 src/away_window.c
-src/chat_room.c
+src/conversation.c
 src/chat_window.c
 src/contact_actions.c
 src/contact_util.C
