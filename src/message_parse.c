@@ -220,7 +220,7 @@ static void send_file(char *filename, int s)
 			break;
 		}
 	}
-	snprintf(buff, 1025, "%05ld", strlen(filename + i + 1));
+	snprintf(buff, 5, "%05ld", strlen(filename + i + 1));
 	write(s, buff, 5);
 	write(s, filename + i + 1, strlen(filename + i + 1));
 	filelen = htonl(fileinfo.st_size);

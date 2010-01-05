@@ -896,7 +896,7 @@ static const char *ay_irc_get_status_string(eb_account *account)
 			g_snprintf(buf, 255, " %d", minutes);
 	}
 
-	strncat(string, buf, 255);
+	strncat(string, buf, sizeof(buf) - 1);
 	strncat(string, irc_states[eia->status], 255 - strlen(string));
 
 	return string;
