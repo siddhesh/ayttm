@@ -129,7 +129,7 @@ int msn_http_got_response(MsnConnection *mc, int len)
 static void http_post_connected(MsnConnection *mc)
 {
 	char buf[4096];
-	char soap_action[64];
+	char soap_action[512];
 
 	LList *l =
 		l_list_find_custom(http_connection_list, mc, http_mc_compare);
@@ -137,7 +137,7 @@ static void http_post_connected(MsnConnection *mc)
 	HttpData *data = (HttpData *)l->data;
 
 	if (data->soap_action) {
-		sprintf(soap_action, "SOAPAction: %s\r\n", data->soap_action);
+		snprintf(soap_action, sizeof(soap_action), "SOAPAction: %s\r\n", data->soap_action);
 	} else {
 		soap_action[0] = '\0';
 	}
