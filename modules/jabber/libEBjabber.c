@@ -522,7 +522,7 @@ int JABBER_ChangeState(JABBER_Conn *JConn, int state)
 	xmlnode x, y;
 	/* Unique away states are possible, but not supported by
 	   ayttm yet.  status would hold that value */
-	char show[7] = "", *status = "";
+	char show[8] = "", *status = "";
 
 	eb_debug(DBG_JBR, "(%i)\n", state);
 	if (!JConn->conn)
