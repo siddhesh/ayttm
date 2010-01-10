@@ -106,7 +106,7 @@ static void add_unknown_callback(GtkWidget *add_button, gpointer userdata)
 static const int nb_cr_colors = 9;
 
 void ay_conversation_fellows_append(Conversation *conv, const char *alias,
-	const char *handle)
+				    const char *handle)
 {
 	ConversationFellow *fellow = g_new0(ConversationFellow, 1);
 
@@ -846,8 +846,31 @@ void ay_conversation_display_status(eb_account *remote, gchar *message)
 	g_free(tmp);
 }
 
+static int conv_counter = 0;
+
+#define gen_conversation_name(buf) { \
+		snprintf(buf, sizeof(buf), _("Conversation #%d"), ++conv_counter); \
+}
+
+Conversation *ay_conversation_clone_as_room(Conversation *conv)
+{
+	Conversation *ret;
+	char name [255];
+	eb_account *ea = find_suitable_remote_account(conv->preferred, conv->contact);
+	
+	gen_conversation_name(name);
+
+	ret = RUN_SERVICE(conv->local_user)->make_chat_room(name, conv->local_user, 0);
+
+	ay_conversation_invite_fellow(conv, conv->preferred->handle, NULL);
+
+	return ret;
+}
+
+#undef gen_conversation_name
+
 Conversation *ay_conversation_new(eb_local_account *local, struct contact *remote,
-	const char *name, int is_room, int is_public)
+				  const char *name, int is_room, int is_public)
 {
 	gchar buff[NAME_MAX];
 	Conversation *ret;
@@ -1012,4 +1035,11 @@ Conversation *ay_conversation_find_by_name(eb_local_account *ela, const char *na
 	}
 
 	return NULL;
+}
+
+void ay_conversation_invite_fellow(Conversation *conv, const char *fellow,
+	const char *message)
+{
+	RUN_SERVICE(conv->local_user)->send_invite(conv->local_user, conv,
+		fellow, message);
 }

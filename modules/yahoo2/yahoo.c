@@ -1367,7 +1367,6 @@ static void eb_yahoo_accept_conference(gpointer data, int result)
 
 		chat_room->protocol_local_conversation_data = ycrd;
 
-		ay_join_conversation(chat_room, TRUE);
 		ay_conversation_buddy_arrive(chat_room,
 			(ea ? ea->account_contact->nick : ycrd->host),
 			ycrd->host);
@@ -1424,11 +1423,9 @@ static void eb_yahoo_accept_invite(eb_local_account *ela, void *data)
 
 	chat_room->protocol_local_conversation_data = ycrd;
 
-	ay_join_conversation(chat_room, TRUE);
-/*	ay_conversation_buddy_arrive(chat_room, 
-			(ea?ea->account_contact->nick:ycrd->host), 
-			ycrd->host);
-*/
+	yahoo_conference_logon(ycrd->id, ylad->act_id, ycrd->members,
+		ycrd->room);
+
 	for (l = ycrd->members; l; l = l->next) {
 		char *handle = l->data;
 		if (!strcmp(ylad->act_id, handle)) {
@@ -1478,7 +1475,7 @@ static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who,
 		members->prev = l;
 	}
 
-	invite_dialog(ela, who, room, ycrd);
+	ay_conversation_got_invite(ela, who, room, ycrd);
 }
 #endif
 
@@ -1654,7 +1651,6 @@ static Conversation *eb_yahoo_make_chat_room(char *name, eb_local_account *ela,
 	yahoo_conference_logon(ycrd->id, ylad->act_id, ycrd->members,
 		ycrd->room);
 
-	ay_join_conversation(ecr, TRUE);
 	return ecr;
 }
 

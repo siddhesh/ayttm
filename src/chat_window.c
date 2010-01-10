@@ -570,6 +570,167 @@ static void allow_offline_callback(GtkWidget *offline_button, gpointer userdata)
 	cw_set_offline_active(cw, !cw_get_offline_active(cw));
 }*/
 
+static void get_group_contacts(gchar *group, chat_window *cw)
+{
+        LList *node = NULL, *accounts = NULL;
+	grouplist *g;
+	Conversation *conv = cw->conv;
+
+	g = find_grouplist_by_name(group);
+
+	if (g)
+		node = g->members;
+
+	while (node) {
+		struct contact *contact = (struct contact *)node->data;
+		accounts = contact->accounts;
+		while (accounts) {
+			struct account *acc = accounts->data;
+
+			if (acc->ela == conv->local_user && acc->online) {
+				char *buf = g_strdup_printf("%s (%s)",
+						contact->nick, acc->handle);
+
+				gtk_combo_box_append_text(
+					GTK_COMBO_BOX(cw->invite_buddy),
+					buf);
+			}
+			accounts = accounts->next;
+		}
+		node = node->next;
+	}
+}
+
+static void get_contacts(chat_window *cw)
+{
+        LList *node = groups;
+	while (node) {
+		get_group_contacts(node->data, cw);
+		node = node->next;
+	}
+}
+
+static void invite_callback(GtkWidget *dialog, int response, gpointer data)
+{
+	chat_window *cw = data;
+	Conversation *conv = cw->conv;
+
+	char *acc = NULL;
+	char *invited = NULL;
+	
+	if (response != GTK_RESPONSE_ACCEPT)
+		goto out;
+
+	invited = gtk_combo_box_get_active_text(GTK_COMBO_BOX(cw->invite_buddy));
+
+	if (!invited || !strstr(invited, "(") || !strstr(invited, ")"))
+		goto out;
+
+	acc = strstr(invited, "(") + 1;
+	*strstr(acc, ")") = '\0';
+
+	if (conv->preferred) {
+		/* this is a chat window */
+		eb_account *third = NULL;
+		third = find_account_by_handle(acc,
+			conv->local_user->service_id);
+		if (third)
+			conv = ay_conversation_clone_as_room(conv);
+	}
+
+	ay_conversation_invite_fellow(conv, acc, 
+		gtk_entry_get_text(GTK_ENTRY(cw->invite_message)));
+
+out:
+	g_free(invited);
+	gtk_widget_destroy(cw->invite_window);
+	cw->invite_window = NULL;
+	cw->invite_buddy = NULL;
+	cw->invite_message = NULL;
+}
+
+static void do_invite_window(GtkWidget *source, gpointer data)
+{
+	GtkWidget *box, *box2, *mbox, *label, *table, *frame, *separator;
+	chat_window *cw = data;
+	Conversation * conv = cw->conv;
+	int result = 0;
+
+	/* Do we already have an invite window open? */
+	if (!cw || cw->invite_window)
+		return;
+	
+	if (!conv->local_user && conv->preferred)
+		conv->local_user = conv->preferred->ela;
+	if (!conv->local_user) {
+		ay_do_error(_("Chatroom error"),
+		_("Cannot invite a third party until a protocol has been chosen."));
+		return;
+	}
+
+	table = gtk_table_new(2, 2, FALSE);
+
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(table), 5);
+
+	label = gtk_label_new(_("Handle: "));
+	gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, GTK_FILL, GTK_FILL,
+		0, 0);
+	gtk_widget_show(label);
+
+	cw->invite_buddy = gtk_combo_box_new_text();
+	get_contacts(cw);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(cw->invite_buddy), -1);
+	gtk_widget_show(cw->invite_buddy);
+
+	gtk_table_attach(GTK_TABLE(table), cw->invite_buddy, 1, 2, 0, 1,
+		GTK_FILL, GTK_FILL, 0, 0);
+
+	label = gtk_label_new(_("Message: "));
+	gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2, GTK_FILL, GTK_FILL,
+		0, 0);
+	gtk_widget_show(label);
+
+	cw->invite_message = gtk_entry_new();
+	gtk_table_attach(GTK_TABLE(table), cw->invite_message, 1, 2, 1, 2,
+		GTK_FILL, GTK_FILL, 0, 0);
+	gtk_widget_show(cw->invite_message);
+
+/*	frame = gtk_frame_new(NULL);
+
+	gtk_frame_set_label(GTK_FRAME(frame), _("Invite a contact"));
+	gtk_container_add(GTK_CONTAINER(frame), table);
+*/
+
+//	gtk_widget_show(frame);
+	gtk_widget_show(table);
+
+	cw->invite_window = gtk_dialog_new_with_buttons(_("Invite a contact"),
+							GTK_WINDOW(cw->window),
+							GTK_DIALOG_MODAL | 
+							GTK_DIALOG_DESTROY_WITH_PARENT,
+							NULL);
+
+	gtk_window_set_resizable(cw->invite_window, FALSE);
+
+	box = gtk_dialog_get_content_area(GTK_DIALOG(cw->invite_window));
+	gtk_box_pack_start(GTK_BOX(box), table, TRUE, TRUE, 0);
+
+	label = gtkut_stock_button_new_with_label(_("Invite"), GTK_STOCK_ADD);
+	gtk_dialog_add_action_widget(GTK_DIALOG(cw->invite_window), label,
+		GTK_RESPONSE_ACCEPT);
+
+	label = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+	gtk_dialog_add_action_widget(GTK_DIALOG(cw->invite_window), label,
+		GTK_RESPONSE_ACCEPT);
+
+	g_signal_connect(cw->invite_window, "response",
+		G_CALLBACK(invite_callback), cw);
+
+	gtk_widget_show_all (cw->invite_window);
+}
+
 static void change_local_account_on_click(GtkWidget *button, gpointer userdata)
 {
 	GtkLabel *label = GTK_LABEL(GTK_BIN(button)->child);
@@ -751,12 +912,12 @@ static gboolean handle_click(GtkWidget *widget, GdkEventButton *event,
 		gtk_widget_show(button);
 
 		/* Invite Selection */
-/*		button = gtk_menu_item_new_with_label(_("Invite"));
+		button = gtk_menu_item_new_with_label(_("Invite"));
 		g_signal_connect(button, "activate",
 			G_CALLBACK(do_invite_window), cw);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
 		gtk_widget_show(button);
-*/
+
 		/* Ignore Section */
 		button = gtk_menu_item_new_with_label(_("Ignore Contact"));
 		g_signal_connect(button, "activate",
@@ -1791,14 +1952,14 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	}
 
 	/* This is the invite button */
-/*	ICON_CREATE_XPM(icon, iconwid, invite_btn_xpm);
+	ICON_CREATE_XPM(icon, iconwid, invite_btn_xpm);
 	TOOLBAR_APPEND(invite_button, _("Invite CTRL+I"), iconwid,
 		do_invite_window, cw);
 	gtk_widget_add_accelerator(invite_button, "clicked", accel_group, GDK_i,
 		GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
 	TOOLBAR_APPEND_SPACE(TRUE);
-*/
+
 	if (!conv->is_room) {
 		/* This is the ignore button */
 		ICON_CREATE(iconwid, GTK_STOCK_REMOVE);
@@ -1806,7 +1967,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 			ignore_callback, cw);
 		gtk_widget_add_accelerator(ignore_button, "clicked", accel_group, GDK_g,
 			GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-        
+
 		TOOLBAR_APPEND_SPACE(TRUE);
 	}
 

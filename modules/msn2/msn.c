@@ -592,8 +592,8 @@ static void ay_msn_finish_login(const char *password, void *data)
 
 	mlad->ma->password = strdup(password);
 
-	strcpy(msn_host, ay_msn_host);
-	strcpy(msn_port, ay_msn_port);
+	strncpy(msn_host, ay_msn_host, sizeof(msn_host) - 1);
+	strncpy(msn_port, ay_msn_port, sizeof(msn_port) - 1);
 
 	if (!mlad->friendlyname[0])
 		mlad->ma->friendlyname = strdup(account->alias);
@@ -1467,7 +1467,7 @@ static void ay_msn_invite_callback(MsnConnection *sb, int error, void *data)
 		return;
 	}
 
-	sprintf(room->name, "MSN Chat Room (#%s)",
+		snprintf(room->name, sizeof(room_name), "MSN Chat Room (#%s)",
 		sb->sbpayload->session_id);
 
 	room->protocol_local_conversation_data = sb;

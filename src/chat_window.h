@@ -52,6 +52,10 @@ typedef struct _chat_window {
 	GtkWidget *reconnect_button;
 	GtkWidget *fellows_widget;
 
+	GtkWidget *invite_window;
+	GtkWidget *invite_message;
+	GtkWidget *invite_buddy;
+
 	GtkListStore *fellows_model;
 
 	GtkWidget *notebook;

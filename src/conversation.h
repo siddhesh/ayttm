@@ -125,5 +125,7 @@ int ay_conversation_buddy_connected(Conversation *conv, const char *alias);
 
 void ay_conversation_rename(Conversation *conv, char *new_name);
 
+void ay_conversation_invite_fellow(Conversation *conv, const char *fellow,
+	const char *message);
 
 #endif
