@@ -592,8 +592,8 @@ static void ay_msn_finish_login(const char *password, void *data)
 
 	mlad->ma->password = strdup(password);
 
-	strcpy(msn_host, ay_msn_host);
-	strcpy(msn_port, ay_msn_port);
+	strncpy(msn_host, ay_msn_host, sizeof(msn_host) - 1);
+	strncpy(msn_port, ay_msn_port, sizeof(msn_port) - 1);
 
 	if (!mlad->friendlyname[0])
 		mlad->ma->friendlyname = strdup(account->alias);
@@ -976,11 +976,11 @@ static eb_chat_room *ay_msn_make_chat_room(gchar *name,
 	mlad = account->protocol_local_account_data;
 
 	if (name && *name)
-		sprintf(ecr->room_name, "MSN Chat Room (#%s)", name);
+		snprintf(ecr->room_name, sizeof(ecr->room_name), "MSN Chat Room (#%s)", name);
 	else
-		sprintf(ecr->room_name, "MSN :: %s", mlad->ma->passport);
+		snprintf(ecr->room_name, sizeof(ecr->room_name), "MSN :: %s", mlad->ma->passport);
 
-	strcpy(ecr->id, ecr->room_name);
+	strncpy(ecr->id, ecr->room_name, sizeof(ecr->id) - 1);
 	ecr->fellows = NULL;
 	ecr->connected = FALSE;
 	ecr->local_user = account;
@@ -1470,9 +1470,9 @@ static void ay_msn_invite_callback(MsnConnection *sb, int error, void *data)
 		return;
 	}
 
-	sprintf(room->room_name, "MSN Chat Room (#%s)",
+	snprintf(room->room_name, sizeof(room->room_name), "MSN Chat Room (#%s)",
 		sb->sbpayload->session_id);
-	strcpy(room->id, room->room_name);
+	strncpy(room->id, room->room_name, sizeof(room->id) - 1);
 
 	room->protocol_local_chat_room_data = sb;
 	sb->sbpayload->data = room;
