@@ -87,6 +87,7 @@ static void msn_command_parse_payload_QRY(MsnMessage *msg);
 static void msn_command_parse_payload_ADL(MsnMessage *msg);
 static void msn_command_parse_payload_FQY(MsnMessage *msg);
 static void msn_command_parse_payload_UBX(MsnMessage *msg);
+static void msn_command_parse_payload_NOT(MsnMessage *msg);
 
 typedef struct {
 	char *name;
@@ -113,27 +114,27 @@ MsnCommandInfo msn_commands[] = {
 	{"ILN", MSN_COMMAND_ILN, 7, 0, msn_command_got_ILN, NULL},
 	{"BLP", MSN_COMMAND_BLP, 2, 0, msn_command_got_BLP, NULL},
 	{"MSG", MSN_COMMAND_MSG, -1, 3, msn_command_got_MSG,
-			msn_command_parse_payload_MSG},
+	 msn_command_parse_payload_MSG},
 
 	{"ADL", MSN_COMMAND_ADL, 2, 2, msn_command_got_ADL,
-			msn_command_parse_payload_ADL},
+	 msn_command_parse_payload_ADL},
 	{"ADG", MSN_COMMAND_ADG, 0, 0, msn_command_got_ADG, NULL},
 	{"CHG", MSN_COMMAND_CHG, 2, 0, msn_command_got_CHG, NULL},
 	{"FQY", MSN_COMMAND_FQY, 2, 2, msn_command_got_FQY,
-			msn_command_parse_payload_FQY},
+	 msn_command_parse_payload_FQY},
 	{"GCF", MSN_COMMAND_GCF, 2, 2, msn_command_got_GCF,
-			msn_command_parse_payload_GCF},
+	 msn_command_parse_payload_GCF},
 	{"OUT", MSN_COMMAND_OUT, 1, 0, msn_command_got_OUT, NULL},
 	{"PNG", MSN_COMMAND_PNG, 0, 0, msn_command_got_PNG, NULL},
 	{"QNG", MSN_COMMAND_QNG, 0, 0, msn_command_got_QNG, NULL},
 	{"QRY", MSN_COMMAND_QRY, 3, 3, msn_command_got_QRY,
-			msn_command_parse_payload_QRY},
+	 msn_command_parse_payload_QRY},
 	{"SBS", MSN_COMMAND_SBS, 2, 0, msn_command_got_SBS, NULL},
 	{"REA", MSN_COMMAND_REA, 0, 0, msn_command_got_REA, NULL},
 	{"RML", MSN_COMMAND_RML, 2, 2, msn_command_got_RML, NULL},
 	{"RMG", MSN_COMMAND_RMG, 0, 0, msn_command_got_RMG, NULL},
 	{"UBX", MSN_COMMAND_UBX, 3, 3, msn_command_got_UBX,
-			msn_command_parse_payload_UBX},
+	 msn_command_parse_payload_UBX},
 	{"SDC", MSN_COMMAND_SDC, 0, 0, msn_command_got_SDC, NULL},
 	{"IMS", MSN_COMMAND_IMS, 0, 0, msn_command_got_IMS, NULL},
 
@@ -141,7 +142,8 @@ MsnCommandInfo msn_commands[] = {
 	{"FLN", MSN_COMMAND_FLN, 2, 0, msn_command_got_FLN, NULL},
 	{"NLN", MSN_COMMAND_NLN, 6, 0, msn_command_got_NLN, NULL},
 	{"RNG", MSN_COMMAND_RNG, 6, 0, msn_command_got_RNG, NULL},
-	{"NOT", MSN_COMMAND_NOT, 0, 0, msn_command_got_NOT, NULL},
+	{"NOT", MSN_COMMAND_NOT, 1, 1, msn_command_got_NOT,
+	 msn_command_parse_payload_NOT},
 
 	{"ANS", MSN_COMMAND_ANS, 4, 0, msn_command_got_ANS, NULL},
 	{"IRO", MSN_COMMAND_IRO, 0, 0, msn_command_got_IRO, NULL},
@@ -296,6 +298,11 @@ static void msn_command_parse_payload_ADL(MsnMessage *msg)
 }
 
 static void msn_command_parse_payload_GCF(MsnMessage *msg)
+{
+
+}
+
+static void msn_command_parse_payload_NOT(MsnMessage *msg)
 {
 
 }

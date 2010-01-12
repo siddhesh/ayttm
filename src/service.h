@@ -228,6 +228,7 @@ enum service_capabilities {
 	SERVICE_CAN_FILETRANSFER = 1 << 2,
 	SERVICE_CAN_ICONVERT = 1 << 3,
 	SERVICE_CAN_MULTIACCOUNT = 1 << 4,
+	SERVICE_CAN_CONFERENCE = 1 << 5,
 	SERVICE_CAN_EVERYTHING = ~0
 };
 
@@ -243,6 +244,7 @@ struct service {
 #define can_file_transfer(x)	(x.capabilities & SERVICE_CAN_FILETRANSFER)
 #define can_iconvert(x)		(x.capabilities & SERVICE_CAN_ICONVERT)
 #define can_multiaccount(x)	(x.capabilities & SERVICE_CAN_MULTIACCOUNT)
+#define can_conference(x)	(x.capabilities & SERVICE_CAN_CONFERENCE)
 
 #ifdef __cplusplus
 extern "C" {

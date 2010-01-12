@@ -123,6 +123,9 @@ extern "C" {
 		const char *group);
 	int connected_local_accounts(void);
 
+	void invite_dialog(eb_local_account *ela, const char *user,
+			   const char *chat_room, void *id);
+
 	pid_t create_lock_file(char *fname);
 	void delete_lock_file(char *fname);
 	void eb_generic_menu_function(void *add_button, void *userdata);

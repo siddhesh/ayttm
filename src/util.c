@@ -1439,7 +1439,7 @@ static void process_invite(void *data, int result)
 }
 
 void invite_dialog(eb_local_account *ela, const char *user,
-	const char *chat_room, void *id)
+		   const char *chat_room, void *id)
 {
 	char *message =
 		g_strdup_printf(_

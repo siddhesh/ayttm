@@ -91,8 +91,10 @@ PLUGIN_INFO plugin_info = {
 };
 
 struct service SERVICE_INFO = { "Jabber", -1,
-	SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_OFFLINEMSG |
-		SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL
+				SERVICE_CAN_MULTIACCOUNT | 
+				SERVICE_CAN_OFFLINEMSG |
+				SERVICE_CAN_GROUPCHAT | 
+				SERVICE_CAN_ICONVERT, NULL
 };
 
 /* End Module Exports */
@@ -814,7 +816,6 @@ static Conversation *eb_jabber_make_chat_room(char *name,
 
 	ecr = ay_conversation_new(account, NULL, name, 1, is_public);
 
-	ay_join_conversation(ecr, TRUE);
 	eb_debug(DBG_JBR, "<\n");
 	return ecr;
 }

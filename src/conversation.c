@@ -1,7 +1,7 @@
 /*
  * Ayttm
  *
- * Copyright (C) 2003, the Ayttm team
+ * Copyright (C) 2009, 2010 the Ayttm team
  * 
  * Ayttm is derivative of Everybuddy
  * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
@@ -72,36 +72,6 @@ LList *outgoing_message_filters_remote = NULL;
 LList *outgoing_message_filters_local = NULL;
 
 static LList *conversation_list = NULL;
-
-static void add_unknown_callback(GtkWidget *add_button, gpointer userdata)
-{
-	Conversation *conv = userdata;
-
-	/* if something wierd is going on and the unknown contact has multiple
-	 * accounts, find use the preferred account
-	 */
-
-	conv->preferred =
-		find_suitable_remote_account(conv->preferred, conv->contact);
-
-	/* if in the weird case that the unknown user has gone offline
-	 * just use the first account you see
-	 */
-
-	if (!conv->preferred)
-		conv->preferred = conv->contact->accounts->data;
-
-	/* if that fails, something is seriously wrong
-	 * bail out while you can
-	 */
-
-	if (!conv->preferred)
-		return;
-
-	/* now that we have a valid account, pop up the window :) */
-
-	add_unknown_account_window_new(conv->preferred);
-}
 
 static const int nb_cr_colors = 9;
 
@@ -455,8 +425,8 @@ void eb_chat_window_do_timestamp(struct contact *c, gboolean online)
 		CHAT_NOTIFICATION_NOTE);
 }
 
-void ay_conversation_got_message(Conversation *conv, gchar *from, 
-	gchar *o_message)
+void ay_conversation_got_message(Conversation *conv, const gchar *from, 
+				 const gchar *o_message)
 {
 	struct contact *remote_contact = conv->contact;
 	eb_account *remote = NULL;
@@ -862,7 +832,7 @@ Conversation *ay_conversation_clone_as_room(Conversation *conv)
 
 	ret = RUN_SERVICE(conv->local_user)->make_chat_room(name, conv->local_user, 0);
 
-	ay_conversation_invite_fellow(conv, conv->preferred->handle, NULL);
+	ay_conversation_invite_fellow(ret, conv->preferred->handle, NULL);
 
 	return ret;
 }
@@ -933,10 +903,8 @@ void ay_conversation_end(Conversation *conv)
 
 		conv->contact->conversation = NULL;
 	}
-	else if (conv->preferred
-		&& eb_services[conv->preferred->service_id].sc->terminate_chat)
-
-		RUN_SERVICE(conv->preferred)->terminate_chat(conv->preferred);
+	else
+		RUN_SERVICE(conv->local_user)->leave_chat_room(conv);
 
 	for (node2 = conv->history; node2; node2 = node2->next) {
 		free(node2->data);

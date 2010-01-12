@@ -1473,7 +1473,6 @@ static int faim_cb_conninitdone_chat(aim_session_t *sess, aim_frame_t *fr, ...)
 	aim_clientready(&(alad->aimsess), fr->conn);
 
 	ecr = oscar_find_conversation_by_conn(alad, fr->conn);
-	ay_join_conversation(ecr, TRUE);
 
 	return 1;
 }

@@ -1,7 +1,7 @@
 /*
  * Ayttm
  *
- * Copyright (C) 2003, the Ayttm team
+ * Copyright (C) 2003-2010 the Ayttm team
  * 
  * Ayttm is derivative of Everybuddy
  * Copyright (C) 1999-2002, Torrey Searle <tsearle@uci.edu>
@@ -35,6 +35,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <ctype.h>
 #include <regex.h>
+#include "messages.h"
 
 #include "auto_complete.h"
 
@@ -83,111 +84,6 @@ static gboolean handle_focus(GtkWidget *widget, GdkEventFocus *event,
 	gpointer userdata);
 
 LList *chat_window_list = NULL;
-
-#ifdef HAVE_ICONV_H
-
-/* 
-    Recodes source text with iconv() and puts it in translated_text
-    returns pointer to recoded text
-*/
-enum {
-	RECODE_TO_LOCAL = 0,
-	RECODE_TO_REMOTE
-};
-
-static char *recode_if_needed(const char *source_text, int direction)
-{
-	size_t inleft;
-	size_t outleft;
-	const char *ptr_src_text = source_text;
-	char *const recoded_text = g_new0(char, strlen(source_text) * 2 + 1);
-	char *ptr_recoded_text = recoded_text;
-	iconv_t conv_desc;
-	int tries;
-
-	if (iGetLocalPref("use_recoding") == 1) {
-		if (direction == RECODE_TO_REMOTE)
-			conv_desc =
-				iconv_open(cGetLocalPref("remote_encoding"),
-				cGetLocalPref("local_encoding"));
-		else
-			conv_desc =
-				iconv_open(cGetLocalPref("local_encoding"),
-				cGetLocalPref("remote_encoding"));
-
-		if (conv_desc != (iconv_t) (-1)) {
-			ptr_src_text = source_text;
-			inleft = strlen(source_text) + 1;
-			/* 'inleft*2' e.g. for 'Latin-x' to 'UTF-8', which is 1-byte to 2-byte recoding */
-			outleft = inleft * 2 + 1;
-
-			for (tries = 0; tries < 4; tries++) {
-				if (iconv(conv_desc, (char **)&ptr_src_text,
-						&inleft, &ptr_recoded_text,
-						&outleft) == (size_t) (-1)) {
-					if (inleft && errno == EILSEQ) {
-						if (tries == 3) {
-							strncpy(ptr_recoded_text, ptr_src_text, strlen(source_text) * 2);
-							fprintf(stderr,
-								"Ayttm: recoding broke 3 times,"
-								" leaving the rest of the line as it is...\n");
-							break;
-						} else {
-							/* trying to skip offending character
-							   this may break input stream if it's multibyte
-							 */
-							*ptr_recoded_text = '.';	/*  *ptr_src_text;  */
-							ptr_recoded_text++;
-							ptr_src_text++;
-							inleft--;
-							outleft--;
-							fprintf(stderr,
-								"Ayttm: charachter cannot be recoded, "
-								"trying to skip it...\n");
-							continue;
-						}
-					} else if (errno == EINVAL) {
-						fprintf(stderr,
-							"Ayttm: recoding broke - "
-							"incomplete multibyte sequence at the end of the line.\n");
-						break;
-					} else if (errno == E2BIG) {
-						fprintf(stderr,
-							"Ayttm: recoding buffer too small?!! Oops! :(\n");
-						break;
-					} else {
-						fprintf(stderr,
-							"Ayttm: unknown recoding error.\n");
-						break;
-					}
-				}
-			}
-			*(ptr_recoded_text + strlen(ptr_src_text)) = '\0';	/* just in case :) */
-
-			iconv_close(conv_desc);
-			return recoded_text;
-		} else {
-			fprintf(stderr,
-				"Ayttm: recoding from %s to %s is not valid, sorry!\n"
-				"Turning recoding off.\n",
-				cGetLocalPref("local_encoding"),
-				cGetLocalPref("remote_encoding"));
-			iSetLocalPref("use_recoding", 0);
-
-			if (recoded_text)
-				g_free(recoded_text);
-
-			return g_strdup(source_text);
-		}
-	}
-
-	if (recoded_text)
-		g_free(recoded_text);
-
-	return g_strdup(source_text);
-}
-
-#endif				/* HAVE_ICONV_H */
 
 #ifdef __MINGW32__
 static void redraw_chat_window(GtkWidget *text)
@@ -629,8 +525,7 @@ static void invite_callback(GtkWidget *dialog, int response, gpointer data)
 	acc = strstr(invited, "(") + 1;
 	*strstr(acc, ")") = '\0';
 
-	if (conv->preferred) {
-		/* this is a chat window */
+	if (!conv->is_room) {
 		eb_account *third = NULL;
 		third = find_account_by_handle(acc,
 			conv->local_user->service_id);
@@ -651,10 +546,9 @@ out:
 
 static void do_invite_window(GtkWidget *source, gpointer data)
 {
-	GtkWidget *box, *box2, *mbox, *label, *table, *frame, *separator;
+	GtkWidget *box, *label, *table;
 	chat_window *cw = data;
 	Conversation * conv = cw->conv;
-	int result = 0;
 
 	/* Do we already have an invite window open? */
 	if (!cw || cw->invite_window)
@@ -697,14 +591,10 @@ static void do_invite_window(GtkWidget *source, gpointer data)
 		GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show(cw->invite_message);
 
-/*	frame = gtk_frame_new(NULL);
-
-	gtk_frame_set_label(GTK_FRAME(frame), _("Invite a contact"));
-	gtk_container_add(GTK_CONTAINER(frame), table);
-*/
-
-//	gtk_widget_show(frame);
 	gtk_widget_show(table);
+
+	label = gtk_label_new("");
+	gtk_label_set_markup(GTK_LABEL(label), _("<b>Select the contact you want to invite</b>"));
 
 	cw->invite_window = gtk_dialog_new_with_buttons(_("Invite a contact"),
 							GTK_WINDOW(cw->window),
@@ -712,9 +602,10 @@ static void do_invite_window(GtkWidget *source, gpointer data)
 							GTK_DIALOG_DESTROY_WITH_PARENT,
 							NULL);
 
-	gtk_window_set_resizable(cw->invite_window, FALSE);
+	gtk_window_set_resizable(GTK_WINDOW(cw->invite_window), FALSE);
 
 	box = gtk_dialog_get_content_area(GTK_DIALOG(cw->invite_window));
+	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(box), table, TRUE, TRUE, 0);
 
 	label = gtkut_stock_button_new_with_label(_("Invite"), GTK_STOCK_ADD);
@@ -723,7 +614,7 @@ static void do_invite_window(GtkWidget *source, gpointer data)
 
 	label = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
 	gtk_dialog_add_action_widget(GTK_DIALOG(cw->invite_window), label,
-		GTK_RESPONSE_ACCEPT);
+		GTK_RESPONSE_REJECT);
 
 	g_signal_connect(cw->invite_window, "response",
 		G_CALLBACK(invite_callback), cw);
@@ -912,11 +803,14 @@ static gboolean handle_click(GtkWidget *widget, GdkEventButton *event,
 		gtk_widget_show(button);
 
 		/* Invite Selection */
-		button = gtk_menu_item_new_with_label(_("Invite"));
-		g_signal_connect(button, "activate",
-			G_CALLBACK(do_invite_window), cw);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
-		gtk_widget_show(button);
+		if (cw->conv->is_room || 
+		    can_conference(GET_SERVICE(cw->conv->local_user))) {
+			button = gtk_menu_item_new_with_label(_("Invite"));
+			g_signal_connect(button, "activate",
+					 G_CALLBACK(do_invite_window), cw);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), button);
+			gtk_widget_show(button);
+		}
 
 		/* Ignore Section */
 		button = gtk_menu_item_new_with_label(_("Ignore Contact"));
@@ -1952,13 +1846,16 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	}
 
 	/* This is the invite button */
-	ICON_CREATE_XPM(icon, iconwid, invite_btn_xpm);
-	TOOLBAR_APPEND(invite_button, _("Invite CTRL+I"), iconwid,
-		do_invite_window, cw);
-	gtk_widget_add_accelerator(invite_button, "clicked", accel_group, GDK_i,
-		GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	if (cw->conv->is_room || 
+	    can_conference(GET_SERVICE(conv->local_user))) {
+		ICON_CREATE_XPM(icon, iconwid, invite_btn_xpm);
+		TOOLBAR_APPEND(invite_button, _("Invite"/* CTRL+I"*/), iconwid,
+			       do_invite_window, cw);
+		gtk_widget_add_accelerator(invite_button, "clicked", accel_group, GDK_i,
+					   GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
-	TOOLBAR_APPEND_SPACE(TRUE);
+		TOOLBAR_APPEND_SPACE(TRUE);
+	}
 
 	if (!conv->is_room) {
 		/* This is the ignore button */

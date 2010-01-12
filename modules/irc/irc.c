@@ -1974,8 +1974,8 @@ static void ay_irc_join_chat_room(Conversation *room)
 		return;
 
 	/* UGLY HACK ALERT!! I'm explicitly checking for the notice window room name. */
-	snprintf(room_name, sizeof(room_name), "#notices-%s-%s", ila->ia->nick,
-		ila->ia->connect_address);
+	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", ila->ia->nick,
+		 ila->ia->connect_address, ila->ia->connect_address);
 
 	if (strcasecmp(room->name, room_name))
 		irc_join(room->name, ila->ia);
@@ -1995,8 +1995,8 @@ static void ay_irc_leave_chat_room(Conversation *room)
 		return;
 
 	/* UGLY HACK ALERT!! I'm explicitly checking for the notice window room name. */
-	snprintf(room_name, sizeof(room_name), "#notices-%s-%s", ila->ia->nick,
-		ila->ia->connect_address);
+	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s", ila->ia->nick,
+		 ila->ia->connect_address, ila->ia->connect_address);
 
 	if (strcasecmp(room->name, room_name))
 		irc_leave_chat_room(room->name, ila->ia);

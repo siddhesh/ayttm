@@ -146,10 +146,13 @@ PLUGIN_INFO plugin_info = {
 };
 
 struct service SERVICE_INFO = { "Yahoo", -1,
-	SERVICE_CAN_OFFLINEMSG | SERVICE_CAN_GROUPCHAT |
-		SERVICE_CAN_FILETRANSFER | SERVICE_CAN_ICONVERT |
-		SERVICE_CAN_MULTIACCOUNT,
-	NULL
+				SERVICE_CAN_OFFLINEMSG | 
+/*				SERVICE_CAN_GROUPCHAT |*/
+				SERVICE_CAN_FILETRANSFER | 
+				SERVICE_CAN_ICONVERT |
+				SERVICE_CAN_MULTIACCOUNT | 
+				SERVICE_CAN_CONFERENCE,
+				NULL
 };
 
 /* End Module Exports */
@@ -1475,7 +1478,7 @@ static void ext_yahoo_got_conf_invite(int id, const char *me, const char *who,
 		members->prev = l;
 	}
 
-	ay_conversation_got_invite(ela, who, room, ycrd);
+	invite_dialog(ela, who, room, ycrd);
 }
 #endif
 
@@ -1508,7 +1511,7 @@ static void ext_yahoo_conf_message(int id, const char *me,
 	}
 	umsg[j] = '\0';
 
-	ay_conversation_show_message(chat_room, who, (char *)umsg);
+	ay_conversation_got_message(chat_room, who, umsg);
 }
 
 static void eb_yahoo_send_chat_room_message(Conversation *room, char *message)
@@ -1609,10 +1612,6 @@ static void eb_yahoo_send_invite(eb_local_account *ela, Conversation *ecr,
 	if (!message || !*message)
 		message = _("Join my conference");
 
-	/* Wait till we logon to the conference. This has potential to explode :( */
-	while (!ycrd->connected)
-		gtk_main_iteration();
-
 	yahoo_conference_addinvite(ylad->id, ylad->act_id, who, ycrd->room,
 		ycrd->members, message);
 	ycrd->members = y_list_append(ycrd->members, strdup(who));
@@ -1650,6 +1649,10 @@ static Conversation *eb_yahoo_make_chat_room(char *name, eb_local_account *ela,
 
 	yahoo_conference_logon(ycrd->id, ylad->act_id, ycrd->members,
 		ycrd->room);
+
+	/* Wait while the chat room is ready */
+	while (!ycrd->connected)
+		gtk_main_iteration();
 
 	return ecr;
 }

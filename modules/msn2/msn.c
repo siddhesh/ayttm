@@ -164,10 +164,11 @@ PLUGIN_INFO plugin_info = {
 struct service SERVICE_INFO = {
 	"MSN",
 	-1,
-/*				SERVICE_CAN_OFFLINEMSG | */
-	SERVICE_CAN_GROUPCHAT |
+/*				SERVICE_CAN_OFFLINEMSG |
+	SERVICE_CAN_GROUPCHAT | */
+	SERVICE_CAN_CONFERENCE |
 /*				SERVICE_CAN_FILETRANSFER | */
-		SERVICE_CAN_MULTIACCOUNT,
+	SERVICE_CAN_MULTIACCOUNT,
 	NULL
 };
 
@@ -982,8 +983,6 @@ static Conversation *ay_msn_make_chat_room(gchar *name,
 		snprintf(room_name, sizeof(room_name), "MSN :: %s", mlad->ma->passport);
 
 	ecr = ay_conversation_new(account, NULL, room_name, 1, is_public);
-
-	ay_join_conversation(ecr, TRUE);
 	ay_conversation_buddy_arrive(ecr, account->alias, mlad->ma->passport);
 
 	return ecr;
@@ -1043,6 +1042,8 @@ void ext_buddy_joined_chat(MsnConnection *mc, char *passport,
 
 	if ((ecr = ay_msn_find_conversation(mc->account->ext_data, payload->session_id)))
 		ay_conversation_buddy_arrive(ecr, friendlyname, passport);
+	else
+		eb_debug(DBG_MSN, "No Conversation by the name of %s??\n", payload->session_id);
 }
 
 static void ay_msn_send_file(eb_local_account *from, eb_account *to, char *file)
@@ -1318,9 +1319,6 @@ static void ay_msn_send_chat_room_message(Conversation *room, gchar *mess)
 	im->body = strdup(mess);
 
 	msn_send_IM_to_sb(sb, im);
-
-	/* We don't get the message back in msn */
-	ay_conversation_show_message(room, ela->alias, mess);
 }
 
 static void ay_msn_leave_chat_room(Conversation *room)
@@ -1459,6 +1457,7 @@ static int ay_msn_authorize_user(eb_local_account *ela, MsnBuddy *bud)
 static void ay_msn_invite_callback(MsnConnection *sb, int error, void *data)
 {
 	Conversation *room = data;
+	char room_name[64];
 
 	if (error) {
 		const MsnError *err = msn_strerror(error);
@@ -1467,8 +1466,10 @@ static void ay_msn_invite_callback(MsnConnection *sb, int error, void *data)
 		return;
 	}
 
-		snprintf(room->name, sizeof(room_name), "MSN Chat Room (#%s)",
+	snprintf(room_name, sizeof(room_name), "MSN Chat Room (#%s)",
 		sb->sbpayload->session_id);
+
+	ay_conversation_rename(room, room_name);
 
 	room->protocol_local_conversation_data = sb;
 	sb->sbpayload->data = room;
@@ -1873,7 +1874,7 @@ void ext_got_unknown_IM(MsnConnection *mc, MsnIM *msg, const char *sender)
 	}
 
 	if (ecr != NULL)
-		ay_conversation_show_message(ecr, sender, msg->body);
+		ay_conversation_got_message(ecr, sender, msg->body);
 	else {
 		ea = g_new0(eb_account, 1);
 		strncpy(ea->handle, sender, 255);
@@ -1920,21 +1921,16 @@ void ext_got_IM(MsnConnection *mc, MsnIM *msg, MsnBuddy *buddy)
 
 	if (ecr != NULL) {
 		if (sender->account_contact->nick)
-			ay_conversation_show_message(ecr,
+			ay_conversation_got_message(ecr,
 				sender->account_contact->nick, msg->body);
 		else
-			ay_conversation_show_message(ecr, buddy->friendlyname,
+			ay_conversation_got_message(ecr, buddy->friendlyname,
 				msg->body);
-
-		if (sender != NULL)
-			eb_update_status(sender, NULL);
-
-		return;
 	}
+	else
+		eb_parse_incoming_message(ela, sender, msg->body);
 
-	eb_parse_incoming_message(ela, sender, msg->body);
-	if (sender != NULL)
-		eb_update_status(sender, NULL);
+	eb_update_status(sender, NULL);
 }
 
 void ext_IM_failed(MsnConnection *mc)

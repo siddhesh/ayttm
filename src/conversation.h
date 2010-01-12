@@ -83,7 +83,9 @@ typedef enum {
 } ChatNotificationType;
 
 Conversation *ay_conversation_new(eb_local_account *local, struct contact *remote,
-	const char *name, int is_room, int is_public);
+				  const char *name, int is_room, int is_public);
+
+Conversation *ay_conversation_clone_as_room(Conversation *conv);
 
 gchar *ay_chat_convert_incoming(Conversation *conv, const char *msg);
 gchar *ay_chat_convert_outgoing(Conversation *conv, const char *msg);
@@ -91,11 +93,11 @@ gchar *ay_chat_convert_outgoing(Conversation *conv, const char *msg);
 void ay_conversation_send_message(Conversation *conv, char *text);
 void ay_conversation_display_status(eb_account *remote, gchar *message);
 
-void ay_conversation_got_message(Conversation *conv, gchar *from, 
-	gchar *o_message);
+void ay_conversation_got_message(Conversation *conv, const gchar *from, 
+				 const gchar *o_message);
 
 void ay_conversation_display_notification(Conversation *conv, const gchar *message,
-	ChatNotificationType type);
+					  ChatNotificationType type);
 
 void ay_conversation_set_encoding(const char *value, void *data);
 
