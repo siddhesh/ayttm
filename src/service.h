@@ -49,8 +49,9 @@ struct service_callbacks {
 	/*callback to disable any timers and disconnect from server */
 	void (*logout) (eb_local_account *account);
 
-	/* send message from one account to another */
-	void (*send_im) (eb_local_account *account_from,
+	/* send message from one account to another. Returns whether we
+	 * should echo or not */
+	int (*send_im) (eb_local_account *account_from,
 		eb_account *account_to, char *message);
 
 	/* send a typing notification - the return value is the number 
@@ -138,9 +139,9 @@ struct service_callbacks {
 
 	void (*set_away) (eb_local_account *account, char *message, int away);
 
-	/*send a message to a chat room */
+	/* send a message to a chat room. Returns whether we should echo or not */
 
-	void (*send_chat_room_message) (Conversation *room, char *message);
+	int (*send_chat_room_message) (Conversation *room, char *message);
 
 	/*these are used to join and leave a chat room */
 

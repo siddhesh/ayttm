@@ -443,12 +443,14 @@ static void eb_jabber_logout(eb_local_account *account)
 	eb_debug(DBG_JBR, "<\n");
 }
 
-static void eb_jabber_send_im(eb_local_account *from, eb_account *account_to,
+static int eb_jabber_send_im(eb_local_account *from, eb_account *account_to,
 	char *message)
 {
 	eb_jabber_account_data *jad = account_to->protocol_account_data;
 
 	JABBER_SendMessage(jad->JConn, account_to->handle, message);
+
+	return 1;
 }
 
 static void jabber_account_prefs_init(eb_local_account *ela)
@@ -769,12 +771,14 @@ static void eb_jabber_set_away(eb_local_account *account, char *message,
 
 }
 
-static void eb_jabber_send_chat_room_message(Conversation *room, char *message)
+static int eb_jabber_send_chat_room_message(Conversation *room, char *message)
 {
 	eb_jabber_local_account_data *jlad =
 		room->local_user->protocol_local_account_data;
 	JABBER_SendChatRoomMessage(jlad->JConn, room->name, message,
 		room->local_user->alias);
+
+	return 1;
 }
 
 static void eb_jabber_join_chat_room(Conversation *room)

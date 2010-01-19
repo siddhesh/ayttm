@@ -105,7 +105,7 @@ typedef struct irc_command_action_type {
 static int ay_irc_query_connected(eb_account *account);
 static void ay_irc_login(eb_local_account *account);
 static void ay_irc_logout(eb_local_account *ela);
-static void ay_irc_send_im(eb_local_account *account_from,
+static int ay_irc_send_im(eb_local_account *account_from,
 	eb_account *account_to, char *message);
 static eb_local_account *ay_irc_read_local_config(LList *pairs);
 static LList *ay_irc_write_local_config(eb_local_account *account);
@@ -131,7 +131,7 @@ static void ay_irc_get_info(eb_local_account *account_from,
 	eb_account *account_to);
 static void ay_irc_join_chat_room(Conversation *room);
 static void ay_irc_leave_chat_room(Conversation *room);
-static void ay_irc_send_chat_room_message(Conversation *room, char *message);
+static int ay_irc_send_chat_room_message(Conversation *room, char *message);
 static void ay_irc_send_invite(eb_local_account *account, Conversation *room,
 	char *user, const char *message);
 static Conversation *ay_irc_make_chat_room(char *name,

@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "gtk_globals.h"
 #include "service.h"
@@ -576,7 +577,7 @@ static void ay_irc_logout(eb_local_account *ela)
 	ref_count--;
 }
 
-static void ay_irc_send_im(eb_local_account *account_from,
+static int ay_irc_send_im(eb_local_account *account_from,
 	eb_account *account_to, char *message)
 {
 	irc_local_account *ila =
@@ -588,7 +589,7 @@ static void ay_irc_send_im(eb_local_account *account_from,
 		nick = strdup(account_to->handle);
 		alpha = strchr(nick, '@');
 		if (!alpha)
-			return;
+			return 0;
 		*alpha = '\0';
 
 		irc_send_privmsg(nick, message, ila->ia);
@@ -596,6 +597,8 @@ static void ay_irc_send_im(eb_local_account *account_from,
 		if (nick)
 			free(nick);
 	}
+
+	return 1;
 }
 
 static void irc_init_account_prefs(eb_local_account *ela)
@@ -1353,7 +1356,6 @@ static void ay_got_namereply(irc_name_list *list, const char *channel,
 	char buddy_name[BUF_LEN];
 
 	if ((ecr = ay_conversation_find_by_name(ela, channel))) {
-		ConversationFellow *ecrb = NULL;
 
 		while (list) {
 			if (!ay_conversation_buddy_connected(ecr, list->name)) {
@@ -2004,7 +2006,7 @@ static void ay_irc_leave_chat_room(Conversation *room)
 	ila->current_rooms = l_list_remove(ila->current_rooms, room);
 }
 
-static void ay_irc_send_chat_room_message(Conversation *room, char *message)
+static int ay_irc_send_chat_room_message(Conversation *room, char *message)
 {
 	int type = 0;
 
@@ -2012,7 +2014,7 @@ static void ay_irc_send_chat_room_message(Conversation *room, char *message)
 		(irc_local_account *)room->local_user->protocol_local_account_data;
 
 	if (!message)
-		return;
+		return 0;
 
 	type = irc_send_privmsg(room->name, message, ila->ia);
 
@@ -2028,11 +2030,16 @@ static void ay_irc_send_chat_room_message(Conversation *room, char *message)
 		g_snprintf(buf, BUF_LEN, "*%s %s", ila->ia->nick, msg);
 
 		ay_conversation_display_notification(room, buf, IRC_CTCP_ACTION);
+
+		return 0;
 	}
-	else if (type == IRC_ECHO_KICK)
+	else if (type == IRC_ECHO_KICK) {
 		ay_conversation_display_notification(room, _("*Kick*"), IRC_CTCP_ACTION);
+		return 0;
+	}
 /*	else if (type != IRC_NOECHO)
 		ay_conversation_got_message(room, ila->ia->nick, message);*/
+	return 1;
 }
 
 static void ay_irc_send_invite(eb_local_account *account, Conversation *room,
@@ -2068,8 +2075,6 @@ static Conversation *ay_irc_start_conversation(const char *name,
 {
 	Conversation *ecr;
 
-	int name_len = 0;
-	char *alpha = NULL;
 	char *channelname = NULL;
 
 	/* according to RFC2812, channels can be marked by #, &, + or !, not only the conventional #. */

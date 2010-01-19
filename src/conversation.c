@@ -207,6 +207,7 @@ void ay_conversation_send_message(Conversation *conv, char *text)
 	char *recoded;
 #endif
 	int i = 0;
+	int echo = 1;
 
 	if (!text || !text[0])
 		return;
@@ -311,13 +312,16 @@ void ay_conversation_send_message(Conversation *conv, char *text)
 	/* TODO: Convert to conversation encoding before we send */
 
 	if (conv->preferred)
-		RUN_SERVICE(conv->local_user)->send_im(conv->local_user,
+		echo = RUN_SERVICE(conv->local_user)->send_im(conv->local_user,
 			conv->preferred, text);
 	else
-		RUN_SERVICE(conv->local_user)->send_chat_room_message(
+		echo = RUN_SERVICE(conv->local_user)->send_chat_room_message(
 			conv, text);
 
 	serv_touch_idle();
+
+	if (!echo)
+		goto out;
 
 	if (iGetLocalPref("do_convo_timestamp")) {
 		time(&t);
@@ -333,6 +337,7 @@ void ay_conversation_send_message(Conversation *conv, char *text)
 
 	ay_chat_window_print_send(conv->window, buff);
 
+out:
 	/* 
 	 * If an away message had been sent to this person, reset the away message tracker
 	 * It's probably faster to just do the assignment all the time--the test
@@ -837,8 +842,6 @@ Conversation *ay_conversation_clone_as_room(Conversation *conv)
 	return ret;
 }
 
-#undef gen_conversation_name
-
 Conversation *ay_conversation_new(eb_local_account *local, struct contact *remote,
 				  const char *name, int is_room, int is_public)
 {
@@ -859,7 +862,12 @@ Conversation *ay_conversation_new(eb_local_account *local, struct contact *remot
 	ret->is_room = is_room;
 	ret->local_user = local;
 
-	ret->name = strdup(name);
+	if (name && *name)
+		ret->name = strdup(name);
+	else {
+		gen_conversation_name(buff);
+		ret->name = strdup(buff);
+	}
 
 	if (remote)
 		make_safe_filename(buff, ret->name, remote->group->name);
@@ -873,6 +881,8 @@ Conversation *ay_conversation_new(eb_local_account *local, struct contact *remot
 
 	return ret;
 }
+
+#undef gen_conversation_name
 
 void ay_conversation_rename(Conversation *conv, char *new_name)
 {

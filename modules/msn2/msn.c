@@ -949,7 +949,7 @@ static int ay_msn_send_cr_typing(Conversation *chatroom)
 }
 
 /* TODO Rich text messages */
-static void ay_msn_send_im(eb_local_account *from, eb_account *account_to,
+static int ay_msn_send_im(eb_local_account *from, eb_account *account_to,
 	gchar *mess)
 {
 	MsnIM *msg = m_new0(MsnIM, 1);
@@ -961,6 +961,8 @@ static void ay_msn_send_im(eb_local_account *from, eb_account *account_to,
 	buddy->mq = l_list_append(buddy->mq, msg);
 
 	msn_send_IM(mlad->ma, buddy);
+
+	return 1;
 }
 
 static Conversation *ay_msn_make_chat_room(gchar *name,
@@ -1303,7 +1305,7 @@ static void ay_msn_set_away(eb_local_account *account, char *message, int away)
 	msn_set_psm(mlad->ma, message);
 }
 
-static void ay_msn_send_chat_room_message(Conversation *room, gchar *mess)
+static int ay_msn_send_chat_room_message(Conversation *room, gchar *mess)
 {
 	MsnIM *im = m_new0(MsnIM, 1);
 	MsnConnection *sb = room->protocol_local_conversation_data;
@@ -1311,7 +1313,7 @@ static void ay_msn_send_chat_room_message(Conversation *room, gchar *mess)
 
 	if (!sb) {
 		eb_debug(DBG_MSN, "No Switchboard!\n");
-		return;
+		return 0;
 	}
 
 	ela = sb->account->ext_data;
@@ -1319,6 +1321,8 @@ static void ay_msn_send_chat_room_message(Conversation *room, gchar *mess)
 	im->body = strdup(mess);
 
 	msn_send_IM_to_sb(sb, im);
+
+	return 1;
 }
 
 static void ay_msn_leave_chat_room(Conversation *room)

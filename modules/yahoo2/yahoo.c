@@ -1514,24 +1514,26 @@ static void ext_yahoo_conf_message(int id, const char *me,
 	ay_conversation_got_message(chat_room, who, umsg);
 }
 
-static void eb_yahoo_send_chat_room_message(Conversation *room, char *message)
+static int eb_yahoo_send_chat_room_message(Conversation *room, char *message)
 {
 	eb_yahoo_chat_room_data *ycrd;
 	eb_yahoo_local_account_data *ylad;
 
 	if (!room) {
 		WARNING(("room is null"));
-		return;
+		return 0;
 	}
 
 	if (!message)
-		return;
+		return 0;
 
 	ylad = room->local_user->protocol_local_account_data;
 
 	ycrd = room->protocol_local_conversation_data;
 	yahoo_conference_message(ycrd->id, ylad->act_id, ycrd->members,
 		ycrd->room, message, 1);
+
+	return 1;
 }
 
 static void eb_yahoo_join_chat_room(Conversation *room)
@@ -2616,7 +2618,7 @@ static void eb_yahoo_logout(eb_local_account *ela)
 	is_setting_state = 0;
 }
 
-static void eb_yahoo_send_im(eb_local_account *account_from,
+static int eb_yahoo_send_im(eb_local_account *account_from,
 	eb_account *account_to, char *message)
 {
 	eb_yahoo_local_account_data *ylad =
@@ -2626,6 +2628,8 @@ static void eb_yahoo_send_im(eb_local_account *account_from,
 			account_to->handle, message));
 	yahoo_send_im(ylad->id, ylad->act_id, account_to->handle, message, 1,
 		0);
+
+	return 1;
 }
 
 static void yahoo_init_account_prefs(eb_local_account *ela)

@@ -835,7 +835,7 @@ static void build_prefs_callback(GtkWidget *widget, gpointer stats)
 
 static void launch_group_chat(GtkWidget *widget, gpointer userdata)
 {
-//	open_join_chat_window();
+	open_join_chat_window();
 }
 
 #if ADD_DEBUG_TO_MENU

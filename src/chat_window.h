@@ -121,5 +121,6 @@ void ay_chat_window_fellows_append(chat_window *cw, ConversationFellow *fellow);
 void ay_chat_window_fellows_remove(chat_window *cw, ConversationFellow *fellow);
 void ay_chat_window_fellows_rename(chat_window *cw, ConversationFellow *fellow);
 void ay_chat_window_set_name(chat_window *cw);
+void open_join_chat_window();
 
 #endif

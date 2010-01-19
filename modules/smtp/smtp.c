@@ -629,7 +629,7 @@ static void eb_smtp_got_connected(AyConnection *fd, int error, void *data)
 	d->tag = ay_connection_input_add(fd, EB_INPUT_READ, send_message_async, d);
 }
 
-static void eb_smtp_send_im(eb_local_account *account_from,
+static int eb_smtp_send_im(eb_local_account *account_from,
 	eb_account *account_to, char *message)
 {
 	AyConnection *fd;
@@ -642,7 +642,7 @@ static void eb_smtp_send_im(eb_local_account *account_from,
 		strcpy(localhost, "localhost");
 		WARNING(("could not get localhost name: %d: %s",
 				errno, strerror(errno)));
-		return;
+		return 0;
 	}
 
 	fd = ay_connection_new(sla->smtp_host, atoi(sla->smtp_port),
@@ -656,6 +656,8 @@ static void eb_smtp_send_im(eb_local_account *account_from,
 	d->tag = ay_connection_connect(fd, eb_smtp_got_connected, NULL, NULL, d);
 
 	pending_connects = l_list_append(pending_connects, (void *)d->tag);
+
+	return 1;
 }
 
 static char *eb_smtp_check_login(const char *user, const char *pass)

@@ -2089,7 +2089,7 @@ ay_oscar_set_away(eb_local_account *account, gchar *message, int away)
 	is_setting_state = 0;
 }
 
-static void
+static int
 ay_aim_send_im(eb_local_account *account_from,
 	eb_account *account_to, gchar *message)
 {
@@ -2111,6 +2111,8 @@ ay_aim_send_im(eb_local_account *account_from,
 	args.msglen = strlen(message);
 
 	aim_im_sendch1_ext(&alad->aimsess, &args);
+
+	return 1;
 }
 
 static LList *ay_aim_get_states()
@@ -2336,7 +2338,7 @@ static void ay_oscar_leave_chat_room(Conversation *room)
 	g_free(ocr);
 }
 
-static void ay_oscar_send_chat_room_message(Conversation *room, char *message)
+static int ay_oscar_send_chat_room_message(Conversation *room, char *message)
 {
 	struct oscar_chat_room *ocr =
 		(struct oscar_chat_room *)room->protocol_local_conversation_data;
@@ -2347,6 +2349,8 @@ static void ay_oscar_send_chat_room_message(Conversation *room, char *message)
 
 	aim_chat_send_im(&(alad->aimsess), ocr->conn, 0, message,
 		strlen(message));
+
+	return 1;
 }
 
 static void
