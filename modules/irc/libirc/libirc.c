@@ -278,7 +278,7 @@ void irc_process_privmsg(const char *to, const char *message,
 	}
 }
 
-/* Get PRIVMSG. CTCP implementation called here. */
+/* Get NOTICE. CTCP implementation called here. */
 void irc_process_notice(const char *to, const char *message,
 	irc_message_prefix *prefix, irc_account *ia)
 {

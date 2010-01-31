@@ -578,27 +578,49 @@ static void ay_irc_logout(eb_local_account *ela)
 }
 
 static int ay_irc_send_im(eb_local_account *account_from,
-	eb_account *account_to, char *message)
+			  eb_account *account_to, char *message)
 {
 	irc_local_account *ila =
 		(irc_local_account *)account_from->protocol_local_account_data;
 	char *nick = NULL;
 	char *alpha = NULL;
+	int type = 0;
+	int ret = 0;
+	Conversation *room = account_to->account_contact->conversation;
 
 	if (account_to->handle) {
 		nick = strdup(account_to->handle);
 		alpha = strchr(nick, '@');
 		if (!alpha)
-			return 0;
+			goto out;
 		*alpha = '\0';
 
-		irc_send_privmsg(nick, message, ila->ia);
+		type = irc_send_privmsg(nick, message, ila->ia);
 
-		if (nick)
-			free(nick);
+		if (type == IRC_ECHO_ACTION) {
+			char *msg = message;
+			char buf[BUF_LEN];
+			
+			while(*msg == ' ' || *msg == '\t')
+				msg++;
+			
+			msg += 4;
+			
+			g_snprintf(buf, BUF_LEN, "*%s %s", ila->ia->nick, msg);
+			
+			ay_conversation_display_notification(room, buf, IRC_CTCP_ACTION);
+			
+			goto out;
+		}
+		else if (type != IRC_NOECHO)
+			ret = 1;
 	}
 
-	return 1;
+out:
+	if (nick)
+		free(nick);
+
+	return ret;
 }
 
 static void irc_init_account_prefs(eb_local_account *ela)
@@ -1711,42 +1733,42 @@ static void ay_irc_got_privmsg(const char *recipient, const char *message,
 
 			switch (element->type) {
 			case CTCP_ACTION:{
-					char buf[BUF_LEN];
-					char *msg;
-					
-					msg = strip_color((unsigned char *)
-						element->data);
-
-					g_snprintf(buf, BUF_LEN,
-						"*%s %s", prefix->nick, msg);
-
-					if (ecr)
-						ay_conversation_display_notification(ecr,
-							buf, IRC_CTCP_ACTION);
-					else {
-						ay_irc_process_incoming_message
-							(recipient,
-							buf,
-							prefix, ia);
-					}
-
-					if (msg) {
-						free(msg);
-						msg = NULL;
-					}
-
-					break;
+				char buf[BUF_LEN];
+				char *msg;
+				
+				msg = strip_color((unsigned char *)
+						  element->data);
+				
+				g_snprintf(buf, BUF_LEN,
+					   "*%s %s", prefix->nick, msg);
+				
+				if (ecr)
+					ay_conversation_display_notification(ecr,
+									     buf, IRC_CTCP_ACTION);
+				else {
+					ay_irc_process_incoming_message
+						(recipient,
+						 buf,
+						 prefix, ia);
 				}
+				
+				if (msg) {
+					free(msg);
+					msg = NULL;
+				}
+				
+				break;
+			}
 			case CTCP_VERSION:{
-					/* Send Ayttm version info */
-					char *msg = ctcp_gen_version_response
-						(PACKAGE_NAME,
-						PACKAGE_VERSION "-" RELEASE,
-						HOST);
-
-					irc_send_notice(prefix->nick, msg, ia);
-					break;
-				}
+				/* Send Ayttm version info */
+				char *msg = ctcp_gen_version_response
+					(PACKAGE_NAME,
+					 PACKAGE_VERSION "-" RELEASE,
+					 HOST);
+				
+				irc_send_notice(prefix->nick, msg, ia);
+				break;
+			}
 			case CTCP_SOURCE:
 				break;
 			case CTCP_USERINFO:
@@ -1754,19 +1776,19 @@ static void ay_irc_got_privmsg(const char *recipient, const char *message,
 			case CTCP_CLIENTINFO:
 				break;
 			case CTCP_TIME:{
-					/* Send Current Time */
-					char *msg = ctcp_gen_time_response();
-					irc_send_notice(prefix->nick, msg, ia);
-					break;
-				}
+				/* Send Current Time */
+				char *msg = ctcp_gen_time_response();
+				irc_send_notice(prefix->nick, msg, ia);
+				break;
+			}
 			case CTCP_PING:{
-					/* Send CTCP PING response */
-					char *msg =
-						ctcp_gen_ping_response(element->
-						data);
-					irc_send_notice(prefix->nick, msg, ia);
-					break;
-				}
+				/* Send CTCP PING response */
+				char *msg =
+					ctcp_gen_ping_response(element->
+							       data);
+				irc_send_notice(prefix->nick, msg, ia);
+				break;
+			}
 			case CTCP_SED:
 				break;
 			case CTCP_DCC:
@@ -1776,10 +1798,11 @@ static void ay_irc_got_privmsg(const char *recipient, const char *message,
 			case CTCP_ERRMSG:
 				break;
 			default:{
+				if ( element->data && element->data[0])
 					ay_irc_process_incoming_message
 						(recipient, element->data,
-						prefix, ia);
-				}
+						 prefix, ia);
+			}
 			}
 
 			data_list = data_list->next;
@@ -1838,60 +1861,61 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 	 * This is one of those AUTH NOTICEs...
 	 * TODO: Put these in the message log
 	 */
-	if (!prefix->nick && !prefix->servername)
+	if ((!prefix->nick && !prefix->servername)
+	    || recipient[0] == '*')
 		return;
 
 	snprintf(room_name, sizeof(room_name), "#notices-%s-%s@%s",
-		recipient, ia->connect_address, ia->connect_address);
-
+		 ia->nick, ia->connect_address, ia->connect_address);
+	
 	if (!(cr = ay_conversation_find_by_name(ela, room_name)))
 		cr = ay_irc_start_conversation(room_name, ela, FALSE, FALSE, FALSE);
-
+	
 	data_list = ctcp_get_extended_data(message, strlen(message));
-
+	
 	while (data_list) {
 		element = (ctcp_extended_data *)data_list->ext_data;
-
+		
 		switch (element->type) {
 		case CTCP_VERSION:{
-				char notice[BUF_LEN];
-				ctcp_version *version =
-					ctcp_got_version(element->data);
-
-				if (version && version->name) {
-					char app[255];
-
-					char *nick = prefix->nick ? 
-						prefix->nick :
-						prefix->servername;
-
-					if(version->version)
-						snprintf(app, sizeof(app), 
-							"%s-%s", version->name,
-							version->version);
-					else
-						snprintf(app, sizeof(app), 
-							"%s", version->name);
-					
-					snprintf(notice, sizeof(notice),
-						_("<b>%s</b> is connected "
-						"using the program <i>%s</i> "
-						"on the <i>%s</i> operating "
-						"system"), nick, app,
-						version->env?version->env:"");
-				}
-
-				if (element->data) {
-					free(element->data);
-					element->data = NULL;
-				}
-
-				type = IRC_CTCP_VERSION;
-
-				element->data = strdup(notice);
-
-				break;
+			char notice[BUF_LEN];
+			ctcp_version *version =
+				ctcp_got_version(element->data);
+			
+			if (version && version->name) {
+				char app[255];
+				
+				char *nick = prefix->nick ? 
+					prefix->nick :
+					prefix->servername;
+				
+				if(version->version)
+					snprintf(app, sizeof(app), 
+						 "%s-%s", version->name,
+						 version->version);
+				else
+					snprintf(app, sizeof(app), 
+						 "%s", version->name);
+				
+				snprintf(notice, sizeof(notice),
+					 _("<b>%s</b> is connected "
+					   "using the program <i>%s</i> "
+					   "on the <i>%s</i> operating "
+					   "system"), nick, app,
+					 version->env?version->env:"");
 			}
+			
+			if (element->data) {
+				free(element->data);
+				element->data = NULL;
+			}
+			
+			type = IRC_CTCP_VERSION;
+			
+			element->data = strdup(notice);
+			
+			break;
+		}
 		case CTCP_SOURCE:
 			break;
 		case CTCP_USERINFO:
@@ -1899,24 +1923,24 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 		case CTCP_CLIENTINFO:
 			break;
 		case CTCP_TIME:{
-				char notice[BUF_LEN];
-
-				snprintf(notice, sizeof(notice),
-					_
-					("<b>%s</b> has sent Time as <b>%s</b>"),
-					(prefix->nick ? prefix->nick : prefix->
-						servername), element->data);
-
-				if (element->data) {
-					free(element->data);
-					element->data = NULL;
-				}
-
-				element->data = strdup(notice);
-				type = IRC_CTCP_TIME;
-
-				break;
+			char notice[BUF_LEN];
+			
+			snprintf(notice, sizeof(notice),
+				 _
+				 ("<b>%s</b> has sent Time as <b>%s</b>"),
+				 (prefix->nick ? prefix->nick : prefix->
+				  servername), element->data);
+			
+			if (element->data) {
+				free(element->data);
+				element->data = NULL;
 			}
+			
+			element->data = strdup(notice);
+			type = IRC_CTCP_TIME;
+			
+			break;
+		}
 		case CTCP_PING:
 			break;
 		case CTCP_SED:
@@ -1928,23 +1952,23 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 		case CTCP_ERRMSG:
 			break;
 		default:{
-				char notice[BUF_LEN];
-
-				snprintf(notice, sizeof(notice),
-					_
-					("<I><B>%s:</B> %s</I>"),
-					(prefix->nick ? prefix->nick : prefix->
-						servername), element->data);
-
-				if (element->data) {
-					free(element->data);
-					element->data = NULL;
-				}
-				element->data = strdup(notice);
-				type = CHAT_NOTIFICATION_NOTE;
+			char notice[BUF_LEN];
+			
+			snprintf(notice, sizeof(notice),
+				 _
+				 ("<I><B>%s:</B> %s</I>"),
+				 (prefix->nick ? prefix->nick : prefix->
+				  servername), element->data);
+			
+			if (element->data) {
+				free(element->data);
+				element->data = NULL;
 			}
+			element->data = strdup(notice);
+			type = CHAT_NOTIFICATION_NOTE;
 		}
-
+		}
+		
 		if (element->data && element->data[0]) {
 			if (prefix->nick) {
 				free(prefix->nick);
@@ -1960,7 +1984,7 @@ static void ay_irc_got_notice(const char *recipient, const char *message,
 		}
 		data_list = data_list->next;
 	}
-
+	
 	ctcp_free_extended_data(data_list);
 }
 
@@ -2037,9 +2061,10 @@ static int ay_irc_send_chat_room_message(Conversation *room, char *message)
 		ay_conversation_display_notification(room, _("*Kick*"), IRC_CTCP_ACTION);
 		return 0;
 	}
-/*	else if (type != IRC_NOECHO)
-		ay_conversation_got_message(room, ila->ia->nick, message);*/
-	return 1;
+	else if (type != IRC_NOECHO)
+		return 1;
+
+	return 0;
 }
 
 static void ay_irc_send_invite(eb_local_account *account, Conversation *room,
