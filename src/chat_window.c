@@ -441,6 +441,20 @@ static void set_sound_callback(GtkWidget *sound_button, gpointer userdata)
 	cw_set_sound_active(cw, !cw_get_sound_active(cw));
 }
 
+static void set_reconnect_on_toggle(GtkWidget *reconnect_button,
+				    gpointer userdata)
+{
+	Conversation *cr = (Conversation *)userdata;
+	
+	if (gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON
+					      (reconnect_button)))
+		ay_add_auto_conversation(cr->local_user, cr->name,
+					 cr->is_public);
+	else
+		ay_remove_auto_conversation(cr->local_user, cr->name,
+					    cr->is_public);
+}
+
 /*
 static void allow_offline_callback(GtkWidget *offline_button,
 	gpointer userdata);
@@ -1720,14 +1734,14 @@ chat_window *ay_chat_window_new(Conversation *conv)
 		TOOLBAR_APPEND_SPACE(TRUE);
 	}
 	else if (conv->is_room) {
-/*		ICON_CREATE(iconwid, GTK_STOCK_REFRESH);
+		ICON_CREATE(iconwid, GTK_STOCK_REFRESH);
 		TOOLBAR_APPEND_TOGGLE_BUTTON(cw->reconnect_button,
-			_("Reconnect at login"),
-			_("Reconnect at login"),
-			iconwid, set_reconnect_on_toggle, cw);
-			
-/ * TODO		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(chat_room->reconnect_button), 
-			eb_is_chatroom_auto(chat_room));*/
+					     _("Reconnect at login"),
+					     _("Reconnect at login"),
+					     iconwid, set_reconnect_on_toggle, cw->conv);
+		
+		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(cw->reconnect_button), 
+						  ay_is_conversation_auto(cw->conv));
 	}
 
 	/* Decide whether the offline messaging button should be displayed */
@@ -2050,12 +2064,11 @@ static void join_chat_callback(GtkWidget *widget, int response, gpointer data)
 		return;
 	}
 
-/* TODO: Chat room autoreconnect
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(reconnect_chkbtn)))
-		eb_add_auto_chatroom(ela, name,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON
-				(public_chkbtn)));
-*/
+		ay_add_auto_conversation(ela, name,
+				     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON
+								  (public_chkbtn)));
+
 
 	conv = RUN_SERVICE(ela)->make_chat_room(name, ela,
 			    gtk_toggle_button_get_active(

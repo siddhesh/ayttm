@@ -208,7 +208,7 @@ int contact_mgmt_flush(eb_local_account *ela)
 
 		ay_strfreev(tokens);
 	}
-//	start_auto_chatrooms(ela);
+	ay_start_auto_conversations(ela);
 	fclose(temp);
 
 	if (queue)

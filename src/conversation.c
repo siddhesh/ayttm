@@ -831,7 +831,6 @@ Conversation *ay_conversation_clone_as_room(Conversation *conv)
 {
 	Conversation *ret;
 	char name [255];
-	eb_account *ea = find_suitable_remote_account(conv->preferred, conv->contact);
 	
 	gen_conversation_name(name);
 
@@ -1021,3 +1020,148 @@ void ay_conversation_invite_fellow(Conversation *conv, const char *fellow,
 	RUN_SERVICE(conv->local_user)->send_invite(conv->local_user, conv,
 		fellow, message);
 }
+
+/* Autoreconnect conversations */
+void ay_start_auto_conversations(eb_local_account *ela)
+{
+	FILE *fp;
+	char buff[4096];
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
+
+	if (!ela)
+		return;
+	
+	eb_debug(DBG_CORE, "buff %s\n", buff);
+	
+	if (!(fp = fopen(buff, "r"))) {
+		eb_debug(DBG_CORE, "Could not open file %s\n", buff);
+		return;
+	}
+	
+	while (fgets(buff, sizeof(buff), fp)) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		if (!strcmp(tokens[0], get_service_name(ela->service_id))
+		    && !strcmp(tokens[1], ela->handle)) {
+			Conversation *conv = NULL;
+
+			conv = RUN_SERVICE(ela)->make_chat_room(tokens[2], ela, 
+								atoi(tokens[3]));
+			RUN_SERVICE(ela)->join_chat_room(conv);
+		}
+		ay_strfreev(tokens);
+	}
+	if (fp)
+		fclose(fp);
+}
+
+int ay_is_conversation_auto(Conversation *cr)
+{
+	FILE *fp;
+	char buff[4096];
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
+	if (!cr->local_user || !cr->name)
+		return FALSE;
+	
+	eb_debug(DBG_CORE, "buff %s\n", buff);
+	
+	if (!(fp = fopen(buff, "r"))) {
+		eb_debug(DBG_CORE, "Could not open file %s\n", buff);
+		return FALSE;
+	}
+	
+	while (fgets(buff, sizeof(buff), fp)) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		if (!strcmp(tokens[0],
+			    get_service_name(cr->local_user->service_id))
+		    && !strcmp(tokens[1], cr->local_user->handle)
+		    && !strcmp(tokens[2], cr->name)
+		    && atoi(tokens[3]) == cr->is_public) {
+			fclose(fp);
+			ay_strfreev(tokens);
+			return TRUE;	/* already in */
+		}
+		ay_strfreev(tokens);
+	}
+	if (fp)
+		fclose(fp);
+	
+	return FALSE;
+}
+
+void ay_add_auto_conversation(eb_local_account *ela,
+			      const char *name, int public)
+{
+	FILE *fp;
+	char buff[4096];
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
+	
+	if (!ela || !name)
+		return;
+	
+	eb_debug(DBG_CORE, "buff %s\n", buff);
+	
+	if ((fp = fopen(buff, "r"))) {
+		while (fgets(buff, sizeof(buff), fp)) {
+			char **tokens = ay_strsplit(buff, "\t", -1);
+			if (!strcmp(tokens[0],
+				    get_service_name(ela->service_id))
+			    && !strcmp(tokens[1], ela->handle)
+			    && !strcmp(tokens[2], name)
+			    && atoi(tokens[3]) == public) {
+				fclose(fp);
+				ay_strfreev(tokens);
+				return;	/* already in */
+			}
+			ay_strfreev(tokens);
+		}
+		fclose(fp);
+	}
+	
+	snprintf(buff, 4095, "%schatroom_autoconnect", config_dir);
+	fp = fopen(buff, "a");
+	if (!fp)
+		return;
+	fprintf(fp, "%s\t%s\t%s\t%d\t--\n", get_service_name(ela->service_id),
+		ela->handle, name, public);
+	fclose(fp);
+}
+
+void ay_remove_auto_conversation(eb_local_account *ela, const char *name,
+				 int public)
+{
+	FILE *fp, *tmp;
+	char buffin[4095], bufftmp[4095], buff[4095];
+	snprintf(bufftmp, 4095, "%schatroom_autoconnect.tmp", config_dir);
+	snprintf(buffin, 4095, "%schatroom_autoconnect", config_dir);
+	if (!ela || !name)
+		return;
+	
+	eb_debug(DBG_CORE, "buff %s\n", buffin);
+	fp = fopen(buffin, "r");
+	tmp = fopen(bufftmp, "w");
+
+	if (!tmp) {
+		if (fp)
+			fclose(fp);
+		return;
+	}
+
+	while (fp && fgets(buff, sizeof(buff), fp)) {
+		char **tokens = ay_strsplit(buff, "\t", -1);
+		if (strcmp(tokens[0], get_service_name(ela->service_id))
+		    || strcmp(tokens[1], ela->handle)
+		    || strcmp(tokens[2], name)
+		    || atoi(tokens[3]) != public) {
+			fprintf(tmp, "%s", buff);
+		}
+	}
+
+	fclose(tmp);
+
+	if (fp) {
+		fclose(fp);
+		unlink(buffin);
+	}
+	rename(bufftmp, buffin);
+}
+

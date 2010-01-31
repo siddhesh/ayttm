@@ -113,21 +113,31 @@ void ay_conversation_chat_with_account(eb_account *remote_account);
 Conversation *ay_conversation_find_by_name(eb_local_account *ela, const char *name);
 
 void ay_conversation_fellows_append(Conversation *conv, const char *alias,
-	const char *handle);
+				    const char *handle);
 void ay_conversation_buddy_arrive(Conversation *conv, const char *alias,
-	const char *handle);
+				  const char *handle);
 void ay_conversation_buddy_chnick(Conversation *conv, const char *handle,
-	const char *newalias);
+				  const char *newalias);
 
 void ay_conversation_buddy_leave(Conversation *conv, const char *handle);
 void ay_conversation_buddy_leave_ex(Conversation *conv, const char *handle,
-	const char *message);
+				    const char *message);
 
 int ay_conversation_buddy_connected(Conversation *conv, const char *alias);
 
 void ay_conversation_rename(Conversation *conv, char *new_name);
 
 void ay_conversation_invite_fellow(Conversation *conv, const char *fellow,
-	const char *message);
+				   const char *message);
+
+void ay_remove_auto_conversation(eb_local_account *ela, const char *name,
+				 int is_public);
+
+void ay_add_auto_conversation(eb_local_account *ela,
+			      const char *name, int is_public);
+
+int ay_is_conversation_auto(Conversation *conv);
+
+void ay_start_auto_conversations(eb_local_account *ela);
 
 #endif
