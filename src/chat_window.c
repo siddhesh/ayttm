@@ -128,10 +128,9 @@ void set_tab_red(chat_window *cw)
 		return;
 
 	label = ay_chat_get_tab_label(GTK_NOTEBOOK(notebook), child);
-
+	
 	gdk_color_parse("red", &color);
 	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, &color);
-	cw->is_child_red = TRUE;
 
 	if (!gtk_widget_is_focus(cw->window))
 		gtk_window_set_urgency_hint(GTK_WINDOW(cw->window), TRUE);
@@ -236,17 +235,17 @@ static gboolean chat_focus_event(GtkNotebook *notebook, GtkNotebookPage *page,
 
 	chatpane = gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), pagenum);
 	label = ay_chat_get_tab_label(GTK_NOTEBOOK(notebook), chatpane);
-
+	
 	eb_debug(DBG_CORE, "Setting tab to normal\n");
 	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE,
-		NULL);
-
+			     NULL);
+	
 	window = gtk_widget_get_toplevel(chatpane);
-
+	
 	if (GTK_WIDGET_TOPLEVEL(window)) {
 		gtk_window_set_urgency_hint(GTK_WINDOW(window), FALSE);
 		gtk_window_set_title(GTK_WINDOW(window),
-			gtk_label_get_text(GTK_LABEL(label)));
+				     gtk_label_get_text(GTK_LABEL(label)));
 	}
 
 	return FALSE;
@@ -346,9 +345,6 @@ void send_message(GtkWidget *widget, gpointer d)
 #endif
 
 	ay_conversation_send_message (data->conv, text);
-
-	if (data->sound_enabled && data->send_enabled)
-		play_sound(SOUND_SEND);
 
 	cw_reset_message(data);
 #ifdef __MINGW32__
@@ -1214,6 +1210,9 @@ void ay_chat_window_print_message(chat_window *cw, gchar *o_message, int send)
 			play_sound(SOUND_SEND);
 	}
 
+	if (!send)
+		set_tab_red(cw);
+
 	/* for raising the window */
 	ay_chat_window_raise(cw, o_message);
 }
@@ -1319,10 +1318,6 @@ static void add_page_with_pane(chat_window *cw, GtkWidget *vbox, const char *nam
 
 	g_signal_connect(vbox, "key-press-event", G_CALLBACK(vbox_key_pressed),
 			 cw);
-
-/*	gtk_widget_add_accelerator(vbox, "key-press-event",
-				   accel_group, GDK_w, GDK_CONTROL_MASK,
-				   GTK_ACCEL_VISIBLE);*/
 
 	tab_label = gtk_hbox_new(FALSE, 3);
 
