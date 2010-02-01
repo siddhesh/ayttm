@@ -37,7 +37,7 @@ http://ayttm.git.sourceforge.net/git/gitweb.cgi?p=ayttm/ayttm;a=blob_plain;f=TOD
     duplication of code
   * Standardize tab switching shortcut to Ctrl+Pageup/Ctrl+Pagedown. Remove
     it from preferences
-  * Prettier/cleaner chat windows
+  * Chat rooms should not cause taskbar flashing unless someone types your name
 
 * eyecandy
   * Emoticons/pictures in contact names and status
