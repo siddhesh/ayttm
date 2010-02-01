@@ -48,7 +48,7 @@
 #include "sound.h"
 #include "dialog.h"
 #include "prefs.h"
-#include "gtk_globals.h"
+#include "globals.h"
 #include "status.h"
 #include "away_window.h"
 #include "message_parse.h"
