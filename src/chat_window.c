@@ -111,29 +111,67 @@ static GtkWidget *ay_chat_get_tab_label(GtkNotebook *notebook, GtkWidget *child)
 	return NULL;
 }
 
-void set_tab_red(chat_window *cw)
+static int should_window_raise(const char *message)
+{
+	if (iGetLocalPref("do_raise_window")) {
+		char *thepattern = cGetLocalPref("regex_pattern");
+
+		if (thepattern && thepattern[0]) {
+			regex_t myreg;
+			regmatch_t pmatch;
+			int rc = regcomp(&myreg, thepattern,
+				REG_EXTENDED | REG_ICASE);
+
+			if (!rc) {
+				rc = regexec(&myreg, message, 1, &pmatch, 0);
+				if (!rc)
+					return 1;
+			}
+		} else
+			/* no pattern specified. Assume always. */
+			return 1;
+	}
+	return 0;
+}
+
+static void ay_chat_window_updated(chat_window *cw, const char *message)
 {
 	GdkColor color;
 	GtkWidget *notebook = NULL, *child = NULL, *label = NULL;
+	int curpagenum = -1, winpagenum = -1;
 
 	if (!cw)
 		return;
 
+	notebook = cw->notebook;
+	child = cw->pane;
+
+	if (notebook) {
+		winpagenum = gtk_notebook_page_num(
+			GTK_NOTEBOOK(notebook),
+			child);
+		curpagenum = gtk_notebook_get_current_page(
+			GTK_NOTEBOOK(notebook));
+	}
+
+	/* for raising the window and tab, if present */
+	if (ay_chat_window_raise(cw, message))
+		return;
+
 	eb_debug(DBG_CORE, "Setting tab to red\n");
 
-	notebook = cw->notebook;
-	child = cw->notebook_child;
+	/* Flash in the taskbar */
+	if (!gtk_window_is_active(GTK_WINDOW(cw->window)))
+		gtk_window_set_urgency_hint(GTK_WINDOW(cw->window), TRUE);
 
-	if (!notebook || !child)
+	/* Colored tab */
+	if (!notebook || winpagenum == curpagenum)
 		return;
 
 	label = ay_chat_get_tab_label(GTK_NOTEBOOK(notebook), child);
 	
 	gdk_color_parse("red", &color);
 	gtk_widget_modify_fg(label, GTK_STATE_ACTIVE, &color);
-
-	if (!gtk_widget_is_focus(cw->window))
-		gtk_window_set_urgency_hint(GTK_WINDOW(cw->window), TRUE);
 }
 
 static void remove_smiley_window(chat_window *cw)
@@ -197,7 +235,7 @@ static void close_tab_callback(GtkWidget *button, gpointer userdata)
 	GtkWidget *notebook = cw->notebook;
 
 	int tab_number = gtk_notebook_page_num(GTK_NOTEBOOK(notebook),
-		cw->notebook_child);
+		cw->pane);
 
 	eb_debug(DBG_CORE, "tab_number %d notebook %p\n", tab_number, notebook);
 
@@ -220,7 +258,7 @@ void ay_chat_window_free(chat_window *cw)
 	if (!cw->pane)
 		return;
 
-	if (cw->notebook_child)
+	if (cw->notebook)
 		close_tab_callback(NULL, cw);
 	else
 		gtk_widget_destroy(cw->window);
@@ -1144,29 +1182,6 @@ static void _show_smileys_cb(GtkWidget *widget, smiley_callback_data *data)
 	show_smileys_cb(data);
 }
 
-static int should_window_raise(const char *message)
-{
-	if (iGetLocalPref("do_raise_window")) {
-		char *thepattern = cGetLocalPref("regex_pattern");
-
-		if (thepattern && thepattern[0]) {
-			regex_t myreg;
-			regmatch_t pmatch;
-			int rc = regcomp(&myreg, thepattern,
-				REG_EXTENDED | REG_ICASE);
-
-			if (!rc) {
-				rc = regexec(&myreg, message, 1, &pmatch, 0);
-				if (!rc)
-					return 1;
-			}
-		} else
-			/* no pattern specified. Assume always. */
-			return 1;
-	}
-	return 0;
-}
-
 void ay_chat_window_printr(chat_window *cw, gchar *o_message)
 {
 	if (!o_message || !o_message[0])
@@ -1186,10 +1201,20 @@ void ay_chat_window_printr(chat_window *cw, gchar *o_message)
 #endif
 }
 
-void ay_chat_window_raise(chat_window *cw, const char *message)
+int ay_chat_window_raise(chat_window *cw, const char *message)
 {
-	if (!message || should_window_raise(message))
+	if (should_window_raise(message)) {
+		if (cw->notebook)
+			gtk_notebook_set_current_page(GTK_NOTEBOOK(cw->notebook),
+						      gtk_notebook_page_num(
+							      GTK_NOTEBOOK(cw->notebook),
+							      cw->pane));
 		gdk_window_raise(cw->window->window);
+
+		return 1;
+	}
+
+	return 0;
 }
 
 void ay_chat_window_print_message(chat_window *cw, gchar *o_message, int send)
@@ -1211,10 +1236,8 @@ void ay_chat_window_print_message(chat_window *cw, gchar *o_message, int send)
 	}
 
 	if (!send)
-		set_tab_red(cw);
+		ay_chat_window_updated(cw, o_message);
 
-	/* for raising the window */
-	ay_chat_window_raise(cw, o_message);
 }
 
 void ay_chat_window_print(chat_window *cw, gchar *o_message)
@@ -1332,8 +1355,6 @@ static void add_page_with_pane(chat_window *cw, GtkWidget *vbox, const char *nam
 	gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
 	gtk_notebook_append_page(GTK_NOTEBOOK(cw->notebook), vbox,
 		tab_label);
-
-	cw->notebook_child = vbox;
 }
 
 void ay_chat_window_set_name(chat_window *cw)
@@ -1470,7 +1491,6 @@ static void layout_chatwindow(chat_window *cw, GtkWidget *vbox,
 		gtk_widget_show(cw->window);
 
 		cw->notebook = NULL;
-		cw->notebook_child = NULL;
 		gtk_container_add(GTK_CONTAINER(cw->window), vbox);
 		gtk_widget_show(vbox);
 	}

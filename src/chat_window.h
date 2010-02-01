@@ -96,7 +96,6 @@ void eb_log_status_changed(eb_account *ea, const gchar *status);
 void eb_chat_window_do_timestamp(struct contact *c, gboolean online);
 void send_message(GtkWidget *widget, gpointer d);
 chat_window *find_tabbed_chat_window_index(int current_page);
-void set_tab_red(chat_window *cw);
 void reassign_tab_pages();
 void chat_window_to_chat_room(chat_window *cw, eb_account *third_party,
 	const char *msg);
@@ -109,7 +108,7 @@ gchar *ay_chat_convert_message(chat_window *cw, char *msg);
 
 void ay_set_chat_encoding(GtkWidget *widget, void *data);
 
-void ay_chat_window_raise(chat_window *window, const char *message);
+int ay_chat_window_raise(chat_window *window, const char *message);
 
 void ay_chat_window_printr(chat_window *cw, gchar *o_message);
 void ay_chat_window_print(chat_window *cw, gchar *o_message);
