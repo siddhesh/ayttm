@@ -32,7 +32,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <gdk/gdkkeysyms.h>
 #include <ctype.h>
 #include <regex.h>
 
