@@ -1272,6 +1272,17 @@ static void destroy_smiley_cb_data(GtkWidget *widget, gpointer data)
 		g_free(scd);
 }
 
+static gboolean vbox_key_pressed(GtkWidget *widget, GdkEventKey *event,
+			       gpointer user_data)
+{
+	if (event->state & GDK_CONTROL_MASK && event->keyval & GDK_w) {
+		close_tab_callback(NULL, user_data);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void add_page_with_pane(chat_window *cw, GtkWidget *vbox, const char *name,
 	GtkAccelGroup *accel_group)
 {
@@ -1304,18 +1315,15 @@ static void add_page_with_pane(chat_window *cw, GtkWidget *vbox, const char *nam
 		gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU));
 
 	g_signal_connect(close_button, "clicked", G_CALLBACK(close_tab_callback),
-		cw);
+			 cw);
 
-/* FIXME: This doesn't quite work.
- * 	The idea is to install the handler for the window and then
- * 	once the window receives the event, we find the in-focus
- * 	tab and close it.
- * 	If that is the last tab then close the window.
- * 	If tabbed chat is disabled then close the window.
+	g_signal_connect(vbox, "key-press-event", G_CALLBACK(vbox_key_pressed),
+			 cw);
 
-	gtk_widget_add_accelerator(close_button, "clicked", accel_group,
-		GDK_w, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-*/
+/*	gtk_widget_add_accelerator(vbox, "key-press-event",
+				   accel_group, GDK_w, GDK_CONTROL_MASK,
+				   GTK_ACCEL_VISIBLE);*/
+
 	tab_label = gtk_hbox_new(FALSE, 3);
 
 	gtk_box_pack_start(GTK_BOX(tab_label), contact_label, TRUE, TRUE, 0);
@@ -1370,8 +1378,6 @@ static void layout_chatwindow(chat_window *cw, GtkWidget *vbox,
 
 			g_signal_connect(cw->window, "delete-event", G_CALLBACK(cw_close_win),
 				cw);
-			/* Adding accelerators to windows */
-			gtk_window_add_accel_group(GTK_WINDOW(cw->window), accel_group);
 
 			gtk_window_set_wmclass(GTK_WINDOW(cw->window),
 				"ayttm-chat", "Ayttm");
@@ -1460,6 +1466,7 @@ static void layout_chatwindow(chat_window *cw, GtkWidget *vbox,
 	} else {
 		/* setup like normal */
 		cw->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
 		gtk_container_set_border_width(GTK_CONTAINER(cw->window), 5);
 
 		gtk_window_set_wmclass(GTK_WINDOW(cw->window), "ayttm-chat",
@@ -1473,6 +1480,7 @@ static void layout_chatwindow(chat_window *cw, GtkWidget *vbox,
 		gtk_widget_show(vbox);
 	}
 
+	gtk_window_add_accel_group(GTK_WINDOW(cw->window), accel_group);
 	cw->pane = vbox;
 
 	chat_window_list = l_list_prepend(chat_window_list, cw);
@@ -1716,20 +1724,19 @@ chat_window *ay_chat_window_new(Conversation *conv)
 
 /* line will tell whether to draw the separator line or not */
 #define TOOLBAR_APPEND_SPACE(line) { \
-	separator = GTK_WIDGET(gtk_separator_tool_item_new()); \
+	separator = GTK_WIDGET(gtk_separator_tool_item_new());	\
 	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator), line); \
 	gtk_widget_show(separator); \
-	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(separator), -1); \
-}
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(separator), -1); }
 
 	/* This is where we decide whether or not the add button should be displayed */
 	if ( !conv->is_room && cw->conv->contact && 
-		(!strcmp(cw->conv->contact->group->name, _("Unknown"))
-		|| !strncmp(cw->conv->contact->group->name, "__Ayttm_Dummy_Group__",
-			strlen("__Ayttm_Dummy_Group__")))) {
+	     (!strcmp(cw->conv->contact->group->name, _("Unknown"))
+	      || !strncmp(cw->conv->contact->group->name, "__Ayttm_Dummy_Group__",
+			  strlen("__Ayttm_Dummy_Group__")))) {
 		ICON_CREATE(iconwid, GTK_STOCK_ADD);
 		TOOLBAR_APPEND(add_button, _("Add Contact"), iconwid,
-			add_unknown_callback, cw);
+			       add_unknown_callback, cw);
 
 		TOOLBAR_APPEND_SPACE(TRUE);
 	}
@@ -1739,7 +1746,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 					     _("Reconnect at login"),
 					     _("Reconnect at login"),
 					     iconwid, set_reconnect_on_toggle, cw->conv);
-		
+
 		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(cw->reconnect_button), 
 						  ay_is_conversation_auto(cw->conv));
 	}
@@ -1787,9 +1794,9 @@ chat_window *ay_chat_window_new(Conversation *conv)
 
 		ICON_CREATE(iconwid, "ayttm_smileys");
 		TOOLBAR_APPEND(cw->smiley_button, _("Insert Smiley"), iconwid,
-			_show_smileys_cb, scd);
+			       _show_smileys_cb, scd);
 		g_signal_connect(cw->smiley_button, "destroy",
-			G_CALLBACK(destroy_smiley_cb_data), scd);
+				 G_CALLBACK(destroy_smiley_cb_data), scd);
 		/* Create the separator for the toolbar */
 		TOOLBAR_APPEND_SPACE(FALSE);
 
@@ -1800,23 +1807,23 @@ chat_window *ay_chat_window_new(Conversation *conv)
 
 	cw->sound_button = GTK_WIDGET(gtk_toggle_tool_button_new());
 	gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(cw->sound_button),
-		iconwid);
+					iconwid);
 	gtk_tool_button_set_label(GTK_TOOL_BUTTON(cw->sound_button),
-		_("Sound"));
+				  _("Sound"));
 
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar),
-		GTK_TOOL_ITEM(cw->sound_button), -1);
+			   GTK_TOOL_ITEM(cw->sound_button), -1);
 
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(cw->sound_button),
-		_("Enable Sound"/* Ctrl+S"*/));
+				       _("Enable Sound (Ctrl+S)"));
 
 	g_signal_connect(cw->sound_button, "clicked",
-		G_CALLBACK(set_sound_callback), cw);
+			 G_CALLBACK(set_sound_callback), cw);
 	gtk_widget_show(cw->sound_button);
-/*
+
 	gtk_widget_add_accelerator(cw->sound_button, "clicked", accel_group,
-		GDK_s, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-*/
+				   GDK_s, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
 	/* Toggle the sound button based on preferences */
 	cw->send_enabled = iGetLocalPref("do_play_send");
 	cw->receive_enabled = iGetLocalPref("do_play_receive");
@@ -1829,33 +1836,33 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	cw_set_sound_active(cw, enableSoundButton);
 
 	ICON_CREATE(iconwid, GTK_STOCK_FIND);
-	TOOLBAR_APPEND(view_log_button, _("View Log"/* CTRL+L"*/), iconwid,
-		view_log_callback, cw);
+	TOOLBAR_APPEND(view_log_button, _("View Log (CTRL+L)"), iconwid,
+		       view_log_callback, cw);
 	
-/* FIXME: Doesn't quite work
 	gtk_widget_add_accelerator(view_log_button, "clicked", accel_group,
-		GDK_l, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-*/
+				   GDK_l, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
 	TOOLBAR_APPEND_SPACE(TRUE);
 
 #ifndef __MINGW32__
 	ICON_CREATE(iconwid, GTK_STOCK_EXECUTE);
-	TOOLBAR_APPEND(print_button, _("Actions..."), iconwid, action_callback,
-		cw);
+	TOOLBAR_APPEND(print_button, _("Actions (CTRL+P)"), iconwid, action_callback,
+		       cw);
 	gtk_widget_add_accelerator(print_button, "clicked", accel_group, GDK_p,
-		GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+				   GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
 	TOOLBAR_APPEND_SPACE(TRUE);
 #endif
 
 	/* This is the send file button... only for private chats */
-	if (cw->conv->contact) {
+	if (cw->conv->contact && can_file_transfer(GET_SERVICE(conv->local_user))) {
 		ICON_CREATE(iconwid, GTK_STOCK_OPEN);
-		TOOLBAR_APPEND(sendf_button, _("Send File"/* CTRL+T"*/), iconwid, send_file,
-			cw);
+		TOOLBAR_APPEND(sendf_button, _("Send File (CTRL+T)"), iconwid, send_file,
+			       cw);
+		
 		gtk_widget_add_accelerator(sendf_button, "clicked", accel_group, GDK_t,
-			GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-
+					   GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+		
 		TOOLBAR_APPEND_SPACE(TRUE);
 	}
 
@@ -1863,7 +1870,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	if (cw->conv->is_room || 
 	    can_conference(GET_SERVICE(conv->local_user))) {
 		ICON_CREATE_XPM(icon, iconwid, invite_btn_xpm);
-		TOOLBAR_APPEND(invite_button, _("Invite"/* CTRL+I"*/), iconwid,
+		TOOLBAR_APPEND(invite_button, _("Invite (CTRL+I)"), iconwid,
 			       do_invite_window, cw);
 		gtk_widget_add_accelerator(invite_button, "clicked", accel_group, GDK_i,
 					   GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -1874,20 +1881,20 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	if (!conv->is_room) {
 		/* This is the ignore button */
 		ICON_CREATE(iconwid, GTK_STOCK_REMOVE);
-		TOOLBAR_APPEND(ignore_button, _("Ignore"/* CTRL+G"*/), iconwid,
-			ignore_callback, cw);
+		TOOLBAR_APPEND(ignore_button, _("Ignore (CTRL+G)"), iconwid,
+			       ignore_callback, cw);
 		gtk_widget_add_accelerator(ignore_button, "clicked", accel_group, GDK_g,
-			GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+					   GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
 		TOOLBAR_APPEND_SPACE(TRUE);
 	}
 
 	/* This is the send button */
 	ICON_CREATE(iconwid, GTK_STOCK_OK);
-	TOOLBAR_APPEND(send_button, _("Send Message"/* CTRL+R"*/), iconwid,
-		send_message, cw);
+	TOOLBAR_APPEND(send_button, _("Send Message (CTRL+R)"), iconwid,
+		       send_message, cw);
 	gtk_widget_add_accelerator(send_button, "clicked", accel_group, GDK_r,
-		GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+				   GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
 #undef TOOLBAR_APPEND
 #undef TOOLBAR_APPEND_SPACE
