@@ -815,7 +815,7 @@ int irc_get_command_string(char *out, const char *recipient, char *command,
 {
 	if (!strcasecmp(command, "ME")) {
 		snprintf(out, BUF_LEN, "PRIVMSG %s :\001ACTION %s\001\n",
-			recipient, params);
+			recipient, params?params:"");
 		return IRC_ECHO_ACTION;
 	}
 
@@ -825,7 +825,7 @@ int irc_get_command_string(char *out, const char *recipient, char *command,
 		return IRC_NOECHO;
 	}
 
-	if (!strcasecmp(command, "J")) {
+	if (!strcasecmp(command, "J") && params) {
 		snprintf(out, BUF_LEN, "JOIN %s\n", params);
 		return IRC_NOECHO;
 	}
@@ -841,7 +841,7 @@ int irc_get_command_string(char *out, const char *recipient, char *command,
 		return IRC_NOECHO;
 	}
 
-	if (!strcasecmp(command, "KICK")) {
+	if (!strcasecmp(command, "KICK") && params) {
 		snprintf(out, BUF_LEN, "%s %s %s\n", command, recipient, params);
 		return IRC_ECHO_KICK;
 	}
@@ -853,7 +853,7 @@ int irc_get_command_string(char *out, const char *recipient, char *command,
 		return IRC_NOECHO;
 	}
 
-	if (!strcasecmp(command, "MSG")) {
+	if (!strcasecmp(command, "MSG") && params) {
 		char *msg = strchr(params, ' ');
 
 		if (msg) {
