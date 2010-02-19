@@ -89,6 +89,7 @@ enum {
 	IRC_WELCOME = 0xaa77aa,
 	IRC_TOPIC = 0x775500,
 	IRC_MOTD = 0x885588,
+	IRC_KICK = 0xAA6600,
 	IRC_CTCP_TIME = 0xaabb44,
 	IRC_CTCP_ACTION = 0x00aa00,
 	IRC_CTCP_VERSION = 0x00bbbb
@@ -104,7 +105,7 @@ typedef struct irc_command_action_type {
 static int ay_irc_query_connected(eb_account *account);
 static void ay_irc_login(eb_local_account *account);
 static void ay_irc_logout(eb_local_account *ela);
-static void ay_irc_send_im(eb_local_account *account_from,
+static int ay_irc_send_im(eb_local_account *account_from,
 	eb_account *account_to, char *message);
 static eb_local_account *ay_irc_read_local_config(LList *pairs);
 static LList *ay_irc_write_local_config(eb_local_account *account);
@@ -128,15 +129,15 @@ static void irc_info_update(info_window *iw);
 static void irc_info_data_cleanup(info_window *iw);
 static void ay_irc_get_info(eb_local_account *account_from,
 	eb_account *account_to);
-static void ay_irc_join_chat_room(eb_chat_room *room);
-static void ay_irc_leave_chat_room(eb_chat_room *room);
-static void ay_irc_send_chat_room_message(eb_chat_room *room, char *message);
-static void ay_irc_send_invite(eb_local_account *account, eb_chat_room *room,
+static void ay_irc_join_chat_room(Conversation *room);
+static void ay_irc_leave_chat_room(Conversation *room);
+static int ay_irc_send_chat_room_message(Conversation *room, char *message);
+static void ay_irc_send_invite(eb_local_account *account, Conversation *room,
 	char *user, const char *message);
-static eb_chat_room *ay_irc_make_chat_room(char *name,
+static Conversation *ay_irc_make_chat_room(char *name,
 	eb_local_account *account, int is_public);
-static eb_chat_room *ay_irc_make_chat_room_window(char *name,
-	eb_local_account *account, int is_public, int send_join);
+static Conversation *ay_irc_start_conversation(const char *name,
+	eb_local_account *account, int is_room, int is_public, int send_join);
 static void ay_irc_accept_invite(eb_local_account *account, void *invitation);
 static void ay_irc_decline_invite(eb_local_account *account, void *invitation);
 static void eb_irc_read_prefs_config(LList *values);

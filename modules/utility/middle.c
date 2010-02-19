@@ -36,6 +36,7 @@
 #include "externs.h"
 #include "plugin_api.h"
 #include "prefs.h"
+#include "conversation.h"
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -49,8 +50,7 @@
 #endif
 
 /* Function Prototypes */
-static char *plstripHTML(const eb_local_account *local,
-	const eb_account *remote, const struct contact *contact, const char *s);
+static char *plstripHTML(Conversation *conv, const char *in);
 static int middle_init(void);
 static int middle_finish(void);
 
@@ -98,8 +98,10 @@ static int middle_init(void)
 
 	eb_debug(DBG_MOD, "L33tSp33k initialised\n");
 
-	outgoing_message_filters =
-		l_list_prepend(outgoing_message_filters, &plstripHTML);
+	outgoing_message_filters_local =
+		l_list_prepend(outgoing_message_filters_local, &plstripHTML);
+	outgoing_message_filters_remote =
+		l_list_prepend(outgoing_message_filters_remote, &plstripHTML);
 	incoming_message_filters =
 		l_list_append(incoming_message_filters, &plstripHTML);
 
@@ -109,8 +111,10 @@ static int middle_init(void)
 static int middle_finish(void)
 {
 	eb_debug(DBG_MOD, "L33tSp33k shutting down\n");
-	outgoing_message_filters =
-		l_list_remove(outgoing_message_filters, &plstripHTML);
+	outgoing_message_filters_local =
+		l_list_remove(outgoing_message_filters_local, &plstripHTML);
+	outgoing_message_filters_remote =
+		l_list_remove(outgoing_message_filters_remote, &plstripHTML);
 	incoming_message_filters =
 		l_list_remove(incoming_message_filters, &plstripHTML);
 
@@ -126,18 +130,17 @@ static int middle_finish(void)
 /*******************************************************************************
  *                             End Module Code
  ******************************************************************************/
-static char *plstripHTML(const eb_local_account *local,
-	const eb_account *remote, const struct contact *contact, const char *in)
+static char *plstripHTML(Conversation *conv, const char *in)
 {
 	int pos = 0;
 	int post = 0;
-	char *s = strdup(in);
+	char *s = g_strdup(in);
 	char *t = NULL;
 
 	if (!s_doLeet && !s_doExtremeLeet)
 		return (s);
 
-	t = calloc(3, strlen(s));
+	t = g_new0(char, 3*strlen(s));
 
 	while (s[pos] != '\0') {
 		switch (s[pos]) {
@@ -241,7 +244,7 @@ static char *plstripHTML(const eb_local_account *local,
 
 	t[post] = '\0';
 
-	free(s);
+	g_free(s);
 
 	return (t);
 }

@@ -41,7 +41,9 @@ char *strchr(), *strrchr();
 #endif
 
 #include <errno.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <ctype.h>
 #include "yahoo2.h"
 #include "yahoo2_callbacks.h"

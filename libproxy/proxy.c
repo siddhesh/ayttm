@@ -291,22 +291,26 @@ int socks5_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 int http_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 {
 	/* step two : do  proxy tunneling init */
-	char cmd[200];
+	char cmd[512];
 	char *inputline = NULL;
 	char *proxy_auth = NULL;
-	char debug_buff[255];
+	char debug_buff[512];
+	int remaining = sizeof(cmd) - 1;
 
-	sprintf(cmd, "CONNECT %s:%d HTTP/1.1\r\n", host, port);
+	remaining -= snprintf(cmd, sizeof(cmd), "CONNECT %s:%d HTTP/1.1\r\n", host, port);
 	if (proxy->username && proxy->username[0]) {
 		proxy_auth = encode_proxy_auth_str(proxy);
 
-		strcat(cmd, "Proxy-Authorization: Basic ");
-		strcat(cmd, proxy_auth);
-		strcat(cmd, "\r\n");
+		strncat(cmd, "Proxy-Authorization: Basic ", remaining);
+		remaining -= 27;
+		strncat(cmd, proxy_auth, remaining);
+		remaining -= strlen(proxy_auth);
+		strncat(cmd, "\r\n", remaining);
+		remaining -= 2;
 	}
-	strcat(cmd, "\r\n");
+	strncat(cmd, "\r\n", remaining);
 #ifndef DEBUG
-	sprintf(debug_buff, "<%s>\n", cmd);
+	snprintf(debug_buff, sizeof(debug_buff), "<%s>\n", cmd);
 	debug_print(debug_buff);
 #endif
 	if (send(sockfd, cmd, strlen(cmd), 0) < 0)
@@ -314,7 +318,7 @@ int http_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 	if (ay_recv_line(sockfd, &inputline) < 0)
 		return AY_CONNECTION_REFUSED;
 #ifndef DEBUG
-	sprintf(debug_buff, "<%s>\n", inputline);
+	snprintf(debug_buff, sizeof(debug_buff), "<%s>\n", inputline);
 	debug_print(debug_buff);
 #endif
 	if (!strstr(inputline, "200")) {
@@ -341,7 +345,7 @@ int http_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 			return AY_CONNECTION_REFUSED;
 		}
 #ifndef DEBUG
-		sprintf(debug_buff, "<%s>\n", inputline);
+		snprintf(debug_buff, sizeof(debug_buff), "<%s>\n", inputline);
 		debug_print(debug_buff);
 #endif
 	}
@@ -354,14 +358,16 @@ int http_connect(int sockfd, const char *host, int port, AyProxyData *proxy)
 
 static char *encode_proxy_auth_str(AyProxyData *proxy)
 {
-	char buff[200];
+	char *buff = NULL;
+	char *ret = NULL;
 
 	if (proxy->username == NULL)
 		return NULL;
 
-	strcpy(buff, proxy->username);
-	strcat(buff, ":");
-	strcat(buff, proxy->password);
+	buff = g_strdup_printf("%s:%s", proxy->username, proxy->password);
 
-	return g_base64_encode((unsigned char *)buff, strlen(buff));
+	ret = g_base64_encode((unsigned char *)buff, strlen(buff));
+	g_free (buff);
+
+	return ret;
 }

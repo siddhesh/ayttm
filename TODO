@@ -12,7 +12,7 @@ http://ayttm.git.sourceforge.net/git/gitweb.cgi?p=ayttm/ayttm;a=blob_plain;f=TOD
   * CTCP color and formatting
   * File Transfer
   * Modes support
-  * Kick/ban
+  * Ban
   * Implement commands interpretation as a filter
   * Replace password chars with * when doing a /identify
 
@@ -35,10 +35,9 @@ http://ayttm.git.sourceforge.net/git/gitweb.cgi?p=ayttm/ayttm;a=blob_plain;f=TOD
   * Remember last selected smiley pack - Done globally, should be per chat
   * Consolidate chat room and window code. There is currently a lot of
     duplication of code
-  * buddy name completion in chat rooms on tab
   * Standardize tab switching shortcut to Ctrl+Pageup/Ctrl+Pagedown. Remove
     it from preferences
-  * Prettier/cleaner chat windows
+  * Chat rooms should not cause taskbar flashing unless someone types your name
 
 * eyecandy
   * Emoticons/pictures in contact names and status

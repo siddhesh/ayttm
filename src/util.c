@@ -51,7 +51,6 @@
 #include "util.h"
 #include "status.h"
 #include "globals.h"
-#include "chat_room.h"
 #include "chat_window.h"
 #include "value_pair.h"
 #include "plugin.h"
@@ -61,6 +60,7 @@
 #include "add_contact_window.h"
 #include "messages.h"
 #include "activity_bar.h"
+#include "smileys.h"
 
 #ifndef NAME_MAX
 #define NAME_MAX 4096
@@ -422,7 +422,25 @@ char *linkify(const char *input)
 	return result;
 }
 
-char *convert_eol(char *text)
+char *ay_linkify_filter(Conversation *conv, const char *s)
+{
+	return linkify(s);
+}
+
+char *ay_smilify_filter(Conversation *conv, const char *s)
+{
+	/* TODO make this a filter */
+	if (iGetLocalPref("do_smiley")
+		&& RUN_SERVICE(conv->local_user)->get_smileys) {
+		return eb_smilify(s,
+			RUN_SERVICE(conv->local_user)->get_smileys(),
+			get_service_name(conv->local_user->service_id));
+	}
+
+	return strdup(s);
+}
+
+char *ay_convert_eol_filter(Conversation *conv, char *text)
 {
 	char *temp;
 	char **data = NULL;
@@ -618,55 +636,6 @@ eb_account *find_suitable_file_transfer_account(eb_account *first,
 		}
 	}
 	return possibility;
-}
-
-eb_chat_room *find_chat_room_by_id(const char *id)
-{
-	LList *node = chat_rooms;
-	for (node = chat_rooms; node; node = node->next) {
-		eb_chat_room *ecr = node->data;
-		/* eb_debug(DBG_CORE, "Comparing %s to %s\n", id, ecr->id ); */
-		if (!strcmp(id, ecr->id))
-			return ecr;
-	}
-	return NULL;
-
-}
-
-eb_chat_room *find_chat_room_by_name(char *name, int service_id)
-{
-	LList *node = chat_rooms;
-	for (node = chat_rooms; node && node->data; node = node->next) {
-		eb_chat_room *ecr = node->data;
-		if ((ecr->local_user->service_id == service_id)
-			&& !strcmp(name, ecr->room_name))
-			return ecr;
-	}
-	return NULL;
-
-}
-
-LList *find_chatrooms_with_remote_account(eb_account *remote)
-{
-	LList *node = NULL;
-	LList *result = NULL;
-
-	for (node = chat_rooms; node && node->data; node = node->next) {
-		eb_chat_room *ecr = node->data;
-		if (remote->service_id == ecr->local_user->service_id) {
-			LList *others = NULL;
-			for (others = ecr->fellows; others && others->data;
-				others = others->next) {
-				eb_chat_room_buddy *ecrb = others->data;
-				if (!strcmp(remote->handle, ecrb->handle)) {
-					result = l_list_prepend(result, ecr);
-					eb_debug(DBG_CORE, "Found %s in %s\n",
-						remote->handle, ecr->room_name);
-				}
-			}
-		}
-	}
-	return result;
 }
 
 grouplist *find_grouplist_by_name(const char *name)
@@ -946,12 +915,8 @@ void remove_contact(struct contact *c)
 {
 	grouplist *g = c->group;
 
-	if (c->chatwindow) {
-		if (iGetLocalPref("do_tabbed_chat"))
-			cw_remove_tab(c);
-		else
-			cw_close_win(NULL, c->chatwindow);
-	}
+	if (c->conversation)
+		ay_conversation_end(c->conversation);
 
 	while (c->accounts && !l_list_empty(c->accounts))
 		if (!remove_account(c->accounts->data))
@@ -1474,7 +1439,7 @@ static void process_invite(void *data, int result)
 }
 
 void invite_dialog(eb_local_account *ela, const char *user,
-	const char *chat_room, void *id)
+		   const char *chat_room, void *id)
 {
 	char *message =
 		g_strdup_printf(_
@@ -1764,13 +1729,13 @@ int eb_send_message(const char *to, const char *msg, int service)
 
 	if (ac) {
 		con = ac->account_contact;
-		eb_chat_window_display_account(ac);
+		ay_conversation_chat_with_account(ac);
 	} else if (con) {
-		eb_chat_window_display_contact(con);
+		ay_conversation_chat_with_contact(con);
 	} else {
 		return 0;
 	}
-	gtk_editable_insert_text(GTK_EDITABLE(con->chatwindow->entry),
+	gtk_editable_insert_text(GTK_EDITABLE(con->conversation->window->entry),
 		msg ? msg : "", msg ? strlen(msg) : 0, &pos);
 	/* send_message(NULL, con->chatwindow); */
 	return 1;
@@ -1891,7 +1856,7 @@ void ay_dump_cts(void)
 				ct->default_chatb,
 				ct->default_filetransb,
 				ct->group,
-				ct->chatwindow,
+				ct->conversation,
 				ct->logwindow,
 				ct->list_item,
 				ct->tree,

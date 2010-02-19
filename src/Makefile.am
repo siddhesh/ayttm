@@ -15,7 +15,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 	edit_contact_window.c edit_account_window.c  sound.c dialog.c \
 	prefs.c away_window.c browser.c message_parse.c \
 	activity_bar.C spellcheck.C video.c usercount.c \
-	chat_room.c value_pair.c edit_group_window.c logs.c \
+	conversation.c value_pair.c edit_group_window.c logs.c \
 	trigger.c console_session.c input_list.c nomodule.c \
 	plugin_api.c plugin.c file_select.c contact_actions.c \
 	smileys.c help_menu.c crash.c account_parser.y account_scanner.l \
@@ -27,7 +27,7 @@ ayttm_SOURCES = main.c contactlist.c edit_local_accounts.c service.c status.c \
 noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 	status.h info_window.h chat_window.h util.h add_contact_window.h \
 	sound.h dialog.h prefs.h away_window.h spellcheck.h \
-	message_parse.h help_menu.h chat_room.h value_pair.h logs.h \
+	message_parse.h help_menu.h conversation.h value_pair.h logs.h \
 	info_window.h trigger.h console_session.h video.h icons.h \
 	browser.h input_list.h plugin.h plugin_api.h debug.h \
 	nomodule.h file_select.h contact_actions.h activity_bar.h \
@@ -41,8 +41,8 @@ noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 
 AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)
-AM_CXXFLAGS = $(AM_CFLAGS)
-LIBS = @LIBS@ $(EB_LIBS) $(top_srcdir)/libproxy/libproxy.a $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS) -L/usr/local/lib/pth/ $(WIN32_LIBS)
+AM_CXXFLAGS = $(AM_CFLAGS) $(ENCHANT_CFLAGS)
+LIBS = @LIBS@ $(EB_LIBS) $(top_srcdir)/libproxy/libproxy.a $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS) $(ENCHANT_LIBS) -L/usr/local/lib/pth/ $(WIN32_LIBS)
 ayttm_LDFLAGS = $(EB_LDFLAGS) -export-dynamic $(WIN32_LD) -lX11
 CLEANFILES = @CLEANFILES@ defaults.h
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\" -D_REENTRANT -DIMG_DIR=\"${datadir}/pixmaps/\"

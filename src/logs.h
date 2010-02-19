@@ -85,8 +85,7 @@ extern "C" {
 	@param	inName			the text of the 'name' portion of the message
 	@param	inMessage		the text of the message itself
 */
-	void ay_log_file_message(log_file *ioLogFile, const char *inName,
-		const char *inMessage);
+	void ay_log_file_message(log_file *ioLogFile, const char *inMessage);
 
 /** Close a log file.
 	

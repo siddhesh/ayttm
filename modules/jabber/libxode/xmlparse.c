@@ -2036,7 +2036,7 @@ prologProcessor(XML_Parser parser,
 				eventPtr = s + encoding->minBytesPerChar;
 				return XML_ERROR_NO_ELEMENTS;
 			default:
-				abort();
+				return XML_ERROR_INVALID_TOKEN;
 			}
 		}
 		switch (XmlTokenRole(&prologState, tok, s, next, encoding)) {

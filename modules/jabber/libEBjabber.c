@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <jabber/jabber.h>
 
-#include "chat_room.h"
+#include "chat_window.h"
 #include "plugin_api.h"
 #include "libEBjabber.h"
 #include "messages.h"
@@ -46,8 +46,8 @@ extern void JABBERListDialog(const char **list, void *data);
 extern void JABBERError(char *message, char *title);
 extern void JABBERBuddy_typing(JABBER_Conn *JConn, char *from, int typing);
 extern void JABBERLogout(void *data);
-extern void JABBERChatRoomMessage(char *id, char *user, char *message);
-extern void JABBERChatRoomBuddyStatus(char *id, char *user, int offline);
+extern void JABBERChatRoomMessage(JABBER_Conn *conn, char *id, char *user, char *message);
+extern void JABBERChatRoomBuddyStatus(JABBER_Conn *conn, char *id, char *user, int offline);
 extern void JABBERDelBuddy(JABBER_Conn *JConn, void *data);
 extern void JABBERConnected(void *data);
 extern void JABBERNotConnected(void *data);
@@ -231,11 +231,9 @@ void ext_jabber_disconnect(jconn j)
 	JABBER_Conn *conn = JCfindConn(j);
 
 	if (!conn) {
-		printf("WHAT THE HELL ARE WE TRYING TO FREE(%p)?!?!?!\n", j);
+		eb_debug(DBG_JBR, "WHAT THE HELL ARE WE TRYING TO FREE(%p)?!?!?!\n", j);
 		return;
 	}
-
-	printf("Freeing %p\n", conn->connection);
 
 	ay_connection_free(conn->connection);
 	conn->connection = NULL;
@@ -522,7 +520,7 @@ int JABBER_ChangeState(JABBER_Conn *JConn, int state)
 	xmlnode x, y;
 	/* Unique away states are possible, but not supported by
 	   ayttm yet.  status would hold that value */
-	char show[7] = "", *status = "";
+	char show[8] = "", *status = "";
 
 	eb_debug(DBG_JBR, "(%i)\n", state);
 	if (!JConn->conn)
@@ -716,7 +714,7 @@ void JABBER_Send_typing(JABBER_Conn *JConn, const char *from, const char *to,
 	 jab_send_raw(JConn->conn, buffer); */
 }
 
-int JABBER_IsChatRoom(char *from)
+/* UNUSED int JABBER_IsChatRoom(char *from)
 {
 	char buffer[257];
 	char *ptr = NULL;
@@ -742,7 +740,7 @@ int JABBER_IsChatRoom(char *from)
 		return (1);
 	}
 
-	/* test with @ */
+	/ * test with @ * /
 	strncpy(buffer, from, 256);
 	if (strchr(buffer, '/'))
 		*strchr(buffer, '/') = 0;
@@ -760,7 +758,7 @@ int JABBER_IsChatRoom(char *from)
 	eb_debug(DBG_JBR, "Returning False\n");
 	return (0);
 
-}
+}*/
 
 int JABBER_JoinChatRoom(JABBER_Conn *JConn, char *room_name, char *nick)
 {
@@ -929,7 +927,7 @@ void j_on_packet_handler(jconn conn, jpacket packet)
 			}
 			eb_debug(DBG_JBR, "chatroom: %s %s %s\n", room, user,
 				buff);
-			JABBERChatRoomMessage(room, user, buff);
+			JABBERChatRoomMessage(JConn, room, user, buff);
 		} else {
 			/* For now, ayttm does not understand resources */
 			JIM.msg = buff;
@@ -1173,7 +1171,7 @@ void j_on_packet_handler(jconn conn, jpacket packet)
 				*user = 0;
 				user++;
 			}
-			JABBERChatRoomBuddyStatus(room, user, status);
+			JABBERChatRoomBuddyStatus(JConn, room, user, status);
 		} else {
 			if ((x = xmlnode_get_tag(packet->x, "status")))
 				JB.description = xmlnode_get_data(x);

@@ -80,10 +80,10 @@ static void eb_nomodule_logout(eb_local_account *account)
 	return;
 }
 
-static void eb_nomodule_send_im(eb_local_account *account_from,
+static int eb_nomodule_send_im(eb_local_account *account_from,
 	eb_account *account_to, char *message)
 {
-	return;
+	return 1;
 }
 
 static eb_local_account *eb_nomodule_read_local_config(LList *pairs)

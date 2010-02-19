@@ -5,7 +5,7 @@ AC_INIT([Ayttm], [0.6.1], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=1
+RELEASE=5
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -61,6 +61,7 @@ if test "$use_posix_dlopen" = "no"; then
 else
 	echo "Using POSIX dlopen for dynamic library loading"
 	AC_DEFINE([USE_POSIX_DLOPEN], [1], [Define if we use POSIX dlopen])
+	LDFLAGS="$LDFLAGS -ldl"
 fi
 
 # global LDFLAGS
@@ -109,8 +110,8 @@ AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.
 AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
 AC_CHECK_HEADERS([sys/utsname.h])
 
-#Checking for aspell
-AC_CHECK_LIB([aspell], [aspell_speller_check])
+#Checking for enchant
+PKG_CHECK_MODULES([ENCHANT], [enchant], [AC_DEFINE(HAVE_LIBENCHANT, , Define if we use enchant)], [])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T

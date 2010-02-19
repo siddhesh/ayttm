@@ -91,8 +91,10 @@ PLUGIN_INFO plugin_info = {
 };
 
 struct service SERVICE_INFO = { "Jabber", -1,
-	SERVICE_CAN_MULTIACCOUNT | SERVICE_CAN_OFFLINEMSG |
-		SERVICE_CAN_GROUPCHAT | SERVICE_CAN_ICONVERT, NULL
+				SERVICE_CAN_MULTIACCOUNT | 
+				SERVICE_CAN_OFFLINEMSG |
+				SERVICE_CAN_GROUPCHAT | 
+				SERVICE_CAN_ICONVERT, NULL
 };
 
 /* End Module Exports */
@@ -105,7 +107,7 @@ static char *eb_jabber_get_color(void)
 
 static int eb_jabber_send_typing(eb_local_account *from,
 	eb_account *account_to);
-static int eb_jabber_send_cr_typing(eb_chat_room *chatroom);
+static int eb_jabber_send_cr_typing(Conversation *chatroom);
 unsigned int module_version()
 {
 	return CORE_VERSION;
@@ -441,12 +443,14 @@ static void eb_jabber_logout(eb_local_account *account)
 	eb_debug(DBG_JBR, "<\n");
 }
 
-static void eb_jabber_send_im(eb_local_account *from, eb_account *account_to,
+static int eb_jabber_send_im(eb_local_account *from, eb_account *account_to,
 	char *message)
 {
 	eb_jabber_account_data *jad = account_to->protocol_account_data;
 
 	JABBER_SendMessage(jad->JConn, account_to->handle, message);
+
+	return 1;
 }
 
 static void jabber_account_prefs_init(eb_local_account *ela)
@@ -767,37 +771,39 @@ static void eb_jabber_set_away(eb_local_account *account, char *message,
 
 }
 
-static void eb_jabber_send_chat_room_message(eb_chat_room *room, char *message)
+static int eb_jabber_send_chat_room_message(Conversation *room, char *message)
 {
 	eb_jabber_local_account_data *jlad =
 		room->local_user->protocol_local_account_data;
-	JABBER_SendChatRoomMessage(jlad->JConn, room->room_name, message,
+	JABBER_SendChatRoomMessage(jlad->JConn, room->name, message,
 		room->local_user->alias);
+
+	return 1;
 }
 
-static void eb_jabber_join_chat_room(eb_chat_room *room)
+static void eb_jabber_join_chat_room(Conversation *room)
 {
 	eb_jabber_local_account_data *jlad =
 		room->local_user->protocol_local_account_data;
 
 	eb_debug(DBG_JBR, ">\n");
-	JABBER_JoinChatRoom(jlad->JConn, room->room_name,
+	JABBER_JoinChatRoom(jlad->JConn, room->name,
 		room->local_user->alias);
 	eb_debug(DBG_JBR, "<\n");
 }
 
-static void eb_jabber_leave_chat_room(eb_chat_room *room)
+static void eb_jabber_leave_chat_room(Conversation *room)
 {
 	eb_jabber_local_account_data *jlad =
 		room->local_user->protocol_local_account_data;
-	JABBER_LeaveChatRoom(jlad->JConn, room->room_name,
+	JABBER_LeaveChatRoom(jlad->JConn, room->name,
 		room->local_user->alias);
 }
 
-static eb_chat_room *eb_jabber_make_chat_room(char *name,
+static Conversation *eb_jabber_make_chat_room(char *name,
 	eb_local_account *account, int is_public)
 {
-	eb_chat_room *ecr = g_new0(eb_chat_room, 1);
+	Conversation *ecr;
 	char *ptr = NULL;
 
 	eb_debug(DBG_JBR, ">\n");
@@ -812,19 +818,13 @@ static eb_chat_room *eb_jabber_make_chat_room(char *name,
 		ptr++;
 	}
 
-	strcpy(ecr->room_name, name);
+	ecr = ay_conversation_new(account, NULL, name, 1, is_public);
 
-	strcpy(ecr->id, name);
-
-	ecr->fellows = NULL;
-	ecr->connected = FALSE;
-	ecr->local_user = account;
-	eb_join_chat_room(ecr, TRUE);
 	eb_debug(DBG_JBR, "<\n");
 	return ecr;
 }
 
-static void eb_jabber_send_invite(eb_local_account *account, eb_chat_room *room,
+static void eb_jabber_send_invite(eb_local_account *account, Conversation *room,
 	char *user, const char *message)
 {
 	eb_debug(DBG_JBR, "Empty function\n");
@@ -971,15 +971,16 @@ struct service_callbacks *query_callbacks()
 	return sc;
 }
 
-void JABBERChatRoomBuddyStatus(char *id, char *user, int offline)
+void JABBERChatRoomBuddyStatus(JABBER_Conn *conn, char *id, char *user, int offline)
 {
-	eb_chat_room *ecr = find_chat_room_by_id(id);
+	eb_local_account *ela = find_local_account_by_conn(conn);
+	Conversation *ecr = ay_conversation_find_by_name(ela, id);
 	char *id2 = strdup(id);
 
 	if (!ecr) {
 		if (strstr(id2, "@"))
 			*strstr(id2, "@") = 0;
-		ecr = find_chat_room_by_id(id2);
+		ecr = ay_conversation_find_by_name(ela, id2);
 		free(id2);
 	}
 	if (!ecr) {
@@ -989,19 +990,20 @@ void JABBERChatRoomBuddyStatus(char *id, char *user, int offline)
 	if (!offline) {
 		eb_account *ea = find_account_with_ela(user, ecr->local_user);
 		if (ea) {
-			eb_chat_room_buddy_arrive(ecr,
+			ay_conversation_buddy_arrive(ecr,
 				ea->account_contact->nick, user);
 		} else {
-			eb_chat_room_buddy_arrive(ecr, user, user);
+			ay_conversation_buddy_arrive(ecr, user, user);
 		}
 
 	} else
-		eb_chat_room_buddy_leave(ecr, user);
+		ay_conversation_buddy_leave(ecr, user);
 }
 
-void JABBERChatRoomMessage(char *id, char *user, char *message)
+void JABBERChatRoomMessage(JABBER_Conn *conn, char *id, char *user, char *message)
 {
-	eb_chat_room *ecr = find_chat_room_by_id(id);
+	eb_local_account *ela = find_local_account_by_conn(conn);
+	Conversation *ecr = ay_conversation_find_by_name(ela, id);
 	eb_account *ea = NULL;
 	char *id2 = strdup(id);
 	char *message2 = linkify(message);
@@ -1009,7 +1011,7 @@ void JABBERChatRoomMessage(char *id, char *user, char *message)
 	if (!ecr) {
 		if (strstr(id2, "@"))
 			*strstr(id2, "@") = 0;
-		ecr = find_chat_room_by_id(id2);
+		ecr = ay_conversation_find_by_name(ela, id2);
 		free(id2);
 	}
 	if (!ecr) {
@@ -1026,19 +1028,19 @@ void JABBERChatRoomMessage(char *id, char *user, char *message)
 		if (strchr(muser, ' '))
 			*strchr(muser, ' ') = 0;
 		if (strstr(message, " has joined")) {
-			eb_chat_room_buddy_arrive(ecr, muser, muser);
+			ay_conversation_buddy_arrive(ecr, muser, muser);
 		} else if (strstr(message, " has left")) {
-			eb_chat_room_buddy_leave(ecr, muser);
+			ay_conversation_buddy_leave(ecr, muser);
 		}
 		free(muser);
 		return;
 	}
 
 	if (ea) {
-		eb_chat_room_show_message(ecr, ea->account_contact->nick,
+		ay_conversation_got_message(ecr, ea->account_contact->nick,
 			message2);
 	} else {
-		eb_chat_room_show_message(ecr, user, message2);
+		ay_conversation_got_message(ecr, user, message2);
 	}
 	g_free(message2);
 }
@@ -1365,7 +1367,7 @@ static int eb_jabber_send_typing(eb_local_account *from, eb_account *to)
 	return 4;
 }
 
-static int eb_jabber_send_cr_typing(eb_chat_room *chatroom)
+static int eb_jabber_send_cr_typing(Conversation *chatroom)
 {
 	if (!iGetLocalPref("do_typing_notify"))
 		return 20;

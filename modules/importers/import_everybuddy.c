@@ -215,15 +215,28 @@ static void ok_callback(GtkWidget *widget, gpointer data)
 	if (!a && !c && !p && !m) {
 		return;
 	} else {
+		int len = 0;
+
 		char message[1024];
-		snprintf(message, 1024, "Successfully imported %s%s%s%s%s%s%s."
-			"from Everybuddy.",
-			a ? "accounts" : "",
-			(a && (c || p || m)) ? ", " : "",
-			c ? "contacts" : "",
-			(c && (p || m)) ? ", " : "",
-			p ? "preferences" : "",
-			(p && m) ? ", " : "", m ? "away messages" : "");
+		len = snprintf(message, 1024, _("Successfully imported the "
+			"following from Everybuddy:\n"));
+
+		if(a)
+			len += snprintf(message + len, 1024 - len,
+				_("  * Accounts\n"));
+
+		if(c)
+			len += snprintf(message + len, 1024 - len,
+				_("  * Contacts\n"));
+
+		if(p)
+			len += snprintf(message + len, 1024 - len,
+				_("  * Preferences\n"));
+
+		if(m)
+			len += snprintf(message + len, 1024 - len,
+				_("  * Away Messages\n"));
+
 		ay_do_info(_("Import success"), message);
 	}
 	gtk_widget_destroy(window);

@@ -35,6 +35,7 @@
 #include "plugin_api.h"
 #include "prefs.h"
 #include "platform_defs.h"
+#include "conversation.h"
 
 /*******************************************************************************
  *                             Begin Module Code
@@ -49,8 +50,7 @@
 
 /* Function Prototypes */
 /* ebmCallbackData is a parent struct, the child of which will be an ebmContactData */
-static char *dorainbow(const eb_local_account *local,
-	const eb_account *remote, const struct contact *contact, const char *s);
+static char *dorainbow(Conversation *conv, const char *s);
 static int rainbow_init();
 static int rainbow_finish();
 
@@ -143,8 +143,10 @@ static int rainbow_init()
 
 	eb_debug(DBG_MOD, "Rainbow initialised\n");
 
-	outgoing_message_filters =
-		l_list_append(outgoing_message_filters, &dorainbow);
+	outgoing_message_filters_local =
+		l_list_append(outgoing_message_filters_local, &dorainbow);
+	outgoing_message_filters_remote =
+		l_list_append(outgoing_message_filters_remote, &dorainbow);
 
 	return 0;
 }
@@ -152,8 +154,10 @@ static int rainbow_init()
 static int rainbow_finish()
 {
 	eb_debug(DBG_MOD, "Rainbow shutting down\n");
-	outgoing_message_filters =
-		l_list_remove(outgoing_message_filters, &dorainbow);
+	outgoing_message_filters_local =
+		l_list_remove(outgoing_message_filters_local, &dorainbow);
+	outgoing_message_filters_remote =
+		l_list_remove(outgoing_message_filters_remote, &dorainbow);
 
 	while (plugin_info.prefs) {
 		input_list *il = plugin_info.prefs->next;
@@ -167,8 +171,7 @@ static int rainbow_finish()
 /*******************************************************************************
  *                             End Module Code
  ******************************************************************************/
-static char *dorainbow(const eb_local_account *local,
-	const eb_account *remote, const struct contact *contact, const char *s)
+static char *dorainbow(Conversation *conv, const char *s)
 {
 	char *retval;
 	char *wptr;
@@ -182,7 +185,7 @@ static char *dorainbow(const eb_local_account *local,
 	int len = strlen(s);
 
 	if (!doRainbow) {
-		return strdup(s);
+		return g_strdup(s);
 	}
 
 	if (start_r > 255 || start_r < 0) {
@@ -204,7 +207,7 @@ static char *dorainbow(const eb_local_account *local,
 		end_b = 0;
 	}
 
-	wptr = retval = malloc(23 * len * sizeof(char));
+	wptr = retval = g_new0(char, 23 * len);
 
 	while (s[pos] != '\0') {
 		if (s[pos] == '<') {

@@ -36,8 +36,12 @@
 #include <gtk/gtk.h>
 
 #include "contact.h"
+#include "conversation.h"
+
+extern LList *chat_window_list;
 
 typedef struct _chat_window {
+	GtkWidget *pane;
 	GtkWidget *window;
 	GtkWidget *chat;
 	GtkWidget *entry;
@@ -45,67 +49,30 @@ typedef struct _chat_window {
 	GtkWidget *smiley_window;
 	GtkWidget *sound_button;
 	GtkWidget *offline_button;
-	GtkWidget *status_label;
 	GtkWidget *reconnect_button;
+	GtkWidget *fellows_widget;
+
+	GtkWidget *invite_window;
+	GtkWidget *invite_message;
+	GtkWidget *invite_buddy;
+
+	GtkListStore *fellows_model;
+
+	GtkWidget *notebook;
+	GtkWidget *notebook_child;
+	int notebook_page;
+	int is_child_red;
 
 	int sound_enabled;
 	int send_enabled;
 	int first_enabled;
 	int receive_enabled;
+	int firstmsg;
 
-	eb_local_account *local_user;
+	char *name;
 
-	time_t next_typing_send;
-	LList *history;
-	LList *hist_pos;
-	int this_msg_in_history;
-	log_file *logfile;
-
-	/* CHATWINDOW STUFF */
-
-	struct contact *contact;
-	eb_account *preferred;	/*for sanity reasons, try using the
-				   most recently used account first */
-
-	/* Set to FALSE on init, TRUE when away msg first sent,
-	   FALSE when user sends regular message */
-	time_t away_msg_sent;
-	time_t away_warn_displayed;
-
-	t_log_window_id lw;
-
-	GtkWidget *notebook;	/* when using tabbed chat, this is the same for all chat_window structs. */
-	GtkWidget *notebook_child;	/* this part is different for each person we're talking to */
-	int notebook_page;
-	int is_child_red;
-
-	/* CHATROOM STUFF */
-
-	int connected;		/* are we currently in this chat room */
-	char id[255];		/* who are we? */
-	/*int service_id; */
-
-	char room_name[1024];	/* what is this chat room called */
-	LList *fellows;		/* who is in the chat room */
-	GtkWidget *fellows_widget;	/* GtkTreeView of online folks */
-	GtkListStore *fellows_model;	/* Model for fellows_widget */
-	GtkTreeViewColumn *column;
+	Conversation *conv;
 	LList *typing_fellows;
-	int total_arrivals;
-	int is_public;
-
-	void *protocol_local_chat_room_data;	/* For protocol-specific storage */
-
-	/*
-	 * the folloing data members is for the invite window gui
-	 * since each chat room may spawn an invite window
-	 */
-
-	int invite_window_is_open;
-	GtkWidget *invite_window;
-	GtkWidget *invite_buddy;
-	GtkWidget *invite_message;
-	char *encoding;		/* Character Encoding to use for this window */
 } chat_window;
 
 /* Struct to hold info used by get_local_accounts to hold callback info */
@@ -114,21 +81,12 @@ typedef struct _chat_window_account {
 	gpointer data;
 } chat_window_account;
 
-/* Add more here or you can make your own */
-typedef enum {
-	CHAT_NOTIFICATION_NOTE = 0x0000ff,	/* Blue */
-	CHAT_NOTIFICATION_ERROR = 0xff0000,	/* Red */
-	CHAT_NOTIFICATION_HIGHLIGHT = 0x00ff00,	/* Green */
-	CHAT_NOTIFICATION_WORKING = 0xcccccc	/* Gray */
-} ChatNotificationType;
-
-chat_window *eb_chat_window_new(eb_local_account *local,
-	struct contact *remote);
+chat_window *ay_chat_window_new(Conversation *conv);
+void ay_chat_window_free(chat_window *cw);
 
 void eb_chat_window_display_remote_message(eb_local_account *account,
 	eb_account *remote, gchar *message);
 
-int should_window_raise(const char *message);
 void eb_chat_window_display_status(eb_account *remote, gchar *message);
 void eb_chat_window_display_contact(struct contact *remote_contact);
 void eb_chat_window_display_account(eb_account *remote_account);
@@ -136,23 +94,32 @@ void eb_chat_window_display_notification(chat_window *cw, const gchar *message,
 	ChatNotificationType type);
 void eb_log_status_changed(eb_account *ea, const gchar *status);
 void eb_chat_window_do_timestamp(struct contact *c, gboolean online);
-void eb_restore_last_conv(gchar *file_name, chat_window *cw);
 void send_message(GtkWidget *widget, gpointer d);
-void layout_chatwindow(chat_window *cw, GtkWidget *vbox, char *name);
 chat_window *find_tabbed_chat_window_index(int current_page);
-void set_tab_red(chat_window *cw);
 void reassign_tab_pages();
 void chat_window_to_chat_room(chat_window *cw, eb_account *third_party,
 	const char *msg);
 gboolean check_tab_accelerators(const GtkWidget *inWidget,
 	const chat_window *inCW, GdkModifierType inModifiers,
 	const GdkEventKey *inEvent);
-void cw_remove_tab(struct contact *ct);
-gboolean cw_close_win(GtkWidget *close_button, gpointer userdata);
 void chat_auto_complete_validate(GtkWidget *entry);
 
 gchar *ay_chat_convert_message(chat_window *cw, char *msg);
 
 void ay_set_chat_encoding(GtkWidget *widget, void *data);
+
+int ay_chat_window_raise(chat_window *window, const char *message);
+
+void ay_chat_window_printr(chat_window *cw, gchar *o_message);
+void ay_chat_window_print(chat_window *cw, gchar *o_message);
+void ay_chat_window_print_message(chat_window *cw, gchar *o_message, int send);
+#define ay_chat_window_print_recv(cw, o_message) ay_chat_window_print_message(cw, o_message, 0)
+#define ay_chat_window_print_send(cw, o_message) ay_chat_window_print_message(cw, o_message, 1)
+
+void ay_chat_window_fellows_append(chat_window *cw, ConversationFellow *fellow);
+void ay_chat_window_fellows_remove(chat_window *cw, ConversationFellow *fellow);
+void ay_chat_window_fellows_rename(chat_window *cw, ConversationFellow *fellow);
+void ay_chat_window_set_name(chat_window *cw);
+void open_join_chat_window();
 
 #endif

@@ -797,9 +797,9 @@ static void double_click(GtkTreeView *tree_view, GtkTreePath *path,
 		MAIN_VIEW_ROW_DATA, &d, MAIN_VIEW_ROW_TYPE, &target_type, -1);
 
 	if (target_type == TARGET_TYPE_ACCOUNT)
-		eb_chat_window_display_account((eb_account *)d);
+		ay_conversation_chat_with_account((eb_account *)d);
 	else if (target_type == TARGET_TYPE_CONTACT)
-		eb_chat_window_display_contact((struct contact *)d);
+		ay_conversation_chat_with_contact((struct contact *)d);
 
 }
 
@@ -1488,7 +1488,7 @@ void contact_update_status(struct contact *ec)
  */
 void buddy_update_status_and_log(eb_account *ea)
 {
-	eb_log_status_changed(ea, RUN_SERVICE(ea)->get_status_string(ea));
+	ay_conversation_log_status_changed(ea, RUN_SERVICE(ea)->get_status_string(ea));
 	buddy_update_status(ea);
 }
 

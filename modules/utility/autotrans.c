@@ -42,7 +42,7 @@
 #include "llist.h"
 #include "platform_defs.h"
 #include "libproxy/networking.h"
-#include "chat_window.h"
+#include "conversation.h"
 #include "status.h"
 
 /* already declared in dialog.h - but that uses gtk */
@@ -59,8 +59,7 @@ void do_list_dialog(char *message, char *title, char **list,
 #endif
 
 /* Function Prototypes */
-static char *translate_out(const eb_local_account *local,
-	const eb_account *remote, const struct contact *contact, const char *s);
+static char *translate_out(Conversation *conv, const char *s);
 
 static int trans_init();
 static int trans_finish();
@@ -134,8 +133,10 @@ static int trans_init()
 
 	eb_debug(DBG_MOD, "Auto-trans initialised\n");
 
-	outgoing_message_filters =
-		l_list_prepend(outgoing_message_filters, &translate_out);
+	outgoing_message_filters_local =
+		l_list_prepend(outgoing_message_filters_local, &translate_out);
+	outgoing_message_filters_remote =
+		l_list_prepend(outgoing_message_filters_remote, &translate_out);
 	incoming_message_filters =
 		l_list_append(incoming_message_filters, &translate_out);
 
@@ -166,8 +167,10 @@ static int trans_finish()
 	int result = 0;
 
 	eb_debug(DBG_MOD, "Auto-trans shutting down\n");
-	outgoing_message_filters =
-		l_list_remove(outgoing_message_filters, &translate_out);
+	outgoing_message_filters_local =
+		l_list_remove(outgoing_message_filters_local, &translate_out);
+	outgoing_message_filters_remote =
+		l_list_remove(outgoing_message_filters_remote, &translate_out);
 	incoming_message_filters =
 		l_list_remove(incoming_message_filters, &translate_out);
 
@@ -209,17 +212,6 @@ static void language_selected(char *text, gpointer data)
 	cont->language[2] = '\0';
 
 	write_contact_list();
-
-	if (!doTrans) {
-		ay_do_warning(_("Auto-Translation Warning"),
-			_("You have just selected a language "
-				"with which to talk to a buddy. This will "
-				"only affect you if you have the auto-translator"
-				"plugin turned on. If you do, beware that it will"
-				"hang each time you send or receive a message, for"
-				"the time it takes to contact BabelFish. This can"
-				"take several seconds."));
-	}
 }
 
 static void language_select(ebmCallbackData *data)
@@ -413,32 +405,34 @@ static char *doTranslate(const char *ostring, const char *from, const char *to)
 	return result;
 }
 
-static char *translate_out(const eb_local_account *local,
-	const eb_account *remote, const struct contact *contact, const char *s)
+static char *translate_out(Conversation *conv, const char *s)
 {
 	char *p;
 	char l[3];
-	if (!doTrans) {
-		return strdup(s);
+
+	struct contact *contact = conv->contact;
+
+	if (!doTrans || !contact) {
+		return g_strdup(s);
 	}
 
 	if (contact->language[0] == '\0') {
-		return strdup(s);
+		return g_strdup(s);
 	}			/* no translation */
 
 	strncpy(l, languages[myLanguage], 2);
 	l[2] = 0;
 	if (!strcmp(contact->language, l)) {
-		return strdup(s);
+		return g_strdup(s);
 	}			/* speak same language */
 
-	eb_chat_window_display_notification(contact->chatwindow,
+	ay_conversation_display_notification(contact->conversation,
 		_("translating..."), CHAT_NOTIFICATION_WORKING);
 
 	p = doTranslate(s, l, contact->language);
 
 	if (!p) {
-		eb_chat_window_display_notification(contact->chatwindow,
+		ay_conversation_display_notification(contact->conversation,
 			_("Failed to get a translation"),
 			CHAT_NOTIFICATION_ERROR);
 	}

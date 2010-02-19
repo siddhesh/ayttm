@@ -70,7 +70,7 @@ extern "C" {
 			int do_auto_complete;
 			char font_face[MAX_PREF_LEN];
 
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 			int do_spell_checking;
 			char spell_dictionary[MAX_PREF_LEN];
 #endif

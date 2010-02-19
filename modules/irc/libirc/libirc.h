@@ -50,6 +50,12 @@
    violations is nice nevertheless. */
 #define BUF_LEN 512*2
 
+enum {
+	IRC_NOECHO = 1,
+	IRC_ECHO_ACTION,
+	IRC_ECHO_KICK
+};
+
 /* from util.c :
  *
  * The last state in the list of states will be the OFFLINE state
@@ -464,7 +470,7 @@ void irc_message_parse(char *incoming, irc_account *ia);
 void irc_login(const char *password, int mode, irc_account *ia);
 void irc_logout(irc_account *ia);
 
-void irc_send_privmsg(const char *recipient, char *message, irc_account *ia);
+int irc_send_privmsg(const char *recipient, char *message, irc_account *ia);
 void irc_send_notice(const char *recipient, char *message, irc_account *ia);
 
 void irc_send_whois(const char *target, const char *mask, irc_account *ia);
@@ -499,7 +505,7 @@ irc_name_list *irc_gen_name_list(char *message);
 
 int irc_recv(irc_account *ia, char *buf, int len);
 
-void irc_get_command_string(char *out, const char *recipient, char *command,
+int irc_get_command_string(char *out, const char *recipient, char *command,
 	char *params, irc_account *ia);
 
 void irc_request_list(const char *channel, const char *target, irc_account *ia);

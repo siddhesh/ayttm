@@ -30,7 +30,7 @@
 #ifndef __SERVICE_H__
 #define __SERVICE_H__
 
-#include "chat_room.h"
+#include "chat_window.h"
 #include "input_list.h"
 
 extern int NUM_SERVICES;
@@ -49,8 +49,9 @@ struct service_callbacks {
 	/*callback to disable any timers and disconnect from server */
 	void (*logout) (eb_local_account *account);
 
-	/* send message from one account to another */
-	void (*send_im) (eb_local_account *account_from,
+	/* send message from one account to another. Returns whether we
+	 * should echo or not */
+	int (*send_im) (eb_local_account *account_from,
 		eb_account *account_to, char *message);
 
 	/* send a typing notification - the return value is the number 
@@ -59,7 +60,7 @@ struct service_callbacks {
 	 */
 	int (*send_typing) (eb_local_account *account_from,
 		eb_account *account_to);
-	int (*send_cr_typing) (eb_chat_room *chatroom);
+	int (*send_cr_typing) (Conversation *chatroom);
 
 	/* reads local account information from a file */
 	eb_local_account *(*read_local_account_config) (LList *values);
@@ -138,23 +139,23 @@ struct service_callbacks {
 
 	void (*set_away) (eb_local_account *account, char *message, int away);
 
-	/*send a message to a chat room */
+	/* send a message to a chat room. Returns whether we should echo or not */
 
-	void (*send_chat_room_message) (eb_chat_room *room, char *message);
+	int (*send_chat_room_message) (Conversation *room, char *message);
 
 	/*these are used to join and leave a chat room */
 
-	void (*join_chat_room) (eb_chat_room *room);
-	void (*leave_chat_room) (eb_chat_room *room);
+	void (*join_chat_room) (Conversation *room);
+	void (*leave_chat_room) (Conversation *room);
 
 	/*this it to create a new chat room */
 
-	eb_chat_room *(*make_chat_room) (char *name, eb_local_account *account,
+	Conversation *(*make_chat_room) (char *name, eb_local_account *account,
 		int is_public);
 
 	/*this is to invite somebody into the chat room */
 
-	void (*send_invite) (eb_local_account *account, eb_chat_room *room,
+	void (*send_invite) (eb_local_account *account, Conversation *room,
 		char *user, const char *message);
 
 	void (*accept_invite) (eb_local_account *account, void *invitation);
@@ -228,6 +229,7 @@ enum service_capabilities {
 	SERVICE_CAN_FILETRANSFER = 1 << 2,
 	SERVICE_CAN_ICONVERT = 1 << 3,
 	SERVICE_CAN_MULTIACCOUNT = 1 << 4,
+	SERVICE_CAN_CONFERENCE = 1 << 5,
 	SERVICE_CAN_EVERYTHING = ~0
 };
 
@@ -243,6 +245,7 @@ struct service {
 #define can_file_transfer(x)	(x.capabilities & SERVICE_CAN_FILETRANSFER)
 #define can_iconvert(x)		(x.capabilities & SERVICE_CAN_ICONVERT)
 #define can_multiaccount(x)	(x.capabilities & SERVICE_CAN_MULTIACCOUNT)
+#define can_conference(x)	(x.capabilities & SERVICE_CAN_CONFERENCE)
 
 #ifdef __cplusplus
 extern "C" {

@@ -153,7 +153,7 @@ char **y_strsplit(char *str, char *sep, int nelem)
 
 void *y_memdup(const void *addr, int n)
 {
-	void *new_chunk = malloc(n);
+	void *new_chunk = y_new(n);
 	if (new_chunk)
 		memcpy(new_chunk, addr, n);
 	return new_chunk;

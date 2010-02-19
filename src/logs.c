@@ -84,23 +84,18 @@ int ay_log_file_open(log_file *ioLogFile, const char *inMode)
 	return (0);
 }
 
-void ay_log_file_message(log_file *ioLogFile, const char *inName,
-	const char *inMessage)
+void ay_log_file_message(log_file *ioLogFile, const char *inMessage)
 {
-	char *my_name = NULL;
 	char *my_message = NULL;
 	const int stripHTML = iGetLocalPref("do_strip_html");
 
 	if (!ioLogFile || !ioLogFile->fp)
 		return;
 
-	my_name = strdup(inName);
 	my_message = strdup(inMessage);
 
-	if (stripHTML) {
-		strip_html(my_name);
+	if (stripHTML)
 		strip_html(my_message);
-	}
 
 	if (!ioLogFile->log_started) {
 		time_t my_time = time(NULL);
@@ -115,14 +110,11 @@ void ay_log_file_message(log_file *ioLogFile, const char *inName,
 		ioLogFile->log_started = 1;
 	}
 
-	fprintf(ioLogFile->fp, "%s%s %s%s\n",
-		(stripHTML ? "" : "<P>"), my_name, my_message,
-		(stripHTML ? "" : "</P>"));
+	fprintf(ioLogFile->fp, "%s\n", my_message);
 
 	fflush(ioLogFile->fp);
 
 	free(my_message);
-	free(my_name);
 }
 
 void ay_log_file_close(log_file *ioLogFile)

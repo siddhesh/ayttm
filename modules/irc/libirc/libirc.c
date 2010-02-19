@@ -64,15 +64,16 @@ void irc_logout(irc_account *ia)
 }
 
 /* Send a PRIVMSG */
-void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
+int irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 {
 	char *out_msg;
 	int offset = 0;
 	char buff[BUF_LEN];
 	memset(buff, 0, BUF_LEN);
+	int type = 0;
 
 	if (!message)
-		return;
+		return IRC_NOECHO;
 
 	while (message[offset] == ' ' || message[offset] == '\t')
 		offset++;
@@ -91,7 +92,7 @@ void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 			param_offset++;
 		}
 
-		irc_get_command_string(buff, recipient, message, param_offset,
+		type = irc_get_command_string(buff, recipient, message, param_offset,
 			ia);
 
 		/* reinstate the space so that we can put the message in our window intact */
@@ -110,6 +111,7 @@ void irc_send_privmsg(const char *recipient, char *message, irc_account *ia)
 	if (*buff)
 		ia->callbacks->irc_send_data(buff, strlen(buff), ia);
 
+	return type;
 }
 
 /* Send a NOTICE */
@@ -276,7 +278,7 @@ void irc_process_privmsg(const char *to, const char *message,
 	}
 }
 
-/* Get PRIVMSG. CTCP implementation called here. */
+/* Get NOTICE. CTCP implementation called here. */
 void irc_process_notice(const char *to, const char *message,
 	irc_message_prefix *prefix, irc_account *ia)
 {
@@ -396,14 +398,17 @@ char *irc_param_list_get_at(irc_param_list *list, int position)
 int irc_recv(irc_account *ia, char *buf, int len)
 {
 	if (buf[len] == '\n') {
+		char *fbuf;
+
 		if (buf[len - 1] != '\r')
 			return 0;
 
-		buf[len - 1] = '\0';
-#ifdef IRC_PKTDUMP
-		fprintf(stderr, "irc> %s\n", buf);
-#endif
-		irc_message_parse(buf, ia);
+		fbuf = strdup(buf);
+
+		fbuf[len - 1] = '\0';
+		irc_message_parse(fbuf, ia);
+
+		free(fbuf);
 
 		return 1;
 	}

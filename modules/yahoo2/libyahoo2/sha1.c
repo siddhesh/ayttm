@@ -22,8 +22,6 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * $Id: sha1.c,v 1.2 2009/09/17 12:05:00 pstef Exp $
  */
 
 /*
@@ -52,11 +50,6 @@
 #include <string.h>
 
 #include "sha1.h"
-
-#ifndef lint
-static const char rcsid[] =
-	"$Id: sha1.c,v 1.2 2009/09/17 12:05:00 pstef Exp $";
-#endif				/* !lint */
 
 #define ROTL(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 #define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))

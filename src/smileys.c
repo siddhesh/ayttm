@@ -477,17 +477,17 @@ void show_smileys_cb(smiley_callback_data *data)
 	int win_x, win_y;
 	int rows, cols;
 
+	if (data && data->c_window)
+		account = data->c_window->conv->local_user;
+	else {
+		eb_debug(DBG_CORE, "no chat* in data !\n");
+		return;
+	}
+
 	/* close popup if open */
 	if (data->c_window && data->c_window->smiley_window) {
 		gtk_widget_destroy(data->c_window->smiley_window);
 		data->c_window->smiley_window = NULL;
-		return;
-	}
-
-	if (data && data->c_window)
-		account = data->c_window->local_user;
-	else {
-		eb_debug(DBG_CORE, "no chat* in data !\n");
 		return;
 	}
 

@@ -217,10 +217,10 @@ void msn_message_send(MsnConnection *mc, const char *payload, MsnCommand cmd,
 
 		strncat(buf, arg, remaining);
 
-		if (count < num_args - 1)
-			strcat(buf, " ");
+		remaining -= strlen(arg);
 
-		remaining -= strlen(arg) + 1;
+		if (count < num_args - 1)
+			strncat(buf, " ", remaining--);
 
 		count++;
 	}
@@ -324,7 +324,7 @@ static void msn_message_check_ack(MsnConnection *mc, void *data)
 static void msn_send_IM_to_sb_real(MsnConnection *sb, MsnIM *im, MsnBuddy *bud)
 {
 	char buf[2048];
-	char bufsize[5];
+	char bufsize[8];
 	int len;
 	MsnAckData *cbdata = m_new0(MsnAckData, 1);
 
@@ -340,7 +340,7 @@ static void msn_send_IM_to_sb_real(MsnConnection *sb, MsnIM *im, MsnBuddy *bud)
 			"Content-Type: text/plain; charset=UTF-8\r\n"
 			"\r\n" "%s", im->body);
 
-	sprintf(bufsize, "%d", len);
+	snprintf(bufsize, sizeof(bufsize), "%d", len);
 
 	msn_message_send(sb, buf, MSN_COMMAND_MSG, 2,
 		im->typing ? MSN_MSG_NO_ACK : MSN_MSG_ACK_ALL, bufsize);

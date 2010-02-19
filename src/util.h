@@ -41,6 +41,7 @@
 
 #include <glib.h>		/* for llist_to_glist and glist_to_llist */
 #include "contact.h"
+#include "conversation.h"
 
 #if !defined(FALSE) && !defined(TRUE)
 enum { FALSE, TRUE };
@@ -69,7 +70,10 @@ enum {
 extern "C" {
 #endif
 
-	char *convert_eol(char *input);
+	char *ay_smilify_filter(Conversation *conv, const char *text);
+	char *ay_linkify_filter(Conversation *conv, const char *text);
+	char *ay_convert_eol_filter(Conversation *conv, char *text);
+
 	char *linkify(const char *input);
 
 	char *escape_string(const char *input);
@@ -118,6 +122,9 @@ extern "C" {
 	void make_safe_filename(char *buff, const char *name,
 		const char *group);
 	int connected_local_accounts(void);
+
+	void invite_dialog(eb_local_account *ela, const char *user,
+			   const char *chat_room, void *id);
 
 	pid_t create_lock_file(char *fname);
 	void delete_lock_file(char *fname);
