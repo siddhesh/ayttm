@@ -64,7 +64,7 @@
 #include "gtk/html_text_buffer.h"
 #include "gtk/gtkutils.h"
 
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 #include "gtk/gtkspell.h"
 #endif
 
@@ -1681,7 +1681,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(cw->entry),
 		GTK_WRAP_WORD_CHAR);
 
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 	if (iGetLocalPref("do_spell_checking"))
 		gtkspell_attach(GTK_TEXT_VIEW(cw->entry));
 #endif

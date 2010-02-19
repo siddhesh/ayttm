@@ -45,7 +45,7 @@
 
 #include "gtkutils.h"
 
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 #include "spellcheck.h"
 #endif
 
@@ -1241,7 +1241,7 @@ void	ay_chat_panel::Build( GtkWidget *inParent )
 	_gtkut_button( _("Ignore unknown people"), &m_prefs.do_ignore_unknown, m_top_vbox );
 	_gtkut_button( _("On the fly chat completion"), &m_prefs.do_auto_complete, m_top_vbox );
 
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 	hbox = gtk_hbox_new( FALSE, 0 );
 	gtk_widget_show( hbox );
 	
@@ -1336,7 +1336,7 @@ void	ay_chat_panel::Apply( void )
 	if ( ptr != NULL )
 		strncpy(m_prefs.font_face, ptr, MAX_PREF_LEN );
 		
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 	bool	needs_reload = false;
 	
 	if ( m_prefs.do_spell_checking )
@@ -1359,7 +1359,7 @@ void	ay_chat_panel::Apply( void )
 void	ay_chat_panel::SetActiveWidgets( void )
 {
 	gtk_widget_set_sensitive( m_regex_entry, m_prefs.do_raise_window );
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 	gtk_widget_set_sensitive( m_dictionary_entry, m_prefs.do_spell_checking );
 #endif
 }

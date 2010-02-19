@@ -110,8 +110,8 @@ AC_CHECK_HEADERS([errno.h fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.
 AC_CHECK_HEADERS([alloca.h argz.h arpa/inet.h malloc.h netdb.h netinet/in.h paths.h sgtty.h stddef.h sys/file.h sys/ioctl.h sys/param.h sys/poll.h sys/socket.h sys/time.h syslog.h termios.h utmp.h getopt.h])
 AC_CHECK_HEADERS([sys/utsname.h])
 
-#Checking for aspell
-AC_CHECK_LIB([aspell], [aspell_speller_check])
+#Checking for enchant
+PKG_CHECK_MODULES([ENCHANT], [enchant], [AC_DEFINE(HAVE_LIBENCHANT, , Define if we use enchant)], [])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T

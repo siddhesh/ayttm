@@ -26,11 +26,9 @@
 #include "spellcheck.h"
 #include <stddef.h>
 
-#ifdef HAVE_LIBASPELL
+#ifdef HAVE_LIBENCHANT
 
-#define USE_ORIGINAL_MANAGER_FUNCS
-#include <aspell.h>
-#undef USE_ORIGINAL_MANAGER_FUNCS
+#include <enchant++.h>
 #include <stdlib.h>
 #include <string.h>
 #include "prefs.h"
@@ -38,9 +36,7 @@
 #include "debug.h"
 
 class AySpellChecker {
-	AspellConfig *spell_config;
-	AspellCanHaveError *possible_err;
-	AspellSpeller *spell_checker;
+	enchant::Dict *spell_checker;
 	const char *language;
 
 	public:
@@ -64,8 +60,8 @@ class AySpellChecker {
  */
 static const char * get_language()
 {
-	char * lang = cGetLocalPref("spell_dictionary");
-	char * env_lang[] = {"LC_LANG", "LC_ALL", "LANG", NULL};
+	const char * lang = cGetLocalPref("spell_dictionary");
+	const char * env_lang[] = {"LC_LANG", "LC_ALL", "LANG", NULL};
 	int i=0;
 
 	while(env_lang[i] && (!lang || !lang[0])) {
@@ -79,28 +75,16 @@ static const char * get_language()
 	return lang;
 }
 
-AySpellChecker::AySpellChecker()
+AySpellChecker::AySpellChecker() : spell_checker(NULL)
 {
-	spell_config = new_aspell_config();
 	reload();
 }
 
 void AySpellChecker::reload()
 {
-	if(!spell_config)
-		spell_config = new_aspell_config();
-
 	language = get_language();
-	aspell_config_replace(spell_config, "lang", language);
-	possible_err = new_aspell_speller(spell_config);
-	spell_checker = NULL;
-	if (aspell_error_number(possible_err)) {
-		delete_aspell_config(spell_config);
-		eb_debug(DBG_CORE, "%s", aspell_error_message(possible_err));
-		spell_config = NULL;
-	}
-	else
-		spell_checker = to_aspell_speller(possible_err);
+	delete spell_checker;
+	spell_checker = enchant::Broker::instance()->request_dict(language);
 }
 
 int AySpellChecker::check(const char * word)
@@ -108,7 +92,7 @@ int AySpellChecker::check(const char * word)
 	if(!word || !spell_checker)
 		return 1;
 	else
-		return aspell_speller_check(spell_checker, word, -1);
+		return spell_checker->check(word);
 }
 
 LList * AySpellChecker::suggest(const char * word)
@@ -116,24 +100,20 @@ LList * AySpellChecker::suggest(const char * word)
 	if(!word || !spell_checker)
 		return NULL;
 
-	LList * words = NULL;
-	const char *w;
+	std::vector<std::string> suggestions;
+	spell_checker->suggest(word, suggestions);
 
-	const AspellWordList *suggestions = aspell_speller_suggest(spell_checker, word, -1);
-	AspellStringEnumeration *elements = aspell_word_list_elements(suggestions);
-	while ((w = aspell_string_enumeration_next(elements)))
-		words = l_list_append(words, strdup(w));
-	delete_aspell_string_enumeration(elements);
+	LList * words = NULL;
+	std::vector<std::string>::iterator aEnd = suggestions.end();
+	for (std::vector<std::string>::iterator aI = suggestions.begin(); aI != aEnd; ++aI)
+		words = l_list_append(words, strdup(aI->c_str()));
 
 	return words;
 }
 
 AySpellChecker::~AySpellChecker()
 {
-	if(spell_checker)
-		delete_aspell_speller(spell_checker);
-	if(spell_config)
-		delete_aspell_config(spell_config);
+	delete spell_checker;
 }
 
 
