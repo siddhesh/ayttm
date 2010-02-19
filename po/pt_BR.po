@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pt_BR\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-12-30 17:53+0530\n"
+"POT-Creation-Date: 2010-02-19 09:55+0530\n"
 "PO-Revision-Date: 2003-10-21 22:12-0200\n"
 "Last-Translator: Fabricio Silva <fabricio@linuxcult.com>\n"
 "Language-Team: Portuguese <pt_BR@li.org>\n"
@@ -87,9 +87,9 @@ msgstr "Memorizar passphrase"
 msgid "Private key for signing:"
 msgstr "Assinar chave privada:"
 
-#: modules/aycryption/aycryption.c:133 modules/irc/irc.c:122
-#: modules/jabber/jabber.c:129 modules/msn2/msn.c:210 modules/smtp/smtp.c:105
-#: modules/yahoo2/yahoo.c:249
+#: modules/aycryption/aycryption.c:133 modules/irc/irc.c:123
+#: modules/jabber/jabber.c:131 modules/msn2/msn.c:211 modules/smtp/smtp.c:105
+#: modules/yahoo2/yahoo.c:252
 msgid "Enable debugging"
 msgstr "Habilitar depurador"
 
@@ -202,7 +202,8 @@ msgid "Select"
 msgstr "Selecionar"
 
 #: modules/aycryption/select-keys.c:435 modules/aycryption/select-keys.c:680
-#: src/activity_bar.C:136 src/edit_local_accounts.c:801
+#: src/activity_bar.C:136 src/chat_window.c:663 src/chat_window.c:2273
+#: src/edit_local_accounts.c:801
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -356,239 +357,239 @@ msgstr "Importar preferências"
 msgid "Import away messages"
 msgstr "Importar mensagens ausentes"
 
-#: modules/irc/irc.c:223 modules/irc/irc.c:287 modules/irc/irc.c:396
+#: modules/irc/irc.c:224 modules/irc/irc.c:288 modules/irc/irc.c:397
 msgid "IRC Error"
 msgstr "IRC - Erro"
 
-#: modules/irc/irc.c:229
+#: modules/irc/irc.c:230
 #, fuzzy
 msgid "IRC Warning"
 msgstr "ICQ Advertência"
 
-#: modules/irc/irc.c:269
+#: modules/irc/irc.c:270
 #, c-format
 msgid "Logging in to IRC account: %s"
 msgstr "Conectando na conta ICQ: %s"
 
-#: modules/irc/irc.c:285 modules/irc/irc.c:394 modules/msn2/msn.c:744
+#: modules/irc/irc.c:286 modules/irc/irc.c:395 modules/msn2/msn.c:745
 #, c-format
 msgid "Cannot connect to %s."
 msgstr "Impossível conectar a %s."
 
-#: modules/irc/irc.c:313
+#: modules/irc/irc.c:314
 #, c-format
 msgid "Connection closed by %s."
 msgstr "Conexão fechada por %s."
 
-#: modules/irc/irc.c:348
+#: modules/irc/irc.c:349
 #, fuzzy, c-format
 msgid "Not Connected to server"
 msgstr "Servidor Padrão"
 
-#: modules/irc/irc.c:376
+#: modules/irc/irc.c:377
 #, c-format
 msgid "Error occurred while sending data to %s: %s"
 msgstr ""
 
-#: modules/irc/irc.c:610
+#: modules/irc/irc.c:635
 msgid "_Nick:"
 msgstr "_Apelido:"
 
-#: modules/irc/irc.c:617 modules/jabber/jabber.c:468 modules/msn2/msn.c:458
-#: modules/smtp/smtp.c:193 modules/yahoo2/yahoo.c:2648
+#: modules/irc/irc.c:642 modules/jabber/jabber.c:472 modules/msn2/msn.c:459
+#: modules/smtp/smtp.c:193 modules/yahoo2/yahoo.c:2651
 #: src/edit_local_accounts.c:672
 msgid "_Password:"
 msgstr "_Senha:"
 
-#: modules/irc/irc.c:624 modules/jabber/jabber.c:489 modules/msn2/msn.c:472
-#: modules/yahoo2/yahoo.c:2662 src/edit_local_accounts.c:710
+#: modules/irc/irc.c:649 modules/jabber/jabber.c:493 modules/msn2/msn.c:473
+#: modules/yahoo2/yahoo.c:2665 src/edit_local_accounts.c:710
 msgid "_Connect at startup"
 msgstr "_Conectar ao iniciar"
 
-#: modules/irc/irc.c:631
+#: modules/irc/irc.c:656
 msgid "IRC _Host:"
 msgstr "IRC _Host:"
 
-#: modules/irc/irc.c:638
+#: modules/irc/irc.c:663
 msgid "IRC P_ort:"
 msgstr "IRC P_orta:"
 
-#: modules/irc/irc.c:735
+#: modules/irc/irc.c:760
 msgid "No hostname found in your login (which should be in user@host form)."
 msgstr ""
 "Nenhum hostname encontrado em seu login (que deveria ser desta forma "
 "user@host)."
 
-#: modules/irc/irc.c:995
+#: modules/irc/irc.c:1020
 #, c-format
 msgid "<b>User info for</b> %s<br>"
 msgstr "<b>info de Usuário para</b> %s<br>"
 
-#: modules/irc/irc.c:996
+#: modules/irc/irc.c:1021
 #, c-format
 msgid "<b>Server:</b> %s<br>"
 msgstr "<b>Servidor:</b> %s <br>"
 
-#: modules/irc/irc.c:1001
+#: modules/irc/irc.c:1026
 #, c-format
 msgid "<b>Idle time and online status:</b> %s<br>"
 msgstr "<b>Tempo inativo e estado on-line :</b> %s<br>"
 
-#: modules/irc/irc.c:1004
+#: modules/irc/irc.c:1029
 #, fuzzy
 msgid "<b>Whois info:</b><br><br>"
 msgstr "<b>Whois info:</b> %s<br>"
 
-#: modules/irc/irc.c:1101
+#: modules/irc/irc.c:1126
 #, fuzzy, c-format
 msgid "<i><b>User Name: </b></i> %s<br><i><b>Real Name: </b></i> %s<br>"
 msgstr "<b>Servidor:</b> %s <br>"
 
-#: modules/irc/irc.c:1261
+#: modules/irc/irc.c:1286
 #, fuzzy, c-format
 msgid "<i><b>Server Info: </b></i> %s<br>"
 msgstr "<b>Servidor:</b> %s <br>"
 
-#: modules/irc/irc.c:1477
+#: modules/irc/irc.c:1501
 #, c-format
 msgid "Quit reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1498
+#: modules/irc/irc.c:1522
 #, c-format
 msgid "Part reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1818
+#: modules/irc/irc.c:1843
 #, c-format
 msgid "Topic set by: %s"
 msgstr ""
 
-#: modules/irc/irc.c:1875
+#: modules/irc/irc.c:1901
 #, c-format
 msgid ""
 "<b>%s</b> is connected using the program <i>%s</i> on the <i>%s</i> "
 "operating system"
 msgstr ""
 
-#: modules/irc/irc.c:1904
+#: modules/irc/irc.c:1930
 #, c-format
 msgid "<b>%s</b> has sent Time as <b>%s</b>"
 msgstr ""
 
-#: modules/irc/irc.c:1933
+#: modules/irc/irc.c:1959
 #, c-format
 msgid "<I><B>%s:</B> %s</I>"
 msgstr ""
 
-#: modules/irc/irc.c:2033
+#: modules/irc/irc.c:2061
 msgid "*Kick*"
 msgstr ""
 
-#: modules/irc/irc.c:2058
+#: modules/irc/irc.c:2090
 #, fuzzy, c-format
 msgid ">>> Inviting %s [Message: %s] <<<"
 msgstr ">>> %s convidando [%s] <<<"
 
-#: modules/irc/irc.c:2061
+#: modules/irc/irc.c:2093
 #, c-format
 msgid ">>> Inviting %s <<<"
 msgstr ">>> %s convidando <<<"
 
-#: modules/irc/irc.c:2211
+#: modules/irc/irc.c:2241
 #, c-format
 msgid "<b>%s</b> has kicked you out of channel <b>%s</b>"
 msgstr ""
 
-#: modules/irc/irc.c:2215
+#: modules/irc/irc.c:2245
 #, c-format
 msgid "<b>%s</b> has kicked you out of channel <b>%s</b>. Reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:2223
+#: modules/irc/irc.c:2253
 #, c-format
 msgid "You just kicked <b>%s</b> out of channel <b>%s</b>"
 msgstr ""
 
-#: modules/irc/irc.c:2227
+#: modules/irc/irc.c:2257
 #, c-format
 msgid "You just kicked <b>%s</b> out of channel <b>%s</b>. Reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:2234
+#: modules/irc/irc.c:2264
 #, c-format
 msgid "<b>%s</b> kicked <b>%s</b> out of channel <b>%s</b>"
 msgstr ""
 
-#: modules/irc/irc.c:2238
+#: modules/irc/irc.c:2268
 #, c-format
 msgid "<b>%s</b> kicked <b>%s</b> out of channel <b>%s</b>. Reason: %s"
 msgstr ""
 
-#: modules/irc/irc.c:2261 modules/irc/irc.c:2306
+#: modules/irc/irc.c:2291 modules/irc/irc.c:2336
 #, fuzzy
 msgid "Nickname in Use"
 msgstr "Apelido: %s <br>"
 
-#: modules/irc/irc.c:2273
+#: modules/irc/irc.c:2303
 #, fuzzy
 msgid "No such Server"
 msgstr "Servidor Padrão"
 
-#: modules/irc/irc.c:2285
+#: modules/irc/irc.c:2315
 msgid "No such Channel"
 msgstr ""
 
-#: modules/irc/irc.c:2297
+#: modules/irc/irc.c:2327
 msgid "No such Nickname"
 msgstr ""
 
-#: modules/jabber/jabber.c:122
+#: modules/jabber/jabber.c:124
 msgid "Default Server:"
 msgstr "Servidor Padrão"
 
-#: modules/jabber/jabber.c:302
+#: modules/jabber/jabber.c:304
 #, c-format
 msgid "Logging in to Jabber account: %s"
 msgstr "Conectando na conta Jabber: %s"
 
-#: modules/jabber/jabber.c:335
+#: modules/jabber/jabber.c:337
 #, c-format
 msgid "Jabber password for: %s"
 msgstr "Senha Jabber para: %s"
 
-#: modules/jabber/jabber.c:461
+#: modules/jabber/jabber.c:465
 msgid "_Username:"
 msgstr "_Usuário:"
 
-#: modules/jabber/jabber.c:475
+#: modules/jabber/jabber.c:479
 #, fuzzy
 msgid "Co_nnect Server:"
 msgstr "Servidor Padrão"
 
-#: modules/jabber/jabber.c:482 modules/msn2/msn.c:465
-#: modules/yahoo2/yahoo.c:2655
+#: modules/jabber/jabber.c:486 modules/msn2/msn.c:466
+#: modules/yahoo2/yahoo.c:2658
 msgid "_Ask for password at Login time"
 msgstr "Pergunt_ar pela senha no momento do Login"
 
-#: modules/jabber/jabber.c:497
+#: modules/jabber/jabber.c:501
 msgid "Use _SSL"
 msgstr "Usar _SSL"
 
-#: modules/jabber/jabber.c:504 modules/smtp/smtp.c:207
+#: modules/jabber/jabber.c:508 modules/smtp/smtp.c:207
 msgid "P_ort:"
 msgstr "P_orta:"
 
-#: modules/jabber/jabber.c:512
+#: modules/jabber/jabber.c:516
 msgid "SSL Po_rt:"
 msgstr "SSL Po_rta:"
 
-#: modules/jabber/jabber.c:520
+#: modules/jabber/jabber.c:524
 msgid "Request mail information (GMail only)"
 msgstr ""
 
-#: modules/jabber/jabber.c:1309 modules/msn2/msn.c:2028
-#: modules/yahoo2/yahoo.c:2298
+#: modules/jabber/jabber.c:1314 modules/msn2/msn.c:2028
+#: modules/yahoo2/yahoo.c:2299
 msgid "typing..."
 msgstr "Digitando..."
 
@@ -649,62 +650,62 @@ msgstr "Conexão com o servidor Jabber %s falhou! "
 msgid "Jabber server not responding"
 msgstr "O Servidor Jabber não está respondendo "
 
-#: modules/msn2/msn.c:196 src/gtk/prefs_window.C:2241
+#: modules/msn2/msn.c:197 src/gtk/prefs_window.C:2241
 msgid "Server:"
 msgstr "Servidor:"
 
-#: modules/msn2/msn.c:203 src/gtk/prefs_window.C:2257
+#: modules/msn2/msn.c:204 src/gtk/prefs_window.C:2257
 msgid "Port:"
 msgstr "Porta:"
 
-#: modules/msn2/msn.c:403 modules/msn2/msn.c:409
+#: modules/msn2/msn.c:404 modules/msn2/msn.c:410
 msgid "Invite to Gnomemeeting"
 msgstr "Convidar para Gnomemeeting"
 
-#: modules/msn2/msn.c:451
+#: modules/msn2/msn.c:452
 msgid "_MSN Login:"
 msgstr "_MSN Login:"
 
-#: modules/msn2/msn.c:479
+#: modules/msn2/msn.c:480
 msgid "_Login invisible"
 msgstr "_Login invisível"
 
-#: modules/msn2/msn.c:486
+#: modules/msn2/msn.c:487
 msgid "Friendly Name:"
 msgstr "Apelido:"
 
-#: modules/msn2/msn.c:588
+#: modules/msn2/msn.c:589
 #, c-format
 msgid "Logging in to MSN account: %s"
 msgstr "Conectando na conta de MSN: %s"
 
-#: modules/msn2/msn.c:623
+#: modules/msn2/msn.c:624
 #, c-format
 msgid "MSN password for: %s"
 msgstr "Senha MSN para: %s"
 
-#: modules/msn2/msn.c:699 modules/msn2/msn.c:746 modules/msn2/msn.c:1775
+#: modules/msn2/msn.c:700 modules/msn2/msn.c:747 modules/msn2/msn.c:1780
 msgid "MSN Error"
 msgstr "MSN - Erro"
 
-#: modules/msn2/msn.c:711
+#: modules/msn2/msn.c:712
 msgid "Connected, sending login information"
 msgstr ""
 
-#: modules/msn2/msn.c:790 modules/msn2/msn.c:803 src/conversation.c:490
-#: src/conversation.c:495 src/conversation.c:500 src/conversation.c:856
-#: src/chat_window.c:679 src/chat_window.c:1665 src/contact_util.C:417
+#: modules/msn2/msn.c:791 modules/msn2/msn.c:804 src/conversation.c:464
+#: src/conversation.c:469 src/conversation.c:474 src/conversation.c:850
+#: src/chat_window.c:779 src/chat_window.c:1749 src/contact_util.C:417
 #: src/crash.c:468 src/crash.c:485 src/edit_account_window.c:309
 #: src/edit_account_window.c:346 src/status.c:1268 src/status.c:1715
 #: src/status.c:1752 src/util.c:1076 src/util.c:1108 src/util.c:1218
 msgid "Unknown"
 msgstr "Desconhecido"
 
-#: modules/msn2/msn.c:891
+#: modules/msn2/msn.c:892
 msgid "Logged in. Downloading contact information."
 msgstr ""
 
-#: modules/msn2/msn.c:901
+#: modules/msn2/msn.c:902
 #, fuzzy, c-format
 msgid ""
 "MSN Login Failed:\n"
@@ -712,48 +713,48 @@ msgid ""
 "%s"
 msgstr "_MSN Login:"
 
-#: modules/msn2/msn.c:904
+#: modules/msn2/msn.c:905
 #, fuzzy
 msgid "Login Failed"
 msgstr "_Login invisível"
 
-#: modules/msn2/msn.c:1179
+#: modules/msn2/msn.c:1182
 msgid ""
 "MSN passport ID must have @domain.tld part. For example foo@live.com or "
 "bar@hotmail.com"
 msgstr ""
 
-#: modules/msn2/msn.c:1356
+#: modules/msn2/msn.c:1358
 #, c-format
 msgid "Could not unblock <i>%s</i>. Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1359 modules/msn2/msn.c:1373 modules/msn2/msn.c:1387
-#: modules/msn2/msn.c:1399 modules/msn2/msn.c:1411 modules/msn2/msn.c:1424
-#: modules/msn2/msn.c:1522
+#: modules/msn2/msn.c:1361 modules/msn2/msn.c:1375 modules/msn2/msn.c:1389
+#: modules/msn2/msn.c:1401 modules/msn2/msn.c:1413 modules/msn2/msn.c:1426
+#: modules/msn2/msn.c:1527
 msgid "MSN"
 msgstr ""
 
-#: modules/msn2/msn.c:1370
+#: modules/msn2/msn.c:1372
 #, c-format
 msgid "Could not block <i>%s</i>. Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1384
+#: modules/msn2/msn.c:1386
 #, c-format
 msgid ""
 "Could not remove <i>%s</i> from group <i>%s</i>.\n"
 "Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1396
+#: modules/msn2/msn.c:1398
 #, c-format
 msgid ""
 "Could not add <i>%s</i> to group <i>%s</i>.\n"
 "Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1408
+#: modules/msn2/msn.c:1410
 #, c-format
 msgid ""
 "Unable to add group <b>%s</b>. Server returned error:\n"
@@ -761,17 +762,17 @@ msgid ""
 "<i>%s</i>"
 msgstr ""
 
-#: modules/msn2/msn.c:1409
+#: modules/msn2/msn.c:1411
 #, fuzzy
 msgid "Unknown error"
 msgstr "Desconhecido"
 
-#: modules/msn2/msn.c:1421
+#: modules/msn2/msn.c:1423
 #, c-format
 msgid "Could not add buddy %s(<i>%s</i>). Server returned an error."
 msgstr ""
 
-#: modules/msn2/msn.c:1447
+#: modules/msn2/msn.c:1449
 #, fuzzy, c-format
 msgid ""
 "The MSN user:\n"
@@ -785,22 +786,22 @@ msgstr ""
 "\n"
 "Você permite que ele lhe veja quando você esta online?"
 
-#: modules/msn2/msn.c:1451
+#: modules/msn2/msn.c:1453
 #, fuzzy
 msgid "MSN New Contact"
 msgstr "Novo Contato Yahoo"
 
-#: modules/msn2/msn.c:1500
+#: modules/msn2/msn.c:1505
 #, fuzzy
 msgid "MSN Invitation"
 msgstr "Aceitar convite"
 
-#: modules/msn2/msn.c:1500
+#: modules/msn2/msn.c:1505
 #, fuzzy
 msgid "Invite failed!"
 msgstr "Convidar Usuário"
 
-#: modules/msn2/msn.c:1514
+#: modules/msn2/msn.c:1519
 #, fuzzy, c-format
 msgid ""
 "%s has invited you to chat.\n"
@@ -810,21 +811,21 @@ msgstr ""
 "\n"
 "Você deseja aceitar?"
 
-#: modules/msn2/msn.c:1517
+#: modules/msn2/msn.c:1522
 #, fuzzy
 msgid "MSN Chat Invitation"
 msgstr "Convite de Chat"
 
-#: modules/msn2/msn.c:1522
+#: modules/msn2/msn.c:1527
 msgid "Not Implemented"
 msgstr ""
 
-#: modules/msn2/msn.c:1688
+#: modules/msn2/msn.c:1693
 #, fuzzy, c-format
 msgid "Connection error: %s"
 msgstr "Tipo de conexão:"
 
-#: modules/msn2/msn.c:1777
+#: modules/msn2/msn.c:1782
 msgid "MSN :: Operation failed"
 msgstr ""
 
@@ -860,7 +861,7 @@ msgstr "Mensagem enviada por SMTP."
 msgid "Error sending message via SMTP."
 msgstr "Erro de envio de mensagem por SMTP."
 
-#: modules/smtp/smtp.c:664
+#: modules/smtp/smtp.c:666
 msgid "SMTP logins must have @domain.tld part."
 msgstr "Logins de SMTP devem que ser @domain.tld.part"
 
@@ -935,68 +936,68 @@ msgstr "Terminado valor G:"
 msgid "Ending B value:"
 msgstr "Terminando valor B:"
 
-#: modules/yahoo2/yahoo.c:172
+#: modules/yahoo2/yahoo.c:175
 msgid "Pager Server:"
 msgstr "Servidor de Pager:"
 
-#: modules/yahoo2/yahoo.c:179
+#: modules/yahoo2/yahoo.c:182
 msgid "Pager Port:"
 msgstr "Pager Porta:"
 
-#: modules/yahoo2/yahoo.c:186
+#: modules/yahoo2/yahoo.c:189
 msgid "File Transfer Host:"
 msgstr "Host de Transferência de arquivo:"
 
-#: modules/yahoo2/yahoo.c:193
+#: modules/yahoo2/yahoo.c:196
 msgid "File Transfer Port:"
 msgstr "Porta de Transferência de arquivo:"
 
-#: modules/yahoo2/yahoo.c:200
+#: modules/yahoo2/yahoo.c:203
 msgid "Webcam Host:"
 msgstr "Webcam Host:"
 
-#: modules/yahoo2/yahoo.c:207
+#: modules/yahoo2/yahoo.c:210
 msgid "Webcam Port:"
 msgstr "Porta da Webcam:"
 
-#: modules/yahoo2/yahoo.c:214
+#: modules/yahoo2/yahoo.c:217
 msgid "Connection type:"
 msgstr "Tipo de conexão:"
 
-#: modules/yahoo2/yahoo.c:217
+#: modules/yahoo2/yahoo.c:220
 msgid "Dialup"
 msgstr "Dialup"
 
-#: modules/yahoo2/yahoo.c:218
+#: modules/yahoo2/yahoo.c:221
 msgid "DSL/Cable"
 msgstr "DSL/Cable"
 
-#: modules/yahoo2/yahoo.c:219
+#: modules/yahoo2/yahoo.c:222
 msgid "T1/Lan"
 msgstr "T1/Lan"
 
-#: modules/yahoo2/yahoo.c:228
+#: modules/yahoo2/yahoo.c:231
 msgid "Prompt for transferred filename"
 msgstr "Prompt para filename transferido"
 
-#: modules/yahoo2/yahoo.c:235
+#: modules/yahoo2/yahoo.c:238
 msgid "Guess status from Away messages"
 msgstr "Adivinhar estado das mensagens"
 
-#: modules/yahoo2/yahoo.c:242
+#: modules/yahoo2/yahoo.c:245
 msgid "Show how long contact has been away"
 msgstr "Mostre quanto tempo o contato esteve ausente"
 
-#: modules/yahoo2/yahoo.c:944
+#: modules/yahoo2/yahoo.c:947
 #, c-format
 msgid "<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"
 msgstr "<FONT COLOR=\"#0000FF\">[Offline message at %s]</FONT><BR>%s"
 
-#: modules/yahoo2/yahoo.c:1058
+#: modules/yahoo2/yahoo.c:1061
 msgid "Save file as"
 msgstr "Salvar arquivo como"
 
-#: modules/yahoo2/yahoo.c:1084
+#: modules/yahoo2/yahoo.c:1087
 #, fuzzy, c-format
 msgid ""
 "The Yahoo user <b>%s</b> has sent you a file.\n"
@@ -1005,7 +1006,7 @@ msgid ""
 msgstr ""
 "%s, o usuário de yahoo %s lhe enviou um Arquivo%s%s, você deseja aceitar?"
 
-#: modules/yahoo2/yahoo.c:1088
+#: modules/yahoo2/yahoo.c:1091
 #, fuzzy, c-format
 msgid ""
 "The Yahoo user <b>%s</b> has sent you a file with the message:\n"
@@ -1016,23 +1017,23 @@ msgid ""
 msgstr ""
 "%s, o usuário de yahoo %s lhe enviou um Arquivo%s%s, você deseja aceitar?"
 
-#: modules/yahoo2/yahoo.c:1097
+#: modules/yahoo2/yahoo.c:1100
 msgid "Yahoo File Transfer"
 msgstr "Transferência de Arquivo Yahoo"
 
-#: modules/yahoo2/yahoo.c:1243 modules/yahoo2/yahoo.c:1354
-#: modules/yahoo2/yahoo.c:1827 modules/yahoo2/yahoo.c:2155
-#: modules/yahoo2/yahoo.c:2208 modules/yahoo2/yahoo.c:2362
-#: modules/yahoo2/yahoo.c:2526 modules/yahoo2/yahoo.c:3485
+#: modules/yahoo2/yahoo.c:1246 modules/yahoo2/yahoo.c:1357
+#: modules/yahoo2/yahoo.c:1828 modules/yahoo2/yahoo.c:2156
+#: modules/yahoo2/yahoo.c:2209 modules/yahoo2/yahoo.c:2363
+#: modules/yahoo2/yahoo.c:2527 modules/yahoo2/yahoo.c:3488
 msgid "Yahoo Error"
 msgstr "Yahoo - Erro"
 
-#: modules/yahoo2/yahoo.c:1243
+#: modules/yahoo2/yahoo.c:1246
 #, fuzzy
 msgid "Failed to send file"
 msgstr "Impossível abrir arquivo"
 
-#: modules/yahoo2/yahoo.c:1340
+#: modules/yahoo2/yahoo.c:1343
 #, c-format
 msgid ""
 "The yahoo user %s declined your invitation to join conference %s, with the "
@@ -1041,11 +1042,11 @@ msgstr ""
 "O usuário de yahoo %s recusou seu convite para unir conferência %s, com a "
 "mensagem: %s"
 
-#: modules/yahoo2/yahoo.c:1378 modules/yahoo2/yahoo.c:1454
+#: modules/yahoo2/yahoo.c:1380 modules/yahoo2/yahoo.c:1454
 msgid "Thanks, but no thanks"
 msgstr "Obrigado, mas não quero."
 
-#: modules/yahoo2/yahoo.c:1393
+#: modules/yahoo2/yahoo.c:1395
 #, fuzzy, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to a conference - %s, the topic is %"
@@ -1056,61 +1057,61 @@ msgstr ""
 "%s, o usuário de yahoo %s o convidou para uma conferência - %s, o tópico é%"
 "s. \n"
 
-#: modules/yahoo2/yahoo.c:1400
+#: modules/yahoo2/yahoo.c:1402
 msgid "Yahoo Join Conference"
 msgstr "Entrar na Conferência Yahoo"
 
-#: modules/yahoo2/yahoo.c:1613
+#: modules/yahoo2/yahoo.c:1615
 msgid "Join my conference"
 msgstr "Una-se a minha conferência"
 
-#: modules/yahoo2/yahoo.c:1746
+#: modules/yahoo2/yahoo.c:1747
 #, c-format
 msgid "%s's webcam"
 msgstr "O webcam de %s"
 
-#: modules/yahoo2/yahoo.c:1829 modules/yahoo2/yahoo.c:2157
+#: modules/yahoo2/yahoo.c:1830 modules/yahoo2/yahoo.c:2158
 #, fuzzy
 msgid "Cannot find a valid local account to view user's webcam."
 msgstr "Impossivel encontar uma conta local válida para convidar seu contato. "
 
-#: modules/yahoo2/yahoo.c:1846
+#: modules/yahoo2/yahoo.c:1847
 #, c-format
 msgid ""
 "%s, the yahoo user %s has invited you to view their webcam.Do you want to "
 "accept?"
 msgstr "%s, o usuário de yahoo %s o convidou para webcam. Você aceita?"
 
-#: modules/yahoo2/yahoo.c:1851
+#: modules/yahoo2/yahoo.c:1852
 msgid "Yahoo Webcam Invitation"
 msgstr "Yahoo Webcam Convite"
 
-#: modules/yahoo2/yahoo.c:1880
+#: modules/yahoo2/yahoo.c:1881
 #, c-format
 msgid "%s, webcam connection closed. %s "
 msgstr "%s, conexão de webcam fechou. %s"
 
-#: modules/yahoo2/yahoo.c:1884
+#: modules/yahoo2/yahoo.c:1885
 msgid "stopped broadcasting."
 msgstr "broadcasting parado"
 
-#: modules/yahoo2/yahoo.c:1888
+#: modules/yahoo2/yahoo.c:1889
 msgid "cancelled viewing permission."
 msgstr "Cancelado vendo permissão."
 
-#: modules/yahoo2/yahoo.c:1892
+#: modules/yahoo2/yahoo.c:1893
 msgid "declined you permission."
 msgstr "Permissão recusada."
 
-#: modules/yahoo2/yahoo.c:1896
+#: modules/yahoo2/yahoo.c:1897
 msgid "does not have their webcam online."
 msgstr "não tenho webcam online."
 
-#: modules/yahoo2/yahoo.c:1900
+#: modules/yahoo2/yahoo.c:1901
 msgid "did something we don't know about."
 msgstr "feito algo sobre o que nós não sabemos."
 
-#: modules/yahoo2/yahoo.c:1907
+#: modules/yahoo2/yahoo.c:1908
 msgid ""
 "\n"
 "Close image window?"
@@ -1118,73 +1119,73 @@ msgstr ""
 "\n"
 "Fechar janela de imagem?"
 
-#: modules/yahoo2/yahoo.c:1909 modules/yahoo2/yahoo.c:1912
+#: modules/yahoo2/yahoo.c:1910 modules/yahoo2/yahoo.c:1913
 msgid "Webcam connection closed"
 msgstr "Conexão de Webcam fechou"
 
-#: modules/yahoo2/yahoo.c:1960 modules/yahoo2/yahoo.c:2041
+#: modules/yahoo2/yahoo.c:1961 modules/yahoo2/yahoo.c:2042
 #, c-format
 msgid "My webcam (%d viewer%s)"
 msgstr ""
 
-#: modules/yahoo2/yahoo.c:2010
+#: modules/yahoo2/yahoo.c:2011
 #, fuzzy, c-format
 msgid "%s, the yahoo user %s has stopped viewing your webcam."
 msgstr "%s, o usuário de yahoo %s o convidou para webcam. Você aceita?"
 
-#: modules/yahoo2/yahoo.c:2016
+#: modules/yahoo2/yahoo.c:2017
 #, fuzzy, c-format
 msgid "%s, the yahoo user %s is viewing your webcam."
 msgstr "%s, o usuário yahoo %s o adicionou para a lista de contato dele"
 
-#: modules/yahoo2/yahoo.c:2023
+#: modules/yahoo2/yahoo.c:2024
 #, fuzzy, c-format
 msgid ""
 "%s, the yahoo user %s wants to view your webcam.\n"
 "Do you want to allow this?"
 msgstr "%s, o usuário de yahoo %s o convidou para webcam. Você aceita?"
 
-#: modules/yahoo2/yahoo.c:2029
+#: modules/yahoo2/yahoo.c:2030
 #, fuzzy, c-format
 msgid ""
 "%s, the yahoo user %s wants to %d your webcam.  Tell the ayttm devels about "
 "this."
 msgstr "%s, o usuário yahoo %s o adicionou para a lista de contato dele"
 
-#: modules/yahoo2/yahoo.c:2038 modules/yahoo2/yahoo.c:2067
+#: modules/yahoo2/yahoo.c:2039 modules/yahoo2/yahoo.c:2068
 #, fuzzy
 msgid "Yahoo Webcam"
 msgstr "Yahoo Webcam Convite"
 
-#: modules/yahoo2/yahoo.c:2050
+#: modules/yahoo2/yahoo.c:2051
 #, fuzzy
 msgid "Yahoo Webcam Request"
 msgstr "Yahoo Webcam Convite"
 
-#: modules/yahoo2/yahoo.c:2069
+#: modules/yahoo2/yahoo.c:2070
 msgid "Could not read images from your webcam, could not find a video grabber."
 msgstr ""
 
-#: modules/yahoo2/yahoo.c:2127
+#: modules/yahoo2/yahoo.c:2128
 #, fuzzy, c-format
 msgid "%s, the yahoo user %s has declined your invitation to view your webcam."
 msgstr "%s, o usuário de yahoo %s o convidou para webcam. Você aceita?"
 
-#: modules/yahoo2/yahoo.c:2129
+#: modules/yahoo2/yahoo.c:2130
 #, fuzzy
 msgid "Webcam invite declined"
 msgstr "Conexão de Webcam fechou"
 
-#: modules/yahoo2/yahoo.c:2206
+#: modules/yahoo2/yahoo.c:2207
 #, c-format
 msgid "%s has rejected your request to be added as a buddy%s%s"
 msgstr "%s rejeitou seu pedido para ser adicionado como um amigo %s%s"
 
-#: modules/yahoo2/yahoo.c:2207
+#: modules/yahoo2/yahoo.c:2208
 msgid " with the message:\n"
 msgstr " com a mensagem:\n"
 
-#: modules/yahoo2/yahoo.c:2221
+#: modules/yahoo2/yahoo.c:2222
 #, fuzzy, c-format
 msgid ""
 "%s, the yahoo user \n"
@@ -1194,7 +1195,7 @@ msgid ""
 "has added you to their contact list"
 msgstr "%s, o usuário yahoo %s o adicionou para a lista de contato dele"
 
-#: modules/yahoo2/yahoo.c:2224
+#: modules/yahoo2/yahoo.c:2225
 #, fuzzy
 msgid ""
 " with the following message:\n"
@@ -1202,52 +1203,52 @@ msgid ""
 "<i>"
 msgstr "com a seguinte mensagem:\n"
 
-#: modules/yahoo2/yahoo.c:2230
+#: modules/yahoo2/yahoo.c:2231
 msgid "Do you want to allow this?"
 msgstr "Você deseja autorizar?"
 
-#: modules/yahoo2/yahoo.c:2234
+#: modules/yahoo2/yahoo.c:2235
 msgid "Yahoo New Contact"
 msgstr "Novo Contato Yahoo"
 
-#: modules/yahoo2/yahoo.c:2329
+#: modules/yahoo2/yahoo.c:2330
 #, c-format
 msgid "You have new mail from %s about %s\n"
 msgstr "Você tem nova mensagem de %s sobre %s\n"
 
-#: modules/yahoo2/yahoo.c:2334
+#: modules/yahoo2/yahoo.c:2335
 #, c-format
 msgid "You have %d message%s\n"
 msgstr "Você tem %d mensagem%s\n"
 
-#: modules/yahoo2/yahoo.c:2335
+#: modules/yahoo2/yahoo.c:2336
 msgid "s"
 msgstr ""
 
-#: modules/yahoo2/yahoo.c:2340
+#: modules/yahoo2/yahoo.c:2341
 msgid "Yahoo Mail"
 msgstr "Yahoo Mail"
 
-#: modules/yahoo2/yahoo.c:2353
+#: modules/yahoo2/yahoo.c:2354
 #, fuzzy, c-format
 msgid "%s: Yahoo System Message"
 msgstr "Yahoo - Mensagem do sistema"
 
-#: modules/yahoo2/yahoo.c:2421
+#: modules/yahoo2/yahoo.c:2422
 #, c-format
 msgid "Logging in to Yahoo account: %s"
 msgstr "Conectando na conta Yahoo: %s"
 
-#: modules/yahoo2/yahoo.c:2452
+#: modules/yahoo2/yahoo.c:2453
 #, c-format
 msgid "Yahoo! password for: %s"
 msgstr "Senha Yahoo! para: %s"
 
-#: modules/yahoo2/yahoo.c:2477
+#: modules/yahoo2/yahoo.c:2478
 msgid "Fetching buddies..."
 msgstr "Trazendo Amigos"
 
-#: modules/yahoo2/yahoo.c:2493
+#: modules/yahoo2/yahoo.c:2494
 #, fuzzy, c-format
 msgid ""
 "Could not log into Yahoo service - username not recognised.  Please verify "
@@ -1256,7 +1257,7 @@ msgstr ""
 "Impossível logar no serviço Yahoo.  Por favor verifique que seu username e   "
 "a senha esta digitada corretamente."
 
-#: modules/yahoo2/yahoo.c:2498
+#: modules/yahoo2/yahoo.c:2499
 #, fuzzy, c-format
 msgid ""
 "Could not log into Yahoo service - incorrect password.  Please verify that "
@@ -1265,7 +1266,7 @@ msgstr ""
 "Impossível logar no serviço Yahoo.  Por favor verifique que seu username e   "
 "a senha esta digitada corretamente."
 
-#: modules/yahoo2/yahoo.c:2504
+#: modules/yahoo2/yahoo.c:2505
 #, c-format
 msgid ""
 "Could not log into Yahoo service.  Your account has been locked.\n"
@@ -1274,7 +1275,7 @@ msgstr ""
 "Impossível logar no serviço Yahoo.  Sua conta foi fechada. \n"
 "Visite %s para reativar isto."
 
-#: modules/yahoo2/yahoo.c:2510
+#: modules/yahoo2/yahoo.c:2511
 #, c-format
 msgid ""
 "You have been logged out of the yahoo service, possibly due to a duplicate "
@@ -1282,7 +1283,7 @@ msgid ""
 msgstr ""
 "Você efetuou logoff do yahoo, possivelmente devido a uma duplicata, de login."
 
-#: modules/yahoo2/yahoo.c:2514
+#: modules/yahoo2/yahoo.c:2515
 #, c-format
 msgid ""
 "Could not connect to Yahoo server.  Please verify that you are connected to "
@@ -1291,65 +1292,65 @@ msgstr ""
 "Impossível conectar ao servidor Yahoo.  Por favor verifique que você é "
 "conectadoa rede e o pager host e porta estão corretos."
 
-#: modules/yahoo2/yahoo.c:2518
+#: modules/yahoo2/yahoo.c:2519
 #, c-format
 msgid "Could not log into Yahoo service due to unknown state: %d\n"
 msgstr "Impossível logar no serviço Yahoo devido a estado desconhecido: %d\n"
 
-#: modules/yahoo2/yahoo.c:2641
+#: modules/yahoo2/yahoo.c:2644
 msgid "_Yahoo Id:"
 msgstr "_Yahoo Id:"
 
-#: modules/yahoo2/yahoo.c:2669
+#: modules/yahoo2/yahoo.c:2672
 msgid "Yahoo _Mail Notification"
 msgstr "Notificação de E_mail Yahoo"
 
-#: modules/yahoo2/yahoo.c:2676
+#: modules/yahoo2/yahoo.c:2679
 msgid "Login _invisible"
 msgstr "Login _invisível"
 
-#: modules/yahoo2/yahoo.c:2683
+#: modules/yahoo2/yahoo.c:2686
 msgid "Ignore _System Messages"
 msgstr "Ignorar Mensagens do _Sistema"
 
-#: modules/yahoo2/yahoo.c:2942 modules/yahoo2/yahoo.c:2987
-#: src/conversation.c:501 src/chat_window.c:487 src/contact_util.C:600
+#: modules/yahoo2/yahoo.c:2945 modules/yahoo2/yahoo.c:2990
+#: src/conversation.c:475 src/chat_window.c:417 src/contact_util.C:600
 #: src/contact_util.C:604 src/offline_queue_mgmt.c:163
 #: src/offline_queue_mgmt.c:166 src/status.c:1269 src/status.c:1655
 #: src/status.c:1688 src/util.c:1116 src/util.c:1249 src/util.c:1253
 msgid "Ignore"
 msgstr "Ignorar"
 
-#: modules/yahoo2/yahoo.c:3162
+#: modules/yahoo2/yahoo.c:3165
 #, c-format
 msgid "%s for %d:%02d:%02d"
 msgstr "%s for %d:%02d:%02d"
 
-#: modules/yahoo2/yahoo.c:3459
+#: modules/yahoo2/yahoo.c:3462
 #, c-format
 msgid "Yahoo read error (%d): %s"
 msgstr "Yahoo - Erro de leitura (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3463
+#: modules/yahoo2/yahoo.c:3466
 #, c-format
 msgid "Yahoo read error: Server closed socket"
 msgstr "Yahoo - Erro de leitura: Servidor fechou o socket"
 
-#: modules/yahoo2/yahoo.c:3471
+#: modules/yahoo2/yahoo.c:3474
 #, c-format
 msgid "Yahoo write error (%d): %s"
 msgstr "Yahoo - Erro de escrita (%d): %s"
 
-#: modules/yahoo2/yahoo.c:3475
+#: modules/yahoo2/yahoo.c:3478
 #, c-format
 msgid "Yahoo write error: Server closed socket"
 msgstr "Yahoo erro de escrita: Servidor fechou o socket"
 
-#: modules/yahoo2/yahoo.c:3901 modules/yahoo2/yahoo.c:3904
+#: modules/yahoo2/yahoo.c:3904 modules/yahoo2/yahoo.c:3907
 msgid "Invite to view Webcam"
 msgstr ""
 
-#: modules/yahoo2/yahoo.c:3911 modules/yahoo2/yahoo.c:3914
+#: modules/yahoo2/yahoo.c:3914 modules/yahoo2/yahoo.c:3917
 msgid "View Webcam"
 msgstr ""
 
@@ -1421,7 +1422,7 @@ msgstr "Erro de Conta"
 msgid "No Account Name specified."
 msgstr "Nenhuma conta local especificada."
 
-#: src/add_contact_window.c:230
+#: src/add_contact_window.c:230 src/chat_window.c:2066
 msgid "No local account specified."
 msgstr "Nenhuma conta local especificada."
 
@@ -1490,7 +1491,7 @@ msgstr "_Grupo:"
 msgid "Buddies"
 msgstr "Amigos"
 
-#: src/add_contact_window.c:461 src/chat_window.c:683 src/chat_window.c:1669
+#: src/add_contact_window.c:461 src/chat_window.c:783 src/chat_window.c:1753
 msgid "Add Contact"
 msgstr "Adicionar Contato"
 
@@ -1524,146 +1525,181 @@ msgstr ""
 msgid "I'm Back"
 msgstr "Voltei"
 
-#: src/away_window.c:145 src/chat_window.c:864
+#: src/away_window.c:145 src/chat_window.c:967
 msgid "Away"
 msgstr "Ausente"
 
-#: src/conversation.c:132
+#: src/conversation.c:101
 #, fuzzy, c-format
 msgid "<b>%s has joined the chat.</b>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s (%s) uniu a conversa. </b></body>"
 
-#: src/conversation.c:135
+#: src/conversation.c:104
 #, fuzzy, c-format
 msgid "<b>%s (%s) has joined the chat.</b>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s (%s) uniu a conversa. </b></body>"
 
-#: src/conversation.c:170
+#: src/conversation.c:139
 #, fuzzy, c-format
 msgid "<b>%s has left the chat (%s).</b>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s deixou a conversa. </b></body> "
 
-#: src/conversation.c:171
+#: src/conversation.c:140
 #, fuzzy, c-format
 msgid "<b>%s has left the chat.</b>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s deixou a conversa. </b></body> "
 
-#: src/conversation.c:204
+#: src/conversation.c:173
 #, fuzzy, c-format
 msgid "<b>%s is now %s.</b>"
 msgstr "%s agora esta on-line"
 
-#: src/conversation.c:253 src/conversation.c:259
+#: src/conversation.c:223 src/conversation.c:229
 #, fuzzy
 msgid "Cannot send message - user is offline\n"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> impossivel enviar mensagem - o usuário "
 "está offline. </  b></body>\n"
 
-#: src/conversation.c:279
+#: src/conversation.c:249
 #, fuzzy
 msgid "Cannot send message - no local account found\n"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> impossivel enviar mensagem - nenhuma conta "
 "local   encontrada. </b></body>\n"
 
-#: src/conversation.c:450
+#: src/conversation.c:424
 #, fuzzy, c-format
 msgid ""
 "<b> %s has logged in @ %s.\n"
 "</b>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s deixou a conversa. </b></body> "
 
-#: src/conversation.c:451
+#: src/conversation.c:425
 #, fuzzy, c-format
 msgid ""
 "<b> %s has logged out @ %s.\n"
 "</b>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s deixou a conversa. </b></body> "
 
-#: src/conversation.c:621 src/conversation.c:622 src/conversation.c:661
-#: src/conversation.c:662
+#: src/conversation.c:595 src/conversation.c:596 src/conversation.c:635
+#: src/conversation.c:636
 msgid "Conversation started"
 msgstr "Conversação começou"
 
-#: src/conversation.c:625 src/conversation.c:626
+#: src/conversation.c:599 src/conversation.c:600
 #, c-format
 msgid "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%%\"><P ALIGN=\"CENTER\"><B>Conversação começou"
 
-#: src/conversation.c:628 src/conversation.c:629
+#: src/conversation.c:602 src/conversation.c:603
 msgid "<HR WIDTH=\"100%\"><B>Conversation started"
 msgstr "<HR WIDTH=\"100%\"><B>Conversação começou"
 
-#: src/conversation.c:667 src/conversation.c:668
+#: src/conversation.c:641 src/conversation.c:642
 msgid "Conversation ended"
 msgstr "Conversação terminou"
 
-#: src/conversation.c:735
+#: src/conversation.c:709
 #, fuzzy
 msgid "Conversation Ended"
 msgstr "Conversação terminou"
 
-#: src/conversation.c:809
+#: src/conversation.c:783
 #, fuzzy, c-format
 msgid "<b> %s changed status to %s @ %s.</b>"
 msgstr "<body bgcolor=#F9E589 width=*><b> %s deixou a conversa. </b></body> "
 
-#: src/conversation.c:811
+#: src/conversation.c:785
 msgid "(Online)"
 msgstr "(On-line)"
 
-#: src/chat_window.c:498
+#: src/conversation.c:826
+#, fuzzy, c-format
+msgid "Conversation #%d"
+msgstr "Conversação terminou"
+
+#: src/chat_window.c:428
 #, c-format
 msgid "Do you really want to ignore %s?"
 msgstr "Você realmente quer ignorar %s?"
 
-#: src/chat_window.c:501 src/chat_window.c:761
+#: src/chat_window.c:431 src/chat_window.c:864
 msgid "Ignore Contact"
 msgstr "Ignorar Contato"
 
-#: src/chat_window.c:515
+#: src/chat_window.c:445
 #, fuzzy
 msgid " Cannot send message - user is offline.\n"
 msgstr ""
 "<body bgcolor=#F9E589 width=*><b> impossivel enviar mensagem - o usuário "
 "está offline. </  b></body>\n"
 
-#: src/chat_window.c:616
+#: src/chat_window.c:608
+msgid "Chatroom error"
+msgstr "Chat - Erro"
+
+#: src/chat_window.c:609
+msgid "Cannot invite a third party until a protocol has been chosen."
+msgstr ""
+"Impossivel convidar um terceiro dominio até que um protocolo esteja "
+"escolhido."
+
+#: src/chat_window.c:619
+msgid "Handle: "
+msgstr "Ocupado:"
+
+#: src/chat_window.c:632
+msgid "Message: "
+msgstr "Mensagem: "
+
+#: src/chat_window.c:645
+msgid "<b>Select the contact you want to invite</b>"
+msgstr ""
+
+#: src/chat_window.c:647
+msgid "Invite a contact"
+msgstr "Convidar um contato"
+
+#: src/chat_window.c:659 src/chat_window.c:856
+msgid "Invite"
+msgstr "Convidar"
+
+#: src/chat_window.c:716
 msgid "Change Local Account"
 msgstr "Mudar Conta Local"
 
-#: src/chat_window.c:707
+#: src/chat_window.c:807
 msgid "Disable Sounds"
 msgstr "Desabilitar Sons"
 
-#: src/chat_window.c:718
+#: src/chat_window.c:818
 #, c-format
 msgid "Set Character Encoding (%s)"
 msgstr ""
 
-#: src/chat_window.c:721
+#: src/chat_window.c:821
 #, c-format
 msgid "Set Character Encoding"
 msgstr ""
 
-#: src/chat_window.c:731 src/status.c:669
+#: src/chat_window.c:831 src/status.c:669
 msgid "View Log"
 msgstr "Ver log"
 
-#: src/chat_window.c:738 src/chat_window.c:1778 src/gtk/log_window.C:264
+#: src/chat_window.c:838 src/gtk/log_window.C:264
 msgid "Actions..."
 msgstr "Ações..."
 
-#: src/chat_window.c:748 src/status.c:660
+#: src/chat_window.c:848 src/status.c:660
 msgid "Send File"
 msgstr "Enviar Arquivo"
 
-#: src/chat_window.c:768
+#: src/chat_window.c:871
 msgid "Send Message"
 msgstr "Enviar Mensagem"
 
-#: src/chat_window.c:863
+#: src/chat_window.c:966
 msgid ""
 "You are currently away. \n"
 "\n"
@@ -1673,52 +1709,122 @@ msgstr ""
 "\n"
 "Você quer regressar para ficar On-line?"
 
-#: src/chat_window.c:1544 src/status.c:2614
+#: src/chat_window.c:1629 src/status.c:2614
 msgid "Online"
 msgstr "On-line"
 
-#: src/chat_window.c:1694
+#: src/chat_window.c:1761 src/chat_window.c:1762 src/chat_window.c:2241
+msgid "Reconnect at login"
+msgstr "Reconectar no login"
+
+#: src/chat_window.c:1778
 msgid "Allow"
 msgstr "Permitir"
 
-#: src/chat_window.c:1701
+#: src/chat_window.c:1785
 #, fuzzy
 msgid "Allow Offline Messaging Ctrl+O"
 msgstr "Habitar Offline Messaging CTRL+O"
 
-#: src/chat_window.c:1727
+#: src/chat_window.c:1811
 msgid "Insert Smiley"
 msgstr "Insirir Smiley"
 
-#: src/chat_window.c:1743 src/gtk/prefs_window.C:495
+#: src/chat_window.c:1827 src/gtk/prefs_window.C:495
 msgid "Sound"
 msgstr "Som"
 
-#: src/chat_window.c:1749
+#: src/chat_window.c:1833
 #, fuzzy
-msgid "Enable Sounds Ctrl+S"
+msgid "Enable Sound (Ctrl+S)"
 msgstr "Habilitar Sons CTRL+S"
 
-#: src/chat_window.c:1769
-msgid "View Log CTRL+L"
+#: src/chat_window.c:1854
+#, fuzzy
+msgid "View Log (CTRL+L)"
 msgstr "Ver log CTRL+L"
 
-#: src/chat_window.c:1789
-msgid "Send File CTRL+T"
+#: src/chat_window.c:1864
+msgid "Actions (CTRL+P)"
+msgstr ""
+
+#: src/chat_window.c:1875
+#, fuzzy
+msgid "Send File (CTRL+T)"
 msgstr "Enviar Arquivo CTRL+T"
 
-#: src/chat_window.c:1809
-msgid "Ignore CTRL+G"
+#: src/chat_window.c:1888
+#, fuzzy
+msgid "Invite (CTRL+I)"
+msgstr "Convidar CTRL+I"
+
+#: src/chat_window.c:1899
+#, fuzzy
+msgid "Ignore (CTRL+G)"
 msgstr "Ignorar CTRL+G "
 
-#: src/chat_window.c:1819
-msgid "Send Message CTRL+R"
+#: src/chat_window.c:1909
+#, fuzzy
+msgid "Send Message (CTRL+R)"
 msgstr "Enviar para Mensagem CTRL+R"
 
-#: src/chat_window.c:1850
+#: src/chat_window.c:1940
 #, c-format
 msgid "Character Encoding for %s"
 msgstr ""
+
+#: src/chat_window.c:2066 src/chat_window.c:2084
+msgid "Cannot join"
+msgstr "Impossível entrar"
+
+#: src/chat_window.c:2085 src/chat_window.c:2193 src/edit_account_window.c:71
+#: src/edit_account_window.c:83
+msgid "The local account doesn't exist."
+msgstr "A conta local não existe."
+
+#: src/chat_window.c:2151 src/chat_window.c:2192
+msgid "Cannot list chatrooms"
+msgstr "Impossivel listar salas de bate-papo"
+
+#: src/chat_window.c:2152
+msgid "No list available."
+msgstr "Nenhum lista disponível"
+
+#: src/chat_window.c:2156
+msgid "Select a chatroom."
+msgstr "Selecione bate-papo."
+
+#: src/chat_window.c:2156
+msgid "Public chatrooms list"
+msgstr "Lista de sala de bate-papo publica"
+
+#: src/chat_window.c:2159 src/chat_window.c:2252
+msgid "List public chatrooms..."
+msgstr "Lista público bate-papo..."
+
+#: src/chat_window.c:2198
+msgid "Loading List. This may take a while..."
+msgstr ""
+
+#: src/chat_window.c:2219
+msgid "Chat Room Name: "
+msgstr "Nome de sala de bate-papo:"
+
+#: src/chat_window.c:2230 src/edit_account_window.c:233
+msgid "Local account: "
+msgstr "Conta local:"
+
+#: src/chat_window.c:2247
+msgid "Chatroom is public"
+msgstr "Público bate-papo"
+
+#: src/chat_window.c:2258
+msgid "Join a Chat Room"
+msgstr "Se junte a uma sala de bate-papo"
+
+#: src/chat_window.c:2269
+msgid "Join"
+msgstr "Entrar"
 
 #: src/contact_actions.c:63
 msgid "Select file to send"
@@ -1789,10 +1895,6 @@ msgstr "Sobre Ayttm"
 msgid "[None]"
 msgstr "[Nenhum]"
 
-#: src/edit_account_window.c:71 src/edit_account_window.c:83
-msgid "The local account doesn't exist."
-msgstr "A conta local não existe."
-
 #: src/edit_account_window.c:191
 msgid "Contact Name: "
 msgstr "Nome do contato:"
@@ -1800,10 +1902,6 @@ msgstr "Nome do contato:"
 #: src/edit_account_window.c:208
 msgid "Group Name: "
 msgstr "Nome do grupo:"
-
-#: src/edit_account_window.c:233
-msgid "Local account: "
-msgstr "Conta local:"
 
 #: src/edit_account_window.c:324
 #, c-format
@@ -2075,11 +2173,12 @@ msgstr "Log sem data"
 msgid "No logs available"
 msgstr "Nenhum log disponível"
 
-#: src/gtk/log_window.C:709
-msgid "' not found in the logs."
+#: src/gtk/log_window.C:706
+#, fuzzy, c-format
+msgid "'%s' not found in the logs."
 msgstr "' não encontrado nos logs."
 
-#: src/gtk/log_window.C:711
+#: src/gtk/log_window.C:708
 msgid "Log Search"
 msgstr "Procurar no Log"
 
@@ -3104,61 +3203,8 @@ msgid ""
 "</font>"
 msgstr ""
 
-#~ msgid "Chatroom error"
-#~ msgstr "Chat - Erro"
-
-#~ msgid "Cannot invite a third party until a protocol has been chosen."
-#~ msgstr ""
-#~ "Impossivel convidar um terceiro dominio até que um protocolo esteja "
-#~ "escolhido."
-
-#~ msgid "Invite a contact"
-#~ msgstr "Convidar um contato"
-
-#~ msgid "Handle: "
-#~ msgstr "Ocupado:"
-
-#~ msgid "Message: "
-#~ msgstr "Mensagem: "
-
-#~ msgid "Invite"
-#~ msgstr "Convidar"
-
 #~ msgid "Chatroom %d"
 #~ msgstr "Bate-papo %d"
-
-#~ msgid "Cannot join"
-#~ msgstr "Impossível entrar"
-
-#~ msgid "Cannot list chatrooms"
-#~ msgstr "Impossivel listar salas de bate-papo"
-
-#~ msgid "No list available."
-#~ msgstr "Nenhum lista disponível"
-
-#~ msgid "Select a chatroom."
-#~ msgstr "Selecione bate-papo."
-
-#~ msgid "Public chatrooms list"
-#~ msgstr "Lista de sala de bate-papo publica"
-
-#~ msgid "List public chatrooms..."
-#~ msgstr "Lista público bate-papo..."
-
-#~ msgid "Chat Room Name: "
-#~ msgstr "Nome de sala de bate-papo:"
-
-#~ msgid "Reconnect at login"
-#~ msgstr "Reconectar no login"
-
-#~ msgid "Chatroom is public"
-#~ msgstr "Público bate-papo"
-
-#~ msgid "Join a Chat Room"
-#~ msgstr "Se junte a uma sala de bate-papo"
-
-#~ msgid "Join"
-#~ msgstr "Entrar"
 
 #, fuzzy
 #~ msgid "Online: %i"
@@ -3177,9 +3223,6 @@ msgstr ""
 
 #~ msgid "Offline Messaging"
 #~ msgstr "Mensagem Offline"
-
-#~ msgid "Invite CTRL+I"
-#~ msgstr "Convidar CTRL+I"
 
 #~ msgid ""
 #~ "<body bgcolor=#F9E589 width=*><b> Cannot send message - user is offline.</"
