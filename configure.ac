@@ -56,12 +56,14 @@ AC_ARG_ENABLE(posix-dlopen, AC_HELP_STRING([--enable-posix-dlopen],
 		[Use POSIX dlopen to open shared libraries instead of libtool. Note that we still need libtool to build the application]), 
 		[use_posix_dlopen=yes], [use_posix_dlopen=no])
 
+EB_LIBS=
+
 if test "$use_posix_dlopen" = "no"; then
 	echo "Using Libtool for dynamic library loading"
 else
 	echo "Using POSIX dlopen for dynamic library loading"
 	AC_DEFINE([USE_POSIX_DLOPEN], [1], [Define if we use POSIX dlopen])
-	LDFLAGS="$LDFLAGS -ldl"
+	EB_LIBS="$EB_LIBS -ldl"
 fi
 
 # global LDFLAGS
