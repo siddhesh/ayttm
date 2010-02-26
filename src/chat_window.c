@@ -1870,7 +1870,8 @@ chat_window *ay_chat_window_new(Conversation *conv)
 #endif
 
 	/* This is the send file button... only for private chats */
-	if (cw->conv->contact && can_file_transfer(GET_SERVICE(conv->local_user))) {
+	if (conv->contact && conv->local_user &&
+	    can_file_transfer(GET_SERVICE(conv->local_user))) {
 		ICON_CREATE(iconwid, GTK_STOCK_OPEN);
 		TOOLBAR_APPEND(sendf_button, _("Send File (CTRL+T)"), iconwid, send_file,
 			       cw);
@@ -1882,7 +1883,7 @@ chat_window *ay_chat_window_new(Conversation *conv)
 	}
 
 	/* This is the invite button */
-	if (cw->conv->is_room || 
+	if (cw->conv->is_room || conv->local_user &&
 	    can_conference(GET_SERVICE(conv->local_user))) {
 		ICON_CREATE_XPM(icon, iconwid, invite_btn_xpm);
 		TOOLBAR_APPEND(invite_button, _("Invite (CTRL+I)"), iconwid,
