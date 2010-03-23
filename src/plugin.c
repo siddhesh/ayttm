@@ -277,12 +277,16 @@ int load_module_full_path(const char *inFullPath)
 
 int load_module(const char *path, const char *name)
 {
-	char full_path[PATH_MAX];
+	char *full_path;
 
 	assert(path != NULL);
 	assert(name != NULL);
 
-	snprintf(full_path, PATH_MAX, "%s/%s", path, name);
+	full_path = calloc(strlen(path)+strlen(name)+2, sizeof(char));
+
+	assert(full_path != NULL);
+
+	sprintf(full_path, "%s/%s", path, name);
 
 	return (load_module_full_path(full_path));
 }
