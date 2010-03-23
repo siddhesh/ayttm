@@ -1,0 +1,223 @@
+* Tue Oct 27 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 73a83597f9d71c2e6ffe1d6e4873aa593b518e58
+ Fixed smtp and livejournal to work with new networking library
+ 
+* Tue Oct 27 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 45c7740da3436659bcae4d0f669ed1530649c290
+ Updated TODO
+ 
+* Mon Oct 26 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- cb8f330663fa46d47f40c8beb442a84b9e41a10f
+ Handle MSN switchboard timeout properly.
+ 
+* Sun Oct 18 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- a9ad5474b62fc43ae6167d481319af4b9710ecc9
+ End column list of gtk_list_store_set with a -1
+ 
+* Fri Oct 16 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- a0d406df3f0ec527a87bcd55b96647dab60453ce
+ Bumped release number
+ 
+* Fri Oct 16 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 50ba6baadf364d5833bec01398f92c98586b234e
+ Removed ext_msn_account_destroyed() callback
+ Can't see any use for it.
+
+* Fri Oct 16 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- eab0d5e2d338b437fda0571c46d82a4a8f058bf8
+ Oops. This is the commit that adds support for autotrans
+ 
+* Fri Oct 16 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 5a7b3f4c920d5139a3c08c0f385fcfbe6cc8523a
+ Updated autotrans plugin to work with new connection code
+ Autotrans now uses translate.google.com. Also added support for temporary
+notifications in the chat window. These notifications will be overwritten by
+subsequent messages.
+
+* Thu Oct 15 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 9d1c8fe27657183ee5ad028cfa5bf27ddbd72dd3
+ Bumped release number
+ 
+* Thu Oct 15 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- a7a51b02203ce9297c0bc52a0441de46d8f28310
+  Multiple YMSG changes
+ * Yahoo! file transfer
+ * Fiddled with urlencoding/decoding to see what works. Some servers
+  seem to want everything except alphanums to be urlencoded. Still others
+  fail erratically regardless of what happens. We need a retry of some sort
+  instead of telling the user that the connection failed for an unknown
+  reason.
+
+* Thu Oct 15 2009 Siddhesh Poyarekar <siddhesh@spoyarek.pnq.redhat.com>
+- 000a5de220dae3c91745a9105d51bbbbad6fbc4e
+ New function to get IP address of a connected host
+ 
+* Thu Oct 15 2009 Siddhesh Poyarekar <siddhesh@spoyarek.pnq.redhat.com>
+- 3ffde30f59d7b7fa9892a5bbf67c4a8fb278f3f5
+ Show colored notifications in chat windows
+ This is the first step away from the popup boxes
+
+* Fri Oct 9 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- e3ecb7d4d4a839ae66c41a173a86b03718b2512a
+ MSN Friendly name changes
+ * Url encode friendly name for MSN when sending to server
+ * Compare with the url decoded friendlyname when looking for
+  changed buddy friendly name
+ * Bumped release number
+
+* Fri Oct 9 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 824914eb2ec2fb8875424a49b9e3d609bc534095
+ Url encode login request in yahoo
+ 
+* Thu Oct 8 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 9eda7bd76dd0416b697e6b1db26c6254d6249a17
+ Bumped release number
+ 
+* Thu Oct 8 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- fadba09efa237dfab2f9bb639e4f8a7e3613dd52
+ Fixed invalid UTF-8 warning with tooltips
+ * pointer was used after being freed leading to junk
+ * If status is blank it means Online
+
+* Thu Oct 8 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 7ea0a96d67ba26aaf6a427a30fb570342b8c1b15
+ Merge branch 'master' of ssh://siddheshp@ayttm.git.sourceforge.net/gitroot/ayttm/ayttm
+ 
+* Thu Oct 8 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 916472389675c4692cb948b9547a4538a05d728a
+ MSN buddy handling fixes * Make sure the libmsn2 buddy and the ayttm account are related to each other at all times. * Avoid a NULL pointer dereference. Thanks Piotr.
+ 
+* Thu Oct 8 2009 Piotr Stefaniak <pstef@users.sourceforge.net>
+- d107bebfa63cdd10edc7c10763b9fba6c2046dae
+ Fixed time and date bug in tooltips
+ 
+* Thu Oct 8 2009 Piotr Stefaniak <pstef@users.sourceforge.net>
+- f3d849d5851ec469022caaa8b7da100968c63ac8
+ Added missing newline to two debug messages
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- c9cbe5c4ed8a972a8042161ad3a681aceb5a2f8e
+ Fixed broken "Check new release" and cleaned up a bit
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 7c2f8e3afd77db5590d20569041159904354e46c
+ We don't support mail notifications yet. Disabled the option for now
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 158dc27c10baefe897e5e2037d6aa62d42e10d3d
+ Respect login_invisible preference
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 98d2e23046c0aac4a28e2e95e81634498458f6dc
+ Removed unimplemented service options
+ * We don't guess state from away messages -- MSN treats both separately
+ * We rename contacts as the MSN server tells us to. This may come back later
+  if anyone cares but won't be disabled by default as it is now.
+
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- e69eb28a919b88ec69c06898c47e55f55a677670
+ Merge branch 'master' of ssh://siddheshp@ayttm.git.sourceforge.net/gitroot/ayttm/ayttm
+ 
+* Sat Oct 3 2009 Piotr Stefaniak <pstef@users.sourceforge.net>
+- 5acc8e8ed27962e893035c752f69599711801763
+ Simplified eb_chat_room_show_message() a bit
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 7d155376439dcbc80bb7862241c2af2db5cdc62e
+ YMSG: Shuffle login procedure to send initial packet first Some users in the US were getting a login failure for unknown reasons. This is probably due to the fact that I had hacked around with the sequence to debug a situation and forgot to revert it. Both sequences work correctly for me but this one is on line with the pidgin dump.
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 7a123c7fe3fc81156a0a22988984f0cd4c560e38
+ MSN: Personal Status Message support Added support for personal status messages. Also renamed MsnAccount.status to state for clarity
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 1a78aeb7a99ecc7bfa1c9481a6bf21c7d1b0fc17
+ Merge branch 'master' of ssh://siddheshp@ayttm.git.sourceforge.net/gitroot/ayttm/ayttm
+ 
+* Sat Oct 3 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- fc6ac691f1149bb91f06faeddaf4ee22f6774ef9
+ Don't g_markup_escape a NULL string
+ 
+* Fri Oct 2 2009 root <root@puppypc.(none)>
+- 179bbe1067a2fd3335ea441b021fda7677857cae
+ Use clean UTF-8 for localized months in tooltips
+ 
+* Wed Sep 30 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 74574ebc7ada5611d3ae1e4f6a24852ea17d8fac
+ Add logging for yahoo read and write methods
+ 
+* Mon Sep 28 2009 Piotr Stefaniak <pstef@users.sourceforge.net>
+- 607440c3410fd7420d420903d882f03a29ddefeb
+ Fixed bug that caused ignoring XMPP buddies with no set name
+ 
+* Mon Sep 28 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 2fc4f5d54442359a249f61fc9766b7af735b2825
+ Updated Changelog bumped release number, updated potfiles
+ 
+* Mon Sep 28 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- ab9fd56426b02d316cf6d6a5540b0f3ba808b251
+ Fix MSN crash when try to login with an incorrect password
+ 
+* Fri Sep 25 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 2585d7a8bdc7d93feabb98b67b8e8b9a89ff48a6
+ Multiple fixes in MSN
+ * Do not send a group add request if it already exists. This happens
+often on very first sign-on of a user
+ * Fixed typo on very first contact list sync. MSN_BUDDY_ALLOW is
+incorrectly checked on buddy type instead of it's membership list.
+This caused a flurry of requests to the server leading to an abort
+ * Fixed buffer overflow in msn_urldecode
+
+* Fri Sep 25 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 9e8c6cfc9501d85b3b35f0263953d2ae4c5805f7
+ Avoid stumbling into interspersed identity tags
+ 
+* Fri Sep 25 2009 kartik_m <kartik_m@users.sourceforge.net>
+- 2addf45cc6874022ab882ae2702b9f0b6bfe17f0
+ Fixed small spelling mistake in aim-oscar module
+ 
+* Wed Sep 23 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 5ec2cdb665a20f220631f7eb73e6f8c2950b59aa
+ Corrected build failure
+ 
+* Wed Sep 23 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 6d43d246833e28a5f4ecfd2ee9e9107d43385d78
+ Enumerators for MSN errors
+ 
+* Mon Sep 21 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 4bc3bc11d524ac77b4a6715dca5677df6502d953
+  * YMSG: Send ACK for messages to server when it is sent with key 429  * YMSG: Fix status messages. Would crash if status message is changed
+ 
+* Mon Sep 21 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- d087e48ef424f12776f2d2e7f84485aaf3cf0130
+ Update ChangeLog and release number
+ 
+* Mon Sep 21 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 802e4ef8a6bfe6de98bc6b78ce4526642553b4f6
+ * Renamed modules/image_filter/ayttm_streamer_wrapper.sh to modules/image_filter/ayttm_streamer_wrapper * Fixed some build warnings * Updated *.po line numbers
+ 
+* Sat Sep 19 2009 Siddhesh Poyarekar <siddheshp@users.sourceforge.net>
+- 9f02435fa02889c5828506edc569b6b0fc07d995
+ Removed committed line
+ The real motive is to test commit email :)
+
+* Sat Sep 19 2009 Siddhesh Poyarekar <siddhesh@spoyarek.pnq.redhat.com>
+- c23813ece2a4b7d49d8ce5efd436c8e809e9ff07
+ Moved to git!
+ 
+* Thu Sep 17 2009 pstef <pstef>
+- d00d946fdadfc6756944c34cb8d6d237e09085d6
+ reformatted source code
+ 
+* Tue Sep 15 2009 siddheshp <siddheshp>
+- 4268ea4c612b50b6e6658d38420e10a8c0992f7f
+  * CORE: Updated configure script to disable yahoo as well as msn if openssl  is not found  * CORE: Build libproxy into core not just statically link against it.
+ 
+* Tue Sep 15 2009 siddheshp <siddheshp>
+- b64058589c73332c43664f4e58fd3c09e9fac3ed
+  * CORE: Fixed Debian Bug #546667. Include gtkutils.h in trigger.c for    declaration of gtkut_stock_button_new_with_label.
+ 
+* Mon Sep 14 2009 siddheshp <siddheshp>
+- 3fc5b579f3343718fc1b79d9815c33f415aa293b
+  * MSN: Do not put in the libtool prefix for plugin_info if  --enable-posix-dlopen is used
+ 

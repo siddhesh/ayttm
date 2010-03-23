@@ -1,11 +1,11 @@
 # Process this file with autoconf to produce a configure script.
 dnl We use the new format of AC_INIT
 dnl info --file=autoconf.info --node="Initializing configure" for more info
-AC_INIT([Ayttm], [0.6.1], [ayttm-users@lists.sourceforge.net])
+AC_INIT([Ayttm], [0.6.2], [ayttm-users@lists.sourceforge.net])
 AC_PREREQ(2.53)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE([1.6 dist-bzip2 dist-zip])
-RELEASE=5
+RELEASE=1
 
 # This is to check modules/core binary compat
 # Bump it up when necessary only (query_callbacks change, struct change etc)
@@ -56,12 +56,14 @@ AC_ARG_ENABLE(posix-dlopen, AC_HELP_STRING([--enable-posix-dlopen],
 		[Use POSIX dlopen to open shared libraries instead of libtool. Note that we still need libtool to build the application]), 
 		[use_posix_dlopen=yes], [use_posix_dlopen=no])
 
+EB_LIBS=
+
 if test "$use_posix_dlopen" = "no"; then
 	echo "Using Libtool for dynamic library loading"
 else
 	echo "Using POSIX dlopen for dynamic library loading"
 	AC_DEFINE([USE_POSIX_DLOPEN], [1], [Define if we use POSIX dlopen])
-	LDFLAGS="$LDFLAGS -ldl"
+	EB_LIBS="$EB_LIBS -ldl"
 fi
 
 # global LDFLAGS
