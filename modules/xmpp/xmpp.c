@@ -119,15 +119,17 @@ static char *ay_xmpp_get_color(void)
 	return XMPP_MSG_COLOUR;
 }
 
-enum xmpp_status_code { XMPP_STATUS_ONLINE, XMPP_STATUS_OFFLINE };
+enum xmpp_state_code { XMPP_STATE_ONLINE, XMPP_STATE_OFFLINE };
 
 typedef struct {
-	int status;
+	int state;
+	char *status;
 } xmpp_account_data;
 
 typedef struct {
 	char password[MAX_PREF_LEN];
-	int status;
+	int state;
+	char *status;
 	int connect_progress_tag;
 	LList *buddies;
 	XmppImplementation *impl;
@@ -166,7 +168,7 @@ static eb_local_account *ay_xmpp_read_local_account_config(LList *pairs)
 	ela = calloc(1, sizeof(eb_local_account));
 	lla = calloc(1, sizeof(xmpp_local_account));
 
-	lla->status = XMPP_STATUS_OFFLINE;
+	lla->state = XMPP_STATE_OFFLINE;
 	strcpy(lla->last_update, "0");
 	lla->poll_interval = 1800;
 
@@ -192,7 +194,7 @@ static int ay_xmpp_get_current_state(eb_local_account *account)
 {
 	xmpp_local_account *lla = account->protocol_local_account_data;
 
-	return lla->status;
+	return lla->state;
 }
 
 static void ay_xmpp_set_idle(eb_local_account *account, int idle)
@@ -213,7 +215,7 @@ static eb_account *ay_xmpp_new_account(eb_local_account *ela, const char *handle
 	ea->protocol_account_data = lad;
 	strncpy(ea->handle, handle, sizeof(ea->handle));
 	ea->service_id = SERVICE_INFO.protocol_id;
-	lad->status = XMPP_STATUS_OFFLINE;
+	lad->state = XMPP_STATE_OFFLINE;
 	ea->ela = ela;
 	return ea;
 }
@@ -229,7 +231,7 @@ static void ay_xmpp_del_user(eb_account *ea)
 static eb_account *ay_xmpp_read_account_config(eb_account *ea, LList *config)
 {
 	xmpp_account_data *lad = calloc(1, sizeof(xmpp_account_data));
-	lad->status = XMPP_STATUS_OFFLINE;
+	lad->state = XMPP_STATE_OFFLINE;
 	ea->protocol_account_data = lad;
 
 	return ea;
@@ -239,10 +241,10 @@ static int ay_xmpp_query_connected(eb_account *account)
 {
 	xmpp_account_data *lad = account->protocol_account_data;
 
-	return (lad->status == XMPP_STATUS_ONLINE);
+	return (lad->state == XMPP_STATE_ONLINE);
 }
 
-static char *status_strings[] = {
+static char *state_strings[] = {
 	"",
 	"Offline"
 };
@@ -251,20 +253,26 @@ static const char *ay_xmpp_get_status_string(eb_account *account)
 {
 	xmpp_account_data *lad = account->protocol_account_data;
 
-	return status_strings[lad->status];
+	return lad->status;
 }
 
-static const char **ay_xmpp_get_status_pixmap(eb_account *account)
+static const char *ay_xmpp_get_state_string(eb_account *account)
+{
+	xmpp_account_data *lad = account->protocol_account_data;
+
+	return state_strings[lad->state];
+}
+
+static const char **ay_xmpp_get_state_pixmap(eb_account *account)
 {
 	xmpp_account_data *lad;
 
 	lad = account->protocol_account_data;
 
-	if (lad->status == XMPP_STATUS_ONLINE)
+	if (lad->state == XMPP_STATE_ONLINE)
 		return NULL;
 	else
 		return NULL;
-
 }
 
 static void ay_xmpp_send_file(eb_local_account *from, eb_account *to, char *file)
@@ -293,12 +301,12 @@ static void ay_xmpp_set_current_state(eb_local_account *account, int state)
 	if (is_setting_state)
 		return;
 
-	if (lla->status == XMPP_STATUS_OFFLINE && state == XMPP_STATUS_ONLINE)
+	if (lla->state == XMPP_STATE_OFFLINE && state == XMPP_STATE_ONLINE)
 		ay_xmpp_login(account);
-	else if (lla->status == XMPP_STATUS_ONLINE && state == XMPP_STATUS_OFFLINE)
+	else if (lla->state == XMPP_STATE_ONLINE && state == XMPP_STATE_OFFLINE)
 		ay_xmpp_logout(account);
 
-	lla->status = state;
+	lla->state = state;
 }
 
 static char *ay_xmpp_check_login(const char *user, const char *pass)
@@ -331,8 +339,9 @@ struct service_callbacks *query_callbacks()
 	sc->add_user = ay_xmpp_add_user;
 	sc->del_user = ay_xmpp_del_user;
 
+	sc->get_state_string = ay_xmpp_get_state_string;
 	sc->get_status_string = ay_xmpp_get_status_string;
-	sc->get_status_pixmap = ay_xmpp_get_status_pixmap;
+	sc->get_status_pixmap = ay_xmpp_get_state_pixmap;
 
 	sc->set_idle = ay_xmpp_set_idle;
 	sc->set_away = ay_xmpp_set_away;
