@@ -241,6 +241,22 @@ char *get_service_name(int service_id)
 	return "unknown";
 }
 
+LList *get_services_for_provider(const char *provider)
+{
+	LList *l = NULL;
+
+	for (i = 0; i < NUM_SERVICES; i++) {
+		/* Look for services with the same provider as the one asked or
+		 * those that don't have a provider if provider is passed as NULL */
+		if ( (eb_services.provider
+		      && !strcasecmp(eb_services[i].provider, servicename))
+		     || (!provider && !eb_services.provider) )
+			l = l_list_append(&eb_services[i]);;
+	}
+
+	return l;
+}
+
 static int strcasecmp_list(const void *a, const void *b)
 {
 	return strcasecmp((const char *)a, (const char *)b);

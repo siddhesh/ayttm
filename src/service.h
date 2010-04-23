@@ -238,6 +238,7 @@ struct service {
 	int protocol_id;
 	int capabilities;
 	struct service_callbacks *sc;
+	char *provider;
 };
 
 #define can_offline_msg(x)	(x.capabilities & SERVICE_CAN_OFFLINEMSG)
@@ -254,6 +255,7 @@ extern "C" {
 	int add_service(struct service *Service_Info);
 	int get_service_id(const char *servicename);
 	char *get_service_name(int serviceid);
+	LList *get_services_for_provider(const char *provider);
 
 	void load_modules();
 

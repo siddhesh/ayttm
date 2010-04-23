@@ -61,6 +61,13 @@ static int ref_count = 0;
 
 static int do_xmpp_debug = 0;
 
+typedef {
+	struct service *service;
+	XmppExtensionCallbacks callbacks;
+} XmppService;
+
+static LList *xmpp_services = NULL;
+
 /*  Module Exports */
 PLUGIN_INFO plugin_info = {
 	PLUGIN_SERVICE,
@@ -74,11 +81,13 @@ PLUGIN_INFO plugin_info = {
 	NULL
 };
 
+static const int XMPP_DEFAULT_CAPABILITIES = SERVICE_CAN_OFFLINEMSG |
+						SERVICE_CAN_FILETRANSFER
+
 struct service SERVICE_INFO = {
 	"XMPP",
 	-1,
-	SERVICE_CAN_OFFLINEMSG |
-	SERVICE_CAN_FILETRANSFER,
+	XMPP_DEFAULT_CAPABILITIES,
 	NULL
 };
 
@@ -89,8 +98,41 @@ unsigned int module_version()
 	return CORE_VERSION;
 }
 
+static void init_xmpp_services(LList *services)
+{
+	LList *l = services;
+
+	while (l) {
+		struct service *s = l->data;
+		char *val = NULL;
+		LList *prefs = NULL;
+		XmppService *newservice = g_new0(XmppService, 1);
+
+		s->capabilities = XMPP_DEFAULT_CAPABILITIES;
+		is->sc = calloc(1, sizeof(struct service_callbacks));
+		memcpy(s->sc, SERVICE_INFO->sc, sizeof(struct service_callbacks));
+
+		newservice->service = s;
+
+		LList *prefs = GetPref (s->name);
+
+		char *val = value_pair_get_value(prefs, "extension");
+
+		if (val) {
+			void *extension = ayttm_dlopen(val);
+			void (*extension_init)(XmppService) = ayttm_dlsym(extension,
+						 			  "extension_init");
+
+			extension_init(newservice);
+		}
+
+		xmpp_services = l_list_append(xmpp_services, newservice);
+	}
+}
+
 static int plugin_init()
 {
+	LList *xmpp_services = NULL;
 	input_list *il = calloc(1, sizeof(input_list));
 	ref_count = 0;
 
@@ -99,6 +141,13 @@ static int plugin_init()
 	il->name = "do_xmpp_debug";
 	il->label = _("Enable debugging");
 	il->type = EB_INPUT_CHECKBOX;
+
+	ayttm_prefs_read_file(XMPP_PREFS);
+
+	xmpp_services = get_services_for_provider(SERVICE_INFO.name);
+	init_xmpp_services(xmpp_services);
+
+	l_list_free(xmpp_services);
 
 	return (0);
 }
