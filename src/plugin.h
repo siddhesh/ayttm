@@ -25,8 +25,42 @@
 #ifndef _PLUGIN_H
 #define _PLUGIN_H
 
-#include <ltdl.h>
 #include "plugin_api.h"
+
+#ifdef USE_POSIX_DLOPEN
+#include <dlfcn.h>
+#else
+#include <ltdl.h>
+#endif
+
+#ifdef USE_POSIX_DLOPEN
+
+#define PLUGIN_SO_EXT ".so"
+typedef void * AyttmPlugin;
+#define ayttm_dlerror dlerror
+#define ayttm_dlopen(path) dlopen(path, RTLD_LAZY)
+#define ayttm_dlsym dlsym
+#define ayttm_dlerror dlerror
+#define ayttm_dlclose dlclose
+
+#define ayttm_dlinit(path) { \
+}
+
+#else
+
+#define PLUGIN_SO_EXT ".la"
+typedef lt_dlhandle AyttmPlugin;
+#define ayttm_dlopen(path) lt_dlopen(path)
+#define ayttm_dlsym lt_dlsym
+#define ayttm_dlerror lt_dlerror
+#define ayttm_dlclose lt_dlclose
+
+#define ayttm_dlinit(path) { \
+	lt_dlinit(); \
+	lt_dlsetsearchpath(path); \
+}
+
+#endif
 
 #define EB_PLUGIN_LIST "PLUGIN::LIST"
 
@@ -42,7 +76,7 @@ typedef enum {
 
 typedef struct {
 	PLUGIN_INFO pi;		/* Information provided by the plugin */
-	lt_dlhandle Module;	/* Reference to the shared object itself */
+	AyttmPlugin Module;	/* Reference to the shared object itself */
 	char *path;		/* Full Path */
 	char *name;		/* File Name */
 	char *service;		/* Non NULL if this is a service plugin */

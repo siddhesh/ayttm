@@ -42,7 +42,7 @@ noinst_HEADERS = account.h service.h contact.h gtk_globals.h globals.h \
 AM_CFLAGS = $(EB_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libproxy \
 	$(GNOME_INCLUDEDIR)
 AM_CXXFLAGS = $(AM_CFLAGS) $(ENCHANT_CFLAGS)
-LIBS = @LIBS@ $(EB_LIBS) $(top_srcdir)/libproxy/libproxy.a $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS) $(ENCHANT_LIBS) -L/usr/local/lib/pth/ $(WIN32_LIBS)
+LIBS = @LIBS@ $(top_srcdir)/libproxy/libproxy.a $(EB_LIBS) $(GNOME_LIBDIR) $(GNOME_APPLETS_LIBS) $(ENCHANT_LIBS) -L/usr/local/lib/pth/ $(WIN32_LIBS)
 ayttm_LDFLAGS = $(EB_LDFLAGS) -export-dynamic $(WIN32_LD) -lX11
 CLEANFILES = @CLEANFILES@ defaults.h
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\" -D_REENTRANT -DIMG_DIR=\"${datadir}/pixmaps/\"
