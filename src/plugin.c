@@ -46,9 +46,6 @@ typedef long __off32_t;
 #include "status.h"
 #include "messages.h"
 
-#ifdef USE_POSIX_DLOPEN
-#include <dlfcn.h>
-#endif
 
 const char *PLUGIN_TYPE_TXT[] = {
 	"SERVICE",
@@ -72,14 +69,10 @@ static PLUGIN_INFO Plugin_Cannot_Load = { PLUGIN_UNKNOWN,
 	"Unknown", NULL, NULL, NULL, NULL
 };
 
-#ifdef USE_POSIX_DLOPEN
-static int load_service_plugin(void *Module, PLUGIN_INFO *info,
+static int load_service_plugin(AyttmPlugin Module, PLUGIN_INFO *info,
 	const char *name);
-#else
-static int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info,
-	const char *name);
-#endif
-static int load_plugin_default(lt_dlhandle Module, PLUGIN_INFO *info,
+
+static int load_plugin_default(AyttmPlugin Module, PLUGIN_INFO *info,
 	const char *name);
 
 static int compare_plugin_loaded_service(gconstpointer a, gconstpointer b)
@@ -121,7 +114,7 @@ eb_PLUGIN_INFO *FindPluginByName(const char *name)
 }
 
 /* Will add/update info about a plugin */
-static void SetPluginInfo(PLUGIN_INFO *pi, const char *name, lt_dlhandle Module,
+static void SetPluginInfo(PLUGIN_INFO *pi, const char *name, AyttmPlugin Module,
 	PLUGIN_STATUS status, const char *status_desc, const char *service,
 	gboolean force)
 {
@@ -183,60 +176,42 @@ static int select_module_entry(const struct dirent *dent)
 	ext = (char *)dent->d_name;
 	ext += (len - 3);
 	eb_debug(DBG_CORE, "select_module_entry: %s[%s]\n", dent->d_name, ext);
-#ifdef USE_POSIX_DLOPEN
-	if (!strncmp(ext, ".so", 3))
-#else
-	if (!strncmp(ext, ".la", 3))
-#endif
+
+	if (!strncmp(ext, PLUGIN_SO_EXT, 3))
 		return (1);
 	return (0);
 }
 
 int load_module_full_path(const char *inFullPath)
 {
-#ifdef USE_POSIX_DLOPEN
-	void *Module;
-#else
-	lt_dlhandle Module;
-#endif
+	AyttmPlugin Module;
+
 	PLUGIN_INFO *plugin_info = NULL;
 	eb_PLUGIN_INFO *epi = NULL;
 
 	assert(inFullPath != NULL);
 
 	eb_debug(DBG_CORE, "Opening module: %s\n", inFullPath);
-#ifdef USE_POSIX_DLOPEN
-	Module = dlopen(inFullPath, RTLD_LAZY);
-#else
-	Module = lt_dlopen(inFullPath);
-#endif
+
+	Module = ayttm_dlopen(inFullPath);
 
 	eb_debug(DBG_CORE, "Module: %p\n", Module);
 
 	/* Find out if this plugin is already loaded */
 	if (Module == NULL) {
 		/* Only update status on a plugin that is not already loaded */
-#ifdef USE_POSIX_DLOPEN
+
 		SetPluginInfo(NULL, inFullPath, NULL, PLUGIN_CANNOT_LOAD,
-			dlerror(), NULL, FALSE);
-#else
-		SetPluginInfo(NULL, inFullPath, NULL, PLUGIN_CANNOT_LOAD,
-			lt_dlerror(), NULL, FALSE);
-#endif
+			ayttm_dlerror(), NULL, FALSE);
+
 		return (-1);
 	}
-#ifdef USE_POSIX_DLOPEN
-	plugin_info = (PLUGIN_INFO *)dlsym(Module, "plugin_info");
-#else
-	plugin_info = (PLUGIN_INFO *)lt_dlsym(Module, "plugin_info");
-#endif
+
+	plugin_info = (PLUGIN_INFO *)ayttm_dlsym(Module, "plugin_info");
 
 	if (!plugin_info) {
-#ifdef USE_POSIX_DLOPEN
-		dlclose(Module);
-#else
-		lt_dlclose(Module);
-#endif
+		ayttm_dlclose(Module);
+
 		/* Only update status on a plugin that is not already loaded */
 		SetPluginInfo(NULL, inFullPath, NULL, PLUGIN_CANNOT_LOAD,
 			_("Cannot resolve symbol \"plugin_info\"."), NULL,
@@ -246,11 +221,7 @@ int load_module_full_path(const char *inFullPath)
 
 	epi = FindPluginByName(inFullPath);
 	if (epi && epi->status == PLUGIN_LOADED) {
-#ifdef USE_POSIX_DLOPEN
-		dlclose(Module);
-#else
-		lt_dlclose(Module);
-#endif
+		ayttm_dlclose(Module);
 		eb_debug(DBG_CORE, "Module already loaded: %s\n", inFullPath);
 		return (-1);
 	}
@@ -306,8 +277,7 @@ void load_modules(void)
 	tok_buf = g_new0(char, strlen(modules_path) + 1);
 	/* Save the old pointer, because strtok_r will change it */
 	tok_buf_old = tok_buf;
-	lt_dlinit();
-	lt_dlsetsearchpath(modules_path);
+	ayttm_dlinit(modules_path);
 
 	/* Use a thread-safe strtok */
 #ifdef HAVE_STRTOK_R
@@ -361,13 +331,8 @@ void load_modules(void)
 	eb_debug(DBG_CORE, "<End services_init\n");
 }
 
-#ifdef USE_POSIX_DLOPEN
-static int load_service_plugin(void *Module, PLUGIN_INFO *info,
+static int load_service_plugin(AyttmPlugin Module, PLUGIN_INFO *info,
 	const char *name)
-#else
-static int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info,
-	const char *name)
-#endif
 {
 	struct service *Service_Info = NULL;
 	struct service_callbacks *(*query_callbacks) ();
@@ -377,22 +342,15 @@ static int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info,
 	eb_PLUGIN_INFO *epi = NULL;
 	LList *user_prefs = NULL;
 
-#ifdef USE_POSIX_DLOPEN
-	Service_Info = (struct service *)dlsym(Module, "SERVICE_INFO");
-#else
-	Service_Info = lt_dlsym(Module, "SERVICE_INFO");
-#endif
+	Service_Info = (struct service *)ayttm_dlsym(Module, "SERVICE_INFO");
 
 	eb_debug(DBG_CORE, "SERVICE_INFO: %p\n", Service_Info);
 	if (!Service_Info) {
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD,
 			_("Unable to resolve symbol SERVICE_INFO"), NULL,
 			FALSE);
-#ifdef USE_POSIX_DLOPEN
-		dlclose(Module);
-#else
-		lt_dlclose(Module);
-#endif
+
+		ayttm_dlclose(Module);
 		return (-1);
 	}
 	/* Don't load this module if there's a service of this type already loaded */
@@ -406,18 +364,11 @@ static int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info,
 			_
 			("Same service is provided by an already loaded plugin."),
 			Service_Info->name, FALSE);
-#ifdef USE_POSIX_DLOPEN
-		dlclose(Module);
-#else
-		lt_dlclose(Module);
-#endif
+
+		ayttm_dlclose(Module);
 		return (-1);
 	}
-#ifdef USE_POSIX_DLOPEN
-	module_version = dlsym(Module, "module_version");
-#else
-	module_version = lt_dlsym(Module, "module_version");
-#endif
+	module_version = ayttm_dlsym(Module, "module_version");
 
 	if (!module_version || module_version() != CORE_VERSION) {
 		const int error_len = 1024;
@@ -439,30 +390,20 @@ static int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info,
 
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD, error,
 			Service_Info->name, FALSE);
-#ifdef USE_POSIX_DLOPEN
-		dlclose(Module);
-#else
-		lt_dlclose(Module);
-#endif
+
+		ayttm_dlclose(Module);
 		return (-1);
 	}
 
 	/* No more hard-coded service_id numbers */
-#ifdef USE_POSIX_DLOPEN
-	query_callbacks = dlsym(Module, "query_callbacks");
-#else
-	query_callbacks = lt_dlsym(Module, "query_callbacks");
-#endif
+	query_callbacks = ayttm_dlsym(Module, "query_callbacks");
 
 	if (!query_callbacks) {
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD,
 			"Unable to resolve symbol \"query_callbacks\".",
 			Service_Info->name, FALSE);
-#ifdef USE_POSIX_DLOPEN
-		dlclose(Module);
-#else
-		lt_dlclose(Module);
-#endif
+
+		ayttm_dlclose(Module);
 		return (-1);
 	}
 	if (info->init) {
@@ -497,7 +438,7 @@ static int load_service_plugin(lt_dlhandle Module, PLUGIN_INFO *info,
 	return (0);
 }
 
-static int load_plugin_default(lt_dlhandle Module, PLUGIN_INFO *info,
+static int load_plugin_default(AyttmPlugin Module, PLUGIN_INFO *info,
 	const char *name)
 {
 	const int buf_len = 1024;
@@ -510,11 +451,7 @@ static int load_plugin_default(lt_dlhandle Module, PLUGIN_INFO *info,
 		SetPluginInfo(info, name, NULL, PLUGIN_CANNOT_LOAD,
 			_("No init function defined"), NULL, FALSE);
 
-#ifdef USE_POSIX_DLOPEN
-		dlclose(Module);
-#else
-		lt_dlclose(Module);
-#endif
+		ayttm_dlclose(Module);
 
 		snprintf(buf, buf_len,
 			_
@@ -603,14 +540,10 @@ int unload_module(eb_PLUGIN_INFO *epi)
 	epi->status = PLUGIN_NOT_LOADED;
 	epi->pi.prefs = NULL;
 	eb_debug(DBG_CORE, "Closing plugin\n");
-#ifdef USE_POSIX_DLOPEN
-	if (dlclose(epi->Module)) {
-		fprintf(stderr, "Error closing plugin: %s\n", dlerror());
-#else
-	if (lt_dlclose(epi->Module)) {
-		fprintf(stderr, "Error closing plugin: %s\n", lt_dlerror());
-#endif
-	}
+
+	if (ayttm_dlclose(epi->Module))
+		fprintf(stderr, "Error closing plugin: %s\n", ayttm_dlerror());
+
 	eb_debug(DBG_CORE, "<Plugin unloaded\n");
 	return (0);
 }
