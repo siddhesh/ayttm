@@ -84,7 +84,12 @@ void AySpellChecker::reload()
 {
 	language = get_language();
 	delete spell_checker;
-	spell_checker = enchant::Broker::instance()->request_dict(language);
+
+	try {
+		spell_checker = enchant::Broker::instance()->request_dict(language);
+	} catch (enchant::Exception e) {
+		eb_debug(DBG_CORE, "Error while loading enchant dictionary: %s\n", e.what());
+	}
 }
 
 int AySpellChecker::check(const char * word)
