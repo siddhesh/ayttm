@@ -27,6 +27,7 @@
 
 #include "service.h"
 #include "plugin_api.h"
+#include "plugin.hOB"
 #include "activity_bar.h"
 
 #include "status.h"
@@ -63,6 +64,7 @@ static int do_xmpp_debug = 0;
 
 typedef {
 	struct service *service;
+	AyttmPlugin extension;
 	XmppExtensionCallbacks callbacks;
 } XmppService;
 
@@ -81,8 +83,9 @@ PLUGIN_INFO plugin_info = {
 	NULL
 };
 
-static const int XMPP_DEFAULT_CAPABILITIES = SERVICE_CAN_OFFLINEMSG |
-						SERVICE_CAN_FILETRANSFER
+static const int XMPP_DEFAULT_CAPABILITIES =
+	SERVICE_CAN_OFFLINEMSG
+	| SERVICE_CAN_FILETRANSFER;
 
 struct service SERVICE_INFO = {
 	"XMPP",
@@ -113,21 +116,43 @@ static void init_xmpp_services(LList *services)
 		memcpy(s->sc, SERVICE_INFO->sc, sizeof(struct service_callbacks));
 
 		newservice->service = s;
-
-		LList *prefs = GetPref (s->name);
-
-		char *val = value_pair_get_value(prefs, "extension");
+		prefs = GetPref (s->name);
+		val = value_pair_get_value(prefs, "extension");
 
 		if (val) {
-			void *extension = ayttm_dlopen(val);
-			void (*extension_init)(XmppService) = ayttm_dlsym(extension,
+			newservice->extension = ayttm_dlopen(val);
+			void (*extension_init)(XmppService) = ayttm_dlsym(newservice->extension,
 						 			  "extension_init");
 
-			extension_init(newservice);
+			if (extension_init)
+				extension_init(newservice);
 		}
 
 		xmpp_services = l_list_append(xmpp_services, newservice);
+		l = l_list_next(l);
 	}
+}
+
+static void destroy_xmpp_services(void)
+{
+	LList *l = xmpp_services;
+
+	while (l) {
+		XmppService *s = l->data;
+		char *val = NULL;
+		LList *prefs = NULL;
+
+		prefs = GetPref (s->name);
+		val = value_pair_get_value(prefs, "extension");
+
+		if (val)
+			ayttm_dlclose(s->extension);
+
+		g_free(s);
+		l = l_list_next(l);
+	}
+	l_list_free(xmpp_services);
+	xmpp_services = NULL;
 }
 
 static int plugin_init()
@@ -155,6 +180,7 @@ static int plugin_init()
 static int plugin_finish()
 {
 	eb_debug(DBG_MOD, "Returning the ref_count: %i\n", ref_count);
+	destroy_xmpp_services();
 	return (ref_count);
 }
 
