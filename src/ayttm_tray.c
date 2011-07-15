@@ -105,18 +105,18 @@ void build_popup_menu()
 
 	popup_menu = gtk_menu_new();
 
-	APPEND_MENU_ITEM(sign_on_menu_item, N_("S_how/Hide Status Window"),
+	APPEND_MENU_ITEM(sign_on_menu_item, _("S_how/Hide Status Window"),
 		GTK_STOCK_FULLSCREEN, G_CALLBACK(icon_activate));
-	APPEND_MENU_ITEM(sign_on_menu_item, N_("Sign o_n All"),
+	APPEND_MENU_ITEM(sign_on_menu_item, _("Sign o_n All"),
 		GTK_STOCK_CONNECT, G_CALLBACK(eb_sign_on_all));
-	APPEND_MENU_ITEM(sign_off_menu_item, N_("Sign o_ff All"),
+	APPEND_MENU_ITEM(sign_off_menu_item, _("Sign o_ff All"),
 		GTK_STOCK_DISCONNECT, G_CALLBACK(eb_sign_off_all));
-	APPEND_MENU_ITEM(set_away_menu_item, N_("Set as _away"),
+	APPEND_MENU_ITEM(set_away_menu_item, _("Set as _away"),
 		"ayttm_away", G_CALLBACK(show_away_choicewindow));
-	APPEND_MENU_ITEM(prefs_menu_item, N_("_Preferences"),
+	APPEND_MENU_ITEM(prefs_menu_item, _("_Preferences"),
 		GTK_STOCK_PREFERENCES, G_CALLBACK(build_prefs_callback));
 	APPEND_MENU_ITEM(separator_menu_item, NULL, NULL, NULL);
-	APPEND_MENU_ITEM(quit_menu_item, N_("_Quit"),
+	APPEND_MENU_ITEM(quit_menu_item, _("_Quit"),
 		GTK_STOCK_QUIT, G_CALLBACK(ayttm_end_app));
 }
 
